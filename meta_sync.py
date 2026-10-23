@@ -160,10 +160,12 @@ def _comparable(b):
 
 
 # ---------------------------------------------------------------- zamanlama
-def due(settings, now=None):
-    if not (settings.get("meta_sync", True) or settings.get("tasks_sync", True)): return False
+def due(settings, kind="builds", now=None):
+    """Bu tür (builds/tasks) bugün indirilmeli mi? Hiç indirilmediyse hemen."""
+    flag, stamp = ("meta_sync", "meta_last_try") if kind == "builds" else ("tasks_sync", "tasks_last_try")
+    if not settings.get(flag, True): return False
     now = now or time.time()
-    return now - float(settings.get("meta_last_try", 0) or 0) >= SYNC_EVERY_S
+    return now - float(settings.get(stamp, 0) or 0) >= SYNC_EVERY_S
 
 
 def run(cfg, cache_path, app_version="", force=False):
@@ -205,6 +207,27 @@ def apply(cfg, feed, source):
 TASKS_PATH = "meta/tasks_feed.json"
 TASK_CATS = ("daily", "weekly", "journey", "global_event", "manhunt", "other")
 MAX_TASKS = 80
+MAX_GUIDES = 60
+
+
+def _langs(d, n):
+    return {str(l)[:5]: _text(v, n) for l, v in (d or {}).items() if _text(v, n)} if isinstance(d, dict) else {}
+
+
+def _https(src):
+    u = src.get("url") if isinstance(src, dict) else src
+    return _text(u, 300) if str(u or "").startswith("https://") else ""
+
+
+def find_guide(text, guides):
+    """Görev metnine (İngilizce) uyan ilk ipucunu döndürür; en uzun anahtar kelime kazanır."""
+    low = (text or "").lower()
+    best, blen = None, 0
+    for g in guides or []:
+        for k in g["match"]:
+            if k in low and len(k) > blen:
+                best, blen = g, len(k)
+    return best
 
 
 def task_urls(builds_setting):
@@ -225,7 +248,14 @@ def validate_tasks(feed):
     if not isinstance(feed, dict) or int(feed.get("schema", 0)) != SCHEMA:
         raise ValueError("unsupported tasks schema")
     out = {"version": _text(feed.get("version"), 40), "season": _text(feed.get("season"), 60),
-           "resets": None, "tasks": []}
+           "resets": None, "tasks": [], "guides": []}
+    for g in (feed.get("guides") or [])[:MAX_GUIDES]:
+        if not isinstance(g, dict): continue
+        keys = [str(k).lower().strip()[:40] for k in (g.get("match") or [])[:12] if str(k).strip()]
+        tip = _langs(g.get("tip"), 500)
+        if keys and "en" in tip:
+            out["guides"].append({"id": _text(g.get("id"), 60), "match": keys, "tip": tip,
+                                  "source": _https(g.get("source"))})
     r = feed.get("resets") or {}
     try:
         out["resets"] = {"daily_hour_utc": int(_num(r["daily_hour_utc"], 0, 23)),
@@ -243,7 +273,7 @@ def validate_tasks(feed):
         seen.add(tid)
         until = _iso_utc(it.get("until"))
         src = it.get("source") if isinstance(it.get("source"), dict) else {}
-        out["tasks"].append({"feed_id": tid, "cat": cat, "texts": texts,
+        out["tasks"].append({"feed_id": tid, "cat": cat, "texts": texts, "how": _langs(it.get("how"), 500),
                              "until": until.isoformat(timespec="minutes") if until else "",
                              "source": _text(src.get("url"), 300) if str(src.get("url", "")).startswith("https://") else ""})
     return out
@@ -270,11 +300,11 @@ def merge_tasks(tasks, feed, now=None):
         have = {x["feed_id"]: x for x in items[c] if x.get("feed_id")}
         for x in feed["tasks"]:
             if x["cat"] != c or x["feed_id"] not in live: continue
-            row = {"feed_id": x["feed_id"], "texts": x["texts"], "en": x["texts"]["en"], "tr": "", "src": "🌐",
+            row = {"feed_id": x["feed_id"], "texts": x["texts"], "how": x.get("how", {}), "en": x["texts"]["en"], "tr": "", "src": "🌐",
                    "until": x["until"], "url": x["source"], "done": done.get(x["feed_id"], False),
                    "time": now.isoformat(timespec="seconds")}
             if x["feed_id"] in have:
-                have[x["feed_id"]].update({k: row[k] for k in ("texts", "en", "until", "url")})
+                have[x["feed_id"]].update({k: row[k] for k in ("texts", "how", "en", "until", "url")})
             else:
                 items[c].append(row); added += 1
     return {"added": added, "removed": removed}

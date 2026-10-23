@@ -1638,6 +1638,11 @@ class App:
         ttk.Combobox(row, textvariable=self.cat_var, values=[cat_name(c) for c in TASK_CATS],
                      width=16, state="readonly").pack(side="left", padx=4)
         ttk.Button(row, text=t("task.read_screen"), command=self.capture_task_region).pack(side="left", padx=8)
+        ttk.Button(row, text=ui_theme.with_icon(t("tasks.read_projects"), "📋"), style="Accent.TButton",
+                   command=self.read_projects_screen).pack(side="left")
+        ttk.Button(row, text=t("tasks.reset_region"), command=lambda: self.read_projects_screen(reselect=True)).pack(side="left", padx=6)
+        ttk.Label(add, text=t("tasks.projects_note"), foreground=PAL["muted"], wraplength=820,
+                  justify="left").pack(anchor="w", padx=8)
         self.task_in = tk.Text(add, height=4, wrap="word"); self.task_in.pack(fill="x", padx=8, pady=(0, 4))
         row2 = ttk.Frame(add); row2.pack(fill="x", padx=8, pady=(0, 6))
         ttk.Button(row2, text=t("task.translate_add"), command=self.translate_and_add, style="Accent.TButton").pack(side="left")
@@ -1656,6 +1661,11 @@ class App:
             self.task_tv.heading(c, text=hd); self.task_tv.column(c, width=w, anchor="center" if c in ("done", "src") else "w")
         self.task_tv.pack(fill="both", expand=True)
         self.task_tv.bind("<Double-1>", lambda e: self.toggle_task_done())
+        self.task_tv.bind("<<TreeviewSelect>>", self.show_task_how)
+        hw = ttk.LabelFrame(right, text=t("tasks.how_title")); hw.pack(fill="x", pady=(6, 0))
+        self.how_lbl = ttk.Label(hw, text=t("tasks.how_pick"), wraplength=700, justify="left"); self.how_lbl.pack(anchor="w", padx=8, pady=4)
+        self.how_btn = ttk.Button(hw, text=ui_theme.with_icon(t("tasks.open_source"), "🔗"), command=self.open_how_source, state="disabled")
+        self.how_btn.pack(anchor="w", padx=8, pady=(0, 6))
         tb = ttk.Frame(right); tb.pack(fill="x", pady=6)
         ttk.Button(tb, text=t("task.toggle_done"), command=self.toggle_task_done).pack(side="left")
         ttk.Button(tb, text=ui_theme.with_icon(t("btn.delete"), "🗑"), command=self.delete_task).pack(side="left", padx=6)
@@ -1813,16 +1823,18 @@ class App:
     def meta_sync_start(self, force=False, quiet=False, what=("builds", "tasks")):
         """Arka planda meta build + görev listelerini indirir (günde bir; force=True ise hemen)."""
         st = self.cfg["settings"]
-        if self.meta_busy or (not force and not meta_sync.due(st)): return
+        if self.meta_busy: return
         if not meta_sync.configured_urls(st.get("meta_feed_url", "")):
             if force and not quiet: self.toast(t("meta.not_configured"))
             log.info("Meta sync skipped: feed URL not configured")
             return
-        do_b = "builds" in what and st.get("meta_sync", True)
-        do_t = "tasks" in what and st.get("tasks_sync", True)
+        do_b = "builds" in what and st.get("meta_sync", True) and (force or meta_sync.due(st, "builds"))
+        do_t = "tasks" in what and st.get("tasks_sync", True) and (force or meta_sync.due(st, "tasks"))
         if not (do_b or do_t): return
         self.meta_busy = True
-        st["meta_last_try"] = time.time(); save_cfg(self.cfg)
+        if do_b: st["meta_last_try"] = time.time()
+        if do_t: st["tasks_last_try"] = time.time()
+        save_cfg(self.cfg)
         if force and not quiet: self.toast(t("meta.syncing"))
         verbose = force and not quiet
 
@@ -1854,6 +1866,7 @@ class App:
         feed, source = res
         st = self.cfg["settings"]
         summary = meta_sync.merge_tasks(self.tasks, feed)
+        self.tasks["guides"] = feed.get("guides", [])
         save_tasks(self.tasks)
         if feed.get("resets") and st.get("auto_reset_times", True):     # resmî sıfırlama saatleri → yerel saat
             dh, wd, wh = meta_sync.local_resets(feed["resets"])
@@ -1941,10 +1954,62 @@ class App:
         lang = i18n.current_language()
         for i, task in enumerate(self.tasks["items"].get(cat, [])):
             shown = task.get("texts", {}).get(lang) or task.get("tr") or task["en"]
-            self.task_tv.insert("", "end", iid=str(i), values=("✔" if task["done"] else "—", shown, task["en"], task.get("src", "")))
+            src = task.get("src", "") + (" 💡" if self.task_how(task)[0] else "")
+            self.task_tv.insert("", "end", iid=str(i), values=("✔" if task["done"] else "—", shown, task["en"], src))
+        if hasattr(self, "how_lbl"): self.show_task_how()
+
+    def task_how(self, task):
+        """(ipucu metni, kaynak adresi) — önce görevin kendi ipucu, yoksa türüne uyan genel ipucu."""
+        lang = i18n.current_language()
+        how = task.get("how") or {}
+        if how:
+            return how.get(lang) or how.get("en", ""), task.get("url", "")
+        g = meta_sync.find_guide(task.get("en", ""), self.tasks.get("guides"))
+        if g:
+            return g["tip"].get(lang) or g["tip"].get("en", ""), g.get("source", "")
+        return "", task.get("url", "")
+
+    def show_task_how(self, _=None):
+        sel = self.task_tv.selection()
+        items = self.tasks["items"].get(self.selected_list_cat(), [])
+        if not sel or int(sel[0]) >= len(items):
+            self.how_lbl.config(text=t("tasks.how_pick")); self.how_url = ""; return
+        tip, url = self.task_how(items[int(sel[0])])
+        self.how_lbl.config(text=tip or t("tasks.how_none")); self.how_url = url
+        try: self.how_btn.config(state="normal" if url else "disabled")
+        except Exception: pass
+
+    def open_how_source(self):
+        if getattr(self, "how_url", ""):
+            import webbrowser; webbrowser.open(self.how_url)
+
+    def read_projects_screen(self, reselect=False):
+        """Oyundaki Projeler ekranını kayıtlı bölgeden okuyup seçili kategoriye ekler.
+        Bölge yoksa (veya reselect) bir kez seçtirir; sonra tek tıkla okunur."""
+        region = self.cfg["settings"].get("projects_region")
+        if region and not reselect:
+            def go():
+                try:
+                    text = ocr(grab(region), self.cfg["settings"]["ocr_lang"])
+                except Exception as e:
+                    return self.root.after(0, lambda: messagebox.showerror(APP_NAME, t("err.read", e=e)))
+                self.root.after(0, lambda: self._projects_text(text))
+            self.root.withdraw(); self.root.after(2500, lambda: (threading.Thread(target=go, daemon=True).start(),
+                                                                 self.root.after(1200, self.root.deiconify)))
+            return
+        self._proj_mode = True
+        self.capture_task_region()
+
+    def _projects_text(self, text):
+        lines = [l.strip() for l in text.splitlines() if len(l.strip()) > 3]
+        if not lines:
+            return self.tr_status.config(text=t("tasks.nothing_read"))
+        self.task_in.delete("1.0", "end"); self.task_in.insert("end", "\n".join(lines))
+        self.translate_and_add()
 
     def capture_task_region(self):
         if not messagebox.askokcancel(APP_NAME, t("calib.ask_tasks")):
+            self._proj_mode = False
             return
         self.root.withdraw(); self.root.after(5000, self._task_region_capture)
 
@@ -1969,9 +2034,15 @@ class App:
             region = {"left": mon["left"] + int(x1 / scale), "top": mon["top"] + int(y1 / scale),
                       "width": int((x2 - x1) / scale), "height": int((y2 - y1) / scale)}
             w.destroy()
+            proj, self._proj_mode = getattr(self, "_proj_mode", False), False
+            if proj:
+                self.cfg["settings"]["projects_region"] = region; save_cfg(self.cfg)
             try:
                 text = ocr(grab(region), self.cfg["settings"]["ocr_lang"])
-                self.task_in.delete("1.0", "end"); self.task_in.insert("end", text.strip())
+                if proj:
+                    self._projects_text(text)
+                else:
+                    self.task_in.delete("1.0", "end"); self.task_in.insert("end", text.strip())
             except Exception as e:
                 messagebox.showerror(APP_NAME, t("err.read", e=e))
         cv.bind("<ButtonPress-1>", down); cv.bind("<B1-Motion>", move); cv.bind("<ButtonRelease-1>", up)

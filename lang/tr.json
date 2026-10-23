@@ -621,5 +621,13 @@
   "tasks.auto_resets": "Sıfırlama saatlerini otomatik ayarla",
   "tasks.status": "🌐 {n} ortak görev · sürüm {version}",
   "tasks.feed_note": "Güncel günlük/haftalık projeler, sezon yolculuğu, global etkinlik ve manhunt adımları merkezi listeden senin dilinde gelir (🌐). İşaretlediğin 'yapıldı' korunur, süresi dolanlar kendiliğinden kalkar. Kendi eklediğin görevlere dokunulmaz. Sıfırlama saatleri oyunun resmî saatinden senin saat dilimine çevrilir.",
-  "tasks.synced": "Görevler: {added} yeni, {removed} kaldırıldı"
+  "tasks.synced": "Görevler: {added} yeni, {removed} kaldırıldı",
+  "tasks.how_title": "💡 Nasıl yapılır",
+  "tasks.how_pick": "Bir görev seç; nasıl yapılacağı burada görünür.",
+  "tasks.how_none": "Bu görev için henüz ipucu yok. Ortak liste güncellendikçe yeni ipuçları gelir.",
+  "tasks.open_source": "Kaynağı aç",
+  "tasks.read_projects": "Proje ekranını oku",
+  "tasks.reset_region": "Bölgeyi yeniden seç",
+  "tasks.projects_note": "Günlük ve haftalık projeler herkese açık sitelerde yayımlanmıyor, bu yüzden kendi ekranından okunur: oyunda Projeler ekranını aç, kategoriyi (Günlük/Haftalık) seç ve '📋 Proje ekranını oku'ya bas. İlk seferde listenin olduğu alanı bir kez seçersin, sonra tek tıkla okunur. Görevler senin diline çevrilir ve türüne uyan ipucu (💡) otomatik eklenir.",
+  "tasks.nothing_read": "Ekrandan okunabilir metin bulunamadı."
 }

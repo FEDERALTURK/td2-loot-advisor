@@ -540,5 +540,13 @@
   "tasks.auto_resets": "Ajustar horários de reset automaticamente",
   "tasks.status": "🌐 {n} tarefas compartilhadas · versão {version}",
   "tasks.feed_note": "Projetos diários/semanais, jornada da temporada, evento global e etapas da caçada vêm de uma lista central no seu idioma (🌐). Suas marcas de 'feito' são mantidas e tarefas vencidas somem sozinhas. Suas próprias tarefas nunca são alteradas. Os horários de reset são convertidos para o seu fuso horário.",
-  "tasks.synced": "Tarefas: {added} novas, {removed} removidas"
+  "tasks.synced": "Tarefas: {added} novas, {removed} removidas",
+  "tasks.how_title": "💡 Como fazer",
+  "tasks.how_pick": "Escolha uma tarefa; aqui aparece como concluí-la.",
+  "tasks.how_none": "Ainda não há dica para esta tarefa. Novas dicas chegam com a lista compartilhada.",
+  "tasks.open_source": "Abrir fonte",
+  "tasks.read_projects": "Ler tela de projetos",
+  "tasks.reset_region": "Escolher área de novo",
+  "tasks.projects_note": "Projetos diários e semanais não são publicados em sites públicos, então são lidos da sua tela: abra a tela de Projetos no jogo, escolha a categoria (Diário/Semanal) e clique em '📋 Ler tela de projetos'. Na primeira vez você seleciona a área da lista; depois é um clique. As tarefas são traduzidas e uma dica (💡) é adicionada automaticamente.",
+  "tasks.nothing_read": "Nenhum texto legível encontrado na tela."
 }

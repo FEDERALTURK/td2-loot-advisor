@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "version": "2026-10-24.1",
-  "updated": "2026-10-24T00:00:00Z",
+  "version": "2026-10-24.2",
+  "updated": "2026-10-23T22:45:00Z",
   "season": "Year 8 Season 3 – Red Horizon",
   "resets": {
     "daily_hour_utc": 8,
@@ -27,6 +27,18 @@
       },
       "source": {
         "url": "https://www.keengamer.com/articles/guides/the-division-2-y8s3-scout-1-manhunt-clue-solutions/"
+      },
+      "how": {
+        "en": "Red execution icons on the map. Kill the first wave while keeping at least one hostage alive, then beat the second wave that goes for the hostages. Do it twice.",
+        "tr": "Haritadaki kırmızı infaz simgelerine git. İlk dalgayı en az bir rehine hayatta kalacak şekilde temizle, sonra rehinelere saldıran ikinci dalgayı yen. İki kez yap.",
+        "de": "Rote Hinrichtungs-Symbole auf der Karte. Erste Welle töten, mindestens eine Geisel am Leben halten, dann die zweite Welle besiegen, die auf die Geiseln geht. Zweimal.",
+        "fr": "Icônes rouges d’exécution sur la carte. Éliminez la première vague en gardant au moins un otage en vie, puis battez la seconde qui vise les otages. Deux fois.",
+        "es": "Iconos rojos de ejecución en el mapa. Elimina la primera oleada manteniendo vivo al menos un rehén y vence la segunda, que va a por los rehenes. Dos veces.",
+        "it": "Icone rosse di esecuzione sulla mappa. Elimina la prima ondata tenendo in vita almeno un ostaggio, poi sconfiggi la seconda che punta agli ostaggi. Due volte.",
+        "pt": "Ícones vermelhos de execução no mapa. Elimine a primeira onda mantendo ao menos um refém vivo e vença a segunda, que ataca os reféns. Duas vezes.",
+        "ru": "Красные значки казни на карте. Убейте первую волну, сохранив хотя бы одного заложника, затем вторую волну, нацеленную на заложников. Дважды.",
+        "pl": "Czerwone ikony egzekucji na mapie. Pokonaj pierwszą falę, utrzymując przy życiu co najmniej jednego zakładnika, potem drugą falę atakującą zakładników. Dwa razy.",
+        "nl": "Rode executie-iconen op de kaart. Versla de eerste golf en houd minstens één gijzelaar in leven, versla daarna de tweede golf die op de gijzelaars afgaat. Twee keer."
       }
     },
     {
@@ -46,6 +58,18 @@
       },
       "source": {
         "url": "https://www.keengamer.com/articles/guides/the-division-2-y8s3-scout-1-manhunt-clue-solutions/"
+      },
+      "how": {
+        "en": "Be in Downtown East. At each point clear the first wave, then the second wave with elites that tries to retake it. Fire the flare for allied help. Repeat at 3 of the 4 points.",
+        "tr": "Downtown East bölgesinde ol. Her noktada ilk dalgayı, sonra noktayı geri almaya çalışan elitli ikinci dalgayı temizle. Yardım için işaret fişeği at. 4 noktadan 3'ünde tekrarla.",
+        "de": "In Downtown East sein. An jedem Punkt erste Welle, dann die zweite Welle mit Elite-Gegnern besiegen. Leuchtsignal für Verbündete nutzen. An 3 der 4 Punkte wiederholen.",
+        "fr": "Soyez à Downtown East. À chaque point, videz la première vague puis la seconde avec des élites. Lancez la fusée pour des renforts alliés. Répétez sur 3 des 4 points.",
+        "es": "Debes estar en Downtown East. En cada punto elimina la primera oleada y luego la segunda con élites. Lanza la bengala para pedir aliados. Repite en 3 de los 4 puntos.",
+        "it": "Devi essere a Downtown East. In ogni punto elimina la prima ondata, poi la seconda con élite. Usa il razzo per gli alleati. Ripeti in 3 dei 4 punti.",
+        "pt": "Esteja em Downtown East. Em cada ponto elimine a primeira onda e depois a segunda, com elites. Use o sinalizador para aliados. Repita em 3 dos 4 pontos.",
+        "ru": "Будьте в Downtown East. На каждой точке зачистите первую волну, затем вторую с элитой. Пустите сигнальную ракету для союзников. Повторите на 3 из 4 точек.",
+        "pl": "Bądź w Downtown East. Na każdym punkcie pokonaj pierwszą falę, potem drugą z elitami. Wystrzel flarę po sojuszników. Powtórz na 3 z 4 punktów.",
+        "nl": "Wees in Downtown East. Versla per punt de eerste golf en daarna de tweede met elites. Gebruik de lichtkogel voor bondgenoten. Herhaal op 3 van de 4 punten."
       }
     },
     {
@@ -65,6 +89,18 @@
       },
       "source": {
         "url": "https://www.keengamer.com/articles/guides/the-division-2-y8s3-scout-1-manhunt-clue-solutions/"
+      },
+      "how": {
+        "en": "Any activity in Downtown East counts. Lower the world difficulty to finish faster.",
+        "tr": "Downtown East'teki her etkinlik sayılır. Daha hızlı bitirmek için dünya zorluğunu düşür.",
+        "de": "Jede Aktivität in Downtown East zählt. Weltschwierigkeit senken geht schneller.",
+        "fr": "Toute activité à Downtown East compte. Baissez la difficulté du monde pour aller plus vite.",
+        "es": "Cuenta cualquier actividad en Downtown East. Baja la dificultad del mundo para ir más rápido.",
+        "it": "Vale qualsiasi attività a Downtown East. Abbassa la difficoltà del mondo per fare prima.",
+        "pt": "Qualquer atividade em Downtown East conta. Baixe a dificuldade do mundo para ir mais rápido.",
+        "ru": "Засчитывается любая активность в Downtown East. Понизьте сложность мира, чтобы быстрее.",
+        "pl": "Liczy się każda aktywność w Downtown East. Obniż poziom trudności świata, będzie szybciej.",
+        "nl": "Elke activiteit in Downtown East telt. Verlaag de wereldmoeilijkheid om sneller klaar te zijn."
       }
     },
     {
@@ -103,6 +139,540 @@
       },
       "source": {
         "url": "https://news.ubisoft.com/en-gb/article/6PXPT3FoQS0q8BKXa6dna/the-division-2-red-horizon-cleaners-in-washington-dc-crossplay-update-dark-zone-news-and-more"
+      }
+    },
+    {
+      "id": "y8s3-scout9-elite-hyenas",
+      "cat": "manhunt",
+      "source": {
+        "url": "https://allthings.how/?p=296455"
+      },
+      "text": {
+        "en": "Manhunt Scout 9 (week 9, from Oct 20): defeat 3 named or elite Hyenas",
+        "tr": "Manhunt Scout 9 (9. hafta, 20 Ekim'den): 3 isimli ya da elit Hyena yen",
+        "de": "Manhunt Scout 9 (Woche 9, ab 20. Okt.): 3 benannte oder Elite-Hyänen besiegen",
+        "fr": "Traque Éclaireur 9 (semaine 9, dès le 20 oct.) : vaincre 3 Hyènes nommées ou élites",
+        "es": "Cacería Explorador 9 (semana 9, desde el 20 oct.): derrota a 3 Hienas con nombre o de élite",
+        "it": "Caccia Esploratore 9 (settimana 9, dal 20 ott.): sconfiggi 3 Iene con nome o élite",
+        "pt": "Caçada Batedor 9 (semana 9, desde 20 out.): derrote 3 Hienas nomeadas ou de elite",
+        "ru": "Охота, Разведчик 9 (неделя 9, с 20 окт.): победите 3 именных или элитных Гиен",
+        "pl": "Obława, Zwiadowca 9 (tydzień 9, od 20 paź.): pokonaj 3 nazwane lub elitarne Hieny",
+        "nl": "Manhunt Verkenner 9 (week 9, vanaf 20 okt.): versla 3 benoemde of elite Hyenas"
+      },
+      "how": {
+        "en": "Elites and named enemies have yellow health bars. Hyena Control Points and their reinforcement waves are a reliable source; higher difficulty spawns more elites.",
+        "tr": "Elit ve isimli düşmanların can barı sarıdır. Hyena kontrol noktaları ve takviye dalgaları en güvenilir yer; zorluk arttıkça daha çok elit çıkar.",
+        "de": "Elite und Benannte haben gelbe Lebensbalken. Hyänen-Kontrollpunkte und deren Verstärkungswellen sind zuverlässig; höhere Schwierigkeit bringt mehr Elite.",
+        "fr": "Élites et nommés ont une barre de vie jaune. Les points de contrôle Hyènes et leurs renforts sont fiables ; une difficulté plus élevée en fait apparaître plus.",
+        "es": "Élites y enemigos con nombre tienen barra de vida amarilla. Los puntos de control de Hienas y sus refuerzos son fiables; más dificultad, más élites.",
+        "it": "Élite e nemici con nome hanno la barra gialla. I punti di controllo delle Iene e i rinforzi sono affidabili; più difficoltà, più élite.",
+        "pt": "Elites e nomeados têm barra de vida amarela. Pontos de controle das Hienas e seus reforços são confiáveis; dificuldade maior gera mais elites.",
+        "ru": "У элиты и именных врагов жёлтая полоса здоровья. Надёжно — контрольные точки Гиен и волны подкрепления; на высокой сложности элиты больше.",
+        "pl": "Elity i nazwani wrogowie mają żółty pasek zdrowia. Pewne źródło to punkty kontrolne Hien i fale posiłków; wyższa trudność daje więcej elit.",
+        "nl": "Elites en benoemde vijanden hebben een gele levensbalk. Hyena-controlepunten en hun versterkingen zijn betrouwbaar; hogere moeilijkheid geeft meer elites."
+      }
+    },
+    {
+      "id": "y8s3-scout9-bt-medics",
+      "cat": "manhunt",
+      "source": {
+        "url": "https://allthings.how/?p=296455"
+      },
+      "text": {
+        "en": "Manhunt Scout 9: defeat 5 Black Tusk Medics",
+        "tr": "Manhunt Scout 9: 5 Black Tusk Medic yen",
+        "de": "Manhunt Scout 9: 5 Black-Tusk-Sanitäter besiegen",
+        "fr": "Traque Éclaireur 9 : vaincre 5 Médecins Black Tusk",
+        "es": "Cacería Explorador 9: derrota a 5 Médicos de Black Tusk",
+        "it": "Caccia Esploratore 9: sconfiggi 5 Medici Black Tusk",
+        "pt": "Caçada Batedor 9: derrote 5 Médicos da Black Tusk",
+        "ru": "Охота, Разведчик 9: победите 5 медиков Black Tusk",
+        "pl": "Obława, Zwiadowca 9: pokonaj 5 Medyków Black Tusk",
+        "nl": "Manhunt Verkenner 9: versla 5 Black Tusk-medics"
+      },
+      "how": {
+        "en": "Medics appear in Invaded missions and other Black Tusk encounters. Replay an Invaded mission from the map's Invaded filter and focus the medics first.",
+        "tr": "Medic'ler İstila (Invaded) görevlerinde ve diğer Black Tusk karşılaşmalarında çıkar. Haritadaki Invaded filtresinden bir görevi tekrar oyna ve önce medic'leri hedef al.",
+        "de": "Sanitäter gibt es in Invaded-Missionen und anderen Black-Tusk-Begegnungen. Eine Invaded-Mission über den Kartenfilter wiederholen und Sanitäter zuerst ausschalten.",
+        "fr": "Les médecins apparaissent dans les missions envahies et autres affrontements Black Tusk. Relancez une mission envahie via le filtre de la carte et ciblez-les d’abord.",
+        "es": "Los médicos aparecen en misiones invadidas y otros encuentros con Black Tusk. Repite una misión invadida desde el filtro del mapa y elimínalos primero.",
+        "it": "I medici compaiono nelle missioni invase e in altri scontri con Black Tusk. Rigioca una missione invasa dal filtro della mappa e colpiscili per primi.",
+        "pt": "Médicos aparecem em missões invadidas e outros encontros com a Black Tusk. Rejogue uma missão invadida pelo filtro do mapa e mire neles primeiro.",
+        "ru": "Медики встречаются в захваченных миссиях и других стычках с Black Tusk. Перепройдите захваченную миссию через фильтр карты и убивайте их первыми.",
+        "pl": "Medycy pojawiają się w misjach najechanych i innych starciach z Black Tusk. Powtórz misję najechaną z filtra mapy i eliminuj ich w pierwszej kolejności.",
+        "nl": "Medics zitten in Invaded-missies en andere Black Tusk-gevechten. Speel een Invaded-missie opnieuw via het kaartfilter en schakel ze als eerste uit."
+      }
+    },
+    {
+      "id": "y8s3-scout9-hyena-cp",
+      "cat": "manhunt",
+      "source": {
+        "url": "https://allthings.how/?p=296455"
+      },
+      "text": {
+        "en": "Manhunt Scout 9: capture 2 Hyena-held Control Points (rewards: XP, Pipelines, mask, M870 Express)",
+        "tr": "Manhunt Scout 9: Hyena elindeki 2 kontrol noktasını ele geçir (ödül: XP, Pipelines, maske, M870 Express)",
+        "de": "Manhunt Scout 9: 2 von Hyänen gehaltene Kontrollpunkte einnehmen (Belohnung: EP, Pipelines, Maske, M870 Express)",
+        "fr": "Traque Éclaireur 9 : prendre 2 points de contrôle tenus par les Hyènes (récompenses : XP, Pipelines, masque, M870 Express)",
+        "es": "Cacería Explorador 9: captura 2 puntos de control de las Hienas (recompensas: XP, Pipelines, máscara, M870 Express)",
+        "it": "Caccia Esploratore 9: conquista 2 punti di controllo delle Iene (ricompense: XP, Pipelines, maschera, M870 Express)",
+        "pt": "Caçada Batedor 9: capture 2 pontos de controle das Hienas (recompensas: XP, Pipelines, máscara, M870 Express)",
+        "ru": "Охота, Разведчик 9: захватите 2 контрольные точки Гиен (награда: опыт, Pipelines, маска, M870 Express)",
+        "pl": "Obława, Zwiadowca 9: zdobądź 2 punkty kontrolne Hien (nagrody: PD, Pipelines, maska, M870 Express)",
+        "nl": "Manhunt Verkenner 9: verover 2 controlepunten van de Hyenas (beloning: XP, Pipelines, masker, M870 Express)"
+      },
+      "how": {
+        "en": "Pick Control Points with the Hyena icon on the map. Clear the waves, kill the leader, raise the flag. Doing it on higher difficulty also helps the elite-Hyena step.",
+        "tr": "Haritada Hyena simgeli kontrol noktalarını seç. Dalgaları temizle, lideri öldür, bayrağı kaldır. Yüksek zorlukta yapmak elit Hyena adımına da yardım eder.",
+        "de": "Kontrollpunkte mit Hyänen-Symbol wählen. Wellen besiegen, Anführer töten, Flagge hissen. Auf höherer Schwierigkeit hilft das auch beim Elite-Hyänen-Schritt.",
+        "fr": "Choisissez les points marqués Hyènes. Videz les vagues, tuez le chef, levez le drapeau. En difficulté élevée, cela aide aussi l’étape des Hyènes élites.",
+        "es": "Elige puntos de control con el icono de Hienas. Limpia las oleadas, mata al líder y alza la bandera. En dificultad alta también ayuda al paso de Hienas élite.",
+        "it": "Scegli i punti con l’icona delle Iene. Elimina le ondate, uccidi il capo, alza la bandiera. A difficoltà alta aiuta anche il passo delle Iene élite.",
+        "pt": "Escolha pontos com o ícone das Hienas. Limpe as ondas, mate o líder e erga a bandeira. Em dificuldade alta também ajuda na etapa das Hienas de elite.",
+        "ru": "Выбирайте точки со значком Гиен. Зачистите волны, убейте лидера, поднимите флаг. На высокой сложности это помогает и с шагом про элитных Гиен.",
+        "pl": "Wybierz punkty z ikoną Hien. Pokonaj fale, zabij przywódcę, podnieś flagę. Na wyższej trudności pomoże to też w etapie z elitarnymi Hienami.",
+        "nl": "Kies controlepunten met het Hyena-icoon. Versla de golven, dood de leider, hijs de vlag. Op hogere moeilijkheid helpt dit ook bij de elite-Hyena-stap."
+      }
+    },
+    {
+      "id": "y8s3-journey-m3-burn10",
+      "cat": "journey",
+      "source": {
+        "url": "https://itemlevel.net/the-division-2-how-to-burn-10-enemies-during-one-fiery-aura-red-horizon-journey/"
+      },
+      "text": {
+        "en": "Red Horizon Journey – Mission 3: burn 10 enemies during a single Fiery Aura activation (5 times)",
+        "tr": "Red Horizon Yolculuğu – Görev 3: tek bir Fiery Aura etkinleştirmesinde 10 düşman yak (5 kez)",
+        "de": "Red Horizon Reise – Mission 3: 10 Gegner während einer Fiery-Aura-Aktivierung verbrennen (5×)",
+        "fr": "Parcours Red Horizon – Mission 3 : brûler 10 ennemis pendant une seule activation de Fiery Aura (5 fois)",
+        "es": "Recorrido Red Horizon – Misión 3: quema a 10 enemigos en una sola activación de Fiery Aura (5 veces)",
+        "it": "Percorso Red Horizon – Missione 3: brucia 10 nemici in una sola attivazione di Fiery Aura (5 volte)",
+        "pt": "Jornada Red Horizon – Missão 3: queime 10 inimigos em uma única ativação de Fiery Aura (5 vezes)",
+        "ru": "Путешествие Red Horizon – Миссия 3: подожгите 10 врагов за одну активацию Fiery Aura (5 раз)",
+        "pl": "Podróż Red Horizon – Misja 3: podpal 10 wrogów podczas jednej aktywacji Fiery Aura (5 razy)",
+        "nl": "Red Horizon-reis – Missie 3: verbrand 10 vijanden tijdens één Fiery Aura-activatie (5×)"
+      },
+      "how": {
+        "en": "Lincoln Memorial on Story. Active modifier Fiery Aura; passives Flow Regulator, Throttle Valve, Leaky Valve. Fill Pressure to ~95–100% in the first two areas, activate in the third area and push spawn to spawn. Restart and repeat.",
+        "tr": "Lincoln Memorial, Story zorluğu. Aktif değiştirici Fiery Aura; pasifler Flow Regulator, Throttle Valve, Leaky Valve. İlk iki alanda Pressure'ı ~%95-100'e doldur, üçüncü alanda etkinleştir ve düşman gruplarına hızla ilerle. Görevi yeniden başlatıp tekrarla.",
+        "de": "Lincoln Memorial auf Story. Aktiver Modifikator Fiery Aura; passiv Flow Regulator, Throttle Valve, Leaky Valve. Druck in den ersten zwei Bereichen auf ~95–100 % bringen, im dritten aktivieren und von Gruppe zu Gruppe pushen. Neu starten, wiederholen.",
+        "fr": "Lincoln Memorial en Histoire. Modificateur actif Fiery Aura ; passifs Flow Regulator, Throttle Valve, Leaky Valve. Montez la Pression à ~95–100 % dans les deux premières zones, activez dans la troisième et enchaînez les groupes. Relancez et répétez.",
+        "es": "Lincoln Memorial en Historia. Modificador activo Fiery Aura; pasivos Flow Regulator, Throttle Valve, Leaky Valve. Sube la Presión a ~95–100 % en las dos primeras zonas, actívalo en la tercera y avanza de grupo en grupo. Reinicia y repite.",
+        "it": "Lincoln Memorial a Storia. Modificatore attivo Fiery Aura; passivi Flow Regulator, Throttle Valve, Leaky Valve. Porta la Pressione a ~95–100% nelle prime due aree, attiva nella terza e passa da un gruppo all’altro. Riavvia e ripeti.",
+        "pt": "Lincoln Memorial no História. Modificador ativo Fiery Aura; passivos Flow Regulator, Throttle Valve, Leaky Valve. Leve a Pressão a ~95–100% nas duas primeiras áreas, ative na terceira e avance de grupo em grupo. Reinicie e repita.",
+        "ru": "Lincoln Memorial на сюжетной сложности. Активный модификатор Fiery Aura; пассивные Flow Regulator, Throttle Valve, Leaky Valve. Наберите давление ~95–100% в первых двух зонах, активируйте в третьей и идите от группы к группе. Перезапускайте и повторяйте.",
+        "pl": "Lincoln Memorial na poziomie Fabularnym. Aktywny modyfikator Fiery Aura; pasywne Flow Regulator, Throttle Valve, Leaky Valve. Nabij Ciśnienie do ~95–100% w dwóch pierwszych strefach, aktywuj w trzeciej i przechodź od grupy do grupy. Restartuj i powtarzaj.",
+        "nl": "Lincoln Memorial op Verhaal. Actieve modifier Fiery Aura; passief Flow Regulator, Throttle Valve, Leaky Valve. Bouw de druk op tot ~95–100% in de eerste twee gebieden, activeer in het derde en ga van groep naar groep. Herstart en herhaal."
+      }
+    },
+    {
+      "id": "y8s3-journey-m3-burn4",
+      "cat": "journey",
+      "source": {
+        "url": "https://itemlevel.net/the-division-2-how-to-burn-10-enemies-during-one-fiery-aura-red-horizon-journey/"
+      },
+      "text": {
+        "en": "Red Horizon Journey – Mission 3: burn 4 different enemies at once when activating Fiery Aura (5 times)",
+        "tr": "Red Horizon Yolculuğu – Görev 3: Fiery Aura'yı etkinleştirirken aynı anda 4 farklı düşmanı yak (5 kez)",
+        "de": "Red Horizon Reise – Mission 3: beim Aktivieren von Fiery Aura 4 verschiedene Gegner gleichzeitig verbrennen (5×)",
+        "fr": "Parcours Red Horizon – Mission 3 : brûler 4 ennemis différents en même temps en activant Fiery Aura (5 fois)",
+        "es": "Recorrido Red Horizon – Misión 3: quema a 4 enemigos distintos a la vez al activar Fiery Aura (5 veces)",
+        "it": "Percorso Red Horizon – Missione 3: brucia 4 nemici diversi contemporaneamente attivando Fiery Aura (5 volte)",
+        "pt": "Jornada Red Horizon – Missão 3: queime 4 inimigos diferentes ao mesmo tempo ao ativar Fiery Aura (5 vezes)",
+        "ru": "Путешествие Red Horizon – Миссия 3: подожгите 4 разных врагов одновременно при активации Fiery Aura (5 раз)",
+        "pl": "Podróż Red Horizon – Misja 3: podpal jednocześnie 4 różnych wrogów, aktywując Fiery Aura (5 razy)",
+        "nl": "Red Horizon-reis – Missie 3: verbrand 4 verschillende vijanden tegelijk bij het activeren van Fiery Aura (5×)"
+      },
+      "how": {
+        "en": "Same route as the 10-burn step: in Lincoln Memorial's third area go left to the group of four and activate Fiery Aura in the middle of them. If they spread out you may only get the 10-burn credit.",
+        "tr": "10 yakma adımıyla aynı rota: Lincoln Memorial'ın üçüncü alanında soldaki dört kişilik gruba git ve Fiery Aura'yı tam ortalarında etkinleştir. Dağılırlarsa sadece 10 yakma adımı sayılabilir.",
+        "de": "Gleiche Route wie beim 10er-Schritt: im dritten Bereich links zur Vierergruppe und Fiery Aura mitten unter ihnen aktivieren. Verteilen sie sich, zählt evtl. nur der 10er-Schritt.",
+        "fr": "Même parcours que l’étape des 10 : dans la troisième zone, allez à gauche vers le groupe de quatre et activez Fiery Aura au milieu. S’ils s’écartent, seule l’étape des 10 peut compter.",
+        "es": "Misma ruta que el paso de 10: en la tercera zona ve a la izquierda al grupo de cuatro y activa Fiery Aura en medio. Si se separan, quizá solo cuente el paso de 10.",
+        "it": "Stesso percorso del passo da 10: nella terza area vai a sinistra dal gruppo di quattro e attiva Fiery Aura in mezzo a loro. Se si sparpagliano può contare solo il passo da 10.",
+        "pt": "Mesma rota da etapa de 10: na terceira área vá à esquerda até o grupo de quatro e ative Fiery Aura no meio deles. Se se espalharem, talvez só conte a etapa de 10.",
+        "ru": "Тот же маршрут, что и для 10 поджогов: в третьей зоне идите влево к группе из четырёх и активируйте Fiery Aura в их центре. Если они разойдутся, засчитается только шаг на 10.",
+        "pl": "Ta sama trasa co przy 10 podpaleniach: w trzeciej strefie idź w lewo do grupy czterech i aktywuj Fiery Aura w ich środku. Jeśli się rozproszą, zaliczy się tylko etap 10.",
+        "nl": "Zelfde route als de 10-stap: ga in het derde gebied links naar de groep van vier en activeer Fiery Aura midden tussen hen. Verspreiden ze zich, dan telt mogelijk alleen de 10-stap."
+      }
+    }
+  ],
+  "guides": [
+    {
+      "id": "control-point",
+      "match": [
+        "control point",
+        "kontrol noktas",
+        "kontrollpunkt",
+        "point de contrôle",
+        "punto de control",
+        "punto di controllo",
+        "ponto de controle",
+        "контрольн",
+        "punkt kontrolny",
+        "punkty kontrolne",
+        "controlepunt"
+      ],
+      "tip": {
+        "en": "Pick a hostile Control Point (flag icon) on the map. Clear the first wave, then the reinforcement wave with elites, kill the leader and raise the flag. Fire the flare for allied help; lower difficulty is faster unless a difficulty is required.",
+        "tr": "Haritada düşman elindeki bir kontrol noktasını (bayrak simgesi) seç. İlk dalgayı, ardından elitli takviye dalgasını temizle, lideri öldür ve bayrağı kaldır. Yardım için işaret fişeği at; zorluk şartı yoksa düşük zorluk daha hızlıdır.",
+        "de": "Feindlichen Kontrollpunkt (Flaggen-Symbol) wählen. Erste Welle, dann Verstärkung mit Elite besiegen, Anführer töten, Flagge hissen. Leuchtsignal für Verbündete; ohne Vorgabe ist niedrige Schwierigkeit schneller.",
+        "fr": "Choisissez un point de contrôle ennemi (icône drapeau). Videz la première vague puis les renforts élites, tuez le chef et levez le drapeau. Fusée pour des alliés ; sans exigence, une difficulté basse va plus vite.",
+        "es": "Elige un punto de control enemigo (icono de bandera). Limpia la primera oleada y los refuerzos con élites, mata al líder y alza la bandera. Usa la bengala para aliados; sin requisito, dificultad baja es más rápida.",
+        "it": "Scegli un punto di controllo nemico (icona bandiera). Elimina la prima ondata e i rinforzi élite, uccidi il capo e alza la bandiera. Razzo per gli alleati; senza requisiti, difficoltà bassa è più veloce.",
+        "pt": "Escolha um ponto de controle inimigo (ícone de bandeira). Limpe a primeira onda e os reforços com elites, mate o líder e erga a bandeira. Sinalizador para aliados; sem exigência, dificuldade baixa é mais rápida.",
+        "ru": "Выберите вражескую контрольную точку (значок флага). Зачистите первую волну и подкрепление с элитой, убейте лидера, поднимите флаг. Ракета вызывает союзников; без требований низкая сложность быстрее.",
+        "pl": "Wybierz wrogi punkt kontrolny (ikona flagi). Pokonaj pierwszą falę i posiłki z elitami, zabij przywódcę, podnieś flagę. Flara wzywa sojuszników; bez wymogu niska trudność jest szybsza.",
+        "nl": "Kies een vijandelijk controlepunt (vlag-icoon). Versla de eerste golf en de versterking met elites, dood de leider en hijs de vlag. Lichtkogel voor bondgenoten; zonder eis is lage moeilijkheid sneller."
+      }
+    },
+    {
+      "id": "public-execution",
+      "match": [
+        "public execution",
+        "infaz",
+        "hinrichtung",
+        "exécution publique",
+        "ejecución pública",
+        "esecuzion",
+        "execuç",
+        "казн",
+        "egzekuc",
+        "executie"
+      ],
+      "tip": {
+        "en": "Red execution icons on the map. Kill the first wave while keeping at least one hostage alive, then beat the second wave that targets the hostages.",
+        "tr": "Haritadaki kırmızı infaz simgeleri. İlk dalgayı en az bir rehine hayatta kalacak şekilde öldür, sonra rehinelere saldıran ikinci dalgayı yen.",
+        "de": "Rote Hinrichtungs-Symbole auf der Karte. Erste Welle töten, mindestens eine Geisel retten, dann die zweite Welle besiegen.",
+        "fr": "Icônes rouges d’exécution sur la carte. Tuez la première vague en gardant un otage en vie, puis battez la seconde qui vise les otages.",
+        "es": "Iconos rojos de ejecución en el mapa. Mata la primera oleada manteniendo vivo un rehén y vence la segunda, que ataca a los rehenes.",
+        "it": "Icone rosse di esecuzione sulla mappa. Uccidi la prima ondata tenendo vivo un ostaggio, poi sconfiggi la seconda che punta agli ostaggi.",
+        "pt": "Ícones vermelhos de execução no mapa. Mate a primeira onda mantendo um refém vivo e vença a segunda, que ataca os reféns.",
+        "ru": "Красные значки казни на карте. Убейте первую волну, сохранив заложника, затем вторую, нацеленную на заложников.",
+        "pl": "Czerwone ikony egzekucji na mapie. Pokonaj pierwszą falę, ratując zakładnika, potem drugą falę atakującą zakładników.",
+        "nl": "Rode executie-iconen op de kaart. Versla de eerste golf en houd een gijzelaar in leven, versla daarna de tweede golf."
+      }
+    },
+    {
+      "id": "bounty",
+      "match": [
+        "bounty",
+        "bounties",
+        "ödül avı",
+        "kopfgeld",
+        "prime",
+        "recompensa",
+        "taglia",
+        "охот за голов",
+        "награда за",
+        "list gończy",
+        "premiejacht"
+      ],
+      "tip": {
+        "en": "Turn on the Bounties filter on the map, travel to an available bounty and kill the target together with its escort. Story/Normal finishes quickly.",
+        "tr": "Haritada Bounty (ödül avı) filtresini aç, uygun bir hedefe git ve hedefi korumalarıyla birlikte öldür. Story/Normal zorlukta çabuk biter.",
+        "de": "Kartenfilter Kopfgelder aktivieren, zu einem verfügbaren Kopfgeld reisen und das Ziel samt Eskorte töten. Story/Normal geht schnell.",
+        "fr": "Activez le filtre Primes sur la carte, rendez-vous à une prime disponible et éliminez la cible et son escorte. Histoire/Normal va vite.",
+        "es": "Activa el filtro de Recompensas en el mapa, viaja a una disponible y mata al objetivo con su escolta. Historia/Normal es rápido.",
+        "it": "Attiva il filtro Taglie sulla mappa, raggiungi una taglia disponibile e uccidi il bersaglio con la scorta. Storia/Normale è rapido.",
+        "pt": "Ative o filtro de Recompensas no mapa, vá até uma disponível e elimine o alvo com a escolta. História/Normal é rápido.",
+        "ru": "Включите на карте фильтр наград за головы, отправляйтесь к доступной цели и убейте её вместе с охраной. На сюжетной/обычной сложности быстро.",
+        "pl": "Włącz na mapie filtr listów gończych, udaj się do dostępnego celu i zabij go wraz z eskortą. Fabularny/Normalny idzie szybko.",
+        "nl": "Zet op de kaart het premiefilter aan, ga naar een beschikbare premie en dood het doelwit met escorte. Verhaal/Normaal gaat snel."
+      }
+    },
+    {
+      "id": "mission",
+      "match": [
+        "main mission",
+        "side mission",
+        "story mission",
+        "stronghold",
+        "invaded",
+        "ana görev",
+        "yan görev",
+        "kale",
+        "istila",
+        "hauptmission",
+        "festung",
+        "mission principale",
+        "forteresse",
+        "misión principal",
+        "fortaleza",
+        "missione principale",
+        "roccaforte",
+        "missão principal",
+        "основн",
+        "крепост",
+        "misja główna",
+        "twierdz",
+        "hoofdmissie",
+        "bolwerk"
+      ],
+      "tip": {
+        "en": "Replay it from the map's mission/stronghold list instead of walking there. Unless the project names a difficulty, lower difficulty is fastest. Invaded versions are under the map's Invaded filter.",
+        "tr": "Oraya yürümek yerine haritadaki görev/kale listesinden tekrar başlat. Proje zorluk belirtmiyorsa düşük zorluk en hızlısıdır. İstila (Invaded) sürümleri haritanın Invaded filtresindedir.",
+        "de": "Über die Missions-/Festungsliste der Karte neu starten statt hinzulaufen. Ohne Vorgabe ist niedrige Schwierigkeit am schnellsten. Invaded-Versionen über den Invaded-Filter.",
+        "fr": "Relancez-la depuis la liste missions/forteresses de la carte plutôt que d’y aller à pied. Sans difficulté imposée, bas = plus rapide. Versions envahies via le filtre Envahi.",
+        "es": "Repítela desde la lista de misiones/fortalezas del mapa en vez de ir a pie. Si no exige dificultad, la baja es la más rápida. Las invadidas están en el filtro Invadida.",
+        "it": "Rigiocala dalla lista missioni/roccaforti della mappa invece di andarci a piedi. Senza difficoltà richiesta, bassa è più veloce. Le invase sono nel filtro Invasa.",
+        "pt": "Rejogue pela lista de missões/fortalezas do mapa em vez de ir a pé. Sem dificuldade exigida, baixa é mais rápida. Versões invadidas ficam no filtro Invadida.",
+        "ru": "Перезапустите через список миссий/крепостей на карте, а не идите пешком. Если сложность не указана, низкая быстрее. Захваченные версии — в фильтре карты.",
+        "pl": "Uruchom ponownie z listy misji/twierdz na mapie zamiast iść pieszo. Bez wymogu trudności niska jest najszybsza. Wersje najechane są w filtrze mapy.",
+        "nl": "Start opnieuw via de missie-/bolwerklijst op de kaart in plaats van ernaartoe te lopen. Zonder eis is lage moeilijkheid het snelst. Invaded-versies via het kaartfilter."
+      }
+    },
+    {
+      "id": "countdown",
+      "match": [
+        "countdown",
+        "geri sayım",
+        "compte à rebours",
+        "cuenta atrás",
+        "conto alla rovescia",
+        "contagem regressiva",
+        "обратный отсч",
+        "odliczanie",
+        "aftellen"
+      ],
+      "tip": {
+        "en": "Queue Countdown from matchmaking. It's a 15-minute 8-player mode: capture the points with the group and reach the extraction helicopter before time runs out to keep the loot.",
+        "tr": "Countdown'ı eşleştirmeden başlat. 15 dakikalık 8 kişilik bir mod: grupla noktaları ele geçir ve süre bitmeden tahliye helikopterine ulaş ki ganimet kalsın.",
+        "de": "Countdown über die Spielersuche starten. 15-Minuten-Modus für 8 Spieler: Punkte einnehmen und vor Ablauf den Helikopter erreichen, um die Beute zu behalten.",
+        "fr": "Lancez Compte à rebours via le matchmaking. Mode de 15 min à 8 : prenez les points et atteignez l’hélicoptère avant la fin pour garder le butin.",
+        "es": "Busca Cuenta atrás en el emparejamiento. Modo de 15 min para 8: captura los puntos y llega al helicóptero antes de que acabe el tiempo para conservar el botín.",
+        "it": "Avvia Conto alla rovescia dal matchmaking. Modalità da 15 min per 8: conquista i punti e raggiungi l’elicottero prima della fine per tenere il bottino.",
+        "pt": "Entre em Contagem Regressiva pelo matchmaking. Modo de 15 min para 8: capture os pontos e chegue ao helicóptero antes do fim para manter o saque.",
+        "ru": "Запустите режим Countdown через подбор. 15 минут, 8 игроков: захватывайте точки и успейте к вертолёту эвакуации, чтобы сохранить добычу.",
+        "pl": "Uruchom Odliczanie przez dobieranie graczy. Tryb 15 min dla 8: zdobywaj punkty i zdąż do helikoptera, by zachować łup.",
+        "nl": "Start Countdown via matchmaking. Modus van 15 min voor 8: verover de punten en haal de helikopter voor de tijd op is om de buit te houden."
+      }
+    },
+    {
+      "id": "summit",
+      "match": [
+        "summit",
+        "zirve",
+        "sommet",
+        "cumbre",
+        "vetta",
+        "cúpula",
+        "саммит",
+        "szczyt"
+      ],
+      "tip": {
+        "en": "Go to The Summit and pick a starting floor and difficulty. Every completed floor counts; low floors on low difficulty are quickest unless a floor or difficulty is required.",
+        "tr": "The Summit'e git, başlangıç katını ve zorluğu seç. Tamamlanan her kat sayılır; kat veya zorluk şartı yoksa düşük katlar ve düşük zorluk en hızlısıdır.",
+        "de": "Zum Summit gehen, Startetage und Schwierigkeit wählen. Jede abgeschlossene Etage zählt; ohne Vorgabe sind niedrige Etagen auf niedriger Schwierigkeit am schnellsten.",
+        "fr": "Allez au Summit, choisissez l’étage de départ et la difficulté. Chaque étage terminé compte ; sans exigence, bas étages en facile = plus rapide.",
+        "es": "Ve a The Summit y elige planta inicial y dificultad. Cada planta completada cuenta; sin requisito, plantas bajas en dificultad baja es lo más rápido.",
+        "it": "Vai al Summit, scegli piano iniziale e difficoltà. Ogni piano completato conta; senza requisiti, piani bassi a difficoltà bassa sono i più rapidi.",
+        "pt": "Vá ao Summit e escolha o andar inicial e a dificuldade. Cada andar concluído conta; sem exigência, andares baixos em dificuldade baixa são mais rápidos.",
+        "ru": "Отправьтесь в The Summit, выберите начальный этаж и сложность. Каждый пройденный этаж засчитывается; без требований быстрее нижние этажи на низкой сложности.",
+        "pl": "Idź do The Summit, wybierz piętro startowe i trudność. Każde ukończone piętro się liczy; bez wymogów najszybsze są niskie piętra na niskiej trudności.",
+        "nl": "Ga naar The Summit en kies startverdieping en moeilijkheid. Elke voltooide verdieping telt; zonder eis zijn lage verdiepingen op lage moeilijkheid het snelst."
+      }
+    },
+    {
+      "id": "dark-zone",
+      "match": [
+        "dark zone",
+        "karanlık bölge",
+        "landmark",
+        "extract",
+        "tahliye",
+        "zone sombre",
+        "zona oscura",
+        "zona nera",
+        "zona escura",
+        "темная зона",
+        "тёмная зона",
+        "strefa mroku",
+        "dark-zone"
+      ],
+      "tip": {
+        "en": "Enter any Dark Zone through its checkpoint. Landmarks are marked on the map. For extraction tasks, pick up contaminated loot, call the helicopter at an extraction zone and defend until it arrives.",
+        "tr": "Herhangi bir Karanlık Bölge'ye kontrol noktasından gir. Landmark'lar haritada işaretlidir. Tahliye görevleri için kirli ganimeti al, tahliye bölgesinde helikopteri çağır ve gelene kadar savun.",
+        "de": "Eine Dark Zone über den Checkpoint betreten. Landmarks sind auf der Karte markiert. Für Extraktionen kontaminierte Beute aufheben, Helikopter an einer Extraktionszone rufen und verteidigen.",
+        "fr": "Entrez dans une Zone sombre par son point de contrôle. Les sites sont indiqués sur la carte. Pour les extractions, ramassez du butin contaminé, appelez l’hélico et défendez la zone.",
+        "es": "Entra en una Zona Oscura por su puesto de control. Los puntos de interés están marcados en el mapa. Para extracciones, recoge botín contaminado, llama al helicóptero y defiende hasta que llegue.",
+        "it": "Entra in una Zona Nera dal checkpoint. I punti di riferimento sono segnati sulla mappa. Per le estrazioni raccogli bottino contaminato, chiama l’elicottero e difendi finché arriva.",
+        "pt": "Entre em uma Zona Escura pelo posto de controle. Pontos de referência ficam marcados no mapa. Para extrações, pegue saque contaminado, chame o helicóptero e defenda até ele chegar.",
+        "ru": "Войдите в любую Тёмную зону через КПП. Ориентиры отмечены на карте. Для эвакуации подберите заражённую добычу, вызовите вертолёт в зоне эвакуации и обороняйтесь до его прилёта.",
+        "pl": "Wejdź do dowolnej Strefy Mroku przez punkt kontrolny. Punkty orientacyjne są na mapie. Przy ewakuacji podnieś skażony łup, wezwij helikopter w strefie ewakuacji i broń się do jego przylotu.",
+        "nl": "Ga een Dark Zone binnen via het checkpoint. Landmarks staan op de kaart. Voor extracties: pak besmette buit op, roep de helikopter bij een extractiezone en verdedig tot hij er is."
+      }
+    },
+    {
+      "id": "donate",
+      "match": [
+        "donate",
+        "bağış",
+        "bağışla",
+        "spende",
+        "spenden",
+        "donner",
+        "donar",
+        "donare",
+        "doar",
+        "пожертв",
+        "przekaż",
+        "doneer"
+      ],
+      "tip": {
+        "en": "Open the project on the Projects screen and donate the requested gear or resources straight from your inventory; the project details show the exact item type needed.",
+        "tr": "Projeler ekranında projeyi aç ve istenen ekipmanı veya kaynağı doğrudan envanterinden bağışla; gereken eşya türü proje detayında yazar.",
+        "de": "Projekt im Projekte-Bildschirm öffnen und die geforderte Ausrüstung oder Ressourcen direkt aus dem Inventar spenden; die Details zeigen den genauen Gegenstandstyp.",
+        "fr": "Ouvrez le projet dans l’écran Projets et donnez l’équipement ou les ressources demandés depuis votre inventaire ; le détail indique le type exact.",
+        "es": "Abre el proyecto en la pantalla de Proyectos y dona el equipo o recurso pedido desde tu inventario; el detalle indica el tipo exacto.",
+        "it": "Apri il progetto nella schermata Progetti e dona l’equipaggiamento o le risorse richieste dall’inventario; i dettagli indicano il tipo esatto.",
+        "pt": "Abra o projeto na tela de Projetos e doe o equipamento ou recurso pedido direto do inventário; os detalhes mostram o tipo exato.",
+        "ru": "Откройте проект на экране «Проекты» и пожертвуйте нужное снаряжение или ресурсы прямо из инвентаря; точный тип указан в деталях проекта.",
+        "pl": "Otwórz projekt na ekranie Projekty i przekaż wymagany sprzęt lub zasoby prosto z ekwipunku; szczegóły pokazują dokładny typ przedmiotu.",
+        "nl": "Open het project op het Projecten-scherm en doneer de gevraagde uitrusting of grondstoffen direct uit je inventaris; de details tonen het exacte type."
+      }
+    },
+    {
+      "id": "headshot",
+      "match": [
+        "headshot",
+        "kafadan",
+        "kafa vuruş",
+        "kopfschuss",
+        "tir à la tête",
+        "a la cabeza",
+        "alla testa",
+        "na cabeça",
+        "в голову",
+        "w głowę",
+        "hoofdschot"
+      ],
+      "tip": {
+        "en": "Use a precise weapon (marksman rifle or rifle) and farm a low-difficulty open-world activity or early Summit floors, aiming at heads of regular red-bar enemies.",
+        "tr": "İsabetli bir silah (keskin nişancı tüfeği veya tüfek) kullan; düşük zorlukta bir açık dünya etkinliğinde ya da Summit'in ilk katlarında normal kırmızı barlı düşmanların kafasını hedefle.",
+        "de": "Präzise Waffe (DMR oder Gewehr) nehmen und eine leichte Open-World-Aktivität oder frühe Summit-Etagen farmen; auf Köpfe normaler Gegner zielen.",
+        "fr": "Prenez une arme précise (fusil de précision ou fusil) et farmez une activité facile du monde ouvert ou les premiers étages du Summit en visant la tête.",
+        "es": "Usa un arma precisa (tirador o fusil) y farmea una actividad fácil del mundo abierto o las primeras plantas del Summit apuntando a la cabeza.",
+        "it": "Usa un’arma precisa (tiratore scelto o fucile) e farma un’attività facile del mondo aperto o i primi piani del Summit mirando alla testa.",
+        "pt": "Use uma arma precisa (atirador ou fuzil) e farme uma atividade fácil do mundo aberto ou os primeiros andares do Summit mirando na cabeça.",
+        "ru": "Возьмите точное оружие (марксманская или обычная винтовка) и фармите лёгкую активность открытого мира или нижние этажи Summit, целясь в голову.",
+        "pl": "Użyj precyzyjnej broni (karabin wyborowy lub karabin) i farm łatwą aktywność w otwartym świecie lub niskie piętra Summit, celując w głowę.",
+        "nl": "Gebruik een precies wapen (marksman rifle of rifle) en farm een makkelijke open-wereldactiviteit of lage Summit-verdiepingen; mik op het hoofd."
+      }
+    },
+    {
+      "id": "weapon-type",
+      "match": [
+        "assault rifle",
+        "submachine",
+        "smg",
+        "lmg",
+        "light machine",
+        "shotgun",
+        "marksman",
+        "pistol",
+        "taarruz tüfeği",
+        "makineli",
+        "pompalı",
+        "tabanca"
+      ],
+      "tip": {
+        "en": "Equip that weapon type (in both slots if possible) and farm low-difficulty open-world activities like Control Points, where enemies come in waves.",
+        "tr": "O silah türünü kuşan (mümkünse iki yuvaya da) ve düşmanların dalga dalga geldiği kontrol noktası gibi düşük zorluktaki açık dünya etkinliklerinde kas.",
+        "de": "Diesen Waffentyp ausrüsten (wenn möglich in beiden Slots) und leichte Open-World-Aktivitäten wie Kontrollpunkte mit Gegnerwellen farmen.",
+        "fr": "Équipez ce type d’arme (dans les deux emplacements si possible) et farmez des activités faciles comme les points de contrôle, où les ennemis arrivent par vagues.",
+        "es": "Equipa ese tipo de arma (en ambas ranuras si puedes) y farmea actividades fáciles como puntos de control, donde los enemigos llegan en oleadas.",
+        "it": "Equipaggia quel tipo d’arma (in entrambi gli slot se puoi) e farma attività facili come i punti di controllo, dove i nemici arrivano a ondate.",
+        "pt": "Equipe esse tipo de arma (nos dois espaços, se possível) e farme atividades fáceis como pontos de controle, onde os inimigos vêm em ondas.",
+        "ru": "Экипируйте этот тип оружия (по возможности в оба слота) и фармите лёгкие активности вроде контрольных точек, где враги идут волнами.",
+        "pl": "Wyposaż ten typ broni (najlepiej w oba sloty) i farm łatwe aktywności, np. punkty kontrolne, gdzie wrogowie przychodzą falami.",
+        "nl": "Rust dat wapentype uit (indien mogelijk in beide slots) en farm makkelijke activiteiten zoals controlepunten, waar vijanden in golven komen."
+      }
+    },
+    {
+      "id": "skill",
+      "match": [
+        "skill kill",
+        "with skills",
+        "using skills",
+        "yetenekle",
+        "yetenek",
+        "fertigkeit",
+        "compétence",
+        "habilidad",
+        "abilità",
+        "habilidade",
+        "навык",
+        "umiejętnoś",
+        "vaardigheid"
+      ],
+      "tip": {
+        "en": "Equip damaging skills such as Assault Turret, Striker Drone, Seeker Mine or Firefly and let them land the kills; skill tier and skill damage gear speed it up.",
+        "tr": "Assault Turret, Striker Drone, Seeker Mine veya Firefly gibi hasar veren yetenekleri kuşan ve öldürmeleri onlara bırak; skill tier ve yetenek hasarı veren ekipman işi hızlandırır.",
+        "de": "Schadens-Fertigkeiten wie Assault Turret, Striker Drone, Seeker Mine oder Firefly ausrüsten und die Kills machen lassen; Skill-Tier- und Fertigkeitsschaden-Ausrüstung beschleunigt.",
+        "fr": "Équipez des compétences offensives (Assault Turret, Striker Drone, Seeker Mine, Firefly) et laissez-les achever ; le niveau et les dégâts de compétence accélèrent.",
+        "es": "Equipa habilidades de daño como Assault Turret, Striker Drone, Seeker Mine o Firefly y deja que rematen; el nivel y daño de habilidad lo aceleran.",
+        "it": "Equipaggia abilità offensive come Assault Turret, Striker Drone, Seeker Mine o Firefly e lascia a loro le uccisioni; livello e danno abilità accelerano.",
+        "pt": "Equipe habilidades de dano como Assault Turret, Striker Drone, Seeker Mine ou Firefly e deixe que finalizem; nível e dano de habilidade aceleram.",
+        "ru": "Возьмите атакующие навыки (Assault Turret, Striker Drone, Seeker Mine, Firefly) и пусть они добивают; уровень и урон навыков ускоряют процесс.",
+        "pl": "Załóż ofensywne umiejętności (Assault Turret, Striker Drone, Seeker Mine, Firefly) i pozwól im dobijać; poziom i obrażenia umiejętności przyspieszają.",
+        "nl": "Gebruik schadevaardigheden zoals Assault Turret, Striker Drone, Seeker Mine of Firefly en laat hen de kills maken; skill tier en vaardigheidsschade versnellen het."
+      }
+    },
+    {
+      "id": "elite",
+      "match": [
+        "elite",
+        "named",
+        "elit",
+        "isimli",
+        "benannt",
+        "élite",
+        "nommé",
+        "élite",
+        "con nome",
+        "nomead",
+        "элит",
+        "именн",
+        "elitarn",
+        "benoemd"
+      ],
+      "tip": {
+        "en": "Elites and named enemies have yellow health bars. Control Point reinforcement waves and higher difficulties spawn more of them.",
+        "tr": "Elit ve isimli düşmanların can barı sarıdır. Kontrol noktası takviye dalgaları ve yüksek zorluklar daha fazlasını çıkarır.",
+        "de": "Elite und Benannte haben gelbe Lebensbalken. Verstärkungswellen an Kontrollpunkten und höhere Schwierigkeit bringen mehr davon.",
+        "fr": "Élites et nommés ont une barre de vie jaune. Les renforts des points de contrôle et les difficultés élevées en font apparaître davantage.",
+        "es": "Élites y enemigos con nombre tienen barra amarilla. Los refuerzos de puntos de control y la dificultad alta generan más.",
+        "it": "Élite e nemici con nome hanno la barra gialla. I rinforzi dei punti di controllo e la difficoltà alta ne generano di più.",
+        "pt": "Elites e nomeados têm barra amarela. Reforços de pontos de controle e dificuldade alta geram mais deles.",
+        "ru": "У элиты и именных врагов жёлтая полоса здоровья. Подкрепления на контрольных точках и высокая сложность дают их больше.",
+        "pl": "Elity i nazwani wrogowie mają żółty pasek zdrowia. Posiłki na punktach kontrolnych i wyższa trudność dają ich więcej.",
+        "nl": "Elites en benoemde vijanden hebben een gele levensbalk. Versterkingsgolven bij controlepunten en hogere moeilijkheid leveren er meer op."
+      }
+    },
+    {
+      "id": "conflict",
+      "match": [
+        "conflict",
+        "çatışma",
+        "konflikt",
+        "conflit",
+        "conflicto",
+        "conflitto",
+        "conflito",
+        "конфликт"
+      ],
+      "tip": {
+        "en": "Start Conflict (PvP) from matchmaking. Check the project text for whether wins or just completed matches are required.",
+        "tr": "Conflict'i (PvP) eşleştirmeden başlat. Projenin galibiyet mi yoksa sadece tamamlanan maç mı istediğine metinden bak.",
+        "de": "Conflict (PvP) über die Spielersuche starten. Im Projekttext prüfen, ob Siege oder nur abgeschlossene Matches nötig sind.",
+        "fr": "Lancez Conflit (JcJ) via le matchmaking. Vérifiez si le projet demande des victoires ou seulement des matchs terminés.",
+        "es": "Inicia Conflicto (JcJ) desde el emparejamiento. Revisa si el proyecto pide victorias o solo partidas completadas.",
+        "it": "Avvia Conflitto (PvP) dal matchmaking. Controlla se il progetto chiede vittorie o solo partite completate.",
+        "pt": "Inicie Conflito (JxJ) pelo matchmaking. Veja se o projeto pede vitórias ou só partidas concluídas.",
+        "ru": "Запустите «Конфликт» (PvP) через подбор. Проверьте, нужны ли победы или просто сыгранные матчи.",
+        "pl": "Uruchom Konflikt (PvP) przez dobieranie graczy. Sprawdź, czy projekt wymaga zwycięstw, czy tylko ukończonych meczów.",
+        "nl": "Start Conflict (PvP) via matchmaking. Kijk of het project overwinningen of alleen voltooide potjes vraagt."
       }
     }
   ]

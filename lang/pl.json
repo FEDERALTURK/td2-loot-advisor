@@ -540,5 +540,13 @@
   "tasks.auto_resets": "Ustawiaj godziny resetu automatycznie",
   "tasks.status": "🌐 {n} wspólnych zadań · wersja {version}",
   "tasks.feed_note": "Aktualne projekty dzienne/tygodniowe, podróż sezonowa, wydarzenie globalne i etapy obławy przychodzą z centralnej listy w twoim języku (🌐). Znaczniki „zrobione” zostają, wygasłe zadania znikają same. Twoje własne zadania pozostają nietknięte. Godziny resetu są przeliczane na twoją strefę czasową.",
-  "tasks.synced": "Zadania: {added} nowych, {removed} usuniętych"
+  "tasks.synced": "Zadania: {added} nowych, {removed} usuniętych",
+  "tasks.how_title": "💡 Jak to zrobić",
+  "tasks.how_pick": "Wybierz zadanie; tu pojawi się, jak je wykonać.",
+  "tasks.how_none": "Brak jeszcze wskazówki dla tego zadania. Nowe przyjdą z aktualizacją wspólnej listy.",
+  "tasks.open_source": "Otwórz źródło",
+  "tasks.read_projects": "Odczytaj ekran projektów",
+  "tasks.reset_region": "Wybierz obszar ponownie",
+  "tasks.projects_note": "Projekty dzienne i tygodniowe nie są publikowane na publicznych stronach, więc są odczytywane z twojego ekranu: otwórz w grze ekran Projekty, wybierz kategorię (Dzienne/Tygodniowe) i kliknij '📋 Odczytaj ekran projektów'. Za pierwszym razem raz zaznaczasz obszar listy, potem wystarczy jedno kliknięcie. Zadania są tłumaczone, a pasująca wskazówka (💡) dodawana automatycznie.",
+  "tasks.nothing_read": "Nie znaleziono czytelnego tekstu na ekranie."
 }
