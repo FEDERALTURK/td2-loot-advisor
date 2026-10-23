@@ -1,0 +1,541 @@
+{
+  "__meta__": {
+    "name": "Deutsch",
+    "english_name": "German"
+  },
+  "__task_dict__": [
+    [
+      "control points",
+      "Kontrollpunkte"
+    ],
+    [
+      "control point",
+      "Kontrollpunkt"
+    ],
+    [
+      "supply drops",
+      "Versorgungsabwürfe"
+    ],
+    [
+      "supply drop",
+      "Versorgungsabwurf"
+    ],
+    [
+      "strongholds",
+      "Festungen"
+    ],
+    [
+      "stronghold",
+      "Festung"
+    ],
+    [
+      "settlements",
+      "Siedlungen"
+    ],
+    [
+      "settlement",
+      "Siedlung"
+    ],
+    [
+      "exotic caches",
+      "exotische Behälter"
+    ],
+    [
+      "bounties",
+      "Kopfgelder"
+    ],
+    [
+      "bounty",
+      "Kopfgeld"
+    ],
+    [
+      "invaded missions",
+      "überfallene Missionen"
+    ],
+    [
+      "invaded mission",
+      "überfallene Mission"
+    ],
+    [
+      "seasonal journey",
+      "Saison-Reise"
+    ],
+    [
+      "global event",
+      "Globales Event"
+    ],
+    [
+      "dark zone",
+      "Dark Zone"
+    ],
+    [
+      "crafting materials",
+      "Handwerksmaterialien"
+    ],
+    [
+      "headshot kills",
+      "Kopfschuss-Kills"
+    ],
+    [
+      "headshots",
+      "Kopfschüsse"
+    ],
+    [
+      "elites",
+      "Elitegegner"
+    ],
+    [
+      "elite",
+      "Elitegegner"
+    ],
+    [
+      "enemies",
+      "Gegner"
+    ],
+    [
+      "enemy",
+      "Gegner"
+    ],
+    [
+      "legendary difficulty",
+      "Legendär-Schwierigkeit"
+    ],
+    [
+      "heroic difficulty",
+      "Heroisch-Schwierigkeit"
+    ],
+    [
+      "challenging difficulty",
+      "Herausfordernd-Schwierigkeit"
+    ],
+    [
+      "hard difficulty",
+      "Schwer-Schwierigkeit"
+    ],
+    [
+      "or above",
+      "oder höher"
+    ],
+    [
+      "or higher",
+      "oder höher"
+    ],
+    [
+      "assault rifle",
+      "Sturmgewehr"
+    ],
+    [
+      "submachine gun",
+      "Maschinenpistole"
+    ],
+    [
+      "light machine gun",
+      "leichtes MG"
+    ],
+    [
+      "marksman rifle",
+      "Präzisionsgewehr"
+    ],
+    [
+      "sniper rifle",
+      "Scharfschützengewehr"
+    ],
+    [
+      "shotgun",
+      "Schrotflinte"
+    ],
+    [
+      "pistol",
+      "Pistole"
+    ],
+    [
+      "skill kills",
+      "Fertigkeits-Kills"
+    ],
+    [
+      "skills",
+      "Fertigkeiten"
+    ],
+    [
+      "skill",
+      "Fertigkeit"
+    ],
+    [
+      "complete",
+      "Schließe ab:"
+    ],
+    [
+      "defeat",
+      "Besiege"
+    ],
+    [
+      "kills",
+      "Kills"
+    ],
+    [
+      "kill",
+      "Töte"
+    ],
+    [
+      "daily project",
+      "Tagesprojekt"
+    ],
+    [
+      "weekly project",
+      "Wochenprojekt"
+    ],
+    [
+      "project",
+      "Projekt"
+    ],
+    [
+      "missions",
+      "Missionen"
+    ],
+    [
+      "mission",
+      "Mission"
+    ],
+    [
+      "difficulty",
+      "Schwierigkeit"
+    ],
+    [
+      "players",
+      "Spieler"
+    ],
+    [
+      "player",
+      "Spieler"
+    ],
+    [
+      "agents",
+      "Agenten"
+    ],
+    [
+      "agent",
+      "Agent"
+    ],
+    [
+      "hijack",
+      "Erobere"
+    ],
+    [
+      "capture",
+      "Erobere"
+    ],
+    [
+      "activate",
+      "Aktiviere"
+    ]
+  ],
+  "tab.dash": "Übersicht",
+  "tab.builds": "Builds",
+  "tab.progress": "Fehlende Teile",
+  "tab.stats": "Statistik",
+  "tab.tasks": "Projekte",
+  "tab.assistant": "Assistent",
+  "tab.settings": "Einstellungen",
+  "tab.history": "Verlauf",
+  "tab.log": "Protokoll",
+  "tab.help": "Hilfe",
+  "verdict.keep": "BEHALTEN",
+  "verdict.consider": "ÜBERLEGEN",
+  "verdict.dismantle": "ZERLEGEN",
+  "verdict.review": "PRÜFEN",
+  "verdict.error": "FEHLER",
+  "verdict.idle": "BEREIT",
+  "slot.mask": "Maske",
+  "slot.backpack": "Rucksack",
+  "slot.chest": "Weste",
+  "slot.gloves": "Handschuhe",
+  "slot.holster": "Holster",
+  "slot.kneepads": "Knieschoner",
+  "slot.weapon": "Waffe",
+  "slot.sidearm": "Pistole",
+  "cat.daily": "Täglich",
+  "cat.weekly": "Wöchentlich",
+  "cat.journey": "Journey",
+  "cat.global_event": "Global Event",
+  "cat.manhunt": "Manhunt",
+  "cat.other": "Sonstige",
+  "weekday.0": "Montag",
+  "weekday.1": "Dienstag",
+  "weekday.2": "Mittwoch",
+  "weekday.3": "Donnerstag",
+  "weekday.4": "Freitag",
+  "weekday.5": "Samstag",
+  "weekday.6": "Sonntag",
+  "provider.ollama": "Lokal (Ollama, offline)",
+  "provider.claude": "Online (Claude API)",
+  "provider.openai": "Online (ChatGPT API)",
+  "provider.builtin": "Integriert (ohne KI)",
+  "provider.claude_code": "Claude (Abo, Claude Code)",
+  "word.unnamed": "Unbenannt",
+  "word.image": "Bild",
+  "word.complete": "vollständig",
+  "period.all": "Gesamt",
+  "period.today": "Heute",
+  "period.7d": "Letzte 7 Tage",
+  "period.30d": "Letzte 30 Tage",
+  "label.period": "Zeitraum:",
+  "label.build": "Build:",
+  "label.category": "Kategorie:",
+  "label.categories": "Kategorien",
+  "rate.good": "GUT",
+  "rate.ok": "ok",
+  "rate.low": "niedrig",
+  "state.running": "LÄUFT",
+  "state.stopped": "gestoppt",
+  "state.auto": "AUTOMATISCH",
+  "state.not_set": "NICHT GESETZT",
+  "state.key": "Taste {key}",
+  "time.days": "{n} T",
+  "time.hm": "{h} Std {m} Min",
+  "btn.start": "▶ Start",
+  "btn.stop": "■ Stopp",
+  "btn.pick_region": "Bereich wählen",
+  "btn.scan_now": "Jetzt scannen",
+  "btn.test_image": "Test per Screenshot",
+  "btn.browse": "Durchsuchen",
+  "btn.add_update": "Hinzufügen / ändern",
+  "btn.open_folder": "Ordner öffnen",
+  "btn.send": "Senden",
+  "btn.save": "💾 Speichern",
+  "btn.save_short": "Speichern",
+  "btn.delete": "Löschen",
+  "btn.clear": "Leeren",
+  "btn.refresh": "Aktualisieren",
+  "panel.scan_mode": "Scan-Modus:",
+  "mode.hotkey": "Tastenkürzel",
+  "mode.auto": "Automatisch (ohne Taste)",
+  "status.line": "Status: {state}  |  Modus: {mode}  |  Bereich: {region}",
+  "status.counts": "Diese Sitzung → Behalten: {keep}   Überlegen: {consider}   Zerlegen: {dismantle}   Prüfen: {review}",
+  "panel.no_build_match": "Passt zu keinem Build.",
+  "panel.rare_warning": "Exotic/Named/Prototype: vor dem Zerlegen selbst prüfen!",
+  "panel.roll_header": "\n\nWERTE-VERGLEICH (deins → dieses Teil)\n",
+  "panel.ocr_text": "\n\n--- OCR-TEXT ---\n",
+  "panel.parsed": "\n--- AUSGELESEN ---\n",
+  "calib.item_hint": "Rahmen um den Tooltip ziehen  (Esc: abbrechen)",
+  "calib.ask_item": "Der Bildschirm wird 5 Sekunden nach OK aufgenommen.\nFahre in dieser Zeit im Spiel über ein Item (Tooltip offen lassen).",
+  "calib.ask_tasks": "Der Bildschirm wird 5 Sekunden nach OK aufgenommen.\nÖffne in dieser Zeit im Spiel die Projektliste (Projects / Seasonal Journey / Global Event).",
+  "calib.ask_gpt": "Der Bildschirm wird 5 Sekunden nach OK aufgenommen.\nÖffne in dieser Zeit in ChatGPT eine Ansicht mit einer Beispielantwort.",
+  "msg.pick_region_first": "Zuerst 'Bereich wählen' ausführen.",
+  "msg.saved": "Gespeichert.",
+  "msg.settings_saved": "Einstellungen gespeichert.",
+  "msg.no_tesseract": "Tesseract OCR nicht gefunden.\nPfad in den Einstellungen wählen oder installieren:\ngithub.com/UB-Mannheim/tesseract/wiki",
+  "build.new": "Neues Build",
+  "build.delete": "Gewähltes Build löschen",
+  "build.delete_confirm": "Gewähltes Build löschen?",
+  "build.sets": "Set / Marke (mit Komma)",
+  "build.slots": "Verfolgte Slots (leer = alle)",
+  "build.attr_rules": "Attributregeln (Gewicht / als 'gut' geltender Wert)",
+  "build.talents": "Talente (Gewicht)",
+  "build.attr": "Attribut",
+  "build.weight": "Gewicht",
+  "build.goodval": "Guter Wert",
+  "build.talent": "Talent",
+  "build.export": "⇩ Builds exportieren",
+  "build.import": "⇧ Build-Datei importieren",
+  "build.exported": "{n} Builds exportiert:\n{path}",
+  "build.imported": "{n} Builds importiert.",
+  "build.import_bad": "In der Datei wurde keine Build-Liste gefunden.",
+  "build.err_weight": "Gewicht muss eine Zahl sein.",
+  "build.err_weight_val": "Gewicht und Wert müssen Zahlen sein.",
+  "build.err_bonus": "Set-Bonus muss eine Zahl sein.",
+  "build.bad_slot": "Ungültiger Slot: {bad}\nGültig: {valid}",
+  "prog.fills_gap": "FÜLLT EINE LÜCKE",
+  "prog.upgrade": "VERBESSERUNG",
+  "prog.already": "Bereits erfasst",
+  "note.fills_gap": "FÜLLT EINE LÜCKE: {build} / {slot}",
+  "note.already": "Bereits erfasst: {build} / {slot}",
+  "note.upgrade": "VERBESSERUNG: {build} / {slot}  {old}% → {new}%",
+  "prog.save_last": "Zuletzt gescanntes Teil in dieses Build übernehmen",
+  "prog.clear_slot": "Gewählten Slot leeren",
+  "prog.reset_build": "Dieses Build zurücksetzen",
+  "prog.reset_confirm": "Alle Einträge dieses Builds löschen?",
+  "prog.all_missing": "FEHLENDES IN ALLEN BUILDS\n\n",
+  "prog.completed": "{have}/{total} Teile vollständig",
+  "prog.no_scan_yet": "Noch kein Item gescannt.",
+  "prog.no_slot": "Slot des Items (Maske, Weste usw.) nicht erkannt.",
+  "roll.only_new": "{k}: beim neuen Teil vorhanden ({n}), beim alten nicht",
+  "roll.only_old": "{k}: beim alten vorhanden ({o}), beim neuen nicht",
+  "col.item": "Item",
+  "col.slot": "Slot",
+  "col.status": "Status",
+  "col.score": "Wert",
+  "col.translated": "Übersetzt",
+  "col.original": "Original (Englisch)",
+  "col.source": "Quelle",
+  "stats.verdicts": "Verteilung der Urteile",
+  "stats.by_build": "BEHALTEN je Build",
+  "stats.daily_scans": "Scans pro Tag (letzte 7 Tage)",
+  "stats.by_slot": "Verteilung nach Slot",
+  "stats.summary": "Scans gesamt: {total}   |   BEHALTEN-Quote: {keep_pct}%   |   Ø Wert: {avg}%   |   Exotic/Named/Prototype: {rare}",
+  "hist.clear": "Verlauf leeren",
+  "hist.clear_confirm": "Gesamten Verlauf löschen? (Die Statistik wird ebenfalls zurückgesetzt)",
+  "set.language_box": "Sprache",
+  "set.language": "Oberflächensprache:",
+  "set.apply_language": "Übernehmen",
+  "set.language_note": "Sprache hinzufügen: lang/en.json kopieren, die Werte übersetzen und als lang/<code>.json speichern. Die App findet sie beim nächsten Start.",
+  "set.language_changed": "Sprache auf {lang} gesetzt.",
+  "set.appearance_box": "Darstellung",
+  "set.theme": "Design:",
+  "theme.dark": "Dunkel (TD2-Orange)",
+  "theme.light": "Hell",
+  "theme.classic": "Klassisch (altes Aussehen)",
+  "set.ui_sounds": "Tasten- und Klickgeräusche",
+  "set.theme_note": "Design- und Sprachänderungen werden sofort übernommen; kein Neustart nötig.",
+  "set.theme_changed": "Neues Design übernommen.",
+  "set.scan_box": "Scannen",
+  "set.keep_threshold": "BEHALTEN-Schwelle (%)",
+  "set.consider_threshold": "ÜBERLEGEN-Schwelle (%)",
+  "set.overlay_seconds": "Anzeigedauer (s)",
+  "set.auto_interval": "Intervall für Auto-Scan (ms)",
+  "set.ocr_lang": "OCR-Sprache",
+  "set.tesseract_path": "Tesseract-Pfad",
+  "set.overlay_corner": "Ecke der Einblendung",
+  "set.sound": "Tonsignal",
+  "set.track_progress": "Verfolgung fehlender Teile aktiv",
+  "set.auto_record": "Teile automatisch erfassen (die mit BEHALTEN)",
+  "set.save_crop": "Letzte Aufnahme speichern (Fehlersuche)",
+  "set.log_csv": "Verlauf in CSV schreiben",
+  "set.save": "💾 Einstellungen speichern",
+  "set.capture_key": "Taste erfassen",
+  "set.press_key": "Taste drücken...",
+  "set.log_box": "Anwendungsprotokoll",
+  "set.log_level": "Protokollstufe",
+  "set.log_size": "Max. Dateigröße (KB)",
+  "set.log_backups": "Aufbewahrte Sicherungen",
+  "log.level_filter": "Stufe:",
+  "log.autoscroll": "Ans Ende scrollen",
+  "log.save_as": "Speichern unter...",
+  "log.clear": "Protokoll leeren",
+  "log.clear_confirm": "Das gesamte Anwendungsprotokoll löschen?",
+  "log.saved": "Protokoll gespeichert: {path}",
+  "log.info": "{shown} von {total} Zeilen · {kb} KB · {path}",
+  "ai.settings": "Assistent-Einstellungen",
+  "ai.provider": "KI",
+  "ai.saved": "Assistent-Einstellungen gespeichert.",
+  "ai.speak_verdict": "Urteil vorlesen",
+  "ai.speak_chat": "Antworten des Assistenten vorlesen",
+  "ai.claude_key": "Claude-API-Schlüssel",
+  "ai.openai_key": "ChatGPT-API-Schlüssel",
+  "ai.stt_model": "Spracherkennungsmodell",
+  "ai.stt_device": "Gerät (cpu/cuda)",
+  "ai.tts_rate": "Sprechtempo",
+  "ai.tts_voice": "Hinweis auf Stimmnamen (opt.)",
+  "ai.voice_hotkey": "Taste für Sprachbefehl",
+  "ai.key_warning": "API-Schlüssel werden im Klartext in builds.json gespeichert — gib diese Datei an niemanden weiter.",
+  "ai.test_voice": "🔊 Stimme testen",
+  "ai.voice_test": "Hallo, ich bin dein lokaler Assistent. So klinge ich.",
+  "ai.examples": "Beispiele: 'Welche Teile fehlen mir?', 'Soll ich das letzte Item zerlegen?', 'Wie viele habe ich behalten?'",
+  "ai.no_key": "Kein API-Schlüssel eingetragen",
+  "ai.talk": "🎤 Sprechen",
+  "ai.listening": "🎤 Ich höre zu... (zum Beenden Taste erneut drücken)",
+  "ai.transcribing": "Wird ausgewertet... (das Modell wird beim ersten Mal geladen)",
+  "ai.too_short": "Aufnahme zu kurz, bitte erneut.",
+  "ai.not_understood": "Sprache nicht verstanden.",
+  "ai.failed": "Die KI hat nicht geantwortet ({e}). Integrierte Antwort:",
+  "ai.context_header": "\n\nKONTEXT:\n",
+  "kw.missing": "fehlt|fehlen|lücke",
+  "kw.stats": "statistik|wie viele",
+  "kw.last": "letzte|letztes",
+  "quick.stats": "Insgesamt {total} Scans, davon {keep} mit Behalten.",
+  "quick.last": "Das letzte Item war {item}. Bestes Build: {build}, {pct} Prozent.",
+  "quick.last_plain": "Das letzte Item war {item}.",
+  "quick.help": "Im integrierten Modus beantworte ich Fragen zu fehlenden Teilen, zur Statistik und zum letzten Item. Für ein echtes Gespräch wähle eine lokale oder Online-KI.",
+  "src.ai": "KI",
+  "src.dict": "Wörterbuch",
+  "task.reset_box": "Reset-Countdown",
+  "task.daily_hour": "Tägliche Reset-Stunde (0-23):",
+  "task.weekly_day": "Wöchentlicher Reset-Tag:",
+  "task.hour": "Stunde:",
+  "task.reset_note": "Hinweis: Massive hat Zeit und Tag des Resets früher mehrfach geändert; prüfe es im Spiel.",
+  "task.reset_saved": "Reset-Einstellungen gespeichert.",
+  "task.err_hour": "Die Stunde muss eine Zahl zwischen 0 und 23 sein.",
+  "task.reset_line": "Nächster täglicher Reset: {daily}   |   Nächster wöchentlicher Reset ({day}): {weekly}",
+  "task.add_box": "Projekt hinzufügen (englischen Text einfügen; ein Projekt pro Zeile)",
+  "task.read_screen": "📷 Vom Bildschirm lesen",
+  "task.translate_add": "🌐 Übersetzen und hinzufügen",
+  "task.translating": "Wird übersetzt...",
+  "task.paste_first": "Füge zuerst den Projekttext ein.",
+  "task.calib_hint": "Rahmen um die Projektliste ziehen  (Esc: abbrechen)",
+  "task.toggle_done": "✔/✘ Als erledigt markieren",
+  "task.clear_done": "Erledigte entfernen",
+  "task.clear_cat": "Ganze Kategorie leeren",
+  "task.clear_cat_confirm": "Alle Projekte in '{cat}' löschen?",
+  "task.added": "{n} Projekte hinzugefügt.",
+  "task.added_src": "{n} Projekte hinzugefügt ({src}).",
+  "gpt.box": "Automatisch von ChatGPT holen (nutzt die installierte ChatGPT-App)",
+  "gpt.warning": "ACHTUNG: Dies ist ein Tastatur-/Fenster-Makro — es tippt für dich in ChatGPT und liest die Antwort vom Bildschirm ab. Die Richtigkeit hängt allein davon ab, was ChatGPT antwortet; ohne Zugriff auf aktuelle Spieldaten kann das Modell Falsches erfinden. Vergleiche wichtige Projekte mit dem Text im Spiel.",
+  "gpt.window_title": "Fenstertitel:",
+  "gpt.hotkey": "Taste:",
+  "gpt.wait": "Wartezeit (s):",
+  "gpt.pick_region": "Antwortbereich wählen",
+  "gpt.run": "▶ Jetzt ausführen (fragen + lesen)",
+  "gpt.read_only": "📖 Antwort jetzt lesen (ohne zu senden)",
+  "gpt.prompt_label": "Anfragetext ({date} wird automatisch eingesetzt):",
+  "gpt.save_prompt": "Anfragetext speichern",
+  "gpt.prompt_saved": "Anfragetext gespeichert.",
+  "gpt.raw_label": "Letzte ChatGPT-Antwort (roher OCR-Text, zur Kontrolle):",
+  "gpt.calib_hint": "Rahmen um den ChatGPT-Antwortbereich ziehen  (Esc: abbrechen)",
+  "gpt.need_region": "Lege zuerst mit 'Antwortbereich wählen' den Antwortbereich von ChatGPT fest.",
+  "gpt.need_region_short": "Zuerst 'Antwortbereich wählen' ausführen.",
+  "gpt.no_parse": "Konnte nicht in Kategorien aufgeteilt werden; prüfe die rohe Antwort.",
+  "gpt.waiting": "ChatGPT antwortet... noch {left} s",
+  "gpt.err.nowindow": "Kein Fenster mit '{title}' gefunden. Stelle sicher, dass die ChatGPT-App offen ist.",
+  "speak.fills_gap": "füllt eine Lücke",
+  "speak.upgrade": "Verbesserung",
+  "speak.already": "bereits erfasst",
+  "speak.rare": "seltenes Item, bitte selbst prüfen",
+  "speak.build_pct": "{build}, {pct} Prozent",
+  "err.bad_setting": "Ungültige Einstellung: {e}",
+  "err.file_read": "Datei konnte nicht gelesen werden: {e}",
+  "err.hotkey_listener": "Tastenerkennung konnte nicht gestartet werden:\n{e}",
+  "err.mic": "Mikrofonfehler: {e}  (pip install sounddevice numpy)",
+  "err.stt": "Fehler der Spracherkennung: {e}  (pip install faster-whisper)",
+  "err.read": "Lesefehler: {e}",
+  "err.no_connection": "Verbindung fehlgeschlagen: {reason}",
+  "err.generic": "Fehler: {e}",
+  "ai.ollama_url": "Ollama-Adresse",
+  "ai.ollama_model": "Ollama-Modell",
+  "ai.claude_model": "Claude-Modell",
+  "ai.cc_model": "Claude-Code-Modell (leer = Standard)",
+  "ai.cc_missing": "Claude Code wurde nicht gefunden. Führe einmal scripts\\install_claude_code.bat aus und versuche es dann erneut.",
+  "ai.cc_login": "Claude Code ist nicht angemeldet. Führe einmal scripts\\install_claude_code.bat (oder 'claude auth login') aus.",
+  "ai.cc_timeout": "Claude Code hat nicht innerhalb von {s} Sekunden geantwortet.",
+  "ai.openai_model": "ChatGPT-Modell",
+  "build.new_name": "Neues Build",
+  "build.set_bonus": "Set-Bonus",
+  "col.time": "Zeit",
+  "col.verdict": "Urteil",
+  "col.best_build": "Bestes Build",
+  "gpt.finding_window": "ChatGPT-Fenster wird gesucht...",
+  "note.yours_better": "Deins ist besser: {build} / {slot} ({pct}%)",
+  "prog.filled": "✔ Belegt",
+  "prog.empty": "✘ Fehlt",
+  "prog.done_all": "VOLLSTÄNDIG ✔",
+  "prog.yours_better": "Deins ist besser",
+  "speak.yours_better": "das vorhandene ist besser",
+  "why.set_match": "Set/Marke passt",
+  "word.no_data": "Keine Daten",
+  "set.bg_interval": "Hintergrundwechsel (s, 0 = fest):",
+  "set.open_art": "Bildordner öffnen",
+  "set.art_note": "Eigene Bilder hinzufügen: art\\backgrounds (Hintergründe), art\\emblems\\<Build-Name>.png (Build-Emblem), art\\flags\\<Sprachcode>.png (Flagge). Embleme und Flaggen erscheinen bei Auswahl 5 s lang.",
+  "meta.not_configured": "Die Meta-Feed-Adresse ist noch nicht gesetzt.",
+  "meta.syncing": "Meta-Builds werden geladen…",
+  "meta.failed": "Meta-Liste nicht erreichbar (offline?). Letzte Kopie wird verwendet.",
+  "meta.synced": "Meta: {added} neu, {updated} aktualisiert, {removed} entfernt.",
+  "meta.up_to_date": "Meta-Builds sind aktuell.",
+  "meta.status": "⭐ {n} Meta-Builds · Version {version}\nLetzter Sync: {when}",
+  "meta.sync_now": "Meta jetzt synchronisieren",
+  "meta.detail": "Modus: {mode} · Beliebtheit: {pop}/100",
+  "meta.sources": "Quellen: {src}",
+  "meta.locked": "🔒 Du hast diesen Meta-Build bearbeitet; der Sync ändert ihn nicht mehr.",
+  "meta.box": "Meta-Build-Sync",
+  "meta.enable": "Beim Start einmal täglich automatisch synchronisieren",
+  "meta.restore_hidden": "Ausgeblendete Meta-Builds wiederherstellen",
+  "meta.url": "Feed-Adresse (leer = offiziell):",
+  "meta.note": "Meta- und vieldiskutierte Builds kommen einmal täglich aus einer zentralen Liste. Eigene Builds bleiben unberührt; bearbeitete Meta-Builds werden gesperrt, gelöschte kommen nicht zurück. ⭐ = Meta, 🔒 = von dir bearbeitet, 🔥 = Beliebtheit."
+}

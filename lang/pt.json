@@ -1,0 +1,537 @@
+{
+  "__meta__": {
+    "name": "Português",
+    "english_name": "Portuguese"
+  },
+  "__task_dict__": [
+    [
+      "control points",
+      "pontos de controlo"
+    ],
+    [
+      "control point",
+      "ponto de controlo"
+    ],
+    [
+      "supply drops",
+      "entregas de suprimentos"
+    ],
+    [
+      "supply drop",
+      "entrega de suprimentos"
+    ],
+    [
+      "strongholds",
+      "fortalezas"
+    ],
+    [
+      "stronghold",
+      "fortaleza"
+    ],
+    [
+      "settlements",
+      "assentamentos"
+    ],
+    [
+      "settlement",
+      "assentamento"
+    ],
+    [
+      "bounties",
+      "recompensas"
+    ],
+    [
+      "bounty",
+      "recompensa"
+    ],
+    [
+      "invaded missions",
+      "missões invadidas"
+    ],
+    [
+      "invaded mission",
+      "missão invadida"
+    ],
+    [
+      "seasonal journey",
+      "jornada sazonal"
+    ],
+    [
+      "global event",
+      "evento global"
+    ],
+    [
+      "dark zone",
+      "Dark Zone"
+    ],
+    [
+      "crafting materials",
+      "materiais de fabrico"
+    ],
+    [
+      "headshot kills",
+      "abates na cabeça"
+    ],
+    [
+      "headshots",
+      "tiros na cabeça"
+    ],
+    [
+      "elites",
+      "elites"
+    ],
+    [
+      "elite",
+      "elite"
+    ],
+    [
+      "enemies",
+      "inimigos"
+    ],
+    [
+      "enemy",
+      "inimigo"
+    ],
+    [
+      "legendary difficulty",
+      "dificuldade lendária"
+    ],
+    [
+      "heroic difficulty",
+      "dificuldade heroica"
+    ],
+    [
+      "challenging difficulty",
+      "dificuldade desafiante"
+    ],
+    [
+      "hard difficulty",
+      "dificuldade difícil"
+    ],
+    [
+      "or above",
+      "ou superior"
+    ],
+    [
+      "or higher",
+      "ou superior"
+    ],
+    [
+      "assault rifle",
+      "espingarda de assalto"
+    ],
+    [
+      "submachine gun",
+      "pistola-metralhadora"
+    ],
+    [
+      "light machine gun",
+      "metralhadora ligeira"
+    ],
+    [
+      "marksman rifle",
+      "espingarda de atirador"
+    ],
+    [
+      "sniper rifle",
+      "espingarda de precisão"
+    ],
+    [
+      "shotgun",
+      "caçadeira"
+    ],
+    [
+      "pistol",
+      "pistola"
+    ],
+    [
+      "skill kills",
+      "abates com habilidade"
+    ],
+    [
+      "skills",
+      "habilidades"
+    ],
+    [
+      "skill",
+      "habilidade"
+    ],
+    [
+      "complete",
+      "Conclui"
+    ],
+    [
+      "defeat",
+      "Derrota"
+    ],
+    [
+      "kills",
+      "abates"
+    ],
+    [
+      "kill",
+      "Elimina"
+    ],
+    [
+      "daily project",
+      "projeto diário"
+    ],
+    [
+      "weekly project",
+      "projeto semanal"
+    ],
+    [
+      "project",
+      "projeto"
+    ],
+    [
+      "missions",
+      "missões"
+    ],
+    [
+      "mission",
+      "missão"
+    ],
+    [
+      "difficulty",
+      "dificuldade"
+    ],
+    [
+      "players",
+      "jogadores"
+    ],
+    [
+      "player",
+      "jogador"
+    ],
+    [
+      "agents",
+      "agentes"
+    ],
+    [
+      "agent",
+      "agente"
+    ],
+    [
+      "hijack",
+      "Captura"
+    ],
+    [
+      "capture",
+      "Captura"
+    ],
+    [
+      "activate",
+      "Ativa"
+    ]
+  ],
+  "tab.dash": "Painel",
+  "tab.builds": "Builds",
+  "tab.progress": "Peças em falta",
+  "tab.stats": "Estatísticas",
+  "tab.tasks": "Projetos",
+  "tab.assistant": "Assistente",
+  "tab.settings": "Definições",
+  "tab.history": "Histórico",
+  "tab.log": "Registo",
+  "tab.help": "Ajuda",
+  "verdict.keep": "GUARDAR",
+  "verdict.consider": "AVALIAR",
+  "verdict.dismantle": "DESMANTELAR",
+  "verdict.review": "VERIFICAR",
+  "verdict.error": "ERRO",
+  "verdict.idle": "PRONTO",
+  "slot.mask": "máscara",
+  "slot.backpack": "mochila",
+  "slot.chest": "colete",
+  "slot.gloves": "luvas",
+  "slot.holster": "coldre",
+  "slot.kneepads": "joelheiras",
+  "slot.weapon": "arma",
+  "slot.sidearm": "arma secundária",
+  "cat.daily": "Diário",
+  "cat.weekly": "Semanal",
+  "cat.journey": "Journey",
+  "cat.global_event": "Global Event",
+  "cat.manhunt": "Manhunt",
+  "cat.other": "Outros",
+  "weekday.0": "Segunda-feira",
+  "weekday.1": "Terça-feira",
+  "weekday.2": "Quarta-feira",
+  "weekday.3": "Quinta-feira",
+  "weekday.4": "Sexta-feira",
+  "weekday.5": "Sábado",
+  "weekday.6": "Domingo",
+  "provider.ollama": "Local (Ollama, sem internet)",
+  "provider.claude": "Online (API Claude)",
+  "provider.openai": "Online (API ChatGPT)",
+  "provider.builtin": "Integrado (sem IA)",
+  "provider.claude_code": "Claude (subscrição, Claude Code)",
+  "word.unnamed": "Sem nome",
+  "word.image": "Imagem",
+  "word.complete": "completo",
+  "period.all": "Tudo",
+  "period.today": "Hoje",
+  "period.7d": "Últimos 7 dias",
+  "period.30d": "Últimos 30 dias",
+  "label.period": "Período:",
+  "label.build": "Build:",
+  "label.category": "Categoria:",
+  "label.categories": "Categorias",
+  "rate.good": "BOM",
+  "rate.ok": "médio",
+  "rate.low": "baixo",
+  "state.running": "A FUNCIONAR",
+  "state.stopped": "parado",
+  "state.auto": "AUTOMÁTICO",
+  "state.not_set": "NÃO DEFINIDA",
+  "state.key": "tecla {key}",
+  "time.days": "{n} d",
+  "time.hm": "{h} h {m} min",
+  "btn.start": "▶ Iniciar",
+  "btn.stop": "■ Parar",
+  "btn.pick_region": "Escolher zona",
+  "btn.scan_now": "Analisar agora",
+  "btn.test_image": "Testar com captura",
+  "btn.browse": "Procurar",
+  "btn.add_update": "Adicionar / atualizar",
+  "btn.open_folder": "Abrir pasta",
+  "btn.send": "Enviar",
+  "btn.save": "💾 Guardar",
+  "btn.save_short": "Guardar",
+  "btn.delete": "Eliminar",
+  "btn.clear": "Limpar",
+  "btn.refresh": "Atualizar",
+  "panel.scan_mode": "Modo de análise:",
+  "mode.hotkey": "Tecla de atalho",
+  "mode.auto": "Automático (sem tecla)",
+  "status.line": "Estado: {state}  |  Modo: {mode}  |  Zona: {region}",
+  "status.counts": "Esta sessão → Guardar: {keep}   Avaliar: {consider}   Desmantelar: {dismantle}   Verificar: {review}",
+  "panel.no_build_match": "Não encaixa em nenhuma build.",
+  "panel.rare_warning": "Exotic/Named/Prototype: verifica tu antes de desmantelar!",
+  "panel.roll_header": "\n\nCOMPARAÇÃO DE ATRIBUTOS (o teu → este item)\n",
+  "panel.ocr_text": "\n\n--- TEXTO OCR ---\n",
+  "panel.parsed": "\n--- ANALISADO ---\n",
+  "calib.item_hint": "Desenha uma caixa à volta da descrição  (Esc: cancelar)",
+  "calib.ask_item": "O ecrã será capturado 5 segundos depois de OK.\nEntretanto, passa o cursor sobre um item no jogo (deixa a descrição aberta).",
+  "calib.ask_tasks": "O ecrã será capturado 5 segundos depois de OK.\nEntretanto, abre no jogo a lista de projetos (Projects / Seasonal Journey / Global Event).",
+  "calib.ask_gpt": "O ecrã será capturado 5 segundos depois de OK.\nEntretanto, mostra no ChatGPT um ecrã com uma resposta de exemplo.",
+  "msg.pick_region_first": "Faz primeiro «Escolher zona».",
+  "msg.saved": "Guardado.",
+  "msg.settings_saved": "Definições guardadas.",
+  "msg.no_tesseract": "Tesseract OCR não encontrado.\nIndica o caminho nas Definições ou instala-o:\ngithub.com/UB-Mannheim/tesseract/wiki",
+  "build.new": "Nova build",
+  "build.delete": "Eliminar a build selecionada",
+  "build.delete_confirm": "Eliminar a build selecionada?",
+  "build.sets": "Set / marca (separados por vírgulas)",
+  "build.slots": "Ranhuras seguidas (vazio = todas)",
+  "build.attr_rules": "Regras de atributos (peso / valor considerado «bom»)",
+  "build.talents": "Talentos (peso)",
+  "build.attr": "Atributo",
+  "build.weight": "Peso",
+  "build.goodval": "Valor bom",
+  "build.talent": "Talento",
+  "build.export": "⇩ Exportar builds",
+  "build.import": "⇧ Importar ficheiro de builds",
+  "build.exported": "{n} builds exportadas:\n{path}",
+  "build.imported": "{n} builds importadas.",
+  "build.import_bad": "Não foi encontrada uma lista de builds no ficheiro.",
+  "build.err_weight": "O peso tem de ser um número.",
+  "build.err_weight_val": "O peso e o valor têm de ser números.",
+  "build.err_bonus": "O bónus de set tem de ser um número.",
+  "build.bad_slot": "Ranhura inválida: {bad}\nVálidas: {valid}",
+  "prog.fills_gap": "PREENCHE UMA FALHA",
+  "prog.upgrade": "MELHORIA",
+  "prog.already": "Já registado",
+  "note.fills_gap": "PREENCHE UMA FALHA: {build} / {slot}",
+  "note.already": "Já registado: {build} / {slot}",
+  "note.upgrade": "MELHORIA: {build} / {slot}  {old}% → {new}%",
+  "prog.save_last": "Guardar o último item analisado nesta build",
+  "prog.clear_slot": "Limpar a ranhura selecionada",
+  "prog.reset_build": "Repor esta build",
+  "prog.reset_confirm": "Eliminar todos os registos desta build?",
+  "prog.all_missing": "EM FALTA EM TODAS AS BUILDS\n\n",
+  "prog.completed": "{have}/{total} peças completas",
+  "prog.no_scan_yet": "Ainda não foi analisado nenhum item.",
+  "prog.no_slot": "Não foi possível detetar a ranhura do item (máscara, colete, etc.).",
+  "roll.only_new": "{k}: existe no item novo ({n}), não existia no antigo",
+  "roll.only_old": "{k}: existia no antigo ({o}), não existe no novo",
+  "col.item": "Item",
+  "col.slot": "Ranhura",
+  "col.status": "Estado",
+  "col.score": "Pontuação",
+  "col.translated": "Traduzido",
+  "col.original": "Original (inglês)",
+  "col.source": "Fonte",
+  "stats.verdicts": "Distribuição das decisões",
+  "stats.by_build": "Número de GUARDAR por build",
+  "stats.daily_scans": "Análises por dia (últimos 7 dias)",
+  "stats.by_slot": "Distribuição por ranhura",
+  "stats.summary": "Análises no total: {total}   |   Taxa de GUARDAR: {keep_pct}%   |   Pontuação média: {avg}%   |   Exotic/Named/Prototype: {rare}",
+  "hist.clear": "Limpar histórico",
+  "hist.clear_confirm": "Eliminar todo o histórico? (As estatísticas também serão repostas)",
+  "set.language_box": "Idioma",
+  "set.language": "Idioma da interface:",
+  "set.apply_language": "Aplicar",
+  "set.language_note": "Adicionar um idioma: copia lang/en.json, traduz os valores e guarda como lang/<código>.json. A aplicação encontra-o no próximo arranque.",
+  "set.language_changed": "Idioma definido como {lang}.",
+  "set.appearance_box": "Aparência",
+  "set.theme": "Tema:",
+  "theme.dark": "Escuro (laranja TD2)",
+  "theme.light": "Claro",
+  "theme.classic": "Clássico (aspeto antigo)",
+  "set.ui_sounds": "Sons de botões e cliques",
+  "set.theme_note": "Mudanças de tema e idioma são aplicadas na hora; não é preciso reiniciar.",
+  "set.theme_changed": "Novo tema aplicado.",
+  "set.scan_box": "Análise",
+  "set.keep_threshold": "Limiar de GUARDAR (%)",
+  "set.consider_threshold": "Limiar de AVALIAR (%)",
+  "set.overlay_seconds": "Duração do aviso (s)",
+  "set.auto_interval": "Intervalo da análise automática (ms)",
+  "set.ocr_lang": "Idioma do OCR",
+  "set.tesseract_path": "Caminho do Tesseract",
+  "set.overlay_corner": "Canto do aviso",
+  "set.sound": "Aviso sonoro",
+  "set.track_progress": "Seguimento de peças em falta ativo",
+  "set.auto_record": "Registar peças automaticamente (as de GUARDAR)",
+  "set.save_crop": "Guardar a última captura (depuração)",
+  "set.log_csv": "Escrever o histórico em CSV",
+  "set.save": "💾 Guardar definições",
+  "set.capture_key": "Capturar tecla",
+  "set.press_key": "Prime uma tecla...",
+  "set.log_box": "Registo da aplicação",
+  "set.log_level": "Nível do registo",
+  "set.log_size": "Tamanho máx. do ficheiro (KB)",
+  "set.log_backups": "Cópias guardadas",
+  "log.level_filter": "Nível:",
+  "log.autoscroll": "Deslocar para o fim",
+  "log.save_as": "Guardar como...",
+  "log.clear": "Limpar registo",
+  "log.clear_confirm": "Eliminar todo o registo da aplicação?",
+  "log.saved": "Registo guardado: {path}",
+  "log.info": "{shown} de {total} linhas · {kb} KB · {path}",
+  "ai.settings": "Definições do assistente",
+  "ai.provider": "IA",
+  "ai.saved": "Definições do assistente guardadas.",
+  "ai.speak_verdict": "Ler a decisão em voz alta",
+  "ai.speak_chat": "Ler as respostas do assistente em voz alta",
+  "ai.claude_key": "Chave API Claude",
+  "ai.openai_key": "Chave API ChatGPT",
+  "ai.stt_model": "Modelo de reconhecimento de voz",
+  "ai.stt_device": "Dispositivo (cpu/cuda)",
+  "ai.tts_rate": "Velocidade da fala",
+  "ai.tts_voice": "Sugestão do nome da voz (opc.)",
+  "ai.voice_hotkey": "Tecla de comando de voz",
+  "ai.key_warning": "As chaves API são escritas em texto simples em builds.json — não partilhes esse ficheiro com ninguém.",
+  "ai.test_voice": "🔊 Testar a voz",
+  "ai.voice_test": "Olá, sou o teu assistente local. A minha voz é assim.",
+  "ai.examples": "Exemplos: «Que peças me faltam?», «Desmantelo o último item?», «Quantas guardei?»",
+  "ai.no_key": "Nenhuma chave API introduzida",
+  "ai.talk": "🎤 Falar",
+  "ai.listening": "🎤 A ouvir... (prime a tecla de novo para terminar)",
+  "ai.transcribing": "A processar... (o modelo é transferido na primeira vez)",
+  "ai.too_short": "Gravação demasiado curta, tenta de novo.",
+  "ai.not_understood": "Não foi possível perceber a fala.",
+  "ai.failed": "A IA não respondeu ({e}). Resposta integrada:",
+  "ai.context_header": "\n\nCONTEXTO:\n",
+  "kw.missing": "falta|faltam|em falta",
+  "kw.stats": "estatística|estatistica|quantos",
+  "kw.last": "último|ultimo",
+  "quick.stats": "{total} análises no total, {keep} delas deram guardar.",
+  "quick.last": "O último item foi {item}. A build mais adequada é {build}, {pct} por cento.",
+  "quick.last_plain": "O último item foi {item}.",
+  "quick.help": "No modo integrado respondo sobre peças em falta, estatísticas e o último item. Para uma conversa a sério, escolhe uma IA local ou online.",
+  "src.ai": "IA",
+  "src.dict": "dicionário",
+  "task.reset_box": "Contagem para o reinício",
+  "task.daily_hour": "Hora do reinício diário (0-23):",
+  "task.weekly_day": "Dia do reinício semanal:",
+  "task.hour": "hora:",
+  "task.reset_note": "Nota: a Massive já mudou a hora e o dia do reinício mais do que uma vez; confirma no jogo.",
+  "task.reset_saved": "Definições de reinício guardadas.",
+  "task.err_hour": "A hora tem de ser um número entre 0 e 23.",
+  "task.reset_line": "Próximo reinício diário: {daily}   |   Próximo reinício semanal ({day}): {weekly}",
+  "task.add_box": "Adicionar projeto (cola o texto em inglês; um projeto por linha)",
+  "task.read_screen": "📷 Ler do ecrã",
+  "task.translate_add": "🌐 Traduzir e adicionar",
+  "task.translating": "A traduzir...",
+  "task.paste_first": "Cola primeiro o texto do projeto.",
+  "task.calib_hint": "Desenha uma caixa à volta da lista de projetos  (Esc: cancelar)",
+  "task.toggle_done": "✔/✘ Marcar como feito",
+  "task.clear_done": "Remover os concluídos",
+  "task.clear_cat": "Limpar toda a categoria",
+  "task.clear_cat_confirm": "Eliminar todos os projetos em «{cat}»?",
+  "task.added": "{n} projetos adicionados.",
+  "task.added_src": "{n} projetos adicionados ({src}).",
+  "gpt.box": "Obter automaticamente do ChatGPT (usa a aplicação ChatGPT instalada)",
+  "gpt.warning": "AVISO: isto é uma macro de teclado/janela — escreve no ChatGPT por ti e lê a resposta do ecrã. A exatidão depende apenas do que o ChatGPT responder; sem acesso a dados atuais do jogo, o modelo pode inventar. Compara os projetos importantes com o texto do jogo.",
+  "gpt.window_title": "Título da janela:",
+  "gpt.hotkey": "Tecla:",
+  "gpt.wait": "Espera (s):",
+  "gpt.pick_region": "Escolher zona da resposta",
+  "gpt.run": "▶ Executar agora (perguntar + ler)",
+  "gpt.read_only": "📖 Ler a resposta agora (sem enviar)",
+  "gpt.prompt_label": "Texto do pedido ({date} é preenchido automaticamente):",
+  "gpt.save_prompt": "Guardar o texto do pedido",
+  "gpt.prompt_saved": "Texto do pedido guardado.",
+  "gpt.raw_label": "Última resposta do ChatGPT (OCR em bruto, para conferir):",
+  "gpt.calib_hint": "Desenha uma caixa à volta da zona de resposta do ChatGPT  (Esc: cancelar)",
+  "gpt.need_region": "Define primeiro a zona de resposta do ChatGPT com «Escolher zona da resposta».",
+  "gpt.need_region_short": "Faz primeiro «Escolher zona da resposta».",
+  "gpt.no_parse": "Não foi possível dividir em categorias; confere a resposta em bruto.",
+  "gpt.waiting": "O ChatGPT está a responder... faltam {left} s",
+  "gpt.err.nowindow": "Não foi encontrada nenhuma janela com «{title}». Confirma que a aplicação ChatGPT está aberta.",
+  "speak.fills_gap": "preenche uma falha",
+  "speak.upgrade": "melhoria",
+  "speak.already": "já registado",
+  "speak.rare": "item raro, verifica tu",
+  "speak.build_pct": "{build}, {pct} por cento",
+  "err.bad_setting": "Definição inválida: {e}",
+  "err.file_read": "Não foi possível ler o ficheiro: {e}",
+  "err.hotkey_listener": "Não foi possível iniciar a deteção de teclas:\n{e}",
+  "err.mic": "Erro do microfone: {e}  (pip install sounddevice numpy)",
+  "err.stt": "Erro de reconhecimento de voz: {e}  (pip install faster-whisper)",
+  "err.read": "Erro de leitura: {e}",
+  "err.no_connection": "Não foi possível ligar: {reason}",
+  "err.generic": "Erro: {e}",
+  "ai.ollama_url": "Endereço do Ollama",
+  "ai.ollama_model": "Modelo do Ollama",
+  "ai.claude_model": "Modelo do Claude",
+  "ai.cc_model": "Modelo do Claude Code (vazio = predefinido)",
+  "ai.cc_missing": "Claude Code não encontrado. Executa uma vez scripts\\install_claude_code.bat e tenta de novo.",
+  "ai.cc_login": "O Claude Code não tem sessão iniciada. Executa uma vez scripts\\install_claude_code.bat (ou «claude auth login»).",
+  "ai.cc_timeout": "O Claude Code não respondeu em {s} segundos.",
+  "ai.openai_model": "Modelo do ChatGPT",
+  "build.new_name": "Nova build",
+  "build.set_bonus": "Bónus de set",
+  "col.time": "Hora",
+  "col.verdict": "Decisão",
+  "col.best_build": "Melhor build",
+  "gpt.finding_window": "A procurar a janela do ChatGPT...",
+  "note.yours_better": "O teu é melhor: {build} / {slot} ({pct}%)",
+  "prog.filled": "✔ Preenchido",
+  "prog.empty": "✘ Em falta",
+  "prog.done_all": "COMPLETO ✔",
+  "prog.yours_better": "O teu é melhor",
+  "speak.yours_better": "o que tens é melhor",
+  "why.set_match": "set/marca corresponde",
+  "word.no_data": "Sem dados",
+  "set.bg_interval": "Troca de fundo (s, 0 = fixo):",
+  "set.open_art": "Abrir pasta de imagens",
+  "set.art_note": "Você pode adicionar suas imagens: art\\backgrounds (fundos), art\\emblems\\<nome da build>.png (emblema), art\\flags\\<código do idioma>.png (bandeira). Emblemas e bandeiras aparecem por 5 s ao selecionar.",
+  "meta.not_configured": "O endereço do feed meta ainda não foi definido.",
+  "meta.syncing": "Baixando builds meta…",
+  "meta.failed": "Não foi possível obter a lista meta (offline?). Usando a última cópia.",
+  "meta.synced": "Meta: {added} novas, {updated} atualizadas, {removed} removidas.",
+  "meta.up_to_date": "As builds meta estão atualizadas.",
+  "meta.status": "⭐ {n} builds meta · versão {version}\nÚltima sincronização: {when}",
+  "meta.sync_now": "Sincronizar meta agora",
+  "meta.detail": "Modo: {mode} · Popularidade: {pop}/100",
+  "meta.sources": "Fontes: {src}",
+  "meta.locked": "🔒 Você editou esta build meta; a sincronização não vai mais alterá-la.",
+  "meta.box": "Sincronização de builds meta",
+  "meta.enable": "Sincronizar automaticamente uma vez por dia ao iniciar",
+  "meta.restore_hidden": "Restaurar builds meta ocultas",
+  "meta.url": "Endereço do feed (vazio = oficial):",
+  "meta.note": "Builds meta e mais comentadas vêm de uma lista central uma vez por dia. Suas builds nunca são alteradas; uma build meta editada fica bloqueada e uma excluída não volta. ⭐ = meta, 🔒 = editada por você, 🔥 = popularidade."
+}

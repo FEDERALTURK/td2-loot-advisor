@@ -1,0 +1,17 @@
+# Kullanıcıya özel / çalışırken oluşanlar — depoya girmez
+logs/
+sounds/
+art/
+meta_cache.json
+progress.json
+tasks.json
+loot_log.csv
+last_crop.png
+optional_skip.txt
+debug_log.txt
+__pycache__/
+*.pyc
+build/
+dist/
+*.spec
+.venv/

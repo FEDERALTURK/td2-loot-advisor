@@ -1,0 +1,198 @@
+"""Meta build senkronu.
+
+Herkese açık uygulama için tasarlandı: meta listesi tek bir merkezde (GitHub deposundaki
+meta/meta_builds.json) günde bir güncellenir; her kullanıcının programı açılışta, son
+denemeden bu yana 20 saat geçtiyse listeyi indirir ve kendi build listesine işler.
+
+Kurallar
+- Kullanıcının kendi build'lerine (meta_id'si olmayan) asla dokunulmaz.
+- Kullanıcı bir meta build'i düzenlerse o build "meta_locked" olur; artık güncellenmez/silinmez.
+- Akıştan çıkan, kilitsiz meta build'ler listeden kaldırılır (ilerleme kayıtları silinmez).
+- Sadece HTTPS, en fazla 512 KB, 8 sn zaman aşımı; ilk adres olmazsa yedek adreslere geçer.
+- Bilinmeyen alanlar ve bilinmeyen attribute anahtarları atılır, sayılar sınırlanır.
+- İnternet yoksa son başarılı kopya (meta_cache.json) kullanılır; program açılışı beklemez.
+Ek kütüphane gerektirmez (urllib).
+"""
+import json
+import logging
+import re
+import ssl
+import time
+import urllib.request
+from datetime import datetime, timezone
+
+log = logging.getLogger("td2")
+
+SCHEMA = 1
+MAX_BYTES = 512 * 1024
+TIMEOUT_S = 8
+MAX_BUILDS = 40
+SYNC_EVERY_S = 20 * 3600          # "günlük": aynı gün içinde tekrar açılışlarda indirme yapmaz
+
+# Resmî akış: GitHub deposu (raw) + jsDelivr CDN yedeği. Depo hazır olunca OWNER/REPO değişir.
+FEED_REPO = "FEDERALTURK/td2-loot-advisor"
+FEED_PATH = "meta/meta_builds.json"
+
+
+def default_urls(repo=FEED_REPO, path=FEED_PATH, branch="main"):
+    return [f"https://raw.githubusercontent.com/{repo}/{branch}/{path}",
+            f"https://cdn.jsdelivr.net/gh/{repo}@{branch}/{path}"]
+
+
+def configured_urls(setting):
+    """Ayardaki adres(ler): boşsa resmî akış; virgül/boşlukla birden fazla adres verilebilir."""
+    urls = [u.strip() for u in re.split(r"[,\s]+", setting or "") if u.strip()]
+    urls = urls or default_urls()
+    return [u for u in urls if u.lower().startswith("https://") and "OWNER/" not in u]
+
+
+# ---------------------------------------------------------------- indirme
+def fetch(urls, app_version="", timeout=TIMEOUT_S):
+    """İlk çalışan adresten akışı indirir. (veri, adres) ya da hata fırlatır."""
+    last = None
+    ctx = ssl.create_default_context()
+    for url in urls:
+        try:
+            req = urllib.request.Request(url, headers={
+                "User-Agent": f"TD2-Loot-Advisor/{app_version}", "Accept": "application/json",
+                "Cache-Control": "no-cache"})
+            with urllib.request.urlopen(req, timeout=timeout, context=ctx) as r:
+                raw = r.read(MAX_BYTES + 1)
+            if len(raw) > MAX_BYTES:
+                raise ValueError("feed too large")
+            return json.loads(raw.decode("utf-8")), url
+        except Exception as e:          # bir sonraki yedek adresi dene
+            last = e
+            log.debug("Meta feed failed at %s: %s", url, e)
+    raise last or RuntimeError("no feed url")
+
+
+# ---------------------------------------------------------------- doğrulama
+def _num(v, lo, hi, default=0.0):
+    try:
+        v = float(v)
+    except (TypeError, ValueError):
+        return default
+    return max(lo, min(hi, v))
+
+
+def _text(v, n=120):
+    return re.sub(r"[\x00-\x1f]", " ", str(v or "")).strip()[:n]
+
+
+def validate(feed, known_attrs):
+    """Akışı güvenli, programın anladığı biçime indirger. Hatalıysa ValueError."""
+    if not isinstance(feed, dict) or int(feed.get("schema", 0)) != SCHEMA:
+        raise ValueError("unsupported feed schema")
+    out = {"schema": SCHEMA, "version": _text(feed.get("version"), 40),
+           "updated": _text(feed.get("updated"), 40), "season": _text(feed.get("season"), 60), "builds": []}
+    seen = set()
+    for b in (feed.get("builds") or [])[:MAX_BUILDS]:
+        if not isinstance(b, dict): continue
+        mid = re.sub(r"[^a-z0-9\-]", "", str(b.get("id", "")).lower())[:60]
+        name = _text(b.get("name"), 80)
+        if not mid or not name or mid in seen: continue
+        seen.add(mid)
+        attrs = {}
+        for k, v in (b.get("attributes") or {}).items():
+            if k in known_attrs and isinstance(v, dict):
+                attrs[k] = {"weight": round(_num(v.get("weight"), 0, 5, 1), 2),
+                            "good_at": round(_num(v.get("good_at"), 0, 1_000_000, 0), 2)}
+        talents = {}
+        for k, v in list((b.get("talents") or {}).items())[:20]:
+            k = _text(k, 60)
+            if k: talents[k] = round(_num(v, 0, 10, 1), 2)
+        build = {
+            "meta_id": mid, "name": name,
+            "sets_or_brands": [_text(s, 60) for s in (b.get("sets_or_brands") or [])[:6] if _text(s, 60)],
+            "set_bonus": round(_num(b.get("set_bonus"), 0, 50, 0), 1),
+            "attributes": attrs, "talents": talents,
+            "meta": {"mode": _text(b.get("mode"), 60), "role": _text(b.get("role"), 20),
+                     "popularity": int(_num(b.get("popularity"), 0, 100, 0)),
+                     "summary": {str(l)[:5]: _text(s, 300) for l, s in (b.get("summary") or {}).items()},
+                     "sources": [{"title": _text(s.get("title"), 80), "url": _text(s.get("url"), 300)}
+                                 for s in (b.get("sources") or [])[:6]
+                                 if isinstance(s, dict) and str(s.get("url", "")).startswith("https://")]},
+        }
+        slots = [_text(s, 20) for s in (b.get("slots") or [])[:6] if _text(s, 20)]
+        if slots: build["slots"] = slots
+        out["builds"].append(build)
+    if not out["builds"]:
+        raise ValueError("feed has no valid builds")
+    return out
+
+
+# ---------------------------------------------------------------- birleştirme
+def merge(builds, feed, hidden=()):
+    """Meta build'leri kullanıcının listesine işler. (yeni liste, özet) döner.
+    hidden: kullanıcının sildiği meta build kimlikleri (bir daha eklenmez).
+    özet["renames"]: {eski ad: yeni ad} — ilerleme kayıtlarını taşımak için."""
+    hidden = set(hidden or ())
+    incoming = {b["meta_id"]: b for b in feed["builds"] if b["meta_id"] not in hidden}
+    result, added, updated, removed, renames = [], 0, 0, 0, {}
+    present = set()
+    for b in builds:
+        mid = b.get("meta_id")
+        if not mid:                                   # kullanıcının kendi build'i
+            result.append(b); continue
+        if b.get("meta_locked"):                      # kullanıcı düzenledi: dokunma
+            result.append(b); present.add(mid); continue
+        if mid in incoming:
+            new = dict(incoming[mid])
+            if b.get("slots") and "slots" not in new: new["slots"] = b["slots"]
+            if _comparable(b) != _comparable(new): updated += 1
+            if b.get("name") != new["name"]: renames[b["name"]] = new["name"]
+            result.append(new); present.add(mid)
+        else:
+            removed += 1                              # akıştan çıktı
+    names = {b["name"] for b in result}
+    for mid, b in incoming.items():
+        if mid in present: continue
+        b = dict(b)
+        while b["name"] in names: b["name"] += " ★"
+        names.add(b["name"]); result.append(b); added += 1
+    return result, {"added": added, "updated": updated, "removed": removed, "renames": renames}
+
+
+def _comparable(b):
+    return json.dumps({k: b.get(k) for k in ("name", "sets_or_brands", "set_bonus", "attributes", "talents", "meta")},
+                      sort_keys=True, ensure_ascii=False)
+
+
+# ---------------------------------------------------------------- zamanlama
+def due(settings, now=None):
+    if not settings.get("meta_sync", True): return False
+    now = now or time.time()
+    return now - float(settings.get("meta_last_try", 0) or 0) >= SYNC_EVERY_S
+
+
+def run(cfg, cache_path, app_version="", force=False):
+    """Arka plan iş parçacığında çağrılır: indirir + doğrular. Ana iş parçacığında
+    apply() ile işlenmek üzere (feed, kaynak) döner. Hata olursa önbelleği dener."""
+    st = cfg["settings"]
+    urls = configured_urls(st.get("meta_feed_url", ""))
+    known = set(cfg.get("attributes", {}).keys())
+    if not urls:
+        raise RuntimeError("meta feed not configured")
+    try:
+        feed, url = fetch(urls, app_version)
+        feed = validate(feed, known)
+        try: cache_path.write_text(json.dumps(feed, ensure_ascii=False, indent=1), encoding="utf-8")
+        except Exception: pass
+        return feed, url
+    except Exception as e:
+        log.info("Meta feed unavailable (%s); trying cache", e)
+        if cache_path.exists() and not force:
+            return validate(json.loads(cache_path.read_text(encoding="utf-8")), known), "cache"
+        raise
+
+
+def apply(cfg, feed, source):
+    """Ana iş parçacığında: birleştirir, ayarlara sürüm/zaman yazar. Özeti döner."""
+    st = cfg["settings"]
+    cfg["builds"], summary = merge(cfg["builds"], feed, st.get("meta_hidden", []))
+    if source != "cache":
+        st["meta_version"] = feed.get("version", "")
+        st["meta_last_sync"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    summary.update(version=feed.get("version", ""), season=feed.get("season", ""), source=source)
+    return summary

@@ -1,0 +1,537 @@
+{
+  "__meta__": {
+    "name": "Русский",
+    "english_name": "Russian"
+  },
+  "__task_dict__": [
+    [
+      "control points",
+      "контрольные точки"
+    ],
+    [
+      "control point",
+      "контрольная точка"
+    ],
+    [
+      "supply drops",
+      "сбросы припасов"
+    ],
+    [
+      "supply drop",
+      "сброс припасов"
+    ],
+    [
+      "strongholds",
+      "опорные пункты"
+    ],
+    [
+      "stronghold",
+      "опорный пункт"
+    ],
+    [
+      "settlements",
+      "поселения"
+    ],
+    [
+      "settlement",
+      "поселение"
+    ],
+    [
+      "bounties",
+      "контракты"
+    ],
+    [
+      "bounty",
+      "контракт"
+    ],
+    [
+      "invaded missions",
+      "захваченные миссии"
+    ],
+    [
+      "invaded mission",
+      "захваченная миссия"
+    ],
+    [
+      "seasonal journey",
+      "сезонный путь"
+    ],
+    [
+      "global event",
+      "глобальное событие"
+    ],
+    [
+      "dark zone",
+      "Тёмная зона"
+    ],
+    [
+      "crafting materials",
+      "материалы для крафта"
+    ],
+    [
+      "headshot kills",
+      "убийства в голову"
+    ],
+    [
+      "headshots",
+      "попадания в голову"
+    ],
+    [
+      "elites",
+      "элитные противники"
+    ],
+    [
+      "elite",
+      "элитный"
+    ],
+    [
+      "enemies",
+      "противники"
+    ],
+    [
+      "enemy",
+      "противник"
+    ],
+    [
+      "legendary difficulty",
+      "легендарная сложность"
+    ],
+    [
+      "heroic difficulty",
+      "героическая сложность"
+    ],
+    [
+      "challenging difficulty",
+      "сложный уровень"
+    ],
+    [
+      "hard difficulty",
+      "высокая сложность"
+    ],
+    [
+      "or above",
+      "или выше"
+    ],
+    [
+      "or higher",
+      "или выше"
+    ],
+    [
+      "assault rifle",
+      "штурмовая винтовка"
+    ],
+    [
+      "submachine gun",
+      "пистолет-пулемёт"
+    ],
+    [
+      "light machine gun",
+      "ручной пулемёт"
+    ],
+    [
+      "marksman rifle",
+      "марксманская винтовка"
+    ],
+    [
+      "sniper rifle",
+      "снайперская винтовка"
+    ],
+    [
+      "shotgun",
+      "дробовик"
+    ],
+    [
+      "pistol",
+      "пистолет"
+    ],
+    [
+      "skill kills",
+      "убийства умением"
+    ],
+    [
+      "skills",
+      "умения"
+    ],
+    [
+      "skill",
+      "умение"
+    ],
+    [
+      "complete",
+      "Выполните"
+    ],
+    [
+      "defeat",
+      "Победите"
+    ],
+    [
+      "kills",
+      "убийства"
+    ],
+    [
+      "kill",
+      "Убейте"
+    ],
+    [
+      "daily project",
+      "ежедневное задание"
+    ],
+    [
+      "weekly project",
+      "еженедельное задание"
+    ],
+    [
+      "project",
+      "задание"
+    ],
+    [
+      "missions",
+      "миссии"
+    ],
+    [
+      "mission",
+      "миссия"
+    ],
+    [
+      "difficulty",
+      "сложность"
+    ],
+    [
+      "players",
+      "игроки"
+    ],
+    [
+      "player",
+      "игрок"
+    ],
+    [
+      "agents",
+      "агенты"
+    ],
+    [
+      "agent",
+      "агент"
+    ],
+    [
+      "hijack",
+      "Перехватите"
+    ],
+    [
+      "capture",
+      "Захватите"
+    ],
+    [
+      "activate",
+      "Активируйте"
+    ]
+  ],
+  "tab.dash": "Панель",
+  "tab.builds": "Сборки",
+  "tab.progress": "Недостающие части",
+  "tab.stats": "Статистика",
+  "tab.tasks": "Задания",
+  "tab.assistant": "Ассистент",
+  "tab.settings": "Настройки",
+  "tab.history": "История",
+  "tab.log": "Журнал",
+  "tab.help": "Справка",
+  "verdict.keep": "ОСТАВИТЬ",
+  "verdict.consider": "ПОДУМАТЬ",
+  "verdict.dismantle": "РАЗОБРАТЬ",
+  "verdict.review": "ПРОВЕРИТЬ",
+  "verdict.error": "ОШИБКА",
+  "verdict.idle": "ГОТОВ",
+  "slot.mask": "маска",
+  "slot.backpack": "рюкзак",
+  "slot.chest": "бронежилет",
+  "slot.gloves": "перчатки",
+  "slot.holster": "кобура",
+  "slot.kneepads": "наколенники",
+  "slot.weapon": "оружие",
+  "slot.sidearm": "пистолет",
+  "cat.daily": "Ежедневные",
+  "cat.weekly": "Еженедельные",
+  "cat.journey": "Journey",
+  "cat.global_event": "Global Event",
+  "cat.manhunt": "Manhunt",
+  "cat.other": "Прочее",
+  "weekday.0": "Понедельник",
+  "weekday.1": "Вторник",
+  "weekday.2": "Среда",
+  "weekday.3": "Четверг",
+  "weekday.4": "Пятница",
+  "weekday.5": "Суббота",
+  "weekday.6": "Воскресенье",
+  "provider.ollama": "Локально (Ollama, без интернета)",
+  "provider.claude": "Онлайн (Claude API)",
+  "provider.openai": "Онлайн (ChatGPT API)",
+  "provider.builtin": "Встроенный (без ИИ)",
+  "provider.claude_code": "Claude (подписка, Claude Code)",
+  "word.unnamed": "Без названия",
+  "word.image": "Изображение",
+  "word.complete": "готово",
+  "period.all": "Всё время",
+  "period.today": "Сегодня",
+  "period.7d": "Последние 7 дней",
+  "period.30d": "Последние 30 дней",
+  "label.period": "Период:",
+  "label.build": "Сборка:",
+  "label.category": "Категория:",
+  "label.categories": "Категории",
+  "rate.good": "ХОРОШО",
+  "rate.ok": "средне",
+  "rate.low": "низко",
+  "state.running": "РАБОТАЕТ",
+  "state.stopped": "остановлено",
+  "state.auto": "АВТОМАТИЧЕСКИ",
+  "state.not_set": "НЕ ЗАДАНА",
+  "state.key": "клавиша {key}",
+  "time.days": "{n} дн",
+  "time.hm": "{h} ч {m} мин",
+  "btn.start": "▶ Запустить",
+  "btn.stop": "■ Остановить",
+  "btn.pick_region": "Выбрать область",
+  "btn.scan_now": "Сканировать",
+  "btn.test_image": "Проверить по снимку",
+  "btn.browse": "Обзор",
+  "btn.add_update": "Добавить / изменить",
+  "btn.open_folder": "Открыть папку",
+  "btn.send": "Отправить",
+  "btn.save": "💾 Сохранить",
+  "btn.save_short": "Сохранить",
+  "btn.delete": "Удалить",
+  "btn.clear": "Очистить",
+  "btn.refresh": "Обновить",
+  "panel.scan_mode": "Режим сканирования:",
+  "mode.hotkey": "По клавише",
+  "mode.auto": "Автоматически (без клавиши)",
+  "status.line": "Состояние: {state}  |  Режим: {mode}  |  Область: {region}",
+  "status.counts": "Эта сессия → Оставить: {keep}   Подумать: {consider}   Разобрать: {dismantle}   Проверить: {review}",
+  "panel.no_build_match": "Не подходит ни к одной сборке.",
+  "panel.rare_warning": "Exotic/Named/Prototype: проверьте сами перед разбором!",
+  "panel.roll_header": "\n\nСРАВНЕНИЕ ХАРАКТЕРИСТИК (ваш → этот предмет)\n",
+  "panel.ocr_text": "\n\n--- ТЕКСТ OCR ---\n",
+  "panel.parsed": "\n--- РАЗОБРАНО ---\n",
+  "calib.item_hint": "Обведите рамкой подсказку предмета  (Esc: отмена)",
+  "calib.ask_item": "Экран будет снят через 5 секунд после нажатия ОК.\nЗа это время наведите курсор на предмет в игре (подсказка должна остаться открытой).",
+  "calib.ask_tasks": "Экран будет снят через 5 секунд после нажатия ОК.\nЗа это время откройте в игре список заданий (Projects / Seasonal Journey / Global Event).",
+  "calib.ask_gpt": "Экран будет снят через 5 секунд после нажатия ОК.\nЗа это время откройте в ChatGPT окно с примером ответа.",
+  "msg.pick_region_first": "Сначала выполните «Выбрать область».",
+  "msg.saved": "Сохранено.",
+  "msg.settings_saved": "Настройки сохранены.",
+  "msg.no_tesseract": "Tesseract OCR не найден.\nУкажите путь в настройках или установите:\ngithub.com/UB-Mannheim/tesseract/wiki",
+  "build.new": "Новая сборка",
+  "build.delete": "Удалить выбранную сборку",
+  "build.delete_confirm": "Удалить выбранную сборку?",
+  "build.sets": "Комплект / бренд (через запятую)",
+  "build.slots": "Отслеживаемые слоты (пусто = все)",
+  "build.attr_rules": "Правила характеристик (вес / значение, считающееся «хорошим»)",
+  "build.talents": "Таланты (вес)",
+  "build.attr": "Характеристика",
+  "build.weight": "Вес",
+  "build.goodval": "Хорошее значение",
+  "build.talent": "Талант",
+  "build.export": "⇩ Экспорт сборок",
+  "build.import": "⇧ Импорт файла сборок",
+  "build.exported": "Экспортировано сборок: {n}\n{path}",
+  "build.imported": "Импортировано сборок: {n}.",
+  "build.import_bad": "В файле не найден список сборок.",
+  "build.err_weight": "Вес должен быть числом.",
+  "build.err_weight_val": "Вес и значение должны быть числами.",
+  "build.err_bonus": "Бонус комплекта должен быть числом.",
+  "build.bad_slot": "Недопустимый слот: {bad}\nДопустимые: {valid}",
+  "prog.fills_gap": "ЗАКРЫВАЕТ ПРОБЕЛ",
+  "prog.upgrade": "УЛУЧШЕНИЕ",
+  "prog.already": "Уже записано",
+  "note.fills_gap": "ЗАКРЫВАЕТ ПРОБЕЛ: {build} / {slot}",
+  "note.already": "Уже записано: {build} / {slot}",
+  "note.upgrade": "УЛУЧШЕНИЕ: {build} / {slot}  {old}% → {new}%",
+  "prog.save_last": "Записать последний предмет в эту сборку",
+  "prog.clear_slot": "Очистить выбранный слот",
+  "prog.reset_build": "Сбросить эту сборку",
+  "prog.reset_confirm": "Удалить все записи этой сборки?",
+  "prog.all_missing": "НЕДОСТАЮЩЕЕ ВО ВСЕХ СБОРКАХ\n\n",
+  "prog.completed": "Собрано частей: {have}/{total}",
+  "prog.no_scan_yet": "Пока не отсканировано ни одного предмета.",
+  "prog.no_slot": "Не удалось определить слот предмета (маска, бронежилет и т. д.).",
+  "roll.only_new": "{k}: есть на новом предмете ({n}), на старом не было",
+  "roll.only_old": "{k}: было на старом ({o}), на новом нет",
+  "col.item": "Предмет",
+  "col.slot": "Слот",
+  "col.status": "Состояние",
+  "col.score": "Оценка",
+  "col.translated": "Перевод",
+  "col.original": "Оригинал (английский)",
+  "col.source": "Источник",
+  "stats.verdicts": "Распределение решений",
+  "stats.by_build": "Количество ОСТАВИТЬ по сборкам",
+  "stats.daily_scans": "Сканирований в день (последние 7 дней)",
+  "stats.by_slot": "Распределение по слотам",
+  "stats.summary": "Всего сканирований: {total}   |   Доля ОСТАВИТЬ: {keep_pct}%   |   Средняя оценка: {avg}%   |   Exotic/Named/Prototype: {rare}",
+  "hist.clear": "Очистить историю",
+  "hist.clear_confirm": "Удалить всю историю? (Статистика тоже сбросится)",
+  "set.language_box": "Язык",
+  "set.language": "Язык интерфейса:",
+  "set.apply_language": "Применить",
+  "set.language_note": "Добавить язык: скопируйте lang/en.json, переведите значения и сохраните как lang/<код>.json. Приложение найдёт файл при следующем запуске.",
+  "set.language_changed": "Язык изменён на {lang}.",
+  "set.appearance_box": "Внешний вид",
+  "set.theme": "Тема:",
+  "theme.dark": "Тёмная (оранжевый TD2)",
+  "theme.light": "Светлая",
+  "theme.classic": "Классическая (старый вид)",
+  "set.ui_sounds": "Звуки кнопок и щелчков",
+  "set.theme_note": "Смена темы и языка применяется сразу, перезапуск не нужен.",
+  "set.theme_changed": "Новая тема применена.",
+  "set.scan_box": "Сканирование",
+  "set.keep_threshold": "Порог ОСТАВИТЬ (%)",
+  "set.consider_threshold": "Порог ПОДУМАТЬ (%)",
+  "set.overlay_seconds": "Время показа уведомления (с)",
+  "set.auto_interval": "Интервал автосканирования (мс)",
+  "set.ocr_lang": "Язык OCR",
+  "set.tesseract_path": "Путь к Tesseract",
+  "set.overlay_corner": "Угол уведомления",
+  "set.sound": "Звуковой сигнал",
+  "set.track_progress": "Отслеживание недостающих частей включено",
+  "set.auto_record": "Записывать части автоматически (те, что ОСТАВИТЬ)",
+  "set.save_crop": "Сохранять последний снимок (отладка)",
+  "set.log_csv": "Записывать историю в CSV",
+  "set.save": "💾 Сохранить настройки",
+  "set.capture_key": "Записать клавишу",
+  "set.press_key": "Нажмите клавишу...",
+  "set.log_box": "Журнал приложения",
+  "set.log_level": "Уровень журнала",
+  "set.log_size": "Макс. размер файла (КБ)",
+  "set.log_backups": "Хранимых копий",
+  "log.level_filter": "Уровень:",
+  "log.autoscroll": "Прокручивать в конец",
+  "log.save_as": "Сохранить как...",
+  "log.clear": "Очистить журнал",
+  "log.clear_confirm": "Удалить весь журнал приложения?",
+  "log.saved": "Журнал сохранён: {path}",
+  "log.info": "Показано {shown} из {total} строк · {kb} КБ · {path}",
+  "ai.settings": "Настройки ассистента",
+  "ai.provider": "ИИ",
+  "ai.saved": "Настройки ассистента сохранены.",
+  "ai.speak_verdict": "Озвучивать решение",
+  "ai.speak_chat": "Озвучивать ответы ассистента",
+  "ai.claude_key": "Ключ API Claude",
+  "ai.openai_key": "Ключ API ChatGPT",
+  "ai.stt_model": "Модель распознавания речи",
+  "ai.stt_device": "Устройство (cpu/cuda)",
+  "ai.tts_rate": "Скорость речи",
+  "ai.tts_voice": "Подсказка имени голоса (необяз.)",
+  "ai.voice_hotkey": "Клавиша голосовой команды",
+  "ai.key_warning": "Ключи API записываются в builds.json открытым текстом — никому не передавайте этот файл.",
+  "ai.test_voice": "🔊 Проверить голос",
+  "ai.voice_test": "Здравствуйте, я ваш локальный ассистент. Вот так звучит мой голос.",
+  "ai.examples": "Примеры: «Каких частей мне не хватает?», «Разобрать последний предмет?», «Сколько я оставил?»",
+  "ai.no_key": "Ключ API не введён",
+  "ai.talk": "🎤 Говорить",
+  "ai.listening": "🎤 Слушаю... (нажмите клавишу ещё раз, чтобы закончить)",
+  "ai.transcribing": "Обработка... (при первом запуске загружается модель)",
+  "ai.too_short": "Запись слишком короткая, попробуйте ещё раз.",
+  "ai.not_understood": "Речь не распознана.",
+  "ai.failed": "ИИ не ответил ({e}). Встроенный ответ:",
+  "ai.context_header": "\n\nКОНТЕКСТ:\n",
+  "kw.missing": "не хватает|недостающ|пробел",
+  "kw.stats": "статистик|сколько",
+  "kw.last": "последн",
+  "quick.stats": "Всего сканирований: {total}, из них с решением «оставить»: {keep}.",
+  "quick.last": "Последний предмет — {item}. Лучше всего подходит сборка {build}, {pct} процентов.",
+  "quick.last_plain": "Последний предмет — {item}.",
+  "quick.help": "Во встроенном режиме я отвечаю про недостающие части, статистику и последний предмет. Для полноценного разговора выберите локальный или онлайновый ИИ.",
+  "src.ai": "ИИ",
+  "src.dict": "словарь",
+  "task.reset_box": "Отсчёт до сброса",
+  "task.daily_hour": "Час ежедневного сброса (0-23):",
+  "task.weekly_day": "День еженедельного сброса:",
+  "task.hour": "час:",
+  "task.reset_note": "Примечание: Massive не раз меняла время и день сброса; проверьте в игре.",
+  "task.reset_saved": "Настройки сброса сохранены.",
+  "task.err_hour": "Час должен быть числом от 0 до 23.",
+  "task.reset_line": "Следующий ежедневный сброс: {daily}   |   Следующий еженедельный сброс ({day}): {weekly}",
+  "task.add_box": "Добавить задание (вставьте английский текст; одно задание в строке)",
+  "task.read_screen": "📷 Считать с экрана",
+  "task.translate_add": "🌐 Перевести и добавить",
+  "task.translating": "Перевод...",
+  "task.paste_first": "Сначала вставьте текст задания.",
+  "task.calib_hint": "Обведите рамкой список заданий  (Esc: отмена)",
+  "task.toggle_done": "✔/✘ Отметить выполненным",
+  "task.clear_done": "Убрать выполненные",
+  "task.clear_cat": "Очистить всю категорию",
+  "task.clear_cat_confirm": "Удалить все задания в категории «{cat}»?",
+  "task.added": "Добавлено заданий: {n}.",
+  "task.added_src": "Добавлено заданий: {n} ({src}).",
+  "gpt.box": "Получить автоматически из ChatGPT (использует установленное приложение ChatGPT)",
+  "gpt.warning": "ВНИМАНИЕ: это макрос клавиатуры и окон — он печатает в ChatGPT за вас и считывает ответ с экрана. Точность целиком зависит от того, что ответит ChatGPT; без доступа к актуальным данным игры модель может выдумать. Важные задания сверяйте с текстом в игре.",
+  "gpt.window_title": "Заголовок окна:",
+  "gpt.hotkey": "Клавиша:",
+  "gpt.wait": "Ожидание (с):",
+  "gpt.pick_region": "Выбрать область ответа",
+  "gpt.run": "▶ Выполнить (спросить + считать)",
+  "gpt.read_only": "📖 Считать ответ сейчас (без отправки)",
+  "gpt.prompt_label": "Текст запроса ({date} подставляется автоматически):",
+  "gpt.save_prompt": "Сохранить текст запроса",
+  "gpt.prompt_saved": "Текст запроса сохранён.",
+  "gpt.raw_label": "Последний ответ ChatGPT (сырой OCR, для проверки):",
+  "gpt.calib_hint": "Обведите рамкой область ответа ChatGPT  (Esc: отмена)",
+  "gpt.need_region": "Сначала задайте область ответа ChatGPT через «Выбрать область ответа».",
+  "gpt.need_region_short": "Сначала выполните «Выбрать область ответа».",
+  "gpt.no_parse": "Не удалось разделить на категории; проверьте сырой ответ.",
+  "gpt.waiting": "ChatGPT отвечает... осталось {left} с",
+  "gpt.err.nowindow": "Окно, содержащее «{title}», не найдено. Убедитесь, что приложение ChatGPT открыто.",
+  "speak.fills_gap": "закрывает пробел",
+  "speak.upgrade": "улучшение",
+  "speak.already": "уже записано",
+  "speak.rare": "редкий предмет, проверьте сами",
+  "speak.build_pct": "{build}, {pct} процентов",
+  "err.bad_setting": "Недопустимая настройка: {e}",
+  "err.file_read": "Не удалось прочитать файл: {e}",
+  "err.hotkey_listener": "Не удалось запустить обработчик клавиш:\n{e}",
+  "err.mic": "Ошибка микрофона: {e}  (pip install sounddevice numpy)",
+  "err.stt": "Ошибка распознавания речи: {e}  (pip install faster-whisper)",
+  "err.read": "Ошибка чтения: {e}",
+  "err.no_connection": "Не удалось подключиться: {reason}",
+  "err.generic": "Ошибка: {e}",
+  "ai.ollama_url": "Адрес Ollama",
+  "ai.ollama_model": "Модель Ollama",
+  "ai.claude_model": "Модель Claude",
+  "ai.cc_model": "Модель Claude Code (пусто = по умолчанию)",
+  "ai.cc_missing": "Claude Code не найден. Один раз запустите scripts\\install_claude_code.bat и попробуйте снова.",
+  "ai.cc_login": "В Claude Code не выполнен вход. Один раз запустите scripts\\install_claude_code.bat (или «claude auth login»).",
+  "ai.cc_timeout": "Claude Code не ответил за {s} с.",
+  "ai.openai_model": "Модель ChatGPT",
+  "build.new_name": "Новая сборка",
+  "build.set_bonus": "Бонус комплекта",
+  "col.time": "Время",
+  "col.verdict": "Решение",
+  "col.best_build": "Лучшая сборка",
+  "gpt.finding_window": "Поиск окна ChatGPT...",
+  "note.yours_better": "Ваш лучше: {build} / {slot} ({pct}%)",
+  "prog.filled": "✔ Занято",
+  "prog.empty": "✘ Нет",
+  "prog.done_all": "ГОТОВО ✔",
+  "prog.yours_better": "Ваш лучше",
+  "speak.yours_better": "имеющийся лучше",
+  "why.set_match": "совпадение комплекта/бренда",
+  "word.no_data": "Нет данных",
+  "set.bg_interval": "Смена фона (с, 0 = не менять):",
+  "set.open_art": "Открыть папку изображений",
+  "set.art_note": "Можно добавить свои изображения: art\\backgrounds (фоны), art\\emblems\\<имя билда>.png (эмблема), art\\flags\\<код языка>.png (флаг). Эмблемы и флаги показываются 5 с при выборе.",
+  "meta.not_configured": "Адрес мета-ленты ещё не задан.",
+  "meta.syncing": "Загрузка мета-билдов…",
+  "meta.failed": "Не удалось получить мета-список (нет сети?). Используется последняя копия.",
+  "meta.synced": "Мета: {added} новых, {updated} обновлено, {removed} удалено.",
+  "meta.up_to_date": "Мета-билды актуальны.",
+  "meta.status": "⭐ {n} мета-билдов · версия {version}\nПоследняя синхронизация: {when}",
+  "meta.sync_now": "Синхронизировать мету",
+  "meta.detail": "Режим: {mode} · Популярность: {pop}/100",
+  "meta.sources": "Источники: {src}",
+  "meta.locked": "🔒 Вы изменили этот мета-билд; синхронизация больше его не тронет.",
+  "meta.box": "Синхронизация мета-билдов",
+  "meta.enable": "Автоматически раз в день при запуске",
+  "meta.restore_hidden": "Вернуть скрытые мета-билды",
+  "meta.url": "Адрес ленты (пусто = официальная):",
+  "meta.note": "Мета- и самые обсуждаемые билды раз в день берутся из центрального списка. Ваши билды не трогаются; изменённый мета-билд блокируется, удалённый не вернётся. ⭐ = мета, 🔒 = изменён вами, 🔥 = популярность."
+}

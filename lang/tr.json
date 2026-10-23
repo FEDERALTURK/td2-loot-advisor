@@ -1,0 +1,618 @@
+{
+  "__meta__": {
+    "name": "Türkçe",
+    "english_name": "Turkish"
+  },
+  "__task_dict__": [
+    [
+      "control points",
+      "kontrol noktaları"
+    ],
+    [
+      "control point",
+      "kontrol noktası"
+    ],
+    [
+      "supply drops",
+      "yardım malzemeleri"
+    ],
+    [
+      "supply drop",
+      "yardım malzemesi"
+    ],
+    [
+      "strongholds",
+      "kaleler"
+    ],
+    [
+      "stronghold",
+      "kale"
+    ],
+    [
+      "settlements",
+      "yerleşimler"
+    ],
+    [
+      "settlement",
+      "yerleşim"
+    ],
+    [
+      "exotic caches",
+      "egzotik sandıklar"
+    ],
+    [
+      "exotic cache",
+      "egzotik sandık"
+    ],
+    [
+      "bounties",
+      "ödül avları"
+    ],
+    [
+      "bounty",
+      "ödül avı"
+    ],
+    [
+      "invaded missions",
+      "istila edilmiş görevler"
+    ],
+    [
+      "invaded mission",
+      "istila edilmiş görev"
+    ],
+    [
+      "specialization points",
+      "uzmanlık puanı"
+    ],
+    [
+      "world tier",
+      "dünya katmanı"
+    ],
+    [
+      "seasonal journey",
+      "sezon yolculuğu"
+    ],
+    [
+      "season journey",
+      "sezon yolculuğu"
+    ],
+    [
+      "global event",
+      "küresel etkinlik"
+    ],
+    [
+      "apparel event",
+      "kıyafet etkinliği"
+    ],
+    [
+      "manhunt",
+      "takip"
+    ],
+    [
+      "occupied dark zone",
+      "işgal edilmiş kara bölge"
+    ],
+    [
+      "dark zone",
+      "kara bölge"
+    ],
+    [
+      "normalized",
+      "normalize edilmiş"
+    ],
+    [
+      "crafting materials",
+      "üretim malzemeleri"
+    ],
+    [
+      "signature weapon",
+      "imza silah"
+    ],
+    [
+      "requisition",
+      "tedarik"
+    ],
+    [
+      "vendor",
+      "satıcı"
+    ],
+    [
+      "headshot kills",
+      "kafadan öldürme"
+    ],
+    [
+      "headshots",
+      "kafa vuruşu"
+    ],
+    [
+      "headshot",
+      "kafa vuruşu"
+    ],
+    [
+      "elites",
+      "elitler"
+    ],
+    [
+      "elite",
+      "elit"
+    ],
+    [
+      "enemies",
+      "düşman"
+    ],
+    [
+      "enemy",
+      "düşman"
+    ],
+    [
+      "legendary difficulty",
+      "efsanevi zorluk"
+    ],
+    [
+      "heroic difficulty",
+      "kahramanca zorluk"
+    ],
+    [
+      "challenging difficulty",
+      "çetin zorluk"
+    ],
+    [
+      "hard difficulty",
+      "zor zorluk"
+    ],
+    [
+      "or above",
+      "veya üzeri"
+    ],
+    [
+      "or higher",
+      "veya üzeri"
+    ],
+    [
+      "assault rifle",
+      "hücum tüfeği"
+    ],
+    [
+      "submachine gun",
+      "hafif makineli tabanca"
+    ],
+    [
+      "light machine gun",
+      "hafif makineli"
+    ],
+    [
+      "marksman rifle",
+      "nişancı tüfeği"
+    ],
+    [
+      "sniper rifle",
+      "keskin nişancı tüfeği"
+    ],
+    [
+      "shotgun",
+      "pompalı"
+    ],
+    [
+      "pistol",
+      "tabanca"
+    ],
+    [
+      "skill kills",
+      "yetenek ile öldürme"
+    ],
+    [
+      "skill damage",
+      "yetenek hasarı"
+    ],
+    [
+      "skills",
+      "yetenekler"
+    ],
+    [
+      "skill",
+      "yetenek"
+    ],
+    [
+      "using a",
+      "kullanarak"
+    ],
+    [
+      "using an",
+      "kullanarak"
+    ],
+    [
+      "with a",
+      "ile"
+    ],
+    [
+      "with an",
+      "ile"
+    ],
+    [
+      "complete",
+      "tamamla"
+    ],
+    [
+      "hijack",
+      "ele geçir"
+    ],
+    [
+      "defeat",
+      "yen"
+    ],
+    [
+      "kills",
+      "öldürme"
+    ],
+    [
+      "kill",
+      "öldür"
+    ],
+    [
+      "daily project",
+      "günlük görev"
+    ],
+    [
+      "weekly project",
+      "haftalık görev"
+    ],
+    [
+      "project",
+      "görev"
+    ],
+    [
+      "daily",
+      "günlük"
+    ],
+    [
+      "weekly",
+      "haftalık"
+    ],
+    [
+      "missions",
+      "görevler"
+    ],
+    [
+      "mission",
+      "görev"
+    ],
+    [
+      "difficulty",
+      "zorluk"
+    ],
+    [
+      "players",
+      "oyuncular"
+    ],
+    [
+      "player",
+      "oyuncu"
+    ],
+    [
+      "agents",
+      "ajanlar"
+    ],
+    [
+      "agent",
+      "ajan"
+    ],
+    [
+      "capture",
+      "ele geçir"
+    ],
+    [
+      "activate",
+      "etkinleştir"
+    ]
+  ],
+  "tab.dash": "Panel",
+  "tab.builds": "Build'ler",
+  "tab.progress": "Eksik Parça",
+  "tab.stats": "İstatistik",
+  "tab.tasks": "Görevler",
+  "tab.assistant": "Asistan",
+  "tab.settings": "Ayarlar",
+  "tab.history": "Geçmiş",
+  "tab.log": "Kayıt",
+  "tab.help": "Yardım",
+  "verdict.keep": "SAKLA",
+  "verdict.consider": "DÜŞÜN",
+  "verdict.dismantle": "KIR",
+  "verdict.review": "KONTROL ET",
+  "verdict.error": "HATA",
+  "verdict.idle": "HAZIR",
+  "slot.mask": "maske",
+  "slot.backpack": "sırt çantası",
+  "slot.chest": "gövde",
+  "slot.gloves": "eldiven",
+  "slot.holster": "kılıf",
+  "slot.kneepads": "dizlik",
+  "slot.weapon": "silah",
+  "slot.sidearm": "tabanca",
+  "cat.daily": "Günlük",
+  "cat.weekly": "Haftalık",
+  "cat.journey": "Journey",
+  "cat.global_event": "Global Event",
+  "cat.manhunt": "Manhunt",
+  "cat.other": "Diğer",
+  "weekday.0": "Pazartesi",
+  "weekday.1": "Salı",
+  "weekday.2": "Çarşamba",
+  "weekday.3": "Perşembe",
+  "weekday.4": "Cuma",
+  "weekday.5": "Cumartesi",
+  "weekday.6": "Pazar",
+  "provider.ollama": "Yerel (Ollama, internetsiz)",
+  "provider.claude": "İnternetli (Claude API)",
+  "provider.openai": "İnternetli (ChatGPT API)",
+  "provider.builtin": "Yerleşik (yapay zekasız)",
+  "provider.claude_code": "Claude (abonelik, Claude Code)",
+  "word.unnamed": "Adsız",
+  "word.image": "Görüntü",
+  "word.complete": "tamam",
+  "period.all": "Tümü",
+  "period.today": "Bugün",
+  "period.7d": "Son 7 gün",
+  "period.30d": "Son 30 gün",
+  "label.period": "Dönem:",
+  "label.build": "Build:",
+  "label.category": "Kategori:",
+  "label.categories": "Kategoriler",
+  "rate.good": "İYİ",
+  "rate.ok": "orta",
+  "rate.low": "düşük",
+  "state.running": "ÇALIŞIYOR",
+  "state.stopped": "durdu",
+  "state.auto": "OTOMATİK",
+  "state.not_set": "SEÇİLMEDİ",
+  "state.key": "tuş {key}",
+  "time.days": "{n} gün",
+  "time.hm": "{h}sa {m}dk",
+  "btn.start": "▶ Başlat",
+  "btn.stop": "■ Durdur",
+  "btn.pick_region": "Bölge seç",
+  "btn.scan_now": "Şimdi tara",
+  "btn.test_image": "Ekran görüntüsünden test",
+  "btn.browse": "Gözat",
+  "btn.add_update": "Ekle/Güncelle",
+  "btn.open_folder": "Klasörü aç",
+  "btn.send": "Gönder",
+  "btn.save": "💾 Kaydet",
+  "btn.save_short": "Kaydet",
+  "btn.delete": "Sil",
+  "btn.clear": "Temizle",
+  "btn.refresh": "Yenile",
+  "panel.scan_mode": "Tarama modu:",
+  "mode.hotkey": "Kısayol tuşu",
+  "mode.auto": "Otomatik (tuşsuz)",
+  "status.line": "Durum: {state}  |  Mod: {mode}  |  Bölge: {region}",
+  "status.counts": "Bu oturum → Sakla: {keep}   Düşün: {consider}   Kır: {dismantle}   Kontrol: {review}",
+  "panel.no_build_match": "Hiçbir build'e uymuyor.",
+  "panel.rare_warning": "Exotic/Named/Prototype: kırmadan önce elle kontrol et!",
+  "panel.roll_header": "\n\nRULO KARŞILAŞTIRMASI (elindeki → bu eşya)\n",
+  "panel.ocr_text": "\n\n--- OCR METNİ ---\n",
+  "panel.parsed": "\n--- AYRIŞTIRILAN ---\n",
+  "calib.item_hint": "Tooltip'in etrafına kutu çiz  (Esc: iptal)",
+  "calib.ask_item": "Tamam'dan 5 saniye sonra ekran yakalanacak.\nO sürede oyunda bir eşyanın üstüne gel (tooltip açık kalsın).",
+  "calib.ask_tasks": "Tamam'dan 5 saniye sonra ekran yakalanacak.\nO sürede oyunda görev listesini (Projects / Seasonal Journey / Global Event) aç.",
+  "calib.ask_gpt": "Tamam'dan 5 saniye sonra ekran yakalanacak.\nO sürede ChatGPT'de örnek bir yanıtın göründüğü ekranı aç.",
+  "msg.pick_region_first": "Önce 'Bölge seç' yap.",
+  "msg.saved": "Kaydedildi.",
+  "msg.settings_saved": "Ayarlar kaydedildi.",
+  "msg.no_tesseract": "Tesseract OCR bulunamadı.\nAyarlar sekmesinden yolunu seç veya kur:\ngithub.com/UB-Mannheim/tesseract/wiki",
+  "build.new": "Yeni build",
+  "build.delete": "Seçili build'i sil",
+  "build.delete_confirm": "Seçili build silinsin mi?",
+  "build.sets": "Set/Marka (virgülle)",
+  "build.slots": "Takip slotları (boş = hepsi)",
+  "build.attr_rules": "Attribute kuralları (ağırlık / 'iyi' sayılan değer)",
+  "build.talents": "Talent'ler (ağırlık)",
+  "build.attr": "Attribute",
+  "build.weight": "Ağırlık",
+  "build.goodval": "İyi değer",
+  "build.talent": "Talent",
+  "build.export": "⇩ Build'leri dışa aktar",
+  "build.import": "⇧ Build dosyası içe aktar",
+  "build.exported": "{n} build dışa aktarıldı:\n{path}",
+  "build.imported": "{n} build içe aktarıldı.",
+  "build.import_bad": "Dosyada build listesi bulunamadı.",
+  "build.err_weight": "Ağırlık sayı olmalı.",
+  "build.err_weight_val": "Ağırlık ve değer sayı olmalı.",
+  "build.err_bonus": "Set bonusu sayı olmalı.",
+  "build.bad_slot": "Geçersiz slot: {bad}\nGeçerli: {valid}",
+  "prog.fills_gap": "EKSİK PARÇA DOLUYOR",
+  "prog.upgrade": "YÜKSELTME",
+  "prog.already": "Zaten kayıtlı",
+  "note.fills_gap": "EKSİK PARÇA DOLUYOR: {build} / {slot}",
+  "note.already": "Zaten kayıtlı: {build} / {slot}",
+  "note.upgrade": "YÜKSELTME: {build} / {slot}  {old}% → {new}%",
+  "prog.save_last": "Son taranan eşyayı bu build'e kaydet",
+  "prog.clear_slot": "Seçili slotu temizle",
+  "prog.reset_build": "Bu build'i sıfırla",
+  "prog.reset_confirm": "Bu build'in tüm kayıtları silinsin mi?",
+  "prog.all_missing": "TÜM BUILD'LERDE EKSİKLER\n\n",
+  "prog.completed": "{have}/{total} parça tamamlandı",
+  "prog.no_scan_yet": "Henüz taranmış eşya yok.",
+  "prog.no_slot": "Eşyanın slotu (Mask, Chest vb.) tespit edilemedi.",
+  "roll.only_new": "{k}: yeni eşyada var ({n}), eskisinde yoktu",
+  "roll.only_old": "{k}: eskisinde vardı ({o}), yeni eşyada yok",
+  "col.item": "Eşya",
+  "col.slot": "Slot",
+  "col.status": "Durum",
+  "col.score": "Skor",
+  "col.translated": "Türkçe",
+  "col.original": "İngilizce (orijinal)",
+  "col.source": "Kaynak",
+  "stats.verdicts": "Karar dağılımı",
+  "stats.by_build": "Build'e göre SAKLA sayısı",
+  "stats.daily_scans": "Günlük tarama (son 7 gün)",
+  "stats.by_slot": "Slot dağılımı",
+  "stats.summary": "Toplam tarama: {total}   |   SAKLA oranı: {keep_pct}%   |   Ort. skor: {avg}%   |   Exotic/Named/Prototype: {rare}",
+  "hist.clear": "Geçmişi temizle",
+  "hist.clear_confirm": "Tüm geçmiş silinsin mi? (İstatistikler de sıfırlanır)",
+  "set.language_box": "Dil",
+  "set.language": "Arayüz dili:",
+  "set.apply_language": "Uygula",
+  "set.language_note": "Dil eklemek için: lang/en.json dosyasını kopyala, değerleri çevir ve lang/<kod>.json olarak kaydet. Uygulama bir sonraki açılışta bulur.",
+  "set.language_changed": "Dil {lang} olarak ayarlandı.",
+  "set.appearance_box": "Görünüm",
+  "set.theme": "Tema:",
+  "theme.dark": "Koyu (TD2 turuncu)",
+  "theme.light": "Açık",
+  "theme.classic": "Klasik (eski görünüm)",
+  "set.ui_sounds": "Buton ve tıklama sesleri",
+  "set.theme_note": "Tema ve dil değişiklikleri anında uygulanır; yeniden başlatmaya gerek yok.",
+  "set.theme_changed": "Yeni tema uygulandı.",
+  "set.scan_box": "Tarama",
+  "set.keep_threshold": "SAKLA eşiği (%)",
+  "set.consider_threshold": "DÜŞÜN eşiği (%)",
+  "set.overlay_seconds": "Bildirim süresi (sn)",
+  "set.auto_interval": "Otomatik tarama aralığı (ms)",
+  "set.ocr_lang": "OCR dili",
+  "set.tesseract_path": "Tesseract yolu",
+  "set.overlay_corner": "Bildirim köşesi",
+  "set.sound": "Sesli uyarı",
+  "set.track_progress": "Eksik parça takibi açık",
+  "set.auto_record": "Parçaları otomatik kaydet (SAKLA olanları)",
+  "set.save_crop": "Son görüntüyü kaydet (hata ayıklama)",
+  "set.log_csv": "Geçmişi CSV'ye yaz",
+  "set.save": "💾 Ayarları kaydet",
+  "set.capture_key": "Tuşu yakala",
+  "set.press_key": "Bir tuşa bas...",
+  "set.log_box": "Uygulama kaydı",
+  "set.log_level": "Kayıt seviyesi",
+  "set.log_size": "En büyük dosya (KB)",
+  "set.log_backups": "Saklanan yedek",
+  "log.level_filter": "Seviye:",
+  "log.autoscroll": "Sona kaydır",
+  "log.save_as": "Farklı kaydet...",
+  "log.clear": "Kaydı temizle",
+  "log.clear_confirm": "Uygulama kaydının tamamı silinsin mi?",
+  "log.saved": "Kayıt kaydedildi: {path}",
+  "log.info": "{total} satırın {shown} tanesi gösteriliyor · {kb} KB · {path}",
+  "ai.settings": "Asistan ayarları",
+  "ai.provider": "Yapay zeka",
+  "ai.saved": "Asistan ayarları kaydedildi.",
+  "ai.speak_verdict": "Eşya kararını sesli oku",
+  "ai.speak_chat": "Asistan cevaplarını sesli oku",
+  "ai.claude_key": "Claude API anahtarı",
+  "ai.openai_key": "ChatGPT API anahtarı",
+  "ai.stt_model": "Konuşma tanıma modeli",
+  "ai.stt_device": "Tanıma cihazı (cpu/cuda)",
+  "ai.tts_rate": "Konuşma hızı",
+  "ai.tts_voice": "Ses adı ipucu (ops.)",
+  "ai.voice_hotkey": "Sesli komut tuşu",
+  "ai.key_warning": "API anahtarları builds.json'a düz metin yazılır — dosyayı kimseyle paylaşma.",
+  "ai.test_voice": "🔊 Sesi dene",
+  "ai.voice_test": "Merhaba, ben yerel asistanın. Sesim böyle.",
+  "ai.examples": "Örnekler: 'Hangi parçalarım eksik?', 'Son taranan eşyayı kırayım mı?', 'Bu dönem kaç parça sakladım?'",
+  "ai.no_key": "API anahtarı girilmemiş",
+  "ai.talk": "🎤 Konuş",
+  "ai.listening": "🎤 Dinliyorum... (bitirmek için tuşa tekrar bas)",
+  "ai.transcribing": "Çözümleniyor... (ilk seferde model indirilir)",
+  "ai.too_short": "Ses çok kısa, tekrar dene.",
+  "ai.not_understood": "Ses anlaşılamadı.",
+  "ai.failed": "Yapay zeka yanıt vermedi ({e}). Yerleşik yanıt:",
+  "ai.context_header": "\n\nBAĞLAM:\n",
+  "kw.missing": "eksik|eksiklerim|kalan",
+  "kw.stats": "istatistik|kaç|kac",
+  "kw.last": "son|sonuncu",
+  "quick.stats": "Toplam {total} tarama yapıldı, {keep} tanesi sakla çıktı.",
+  "quick.last": "Son eşya {item}. En uyumlu build {build}, yüzde {pct}.",
+  "quick.last_plain": "Son eşya {item}.",
+  "quick.help": "Yerleşik modda eksik parça, istatistik ve son eşya sorularını yanıtlayabilirim. Sohbet için yerel veya internetli yapay zekayı seç.",
+  "src.ai": "yapay zeka",
+  "src.dict": "sözlük",
+  "task.reset_box": "Reset sayacı",
+  "task.daily_hour": "Günlük reset saati (0-23):",
+  "task.weekly_day": "Haftalık reset günü:",
+  "task.hour": "saat:",
+  "task.reset_note": "Not: Massive reset saatini/gününü geçmişte birkaç kez değiştirdi; oyun içinde doğrula.",
+  "task.reset_saved": "Reset ayarları kaydedildi.",
+  "task.err_hour": "Saat 0-23 arasında bir sayı olmalı.",
+  "task.reset_line": "Sonraki günlük reset: {daily}   |   Sonraki haftalık reset ({day}): {weekly}",
+  "task.add_box": "Görev ekle (İngilizce metni yapıştır, her satır bir görev)",
+  "task.read_screen": "📷 Ekrandan oku",
+  "task.translate_add": "🌐 Çevir ve ekle",
+  "task.translating": "Çevriliyor...",
+  "task.paste_first": "Önce görev metni yapıştır.",
+  "task.calib_hint": "Görev listesinin etrafına kutu çiz  (Esc: iptal)",
+  "task.toggle_done": "✔/✘ Tamamlandı işaretle",
+  "task.clear_done": "Tamamlananları temizle",
+  "task.clear_cat": "Kategoriyi tamamen temizle",
+  "task.clear_cat_confirm": "'{cat}' kategorisindeki tüm görevler silinsin mi?",
+  "task.added": "{n} görev eklendi.",
+  "task.added_src": "{n} görev eklendi ({src}).",
+  "gpt.box": "ChatGPT'den otomatik getir (kurulu ChatGPT uygulamasını kullanır)",
+  "gpt.warning": "UYARI: Bu bir klavye/pencere otomasyonudur — ChatGPT'ye senin yerine yazar ve ekrandaki yanıtı okur. Doğruluk tamamen ChatGPT'nin verdiği cevaba bağlıdır; model güncel oyun verisine erişemiyorsa yanlış veya uydurma bilgi verebilir. Önemli görevlerde oyun içi metinle karşılaştır.",
+  "gpt.window_title": "Pencere başlığı:",
+  "gpt.hotkey": "Tuş:",
+  "gpt.wait": "Bekleme (sn):",
+  "gpt.pick_region": "Yanıt bölgesini seç",
+  "gpt.run": "▶ Şimdi çalıştır (sor + oku)",
+  "gpt.read_only": "📖 Yanıtı şimdi oku (göndermeden)",
+  "gpt.prompt_label": "İstek metni ({date} otomatik doldurulur):",
+  "gpt.save_prompt": "İstek metnini kaydet",
+  "gpt.prompt_saved": "İstek metni kaydedildi.",
+  "gpt.raw_label": "Son ChatGPT yanıtı (ham OCR, kontrol için):",
+  "gpt.calib_hint": "ChatGPT yanıt alanının etrafına kutu çiz  (Esc: iptal)",
+  "gpt.need_region": "Önce 'Yanıt bölgesini seç' ile ChatGPT'nin cevap alanını tanımla.",
+  "gpt.need_region_short": "Önce 'Yanıt bölgesini seç' yap.",
+  "gpt.no_parse": "Kategorilere ayrıştırılamadı; ham yanıtı kontrol et.",
+  "gpt.waiting": "ChatGPT yanıt veriyor... {left} sn bekleniyor",
+  "gpt.err.nowindow": "'{title}' içeren bir pencere bulunamadı. ChatGPT uygulamasının açık olduğundan emin ol.",
+  "speak.fills_gap": "eksik parça doluyor",
+  "speak.upgrade": "yükseltme",
+  "speak.already": "zaten kayıtlı",
+  "speak.rare": "nadir eşya, elle kontrol et",
+  "speak.build_pct": "{build}, yüzde {pct}",
+  "err.bad_setting": "Geçersiz ayar: {e}",
+  "err.file_read": "Dosya okunamadı: {e}",
+  "err.hotkey_listener": "Tuş dinleyici başlatılamadı:\n{e}",
+  "err.mic": "Mikrofon hatası: {e}  (pip install sounddevice numpy)",
+  "err.stt": "Konuşma tanıma hatası: {e}  (pip install faster-whisper)",
+  "err.read": "Okuma hatası: {e}",
+  "err.no_connection": "Bağlantı kurulamadı: {reason}",
+  "err.generic": "Hata: {e}",
+  "help.body": "NASIL KULLANILIR\n1) Oyunu İngilizce ve 'Borderless Windowed' modunda aç.\n2) Panel > 'Bölge seç': tooltip açıkken 5 sn sonra yakalanan ekranda tooltip'in etrafına kutu çiz.\n3) Tarama modunu seç ve 'Başlat'a bas:\n   • Kısayol tuşu: eşyanın üstüne gel, F8'e (veya seçtiğin tuşa) bas.\n   • Otomatik: envanteri aç, eşyaların üstünde gezin; tooltip oturunca kendiliğinden okur. Oynarken değil, envanter/depo açıkken kullan.\n4) Karar: SAKLA / DÜŞÜN / KIR / KONTROL ET.\n\nDİL\nArayüz dili Ayarlar sekmesinden seçilir. Yeni dil eklemek için lang/en.json dosyasını kopyala, değerleri çevir ve lang/<kod>.json olarak kaydet — uygulama bir sonraki açılışta bulur. Build'ler, görevler ve ilerleme sabit iç kimliklerle saklandığı için dil değiştirmek hiçbir kaydı bozmaz.\n\nEKSİK PARÇA TAKİBİ\nSAKLA çıkan ve slotu tespit edilen (Mask, Backpack, Chest, Gloves, Holster, Kneepads ve Weapon/Sidearm) parçalar, en uyumlu build'in slotuna kaydedilir. Slot boşsa 'EKSİK PARÇA DOLUYOR', yenisi daha iyiyse 'YÜKSELTME' yazar; elindeki daha iyiyse SAKLA yerine DÜŞÜN der. Weapon/Sidearm, tooltip'teki silah tipinden (Assault Rifle, SMG, Pistol vb.) bulunur; 'birincil' ile 'ikincil' silahı ayırt edemez, tabanca dışındaki tüm silahlar tek 'Weapon' slotu sayılır. Kayıtlar progress.json'da tutulur, elle de düzenlenebilir.\n\nRULO KARŞILAŞTIRMASI\nZaten kayıtlı bir parçayla karşılaştırıldığında çıktı kutusunda attribute attribute fark gösterilir, örn. 'weapon_damage: 10.2 → 11.5 (↑1.3)'. Karşılaştırma, parçayı kaydettiğin andaki değerlere göre yapılır.\n\nBUILD DIŞA/İÇE AKTARMA\nBuild'ler sekmesinden tüm build'lerini bir .json dosyasına kaydedip başka bir bilgisayara taşıyabilir ya da arkadaşına gönderebilirsin. İçe aktarırken aynı isimli build varsa üzerine yazılmaz, sonuna '(2)' eklenir.\n\nİSTATİSTİK\nHer tarama loot_log.csv'ye yazılır; İstatistik sekmesi karar dağılımını, build bazlı SAKLA sayısını, günlük tarama sayısını ve slot dağılımını gösterir.\n\nGÖREVLER\nGünlük, Haftalık, Journey, Global Event, Manhunt ve Diğer kategorilerinde görev takibi yapar.\n• Görev eklemek için oyundaki İngilizce metni yapıştır ya da '📷 Ekrandan oku' ile oyunda açık olan görev listesini OCR ile metin kutusuna aktar, sonra 'Çevir ve ekle'ye bas. Birden fazla görevi ayrı satırlara yapıştırırsan hepsi tek tek çevrilip eklenir.\n• Çeviri, Asistan sekmesinde seçtiğin yapay zeka ile yapılır (Ollama/Claude/ChatGPT). Hiçbiri ayarlı değilse ya da yanıt vermezse küçük bir yerleşik sözlük kaba bir çeviri yapar ve satır 'sözlük' diye işaretlenir — cümle akışı bozuk olabilir, önemli görevlerde İngilizce orijinaline bak. Dil dosyasında sözlük yoksa metin yanlış çevrilmek yerine olduğu gibi bırakılır.\n• Tamamlandı işaretlemek için satıra çift tıkla ya da '✔/✘' butonunu kullan. Günlük ve Haftalık listeler, belirlediğin reset saatine/gününe göre kendiliğinden temizlenir; diğer kategorileri elle temizlersin.\n• 'ChatGPT'den otomatik getir', kurulu ChatGPT uygulamana senin yerine yazıp ekrandaki yanıtı okuyan bir klavye/pencere makrosudur. Önce 'Yanıt bölgesini seç' ile cevap alanını bir kere tanımla, sonra tuşa bas (varsayılan F10) ya da 'Şimdi çalıştır'a tıkla: istek gönderilir, beklenir, yanıt okunup kategorilere ayrılır. Başlıklar her zaman İngilizce istenir ki ayrıştırma her dilde çalışsın; görev metni senin dilinde gelir. Zamanlama tutmazsa '📖 Yanıtı şimdi oku' göndermeden tekrar okur. ChatGPT'nin verdiği bilgi güncel ya da doğru olmayabilir (internete bakamayan bir model uydurabilir), bu yüzden ham yanıtı her zaman kontrol et.\n• ÖNEMLİ: Bu program görevleri Ubisoft'un sunucularından veya bir web sitesinden çekmez — resmi bir API yok ve site yapıları sık değişiyor, bu yüzden güncel listeyi oyunun kendisinden al (Projeler / Sezon Yolculuğu / Küresel Etkinlik menüleri). Reset saatleri de geçmişte Massive tarafından değiştirildi, varsayılanları oyunda doğrula.\n\nASİSTAN\n• Sesli karar: eşya taranınca 'Sakla. Striker, yüzde 90. Eldiven. Eksik parça doluyor.' gibi okur. Windows'a kendi dilinde bir ses paketi kurulu olmalı.\n• Sesli komut: sesli komut tuşuna (varsayılan F9) bas, konuş, tekrar bas. Yerel Whisper modeli yazıya çevirir.\n• Sohbet: Yerel (Ollama, internetsiz), İnternetli (Claude API) ya da İnternetli (ChatGPT API) — internetli olanlar için kendi API anahtarın gerekir; ChatGPT Go aboneliği anahtar vermez, platform.openai.com'dan ayrıca alınır. Asistan; build'lerini, kayıtlı ve eksik parçalarını, son eşyayı ve geçmişi bilir.\n• Yapay zeka yanıt vermezse yerleşik basit yanıtlara geçer (eksik parçalar, istatistik, son eşya).\n\nKAYIT\nUygulamanın yaptığı her şey logs/app.log dosyasına yazılır. Kayıt sekmesi bunu seviye filtresiyle gösterir, kopyasını kaydetmeni ya da temizlemeni sağlar. Bir şey ters giderse ilk bakılacak yer burasıdır — yardım isterken de eklenecek en iyi dosyadır. Seviye, en büyük dosya boyutu ve saklanan yedek sayısı Ayarlar'dan belirlenir.\n\nİPUÇLARI\n- Okuma yanlışsa 'Ekran görüntüsünden test' ile OCR metnine bak; last_crop.png son yakalanan görüntüdür.\n- Talent ve set adlarını oyundaki birebir adlarla yaz. Slot, eşya adının ilk satırlarındaki kelimeden (Mask, Gloves, Assault Rifle...) bulunur.\n- Bu program oyun belleğine dokunmaz, yalnızca ekranı okur. Otomatik mod ekranı sürekli yakaladığı için Ubisoft açısından riski sıfır varsayma.\n",
+  "ai.ollama_url": "Ollama adresi",
+  "ai.ollama_model": "Ollama modeli",
+  "ai.claude_model": "Claude modeli",
+  "ai.cc_model": "Claude Code modeli (boş = varsayılan)",
+  "ai.cc_missing": "Claude Code bulunamadı. scripts\\install_claude_code.bat dosyasını bir kez çalıştır, sonra tekrar dene.",
+  "ai.cc_login": "Claude Code'a giriş yapılmamış. scripts\\install_claude_code.bat dosyasını (ya da 'claude auth login') bir kez çalıştır.",
+  "ai.cc_timeout": "Claude Code {s} saniye içinde yanıt vermedi.",
+  "ai.openai_model": "ChatGPT modeli",
+  "build.new_name": "Yeni build",
+  "build.set_bonus": "Set bonusu",
+  "col.time": "Zaman",
+  "col.verdict": "Karar",
+  "col.best_build": "En iyi build",
+  "gpt.finding_window": "ChatGPT penceresi bulunuyor...",
+  "note.yours_better": "Elindeki daha iyi: {build} / {slot} ({pct}%)",
+  "prog.filled": "✔ Dolu",
+  "prog.empty": "✘ Eksik",
+  "prog.done_all": "TAMAM ✔",
+  "prog.yours_better": "Elindeki daha iyi",
+  "speak.yours_better": "elindeki daha iyi",
+  "why.set_match": "set/marka uyumu",
+  "word.no_data": "Veri yok",
+  "set.bg_interval": "Arka plan değişim süresi (sn, 0 = sabit):",
+  "set.open_art": "Görsel klasörünü aç",
+  "set.art_note": "Kendi görsellerini ekleyebilirsin: art\\backgrounds (arka planlar), art\\emblems\\<build adı>.png (build amblemi), art\\flags\\<dil kodu>.png (bayrak). Amblem ve bayraklar seçimde 5 sn görünür.",
+  "meta.not_configured": "Meta akış adresi henüz ayarlanmadı.",
+  "meta.syncing": "Meta build'ler indiriliyor…",
+  "meta.failed": "Meta listesi alınamadı (internet?). Son kopya kullanılıyor.",
+  "meta.synced": "Meta: {added} yeni, {updated} güncellendi, {removed} kaldırıldı.",
+  "meta.up_to_date": "Meta build'ler güncel.",
+  "meta.status": "⭐ {n} meta build · sürüm {version}\nSon senkron: {when}",
+  "meta.sync_now": "Meta'yı şimdi senkronize et",
+  "meta.detail": "Mod: {mode} · Popülerlik: {pop}/100",
+  "meta.sources": "Kaynaklar: {src}",
+  "meta.locked": "🔒 Bu meta build'i düzenledin; senkron artık onu değiştirmez.",
+  "meta.box": "Meta build senkronu",
+  "meta.enable": "Açılışta günde bir otomatik senkronize et",
+  "meta.restore_hidden": "Gizlenen meta build'leri geri getir",
+  "meta.url": "Akış adresi (boş = resmî):",
+  "meta.note": "Meta ve çok konuşulan build'ler merkezi listeden günde bir alınır. Kendi build'lerine dokunulmaz; düzenlediğin meta build kilitlenir, sildiğin bir daha eklenmez. ⭐ = meta, 🔒 = senin düzenlediğin, 🔥 = popülerlik."
+}

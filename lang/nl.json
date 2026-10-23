@@ -1,0 +1,537 @@
+{
+  "__meta__": {
+    "name": "Nederlands",
+    "english_name": "Dutch"
+  },
+  "__task_dict__": [
+    [
+      "control points",
+      "controlepunten"
+    ],
+    [
+      "control point",
+      "controlepunt"
+    ],
+    [
+      "supply drops",
+      "bevoorradingsdroppings"
+    ],
+    [
+      "supply drop",
+      "bevoorradingsdropping"
+    ],
+    [
+      "strongholds",
+      "bolwerken"
+    ],
+    [
+      "stronghold",
+      "bolwerk"
+    ],
+    [
+      "settlements",
+      "nederzettingen"
+    ],
+    [
+      "settlement",
+      "nederzetting"
+    ],
+    [
+      "bounties",
+      "premies"
+    ],
+    [
+      "bounty",
+      "premie"
+    ],
+    [
+      "invaded missions",
+      "overgenomen missies"
+    ],
+    [
+      "invaded mission",
+      "overgenomen missie"
+    ],
+    [
+      "seasonal journey",
+      "seizoensreis"
+    ],
+    [
+      "global event",
+      "global event"
+    ],
+    [
+      "dark zone",
+      "Dark Zone"
+    ],
+    [
+      "crafting materials",
+      "maakmaterialen"
+    ],
+    [
+      "headshot kills",
+      "headshot-kills"
+    ],
+    [
+      "headshots",
+      "headshots"
+    ],
+    [
+      "elites",
+      "elites"
+    ],
+    [
+      "elite",
+      "elite"
+    ],
+    [
+      "enemies",
+      "vijanden"
+    ],
+    [
+      "enemy",
+      "vijand"
+    ],
+    [
+      "legendary difficulty",
+      "legendarische moeilijkheid"
+    ],
+    [
+      "heroic difficulty",
+      "heroïsche moeilijkheid"
+    ],
+    [
+      "challenging difficulty",
+      "uitdagende moeilijkheid"
+    ],
+    [
+      "hard difficulty",
+      "moeilijke moeilijkheidsgraad"
+    ],
+    [
+      "or above",
+      "of hoger"
+    ],
+    [
+      "or higher",
+      "of hoger"
+    ],
+    [
+      "assault rifle",
+      "aanvalsgeweer"
+    ],
+    [
+      "submachine gun",
+      "machinepistool"
+    ],
+    [
+      "light machine gun",
+      "licht machinegeweer"
+    ],
+    [
+      "marksman rifle",
+      "scherpschuttersgeweer"
+    ],
+    [
+      "sniper rifle",
+      "sluipschuttersgeweer"
+    ],
+    [
+      "shotgun",
+      "shotgun"
+    ],
+    [
+      "pistol",
+      "pistool"
+    ],
+    [
+      "skill kills",
+      "skill-kills"
+    ],
+    [
+      "skills",
+      "skills"
+    ],
+    [
+      "skill",
+      "skill"
+    ],
+    [
+      "complete",
+      "Voltooi"
+    ],
+    [
+      "defeat",
+      "Versla"
+    ],
+    [
+      "kills",
+      "kills"
+    ],
+    [
+      "kill",
+      "Dood"
+    ],
+    [
+      "daily project",
+      "dagelijks project"
+    ],
+    [
+      "weekly project",
+      "wekelijks project"
+    ],
+    [
+      "project",
+      "project"
+    ],
+    [
+      "missions",
+      "missies"
+    ],
+    [
+      "mission",
+      "missie"
+    ],
+    [
+      "difficulty",
+      "moeilijkheidsgraad"
+    ],
+    [
+      "players",
+      "spelers"
+    ],
+    [
+      "player",
+      "speler"
+    ],
+    [
+      "agents",
+      "agents"
+    ],
+    [
+      "agent",
+      "agent"
+    ],
+    [
+      "hijack",
+      "Verover"
+    ],
+    [
+      "capture",
+      "Verover"
+    ],
+    [
+      "activate",
+      "Activeer"
+    ]
+  ],
+  "tab.dash": "Paneel",
+  "tab.builds": "Builds",
+  "tab.progress": "Ontbrekende stukken",
+  "tab.stats": "Statistieken",
+  "tab.tasks": "Projecten",
+  "tab.assistant": "Assistent",
+  "tab.settings": "Instellingen",
+  "tab.history": "Geschiedenis",
+  "tab.log": "Logboek",
+  "tab.help": "Help",
+  "verdict.keep": "HOUDEN",
+  "verdict.consider": "OVERWEGEN",
+  "verdict.dismantle": "SLOPEN",
+  "verdict.review": "CONTROLEREN",
+  "verdict.error": "FOUT",
+  "verdict.idle": "KLAAR",
+  "slot.mask": "masker",
+  "slot.backpack": "rugzak",
+  "slot.chest": "vest",
+  "slot.gloves": "handschoenen",
+  "slot.holster": "holster",
+  "slot.kneepads": "kniebeschermers",
+  "slot.weapon": "wapen",
+  "slot.sidearm": "pistool",
+  "cat.daily": "Dagelijks",
+  "cat.weekly": "Wekelijks",
+  "cat.journey": "Journey",
+  "cat.global_event": "Global Event",
+  "cat.manhunt": "Manhunt",
+  "cat.other": "Overig",
+  "weekday.0": "Maandag",
+  "weekday.1": "Dinsdag",
+  "weekday.2": "Woensdag",
+  "weekday.3": "Donderdag",
+  "weekday.4": "Vrijdag",
+  "weekday.5": "Zaterdag",
+  "weekday.6": "Zondag",
+  "provider.ollama": "Lokaal (Ollama, offline)",
+  "provider.claude": "Online (Claude API)",
+  "provider.openai": "Online (ChatGPT API)",
+  "provider.builtin": "Ingebouwd (zonder AI)",
+  "provider.claude_code": "Claude (abonnement, Claude Code)",
+  "word.unnamed": "Naamloos",
+  "word.image": "Afbeelding",
+  "word.complete": "compleet",
+  "period.all": "Alles",
+  "period.today": "Vandaag",
+  "period.7d": "Laatste 7 dagen",
+  "period.30d": "Laatste 30 dagen",
+  "label.period": "Periode:",
+  "label.build": "Build:",
+  "label.category": "Categorie:",
+  "label.categories": "Categorieën",
+  "rate.good": "GOED",
+  "rate.ok": "redelijk",
+  "rate.low": "laag",
+  "state.running": "ACTIEF",
+  "state.stopped": "gestopt",
+  "state.auto": "AUTOMATISCH",
+  "state.not_set": "NIET INGESTELD",
+  "state.key": "toets {key}",
+  "time.days": "{n} d",
+  "time.hm": "{h} u {m} min",
+  "btn.start": "▶ Starten",
+  "btn.stop": "■ Stoppen",
+  "btn.pick_region": "Gebied kiezen",
+  "btn.scan_now": "Nu scannen",
+  "btn.test_image": "Testen met schermafbeelding",
+  "btn.browse": "Bladeren",
+  "btn.add_update": "Toevoegen / bijwerken",
+  "btn.open_folder": "Map openen",
+  "btn.send": "Versturen",
+  "btn.save": "💾 Opslaan",
+  "btn.save_short": "Opslaan",
+  "btn.delete": "Verwijderen",
+  "btn.clear": "Wissen",
+  "btn.refresh": "Vernieuwen",
+  "panel.scan_mode": "Scanmodus:",
+  "mode.hotkey": "Sneltoets",
+  "mode.auto": "Automatisch (zonder toets)",
+  "status.line": "Status: {state}  |  Modus: {mode}  |  Gebied: {region}",
+  "status.counts": "Deze sessie → Houden: {keep}   Overwegen: {consider}   Slopen: {dismantle}   Controleren: {review}",
+  "panel.no_build_match": "Past bij geen enkele build.",
+  "panel.rare_warning": "Exotic/Named/Prototype: controleer zelf voordat je sloopt!",
+  "panel.roll_header": "\n\nWAARDEVERGELIJKING (die van jou → dit item)\n",
+  "panel.ocr_text": "\n\n--- OCR-TEKST ---\n",
+  "panel.parsed": "\n--- UITGELEZEN ---\n",
+  "calib.item_hint": "Teken een kader rond de tooltip  (Esc: annuleren)",
+  "calib.ask_item": "Het scherm wordt 5 seconden na OK vastgelegd.\nGa in die tijd in het spel met de muis over een item (laat de tooltip open).",
+  "calib.ask_tasks": "Het scherm wordt 5 seconden na OK vastgelegd.\nOpen in die tijd in het spel de projectenlijst (Projects / Seasonal Journey / Global Event).",
+  "calib.ask_gpt": "Het scherm wordt 5 seconden na OK vastgelegd.\nToon in die tijd in ChatGPT een scherm met een voorbeeldantwoord.",
+  "msg.pick_region_first": "Doe eerst 'Gebied kiezen'.",
+  "msg.saved": "Opgeslagen.",
+  "msg.settings_saved": "Instellingen opgeslagen.",
+  "msg.no_tesseract": "Tesseract OCR niet gevonden.\nKies het pad bij Instellingen, of installeer het:\ngithub.com/UB-Mannheim/tesseract/wiki",
+  "build.new": "Nieuwe build",
+  "build.delete": "Geselecteerde build verwijderen",
+  "build.delete_confirm": "Geselecteerde build verwijderen?",
+  "build.sets": "Set / merk (gescheiden door komma's)",
+  "build.slots": "Gevolgde slots (leeg = alle)",
+  "build.attr_rules": "Attribuutregels (gewicht / waarde die als 'goed' telt)",
+  "build.talents": "Talenten (gewicht)",
+  "build.attr": "Attribuut",
+  "build.weight": "Gewicht",
+  "build.goodval": "Goede waarde",
+  "build.talent": "Talent",
+  "build.export": "⇩ Builds exporteren",
+  "build.import": "⇧ Buildbestand importeren",
+  "build.exported": "{n} builds geëxporteerd:\n{path}",
+  "build.imported": "{n} builds geïmporteerd.",
+  "build.import_bad": "Geen buildlijst in het bestand gevonden.",
+  "build.err_weight": "Gewicht moet een getal zijn.",
+  "build.err_weight_val": "Gewicht en waarde moeten getallen zijn.",
+  "build.err_bonus": "Setbonus moet een getal zijn.",
+  "build.bad_slot": "Ongeldig slot: {bad}\nGeldig: {valid}",
+  "prog.fills_gap": "VULT EEN GAT",
+  "prog.upgrade": "UPGRADE",
+  "prog.already": "Al vastgelegd",
+  "note.fills_gap": "VULT EEN GAT: {build} / {slot}",
+  "note.already": "Al vastgelegd: {build} / {slot}",
+  "note.upgrade": "UPGRADE: {build} / {slot}  {old}% → {new}%",
+  "prog.save_last": "Laatst gescande item in deze build opslaan",
+  "prog.clear_slot": "Geselecteerd slot leegmaken",
+  "prog.reset_build": "Deze build resetten",
+  "prog.reset_confirm": "Alle gegevens van deze build verwijderen?",
+  "prog.all_missing": "ONTBREKEND IN ALLE BUILDS\n\n",
+  "prog.completed": "{have}/{total} stukken compleet",
+  "prog.no_scan_yet": "Nog geen item gescand.",
+  "prog.no_slot": "Kon het slot van het item niet herkennen (masker, vest enz.).",
+  "roll.only_new": "{k}: staat op het nieuwe item ({n}), stond niet op het oude",
+  "roll.only_old": "{k}: stond op het oude ({o}), staat niet op het nieuwe",
+  "col.item": "Item",
+  "col.slot": "Slot",
+  "col.status": "Status",
+  "col.score": "Score",
+  "col.translated": "Vertaald",
+  "col.original": "Origineel (Engels)",
+  "col.source": "Bron",
+  "stats.verdicts": "Verdeling van beslissingen",
+  "stats.by_build": "Aantal HOUDEN per build",
+  "stats.daily_scans": "Scans per dag (laatste 7 dagen)",
+  "stats.by_slot": "Verdeling per slot",
+  "stats.summary": "Scans totaal: {total}   |   HOUDEN-aandeel: {keep_pct}%   |   Gem. score: {avg}%   |   Exotic/Named/Prototype: {rare}",
+  "hist.clear": "Geschiedenis wissen",
+  "hist.clear_confirm": "Alle geschiedenis verwijderen? (De statistieken worden ook gewist)",
+  "set.language_box": "Taal",
+  "set.language": "Taal van de interface:",
+  "set.apply_language": "Toepassen",
+  "set.language_note": "Een taal toevoegen: kopieer lang/en.json, vertaal de waarden en sla het op als lang/<code>.json. De app vindt het bij de volgende start.",
+  "set.language_changed": "Taal ingesteld op {lang}.",
+  "set.appearance_box": "Weergave",
+  "set.theme": "Thema:",
+  "theme.dark": "Donker (TD2-oranje)",
+  "theme.light": "Licht",
+  "theme.classic": "Klassiek (oude weergave)",
+  "set.ui_sounds": "Knop- en klikgeluiden",
+  "set.theme_note": "Thema- en taalwijzigingen worden direct toegepast; opnieuw starten is niet nodig.",
+  "set.theme_changed": "Nieuw thema toegepast.",
+  "set.scan_box": "Scannen",
+  "set.keep_threshold": "HOUDEN-drempel (%)",
+  "set.consider_threshold": "OVERWEGEN-drempel (%)",
+  "set.overlay_seconds": "Duur van de melding (s)",
+  "set.auto_interval": "Interval automatisch scannen (ms)",
+  "set.ocr_lang": "OCR-taal",
+  "set.tesseract_path": "Pad naar Tesseract",
+  "set.overlay_corner": "Hoek van de melding",
+  "set.sound": "Geluidssignaal",
+  "set.track_progress": "Bijhouden van ontbrekende stukken aan",
+  "set.auto_record": "Stukken automatisch vastleggen (die met HOUDEN)",
+  "set.save_crop": "Laatste opname bewaren (foutopsporing)",
+  "set.log_csv": "Geschiedenis naar CSV schrijven",
+  "set.save": "💾 Instellingen opslaan",
+  "set.capture_key": "Toets vastleggen",
+  "set.press_key": "Druk op een toets...",
+  "set.log_box": "Logboek van de app",
+  "set.log_level": "Logniveau",
+  "set.log_size": "Max. bestandsgrootte (KB)",
+  "set.log_backups": "Bewaarde back-ups",
+  "log.level_filter": "Niveau:",
+  "log.autoscroll": "Naar het einde scrollen",
+  "log.save_as": "Opslaan als...",
+  "log.clear": "Logboek wissen",
+  "log.clear_confirm": "Het hele logboek van de app verwijderen?",
+  "log.saved": "Logboek opgeslagen: {path}",
+  "log.info": "{shown} van {total} regels · {kb} KB · {path}",
+  "ai.settings": "Assistentinstellingen",
+  "ai.provider": "AI",
+  "ai.saved": "Assistentinstellingen opgeslagen.",
+  "ai.speak_verdict": "Beslissing hardop voorlezen",
+  "ai.speak_chat": "Antwoorden van de assistent hardop voorlezen",
+  "ai.claude_key": "Claude API-sleutel",
+  "ai.openai_key": "ChatGPT API-sleutel",
+  "ai.stt_model": "Spraakherkenningsmodel",
+  "ai.stt_device": "Apparaat (cpu/cuda)",
+  "ai.tts_rate": "Spreeksnelheid",
+  "ai.tts_voice": "Hint voor stemnaam (opt.)",
+  "ai.voice_hotkey": "Toets voor spraakopdracht",
+  "ai.key_warning": "API-sleutels worden als platte tekst in builds.json gezet — deel dat bestand met niemand.",
+  "ai.test_voice": "🔊 Stem testen",
+  "ai.voice_test": "Hallo, ik ben je lokale assistent. Zo klink ik.",
+  "ai.examples": "Voorbeelden: 'Welke stukken mis ik?', 'Moet ik het laatste item slopen?', 'Hoeveel heb ik gehouden?'",
+  "ai.no_key": "Geen API-sleutel ingevuld",
+  "ai.talk": "🎤 Spreken",
+  "ai.listening": "🎤 Ik luister... (druk de toets opnieuw om te stoppen)",
+  "ai.transcribing": "Bezig met verwerken... (het model wordt de eerste keer gedownload)",
+  "ai.too_short": "Opname te kort, probeer opnieuw.",
+  "ai.not_understood": "Spraak niet verstaan.",
+  "ai.failed": "De AI heeft niet geantwoord ({e}). Ingebouwd antwoord:",
+  "ai.context_header": "\n\nCONTEXT:\n",
+  "kw.missing": "mis|ontbreek|ontbrekend",
+  "kw.stats": "statistiek|hoeveel",
+  "kw.last": "laatste",
+  "quick.stats": "{total} scans in totaal, waarvan {keep} als houden.",
+  "quick.last": "Het laatste item was {item}. De best passende build is {build}, {pct} procent.",
+  "quick.last_plain": "Het laatste item was {item}.",
+  "quick.help": "In de ingebouwde modus beantwoord ik vragen over ontbrekende stukken, statistieken en het laatste item. Kies een lokale of online AI voor een echt gesprek.",
+  "src.ai": "AI",
+  "src.dict": "woordenlijst",
+  "task.reset_box": "Aftellen tot reset",
+  "task.daily_hour": "Uur van de dagelijkse reset (0-23):",
+  "task.weekly_day": "Dag van de wekelijkse reset:",
+  "task.hour": "uur:",
+  "task.reset_note": "Let op: Massive heeft het tijdstip en de dag van de reset in het verleden meermaals gewijzigd; controleer het in het spel.",
+  "task.reset_saved": "Resetinstellingen opgeslagen.",
+  "task.err_hour": "Het uur moet een getal tussen 0 en 23 zijn.",
+  "task.reset_line": "Volgende dagelijkse reset: {daily}   |   Volgende wekelijkse reset ({day}): {weekly}",
+  "task.add_box": "Project toevoegen (plak de Engelse tekst; één project per regel)",
+  "task.read_screen": "📷 Van het scherm lezen",
+  "task.translate_add": "🌐 Vertalen en toevoegen",
+  "task.translating": "Bezig met vertalen...",
+  "task.paste_first": "Plak eerst de projecttekst.",
+  "task.calib_hint": "Teken een kader rond de projectenlijst  (Esc: annuleren)",
+  "task.toggle_done": "✔/✘ Als gedaan markeren",
+  "task.clear_done": "Voltooide verwijderen",
+  "task.clear_cat": "Hele categorie leegmaken",
+  "task.clear_cat_confirm": "Alle projecten in '{cat}' verwijderen?",
+  "task.added": "{n} projecten toegevoegd.",
+  "task.added_src": "{n} projecten toegevoegd ({src}).",
+  "gpt.box": "Automatisch ophalen uit ChatGPT (gebruikt de geïnstalleerde ChatGPT-app)",
+  "gpt.warning": "LET OP: dit is een toetsenbord-/venstermacro — hij typt voor jou in ChatGPT en leest het antwoord van het scherm. De juistheid hangt volledig af van wat ChatGPT antwoordt; zonder toegang tot actuele spelgegevens kan het model iets verzinnen. Vergelijk belangrijke projecten met de tekst in het spel.",
+  "gpt.window_title": "Venstertitel:",
+  "gpt.hotkey": "Toets:",
+  "gpt.wait": "Wachten (s):",
+  "gpt.pick_region": "Antwoordgebied kiezen",
+  "gpt.run": "▶ Nu uitvoeren (vragen + lezen)",
+  "gpt.read_only": "📖 Antwoord nu lezen (zonder te versturen)",
+  "gpt.prompt_label": "Tekst van het verzoek ({date} wordt automatisch ingevuld):",
+  "gpt.save_prompt": "Tekst van het verzoek opslaan",
+  "gpt.prompt_saved": "Tekst van het verzoek opgeslagen.",
+  "gpt.raw_label": "Laatste antwoord van ChatGPT (ruwe OCR, ter controle):",
+  "gpt.calib_hint": "Teken een kader rond het antwoordgebied van ChatGPT  (Esc: annuleren)",
+  "gpt.need_region": "Bepaal eerst het antwoordgebied van ChatGPT met 'Antwoordgebied kiezen'.",
+  "gpt.need_region_short": "Doe eerst 'Antwoordgebied kiezen'.",
+  "gpt.no_parse": "Kon niet in categorieën worden verdeeld; controleer het ruwe antwoord.",
+  "gpt.waiting": "ChatGPT antwoordt... nog {left} s",
+  "gpt.err.nowindow": "Geen venster met '{title}' gevonden. Zorg dat de ChatGPT-app open is.",
+  "speak.fills_gap": "vult een gat",
+  "speak.upgrade": "upgrade",
+  "speak.already": "al vastgelegd",
+  "speak.rare": "zeldzaam item, controleer het zelf",
+  "speak.build_pct": "{build}, {pct} procent",
+  "err.bad_setting": "Ongeldige instelling: {e}",
+  "err.file_read": "Kon het bestand niet lezen: {e}",
+  "err.hotkey_listener": "Kon het luisteren naar toetsen niet starten:\n{e}",
+  "err.mic": "Microfoonfout: {e}  (pip install sounddevice numpy)",
+  "err.stt": "Fout bij spraakherkenning: {e}  (pip install faster-whisper)",
+  "err.read": "Leesfout: {e}",
+  "err.no_connection": "Verbinding mislukt: {reason}",
+  "err.generic": "Fout: {e}",
+  "ai.ollama_url": "Ollama-adres",
+  "ai.ollama_model": "Ollama-model",
+  "ai.claude_model": "Claude-model",
+  "ai.cc_model": "Claude Code-model (leeg = standaard)",
+  "ai.cc_missing": "Claude Code niet gevonden. Voer eenmaal scripts\\install_claude_code.bat uit en probeer het opnieuw.",
+  "ai.cc_login": "Claude Code is niet aangemeld. Voer eenmaal scripts\\install_claude_code.bat (of 'claude auth login') uit.",
+  "ai.cc_timeout": "Claude Code antwoordde niet binnen {s} seconden.",
+  "ai.openai_model": "ChatGPT-model",
+  "build.new_name": "Nieuwe build",
+  "build.set_bonus": "Setbonus",
+  "col.time": "Tijd",
+  "col.verdict": "Beslissing",
+  "col.best_build": "Beste build",
+  "gpt.finding_window": "Zoeken naar het ChatGPT-venster...",
+  "note.yours_better": "De jouwe is beter: {build} / {slot} ({pct}%)",
+  "prog.filled": "✔ Gevuld",
+  "prog.empty": "✘ Ontbreekt",
+  "prog.done_all": "COMPLEET ✔",
+  "prog.yours_better": "De jouwe is beter",
+  "speak.yours_better": "die je hebt is beter",
+  "why.set_match": "set/merk komt overeen",
+  "word.no_data": "Geen gegevens",
+  "set.bg_interval": "Achtergrondwissel (s, 0 = vast):",
+  "set.open_art": "Afbeeldingenmap openen",
+  "set.art_note": "Je kunt eigen afbeeldingen toevoegen: art\\backgrounds (achtergronden), art\\emblems\\<buildnaam>.png (embleem), art\\flags\\<taalcode>.png (vlag). Emblemen en vlaggen verschijnen 5 s bij selectie.",
+  "meta.not_configured": "Het adres van de metafeed is nog niet ingesteld.",
+  "meta.syncing": "Metabuilds downloaden…",
+  "meta.failed": "Metalijst niet bereikbaar (offline?). Laatste kopie wordt gebruikt.",
+  "meta.synced": "Meta: {added} nieuw, {updated} bijgewerkt, {removed} verwijderd.",
+  "meta.up_to_date": "Metabuilds zijn actueel.",
+  "meta.status": "⭐ {n} metabuilds · versie {version}\nLaatste sync: {when}",
+  "meta.sync_now": "Meta nu synchroniseren",
+  "meta.detail": "Modus: {mode} · Populariteit: {pop}/100",
+  "meta.sources": "Bronnen: {src}",
+  "meta.locked": "🔒 Je hebt deze metabuild bewerkt; de sync verandert hem niet meer.",
+  "meta.box": "Metabuild-sync",
+  "meta.enable": "Eén keer per dag automatisch synchroniseren bij het starten",
+  "meta.restore_hidden": "Verborgen metabuilds terugzetten",
+  "meta.url": "Feedadres (leeg = officieel):",
+  "meta.note": "Meta- en veelbesproken builds komen één keer per dag uit een centrale lijst. Je eigen builds blijven onaangeroerd; een bewerkte metabuild wordt vergrendeld, een verwijderde komt niet terug. ⭐ = meta, 🔒 = door jou bewerkt, 🔥 = populariteit."
+}
