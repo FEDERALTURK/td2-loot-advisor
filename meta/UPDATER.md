@@ -98,3 +98,11 @@ indirir; görevler kullanıcının dilinde gösterilir.
 - `id` kalıcıdır: aynı görevin kimliğini değiştirme (kullanıcıların "yapıldı" işareti ona bağlı).
 - `weekly_weekday`: 0 = Pazartesi … 6 = Pazar. Resmî saat değişirse `resets`'i güncelle.
 - `until` boş = sezon boyunca geçerli.
+
+## "Nasıl yapılır" alanları
+- Her görevde isteğe bağlı `"how": {10 dil}` — nerede/nasıl yapılır, en fazla 500 karakter, kendi cümlenle.
+  Kaynak rehberin adresi `source.url`'de dursun (uygulamada "Kaynağı aç" butonu).
+- `"guides": [{"id", "match": [anahtar kelimeler, küçük harf, birkaç dilde], "tip": {10 dil}, "source"}]` —
+  oyuncunun ekrandan okuduğu günlük/haftalık projelere türüne göre ipucu eşler (kontrol noktası, bounty,
+  Countdown, Summit, Dark Zone, bağış…). En fazla 60. Yeni proje türü görürsen ekle; mevcut `id`'leri koru.
+- Her hafta yeni Manhunt Scout/HVT adımlarını `how` ile ekle; sezon yolculuğu görevlerini (journey) bulunca ekle.
