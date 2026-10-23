@@ -539,7 +539,7 @@
   "tasks.enable": "Mettre à jour automatiquement au démarrage",
   "tasks.auto_resets": "Régler les heures de réinitialisation automatiquement",
   "tasks.status": "🌐 {n} tâches partagées · version {version}",
-  "tasks.feed_note": "Les projets quotidiens/hebdomadaires, le parcours de saison, l’événement mondial et les étapes de traque arrivent d’une liste centrale dans votre langue (🌐). Vos coches « fait » sont conservées, les tâches expirées disparaissent seules. Vos propres tâches ne sont jamais modifiées. Les heures de réinitialisation sont converties dans votre fuseau horaire.",
+  "tasks.feed_note": "Les projets, le parcours et la traque du jeu arrivent d’une liste centrale dans votre langue (🌐). Vos coches « fait » sont conservées, les tâches expirées disparaissent seules. Vos propres tâches ne sont jamais modifiées. Les heures de réinitialisation sont converties dans votre fuseau.",
   "tasks.synced": "Tâches : {added} nouvelles, {removed} retirées",
   "tasks.how_title": "💡 Comment faire",
   "tasks.how_pick": "Choisissez une tâche ; la marche à suivre s’affiche ici.",
@@ -547,6 +547,9 @@
   "tasks.open_source": "Ouvrir la source",
   "tasks.read_projects": "Lire l’écran des projets",
   "tasks.reset_region": "Resélectionner la zone",
-  "tasks.projects_note": "Les projets quotidiens et hebdomadaires ne sont publiés sur aucun site public : ils sont lus sur votre écran. Ouvrez l’écran Projets dans le jeu, choisissez la catégorie (Quotidien/Hebdo) et cliquez sur « 📋 Lire l’écran des projets ». La première fois, sélectionnez une fois la zone de la liste ; ensuite un clic suffit. Les tâches sont traduites et une astuce adaptée (💡) est ajoutée automatiquement.",
-  "tasks.nothing_read": "Aucun texte lisible trouvé à l’écran."
+  "tasks.projects_note": "Les projets quotidiens et hebdomadaires ne sont publiés nulle part : ils sont lus sur votre écran. Ouvrez l’écran Projets, choisissez « Projets – Quotidien » ou « Projets – Hebdo » et cliquez sur « 📋 Lire l’écran des projets ». La première fois, sélectionnez la zone de la liste ; ensuite un clic suffit. Les tâches sont traduites et une astuce (💡) est ajoutée.",
+  "tasks.nothing_read": "Aucun texte lisible trouvé à l’écran.",
+  "cat.projects": "Projets",
+  "cat.settlement": "Colonie",
+  "cat.seasonal": "Saisonnier"
 }

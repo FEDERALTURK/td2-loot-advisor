@@ -539,7 +539,7 @@
   "tasks.enable": "Actualizar automáticamente al iniciar",
   "tasks.auto_resets": "Ajustar horas de reinicio automáticamente",
   "tasks.status": "🌐 {n} tareas compartidas · versión {version}",
-  "tasks.feed_note": "Los proyectos diarios/semanales, el recorrido de temporada, el evento global y los pasos de la cacería llegan de una lista central en tu idioma (🌐). Tus marcas de 'hecho' se conservan y las tareas vencidas desaparecen solas. Tus propias tareas nunca se tocan. Las horas de reinicio se convierten a tu zona horaria.",
+  "tasks.feed_note": "Los proyectos, el recorrido y la cacería del juego llegan de una lista central en tu idioma (🌐). Tus marcas de 'hecho' se conservan y las vencidas desaparecen solas. Tus propias tareas no se tocan. Las horas de reinicio se convierten a tu zona horaria.",
   "tasks.synced": "Tareas: {added} nuevas, {removed} eliminadas",
   "tasks.how_title": "💡 Cómo hacerlo",
   "tasks.how_pick": "Elige una tarea; aquí verás cómo completarla.",
@@ -547,6 +547,9 @@
   "tasks.open_source": "Abrir fuente",
   "tasks.read_projects": "Leer pantalla de proyectos",
   "tasks.reset_region": "Volver a elegir área",
-  "tasks.projects_note": "Los proyectos diarios y semanales no se publican en sitios públicos, así que se leen de tu pantalla: abre la pantalla de Proyectos en el juego, elige la categoría (Diario/Semanal) y pulsa '📋 Leer pantalla de proyectos'. La primera vez seleccionas el área de la lista; después basta un clic. Las tareas se traducen y se añade automáticamente un consejo (💡).",
-  "tasks.nothing_read": "No se encontró texto legible en pantalla."
+  "tasks.projects_note": "Los proyectos diarios y semanales no se publican en ningún sitio, así que se leen de tu pantalla: abre Proyectos en el juego, elige 'Proyectos – Diario' o 'Proyectos – Semanal' y pulsa '📋 Leer pantalla de proyectos'. La primera vez seleccionas el área de la lista; luego basta un clic. Se traducen y se añade un consejo (💡).",
+  "tasks.nothing_read": "No se encontró texto legible en pantalla.",
+  "cat.projects": "Proyectos",
+  "cat.settlement": "Asentamiento",
+  "cat.seasonal": "De temporada"
 }

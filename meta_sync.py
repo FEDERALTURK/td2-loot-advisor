@@ -205,7 +205,8 @@ def apply(cfg, feed, source):
 # global etkinlik, manhunt adımları — her biri tüm dillere çevrilmiş olarak gelir.
 # Ayrıca oyunun resmî sıfırlama saatlerini (UTC) taşır; program bunları yerel saate çevirir.
 TASKS_PATH = "meta/tasks_feed.json"
-TASK_CATS = ("daily", "weekly", "journey", "global_event", "manhunt", "other")
+TASK_CATS = ("projects", "journey", "manhunt")          # oyundaki menülere göre
+PROJECT_KINDS = ("daily", "weekly", "settlement", "seasonal")
 MAX_TASKS = 80
 MAX_GUIDES = 60
 
@@ -267,13 +268,15 @@ def validate_tasks(feed):
     for it in (feed.get("tasks") or [])[:MAX_TASKS]:
         if not isinstance(it, dict): continue
         tid = re.sub(r"[^a-z0-9\-]", "", str(it.get("id", "")).lower())[:80]
-        cat = it.get("cat") if it.get("cat") in TASK_CATS else "other"
+        cat, kind = it.get("cat"), it.get("kind") if it.get("kind") in PROJECT_KINDS else ""
+        if cat in PROJECT_KINDS: cat, kind = "projects", cat          # eski biçim: cat=daily/weekly
+        if cat not in TASK_CATS: continue                             # global_event/other artık yok
         texts = {str(l)[:5]: _text(v, 300) for l, v in (it.get("text") or {}).items() if _text(v, 300)}
         if not tid or tid in seen or "en" not in texts: continue
         seen.add(tid)
         until = _iso_utc(it.get("until"))
         src = it.get("source") if isinstance(it.get("source"), dict) else {}
-        out["tasks"].append({"feed_id": tid, "cat": cat, "texts": texts, "how": _langs(it.get("how"), 500),
+        out["tasks"].append({"feed_id": tid, "cat": cat, "kind": kind if cat == "projects" else "", "texts": texts, "how": _langs(it.get("how"), 500),
                              "until": until.isoformat(timespec="minutes") if until else "",
                              "source": _text(src.get("url"), 300) if str(src.get("url", "")).startswith("https://") else ""})
     return out
@@ -300,11 +303,11 @@ def merge_tasks(tasks, feed, now=None):
         have = {x["feed_id"]: x for x in items[c] if x.get("feed_id")}
         for x in feed["tasks"]:
             if x["cat"] != c or x["feed_id"] not in live: continue
-            row = {"feed_id": x["feed_id"], "texts": x["texts"], "how": x.get("how", {}), "en": x["texts"]["en"], "tr": "", "src": "🌐",
+            row = {"feed_id": x["feed_id"], "kind": x.get("kind", ""), "texts": x["texts"], "how": x.get("how", {}), "en": x["texts"]["en"], "tr": "", "src": "🌐",
                    "until": x["until"], "url": x["source"], "done": done.get(x["feed_id"], False),
                    "time": now.isoformat(timespec="seconds")}
             if x["feed_id"] in have:
-                have[x["feed_id"]].update({k: row[k] for k in ("texts", "how", "en", "until", "url")})
+                have[x["feed_id"]].update({k: row[k] for k in ("kind", "texts", "how", "en", "until", "url")})
             else:
                 items[c].append(row); added += 1
     return {"added": added, "removed": removed}

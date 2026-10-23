@@ -543,7 +543,7 @@
   "tasks.enable": "Beim Start automatisch aktualisieren",
   "tasks.auto_resets": "Reset-Zeiten automatisch setzen",
   "tasks.status": "🌐 {n} gemeinsame Aufgaben · Version {version}",
-  "tasks.feed_note": "Aktuelle tägliche/wöchentliche Projekte, Saison-Reise, globale Events und Manhunt-Schritte kommen aus einer zentralen Liste in deiner Sprache (🌐). Erledigt-Markierungen bleiben erhalten, abgelaufene Aufgaben verschwinden von selbst. Eigene Aufgaben bleiben unberührt. Reset-Zeiten werden in deine Zeitzone umgerechnet.",
+  "tasks.feed_note": "Projekte, Reise und Manhunt aus dem Spiel kommen aus einer zentralen Liste in deiner Sprache (🌐). Erledigt-Markierungen bleiben, abgelaufene Aufgaben verschwinden von selbst. Eigene Aufgaben bleiben unberührt. Reset-Zeiten werden in deine Zeitzone umgerechnet.",
   "tasks.synced": "Aufgaben: {added} neu, {removed} entfernt",
   "tasks.how_title": "💡 So geht's",
   "tasks.how_pick": "Wähle eine Aufgabe; hier steht, wie sie zu erledigen ist.",
@@ -551,6 +551,9 @@
   "tasks.open_source": "Quelle öffnen",
   "tasks.read_projects": "Projektbildschirm lesen",
   "tasks.reset_region": "Bereich neu wählen",
-  "tasks.projects_note": "Tägliche und wöchentliche Projekte werden nirgends öffentlich gelistet, daher werden sie von deinem Bildschirm gelesen: Öffne im Spiel den Projekte-Bildschirm, wähle die Kategorie (Täglich/Wöchentlich) und klicke auf '📋 Projektbildschirm lesen'. Beim ersten Mal wählst du den Listenbereich einmal aus, danach genügt ein Klick. Aufgaben werden übersetzt und ein passender Tipp (💡) wird automatisch ergänzt.",
-  "tasks.nothing_read": "Kein lesbarer Text auf dem Bildschirm gefunden."
+  "tasks.projects_note": "Tägliche und wöchentliche Projekte werden nirgends öffentlich gelistet, daher werden sie von deinem Bildschirm gelesen: Projekte-Bildschirm im Spiel öffnen, 'Projekte – Täglich' oder 'Projekte – Wöchentlich' wählen und '📋 Projektbildschirm lesen' klicken. Beim ersten Mal den Listenbereich einmal auswählen, danach genügt ein Klick. Aufgaben werden übersetzt, ein passender Tipp (💡) wird ergänzt.",
+  "tasks.nothing_read": "Kein lesbarer Text auf dem Bildschirm gefunden.",
+  "cat.projects": "Projekte",
+  "cat.settlement": "Siedlung",
+  "cat.seasonal": "Saisonal"
 }

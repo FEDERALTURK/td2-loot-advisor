@@ -181,11 +181,11 @@ saniye sonra, son denemeden bu yana 20 saat geçtiyse listeyi arka planda indiri
 ### Ortak görev listesi ve "Nasıl yapılır"
 
 - **Görevler** sekmesi açılışta (günde bir) ve her oyun sıfırlamasından sonra `meta/tasks_feed.json`'u indirir:
-  sezon yolculuğu, haftanın Manhunt adımları, Classified Assignment, global etkinlik — hepsi senin dilinde (🌐).
+  oyundaki menülerle aynı üç kategori: **Projeler** (Günlük / Haftalık / Yerleşim / Sezonluk), **Journey** (sezon yolculuğu, Classified Assignment) ve **Manhunt** — hepsi senin dilinde (🌐).
 - Bir göreve tıklayınca altında **💡 Nasıl yapılır** paneli açılır (nerede, hangi ayarla, püf noktaları) ve
   **Kaynağı aç** ile rehbere gidilir.
 - **Günlük/haftalık projeler** herkese açık hiçbir sitede yayımlanmıyor; bu yüzden oyundaki Projeler ekranından
-  okunur: kategoriyi seç → **📋 Proje ekranını oku**. Bölge bir kez seçilir, sonra tek tık. Okunan projeler
+  okunur: kategoriden *Projeler – Günlük* veya *Projeler – Haftalık*ı seç → **📋 Proje ekranını oku**. Bölge bir kez seçilir, sonra tek tık. Okunan projeler
   çevrilir ve türüne uyan ipucu (kontrol noktası, bounty, Countdown, Summit, Dark Zone, bağış, kafa vuruşu,
   silah türü, yetenek, elit, Conflict…) otomatik eklenir.
 - Sıfırlama saatleri oyunun resmî UTC saatinden senin saat dilimine otomatik çevrilir.

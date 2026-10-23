@@ -318,7 +318,7 @@
   "tasks.enable": "Update automatically at startup",
   "tasks.auto_resets": "Set reset times automatically",
   "tasks.status": "🌐 {n} shared tasks · version {version}",
-  "tasks.feed_note": "Current daily/weekly projects, season journey, global event and manhunt steps come from a central list in your language (🌐). Your 'done' marks are kept and expired tasks disappear on their own. Tasks you added yourself are never touched. Reset times are converted from the game's official time to your time zone.",
+  "tasks.feed_note": "The game's Projects, Journey and Manhunt tasks come from a central list in your language (🌐). Your 'done' marks are kept and expired tasks disappear on their own. Tasks you added yourself are never touched. Reset times are converted from the game's official time to your time zone.",
   "tasks.synced": "Tasks: {added} new, {removed} removed",
   "tasks.how_title": "💡 How to do it",
   "tasks.how_pick": "Pick a task; how to complete it appears here.",
@@ -326,6 +326,9 @@
   "tasks.open_source": "Open source",
   "tasks.read_projects": "Read projects screen",
   "tasks.reset_region": "Reselect area",
-  "tasks.projects_note": "Daily and weekly projects aren't published on public sites, so they're read from your own screen: open the Projects screen in the game, pick the category (Daily/Weekly) and press '📋 Read projects screen'. The first time you select the list area once; after that it's one click. Tasks are translated into your language and a matching tip (💡) is added automatically.",
-  "tasks.nothing_read": "No readable text found on screen."
+  "tasks.projects_note": "Daily and weekly projects aren't published on public sites, so they're read from your own screen: open the Projects screen in the game, pick 'Projects – Daily' or 'Projects – Weekly' and press '📋 Read projects screen'. The first time you select the list area once; after that it's one click. Tasks are translated into your language and a matching tip (💡) is added automatically.",
+  "tasks.nothing_read": "No readable text found on screen.",
+  "cat.projects": "Projects",
+  "cat.settlement": "Settlement",
+  "cat.seasonal": "Seasonal"
 }

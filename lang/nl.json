@@ -539,7 +539,7 @@
   "tasks.enable": "Automatisch bijwerken bij het starten",
   "tasks.auto_resets": "Resettijden automatisch instellen",
   "tasks.status": "🌐 {n} gedeelde taken · versie {version}",
-  "tasks.feed_note": "Actuele dagelijkse/wekelijkse projecten, seizoensreis, wereldevenement en manhunt-stappen komen uit een centrale lijst in jouw taal (🌐). Je 'klaar'-vinkjes blijven bewaard en verlopen taken verdwijnen vanzelf. Je eigen taken blijven onaangeroerd. Resettijden worden omgerekend naar jouw tijdzone.",
+  "tasks.feed_note": "Projecten, reis en manhunt uit het spel komen uit een centrale lijst in jouw taal (🌐). 'Klaar'-vinkjes blijven bewaard en verlopen taken verdwijnen vanzelf. Je eigen taken blijven onaangeroerd. Resettijden worden omgerekend naar jouw tijdzone.",
   "tasks.synced": "Taken: {added} nieuw, {removed} verwijderd",
   "tasks.how_title": "💡 Zo doe je het",
   "tasks.how_pick": "Kies een taak; hier zie je hoe je hem voltooit.",
@@ -547,6 +547,9 @@
   "tasks.open_source": "Bron openen",
   "tasks.read_projects": "Projectscherm lezen",
   "tasks.reset_region": "Gebied opnieuw kiezen",
-  "tasks.projects_note": "Dagelijkse en wekelijkse projecten worden nergens openbaar gepubliceerd, dus ze worden van je eigen scherm gelezen: open in het spel het Projecten-scherm, kies de categorie (Dagelijks/Wekelijks) en klik op '📋 Projectscherm lezen'. De eerste keer selecteer je het lijstgebied één keer; daarna is het één klik. Taken worden vertaald en een passende tip (💡) wordt automatisch toegevoegd.",
-  "tasks.nothing_read": "Geen leesbare tekst op het scherm gevonden."
+  "tasks.projects_note": "Dagelijkse en wekelijkse projecten worden nergens gepubliceerd, dus ze worden van je scherm gelezen: open Projecten in het spel, kies 'Projecten – Dagelijks' of 'Projecten – Wekelijks' en klik op '📋 Projectscherm lezen'. De eerste keer selecteer je het lijstgebied; daarna één klik. Taken worden vertaald en krijgen een tip (💡).",
+  "tasks.nothing_read": "Geen leesbare tekst op het scherm gevonden.",
+  "cat.projects": "Projecten",
+  "cat.settlement": "Nederzetting",
+  "cat.seasonal": "Seizoens"
 }

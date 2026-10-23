@@ -555,11 +555,25 @@ def ask_claude_code(model, system, history, timeout=CLAUDE_CODE_TIMEOUT):
 # böylece dil değişince kayıtlı görevler yerinde kalır.
 # Category IDs are stored on disk and never translated.
 TASK_PATH = BASE / "tasks.json"
-TASK_CATS = ["daily", "weekly", "journey", "global_event", "manhunt", "other"]
-AUTO_RESET_CATS = {"daily", "weekly"}  # reset sınırı geçince otomatik temizlenir
-# v4 ve öncesi Türkçe adlar kullanıyordu; eski tasks.json dosyaları taşınır.
+# Oyundaki menülere göre: Projeler (günlük/haftalık/yerleşim/sezonluk), Yolculuk (sezon sekmesi), Manhunt.
+TASK_CATS = ["projects", "journey", "manhunt"]
+PROJECT_KINDS = ["daily", "weekly", "settlement", "seasonal"]
+AUTO_RESET_KINDS = {"daily", "weekly"}  # sıfırlama sınırı geçince o türdeki projeler temizlenir
+# Eski sürümlerin kategorileri (v4 Türkçe adlar, v5.0 daily/weekly/global_event/other) taşınır.
 LEGACY_CATS = {"Günlük": "daily", "Haftalık": "weekly", "Journey": "journey",
                "Global Event": "global_event", "Manhunt": "manhunt", "Diğer": "other"}
+
+def split_cat(c):
+    """Eski/ham kategori → (kategori, proje türü)."""
+    c = LEGACY_CATS.get(c, c)
+    if c in PROJECT_KINDS: return "projects", c
+    if c in ("journey", "manhunt", "projects"): return c, ""
+    return "projects", ""          # global_event / other / bilinmeyen → Projeler (türsüz)
+
+ADD_CHOICES = [("projects", k) for k in PROJECT_KINDS] + [("journey", ""), ("manhunt", "")]
+
+def add_choice_name(cat, kind):
+    return f"{cat_name(cat)} – {cat_name(kind)}" if kind else cat_name(cat)
 
 def cat_name(cid):
     """Kategori kimliğinin o anki dildeki görünen adı."""
@@ -574,13 +588,12 @@ def load_tasks():
     except Exception:
         d = {}
     items = d.get("items") or {}
-    migrated = {}
-    for key, val in items.items():                   # eski Türkçe adları kimliğe taşı
-        migrated.setdefault(LEGACY_CATS.get(key, key), []).extend(val or [])
-    d["items"] = {c: migrated.get(c, []) for c in TASK_CATS}
-    for c, v in migrated.items():                    # tanınmayan kategori kaybolmasın
-        if c not in d["items"]:
-            d["items"]["other"].extend(v)
+    d["items"] = {c: [] for c in TASK_CATS}
+    for key, val in items.items():                   # eski kategorileri yeni yapıya taşı
+        cat, kind = split_cat(key)
+        for it in val or []:
+            if kind and not it.get("kind"): it["kind"] = kind
+            d["items"][cat].append(it)
     d.setdefault("last_daily_key", ""); d.setdefault("last_weekly_key", "")
     return d
 
@@ -673,8 +686,8 @@ def default_gpt_prompt():
     """ChatGPT'ye gönderilecek hazır istek; yanıt kullanıcının dilinde istenir."""
     lang = i18n.english_name()
     return (
-        "List the daily projects, weekly projects, current Season / Seasonal Journey steps, "
-        "active Global Event objectives and any active Manhunt objectives that are live in "
+        "List the daily projects, weekly projects, current Season / Seasonal Journey steps "
+        "and any active Manhunt objectives that are live in "
         "Tom Clancy's The Division 2 today ({date}). For each one add a short note on how to complete it.\n"
         "Do not invent anything: if you cannot access current information or are unsure, write "
         "\"not sure about this\" instead of guessing.\n"
@@ -684,13 +697,12 @@ def default_gpt_prompt():
         "DAILY:\n- <task>: <how to do it>\n"
         "WEEKLY:\n- <task>: <how to do it>\n"
         "JOURNEY:\n- <task>: <how to do it>\n"
-        "GLOBAL EVENT:\n- <task>: <how to do it>\n"
         "MANHUNT:\n- <task>: <how to do it>\n"
         "If a section has nothing active, put '- none' under it.")
 
 def parse_gpt_answer(text):
     """Yanıtı kategori kimliklerine ayırır. Başlıkların İngilizce olması beklenir."""
-    cur, out = "other", {c: [] for c in TASK_CATS}
+    cur, out = "other", {c: [] for c in set(GPT_HEADINGS.values())}
     for raw in text.splitlines():
         line = raw.strip()
         if not line:
@@ -1025,9 +1037,12 @@ class App:
                 if r[0] == "voice":
                     self.vstatus.config(text=""); self.ask(r[1], voice=True); continue
                 if r[0] == "tasks_added":
-                    self.tasks["items"].setdefault(r[1], []).extend(r[2]); save_tasks(self.tasks)
+                    cat, kind = r[1] if isinstance(r[1], tuple) else split_cat(r[1])
+                    for it in r[2]:
+                        if kind and not it.get("kind"): it["kind"] = kind
+                    self.tasks["items"].setdefault(cat, []).extend(r[2]); save_tasks(self.tasks)
                     self.task_in.delete("1.0", "end"); self.tr_status.config(text=t("task.added_src", n=len(r[2]), src=r[2][0]["src"]))
-                    if self.selected_add_cat() == r[1] or self.selected_list_cat() == r[1]: self.refresh_tasks()
+                    if self.selected_list_cat() == cat: self.refresh_tasks()
                     continue
                 if r[0] == "gpt_status":
                     self.gpt_status.config(text=r[1]); continue
@@ -1634,9 +1649,9 @@ class App:
         add.pack(fill="x", padx=10, pady=(0, 8))
         row = ttk.Frame(add); row.pack(fill="x", padx=8, pady=4)
         ttk.Label(row, text=t("label.category")).pack(side="left")
-        self.cat_var = tk.StringVar(value=cat_name(TASK_CATS[0]))
-        ttk.Combobox(row, textvariable=self.cat_var, values=[cat_name(c) for c in TASK_CATS],
-                     width=16, state="readonly").pack(side="left", padx=4)
+        self.cat_var = tk.StringVar(value=add_choice_name(*ADD_CHOICES[0]))
+        ttk.Combobox(row, textvariable=self.cat_var, values=[add_choice_name(*c) for c in ADD_CHOICES],
+                     width=22, state="readonly").pack(side="left", padx=4)
         ttk.Button(row, text=t("task.read_screen"), command=self.capture_task_region).pack(side="left", padx=8)
         ttk.Button(row, text=ui_theme.with_icon(t("tasks.read_projects"), "📋"), style="Accent.TButton",
                    command=self.read_projects_screen).pack(side="left")
@@ -1927,10 +1942,12 @@ class App:
         st, now = self.cfg["settings"], datetime.now()
         dk, wk = daily_period_key(now, st["daily_reset_hour"]), weekly_period_key(now, st["weekly_reset_day"], st["weekly_reset_hour"])
         changed = False
-        if self.tasks["last_daily_key"] and self.tasks["last_daily_key"] != dk:
-            self.tasks["items"]["daily"] = []; changed = True
-        if self.tasks["last_weekly_key"] and self.tasks["last_weekly_key"] != wk:
-            self.tasks["items"]["weekly"] = []; changed = True
+        drop = set()
+        if self.tasks["last_daily_key"] and self.tasks["last_daily_key"] != dk: drop.add("daily")
+        if self.tasks["last_weekly_key"] and self.tasks["last_weekly_key"] != wk: drop.add("weekly")
+        if drop:
+            self.tasks["items"]["projects"] = [x for x in self.tasks["items"]["projects"] if x.get("kind") not in drop]
+            changed = True
         reset_happened = changed
         for c, lst in self.tasks["items"].items():          # süresi dolan ortak görevler
             keep = [x for x in lst if not meta_sync.task_expired(x)]
@@ -1954,6 +1971,7 @@ class App:
         lang = i18n.current_language()
         for i, task in enumerate(self.tasks["items"].get(cat, [])):
             shown = task.get("texts", {}).get(lang) or task.get("tr") or task["en"]
+            if cat == "projects" and task.get("kind") in PROJECT_KINDS: shown = f"[{cat_name(task['kind'])}] {shown}"
             src = task.get("src", "") + (" 💡" if self.task_how(task)[0] else "")
             self.task_tv.insert("", "end", iid=str(i), values=("✔" if task["done"] else "—", shown, task["en"], src))
         if hasattr(self, "how_lbl"): self.show_task_how()
@@ -2067,7 +2085,7 @@ class App:
     def selected_add_cat(self):
         """Ekleme kutusundaki açılır listede seçili kategorinin kimliği."""
         label = self.cat_var.get()
-        return next((c for c in TASK_CATS if cat_name(c) == label), TASK_CATS[0])
+        return next((c for c in ADD_CHOICES if add_choice_name(*c) == label), ADD_CHOICES[0])
 
     def toggle_task_done(self):
         s, idx = self.cat_lb.curselection(), self.task_tv.selection()

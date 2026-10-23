@@ -69,12 +69,14 @@ Aynı günlük görev bu dosyayı da günceller. Uygulama açılışta ve her oy
 indirir; görevler kullanıcının dilinde gösterilir.
 
 ## Ne girer
-- **daily / weekly:** O günün/haftanın projeleri, hedefli loot (targeted loot) ve haftalık
-  rotasyonlar. **Sadece doğrulayabildiğini yaz**; kaynak bulamazsan bu kategorileri boş bırak.
-  `until` alanına bir sonraki sıfırlamanın UTC zamanını yaz (günlük 08:00, haftalık Salı 08:00).
-- **manhunt:** Sezonun Scout/HVT adımları (kısa, ipucu metnini kopyalamadan; ne yapılacağını yaz).
-- **journey / global_event / other:** Sezon yolculuğu, global etkinlik (başlangıç-bitiş tarihli,
-  `until` = bitiş), Classified Assignment ve benzerleri.
+Kategoriler oyundaki menülerle birebir aynıdır (başka kategori kullanma):
+- **projects** — oyundaki *Projeler* ekranı. `kind`: `daily` (günlük), `weekly` (haftalık),
+  `settlement` (yerleşim projeleri), `seasonal` (etkinlik/sezon projeleri).
+  **Sadece doğrulayabildiğini yaz**; kaynak bulamazsan günlük/haftalığı boş bırak.
+  `until` = bir sonraki sıfırlamanın UTC zamanı (günlük 08:00, haftalık Salı 08:00).
+- **journey** — sezon sekmesindeki *Yolculuk* (Journey) görevleri; Classified Assignment da buraya.
+- **manhunt** — sezonun Scout/HVT adımları (kısa, ipucu metnini kopyalamadan; ne yapılacağını yaz).
+- Global Event ve "diğer" kategorisi yok: sezon değiştiricileri sisteminde Global Event çalışmıyor.
 - En fazla 80 görev. Bitmiş/süresi dolmuş görevleri çıkar.
 
 ## Şema (schema: 1)
@@ -85,7 +87,8 @@ indirir; görevler kullanıcının dilinde gösterilir.
   "resets": {"daily_hour_utc": 8, "weekly_weekday": 1, "weekly_hour_utc": 8},
   "tasks": [{
     "id": "y8s3-scout1-cleaners",
-    "cat": "daily | weekly | journey | global_event | manhunt | other",
+    "cat": "projects | journey | manhunt",
+    "kind": "daily | weekly | settlement | seasonal   (yalnız projects için)",
     "text": {"en": "…", "tr": "…", "de": "…", "fr": "…", "es": "…", "it": "…",
              "pt": "…", "ru": "…", "pl": "…", "nl": "…"},
     "until": "2026-10-27T08:00Z",

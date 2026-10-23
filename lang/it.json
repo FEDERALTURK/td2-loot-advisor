@@ -539,7 +539,7 @@
   "tasks.enable": "Aggiorna automaticamente all’avvio",
   "tasks.auto_resets": "Imposta orari di reset automaticamente",
   "tasks.status": "🌐 {n} attività condivise · versione {version}",
-  "tasks.feed_note": "Progetti giornalieri/settimanali, percorso stagionale, evento globale e fasi della caccia arrivano da una lista centrale nella tua lingua (🌐). I segni 'fatto' restano, le attività scadute spariscono da sole. Le tue attività non vengono toccate. Gli orari di reset vengono convertiti nel tuo fuso orario.",
+  "tasks.feed_note": "Progetti, percorso e caccia del gioco arrivano da una lista centrale nella tua lingua (🌐). I segni 'fatto' restano, le attività scadute spariscono da sole. Le tue attività non vengono toccate. Gli orari di reset vengono convertiti nel tuo fuso.",
   "tasks.synced": "Attività: {added} nuove, {removed} rimosse",
   "tasks.how_title": "💡 Come fare",
   "tasks.how_pick": "Scegli un’attività; qui vedrai come completarla.",
@@ -547,6 +547,9 @@
   "tasks.open_source": "Apri fonte",
   "tasks.read_projects": "Leggi schermata progetti",
   "tasks.reset_region": "Riseleziona area",
-  "tasks.projects_note": "I progetti giornalieri e settimanali non sono pubblicati su siti pubblici, quindi vengono letti dal tuo schermo: apri la schermata Progetti nel gioco, scegli la categoria (Giornaliero/Settimanale) e premi '📋 Leggi schermata progetti'. La prima volta selezioni l’area della lista; poi basta un clic. Le attività vengono tradotte e viene aggiunto un consiglio (💡) adatto.",
-  "tasks.nothing_read": "Nessun testo leggibile trovato sullo schermo."
+  "tasks.projects_note": "I progetti giornalieri e settimanali non sono pubblicati da nessuna parte, quindi vengono letti dal tuo schermo: apri Progetti nel gioco, scegli 'Progetti – Giornaliero' o 'Progetti – Settimanale' e premi '📋 Leggi schermata progetti'. La prima volta selezioni l’area; poi basta un clic. Vengono tradotti e si aggiunge un consiglio (💡).",
+  "tasks.nothing_read": "Nessun testo leggibile trovato sullo schermo.",
+  "cat.projects": "Progetti",
+  "cat.settlement": "Insediamento",
+  "cat.seasonal": "Stagionale"
 }
