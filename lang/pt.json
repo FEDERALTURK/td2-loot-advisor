@@ -533,5 +533,12 @@
   "meta.enable": "Sincronizar automaticamente uma vez por dia ao iniciar",
   "meta.restore_hidden": "Restaurar builds meta ocultas",
   "meta.url": "Endereço do feed (vazio = oficial):",
-  "meta.note": "Builds meta e mais comentadas vêm de uma lista central uma vez por dia. Suas builds nunca são alteradas; uma build meta editada fica bloqueada e uma excluída não volta. ⭐ = meta, 🔒 = editada por você, 🔥 = popularidade."
+  "meta.note": "Builds meta e mais comentadas vêm de uma lista central uma vez por dia. Suas builds nunca são alteradas; uma build meta editada fica bloqueada e uma excluída não volta. ⭐ = meta, 🔒 = editada por você, 🔥 = popularidade.",
+  "tasks.feed_box": "Lista de tarefas compartilhada (atualizada diariamente)",
+  "tasks.sync_now": "Atualizar tarefas agora",
+  "tasks.enable": "Atualizar automaticamente ao iniciar",
+  "tasks.auto_resets": "Ajustar horários de reset automaticamente",
+  "tasks.status": "🌐 {n} tarefas compartilhadas · versão {version}",
+  "tasks.feed_note": "Projetos diários/semanais, jornada da temporada, evento global e etapas da caçada vêm de uma lista central no seu idioma (🌐). Suas marcas de 'feito' são mantidas e tarefas vencidas somem sozinhas. Suas próprias tarefas nunca são alteradas. Os horários de reset são convertidos para o seu fuso horário.",
+  "tasks.synced": "Tarefas: {added} novas, {removed} removidas"
 }

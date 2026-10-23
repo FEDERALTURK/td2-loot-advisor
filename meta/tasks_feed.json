@@ -1,0 +1,109 @@
+{
+  "schema": 1,
+  "version": "2026-10-24.1",
+  "updated": "2026-10-24T00:00:00Z",
+  "season": "Year 8 Season 3 – Red Horizon",
+  "resets": {
+    "daily_hour_utc": 8,
+    "weekly_weekday": 1,
+    "weekly_hour_utc": 8,
+    "note": "Daily 08:00 UTC; weekly Tuesday 08:00 UTC (weekly_weekday 0 = Monday)"
+  },
+  "tasks": [
+    {
+      "id": "y8s3-scout1-executions",
+      "cat": "manhunt",
+      "text": {
+        "en": "Manhunt Scout 1: complete 2 Public Executions in Downtown East or Judiciary Square",
+        "tr": "Manhunt Scout 1: Downtown East veya Judiciary Square'de 2 Public Execution tamamla",
+        "de": "Manhunt Scout 1: 2 öffentliche Hinrichtungen in Downtown East oder Judiciary Square abschließen",
+        "fr": "Traque Éclaireur 1 : terminer 2 exécutions publiques à Downtown East ou Judiciary Square",
+        "es": "Cacería Explorador 1: completa 2 ejecuciones públicas en Downtown East o Judiciary Square",
+        "it": "Caccia Esploratore 1: completa 2 esecuzioni pubbliche a Downtown East o Judiciary Square",
+        "pt": "Caçada Batedor 1: conclua 2 execuções públicas em Downtown East ou Judiciary Square",
+        "ru": "Охота, Разведчик 1: завершите 2 публичные казни в Downtown East или Judiciary Square",
+        "pl": "Obława, Zwiadowca 1: ukończ 2 publiczne egzekucje w Downtown East lub Judiciary Square",
+        "nl": "Manhunt Verkenner 1: voltooi 2 openbare executies in Downtown East of Judiciary Square"
+      },
+      "source": {
+        "url": "https://www.keengamer.com/articles/guides/the-division-2-y8s3-scout-1-manhunt-clue-solutions/"
+      }
+    },
+    {
+      "id": "y8s3-scout1-control-points",
+      "cat": "manhunt",
+      "text": {
+        "en": "Manhunt Scout 1: capture 3 of the 4 Control Points in Downtown East",
+        "tr": "Manhunt Scout 1: Downtown East'teki 4 Control Point'ten 3'ünü ele geçir",
+        "de": "Manhunt Scout 1: 3 der 4 Kontrollpunkte in Downtown East einnehmen",
+        "fr": "Traque Éclaireur 1 : prendre 3 des 4 points de contrôle de Downtown East",
+        "es": "Cacería Explorador 1: captura 3 de los 4 puntos de control de Downtown East",
+        "it": "Caccia Esploratore 1: conquista 3 dei 4 punti di controllo di Downtown East",
+        "pt": "Caçada Batedor 1: capture 3 dos 4 pontos de controle de Downtown East",
+        "ru": "Охота, Разведчик 1: захватите 3 из 4 контрольных точек в Downtown East",
+        "pl": "Obława, Zwiadowca 1: zdobądź 3 z 4 punktów kontrolnych w Downtown East",
+        "nl": "Manhunt Verkenner 1: verover 3 van de 4 controlepunten in Downtown East"
+      },
+      "source": {
+        "url": "https://www.keengamer.com/articles/guides/the-division-2-y8s3-scout-1-manhunt-clue-solutions/"
+      }
+    },
+    {
+      "id": "y8s3-scout1-cleaners",
+      "cat": "manhunt",
+      "text": {
+        "en": "Manhunt Scout 1: kill 10 Cleaners in Downtown East",
+        "tr": "Manhunt Scout 1: Downtown East'te 10 Cleaner öldür",
+        "de": "Manhunt Scout 1: 10 Cleaner in Downtown East töten",
+        "fr": "Traque Éclaireur 1 : éliminer 10 Nettoyeurs à Downtown East",
+        "es": "Cacería Explorador 1: elimina a 10 Limpiadores en Downtown East",
+        "it": "Caccia Esploratore 1: uccidi 10 Pulitori a Downtown East",
+        "pt": "Caçada Batedor 1: elimine 10 Limpadores em Downtown East",
+        "ru": "Охота, Разведчик 1: убейте 10 Чистильщиков в Downtown East",
+        "pl": "Obława, Zwiadowca 1: zabij 10 Czyścicieli w Downtown East",
+        "nl": "Manhunt Verkenner 1: dood 10 Cleaners in Downtown East"
+      },
+      "source": {
+        "url": "https://www.keengamer.com/articles/guides/the-division-2-y8s3-scout-1-manhunt-clue-solutions/"
+      }
+    },
+    {
+      "id": "y8s3-weekly-clues",
+      "cat": "manhunt",
+      "text": {
+        "en": "New Manhunt clues unlock every weekly reset; missed Scout steps stay available. Finishing the track unlocks the Climax mission (Loaded for Bear exotic gloves)",
+        "tr": "Her haftalık sıfırlamada yeni Manhunt ipuçları açılır; kaçırdığın Scout adımları sonra da yapılabilir. Hepsini bitirince Climax görevi açılır (Loaded for Bear egzotik eldiven)",
+        "de": "Neue Manhunt-Hinweise mit jedem Wochen-Reset; verpasste Scout-Schritte bleiben verfügbar. Am Ende wartet die Climax-Mission (exotische Handschuhe Loaded for Bear)",
+        "fr": "De nouveaux indices de traque à chaque réinitialisation hebdo ; les étapes manquées restent disponibles. La fin débloque la mission Climax (gants exotiques Loaded for Bear)",
+        "es": "Nuevas pistas de cacería con cada reinicio semanal; los pasos perdidos siguen disponibles. Al terminar se desbloquea la misión Climax (guantes exóticos Loaded for Bear)",
+        "it": "Nuovi indizi della caccia a ogni reset settimanale; i passi persi restano disponibili. Alla fine si sblocca la missione Climax (guanti esotici Loaded for Bear)",
+        "pt": "Novas pistas da caçada a cada reset semanal; etapas perdidas continuam disponíveis. Ao terminar, libera a missão Climax (luvas exóticas Loaded for Bear)",
+        "ru": "Новые подсказки охоты открываются с каждым недельным сбросом; пропущенные шаги остаются доступны. В конце открывается миссия Climax (экзотические перчатки Loaded for Bear)",
+        "pl": "Nowe wskazówki obławy z każdym resetem tygodniowym; pominięte etapy zostają dostępne. Koniec odblokowuje misję Climax (egzotyczne rękawice Loaded for Bear)",
+        "nl": "Nieuwe manhunt-aanwijzingen bij elke wekelijkse reset; gemiste stappen blijven beschikbaar. Aan het eind wacht de Climax-missie (exotische handschoenen Loaded for Bear)"
+      },
+      "source": {
+        "url": "https://www.keengamer.com/articles/guides/the-division-2-y8s3-scout-1-manhunt-clue-solutions/"
+      }
+    },
+    {
+      "id": "y8s3-classified-district-mall",
+      "cat": "journey",
+      "text": {
+        "en": "Classified Assignment: The District Mall Inferno (live this season; Georgetown Dead Zone comes later)",
+        "tr": "Gizli Görev (Classified Assignment): The District Mall Inferno (bu sezon açık; Georgetown Dead Zone daha sonra gelecek)",
+        "de": "Classified Assignment: The District Mall Inferno (diese Saison verfügbar; Georgetown Dead Zone folgt später)",
+        "fr": "Mission classifiée : The District Mall Inferno (disponible cette saison ; Georgetown Dead Zone arrive plus tard)",
+        "es": "Misión clasificada: The District Mall Inferno (disponible esta temporada; Georgetown Dead Zone llegará después)",
+        "it": "Incarico classificato: The District Mall Inferno (disponibile questa stagione; Georgetown Dead Zone arriverà più avanti)",
+        "pt": "Missão confidencial: The District Mall Inferno (disponível nesta temporada; Georgetown Dead Zone virá depois)",
+        "ru": "Секретное задание: The District Mall Inferno (доступно в этом сезоне; Georgetown Dead Zone появится позже)",
+        "pl": "Tajne zadanie: The District Mall Inferno (dostępne w tym sezonie; Georgetown Dead Zone pojawi się później)",
+        "nl": "Geheime opdracht: The District Mall Inferno (dit seizoen beschikbaar; Georgetown Dead Zone volgt later)"
+      },
+      "source": {
+        "url": "https://news.ubisoft.com/en-gb/article/6PXPT3FoQS0q8BKXa6dna/the-division-2-red-horizon-cleaners-in-washington-dc-crossplay-update-dark-zone-news-and-more"
+      }
+    }
+  ]
+}

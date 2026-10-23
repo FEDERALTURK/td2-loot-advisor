@@ -533,5 +533,12 @@
   "meta.enable": "Eén keer per dag automatisch synchroniseren bij het starten",
   "meta.restore_hidden": "Verborgen metabuilds terugzetten",
   "meta.url": "Feedadres (leeg = officieel):",
-  "meta.note": "Meta- en veelbesproken builds komen één keer per dag uit een centrale lijst. Je eigen builds blijven onaangeroerd; een bewerkte metabuild wordt vergrendeld, een verwijderde komt niet terug. ⭐ = meta, 🔒 = door jou bewerkt, 🔥 = populariteit."
+  "meta.note": "Meta- en veelbesproken builds komen één keer per dag uit een centrale lijst. Je eigen builds blijven onaangeroerd; een bewerkte metabuild wordt vergrendeld, een verwijderde komt niet terug. ⭐ = meta, 🔒 = door jou bewerkt, 🔥 = populariteit.",
+  "tasks.feed_box": "Gedeelde takenlijst (dagelijks bijgewerkt)",
+  "tasks.sync_now": "Taken nu bijwerken",
+  "tasks.enable": "Automatisch bijwerken bij het starten",
+  "tasks.auto_resets": "Resettijden automatisch instellen",
+  "tasks.status": "🌐 {n} gedeelde taken · versie {version}",
+  "tasks.feed_note": "Actuele dagelijkse/wekelijkse projecten, seizoensreis, wereldevenement en manhunt-stappen komen uit een centrale lijst in jouw taal (🌐). Je 'klaar'-vinkjes blijven bewaard en verlopen taken verdwijnen vanzelf. Je eigen taken blijven onaangeroerd. Resettijden worden omgerekend naar jouw tijdzone.",
+  "tasks.synced": "Taken: {added} nieuw, {removed} verwijderd"
 }

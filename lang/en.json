@@ -312,5 +312,12 @@
   "meta.enable": "Sync automatically once a day at startup",
   "meta.restore_hidden": "Restore hidden meta builds",
   "meta.url": "Feed address (empty = official):",
-  "meta.note": "Meta and much-discussed builds are pulled from a central list once a day. Your own builds are never touched; a meta build you edit is locked, one you delete won't come back. ⭐ = meta, 🔒 = edited by you, 🔥 = popularity."
+  "meta.note": "Meta and much-discussed builds are pulled from a central list once a day. Your own builds are never touched; a meta build you edit is locked, one you delete won't come back. ⭐ = meta, 🔒 = edited by you, 🔥 = popularity.",
+  "tasks.feed_box": "Shared task list (updated daily)",
+  "tasks.sync_now": "Update tasks now",
+  "tasks.enable": "Update automatically at startup",
+  "tasks.auto_resets": "Set reset times automatically",
+  "tasks.status": "🌐 {n} shared tasks · version {version}",
+  "tasks.feed_note": "Current daily/weekly projects, season journey, global event and manhunt steps come from a central list in your language (🌐). Your 'done' marks are kept and expired tasks disappear on their own. Tasks you added yourself are never touched. Reset times are converted from the game's official time to your time zone.",
+  "tasks.synced": "Tasks: {added} new, {removed} removed"
 }

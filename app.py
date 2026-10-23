@@ -35,6 +35,7 @@ APP_NAME = "TD2 Loot Advisor"
 APP_VERSION = "5.0"
 FROZEN = getattr(sys, "frozen", False)
 BASE = Path(sys.executable).parent if FROZEN else Path(__file__).resolve().parent
+TASKS_CACHE = BASE / "tasks_cache.json"  # son indirilen görev listesi
 META_CACHE = BASE / "meta_cache.json"   # son indirilen meta listesi (çevrimdışı kullanım)
 ART_DIR = BASE / "art"   # arka planlar / amblemler / bayraklar (kullanıcı kendi görsellerini ekleyebilir)
 BUNDLE = Path(getattr(sys, "_MEIPASS", BASE))
@@ -58,7 +59,7 @@ DEFAULTS = {"scan_mode": "hotkey", "auto_interval_ms": 700, "auto_record": True,
             "language": "", "log_level": "INFO", "log_max_kb": 1024, "log_backups": 3,
             "ui_theme": "dark", "ui_sounds": True, "bg_interval": 15,
             "meta_sync": True, "meta_feed_url": "", "meta_last_try": 0, "meta_last_sync": "", "meta_version": "",
-            "meta_hidden": []}
+            "meta_hidden": [], "tasks_sync": True, "auto_reset_times": True}
 AUTO_STABLE, AUTO_CHANGE, DEDUP_SECONDS, UPGRADE_MARGIN = 4, 8, 30, 3
 
 if not CFG_PATH.exists() and (BUNDLE / "builds.json").exists():
@@ -761,8 +762,8 @@ class App:
         ui_theme.bind_click_sounds(self.root, self.sounds)
         self.build_ui()
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)
-        self.poll(); self.check_resets()
         self.meta_busy = False
+        self.poll(); self.check_resets()
         self.root.after(2500, self.meta_sync_start)     # açılışı bekletmeden, günde bir
         log.info("UI ready — language=%s, tesseract=%s", i18n.current_language(), self.tess or "NOT FOUND")
         if not self.tess:
@@ -1154,7 +1155,7 @@ class App:
         ttk.Button(left, text=t("build.export"), command=self.export_builds).pack(fill="x")
         ttk.Button(left, text=t("build.import"), command=self.import_builds).pack(fill="x", pady=2)
         ttk.Separator(left).pack(fill="x", pady=6)
-        ttk.Button(left, text=ui_theme.with_icon(t("meta.sync_now"), "⭐"), command=lambda: self.meta_sync_start(force=True),
+        ttk.Button(left, text=ui_theme.with_icon(t("meta.sync_now"), "⭐"), command=lambda: self.meta_sync_start(force=True, what=("builds",)),
                    style="Accent.TButton").pack(fill="x")
         self.meta_info = ttk.Label(left, text=self.meta_status_text(), foreground=PAL["muted"], wraplength=220, justify="left")
         self.meta_info.pack(fill="x", pady=(4, 0))
@@ -1615,6 +1616,20 @@ class App:
         ttk.Label(top, text=t("task.reset_note"),
                  foreground=PAL["muted"]).pack(anchor="w", padx=8, pady=(0, 4))
 
+        fb = ttk.LabelFrame(f, text=t("tasks.feed_box")); fb.pack(fill="x", padx=10, pady=(0, 8))
+        fr = ttk.Frame(fb); fr.pack(fill="x", padx=8, pady=6)
+        ttk.Button(fr, text=ui_theme.with_icon(t("tasks.sync_now"), "🌐"), style="Accent.TButton",
+                   command=lambda: self.meta_sync_start(force=True, what=("tasks",))).pack(side="left")
+        self.bv_tasks = {k: tk.BooleanVar(value=bool(st.get(k, True))) for k in ("tasks_sync", "auto_reset_times")}
+        ttk.Checkbutton(fr, text=t("tasks.enable"), variable=self.bv_tasks["tasks_sync"],
+                        command=self.save_task_feed_flags).pack(side="left", padx=(14, 0))
+        ttk.Checkbutton(fr, text=t("tasks.auto_resets"), variable=self.bv_tasks["auto_reset_times"],
+                        command=self.save_task_feed_flags).pack(side="left", padx=(14, 0))
+        self.tasks_info = ttk.Label(fb, text=self.tasks_status_text(), foreground=PAL["muted"], wraplength=820, justify="left")
+        self.tasks_info.pack(anchor="w", padx=8)
+        ttk.Label(fb, text=t("tasks.feed_note"), foreground=PAL["muted"], wraplength=820,
+                  justify="left").pack(anchor="w", padx=8, pady=(0, 6))
+
         add = ttk.LabelFrame(f, text=t("task.add_box"))
         add.pack(fill="x", padx=10, pady=(0, 8))
         row = ttk.Frame(add); row.pack(fill="x", padx=8, pady=4)
@@ -1768,6 +1783,11 @@ class App:
             self.results.put(("gpt_status", t("err.read", e=e)))
 
 
+    def save_task_feed_flags(self):
+        st = self.cfg["settings"]
+        for k, v in self.bv_tasks.items(): st[k] = bool(v.get())
+        save_cfg(self.cfg)
+
     def save_reset_settings(self):
         st = self.cfg["settings"]
         try:
@@ -1777,6 +1797,8 @@ class App:
             return messagebox.showerror(APP_NAME, t("task.err_hour"))
         st["daily_reset_hour"], st["weekly_reset_hour"] = dh, wh
         st["weekly_reset_day"] = weekday_names().index(self.rv["weekly_reset_day"].get())
+        st["auto_reset_times"] = False      # elle ayarladı: ortak liste artık saatleri değiştirmesin
+        if hasattr(self, "bv_tasks"): self.bv_tasks["auto_reset_times"].set(False)
         save_cfg(self.cfg); self.update_reset_label(); messagebox.showinfo(APP_NAME, t("task.reset_saved"))
 
     def update_reset_label(self):
@@ -1788,32 +1810,76 @@ class App:
                                      weekly=fmt_remaining(nw, now)))
 
     # ---------- Meta build senkronu ----------
-    def meta_sync_start(self, force=False):
-        """Arka planda meta listesini indirir (günde bir; force=True ise hemen)."""
+    def meta_sync_start(self, force=False, quiet=False, what=("builds", "tasks")):
+        """Arka planda meta build + görev listelerini indirir (günde bir; force=True ise hemen)."""
         st = self.cfg["settings"]
         if self.meta_busy or (not force and not meta_sync.due(st)): return
         if not meta_sync.configured_urls(st.get("meta_feed_url", "")):
-            if force: self.toast(t("meta.not_configured"))
+            if force and not quiet: self.toast(t("meta.not_configured"))
             log.info("Meta sync skipped: feed URL not configured")
             return
+        do_b = "builds" in what and st.get("meta_sync", True)
+        do_t = "tasks" in what and st.get("tasks_sync", True)
+        if not (do_b or do_t): return
         self.meta_busy = True
         st["meta_last_try"] = time.time(); save_cfg(self.cfg)
-        if force: self.toast(t("meta.syncing"))
+        if force and not quiet: self.toast(t("meta.syncing"))
+        verbose = force and not quiet
 
         def work():
-            try:
-                res = meta_sync.run(self.cfg, META_CACHE, APP_VERSION, force=force)
-                self.root.after(0, lambda: self.meta_sync_done(res, None, force))
-            except Exception as e:
-                self.root.after(0, lambda e=e: self.meta_sync_done(None, e, force))
+            out = {}
+            for kind, fn, cache, on in (("builds", meta_sync.run, META_CACHE, do_b),
+                                        ("tasks", meta_sync.run_tasks, TASKS_CACHE, do_t)):
+                if not on: continue
+                try: out[kind] = (fn(self.cfg, cache, APP_VERSION, force=force), None)
+                except Exception as e: out[kind] = (None, e)
+            self.root.after(0, lambda: self.sync_done(out, verbose))
         threading.Thread(target=work, daemon=True).start()
 
-    def meta_sync_done(self, res, err, force):
+    def sync_done(self, out, verbose):
         self.meta_busy = False
+        msgs = []
+        if "builds" in out:
+            m = self.meta_sync_done(*out["builds"], verbose)
+            if m: msgs.append(m)
+        if "tasks" in out:
+            m = self.tasks_sync_done(*out["tasks"], verbose)
+            if m: msgs.append(m)
+        if msgs: self.toast("  ·  ".join(msgs))
+
+    def tasks_sync_done(self, res, err, verbose):
+        if err is not None:
+            log.warning("Tasks sync failed: %s", err)
+            return t("meta.failed") if verbose else ""
+        feed, source = res
+        st = self.cfg["settings"]
+        summary = meta_sync.merge_tasks(self.tasks, feed)
+        save_tasks(self.tasks)
+        if feed.get("resets") and st.get("auto_reset_times", True):     # resmî sıfırlama saatleri → yerel saat
+            dh, wd, wh = meta_sync.local_resets(feed["resets"])
+            if (st["daily_reset_hour"], st["weekly_reset_day"], st["weekly_reset_hour"]) != (dh, wd, wh):
+                st["daily_reset_hour"], st["weekly_reset_day"], st["weekly_reset_hour"] = dh, wd, wh
+                save_cfg(self.cfg)
+                if hasattr(self, "rv"):
+                    self.rv["daily_reset_hour"].set(str(dh)); self.rv["weekly_reset_hour"].set(str(wh))
+                    self.rv["weekly_reset_day"].set(weekday_names()[wd])
+        st["tasks_version"] = feed.get("version", ""); save_cfg(self.cfg)
+        log.info("Tasks sync from %s: version=%s added=%d removed=%d", source, feed.get("version"), summary["added"], summary["removed"])
+        try: self.refresh_tasks(); self.update_reset_label()
+        except Exception: pass
+        if hasattr(self, "tasks_info"): self.tasks_info.config(text=self.tasks_status_text())
+        if summary["added"] or summary["removed"] or verbose:
+            return t("tasks.synced", added=summary["added"], removed=summary["removed"])
+        return ""
+
+    def tasks_status_text(self):
+        n = sum(1 for c in self.tasks["items"].values() for x in c if x.get("feed_id"))
+        return t("tasks.status", n=n, version=self.cfg["settings"].get("tasks_version") or "—")
+
+    def meta_sync_done(self, res, err, force):
         if err is not None:
             log.warning("Meta sync failed: %s", err)
-            if force: self.toast(t("meta.failed"))
-            return
+            return t("meta.failed") if force else ""
         feed, source = res
         cur_name = self.cur["name"] if self.cur else None
         summary = meta_sync.apply(self.cfg, feed, source)
@@ -1830,8 +1896,9 @@ class App:
         if hasattr(self, "meta_info"): self.meta_info.config(text=self.meta_status_text())
         changed = summary["added"] + summary["updated"] + summary["removed"]
         if changed or force:
-            self.toast(t("meta.synced", added=summary["added"], updated=summary["updated"], removed=summary["removed"])
-                       if changed else t("meta.up_to_date"))
+            return (t("meta.synced", added=summary["added"], updated=summary["updated"], removed=summary["removed"])
+                    if changed else t("meta.up_to_date"))
+        return ""
 
     def meta_status_text(self):
         st = self.cfg["settings"]
@@ -1851,6 +1918,12 @@ class App:
             self.tasks["items"]["daily"] = []; changed = True
         if self.tasks["last_weekly_key"] and self.tasks["last_weekly_key"] != wk:
             self.tasks["items"]["weekly"] = []; changed = True
+        reset_happened = changed
+        for c, lst in self.tasks["items"].items():          # süresi dolan ortak görevler
+            keep = [x for x in lst if not meta_sync.task_expired(x)]
+            if len(keep) != len(lst): self.tasks["items"][c] = keep; changed = True
+        if reset_happened and self.cfg["settings"].get("tasks_sync", True):
+            self.root.after(90_000, lambda: self.meta_sync_start(force=True, quiet=True, what=("tasks",)))
         self.tasks["last_daily_key"], self.tasks["last_weekly_key"] = dk, wk
         if changed:
             save_tasks(self.tasks); self.refresh_tasks()
@@ -1865,8 +1938,10 @@ class App:
     def refresh_tasks(self):
         self.task_tv.delete(*self.task_tv.get_children())
         cat = self.selected_list_cat()
+        lang = i18n.current_language()
         for i, task in enumerate(self.tasks["items"].get(cat, [])):
-            self.task_tv.insert("", "end", iid=str(i), values=("✔" if task["done"] else "—", task["tr"], task["en"], task.get("src", "")))
+            shown = task.get("texts", {}).get(lang) or task.get("tr") or task["en"]
+            self.task_tv.insert("", "end", iid=str(i), values=("✔" if task["done"] else "—", shown, task["en"], task.get("src", "")))
 
     def capture_task_region(self):
         if not messagebox.askokcancel(APP_NAME, t("calib.ask_tasks")):
@@ -1979,7 +2054,7 @@ class App:
         rm = ttk.Frame(mb); rm.pack(fill="x", padx=8, pady=6)
         self.bv["meta_sync"] = tk.BooleanVar(value=bool(st.get("meta_sync", True)))
         ttk.Checkbutton(rm, text=t("meta.enable"), variable=self.bv["meta_sync"]).pack(side="left")
-        ttk.Button(rm, text=ui_theme.with_icon(t("meta.sync_now"), "⭐"), command=lambda: self.meta_sync_start(force=True)).pack(side="left", padx=12)
+        ttk.Button(rm, text=ui_theme.with_icon(t("meta.sync_now"), "⭐"), command=lambda: self.meta_sync_start(force=True, what=("builds",))).pack(side="left", padx=12)
         if st.get("meta_hidden"):
             ttk.Button(rm, text=t("meta.restore_hidden"), command=self.meta_restore_hidden).pack(side="left")
         rm2 = ttk.Frame(mb); rm2.pack(fill="x", padx=8, pady=(0, 4))
@@ -2095,7 +2170,7 @@ class App:
 
     def meta_restore_hidden(self):
         self.cfg["settings"]["meta_hidden"] = []; save_cfg(self.cfg)
-        self.meta_sync_start(force=True)
+        self.meta_sync_start(force=True, what=("builds",))
 
     def open_art_folder(self):
         for sub in ("backgrounds", "emblems", "flags"):

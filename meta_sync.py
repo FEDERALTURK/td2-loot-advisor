@@ -19,7 +19,7 @@ import re
 import ssl
 import time
 import urllib.request
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 log = logging.getLogger("td2")
 
@@ -161,7 +161,7 @@ def _comparable(b):
 
 # ---------------------------------------------------------------- zamanlama
 def due(settings, now=None):
-    if not settings.get("meta_sync", True): return False
+    if not (settings.get("meta_sync", True) or settings.get("tasks_sync", True)): return False
     now = now or time.time()
     return now - float(settings.get("meta_last_try", 0) or 0) >= SYNC_EVERY_S
 
@@ -175,9 +175,9 @@ def run(cfg, cache_path, app_version="", force=False):
     if not urls:
         raise RuntimeError("meta feed not configured")
     try:
-        feed, url = fetch(urls, app_version)
-        feed = validate(feed, known)
-        try: cache_path.write_text(json.dumps(feed, ensure_ascii=False, indent=1), encoding="utf-8")
+        raw, url = fetch(urls, app_version)
+        feed = validate(raw, known)
+        try: cache_path.write_text(json.dumps(raw, ensure_ascii=False, indent=1), encoding="utf-8")  # ham hali saklanır
         except Exception: pass
         return feed, url
     except Exception as e:
@@ -196,3 +196,116 @@ def apply(cfg, feed, source):
         st["meta_last_sync"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
     summary.update(version=feed.get("version", ""), season=feed.get("season", ""), source=source)
     return summary
+
+
+# ================================================================ görev akışı
+# Aynı depodaki meta/tasks_feed.json: güncel günlük/haftalık projeler, sezon yolculuğu,
+# global etkinlik, manhunt adımları — her biri tüm dillere çevrilmiş olarak gelir.
+# Ayrıca oyunun resmî sıfırlama saatlerini (UTC) taşır; program bunları yerel saate çevirir.
+TASKS_PATH = "meta/tasks_feed.json"
+TASK_CATS = ("daily", "weekly", "journey", "global_event", "manhunt", "other")
+MAX_TASKS = 80
+
+
+def task_urls(builds_setting):
+    """Build akışı adreslerinden görev akışı adreslerini türetir (aynı depo/klasör)."""
+    return [u.replace("meta_builds.json", "tasks_feed.json") for u in configured_urls(builds_setting)
+            if u.endswith("meta_builds.json")]
+
+
+def _iso_utc(v):
+    try:
+        d = datetime.fromisoformat(str(v).replace("Z", "+00:00"))
+        return (d if d.tzinfo else d.replace(tzinfo=timezone.utc)).astimezone(timezone.utc)
+    except Exception:
+        return None
+
+
+def validate_tasks(feed):
+    if not isinstance(feed, dict) or int(feed.get("schema", 0)) != SCHEMA:
+        raise ValueError("unsupported tasks schema")
+    out = {"version": _text(feed.get("version"), 40), "season": _text(feed.get("season"), 60),
+           "resets": None, "tasks": []}
+    r = feed.get("resets") or {}
+    try:
+        out["resets"] = {"daily_hour_utc": int(_num(r["daily_hour_utc"], 0, 23)),
+                         "weekly_weekday": int(_num(r["weekly_weekday"], 0, 6)),      # 0 = Pazartesi
+                         "weekly_hour_utc": int(_num(r["weekly_hour_utc"], 0, 23))}
+    except Exception:
+        out["resets"] = None
+    seen = set()
+    for it in (feed.get("tasks") or [])[:MAX_TASKS]:
+        if not isinstance(it, dict): continue
+        tid = re.sub(r"[^a-z0-9\-]", "", str(it.get("id", "")).lower())[:80]
+        cat = it.get("cat") if it.get("cat") in TASK_CATS else "other"
+        texts = {str(l)[:5]: _text(v, 300) for l, v in (it.get("text") or {}).items() if _text(v, 300)}
+        if not tid or tid in seen or "en" not in texts: continue
+        seen.add(tid)
+        until = _iso_utc(it.get("until"))
+        src = it.get("source") if isinstance(it.get("source"), dict) else {}
+        out["tasks"].append({"feed_id": tid, "cat": cat, "texts": texts,
+                             "until": until.isoformat(timespec="minutes") if until else "",
+                             "source": _text(src.get("url"), 300) if str(src.get("url", "")).startswith("https://") else ""})
+    return out
+
+
+def task_expired(item, now=None):
+    u = _iso_utc(item.get("until")) if item.get("until") else None
+    return bool(u and u <= (now or datetime.now(timezone.utc)))
+
+
+def merge_tasks(tasks, feed, now=None):
+    """Akış görevlerini kullanıcının görev listesine işler. Kendi eklediği görevlere dokunmaz;
+    akış görevlerinin 'yapıldı' işaretini korur; süresi dolanları ve akıştan çıkanları kaldırır."""
+    now = now or datetime.now(timezone.utc)
+    items = tasks.setdefault("items", {})
+    done = {x["feed_id"]: x.get("done", False) for c in items.values() for x in c if x.get("feed_id")}
+    added = removed = 0
+    live = {x["feed_id"] for x in feed["tasks"] if not task_expired(x, now)}
+    for c in TASK_CATS:
+        lst = items.setdefault(c, [])
+        before = len(lst)
+        items[c] = [x for x in lst if not x.get("feed_id") or x["feed_id"] in live]
+        removed += before - len(items[c])
+        have = {x["feed_id"]: x for x in items[c] if x.get("feed_id")}
+        for x in feed["tasks"]:
+            if x["cat"] != c or x["feed_id"] not in live: continue
+            row = {"feed_id": x["feed_id"], "texts": x["texts"], "en": x["texts"]["en"], "tr": "", "src": "🌐",
+                   "until": x["until"], "url": x["source"], "done": done.get(x["feed_id"], False),
+                   "time": now.isoformat(timespec="seconds")}
+            if x["feed_id"] in have:
+                have[x["feed_id"]].update({k: row[k] for k in ("texts", "en", "until", "url")})
+            else:
+                items[c].append(row); added += 1
+    return {"added": added, "removed": removed}
+
+
+def local_resets(resets, now=None):
+    """UTC sıfırlama saatlerini bu bilgisayarın yerel saatine çevirir:
+    (günlük saat, haftalık gün 0=Pzt, haftalık saat)."""
+    now = now or datetime.now(timezone.utc)
+    def conv(weekday, hour):
+        base = now.replace(hour=hour, minute=0, second=0, microsecond=0)
+        base = base + timedelta(days=(weekday - base.weekday()) % 7)
+        loc = base.astimezone()
+        return loc.weekday(), loc.hour
+    _, dh = conv(now.weekday(), resets["daily_hour_utc"])
+    wd, wh = conv(resets["weekly_weekday"], resets["weekly_hour_utc"])
+    return dh, wd, wh
+
+
+def run_tasks(cfg, cache_path, app_version="", force=False):
+    urls = task_urls(cfg["settings"].get("meta_feed_url", ""))
+    if not urls:
+        raise RuntimeError("tasks feed not configured")
+    try:
+        raw, url = fetch(urls, app_version)
+        feed = validate_tasks(raw)
+        try: cache_path.write_text(json.dumps(raw, ensure_ascii=False, indent=1), encoding="utf-8")
+        except Exception: pass
+        return feed, url
+    except Exception as e:
+        log.info("Tasks feed unavailable (%s); trying cache", e)
+        if cache_path.exists() and not force:
+            return validate_tasks(json.loads(cache_path.read_text(encoding="utf-8"))), "cache"
+        raise

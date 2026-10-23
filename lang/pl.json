@@ -533,5 +533,12 @@
   "meta.enable": "Synchronizuj automatycznie raz dziennie przy starcie",
   "meta.restore_hidden": "Przywróć ukryte buildy meta",
   "meta.url": "Adres kanału (puste = oficjalny):",
-  "meta.note": "Buildy meta i najczęściej omawiane pobierane są raz dziennie z centralnej listy. Twoje buildy pozostają nietknięte; edytowany build meta zostaje zablokowany, usunięty nie wraca. ⭐ = meta, 🔒 = edytowany przez ciebie, 🔥 = popularność."
+  "meta.note": "Buildy meta i najczęściej omawiane pobierane są raz dziennie z centralnej listy. Twoje buildy pozostają nietknięte; edytowany build meta zostaje zablokowany, usunięty nie wraca. ⭐ = meta, 🔒 = edytowany przez ciebie, 🔥 = popularność.",
+  "tasks.feed_box": "Wspólna lista zadań (aktualizowana codziennie)",
+  "tasks.sync_now": "Aktualizuj zadania teraz",
+  "tasks.enable": "Aktualizuj automatycznie przy starcie",
+  "tasks.auto_resets": "Ustawiaj godziny resetu automatycznie",
+  "tasks.status": "🌐 {n} wspólnych zadań · wersja {version}",
+  "tasks.feed_note": "Aktualne projekty dzienne/tygodniowe, podróż sezonowa, wydarzenie globalne i etapy obławy przychodzą z centralnej listy w twoim języku (🌐). Znaczniki „zrobione” zostają, wygasłe zadania znikają same. Twoje własne zadania pozostają nietknięte. Godziny resetu są przeliczane na twoją strefę czasową.",
+  "tasks.synced": "Zadania: {added} nowych, {removed} usuniętych"
 }

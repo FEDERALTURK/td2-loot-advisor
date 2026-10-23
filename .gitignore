@@ -3,6 +3,7 @@ logs/
 sounds/
 art/
 meta_cache.json
+tasks_cache.json
 progress.json
 tasks.json
 loot_log.csv

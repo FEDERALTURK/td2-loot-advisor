@@ -614,5 +614,12 @@
   "meta.enable": "Açılışta günde bir otomatik senkronize et",
   "meta.restore_hidden": "Gizlenen meta build'leri geri getir",
   "meta.url": "Akış adresi (boş = resmî):",
-  "meta.note": "Meta ve çok konuşulan build'ler merkezi listeden günde bir alınır. Kendi build'lerine dokunulmaz; düzenlediğin meta build kilitlenir, sildiğin bir daha eklenmez. ⭐ = meta, 🔒 = senin düzenlediğin, 🔥 = popülerlik."
+  "meta.note": "Meta ve çok konuşulan build'ler merkezi listeden günde bir alınır. Kendi build'lerine dokunulmaz; düzenlediğin meta build kilitlenir, sildiğin bir daha eklenmez. ⭐ = meta, 🔒 = senin düzenlediğin, 🔥 = popülerlik.",
+  "tasks.feed_box": "Ortak görev listesi (günlük güncellenir)",
+  "tasks.sync_now": "Görevleri şimdi güncelle",
+  "tasks.enable": "Açılışta otomatik güncelle",
+  "tasks.auto_resets": "Sıfırlama saatlerini otomatik ayarla",
+  "tasks.status": "🌐 {n} ortak görev · sürüm {version}",
+  "tasks.feed_note": "Güncel günlük/haftalık projeler, sezon yolculuğu, global etkinlik ve manhunt adımları merkezi listeden senin dilinde gelir (🌐). İşaretlediğin 'yapıldı' korunur, süresi dolanlar kendiliğinden kalkar. Kendi eklediğin görevlere dokunulmaz. Sıfırlama saatleri oyunun resmî saatinden senin saat dilimine çevrilir.",
+  "tasks.synced": "Görevler: {added} yeni, {removed} kaldırıldı"
 }

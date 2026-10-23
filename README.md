@@ -30,7 +30,11 @@ own builds.
 - Raw: `https://raw.githubusercontent.com/FEDERALTURK/td2-loot-advisor/main/meta/meta_builds.json`
 - CDN: `https://cdn.jsdelivr.net/gh/FEDERALTURK/td2-loot-advisor@main/meta/meta_builds.json`
 
-How the feed is researched and scored: [`meta/UPDATER.md`](meta/UPDATER.md).
+`meta/tasks_feed.json` carries the current daily/weekly projects, season journey, global events and
+manhunt steps — already translated into all 10 languages — plus the official reset times (UTC), which the app
+converts to each player's local time.
+
+How the feeds are researched and scored: [`meta/UPDATER.md`](meta/UPDATER.md).
 
 ## License
 

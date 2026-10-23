@@ -60,3 +60,41 @@ indirir; bu yüzden **doğruluk hızdan önemlidir**.
 - Resmî logo/görsel ekleme, sitelerin metnini kopyalama.
 - Tek bir kaynağa dayanan build'e 60'tan yüksek popülerlik verme.
 - Dosyayı 512 KB'tan büyük yapma.
+
+---
+
+# Görev akışı — `meta/tasks_feed.json`
+
+Aynı günlük görev bu dosyayı da günceller. Uygulama açılışta ve her oyun sıfırlamasından sonra
+indirir; görevler kullanıcının dilinde gösterilir.
+
+## Ne girer
+- **daily / weekly:** O günün/haftanın projeleri, hedefli loot (targeted loot) ve haftalık
+  rotasyonlar. **Sadece doğrulayabildiğini yaz**; kaynak bulamazsan bu kategorileri boş bırak.
+  `until` alanına bir sonraki sıfırlamanın UTC zamanını yaz (günlük 08:00, haftalık Salı 08:00).
+- **manhunt:** Sezonun Scout/HVT adımları (kısa, ipucu metnini kopyalamadan; ne yapılacağını yaz).
+- **journey / global_event / other:** Sezon yolculuğu, global etkinlik (başlangıç-bitiş tarihli,
+  `until` = bitiş), Classified Assignment ve benzerleri.
+- En fazla 80 görev. Bitmiş/süresi dolmuş görevleri çıkar.
+
+## Şema (schema: 1)
+```json
+{
+  "schema": 1, "version": "2026-10-24.1", "updated": "…Z",
+  "season": "Year 8 Season 3 – Red Horizon",
+  "resets": {"daily_hour_utc": 8, "weekly_weekday": 1, "weekly_hour_utc": 8},
+  "tasks": [{
+    "id": "y8s3-scout1-cleaners",
+    "cat": "daily | weekly | journey | global_event | manhunt | other",
+    "text": {"en": "…", "tr": "…", "de": "…", "fr": "…", "es": "…", "it": "…",
+             "pt": "…", "ru": "…", "pl": "…", "nl": "…"},
+    "until": "2026-10-27T08:00Z",
+    "source": {"url": "https://…"}
+  }]
+}
+```
+- `text` **10 dilin hepsini** içermeli (en zorunlu). Oyun içi özel adları (Control Point, Cleaners,
+  bölge adları) İngilizce bırak; cümleyi çevir. Her metin en fazla 300 karakter.
+- `id` kalıcıdır: aynı görevin kimliğini değiştirme (kullanıcıların "yapıldı" işareti ona bağlı).
+- `weekly_weekday`: 0 = Pazartesi … 6 = Pazar. Resmî saat değişirse `resets`'i güncelle.
+- `until` boş = sezon boyunca geçerli.

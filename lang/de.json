@@ -537,5 +537,12 @@
   "meta.enable": "Beim Start einmal täglich automatisch synchronisieren",
   "meta.restore_hidden": "Ausgeblendete Meta-Builds wiederherstellen",
   "meta.url": "Feed-Adresse (leer = offiziell):",
-  "meta.note": "Meta- und vieldiskutierte Builds kommen einmal täglich aus einer zentralen Liste. Eigene Builds bleiben unberührt; bearbeitete Meta-Builds werden gesperrt, gelöschte kommen nicht zurück. ⭐ = Meta, 🔒 = von dir bearbeitet, 🔥 = Beliebtheit."
+  "meta.note": "Meta- und vieldiskutierte Builds kommen einmal täglich aus einer zentralen Liste. Eigene Builds bleiben unberührt; bearbeitete Meta-Builds werden gesperrt, gelöschte kommen nicht zurück. ⭐ = Meta, 🔒 = von dir bearbeitet, 🔥 = Beliebtheit.",
+  "tasks.feed_box": "Gemeinsame Aufgabenliste (täglich aktualisiert)",
+  "tasks.sync_now": "Aufgaben jetzt aktualisieren",
+  "tasks.enable": "Beim Start automatisch aktualisieren",
+  "tasks.auto_resets": "Reset-Zeiten automatisch setzen",
+  "tasks.status": "🌐 {n} gemeinsame Aufgaben · Version {version}",
+  "tasks.feed_note": "Aktuelle tägliche/wöchentliche Projekte, Saison-Reise, globale Events und Manhunt-Schritte kommen aus einer zentralen Liste in deiner Sprache (🌐). Erledigt-Markierungen bleiben erhalten, abgelaufene Aufgaben verschwinden von selbst. Eigene Aufgaben bleiben unberührt. Reset-Zeiten werden in deine Zeitzone umgerechnet.",
+  "tasks.synced": "Aufgaben: {added} neu, {removed} entfernt"
 }
