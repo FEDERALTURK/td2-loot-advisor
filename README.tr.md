@@ -245,7 +245,8 @@ günlük tarama, slot dağılımı.
 
 ### Görevler — çeviri ve takip
 
-Kategoriler: Günlük, Haftalık, Journey, Global Event, Manhunt, Diğer.
+Kategoriler oyundaki menülerle aynı: **Projeler** (Günlük / Haftalık / Yerleşim / Sezonluk), **Journey** ve **Manhunt**.
+Eski sürümdeki Günlük/Haftalık görevler otomatik olarak *Projeler*'e taşınır.
 
 **Görev eklemenin üç yolu:**
 
@@ -259,10 +260,9 @@ Türkçeye çevirir. Yoksa oyun terimlerine özel bir sözlükle kaba çeviri ya
 satırı `sözlük` diye işaretler — bu durumda cümle akışı bozuk olabilir,
 İngilizce orijinaline de bak.
 
-**Reset:** Günlük ve Haftalık listeler, ayarladığın saate/güne göre kendiliğinden
-temizlenir. Varsayılan günlük 02:00, haftalık Salı 02:00 — ama Massive bunu
-geçmişte birkaç kez değiştirdi, **oyun içinde doğrula**. Journey, Global Event ve
-Manhunt elle yönetilir.
+**Reset:** Günlük ve haftalık projeler sıfırlama saatinde kendiliğinden temizlenir. Saatler ortak listeden
+oyunun resmî UTC saatine göre senin saat dilimine otomatik ayarlanır (Türkiye: günlük 11:00, haftalık Salı
+11:00). Elle değiştirirsen otomatik ayar kapanır. Journey ve Manhunt sezon boyunca kalır.
 
 #### ChatGPT otomasyonu (F10)
 
