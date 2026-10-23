@@ -551,5 +551,13 @@
   "tasks.nothing_read": "Nie znaleziono czytelnego tekstu na ekranie.",
   "cat.projects": "Projekty",
   "cat.settlement": "Osada",
-  "cat.seasonal": "Sezonowe"
+  "cat.seasonal": "Sezonowe",
+  "wiki.sync_now": "Aktualizuj z wiki",
+  "wiki.enable": "Czytaj wiki automatycznie przy starcie",
+  "wiki.open": "Otwórz stronę wiki",
+  "wiki.status": "📚 Wiki: {season} · {manhunt} zwiadowców obławy · {journey} tajnych zadań · {projects} projektów sezonowych · odczyt {when}",
+  "wiki.none": "📚 Wiki jeszcze nieodczytana.",
+  "wiki.synced": "Wiki: {added} nowych, {removed} usuniętych",
+  "wiki.failed": "Brak dostępu do wiki (offline?).",
+  "wiki.note": "Wiki The Division (thedivision.fandom.com) jest czytana na żywo z twojego komputera: zwiadowcy obławy bieżącego sezonu, tajne zadania (ze wskazówkami do zagadek/ECHO) i datowane projekty sezonowe. Gdy zaczyna się nowy sezon, aplikacja sama przechodzi na nową stronę. Wiki jest po angielsku; jeśli w Asystencie wybrano AI, zadania są tłumaczone. Treść CC BY-SA, każde zadanie linkuje do źródła (📚)."
 }

@@ -34,6 +34,11 @@ own builds.
 manhunt steps — already translated into all 10 languages — plus the official reset times (UTC), which the app
 converts to each player's local time.
 
+**Live wiki:** the app also reads [The Division Wiki](https://thedivision.fandom.com) directly from the player's
+computer (MediaWiki API) — current season's Manhunt Scouts, Classified Assignments with puzzle tips and dated
+seasonal projects — and follows the season infobox to the next season automatically (`wiki_sync.py`).
+Wiki content is CC BY-SA; every task links back to its wiki section.
+
 How the feeds are researched and scored: [`meta/UPDATER.md`](meta/UPDATER.md).
 
 ## License

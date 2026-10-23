@@ -35,7 +35,8 @@ Thedivision2program/
 ├── i18n.py             ← çeviri motoru
 ├── ui_theme.py         ← tema, renkler ve arayüz sesleri
 ├── ui_art.py           ← üst bant: arka planlar, build amblemleri, bayraklar
-├── meta_sync.py        ← günlük meta build senkronu
+├── meta_sync.py        ← günlük meta build + görev senkronu
+├── wiki_sync.py        ← The Division Wiki canlı okuyucu (sezon, Manhunt, Classified Assignment)
 ├── meta/               ← meta_builds.json (merkezi akış) + UPDATER.md (güncelleme kuralları)
 ├── art/                ← görseller (ilk açılışta oluşur; kendi görsellerini ekleyebilirsin)
 ├── builds.json         ← build kuralları + ayarlar
@@ -189,6 +190,21 @@ saniye sonra, son denemeden bu yana 20 saat geçtiyse listeyi arka planda indiri
   çevrilir ve türüne uyan ipucu (kontrol noktası, bounty, Countdown, Summit, Dark Zone, bağış, kafa vuruşu,
   silah türü, yetenek, elit, Conflict…) otomatik eklenir.
 - Sıfırlama saatleri oyunun resmî UTC saatinden senin saat dilimine otomatik çevrilir.
+
+
+### 📚 Canlı Wiki okuyucu
+
+- Program **The Division Wiki**'yi (thedivision.fandom.com) senin bilgisayarından, wiki'nin herkese açık
+  veri arayüzüyle (MediaWiki API, anahtar gerekmez) günde bir okur — `wiki_sync.py`.
+- Güncel sezon sayfasından çıkarılanlar: **Manhunt Scout'ları** (adı + ne yapılacağı), **Classified Assignment'lar**
+  (açıklama, çıkış tarihi, ECHO / sırt çantası süsü bulmaca ipuçları) ve **tarihli sezon projeleri**
+  ("Project Chain from … to …" → *Projeler – Sezonluk*, bitiş tarihinde kendiliğinden kalkar).
+- Yeni sezon açılınca sezon kutusundaki `next=` bağlantısını izleyip yeni sayfaya kendiliğinden geçer.
+- Ortak listede (🌐, 10 dilde) zaten ayrıntılı olan görevler wiki'den tekrar eklenmez; eksikler 📚 ile gelir.
+- Wiki İngilizcedir; Asistan sekmesinde bir yapay zekâ (Claude Code, Ollama…) seçiliyse görevler ve
+  ipuçları arka planda senin diline çevrilir. İçerik CC BY-SA; her görevde **Kaynağı aç** wiki bölümüne gider.
+- Görevler sekmesi → *Ortak görev listesi* kutusu: **📚 Wiki'den güncelle**, otomatik okuma seçeneği ve
+  **Wiki sayfasını aç**.
 
 ## Sekmeler
 
@@ -363,7 +379,8 @@ gibi küçük bir model seç.
 | `i18n.py` | Çeviri motoru |
 | `ui_theme.py` | Tema (koyu/açık/klasik), renkler ve arayüz sesleri |
 | `ui_art.py` | Üst bant: dönen arka planlar, build amblemleri, bayraklar |
-| `meta_sync.py` | Günlük meta build senkronu (indir, doğrula, birleştir) |
+| `meta_sync.py` | Günlük meta build + görev senkronu (indir, doğrula, birleştir) |
+| `wiki_sync.py` | The Division Wiki canlı okuyucu |
 | `meta/meta_builds.json` | Merkezi meta akışı (depoda günlük güncellenir) |
 | `meta_cache.json` | Son indirilen meta listesi (otomatik oluşur) |
 | `art/` | Arka plan / amblem / bayrak görselleri (kullanıcı ekleyebilir) |

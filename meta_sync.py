@@ -162,7 +162,8 @@ def _comparable(b):
 # ---------------------------------------------------------------- zamanlama
 def due(settings, kind="builds", now=None):
     """Bu tür (builds/tasks) bugün indirilmeli mi? Hiç indirilmediyse hemen."""
-    flag, stamp = ("meta_sync", "meta_last_try") if kind == "builds" else ("tasks_sync", "tasks_last_try")
+    flag, stamp = {"builds": ("meta_sync", "meta_last_try"), "tasks": ("tasks_sync", "tasks_last_try"),
+                   "wiki": ("wiki_sync", "wiki_last_try")}[kind]
     if not settings.get(flag, True): return False
     now = now or time.time()
     return now - float(settings.get(stamp, 0) or 0) >= SYNC_EVERY_S
@@ -249,7 +250,8 @@ def validate_tasks(feed):
     if not isinstance(feed, dict) or int(feed.get("schema", 0)) != SCHEMA:
         raise ValueError("unsupported tasks schema")
     out = {"version": _text(feed.get("version"), 40), "season": _text(feed.get("season"), 60),
-           "resets": None, "tasks": [], "guides": []}
+           "resets": None, "tasks": [], "guides": [],
+           "wiki_season": _text((feed.get("wiki") or {}).get("season_page"), 80) if isinstance(feed.get("wiki"), dict) else ""}
     for g in (feed.get("guides") or [])[:MAX_GUIDES]:
         if not isinstance(g, dict): continue
         keys = [str(k).lower().strip()[:40] for k in (g.get("match") or [])[:12] if str(k).strip()]
@@ -276,7 +278,7 @@ def validate_tasks(feed):
         seen.add(tid)
         until = _iso_utc(it.get("until"))
         src = it.get("source") if isinstance(it.get("source"), dict) else {}
-        out["tasks"].append({"feed_id": tid, "cat": cat, "kind": kind if cat == "projects" else "", "texts": texts, "how": _langs(it.get("how"), 500),
+        out["tasks"].append({"feed_id": tid, "wiki_id": _text(it.get("wiki_id"), 80), "cat": cat, "kind": kind if cat == "projects" else "", "texts": texts, "how": _langs(it.get("how"), 500),
                              "until": until.isoformat(timespec="minutes") if until else "",
                              "source": _text(src.get("url"), 300) if str(src.get("url", "")).startswith("https://") else ""})
     return out
@@ -287,29 +289,43 @@ def task_expired(item, now=None):
     return bool(u and u <= (now or datetime.now(timezone.utc)))
 
 
-def merge_tasks(tasks, feed, now=None):
+def merge_tasks(tasks, feed, now=None, scope="feed"):
     """Akış görevlerini kullanıcının görev listesine işler. Kendi eklediği görevlere dokunmaz;
-    akış görevlerinin 'yapıldı' işaretini korur; süresi dolanları ve akıştan çıkanları kaldırır."""
+    akış görevlerinin 'yapıldı' işaretini korur; süresi dolanları ve akıştan çıkanları kaldırır.
+    scope: "feed" (ortak liste, 🌐) ya da "wiki" (canlı wiki, 📚, kimlikler "wiki-" ile başlar);
+    her kaynak yalnızca kendi görevlerini ekler/siler."""
+    owned = (lambda f: f.startswith("wiki-")) if scope == "wiki" else (lambda f: not f.startswith("wiki-"))
     now = now or datetime.now(timezone.utc)
     items = tasks.setdefault("items", {})
     done = {x["feed_id"]: x.get("done", False) for c in items.values() for x in c if x.get("feed_id")}
     added = removed = 0
     live = {x["feed_id"] for x in feed["tasks"] if not task_expired(x, now)}
+    if scope == "wiki":       # ortak listede (10 dilde, ayrıntılı) zaten olan wiki görevlerini tekrar ekleme
+        covered = {x.get("wiki_id") for c in items.values() for x in c if x.get("wiki_id")}
+        live -= covered
     for c in TASK_CATS:
         lst = items.setdefault(c, [])
         before = len(lst)
-        items[c] = [x for x in lst if not x.get("feed_id") or x["feed_id"] in live]
+        items[c] = [x for x in lst if not x.get("feed_id") or not owned(x["feed_id"]) or x["feed_id"] in live]
         removed += before - len(items[c])
         have = {x["feed_id"]: x for x in items[c] if x.get("feed_id")}
         for x in feed["tasks"]:
             if x["cat"] != c or x["feed_id"] not in live: continue
-            row = {"feed_id": x["feed_id"], "kind": x.get("kind", ""), "texts": x["texts"], "how": x.get("how", {}), "en": x["texts"]["en"], "tr": "", "src": "🌐",
+            row = {"feed_id": x["feed_id"], "wiki_id": x.get("wiki_id", ""), "kind": x.get("kind", ""), "texts": x["texts"], "how": x.get("how", {}), "en": x["texts"]["en"], "tr": "", "src": "📚" if scope == "wiki" else "🌐",
                    "until": x["until"], "url": x["source"], "done": done.get(x["feed_id"], False),
                    "time": now.isoformat(timespec="seconds")}
             if x["feed_id"] in have:
-                have[x["feed_id"]].update({k: row[k] for k in ("kind", "texts", "how", "en", "until", "url")})
+                old = have[x["feed_id"]]
+                if old.get("en") == row["en"]:          # metin aynıysa önceki çevirileri koru
+                    row["texts"] = {**old.get("texts", {}), **row["texts"]}
+                    row["how"] = {**old.get("how", {}), **row["how"]}
+                old.update({k: row[k] for k in ("wiki_id", "kind", "texts", "how", "en", "until", "url")})
             else:
                 items[c].append(row); added += 1
+    def scout_no(x):                             # Manhunt listesi Scout numarasına göre sıralı dursun
+        m = re.search(r"Scout (\d+)", x.get("en", ""))
+        return int(m.group(1)) if m else 999
+    items["manhunt"] = sorted(items.get("manhunt", []), key=scout_no)
     return {"added": added, "removed": removed}
 
 

@@ -632,5 +632,13 @@
   "tasks.nothing_read": "Ekrandan okunabilir metin bulunamadı.",
   "cat.projects": "Projeler",
   "cat.settlement": "Yerleşim",
-  "cat.seasonal": "Sezonluk"
+  "cat.seasonal": "Sezonluk",
+  "wiki.sync_now": "Wiki'den güncelle",
+  "wiki.enable": "Açılışta wiki'yi otomatik oku",
+  "wiki.open": "Wiki sayfasını aç",
+  "wiki.status": "📚 Wiki: {season} · {manhunt} Manhunt Scout · {journey} Classified Assignment · {projects} sezonluk proje · son okuma {when}",
+  "wiki.none": "📚 Wiki henüz okunmadı.",
+  "wiki.synced": "Wiki: {added} yeni, {removed} kaldırıldı",
+  "wiki.failed": "Wiki'ye ulaşılamadı (internet?).",
+  "wiki.note": "The Division Wiki (thedivision.fandom.com) senin bilgisayarından canlı okunur: güncel sezonun Manhunt Scout'ları, Classified Assignment'lar (bulmaca/ECHO ipuçlarıyla) ve tarihli sezon projeleri. Yeni sezon açılınca program kendiliğinden yeni sayfaya geçer. Wiki İngilizcedir; Asistan sekmesinde bir yapay zekâ seçiliyse görevler senin diline çevrilir. İçerik CC BY-SA, her görev kaynağına bağlantı verir (📚)."
 }

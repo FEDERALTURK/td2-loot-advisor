@@ -551,5 +551,13 @@
   "tasks.nothing_read": "No se encontró texto legible en pantalla.",
   "cat.projects": "Proyectos",
   "cat.settlement": "Asentamiento",
-  "cat.seasonal": "De temporada"
+  "cat.seasonal": "De temporada",
+  "wiki.sync_now": "Actualizar desde la wiki",
+  "wiki.enable": "Leer la wiki automáticamente al iniciar",
+  "wiki.open": "Abrir página de la wiki",
+  "wiki.status": "📚 Wiki: {season} · {manhunt} exploradores de cacería · {journey} misiones clasificadas · {projects} proyectos de temporada · leído {when}",
+  "wiki.none": "📚 La wiki aún no se ha leído.",
+  "wiki.synced": "Wiki: {added} nuevas, {removed} eliminadas",
+  "wiki.failed": "No se pudo acceder a la wiki (¿sin conexión?).",
+  "wiki.note": "La wiki de The Division (thedivision.fandom.com) se lee en directo desde tu PC: exploradores de cacería de la temporada, misiones clasificadas (con pistas de acertijos/ECHO) y proyectos de temporada con fecha. Al empezar una temporada nueva la app cambia sola de página. La wiki está en inglés; si eliges una IA en el Asistente, las tareas se traducen. Contenido CC BY-SA, cada tarea enlaza su fuente (📚)."
 }

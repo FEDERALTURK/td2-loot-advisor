@@ -29,6 +29,7 @@ import i18n
 import ui_theme
 import ui_art
 import meta_sync
+import wiki_sync
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
@@ -59,7 +60,8 @@ DEFAULTS = {"scan_mode": "hotkey", "auto_interval_ms": 700, "auto_record": True,
             "language": "", "log_level": "INFO", "log_max_kb": 1024, "log_backups": 3,
             "ui_theme": "dark", "ui_sounds": True, "bg_interval": 15,
             "meta_sync": True, "meta_feed_url": "", "meta_last_try": 0, "meta_last_sync": "", "meta_version": "",
-            "meta_hidden": [], "tasks_sync": True, "auto_reset_times": True}
+            "meta_hidden": [], "tasks_sync": True, "auto_reset_times": True,
+            "wiki_sync": True, "wiki_last_try": 0}
 AUTO_STABLE, AUTO_CHANGE, DEDUP_SECONDS, UPGRADE_MARGIN = 4, 8, 30, 3
 
 if not CFG_PATH.exists() and (BUNDLE / "builds.json").exists():
@@ -1642,6 +1644,16 @@ class App:
                         command=self.save_task_feed_flags).pack(side="left", padx=(14, 0))
         self.tasks_info = ttk.Label(fb, text=self.tasks_status_text(), foreground=PAL["muted"], wraplength=820, justify="left")
         self.tasks_info.pack(anchor="w", padx=8)
+        wr = ttk.Frame(fb); wr.pack(fill="x", padx=8, pady=(6, 2))
+        ttk.Button(wr, text=ui_theme.with_icon(t("wiki.sync_now"), "📚"), style="Accent.TButton",
+                   command=lambda: self.meta_sync_start(force=True, what=("wiki",))).pack(side="left")
+        self.bv_tasks["wiki_sync"] = tk.BooleanVar(value=bool(st.get("wiki_sync", True)))
+        ttk.Checkbutton(wr, text=t("wiki.enable"), variable=self.bv_tasks["wiki_sync"],
+                        command=self.save_task_feed_flags).pack(side="left", padx=(14, 0))
+        ttk.Button(wr, text=ui_theme.with_icon(t("wiki.open"), "🔗"), command=self.open_wiki_page).pack(side="left", padx=(14, 0))
+        self.wiki_lbl = ttk.Label(fb, text=self.wiki_status_text(), foreground=PAL["muted"], wraplength=820, justify="left")
+        self.wiki_lbl.pack(anchor="w", padx=8)
+        ttk.Label(fb, text=t("wiki.note"), foreground=PAL["muted"], wraplength=820, justify="left").pack(anchor="w", padx=8)
         ttk.Label(fb, text=t("tasks.feed_note"), foreground=PAL["muted"], wraplength=820,
                   justify="left").pack(anchor="w", padx=8, pady=(0, 6))
 
@@ -1835,7 +1847,7 @@ class App:
                                      weekly=fmt_remaining(nw, now)))
 
     # ---------- Meta build senkronu ----------
-    def meta_sync_start(self, force=False, quiet=False, what=("builds", "tasks")):
+    def meta_sync_start(self, force=False, quiet=False, what=("builds", "tasks", "wiki")):
         """Arka planda meta build + görev listelerini indirir (günde bir; force=True ise hemen)."""
         st = self.cfg["settings"]
         if self.meta_busy: return
@@ -1845,10 +1857,12 @@ class App:
             return
         do_b = "builds" in what and st.get("meta_sync", True) and (force or meta_sync.due(st, "builds"))
         do_t = "tasks" in what and st.get("tasks_sync", True) and (force or meta_sync.due(st, "tasks"))
-        if not (do_b or do_t): return
+        do_w = "wiki" in what and st.get("wiki_sync", True) and (force or meta_sync.due(st, "wiki"))
+        if not (do_b or do_t or do_w): return
         self.meta_busy = True
         if do_b: st["meta_last_try"] = time.time()
         if do_t: st["tasks_last_try"] = time.time()
+        if do_w: st["wiki_last_try"] = time.time()
         save_cfg(self.cfg)
         if force and not quiet: self.toast(t("meta.syncing"))
         verbose = force and not quiet
@@ -1860,6 +1874,12 @@ class App:
                 if not on: continue
                 try: out[kind] = (fn(self.cfg, cache, APP_VERSION, force=force), None)
                 except Exception as e: out[kind] = (None, e)
+            if do_w:     # wiki: ortak listenin söylediği sezon sayfasından başla (yeni sezona kendisi geçer)
+                res_t = out.get("tasks", (None, None))[0]          # (feed, kaynak) ya da None
+                start = res_t[0].get("wiki_season", "") if res_t else ""
+                start = start or self.tasks.get("wiki_season") or wiki_sync.DEFAULT_SEASON
+                try: out["wiki"] = (wiki_sync.run(start, APP_VERSION), None)
+                except Exception as e: out["wiki"] = (None, e)
             self.root.after(0, lambda: self.sync_done(out, verbose))
         threading.Thread(target=work, daemon=True).start()
 
@@ -1872,6 +1892,9 @@ class App:
         if "tasks" in out:
             m = self.tasks_sync_done(*out["tasks"], verbose)
             if m: msgs.append(m)
+        if "wiki" in out:
+            m = self.wiki_sync_done(*out["wiki"], verbose)
+            if m: msgs.append(m)
         if msgs: self.toast("  ·  ".join(msgs))
 
     def tasks_sync_done(self, res, err, verbose):
@@ -1882,6 +1905,7 @@ class App:
         st = self.cfg["settings"]
         summary = meta_sync.merge_tasks(self.tasks, feed)
         self.tasks["guides"] = feed.get("guides", [])
+        if feed.get("wiki_season"): self.tasks["wiki_season"] = feed["wiki_season"]
         save_tasks(self.tasks)
         if feed.get("resets") and st.get("auto_reset_times", True):     # resmî sıfırlama saatleri → yerel saat
             dh, wd, wh = meta_sync.local_resets(feed["resets"])
@@ -1899,6 +1923,72 @@ class App:
         if summary["added"] or summary["removed"] or verbose:
             return t("tasks.synced", added=summary["added"], removed=summary["removed"])
         return ""
+
+    def wiki_sync_done(self, res, err, verbose):
+        if err is not None:
+            log.warning("Wiki sync failed: %s", err)
+            return t("wiki.failed") if verbose else ""
+        summary = meta_sync.merge_tasks(self.tasks, res, scope="wiki")
+        cats = [x["cat"] for x in res["tasks"]]
+        self.tasks["wiki_info"] = {"season": res["season"], "url": res["season_url"], "manhunt": cats.count("manhunt"),
+                                   "journey": cats.count("journey"), "projects": cats.count("projects"),
+                                   "time": datetime.now().strftime("%Y-%m-%d %H:%M")}
+        save_tasks(self.tasks)
+        log.info("Wiki sync: season=%s tasks=%d added=%d removed=%d", res["season"], len(res["tasks"]),
+                 summary["added"], summary["removed"])
+        try: self.refresh_tasks()
+        except Exception: pass
+        if hasattr(self, "wiki_lbl"): self.wiki_lbl.config(text=self.wiki_status_text())
+        self.translate_wiki_tasks()
+        if summary["added"] or summary["removed"] or verbose:
+            return t("wiki.synced", added=summary["added"], removed=summary["removed"])
+        return ""
+
+    def wiki_status_text(self):
+        w = self.tasks.get("wiki_info")
+        if not w: return t("wiki.none")
+        return t("wiki.status", season=w["season"], manhunt=w["manhunt"], journey=w["journey"],
+                 projects=w["projects"], when=w["time"])
+
+    def open_wiki_page(self):
+        import webbrowser
+        webbrowser.open((self.tasks.get("wiki_info") or {}).get("url") or wiki_sync.WIKI + "Seasons")
+
+    def translate_wiki_tasks(self):
+        """Wiki metni İngilizce: bir yapay zekâ seçiliyse görevleri arka planda kullanıcının diline çevirir."""
+        lang = i18n.current_language()
+        if lang == "en" or self.cfg["settings"].get("ai_provider", "builtin") == "builtin" or getattr(self, "_wiki_tr_busy", False):
+            return
+        todo = [x for c in self.tasks["items"].values() for x in c
+                if str(x.get("feed_id", "")).startswith("wiki-") and lang not in x.get("texts", {})][:30]
+        if not todo: return
+        self._wiki_tr_busy = True
+
+        def work():
+            done = {}
+            for x in todo:
+                try:
+                    tr, src = translate_task_text(self, x["en"])
+                    if src != t("src.ai"): break                       # yapay zekâ yanıt vermiyor: sözlükle karıştırma
+                    how_en = (x.get("how") or {}).get("en", "")
+                    how_tr = translate_task_text(self, how_en)[0] if how_en else ""
+                    done[x["feed_id"]] = (tr.strip(), how_tr.strip())
+                except Exception as e:
+                    log.debug("Wiki translation failed: %s", e); break
+            self.root.after(0, lambda: self._apply_wiki_translations(lang, done))
+        threading.Thread(target=work, daemon=True).start()
+
+    def _apply_wiki_translations(self, lang, done):
+        self._wiki_tr_busy = False
+        for c in self.tasks["items"].values():
+            for x in c:
+                if x.get("feed_id") in done:
+                    tr, how = done[x["feed_id"]]
+                    x.setdefault("texts", {})[lang] = tr
+                    if how: x.setdefault("how", {})[lang] = how
+        if done:
+            save_tasks(self.tasks); self.refresh_tasks()
+            log.info("Wiki tasks translated to %s: %d", lang, len(done))
 
     def tasks_status_text(self):
         n = sum(1 for c in self.tasks["items"].values() for x in c if x.get("feed_id"))
@@ -2220,6 +2310,7 @@ class App:
         self.rebuild_ui(tab="settings")
         self.flash_language(code)
         self.toast(t("set.language_changed", lang=i18n.language_name(code)))
+        self.translate_wiki_tasks()
 
     def capture_key(self):
         self.sv["hotkey"].set(t("set.press_key"))

@@ -551,5 +551,13 @@
   "tasks.nothing_read": "Nenhum texto legível encontrado na tela.",
   "cat.projects": "Projetos",
   "cat.settlement": "Assentamento",
-  "cat.seasonal": "Sazonal"
+  "cat.seasonal": "Sazonal",
+  "wiki.sync_now": "Atualizar pela wiki",
+  "wiki.enable": "Ler a wiki automaticamente ao iniciar",
+  "wiki.open": "Abrir página da wiki",
+  "wiki.status": "📚 Wiki: {season} · {manhunt} batedores da caçada · {journey} missões confidenciais · {projects} projetos sazonais · lido {when}",
+  "wiki.none": "📚 Wiki ainda não lida.",
+  "wiki.synced": "Wiki: {added} novas, {removed} removidas",
+  "wiki.failed": "Wiki inacessível (offline?).",
+  "wiki.note": "A wiki de The Division (thedivision.fandom.com) é lida ao vivo do seu PC: batedores da caçada da temporada, missões confidenciais (com dicas de enigmas/ECHO) e projetos sazonais com data. Quando uma nova temporada começa, o app muda sozinho de página. A wiki é em inglês; se você escolher uma IA no Assistente, as tarefas são traduzidas. Conteúdo CC BY-SA, cada tarefa leva à fonte (📚)."
 }

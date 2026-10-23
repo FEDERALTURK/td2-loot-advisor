@@ -551,5 +551,13 @@
   "tasks.nothing_read": "Geen leesbare tekst op het scherm gevonden.",
   "cat.projects": "Projecten",
   "cat.settlement": "Nederzetting",
-  "cat.seasonal": "Seizoens"
+  "cat.seasonal": "Seizoens",
+  "wiki.sync_now": "Bijwerken vanuit wiki",
+  "wiki.enable": "Wiki automatisch lezen bij het starten",
+  "wiki.open": "Wikipagina openen",
+  "wiki.status": "📚 Wiki: {season} · {manhunt} manhunt-verkenners · {journey} geheime opdrachten · {projects} seizoensprojecten · gelezen {when}",
+  "wiki.none": "📚 Wiki nog niet gelezen.",
+  "wiki.synced": "Wiki: {added} nieuw, {removed} verwijderd",
+  "wiki.failed": "Wiki niet bereikbaar (offline?).",
+  "wiki.note": "De Division-wiki (thedivision.fandom.com) wordt live vanaf je pc gelezen: manhunt-verkenners van het huidige seizoen, geheime opdrachten (met puzzel-/ECHO-tips) en gedateerde seizoensprojecten. Bij een nieuw seizoen schakelt de app zelf over naar de nieuwe pagina. De wiki is Engels; als je in de Assistent een AI kiest, worden taken vertaald. Inhoud CC BY-SA, elke taak linkt naar de bron (📚)."
 }

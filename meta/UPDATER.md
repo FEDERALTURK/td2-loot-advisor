@@ -109,3 +109,14 @@ Kategoriler oyundaki menülerle birebir aynıdır (başka kategori kullanma):
   oyuncunun ekrandan okuduğu günlük/haftalık projelere türüne göre ipucu eşler (kontrol noktası, bounty,
   Countdown, Summit, Dark Zone, bağış…). En fazla 60. Yeni proje türü görürsen ekle; mevcut `id`'leri koru.
 - Her hafta yeni Manhunt Scout/HVT adımlarını `how` ile ekle; sezon yolculuğu görevlerini (journey) bulunca ekle.
+
+## Wiki bağlantısı
+- Uygulama The Division Wiki'yi (thedivision.fandom.com) **kullanıcının bilgisayarından** canlı okur
+  (`wiki_sync.py`): sezon sayfasındaki Manhunt Scout'ları, Classified Assignment'lar ve tarihli proje
+  zincirleri 📚 işaretiyle eklenir. Wiki İngilizcedir; uygulama yapay zekâ seçiliyse çevirir.
+- `"wiki": {"season_page": "Red Horizon"}` — wiki okuyucunun başlayacağı sezon sayfası. Yeni sezon
+  başlayınca güncelle (uygulama infobox'taki `next=` ile kendisi de ilerler).
+- Ortak listede 10 dilde ayrıntılı yazdığın bir görev wiki'de de varsa `"wiki_id"` ver; uygulama o wiki
+  görevini tekrar göstermez. Biçim: `wiki-<sezon-slug>-scout-<n>`, `wiki-ca-<görev-slug>`
+  (ör. `wiki-red-horizon-scout-9`, `wiki-ca-georgetown-dead-zone`).
+- Bulut ortamı fandom.com'a doğrudan erişemeyebilir; o durumda wiki içeriğini başka kaynaklardan doğrula.

@@ -555,5 +555,13 @@
   "tasks.nothing_read": "Kein lesbarer Text auf dem Bildschirm gefunden.",
   "cat.projects": "Projekte",
   "cat.settlement": "Siedlung",
-  "cat.seasonal": "Saisonal"
+  "cat.seasonal": "Saisonal",
+  "wiki.sync_now": "Aus dem Wiki aktualisieren",
+  "wiki.enable": "Wiki beim Start automatisch lesen",
+  "wiki.open": "Wiki-Seite öffnen",
+  "wiki.status": "📚 Wiki: {season} · {manhunt} Manhunt-Scouts · {journey} Classified Assignments · {projects} Saisonprojekte · zuletzt {when}",
+  "wiki.none": "📚 Wiki noch nicht gelesen.",
+  "wiki.synced": "Wiki: {added} neu, {removed} entfernt",
+  "wiki.failed": "Wiki nicht erreichbar (offline?).",
+  "wiki.note": "Das Division-Wiki (thedivision.fandom.com) wird live von deinem PC gelesen: Manhunt-Scouts der aktuellen Saison, Classified Assignments (mit Rätsel-/ECHO-Tipps) und datierte Saisonprojekte. Bei einer neuen Saison wechselt die App selbst zur neuen Seite. Das Wiki ist englisch; ist im Assistenten eine KI gewählt, werden Aufgaben übersetzt. Inhalt CC BY-SA, jede Aufgabe verlinkt die Quelle (📚)."
 }

@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "version": "2026-10-24.2",
-  "updated": "2026-10-23T22:45:00Z",
+  "version": "2026-10-24.3",
+  "updated": "2026-10-23T23:30:00Z",
   "season": "Year 8 Season 3 – Red Horizon",
   "resets": {
     "daily_hour_utc": 8,
@@ -39,7 +39,8 @@
         "ru": "Красные значки казни на карте. Убейте первую волну, сохранив хотя бы одного заложника, затем вторую волну, нацеленную на заложников. Дважды.",
         "pl": "Czerwone ikony egzekucji na mapie. Pokonaj pierwszą falę, utrzymując przy życiu co najmniej jednego zakładnika, potem drugą falę atakującą zakładników. Dwa razy.",
         "nl": "Rode executie-iconen op de kaart. Versla de eerste golf en houd minstens één gijzelaar in leven, versla daarna de tweede golf die op de gijzelaars afgaat. Twee keer."
-      }
+      },
+      "wiki_id": "wiki-red-horizon-scout-1"
     },
     {
       "id": "y8s3-scout1-control-points",
@@ -70,7 +71,8 @@
         "ru": "Будьте в Downtown East. На каждой точке зачистите первую волну, затем вторую с элитой. Пустите сигнальную ракету для союзников. Повторите на 3 из 4 точек.",
         "pl": "Bądź w Downtown East. Na każdym punkcie pokonaj pierwszą falę, potem drugą z elitami. Wystrzel flarę po sojuszników. Powtórz na 3 z 4 punktów.",
         "nl": "Wees in Downtown East. Versla per punt de eerste golf en daarna de tweede met elites. Gebruik de lichtkogel voor bondgenoten. Herhaal op 3 van de 4 punten."
-      }
+      },
+      "wiki_id": "wiki-red-horizon-scout-1"
     },
     {
       "id": "y8s3-scout1-cleaners",
@@ -101,7 +103,8 @@
         "ru": "Засчитывается любая активность в Downtown East. Понизьте сложность мира, чтобы быстрее.",
         "pl": "Liczy się każda aktywność w Downtown East. Obniż poziom trudności świata, będzie szybciej.",
         "nl": "Elke activiteit in Downtown East telt. Verlaag de wereldmoeilijkheid om sneller klaar te zijn."
-      }
+      },
+      "wiki_id": "wiki-red-horizon-scout-1"
     },
     {
       "id": "y8s3-weekly-clues",
@@ -120,25 +123,6 @@
       },
       "source": {
         "url": "https://www.keengamer.com/articles/guides/the-division-2-y8s3-scout-1-manhunt-clue-solutions/"
-      }
-    },
-    {
-      "id": "y8s3-classified-district-mall",
-      "cat": "journey",
-      "text": {
-        "en": "Classified Assignment: The District Mall Inferno (live this season; Georgetown Dead Zone comes later)",
-        "tr": "Gizli Görev (Classified Assignment): The District Mall Inferno (bu sezon açık; Georgetown Dead Zone daha sonra gelecek)",
-        "de": "Classified Assignment: The District Mall Inferno (diese Saison verfügbar; Georgetown Dead Zone folgt später)",
-        "fr": "Mission classifiée : The District Mall Inferno (disponible cette saison ; Georgetown Dead Zone arrive plus tard)",
-        "es": "Misión clasificada: The District Mall Inferno (disponible esta temporada; Georgetown Dead Zone llegará después)",
-        "it": "Incarico classificato: The District Mall Inferno (disponibile questa stagione; Georgetown Dead Zone arriverà più avanti)",
-        "pt": "Missão confidencial: The District Mall Inferno (disponível nesta temporada; Georgetown Dead Zone virá depois)",
-        "ru": "Секретное задание: The District Mall Inferno (доступно в этом сезоне; Georgetown Dead Zone появится позже)",
-        "pl": "Tajne zadanie: The District Mall Inferno (dostępne w tym sezonie; Georgetown Dead Zone pojawi się później)",
-        "nl": "Geheime opdracht: The District Mall Inferno (dit seizoen beschikbaar; Georgetown Dead Zone volgt later)"
-      },
-      "source": {
-        "url": "https://news.ubisoft.com/en-gb/article/6PXPT3FoQS0q8BKXa6dna/the-division-2-red-horizon-cleaners-in-washington-dc-crossplay-update-dark-zone-news-and-more"
       }
     },
     {
@@ -170,7 +154,8 @@
         "ru": "У элиты и именных врагов жёлтая полоса здоровья. Надёжно — контрольные точки Гиен и волны подкрепления; на высокой сложности элиты больше.",
         "pl": "Elity i nazwani wrogowie mają żółty pasek zdrowia. Pewne źródło to punkty kontrolne Hien i fale posiłków; wyższa trudność daje więcej elit.",
         "nl": "Elites en benoemde vijanden hebben een gele levensbalk. Hyena-controlepunten en hun versterkingen zijn betrouwbaar; hogere moeilijkheid geeft meer elites."
-      }
+      },
+      "wiki_id": "wiki-red-horizon-scout-9"
     },
     {
       "id": "y8s3-scout9-bt-medics",
@@ -201,7 +186,8 @@
         "ru": "Медики встречаются в захваченных миссиях и других стычках с Black Tusk. Перепройдите захваченную миссию через фильтр карты и убивайте их первыми.",
         "pl": "Medycy pojawiają się w misjach najechanych i innych starciach z Black Tusk. Powtórz misję najechaną z filtra mapy i eliminuj ich w pierwszej kolejności.",
         "nl": "Medics zitten in Invaded-missies en andere Black Tusk-gevechten. Speel een Invaded-missie opnieuw via het kaartfilter en schakel ze als eerste uit."
-      }
+      },
+      "wiki_id": "wiki-red-horizon-scout-9"
     },
     {
       "id": "y8s3-scout9-hyena-cp",
@@ -232,7 +218,8 @@
         "ru": "Выбирайте точки со значком Гиен. Зачистите волны, убейте лидера, поднимите флаг. На высокой сложности это помогает и с шагом про элитных Гиен.",
         "pl": "Wybierz punkty z ikoną Hien. Pokonaj fale, zabij przywódcę, podnieś flagę. Na wyższej trudności pomoże to też w etapie z elitarnymi Hienami.",
         "nl": "Kies controlepunten met het Hyena-icoon. Versla de golven, dood de leider, hijs de vlag. Op hogere moeilijkheid helpt dit ook bij de elite-Hyena-stap."
-      }
+      },
+      "wiki_id": "wiki-red-horizon-scout-9"
     },
     {
       "id": "y8s3-journey-m3-burn10",
@@ -294,6 +281,70 @@
         "ru": "Тот же маршрут, что и для 10 поджогов: в третьей зоне идите влево к группе из четырёх и активируйте Fiery Aura в их центре. Если они разойдутся, засчитается только шаг на 10.",
         "pl": "Ta sama trasa co przy 10 podpaleniach: w trzeciej strefie idź w lewo do grupy czterech i aktywuj Fiery Aura w ich środku. Jeśli się rozproszą, zaliczy się tylko etap 10.",
         "nl": "Zelfde route als de 10-stap: ga in het derde gebied links naar de groep van vier en activeer Fiery Aura midden tussen hen. Verspreiden ze zich, dan telt mogelijk alleen de 10-stap."
+      }
+    },
+    {
+      "id": "y8s3-ca-district-mall-inferno",
+      "cat": "journey",
+      "wiki_id": "wiki-ca-district-mall-inferno",
+      "source": {
+        "url": "https://thedivision.fandom.com/wiki/District_Mall_Inferno"
+      },
+      "text": {
+        "en": "Classified Assignment: District Mall Inferno – back up Agent Felix McNally against the Cleaners (boss: Iris Sullivan)",
+        "tr": "Classified Assignment: District Mall Inferno – Cleaner'lara karşı Ajan Felix McNally'ye destek ol (boss: Iris Sullivan)",
+        "de": "Classified Assignment: District Mall Inferno – Agent Felix McNally gegen die Cleaner unterstützen (Boss: Iris Sullivan)",
+        "fr": "Mission classifiée : District Mall Inferno – épauler l’agent Felix McNally contre les Nettoyeurs (boss : Iris Sullivan)",
+        "es": "Misión clasificada: District Mall Inferno – apoya al agente Felix McNally contra los Limpiadores (jefa: Iris Sullivan)",
+        "it": "Incarico classificato: District Mall Inferno – supporta l’agente Felix McNally contro i Pulitori (boss: Iris Sullivan)",
+        "pt": "Missão confidencial: District Mall Inferno – apoie o agente Felix McNally contra os Limpadores (chefe: Iris Sullivan)",
+        "ru": "Секретное задание: District Mall Inferno – поддержите агента Феликса Макнелли против Чистильщиков (босс: Айрис Салливан)",
+        "pl": "Tajne zadanie: District Mall Inferno – wesprzyj agenta Felixa McNally’ego przeciw Czyścicielom (boss: Iris Sullivan)",
+        "nl": "Geheime opdracht: District Mall Inferno – steun agent Felix McNally tegen de Cleaners (baas: Iris Sullivan)"
+      },
+      "how": {
+        "en": "ECHO: after the boss, take the service-tunnel key from McNally, shoot the yellow fuse box in the half-closed elevator shaft, go down and blow the barrels next to the marked wall. Backpack trophy: use 5 glowing blue toy machines (random each run); the CERA Staff Area and Storage keys open some of them.",
+        "tr": "ECHO: Boss'tan sonra McNally'den servis tüneli anahtarını al, yarı kapalı asansör boşluğundaki sarı sigorta kutusunu vur, aşağı in ve işaretli duvarın yanındaki varilleri patlat. Sırt çantası süsü: mavi parlayan 5 oyuncak makinesini kullan (her oyunda farklı); CERA Staff Area ve Storage anahtarları bazılarını açar.",
+        "de": "ECHO: Nach dem Boss von McNally den Servicetunnel-Schlüssel holen, im halb geschlossenen Aufzugsschacht den gelben Sicherungskasten zerschießen, runter und die Fässer an der markierten Wand sprengen. Rucksack-Trophäe: 5 blau leuchtende Spielzeugautomaten nutzen (zufällig); die CERA-Schlüssel öffnen einige davon.",
+        "fr": "ECHO : après le boss, prenez la clé des tunnels auprès de McNally, tirez sur le boîtier à fusibles jaune dans la cage d’ascenseur, descendez et faites sauter les barils près du mur marqué. Trophée de sac : utilisez 5 machines à jouets bleues (aléatoires) ; les clés CERA en ouvrent certaines.",
+        "es": "ECHO: tras el jefe, coge la llave de los túneles de McNally, dispara a la caja de fusibles amarilla del hueco del ascensor, baja y vuela los barriles junto al muro marcado. Trofeo de mochila: usa 5 máquinas de juguetes azules (aleatorias); las llaves CERA abren algunas.",
+        "it": "ECHO: dopo il boss prendi la chiave dei tunnel da McNally, spara alla scatola dei fusibili gialla nel vano ascensore, scendi e fai esplodere i barili vicino al muro segnato. Trofeo zaino: usa 5 macchinette blu (casuali); le chiavi CERA ne aprono alcune.",
+        "pt": "ECHO: após o chefe, pegue a chave dos túneis com McNally, atire na caixa de fusíveis amarela do poço do elevador, desça e exploda os barris junto à parede marcada. Troféu de mochila: use 5 máquinas de brinquedo azuis (aleatórias); as chaves CERA abrem algumas.",
+        "ru": "ECHO: после босса возьмите у Макнелли ключ от служебных тоннелей, выстрелите в жёлтый щиток в шахте лифта, спуститесь и взорвите бочки у отмеченной стены. Трофей на рюкзак: используйте 5 светящихся синим автоматов с игрушками (случайно); ключи CERA открывают часть из них.",
+        "pl": "ECHO: po bossie weź od McNally’ego klucz do tuneli, zestrzel żółtą skrzynkę bezpieczników w szybie windy, zejdź i wysadź beczki przy oznaczonej ścianie. Trofeum na plecak: użyj 5 świecących na niebiesko automatów z zabawkami (losowo); klucze CERA otwierają część.",
+        "nl": "ECHO: pak na de baas de tunnelsleutel van McNally, schiet de gele zekeringkast in de liftschacht kapot, ga naar beneden en blaas de vaten bij de gemarkeerde muur op. Rugzaktrofee: gebruik 5 blauw oplichtende speelgoedautomaten (willekeurig); de CERA-sleutels openen er een paar."
+      }
+    },
+    {
+      "id": "y8s3-ca-georgetown-dead-zone",
+      "cat": "journey",
+      "wiki_id": "wiki-ca-georgetown-dead-zone",
+      "source": {
+        "url": "https://thedivision.fandom.com/wiki/Georgetown_Dead_Zone"
+      },
+      "text": {
+        "en": "Classified Assignment: Georgetown Dead Zone (released Oct 15) – find the missing JTF engineers and restore comms in Acacia Grove (boss: The Crooked Man)",
+        "tr": "Classified Assignment: Georgetown Dead Zone (15 Ekim'de çıktı) – kayıp JTF mühendislerini bul, Acacia Grove'da iletişimi geri getir (boss: The Crooked Man)",
+        "de": "Classified Assignment: Georgetown Dead Zone (seit 15. Okt.) – vermisste JTF-Techniker finden, Funk in Acacia Grove wiederherstellen (Boss: The Crooked Man)",
+        "fr": "Mission classifiée : Georgetown Dead Zone (sortie le 15 oct.) – retrouver les ingénieurs JTF et rétablir les communications à Acacia Grove (boss : The Crooked Man)",
+        "es": "Misión clasificada: Georgetown Dead Zone (desde el 15 oct.) – encuentra a los ingenieros de la JTF y restaura las comunicaciones en Acacia Grove (jefe: The Crooked Man)",
+        "it": "Incarico classificato: Georgetown Dead Zone (dal 15 ott.) – trova gli ingegneri JTF scomparsi e ripristina le comunicazioni ad Acacia Grove (boss: The Crooked Man)",
+        "pt": "Missão confidencial: Georgetown Dead Zone (desde 15 out.) – encontre os engenheiros da JTF e restaure as comunicações em Acacia Grove (chefe: The Crooked Man)",
+        "ru": "Секретное задание: Georgetown Dead Zone (с 15 окт.) – найдите пропавших инженеров JTF и восстановите связь в Acacia Grove (босс: The Crooked Man)",
+        "pl": "Tajne zadanie: Georgetown Dead Zone (od 15 paź.) – odnajdź zaginionych inżynierów JTF i przywróć łączność w Acacia Grove (boss: The Crooked Man)",
+        "nl": "Geheime opdracht: Georgetown Dead Zone (sinds 15 okt.) – vind de vermiste JTF-technici en herstel de verbinding in Acacia Grove (baas: The Crooked Man)"
+      },
+      "how": {
+        "en": "The Crooked Man is fought three times. ECHO: shoot the 5 fake ravens that blink red (rooftops, flagpoles; positions change each run; the hospital CCTV room helps) to open the basement. Backpack trophy: in the funeral home mortuary, enter the 4 laptop sound-wave patterns in the order of the rhyme.",
+        "tr": "The Crooked Man üç kez karşına çıkar. ECHO: kırmızı yanıp sönen 5 sahte kargayı vur (çatılar, bayrak direkleri; yerleri her oyunda değişir; hastanedeki CCTV odası yardımcı olur), bodrum açılır. Sırt çantası süsü: cenaze evinin morgunda 4 dizüstünün ses dalgalarını tekerlemedeki sırayla gir.",
+        "de": "The Crooked Man wird dreimal bekämpft. ECHO: die 5 rot blinkenden falschen Raben abschießen (Dächer, Fahnenmasten; wechselnde Positionen; der Kameraraum im Krankenhaus hilft), dann öffnet sich der Keller. Rucksack-Trophäe: im Bestattungsinstitut die 4 Laptop-Wellenmuster in der Reihenfolge des Reims eingeben.",
+        "fr": "The Crooked Man est affronté trois fois. ECHO : abattez les 5 faux corbeaux qui clignotent en rouge (toits, mâts ; positions variables ; la salle CCTV de l’hôpital aide) pour ouvrir le sous-sol. Trophée de sac : à la morgue du funérarium, entrez les 4 ondes des laptops dans l’ordre de la comptine.",
+        "es": "Te enfrentas a The Crooked Man tres veces. ECHO: dispara a los 5 cuervos falsos que parpadean en rojo (tejados, mástiles; cambian cada partida; la sala CCTV del hospital ayuda) para abrir el sótano. Trofeo de mochila: en la morgue de la funeraria introduce las 4 ondas de los portátiles en el orden de la rima.",
+        "it": "The Crooked Man si affronta tre volte. ECHO: abbatti i 5 corvi finti che lampeggiano in rosso (tetti, pennoni; posizioni casuali; la sala CCTV dell’ospedale aiuta) per aprire il seminterrato. Trofeo zaino: nell’obitorio dell’impresa funebre inserisci le 4 onde dei portatili nell’ordine della filastrocca.",
+        "pt": "The Crooked Man é enfrentado três vezes. ECHO: atire nos 5 corvos falsos que piscam em vermelho (telhados, mastros; mudam a cada partida; a sala de CCTV do hospital ajuda) para abrir o porão. Troféu de mochila: no necrotério da funerária, insira as 4 ondas dos laptops na ordem da rima.",
+        "ru": "С The Crooked Man придётся сразиться трижды. ECHO: сбейте 5 фальшивых воронов, мигающих красным (крыши, флагштоки; места меняются; помогает комната видеонаблюдения в больнице), чтобы открыть подвал. Трофей на рюкзак: в морге похоронного бюро введите 4 звуковые волны ноутбуков в порядке считалки.",
+        "pl": "Z The Crooked Man walczysz trzy razy. ECHO: zestrzel 5 fałszywych kruków migających na czerwono (dachy, maszty; losowe miejsca; pomaga pokój CCTV w szpitalu), by otworzyć piwnicę. Trofeum na plecak: w kostnicy domu pogrzebowego wprowadź 4 fale dźwiękowe laptopów w kolejności z wyliczanki.",
+        "nl": "Je vecht drie keer tegen The Crooked Man. ECHO: schiet de 5 rood knipperende nepraven neer (daken, vlaggenmasten; wisselende plekken; de CCTV-kamer in het ziekenhuis helpt) om de kelder te openen. Rugzaktrofee: voer in het mortuarium van de uitvaartonderneming de 4 laptop-golfpatronen in de volgorde van het rijmpje in."
       }
     }
   ],
@@ -674,6 +725,105 @@
         "pl": "Uruchom Konflikt (PvP) przez dobieranie graczy. Sprawdź, czy projekt wymaga zwycięstw, czy tylko ukończonych meczów.",
         "nl": "Start Conflict (PvP) via matchmaking. Kijk of het project overwinningen of alleen voltooide potjes vraagt."
       }
+    },
+    {
+      "id": "settlement-project",
+      "match": [
+        "settlement",
+        "yerleşim",
+        "siedlung",
+        "colonie",
+        "asentamiento",
+        "insediamento",
+        "assentamento",
+        "поселен",
+        "osad",
+        "nederzetting",
+        "theater",
+        "campus",
+        "castle",
+        "haven"
+      ],
+      "tip": {
+        "en": "Settlement projects come from settlement leaders (Theater, Campus, Castle…). In the campaign they ask for food, water, components or gear donations; in the endgame they are repeatable daily/weekly combat tasks. Open the project on the Projects screen to see exactly what to donate or do.",
+        "tr": "Yerleşim projeleri yerleşim liderlerinden gelir (Theater, Campus, Castle…). Hikâyede yiyecek, su, parça veya ekipman bağışı ister; oyun sonunda tekrarlanabilir günlük/haftalık savaş görevleridir. Ne bağışlayacağını/yapacağını görmek için Projeler ekranında projeyi aç.",
+        "de": "Siedlungsprojekte kommen von Siedlungsleitern (Theater, Campus, Castle…). In der Kampagne wollen sie Nahrung, Wasser, Komponenten oder Ausrüstung; im Endgame sind es wiederholbare tägliche/wöchentliche Kampfaufgaben. Details im Projekte-Bildschirm.",
+        "fr": "Les projets de colonie viennent des chefs (Theater, Campus, Castle…). En campagne : dons de nourriture, d’eau, de composants ou d’équipement ; en fin de jeu : tâches de combat quotidiennes/hebdo. Détails dans l’écran Projets.",
+        "es": "Los proyectos de asentamiento los dan sus líderes (Theater, Campus, Castle…). En la campaña piden donar comida, agua, componentes o equipo; al final del juego son tareas de combate diarias/semanales. Mira el detalle en Proyectos.",
+        "it": "I progetti degli insediamenti arrivano dai leader (Theater, Campus, Castle…). Nella campagna chiedono cibo, acqua, componenti o equipaggiamento; nel finale sono compiti di combattimento giornalieri/settimanali. Dettagli nella schermata Progetti.",
+        "pt": "Projetos de assentamento vêm dos líderes (Theater, Campus, Castle…). Na campanha pedem doação de comida, água, componentes ou equipamento; no fim de jogo são tarefas de combate diárias/semanais. Veja o detalhe em Projetos.",
+        "ru": "Проекты поселений выдают их лидеры (Theater, Campus, Castle…). В кампании просят пожертвовать еду, воду, детали или снаряжение; в эндгейме это повторяемые ежедневные/еженедельные боевые задачи. Подробности — на экране «Проекты».",
+        "pl": "Projekty osad zlecają przywódcy (Theater, Campus, Castle…). W kampanii proszą o żywność, wodę, części lub sprzęt; w endgame to powtarzalne dzienne/tygodniowe zadania bojowe. Szczegóły na ekranie Projekty.",
+        "nl": "Nederzettingsprojecten komen van leiders (Theater, Campus, Castle…). In de campagne vragen ze voedsel, water, onderdelen of uitrusting; in de endgame zijn het herhaalbare dagelijkse/wekelijkse gevechtstaken. Details op het Projecten-scherm."
+      },
+      "source": "https://thedivision.fandom.com/wiki/Projects"
+    },
+    {
+      "id": "zone-liberation",
+      "match": [
+        "liberat",
+        "safe house",
+        "named zone",
+        "sığınak",
+        "kurtar",
+        "befrei",
+        "libér",
+        "liberar",
+        "liberare",
+        "libertar",
+        "освобожд",
+        "wyzwol",
+        "bevrij"
+      ],
+      "tip": {
+        "en": "Zone liberation (safe house) projects: in that named zone capture and resupply its control points, disrupt hostile activities and find the hidden SHD caches; that draws out the faction leader, then defeat them.",
+        "tr": "Bölge kurtarma (sığınak) projeleri: o bölgedeki kontrol noktalarını ele geçirip ikmal et, düşman etkinliklerini boz ve gizli SHD sandıklarını bul; bu, grup liderini ortaya çıkarır, sonra onu yen.",
+        "de": "Zonenbefreiung (Unterschlupf): in der Zone Kontrollpunkte einnehmen und versorgen, feindliche Aktivitäten stören und versteckte SHD-Caches finden; das lockt den Anführer hervor, dann besiegen.",
+        "fr": "Libération de zone (planque) : dans la zone, prenez et ravitaillez les points de contrôle, perturbez les activités ennemies et trouvez les caches SHD ; le chef de faction apparaît, éliminez-le.",
+        "es": "Liberación de zona (refugio): en esa zona captura y abastece los puntos de control, interrumpe actividades enemigas y encuentra los alijos SHD; así aparece el líder de la facción, derrótalo.",
+        "it": "Liberazione della zona (rifugio): nella zona conquista e rifornisci i punti di controllo, interrompi le attività nemiche e trova le casse SHD; così esce allo scoperto il capo della fazione, sconfiggilo.",
+        "pt": "Libertação de zona (abrigo): na zona capture e reabasteça os pontos de controle, atrapalhe atividades inimigas e encontre os esconderijos SHD; isso atrai o líder da facção, derrote-o.",
+        "ru": "Освобождение района (убежище): захватите и снабдите контрольные точки, сорвите вражеские активности и найдите тайники SHD; это выманит лидера фракции — победите его.",
+        "pl": "Wyzwolenie strefy (kryjówka): w tej strefie zdobądź i zaopatrz punkty kontrolne, zakłócaj działania wroga i znajdź ukryte skrzynki SHD; to wywabi przywódcę frakcji — pokonaj go.",
+        "nl": "Zonebevrijding (safehouse): verover en bevoorraad in die zone de controlepunten, verstoor vijandelijke activiteiten en vind de verborgen SHD-caches; dat lokt de leider tevoorschijn, versla hem."
+      },
+      "source": "https://thedivision.fandom.com/wiki/Projects"
+    },
+    {
+      "id": "invaded-mission",
+      "match": [
+        "invaded",
+        "istila",
+        "heroic",
+        "legendary",
+        "challenging",
+        "kahraman",
+        "efsanevi",
+        "zorlu",
+        "invasion",
+        "envahi",
+        "invadid",
+        "invas",
+        "захвач",
+        "najecha",
+        "binnengevallen"
+      ],
+      "tip": {
+        "en": "Invaded / priority mission projects ask for specific main missions on higher difficulties (Hard, Challenging, Legendary or Heroic). Launch them from the map's mission list (Invaded filter for invaded versions) and set the difficulty the project names.",
+        "tr": "İstila/öncelikli görev projeleri belirli ana görevleri yüksek zorlukta (Hard, Challenging, Legendary veya Heroic) ister. Haritadaki görev listesinden başlat (istila sürümleri için Invaded filtresi) ve projenin istediği zorluğu seç.",
+        "de": "Invaded-/Prioritätsmissionsprojekte verlangen bestimmte Hauptmissionen auf hoher Schwierigkeit (Hard, Challenging, Legendary, Heroic). Über die Missionsliste der Karte starten (Invaded-Filter) und die geforderte Schwierigkeit wählen.",
+        "fr": "Les projets de mission envahie/prioritaire demandent certaines missions principales en difficulté élevée (Difficile, Ardu, Légendaire, Héroïque). Lancez-les depuis la liste de la carte (filtre Envahi) avec la difficulté demandée.",
+        "es": "Los proyectos de misión invadida/prioritaria piden misiones principales concretas en dificultad alta (Difícil, Desafiante, Legendaria, Heroica). Lánzalas desde la lista del mapa (filtro Invadida) con la dificultad indicada.",
+        "it": "I progetti di missione invasa/prioritaria chiedono missioni principali specifiche a difficoltà alta (Difficile, Impegnativa, Leggendaria, Eroica). Avviale dalla lista della mappa (filtro Invasa) con la difficoltà richiesta.",
+        "pt": "Projetos de missão invadida/prioritária pedem missões principais específicas em dificuldade alta (Difícil, Desafiador, Lendário, Heroico). Inicie pela lista do mapa (filtro Invadida) com a dificuldade pedida.",
+        "ru": "Проекты захваченных/приоритетных миссий требуют определённые основные миссии на высокой сложности (Hard, Challenging, Legendary, Heroic). Запускайте из списка миссий на карте (фильтр захваченных) с нужной сложностью.",
+        "pl": "Projekty misji najechanych/priorytetowych wymagają konkretnych misji głównych na wysokiej trudności (Hard, Challenging, Legendary, Heroic). Uruchom z listy misji na mapie (filtr najechanych) z wymaganą trudnością.",
+        "nl": "Projecten voor invaded-/prioriteitsmissies vragen bepaalde hoofdmissies op hoge moeilijkheid (Hard, Challenging, Legendary, Heroic). Start ze via de missielijst op de kaart (Invaded-filter) met de gevraagde moeilijkheid."
+      },
+      "source": "https://thedivision.fandom.com/wiki/Projects"
     }
-  ]
+  ],
+  "wiki": {
+    "season_page": "Red Horizon"
+  }
 }

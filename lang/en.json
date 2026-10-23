@@ -330,5 +330,13 @@
   "tasks.nothing_read": "No readable text found on screen.",
   "cat.projects": "Projects",
   "cat.settlement": "Settlement",
-  "cat.seasonal": "Seasonal"
+  "cat.seasonal": "Seasonal",
+  "wiki.sync_now": "Update from Wiki",
+  "wiki.enable": "Read the Wiki automatically at startup",
+  "wiki.open": "Open Wiki page",
+  "wiki.status": "📚 Wiki: {season} · {manhunt} Manhunt Scouts · {journey} Classified Assignments · {projects} seasonal projects · last read {when}",
+  "wiki.none": "📚 Wiki not read yet.",
+  "wiki.synced": "Wiki: {added} new, {removed} removed",
+  "wiki.failed": "Couldn't reach the Wiki (offline?).",
+  "wiki.note": "The Division Wiki (thedivision.fandom.com) is read live from your computer: the current season's Manhunt Scouts, Classified Assignments (with puzzle/ECHO tips) and dated seasonal projects. When a new season starts the app moves to the new page by itself. Wiki content is CC BY-SA and every task links to its source (📚)."
 }
