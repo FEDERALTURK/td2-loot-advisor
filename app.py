@@ -42,6 +42,7 @@ import stash
 import vendor
 import companion
 import share
+import dropstats
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
@@ -55,6 +56,9 @@ BUNDLE = Path(getattr(sys, "_MEIPASS", BASE))
 CFG_PATH, LOG_PATH, DEBUG_PATH, PROG_PATH = (BASE / n for n in ("builds.json", "loot_log.csv", "last_crop.png", "progress.json"))
 STASH_PATH = BASE / "stash.json"
 VENDOR_CACHE = BASE / "vendor_cache.json"
+DROPQ_PATH = BASE / "drop_queue.json"
+REPORTS_DIR = BASE / "reports"
+ISSUES_URL = "https://github.com/FEDERALTURK/td2-loot-advisor/issues/new"
 APPLOG_DIR = BASE / "logs"
 APPLOG_PATH = APPLOG_DIR / "app.log"
 LOG_HEADER = ["time", "item", "verdict", "best_build", "score", "slot", "rarity"]
@@ -76,7 +80,7 @@ DEFAULTS = {"scan_mode": "hotkey", "auto_interval_ms": 700, "auto_record": True,
             "fx_cursor": True, "fx_cursor_style": "crosshair", "fx_cursor_color": "#ff6d10", "fx_cursor_custom": "",
             "fx_trail": True, "fx_trail_color": "#ff6d10", "fx_trail_len": 18, "fx_transitions": True,
             "fx_video": True, "fx_video_dim": 0.35, "fx_transition_ms": 650, "fx_bgwatch": True, "fx_bgwatch_dim": 0.0,
-            "res_profile": "auto", "ocr_engine": "auto", "license_key": "", "stash_record": True, "vendor_mode": False, "vendor_auto": True, "vendor_notified": "", "companion_port": 8765, "ocr_threshold": 170, "ocr_scale": "auto", "ocr_psm": 6, "ocr_passes": 3,
+            "res_profile": "auto", "ocr_engine": "auto", "license_key": "", "stash_record": True, "vendor_mode": False, "vendor_auto": True, "drop_share": False, "drop_asked": False, "drop_activity": "none", "drop_server": "", "drop_client": "", "vision_ok": False, "vendor_notified": "", "companion_port": 8765, "ocr_threshold": 170, "ocr_scale": "auto", "ocr_psm": 6, "ocr_passes": 3,
             "overlay_mode": "card", "overlay_alpha": 0.94, "overlay_size": 1.0, "ui_depth": True,
             "meta_sync": True, "meta_feed_url": "", "meta_last_try": 0, "meta_last_sync": "", "meta_version": "",
             "meta_hidden": [], "tasks_sync": True, "auto_reset_times": True,
@@ -846,6 +850,11 @@ def ask_openai(key, model, system, history):
 # this app never reads or stores credentials.
 CLAUDE_CODE_TIMEOUT = 150
 
+VISION_SYSTEM = ("You transcribe Tom Clancy's The Division 2 item tooltip screenshots. Read the image file with the Read tool. "
+                 "Output ONLY the card text, line by line, top to bottom, exactly as written in the game (keep section headers like "
+                 "'Core Attribute', 'Attributes', 'Talents', keep numbers and % signs). No commentary, no markdown.")
+
+
 def find_claude_cli():
     """claude.exe yolunu bulur: PATH, yerel kurulum (~/.local/bin), npm."""
     found = shutil.which("claude")
@@ -1181,6 +1190,10 @@ class App:
         self.vendor_week = vendor.load_cache(VENDOR_CACHE)
         self.vendor_scans, self.vendor_hits, self.vendor_busy = [], [], False
         self.companion, self.comp_state = None, {}
+        self.dropq = dropstats.Queue(DROPQ_PATH)
+        if not stg.get("drop_client"):
+            stg["drop_client"] = dropstats.new_client_id(); save_cfg(self.cfg)
+        self.last_text, self.drops_busy = "", False
         if not self.stash.data.get("imported_progress"):          # eski sürümün kayıtları bir kez aktarılır
             try:
                 n = self.stash.import_progress(self.progress, GAME) if GAME.ok else 0
@@ -1212,6 +1225,8 @@ class App:
         self.poll(); self.check_resets()
         self.root.after(2500, self.meta_sync_start)     # açılışı bekletmeden, günde bir
         self.root.after(6000, lambda: self.vendor_refresh(auto=True))
+        self.root.after(4000, self.ask_drop_consent)
+        self.root.after(20000, self._drops_tick)
         log.info("UI ready — language=%s, OCR=%s, tesseract=%s", i18n.current_language(), OCR.name, self.tess or "NOT FOUND")
         OCR.warm_up()
         if OCR.name == "tesseract" and not self.tess:
@@ -1450,6 +1465,18 @@ class App:
         self.act_cb.pack(side="left", padx=6)
         self.act_cb.bind("<<ComboboxSelected>>", lambda e: self.set_active_build(self.act_cb.get()))
         self.act_prog = ttk.Label(ab, text="", foreground=PAL["muted"]); self.act_prog.pack(side="left", padx=6)
+        ac = ttk.Frame(left); ac.pack(fill="x", pady=(4, 0))
+        ttk.Label(ac, text="🎮 " + t("drops.activity")).pack(side="left")
+        self._acts = {k: t("act." + k) for k in dropstats.ACTIVITIES}
+        self.drop_act = ttk.Combobox(ac, state="readonly", width=22, values=list(self._acts.values()))
+        self.drop_act.set(self._acts.get(st.get("drop_activity", "none"), self._acts["none"]))
+        self.drop_act.pack(side="left", padx=6)
+        self.drop_act.bind("<<ComboboxSelected>>", lambda e=None: self._set_activity())
+        ttk.Label(ac, text=t("drops.activity_hint"), foreground=PAL["muted"]).pack(side="left", padx=4)
+        tb = ttk.Frame(left); tb.pack(fill="x", pady=(4, 0))
+        ttk.Button(tb, text="🤖 " + t("ai.ask_item"), command=self.ask_about_item).pack(side="left")
+        ttk.Button(tb, text="👁 " + t("ai.vision_read"), command=self.vision_read).pack(side="left", padx=6)
+        ttk.Button(tb, text="⚑ " + t("report.wrong"), command=self.report_wrong).pack(side="left")
         self.status = ttk.Label(left, foreground=PAL["muted"], wraplength=560, justify="left"); self.status.pack(anchor="w", pady=(4, 2))
 
         card = ttk.Frame(left, style="Card.TFrame", padding=(0, 0, 0, 12)); card.pack(fill="x", pady=(6, 8))
@@ -1805,6 +1832,7 @@ class App:
             self.record(act[0], act[1], act[2], item, sig)
             log.info("Progress: %s / %s <- %r (%s%%)", act[0], act[1], item["name"][:40], act[2])
         self.counts[verdict] += 1; self.refresh_counts()
+        self.last_text = text
         self.show_result(text, item, verdict, res, note, diff=diff)
         self.popup(verdict, item, res, note)
         if s.get("speak_verdict"): self.speak_verdict(verdict, item, res, note)
@@ -1818,6 +1846,7 @@ class App:
         elif s.get("stash_record", True) and valid_item(item):
             try:
                 rec, new = self.stash.add(item, verdict, res[0][1] if res else None, res[0][0] if res else None, GAME)
+                if new: self._drop_report(item)
                 if rec:
                     self.stash.save()
                     if self.current_tab() == "stash": self.refresh_stash()
@@ -1825,6 +1854,121 @@ class App:
                 log.exception("Stash add failed")
         log.info("Scan: %r -> %s (%s %s%%) slot=%s", item["name"][:50], verdict,
                  res[0][1] if res else "-", res[0][0] if res else 0, item.get("slot") or "-")
+
+    def _set_activity(self):
+        key = next((k for k, v in self._acts.items() if v == self.drop_act.get()), "none")
+        st = self.cfg["settings"]; st["drop_activity"] = key; save_cfg(self.cfg)
+        if key != "none" and not st.get("drop_share"):
+            self.toast(t("drops.share_off"))
+
+    # ---------- Yapay zekâ / hata bildirimi ----------
+    def _last_item(self):
+        return (self.last_scan or (None,))[0] if getattr(self, "last_scan", None) else None
+
+    def ask_about_item(self):
+        it = self._last_item()
+        if not it: return messagebox.showinfo(APP_NAME, t("ai.no_item"))
+        b = active_build(self.cfg)
+        req = plan_of(b).get(it.get("slot")) if b and it.get("slot") else None
+        attrs = ", ".join(f"{attr_name(k)} {v:g}" + (f" ({(it.get('quality') or {}).get(k)}%)" if (it.get("quality") or {}).get(k) is not None else "")
+                          for k, v in (it.get("attrs") or {}).items())
+        q = t("ai.item_prompt", name=it.get("name"), slot=slot_name(it.get("slot") or "") if it.get("slot") else "?",
+              src=it.get("gear_set") or it.get("brand") or "-", attrs=attrs or "-", talents=", ".join(it.get("talents") or []) or "-",
+              build=(b or {}).get("name", "-"), req=req_lines_short(req) or "-")
+        self.nb.select(self.tab_keys.index("assistant"))
+        self.ask(q)
+
+    def vision_read(self):
+        """Okunamayan kartı Claude Code'a resim olarak okut (isteğe bağlı; kart görüntüsü Anthropic'e gider)."""
+        img = getattr(self, "last_card_img", None)
+        if img is None: return messagebox.showinfo(APP_NAME, t("ocr.need_card"))
+        st = self.cfg["settings"]
+        if not find_claude_cli(): return messagebox.showwarning(APP_NAME, t("ai.cc_missing"))
+        if not st.get("vision_ok"):
+            if not messagebox.askyesno(APP_NAME, t("ai.vision_consent")): return
+            st["vision_ok"] = True; save_cfg(self.cfg)
+        work = BASE / "logs" / "claude_code"; work.mkdir(parents=True, exist_ok=True)
+        path = work / "card.png"; img.save(path)
+        self.toast(t("ai.vision_busy"))
+
+        def go():
+            try:
+                txt = ask_claude_code(st.get("claude_code_model", ""), VISION_SYSTEM,
+                                      [{"role": "user", "content": t("ai.vision_prompt", path=str(path))}],
+                                      tools="Read", max_turns=3)
+                txt = re.sub(r"^```[a-z]*\n?|```$", "", (txt or "").strip(), flags=re.M).strip()
+                item, verdict, res = evaluate(txt, self.cfg)
+                self.results.put(("ok", txt, item, verdict, res, signature(item)))
+            except Exception as e:
+                log.exception("vision read failed")
+                self.results.put(("err", f"{type(e).__name__}: {e}"))
+        threading.Thread(target=go, daemon=True).start()
+
+    def report_wrong(self):
+        """Yanlış okunan kartı kaydet (test setine eklensin diye) ve GitHub'da hata bildirimi aç."""
+        img = getattr(self, "last_card_img", None)
+        if img is None: return messagebox.showinfo(APP_NAME, t("ocr.need_card"))
+        it = self._last_item() or {}
+        d = REPORTS_DIR / datetime.now().strftime("%Y%m%d_%H%M%S"); d.mkdir(parents=True, exist_ok=True)
+        img.save(d / "card.png")
+        info = {"read_as": {k: it.get(k) for k in ("name", "kind", "slot", "brand", "gear_set", "rarity", "attrs", "talents")},
+                "ocr_text": self.last_text, "engine": OCR.name, "app": APP_VERSION,
+                "resolution": active_profile(self.cfg["settings"])[0]}
+        (d / "report.json").write_text(json.dumps(info, ensure_ascii=False, indent=2), encoding="utf-8")
+        import webbrowser
+        title = f"OCR: {it.get('name') or '?'} read wrong"
+        body = (f"Engine: {OCR.name} · App {APP_VERSION} · {info['resolution']}\n\nRead as: `{json.dumps(info['read_as'], ensure_ascii=False)}`\n\n"
+                "Correct values: (please write them here)\n\nPlease attach card.png from: " + str(d))
+        webbrowser.open(ISSUES_URL + "?" + urllib.parse.urlencode({"title": title, "body": body, "labels": "ocr"}))
+        try: os.startfile(str(d))                  # Windows: klasörü aç, kart sürüklenip eklensin
+        except Exception: pass
+        self.toast(t("report.saved"))
+
+    def _drop_report(self, item):
+        """Sandığa ilk kez giren eşya, oyuncu bir aktivite seçtiyse o aktivitenin düşüşü sayılır (gönüllü)."""
+        st = self.cfg["settings"]
+        if not st.get("drop_share") or st.get("drop_activity", "none") == "none": return
+        if self.dropq.add(dropstats.record(item, st["drop_activity"])) and hasattr(self, "drop_lbl"):
+            self._drops_label()
+
+    def _drops_tick(self):
+        st = self.cfg["settings"]
+        if st.get("drop_share") and len(self.dropq) and (st.get("drop_server") or dropstats.DEFAULT_URL):
+            self.drops_flush(quiet=True)
+        self.root.after(10 * 60 * 1000, self._drops_tick)
+
+    def drops_flush(self, quiet=False):
+        if self.drops_busy: return
+        st = self.cfg["settings"]
+        url = st.get("drop_server") or dropstats.DEFAULT_URL
+        if not url:
+            if not quiet: messagebox.showinfo(APP_NAME, t("drops.no_server"))
+            return
+        self.drops_busy = True
+
+        def work():
+            n, err = self.dropq.flush(url, st["drop_client"])
+            self.root.after(0, lambda: self._drops_done(n, err, quiet))
+        threading.Thread(target=work, daemon=True).start()
+
+    def _drops_done(self, n, err, quiet):
+        self.drops_busy = False
+        log.info("Drop stats: sent %d (%s)", n, err or "ok")
+        if not quiet:
+            if err: messagebox.showwarning(APP_NAME, t("drops.send_failed", e=err))
+            else: self.toast(t("drops.sent", n=n))
+        self._drops_label()
+
+    def _drops_label(self):
+        if hasattr(self, "drop_lbl"):
+            self.drop_lbl.config(text=t("drops.pending", n=len(self.dropq), sent=self.dropq.sent_total))
+
+    def ask_drop_consent(self):
+        st = self.cfg["settings"]
+        if st.get("drop_asked"): return
+        st["drop_share"] = bool(messagebox.askyesno(t("drops.ask_title"), t("drops.ask")))
+        st["drop_asked"] = True; save_cfg(self.cfg)
+        if hasattr(self, "drop_var"): self.drop_var.set(st["drop_share"])
 
     def record(self, bname, slot, score, item, sig):
         self.progress.setdefault(bname, {})[slot] = {"item": item["name"], "score": score, "sig": sig, "attrs": item.get("attrs", {}),
@@ -2516,6 +2660,7 @@ class App:
         self.sp.pack(side="left", padx=6); self.sp.bind("<<ComboboxSelected>>", lambda e: self.refresh_stats_tab())
         ttk.Button(bar, text=ui_theme.with_icon(t("btn.refresh"), "⟳"), command=self.refresh_stats_tab).pack(side="left")
         self.sum_lbl = ttk.Label(f, style="Section.TLabel"); self.sum_lbl.pack(anchor="w", padx=12)
+        self._build_community(f)
         grid = ttk.Frame(f); grid.pack(fill="both", expand=True, padx=8, pady=6)
         self.cvs = []
         for i in range(4):
@@ -2523,6 +2668,79 @@ class App:
             cv.grid(row=i // 2, column=i % 2, sticky="nsew", padx=4, pady=4); self.cvs.append(cv)
         for c in (0, 1): grid.columnconfigure(c, weight=1)
         for r in (0, 1): grid.rowconfigure(r, weight=1)
+
+    def _build_community(self, f):
+        st = self.cfg["settings"]
+        cb = ttk.LabelFrame(f, text="🌐 " + t("drops.box")); cb.pack(fill="x", padx=10, pady=(6, 2))
+        r = ttk.Frame(cb); r.pack(fill="x", padx=8, pady=4)
+        self.drop_var = tk.BooleanVar(value=bool(st.get("drop_share")))
+        ttk.Checkbutton(r, text=t("drops.share"), variable=self.drop_var, command=self._drop_toggle).pack(side="left")
+        ttk.Label(r, text=t("drops.server")).pack(side="left", padx=(16, 2))
+        self.drop_srv = tk.StringVar(value=st.get("drop_server") or dropstats.DEFAULT_URL)
+        ttk.Entry(r, textvariable=self.drop_srv, width=40).pack(side="left")
+        ttk.Button(r, text="💾", width=3, command=self._drop_server_save).pack(side="left", padx=4)
+        ttk.Button(r, text="⇪ " + t("drops.send_now"), command=self.drops_flush).pack(side="left", padx=4)
+        ttk.Button(r, text="Σ " + t("drops.summary_btn"), command=self.drops_summary).pack(side="left")
+        self.drop_lbl = ttk.Label(cb, text="", foreground=PAL["muted"]); self.drop_lbl.pack(anchor="w", padx=12)
+        self._drops_label()
+        hold = ttk.Frame(cb); hold.pack(fill="x", padx=8, pady=(2, 6))
+        self.cs_out = None
+        if self.premium_gate(hold, "drop_stats_view"):
+            r2 = ttk.Frame(hold); r2.pack(fill="x")
+            self.cs_act = ttk.Combobox(r2, state="readonly", width=22, values=[v for k, v in self._acts.items() if k != "none"])
+            self.cs_act.pack(side="left")
+            ttk.Label(r2, text=t("drops.search")).pack(side="left", padx=(12, 2))
+            self.cs_q = tk.StringVar(); ttk.Entry(r2, textvariable=self.cs_q, width=28).pack(side="left")
+            ttk.Button(r2, text="🔍 " + t("drops.show"), command=self.community_stats).pack(side="left", padx=6)
+            self.cs_out = tk.Text(hold, height=7, bg=PAL["surface"], fg=PAL["fg"], relief="flat", wrap="word", font=(ui_theme.FONT, 10))
+            self.cs_out.pack(fill="x", pady=(4, 0))
+        ttk.Label(cb, text=t("drops.privacy"), foreground=PAL["muted"], wraplength=1000, justify="left").pack(anchor="w", padx=12, pady=(0, 6))
+
+    def _drop_toggle(self):
+        self.cfg["settings"]["drop_share"] = bool(self.drop_var.get()); self.cfg["settings"]["drop_asked"] = True
+        save_cfg(self.cfg)
+
+    def _drop_server_save(self):
+        u = self.drop_srv.get().strip().rstrip("/")
+        if u and not re.match(r"^https?://[\w.\-:]+(/[\w.\-/]*)?$", u):
+            return messagebox.showerror(APP_NAME, t("drops.bad_url"))
+        self.cfg["settings"]["drop_server"] = u; save_cfg(self.cfg); self.toast(t("drops.saved"))
+
+    def drops_summary(self):
+        url = self.cfg["settings"].get("drop_server") or dropstats.DEFAULT_URL
+        if not url: return messagebox.showinfo(APP_NAME, t("drops.no_server"))
+        def go():
+            try: s_ = dropstats.summary(url); msg = t("drops.summary", drops=s_.get("drops", 0), players=s_.get("contributors", 0))
+            except Exception as e: msg = t("drops.send_failed", e=e)
+            self.root.after(0, lambda: messagebox.showinfo(APP_NAME, msg))
+        threading.Thread(target=go, daemon=True).start()
+
+    def community_stats(self):
+        url = self.cfg["settings"].get("drop_server") or dropstats.DEFAULT_URL
+        if not url: return messagebox.showinfo(APP_NAME, t("drops.no_server"))
+        act = next((k for k, v in self._acts.items() if v == self.cs_act.get()), None)
+        q, key = self.cs_q.get().strip(), self.cfg["settings"].get("license_key", "")
+        def go():
+            try: data, err = dropstats.stats(url, key, act, q), None
+            except Exception as e: data, err = None, e
+            self.root.after(0, lambda: self._community_show(data, err))
+        threading.Thread(target=go, daemon=True).start()
+
+    def _community_show(self, d, err):
+        T = self.cs_out; T.config(state="normal"); T.delete("1.0", "end")
+        if err: T.insert("end", t("drops.send_failed", e=err))
+        else:
+            T.insert("end", t("drops.weeks", n=d.get("weeks"), since=d.get("since")) + "\n")
+            for a in d.get("activities", [])[:8]:
+                T.insert("end", f"  {self._acts.get(a['activity'], a['activity'])}: {a['drops']}  ·  ★{a.get('named') or 0}  ⬢{a.get('exotic') or 0}  ·  {a.get('players')}👤\n")
+            if d.get("top"):
+                T.insert("end", "\n" + t("drops.top", act=self._acts.get(d["activity"], d["activity"])) + "\n")
+                for x in d["top"][:15]: T.insert("end", f"  {x['n']:4d}  {x['item']}  ({x.get('slot') or x.get('kind')})\n")
+            if d.get("where") is not None and d.get("q"):
+                T.insert("end", "\n" + t("drops.where", q=d["q"]) + "\n")
+                for w in d["where"]: T.insert("end", f"  {self._acts.get(w['activity'], w['activity'])}: {w['n']}  ({w['per1000']}‰)\n")
+                if not d["where"]: T.insert("end", "  —\n")
+        T.config(state="disabled")
 
     def refresh_stats_tab(self):
         rows, per = read_log(), self.sp.get()
@@ -4667,6 +4885,10 @@ class App:
     def on_close(self):
         self.stop(); self.speaker.close()
         if self.companion: self.companion.stop()
+        st_ = self.cfg["settings"]
+        if st_.get("drop_share") and len(self.dropq) and (st_.get("drop_server") or dropstats.DEFAULT_URL):
+            th = threading.Thread(target=lambda: self.dropq.flush(st_.get("drop_server"), st_["drop_client"], timeout=3), daemon=True)
+            th.start(); th.join(4)
         for name in ("video", "watch_bg", "trail_fx"):            # arka plan işleri / pencereleri
             obj = getattr(self, name, None)
             try: obj and obj.stop()

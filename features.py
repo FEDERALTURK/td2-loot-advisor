@@ -33,7 +33,7 @@ FEATURES = {
 }
 TIERS = ("free", "premium")
 # Henüz yapım aşamasında olanlar (arayüzde "yakında" görünür; yapılınca buradan çıkar)
-COMING = {"drop_stats_share", "drop_stats_view", "cloud_sync"}
+COMING = {"cloud_sync"}
 
 # Yayıncının açık anahtarı (32 bayt, hex). scripts/license_tool.py init ile üretilir.
 PUBLIC_KEY_HEX = "d70b17497241261ca45bcd05bbaedcd0fdeb3d866de4993d23db3c25274f633a"

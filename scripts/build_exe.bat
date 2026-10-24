@@ -27,7 +27,7 @@ REM Yeni OCR motoru (onerilen) / new OCR engine (recommended)
   --add-data "lang;lang" ^
   --add-data "meta;meta" ^
   --hidden-import pyttsx3.drivers --hidden-import pyttsx3.drivers.sapi5 ^
-  --hidden-import ocr_backend --hidden-import features --hidden-import stash --hidden-import vendor --hidden-import companion --hidden-import share --hidden-import fx --hidden-import bgvideo --hidden-import view3d --hidden-import display ^
+  --hidden-import ocr_backend --hidden-import features --hidden-import stash --hidden-import vendor --hidden-import companion --hidden-import share --hidden-import dropstats --hidden-import fx --hidden-import bgvideo --hidden-import view3d --hidden-import display ^
   --collect-all rapidocr --collect-all onnxruntime --collect-all faster_whisper --collect-all ctranslate2 ^
   app.py
 

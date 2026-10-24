@@ -60,6 +60,15 @@ Recommended game settings: English game language, borderless window, HDR off, ga
   build and vendor matches. Premium.
 - Build sharing: a build becomes a short code (`TD2B-…`) and QR; Builds → Paste code adds it. Free.
 
+**Community and AI** (new)
+- Anonymous drop statistics (opt-in, asked once): pick the activity you are playing on the Panel and every NEW item
+  counts for it. Sent: item, slot, rarity, attribute types, best roll %, activity, random ID — never values, name, e-mail,
+  license key or computer details; the server stores no IP. Premium: what drops most in each activity, where an item
+  drops (per 1000 drops). Server: Cloudflare Workers + D1, see [`server/README.md`](server/README.md).
+- Ask the assistant about the scanned item (with your active build's requirements for that slot).
+- Read with Claude: when OCR fails, Claude Code reads the card picture (opt-in; tested on a real card: 5 s, all values right).
+- Read wrong: saves the card and opens a prefilled GitHub issue so it can become a test case.
+
 **Tasks**
 - Interface-language only, grouped, duplicates merged; double-click for steps and The Division Wiki pictures.
 - *Fetch with Claude* (Claude Code + web search), shared task feed (`meta/tasks_feed.json`) and a live wiki reader (`wiki_sync.py`).
@@ -108,6 +117,8 @@ Sources: [The Division Wiki](https://thedivision.fandom.com) (CC BY-SA) and
 | `vendor.py` | Weekly vendors, targeted loot, matching against builds |
 | `companion.py` | Phone companion (local read-only web page + QR) |
 | `share.py` | Build share codes |
+| `dropstats.py` | Anonymous drop statistics client |
+| `server/` | Community stats server (Cloudflare Worker + D1) |
 | `features.py` | Free/premium features, license key check (Ed25519) |
 | `tests/` | OCR test with real game cards (`tests/test_ocr.py`), license and optimizer tests (`tests/test_core.py`) |
 | `display.py` | Resolution profiles, game settings reader |

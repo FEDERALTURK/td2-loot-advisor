@@ -73,6 +73,15 @@ tüm build'ler için **3D puan çubukları**. Uyan eşyalar otomatik kaydedilir;
 - **Build paylaşımı** (Build'ler → 🔗 Paylaş): build kısa bir koda (`TD2B-…`) ve QR'a dönüşür; Build'ler → Kodu yapıştır ile
   eklenir. Ücretsiz.
 
+### Topluluk ve yapay zekâ (yeni)
+- **Anonim düşüş istatistiği** (gönüllü, bir kez sorulur): Panel'de oynadığın aktiviteyi seç; taradığın her YENİ eşya o
+  aktiviteye sayılır. Gönderilen: eşya, yuva, nadirlik, attribute türleri, en iyi rulo %, aktivite, rastgele kimlik —
+  değerler, ad, e-posta, lisans anahtarı, bilgisayar bilgisi asla; sunucu IP saklamaz. Premium: aktivite başına en çok
+  düşenler, bir eşyanın nerede düştüğü (1000 düşüşte). Sunucu: Cloudflare Workers + D1 — [`server/README.md`](server/README.md).
+- **Asistana sor**: taranan eşyayı, aktif build'inin o yuva için şartlarıyla birlikte asistana sorar.
+- **Claude ile oku**: OCR başarısız olursa kart resmi Claude Code ile okunur (isteğe bağlı; gerçek kartla denendi: 5 sn, tüm değerler doğru).
+- **Yanlış okundu**: kartı kaydeder ve hazır doldurulmuş bir GitHub hata bildirimi açar; kart test setine eklenebilir.
+
 ### Görevler
 - Yalnızca **arayüz dilinde**, gruplu ve kısa: Journey görevleri, Manhunt scout'ları, Gizli Görevler,
   günlük/haftalık projeler. Farklı kaynaklardan gelen aynı görev tek satır görünür.
@@ -129,6 +138,8 @@ Kaynaklar: The Division Wiki ve mx-division-builds verisi (CC BY-NC-SA 4.0).
 | `vendor.py` | Haftalık satıcılar, hedefli loot, build eşleştirme |
 | `companion.py` | Telefon arkadaşı (yerel, yalnız okunur web sayfası + QR) |
 | `share.py` | Build paylaşım kodları |
+| `dropstats.py` | Anonim düşüş istatistiği istemcisi |
+| `server/` | Topluluk istatistik sunucusu (Cloudflare Worker + D1) |
 | `features.py` | Ücretsiz/premium özellikler, lisans anahtarı doğrulama (Ed25519) |
 | `tests/` | Gerçek kartlarla OCR testi (`tests/test_ocr.py`), lisans ve optimize edici testleri (`tests/test_core.py`) |
 | `display.py` | Çözünürlük profilleri, oyun ayar dosyası okuyucu |

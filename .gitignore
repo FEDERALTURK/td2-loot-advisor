@@ -26,3 +26,7 @@ private/
 tests/.stash_test.json
 vendor_cache.json
 stash.json
+drop_queue.json
+reports/
+server/.wrangler/
+server/node_modules/

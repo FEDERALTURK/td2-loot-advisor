@@ -1,0 +1,22 @@
+# TD2 Loot Advisor — topluluk istatistik sunucusu (Cloudflare Workers + D1)
+# Kurulum adımları: server/README.md
+name = "td2-stats"
+main = "worker.js"
+compatibility_date = "2026-09-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "td2stats"
+database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"   # npx wrangler d1 create td2stats çıktısındaki id
+
+[vars]
+# Lisans anahtarlarını doğrulayan açık anahtar (features.py PUBLIC_KEY_HEX ile aynı)
+LICENSE_PUBKEY = "d70b17497241261ca45bcd05bbaedcd0fdeb3d866de4993d23db3c25274f633a"
+MAX_BATCH = "50"
+MAX_PER_HOUR = "600"
+
+# Saatlik temizlik: eski oran kayıtları silinir
+[triggers]
+crons = ["17 * * * *"]
+
+# HASH_SALT gizli değişkendir, dosyaya yazılmaz:  npx wrangler secret put HASH_SALT
