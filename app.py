@@ -67,7 +67,7 @@ DEFAULTS = {"scan_mode": "hotkey", "auto_interval_ms": 700, "auto_record": True,
             "ui_theme": "dark", "ui_sounds": True, "bg_interval": 15,
             "fx_cursor": True, "fx_cursor_style": "crosshair", "fx_cursor_color": "#ff6d10", "fx_cursor_custom": "",
             "fx_trail": True, "fx_trail_color": "#ff6d10", "fx_trail_len": 18, "fx_transitions": True,
-            "fx_video": True, "fx_video_dim": 0.45,
+            "fx_video": True, "fx_video_dim": 0.35, "fx_transition_ms": 650,
             "res_profile": "auto", "ocr_threshold": 170, "ocr_scale": "auto", "ocr_psm": 6, "ocr_passes": 3,
             "overlay_mode": "card", "overlay_alpha": 0.94, "overlay_size": 1.0, "ui_depth": True,
             "meta_sync": True, "meta_feed_url": "", "meta_last_try": 0, "meta_last_sync": "", "meta_version": "",
@@ -1263,6 +1263,7 @@ class App:
                 self.trail_fx.start()
         elif tr:
             tr.stop(); self.trail_fx = None
+        if float(st.get("fx_video_dim", 0.35)) > 0.7: st["fx_video_dim"] = 0.35     # eski sürümden kalan çok koyu ayar
         v = getattr(self, "video", None)
         if v: v.stop(); self.video = None
         if hasattr(self, "banner"):
@@ -1270,12 +1271,12 @@ class App:
             if st.get("fx_video", True):
                 (ART_DIR / "videos").mkdir(parents=True, exist_ok=True)
                 self.video = fx.VideoFX(ART_DIR / "videos", self.banner.push_video, self.banner.video_size,
-                                        dim=float(st.get("fx_video_dim", 0.45)))
+                                        dim=min(0.7, float(st.get("fx_video_dim", 0.35))))
                 if self.video.start():
                     self.banner.start_video(); log.info("Background video on (%s)", fx.video_backend())
                 else:
                     log.info("Background video off: %s", self.video.error)
-                    if self.video.error == "no_videos" and fx.video_backend() == "av":
+                    if self.video.error == "no_videos":
                         self.make_videos()                         # ilk açılış: özgün arka plan videolarını üret
                     self.video = None
 
@@ -1293,7 +1294,8 @@ class App:
         """Tema + başlık bandı + tüm sekmeler. Tema/dil değişince rebuild_ui() ile yeniden kurulur."""
         set_palette(ui_theme.apply(self.root, self.cfg["settings"].get("ui_theme", "dark")))
         self.build_header()
-        self.fxbar = fx.Transition(self.root, self.root, color=PAL["accent"], bg=PAL["bg"])
+        self.fxbar = fx.Transition(self.root, self.root, color=PAL["accent"], bg=PAL["bg"],
+                                   duration_ms=int(self.cfg["settings"].get("fx_transition_ms", 650)))
         nb = self.nb = ttk.Notebook(self.root); nb.pack(fill="both", expand=True, padx=10, pady=(6, 10))
         # Sekmeler sabit kimliklerle tutulur, başlıkları t() ile çevrilir.
         self.tab_keys = ("dash", "builds", "progress", "stats", "tasks", "assistant", "settings", "history", "log", "help")
@@ -3615,20 +3617,30 @@ class App:
         ttk.Scale(r3, from_=6, to=40, variable=self.fx_tlen, length=160).pack(side="left")
 
         an = ttk.LabelFrame(f, text="🎞 " + t("fx.anim_box")); an.pack(fill="x", padx=10, pady=6)
-        ttk.Checkbutton(an, text=t("fx.transitions"), variable=self.fxv["fx_transitions"]).pack(anchor="w", padx=8, pady=8)
+        ar = ttk.Frame(an); ar.pack(fill="x", padx=8, pady=8)
+        ttk.Checkbutton(ar, text=t("fx.transitions"), variable=self.fxv["fx_transitions"]).pack(side="left")
+        ttk.Label(ar, text=t("fx.speed")).pack(side="left", padx=(18, 4))
+        self.fx_tms = tk.IntVar(value=int(st.get("fx_transition_ms", 650)))
+        tl = ttk.Label(ar, text=f"{self.fx_tms.get()} ms", width=8)
+        ttk.Scale(ar, from_=250, to=1500, variable=self.fx_tms, length=200,
+                  command=lambda v: (self.fx_tms.set(int(float(v))), tl.config(text=f"{int(float(v))} ms"))).pack(side="left")
+        tl.pack(side="left", padx=4)
+        ttk.Button(ar, text=ui_theme.with_icon(t("fx.preview"), "▶"),
+                   command=lambda: (setattr(self.fxbar, "duration", int(self.fx_tms.get())), self.fxbar.play())).pack(side="left", padx=8)
 
         vd = ttk.LabelFrame(f, text="🎬 " + t("fx.video_box")); vd.pack(fill="x", padx=10, pady=6)
         r4 = ttk.Frame(vd); r4.pack(fill="x", padx=8, pady=6)
         ttk.Checkbutton(r4, text=t("fx.enable"), variable=self.fxv["fx_video"]).pack(side="left")
         ttk.Label(r4, text=t("fx.dim")).pack(side="left", padx=(16, 4))
-        ttk.Scale(r4, from_=0.0, to=0.85, variable=self.fx_dim, length=160).pack(side="left")
+        ttk.Scale(r4, from_=0.0, to=0.7, variable=self.fx_dim, length=160).pack(side="left")
         ttk.Button(r4, text=ui_theme.with_icon(t("fx.add_video"), "➕"), command=self.add_video).pack(side="left", padx=(16, 4))
         ttk.Button(r4, text=ui_theme.with_icon(t("fx.open_videos"), "📂"), command=lambda: self.open_folder(ART_DIR / "videos")).pack(side="left")
         ttk.Button(r4, text=ui_theme.with_icon(t("fx.multiply"), "🎬"), command=lambda: self.make_videos(count=6)).pack(side="left", padx=(8, 0))
         n = len(fx.list_videos(ART_DIR / "videos"))
         be = fx.video_backend()
-        state = t("fx.video_state", n=n, be=be or "—") + ("" if be else "  ·  " + t("fx.no_backend"))
-        self.fx_vstate = ttk.Label(vd, text=state, foreground=PAL["warning"] if not be or not n else PAL["muted"])
+        mp4s = [x for x in (ART_DIR / "videos").glob("*") if x.suffix.lower() in fx.VIDEO_EXT] if (ART_DIR / "videos").exists() else []
+        state = t("fx.video_state", n=n, be=be) + ("  ·  " + t("fx.webp_note", n=len(mp4s)) if be == "pil" and mp4s else "")
+        self.fx_vstate = ttk.Label(vd, text=state, foreground=PAL["warning"] if not n else PAL["muted"])
         self.fx_vstate.pack(anchor="w", padx=12)
         ttk.Label(vd, text=t("fx.video_note"), foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=12, pady=(2, 8))
         ttk.Button(f, text=ui_theme.with_icon(t("fx.apply"), "✨"), command=self.save_fx, style="Accent.TButton").pack(anchor="w", padx=12, pady=8)
@@ -3642,6 +3654,8 @@ class App:
         st["fx_trail_color"] = self.fx_tcol.get().strip() or "#ff6d10"
         st["fx_trail_len"] = int(self.fx_tlen.get())
         st["fx_video_dim"] = round(float(self.fx_dim.get()), 2)
+        st["fx_transition_ms"] = int(self.fx_tms.get())
+        if hasattr(self, "fxbar"): self.fxbar.duration = st["fx_transition_ms"]
 
     def save_fx(self):
         self._fx_from_ui(); save_cfg(self.cfg); self.apply_fx(); self.toast(t("msg.settings_saved"))
@@ -3649,8 +3663,6 @@ class App:
     def make_videos(self, count=None):
         """Özgün (koddan çizilen) arka plan videoları üretir; count verilirse yeni çeşitlerle çoğaltır."""
         if getattr(self, "_vid_busy", False): return
-        if fx.video_backend() != "av":
-            return messagebox.showinfo(APP_NAME, t("fx.no_backend"))
         self._vid_busy, self._vid_prog = True, 0.0
         def work():
             try:

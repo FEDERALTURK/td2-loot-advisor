@@ -792,5 +792,8 @@
   "tpage.sync": "Reinicios y sincronización",
   "grp.classified": "Misiones clasificadas",
   "grp.scout": "Explorador {n}",
-  "grp.mission": "Misión {n}"
+  "grp.mission": "Misión {n}",
+  "fx.speed": "Velocidad:",
+  "fx.preview": "Vista previa",
+  "fx.webp_note": "{n} archivo(s) .mp4 necesitan el paquete opcional 'av' (inicia con run.bat); se usan las versiones .webp animadas."
 }

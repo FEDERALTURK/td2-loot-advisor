@@ -792,5 +792,8 @@
   "tpage.sync": "Resets e sincronização",
   "grp.classified": "Missões confidenciais",
   "grp.scout": "Batedor {n}",
-  "grp.mission": "Missão {n}"
+  "grp.mission": "Missão {n}",
+  "fx.speed": "Velocidade:",
+  "fx.preview": "Pré-visualizar",
+  "fx.webp_note": "{n} arquivo(s) .mp4 precisam do pacote opcional 'av' (inicie com run.bat); as versões .webp animadas são usadas."
 }

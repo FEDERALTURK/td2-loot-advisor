@@ -571,5 +571,8 @@
   "tpage.sync": "Resets & sync",
   "grp.classified": "Classified Assignments",
   "grp.scout": "Scout {n}",
-  "grp.mission": "Mission {n}"
+  "grp.mission": "Mission {n}",
+  "fx.speed": "Speed:",
+  "fx.preview": "Preview",
+  "fx.webp_note": "{n} .mp4 file(s) need the optional 'av' package (start with run.bat); animated .webp versions are used instead."
 }

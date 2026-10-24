@@ -21,6 +21,7 @@ from PIL import Image, ImageDraw, ImageFilter
 
 CURSOR_STYLES = ["system", "crosshair", "ring", "rifle", "smg", "sniper", "pistol", "shotgun", "custom"]
 VIDEO_EXT = (".mp4", ".mkv", ".webm", ".mov", ".avi", ".m4v")
+ANIM_EXT = (".webp", ".gif")            # Pillow ile ek paket olmadan oynatılır
 
 
 # ---------------------------------------------------------------- .cur dosyası
@@ -230,40 +231,49 @@ class TrailFX:
 
 # ---------------------------------------------------------------- sekme geçişi
 class Transition:
-    def __init__(self, root, bar_parent, color="#ff6d10", bg="#0f1116"):
-        self.root, self.color = root, color
-        self.bar = tk.Canvas(bar_parent, height=3, bg=bg, highlightthickness=0, bd=0)
+    """Sekme geçişi: pencere kısa bir an kararıp yumuşakça açılır + başlığın altında kayan ışık.
+    duration_ms ile hız ayarlanır (varsayılan 650 ms)."""
+
+    def __init__(self, root, bar_parent, color="#ff6d10", bg="#0f1116", duration_ms=650):
+        self.root, self.color, self.duration = root, color, max(150, int(duration_ms))
+        self.bar = tk.Canvas(bar_parent, height=4, bg=bg, highlightthickness=0, bd=0)
         self.bar.pack(fill="x")
-        self._job = None
+        self._gen = 0
 
     def play(self):
+        self._gen += 1
+        g = self._gen
+        t0 = time.time()
         try:
-            if os.name == "nt":
-                self._fade(0)
-            self._sweep(0)
+            self._tick(g, t0)
         except Exception:
             pass
 
-    def _fade(self, i, steps=6):
-        a = 0.82 + 0.18 * (i / steps)
-        try: self.root.attributes("-alpha", min(1.0, a))
-        except Exception: return
-        if i < steps: self.root.after(22, lambda: self._fade(i + 1, steps))
+    def _ease(self, k):
+        return 1 - (1 - k) ** 3
 
-    def _sweep(self, i, steps=14):
+    def _tick(self, g, t0):
+        if g != self._gen: return                       # yeni geçiş başladı
+        k = min(1.0, (time.time() - t0) * 1000 / self.duration)
+        if os.name == "nt":                             # karar → açıl (0.55 → 1.0)
+            try: self.root.attributes("-alpha", 0.55 + 0.45 * self._ease(min(1.0, k * 1.15)))
+            except Exception: pass
         try:
-            if not self.bar.winfo_exists(): return
+            if self.bar.winfo_exists():
+                w = max(100, self.bar.winfo_width())
+                self.bar.delete("all")
+                if k < 1.0:
+                    x = -w * 0.35 + (w * 1.4) * self._ease(k)
+                    for j, alpha in enumerate((0.2, 0.45, 1.0)):
+                        seg = w * (0.22 - j * 0.06)
+                        self.bar.create_rectangle(x - seg, 0, x, 4, fill=self.color if alpha == 1.0 else self._dim(alpha), outline="")
         except tk.TclError:
             return
-        w = max(100, self.bar.winfo_width())
-        self.bar.delete("all")
-        if i <= steps:
-            k = i / steps
-            x = -w * 0.3 + (w * 1.3) * (1 - (1 - k) ** 3)
-            for j, alpha in enumerate((0.25, 0.5, 1.0)):
-                seg = w * (0.18 - j * 0.05)
-                self.bar.create_rectangle(x - seg, 0, x, 3, fill=self.color if alpha == 1.0 else self._dim(alpha), outline="")
-            self.root.after(16, lambda: self._sweep(i + 1, steps))
+        if k < 1.0:
+            self.root.after(15, lambda: self._tick(g, t0))
+        elif os.name == "nt":
+            try: self.root.attributes("-alpha", 1.0)
+            except Exception: pass
 
     def _dim(self, a):
         r, g, b = _hex(self.color)
@@ -276,6 +286,7 @@ class Transition:
 
 # ---------------------------------------------------------------- arka plan videosu
 def video_backend():
+    """av / cv2 varsa mp4 de oynar; yoksa 'pil' (yalnızca .webp/.gif animasyonları, ek paket gerekmez)."""
     try:
         import av  # noqa: F401
         return "av"
@@ -285,15 +296,24 @@ def video_backend():
         import cv2  # noqa: F401
         return "cv2"
     except Exception:
-        return None
+        return "pil"
 
 
-def list_videos(folder):
+def list_videos(folder, backend=None):
+    """Oynatılabilir dosyalar. Aynı adlı .mp4 ve .webp varsa biri seçilir (mp4 oynatıcı varsa mp4)."""
     f = Path(folder)
+    be = backend or video_backend()
+    exts = ANIM_EXT + (VIDEO_EXT if be in ("av", "cv2") else ())
     try:
-        return sorted(p for p in f.iterdir() if p.suffix.lower() in VIDEO_EXT)
+        files = sorted(p for p in f.iterdir() if p.suffix.lower() in exts)
     except Exception:
         return []
+    by_stem = {}
+    for p in files:
+        cur = by_stem.get(p.stem)
+        if cur is None or (be in ("av", "cv2") and p.suffix.lower() in VIDEO_EXT):
+            by_stem[p.stem] = p
+    return sorted(by_stem.values())
 
 
 class VideoFX:
@@ -308,8 +328,6 @@ class VideoFX:
         if self.alive: return True
         if not list_videos(self.folder):
             self.error = "no_videos"; return False
-        if not video_backend():
-            self.error = "no_backend"; return False
         self.alive = True
         self.thread = threading.Thread(target=self._run, daemon=True); self.thread.start()
         return True
@@ -327,6 +345,15 @@ class VideoFX:
                 w, h = self.size_fn()
                 yield fr.to_image()
 
+    def _frames_pil(self, path):
+        from PIL import ImageSequence
+        with Image.open(path) as im:
+            dur = im.info.get("duration") or 1000 / self.fps
+            self._frame_dt = max(0.02, float(dur) / 1000)
+            for fr in ImageSequence.Iterator(im):
+                if not self.alive: return
+                yield fr.convert("RGB")
+
     def _frames_cv2(self, path):
         import cv2
         cap = cv2.VideoCapture(str(path))
@@ -340,7 +367,7 @@ class VideoFX:
 
     def _run(self):
         from PIL import ImageOps
-        gen = self._frames_av if video_backend() == "av" else self._frames_cv2
+        be = video_backend()
         last = None
         while self.alive:
             vids = list_videos(self.folder)
@@ -348,6 +375,8 @@ class VideoFX:
             random.shuffle(vids)
             for v in vids:
                 if not self.alive: break
+                gen = self._frames_pil if v.suffix.lower() in ANIM_EXT else (self._frames_av if be == "av" else self._frames_cv2)
+                self._frame_dt = 1.0 / self.fps
                 try:
                     for img in gen(v):
                         if not self.alive: break
@@ -358,7 +387,7 @@ class VideoFX:
                         if self.dim > 0:
                             frame = Image.blend(frame, Image.new("RGB", frame.size, (8, 9, 12)), self.dim)
                         self.on_frame(frame)
-                        time.sleep(max(0.0, 1.0 / self.fps - (time.time() - t0)))
+                        time.sleep(max(0.0, self._frame_dt - (time.time() - t0)))
                 except Exception as e:
                     self.error = f"{type(e).__name__}: {e}"
                     time.sleep(0.5)

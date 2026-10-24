@@ -250,8 +250,31 @@ class Renderer:
         return Image.composite(lamp, im, lamp.convert("L").point(lambda v: int(v * 0.8)))
 
 
+def render_webp(path, style="hexscan", color="orange", seed=1, w=960, h=150, fps=20, seconds=8, progress=None):
+    """Ek paket gerektirmeyen animasyonlu WebP (Pillow). Dönüş: yol."""
+    col = THEMES.get(color, color) if isinstance(color, str) else color
+    r = Renderer(style, w, h, fps, seconds, col, seed)
+    frames = []
+    for i in range(r.n):
+        frames.append(r.frame(i))
+        if progress and i % 20 == 0: progress(i / r.n)
+    frames[0].save(str(path), save_all=True, append_images=frames[1:], duration=int(1000 / fps), loop=0,
+                   quality=72, method=4)
+    return Path(path)
+
+
+def has_av():
+    try:
+        import av  # noqa: F401
+        return True
+    except Exception:
+        return False
+
+
 def render(path, style="hexscan", color="orange", seed=1, w=1280, h=200, fps=24, seconds=10, progress=None):
-    """Tek bir döngü videosu yazar (mp4). Dönüş: yol."""
+    """Tek bir döngü videosu yazar (mp4; av yoksa aynı adla .webp). Dönüş: yol."""
+    if not has_av():
+        return render_webp(Path(path).with_suffix(".webp"), style, color, seed, progress=progress)
     import av
     col = THEMES.get(color, color) if isinstance(color, str) else color
     r = Renderer(style, w, h, fps, seconds, col, seed)
@@ -297,7 +320,7 @@ def generate(folder, count=None, start_seed=None, progress=None, stop=lambda: Fa
     for k, (st, col, seed) in enumerate(jobs):
         if stop(): break
         p = folder / f"td2bg_{st}_{col}_{seed}.mp4"
-        if p.exists(): continue
+        if (p if has_av() else p.with_suffix(".webp")).exists(): continue
         render(p, st, col, seed, progress=(lambda f, k=k: progress((k + f) / len(jobs))) if progress else None)
         made.append(p)
     return made

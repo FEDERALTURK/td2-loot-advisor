@@ -796,5 +796,8 @@
   "tpage.sync": "Resets & Sync",
   "grp.classified": "Geheimaufträge",
   "grp.scout": "Späher {n}",
-  "grp.mission": "Mission {n}"
+  "grp.mission": "Mission {n}",
+  "fx.speed": "Tempo:",
+  "fx.preview": "Vorschau",
+  "fx.webp_note": "{n} .mp4-Datei(en) brauchen das optionale Paket 'av' (mit run.bat starten); stattdessen werden animierte .webp-Versionen genutzt."
 }

@@ -792,5 +792,8 @@
   "tpage.sync": "Reset e sincronizzazione",
   "grp.classified": "Incarichi riservati",
   "grp.scout": "Esploratore {n}",
-  "grp.mission": "Missione {n}"
+  "grp.mission": "Missione {n}",
+  "fx.speed": "Velocità:",
+  "fx.preview": "Anteprima",
+  "fx.webp_note": "{n} file .mp4 richiedono il pacchetto opzionale 'av' (avvia con run.bat); si usano le versioni .webp animate."
 }

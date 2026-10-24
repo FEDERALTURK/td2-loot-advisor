@@ -873,5 +873,8 @@
   "tpage.sync": "Sıfırlama ve senkron",
   "grp.classified": "Gizli Görevler (Classified)",
   "grp.scout": "Scout {n}",
-  "grp.mission": "Görev {n}"
+  "grp.mission": "Görev {n}",
+  "fx.speed": "Hız:",
+  "fx.preview": "Önizle",
+  "fx.webp_note": "{n} .mp4 dosyası için isteğe bağlı 'av' paketi gerekiyor (run.bat ile başlat); yerine animasyonlu .webp sürümleri kullanılıyor."
 }

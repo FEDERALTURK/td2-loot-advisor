@@ -792,5 +792,8 @@
   "tpage.sync": "Resety i synchronizacja",
   "grp.classified": "Tajne zlecenia",
   "grp.scout": "Zwiadowca {n}",
-  "grp.mission": "Misja {n}"
+  "grp.mission": "Misja {n}",
+  "fx.speed": "Szybkość:",
+  "fx.preview": "Podgląd",
+  "fx.webp_note": "{n} plik(ów) .mp4 wymaga opcjonalnego pakietu 'av' (uruchom run.bat); używane są animowane wersje .webp."
 }
