@@ -172,4 +172,3 @@ export default {
   },
 };
 
-export { weekOf, cleanDrop };
