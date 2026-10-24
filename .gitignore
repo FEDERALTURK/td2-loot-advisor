@@ -22,3 +22,5 @@ game_data_cache.json
 # kullanıcıya özel / üretilen arka plan videoları
 art/videos/
 tests/.game_cache.json
+private/
+tests/.stash_test.json

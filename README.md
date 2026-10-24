@@ -42,6 +42,15 @@ Recommended game settings: English game language, borderless window, HDR off, ga
   and the piece you have, with ✔/✖ per requirement. Completed builds are announced.
 - 3D agent and 3D build × slot score bars. Daily meta-build sync (`meta/meta_builds.json`).
 
+**Stash** (new)
+- Every scanned item is saved to your stash (`stash.json`); mark the ones you dismantle.
+- **Optimize**: the best pieces you own for a build — gear-set pieces may sit in any slot, the 4-piece bonus is kept,
+  named/exotic items stay in their slot — with fit % per slot, ✔/✖ requirements and the most valuable next drop.
+- **Audit report**: what can be dismantled (verdict, better copy; never pieces your 5 closest builds use, never exotics),
+  duplicates and items to add to the recalibration library first.
+- Premium: recalibration advisor (which attribute from which item; gear and weapon libraries kept apart, exotics never
+  donors), every build ranked against your stash, CSV export.
+
 **Tasks**
 - Interface-language only, grouped, duplicates merged; double-click for steps and The Division Wiki pictures.
 - *Fetch with Claude* (Claude Code + web search), shared task feed (`meta/tasks_feed.json`) and a live wiki reader (`wiki_sync.py`).
@@ -56,6 +65,14 @@ Recommended game settings: English game language, borderless window, HDR off, ga
 
 **Assistant**
 - Chat and voice commands (F9) via Ollama, Claude Code, Claude API or OpenAI; voice diagnostics; Windows speech fallback.
+
+## Free and premium
+
+Scanning, builds, tasks, stash and the active-build optimizer are free. Premium features are listed in
+Settings → Premium and in `features.py`. A license key is a small Ed25519-signed token checked on the computer
+(no internet). Keys are issued with `scripts/license_tool.py` by the publisher; the private key is kept in `private/`,
+which never goes to git. Because the app is open source, server-side features (community drop statistics,
+cloud sync, vendor alerts) are where premium is really enforced.
 
 ## Game library
 
@@ -78,7 +95,9 @@ Sources: [The Division Wiki](https://thedivision.fandom.com) (CC BY-SA) and
 | `engine.py` | Decision engine, build plan, card finder |
 | `gamedata.py` | Item recognition against the game library |
 | `ocr_backend.py` | OCR engines (RapidOCR / Tesseract), icon and rarity colour hints |
-| `tests/` | OCR regression test with real game cards (`python tests/test_ocr.py`) |
+| `stash.py` | Stash, audit report, build optimizer, recalibration advisor |
+| `features.py` | Free/premium features, license key check (Ed25519) |
+| `tests/` | OCR test with real game cards (`tests/test_ocr.py`), license and optimizer tests (`tests/test_core.py`) |
 | `display.py` | Resolution profiles, game settings reader |
 | `fx.py`, `bgvideo.py`, `view3d.py`, `ui_art.py`, `ui_theme.py` | Effects, background videos, 3D, art, theme |
 | `meta_sync.py`, `wiki_sync.py` | Daily feeds, live wiki reader |

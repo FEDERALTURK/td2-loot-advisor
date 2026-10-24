@@ -57,7 +57,7 @@ FONT = "Segoe UI"
 FONT_SEMI = "Segoe UI Semibold"
 
 # Sekme ikonları (sekme kimliğine göre) / tab icons by tab id
-TAB_ICONS = {"dash": "🎯", "builds": "🧩", "progress": "📦", "stats": "📊", "tasks": "📋",
+TAB_ICONS = {"dash": "🎯", "builds": "🧩", "progress": "📦", "stash": "🗄", "stats": "📊", "tasks": "📋",
              "assistant": "🤖", "settings": "⚙", "history": "🕘", "log": "📜", "help": "❓"}
 
 
@@ -300,8 +300,9 @@ def scrollable(parent, bg):
     sb = ttk.Scrollbar(parent, orient="vertical", command=canvas.yview)
     inner = ttk.Frame(canvas)
     win = canvas.create_window((0, 0), window=inner, anchor="nw")
-    inner.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
-    canvas.bind("<Configure>", lambda e: canvas.itemconfigure(win, width=e.width))
+    # e=None: arayüz yeniden kurulurken Tk eski bir komut adını argümansız çağırabiliyor (zararsız, yok sayılır)
+    inner.bind("<Configure>", lambda e=None: canvas.configure(scrollregion=canvas.bbox("all")))
+    canvas.bind("<Configure>", lambda e=None: canvas.itemconfigure(win, width=e.width) if e is not None else None)
     canvas.configure(yscrollcommand=sb.set)
     sb.pack(side="right", fill="y")
     canvas.pack(side="left", fill="both", expand=True)

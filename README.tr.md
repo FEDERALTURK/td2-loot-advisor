@@ -53,6 +53,15 @@ Oyunda bindirme kartın **hemen yanında** çıkar.
 Döndürülebilir **3D ajan** (yeşil = var, kırmızı = eksik; parçaya tıkla), şartlarıyla yuva kartları ve
 tüm build'ler için **3D puan çubukları**. Uyan eşyalar otomatik kaydedilir; build tamamlanınca haber verilir.
 
+### Sandık (yeni)
+- **Envanter:** taranan her eşya sandığa kaydedilir (`stash.json`); kırdıklarını "Kırıldı" işaretle.
+- **Optimize et:** seçili build için sendeki en iyi parçalar. Set parçaları herhangi bir yuvada olabilir ama 4 parça bonusu
+  korunur; named/egzotik eşyalar kendi yuvasında kalır. Her yuva için uyum %, ✔/✖ şartlar ve **sıradaki en değerli düşüş**.
+- **Denetim raporu:** kırılabilecekler (kararı KIR ya da daha iyi kopyası olanlar; en yakın 5 build'inde kullanılan parçalar
+  ve egzotikler asla), kopyalar ve kırmadan önce kalibrasyon kütüphanesine eklenecekler.
+- Premium: **kalibrasyon danışmanı** (hangi attribute hangi eşyadan; silah ve ekipman kütüphaneleri ayrı, egzotik kaynak
+  önerilmez), tüm build'lerin sandığa göre sıralaması, CSV dışa aktarma.
+
 ### Görevler
 - Yalnızca **arayüz dilinde**, gruplu ve kısa: Journey görevleri, Manhunt scout'ları, Gizli Görevler,
   günlük/haftalık projeler. Farklı kaynaklardan gelen aynı görev tek satır görünür.
@@ -81,6 +90,14 @@ Genel · **Efektler** · Tarama · **Ekran ve oyun** · **OCR** · Bindirme · S
   (hız ayarlı), **arka planda ajan saati** (tüm pencere; turuncu ışık fareyi takip eder) ve başlık videosu
   (program kendi özgün animasyonlarını üretir; "Videoları çoğalt" yenilerini ekler). Hepsi kapatılabilir.
 
+## Ücretsiz ve premium
+
+Okuma, build'ler, görevler, sandık ve aktif build optimize edicisi ücretsiz. Premium özellikler Ayarlar → **Premium**
+sayfasında ve `features.py`'de listeli. Lisans anahtarı Ed25519 ile imzalı küçük bir belirteçtir, bilgisayarda doğrulanır
+(internet gerekmez). Anahtarları yayıncı `scripts/license_tool.py` ile üretir; gizli anahtar `private/` klasöründe durur ve
+asla git'e girmez. Program açık kaynak olduğu için premium asıl olarak sunucu tarafı özelliklerde (topluluk düşüş
+istatistikleri, bulut eşitleme, satıcı bildirimleri) korunur.
+
 ## Oyun kütüphanesi
 
 `meta/game_data.json`: tüm gear set'ler, markalar, named/egzotik eşyalar (yuvasıyla), silahlar (türüyle),
@@ -97,13 +114,16 @@ Kaynaklar: The Division Wiki ve mx-division-builds verisi (CC BY-NC-SA 4.0).
 | `engine.py` | Karar motoru, build planı, kart bulucu |
 | `gamedata.py` | Eşya tanıma (oyun verisiyle) |
 | `ocr_backend.py` | OCR motorları (RapidOCR / Tesseract), simge ve nadirlik renk ipuçları |
-| `tests/` | Gerçek oyun kartlarıyla OCR testi (`python tests/test_ocr.py`) |
+| `stash.py` | Sandık, denetim raporu, build optimize edici, kalibrasyon danışmanı |
+| `features.py` | Ücretsiz/premium özellikler, lisans anahtarı doğrulama (Ed25519) |
+| `tests/` | Gerçek kartlarla OCR testi (`tests/test_ocr.py`), lisans ve optimize edici testleri (`tests/test_core.py`) |
 | `display.py` | Çözünürlük profilleri, oyun ayar dosyası okuyucu |
 | `fx.py`, `bgvideo.py`, `view3d.py`, `ui_art.py`, `ui_theme.py` | Efektler, arka plan videoları, 3D, görseller, tema |
 | `meta_sync.py`, `wiki_sync.py` | Günlük meta/görev senkronu, canlı wiki okuyucu |
 | `i18n.py`, `lang/*.json` | Diller |
 | `builds.json` | Ayarlar ve build'lerin |
-| `progress.json`, `tasks.json`, `loot_log.csv` | İlerleme, görevler, tarama geçmişi |
+| `progress.json`, `stash.json`, `tasks.json`, `loot_log.csv` | İlerleme, sandık, görevler, tarama geçmişi |
+| `private/` | Yalnız yayıncıda: lisans gizli anahtarı (git'e girmez, yedekle) |
 | `logs/app.log` | Günlük (sorun olursa buna bak) |
 | `art/` | Arka planlar, amblemler, imleçler, videolar |
 

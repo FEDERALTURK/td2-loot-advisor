@@ -37,6 +37,8 @@ import view3d
 import fx
 import bgvideo
 import ocr_backend
+import features
+import stash
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
@@ -48,6 +50,7 @@ META_CACHE = BASE / "meta_cache.json"   # son indirilen meta listesi (çevrimdı
 ART_DIR = BASE / "art"   # arka planlar / amblemler / bayraklar (kullanıcı kendi görsellerini ekleyebilir)
 BUNDLE = Path(getattr(sys, "_MEIPASS", BASE))
 CFG_PATH, LOG_PATH, DEBUG_PATH, PROG_PATH = (BASE / n for n in ("builds.json", "loot_log.csv", "last_crop.png", "progress.json"))
+STASH_PATH = BASE / "stash.json"
 APPLOG_DIR = BASE / "logs"
 APPLOG_PATH = APPLOG_DIR / "app.log"
 LOG_HEADER = ["time", "item", "verdict", "best_build", "score", "slot", "rarity"]
@@ -69,7 +72,7 @@ DEFAULTS = {"scan_mode": "hotkey", "auto_interval_ms": 700, "auto_record": True,
             "fx_cursor": True, "fx_cursor_style": "crosshair", "fx_cursor_color": "#ff6d10", "fx_cursor_custom": "",
             "fx_trail": True, "fx_trail_color": "#ff6d10", "fx_trail_len": 18, "fx_transitions": True,
             "fx_video": True, "fx_video_dim": 0.35, "fx_transition_ms": 650, "fx_bgwatch": True, "fx_bgwatch_dim": 0.0,
-            "res_profile": "auto", "ocr_engine": "auto", "ocr_threshold": 170, "ocr_scale": "auto", "ocr_psm": 6, "ocr_passes": 3,
+            "res_profile": "auto", "ocr_engine": "auto", "license_key": "", "stash_record": True, "ocr_threshold": 170, "ocr_scale": "auto", "ocr_psm": 6, "ocr_passes": 3,
             "overlay_mode": "card", "overlay_alpha": 0.94, "overlay_size": 1.0, "ui_depth": True,
             "meta_sync": True, "meta_feed_url": "", "meta_last_try": 0, "meta_last_sync": "", "meta_version": "",
             "meta_hidden": [], "tasks_sync": True, "auto_reset_times": True,
@@ -471,6 +474,16 @@ def active_build(cfg):
     """Aktif build (Panel, Build'ler ve Eksik Parça bunu ortak kullanır)."""
     b = build_by_name(cfg, cfg["settings"].get("active_build", ""))
     return b or (cfg["builds"][0] if cfg["builds"] else None)
+
+
+def req_lines_short(req):
+    """Yuva şartının tek satırlık özeti: 'Striker's Battlegear · Weapon Damage · Critical Hit Chance'."""
+    if not req or req.get("kind") == "off": return ""
+    parts = list(req.get("source") or []) + list(req.get("types") or [])
+    if req.get("core"): parts.append(attr_name(req["core"]))
+    parts += [attr_name(a) for a in req.get("attrs") or []]
+    if req.get("talent"): parts.append("★ " + req["talent"])
+    return " · ".join(parts) or t("plan.any")
 
 
 def plan_of(build):
@@ -1158,6 +1171,16 @@ class App:
         log.info("Language: %s (%s)", active, i18n.language_name(active))
         self.progress, self.tasks = load_progress(), load_tasks()
         self.normalize_builds()
+        self.ent = features.Entitlements(stg.get("license_key", ""))
+        log.info("Tier: %s (%s)", self.ent.tier, self.ent.reason)
+        self.stash = stash.Stash(STASH_PATH)
+        if not self.stash.data.get("imported_progress"):          # eski sürümün kayıtları bir kez aktarılır
+            try:
+                n = self.stash.import_progress(self.progress, GAME) if GAME.ok else 0
+                self.stash.data["imported_progress"] = True; self.stash.save()
+                if n: log.info("Stash: imported %d items from progress.json", n)
+            except Exception:
+                log.exception("Stash import failed")
         apply_ocr_settings(stg)
         log.info("Display profile: %s, OCR threshold %s, scale %s", active_profile(stg)[0], gamedata.THRESHOLD, gamedata.SCALE or "auto")
         self.tess = find_tesseract(self.cfg)
@@ -1286,10 +1309,10 @@ class App:
                                    duration_ms=int(self.cfg["settings"].get("fx_transition_ms", 650)))
         nb = self.nb = ttk.Notebook(self.root); nb.pack(fill="both", expand=True, padx=10, pady=(6, 10))
         # Sekmeler sabit kimliklerle tutulur, başlıkları t() ile çevrilir.
-        self.tab_keys = ("dash", "builds", "progress", "stats", "tasks", "assistant", "settings", "history", "log", "help")
+        self.tab_keys = ("dash", "builds", "progress", "stash", "stats", "tasks", "assistant", "settings", "history", "log", "help")
         self.tabs = {k: ttk.Frame(nb) for k in self.tab_keys}
         for k in self.tab_keys: nb.add(self.tabs[k], text=ui_theme.with_icon(t(f"tab.{k}"), ui_theme.TAB_ICONS.get(k, "")))
-        self.build_dash(); self.build_builds(); self.build_prog(); self.build_stats(); self.build_gorevler(); self.build_asistan()
+        self.build_dash(); self.build_builds(); self.build_prog(); self.build_stash(); self.build_stats(); self.build_gorevler(); self.build_asistan()
         self.build_settings(); self.build_hist(); self.build_logtab(); self.build_help()
         nb.bind("<<NotebookTabChanged>>", self.on_tab)
         self.root.after(300, self.apply_fx)
@@ -1383,6 +1406,7 @@ class App:
         if k == "history": self.load_history()
         elif k == "stats": self.root.after(50, self.refresh_stats_tab)
         elif k == "progress": self.refresh_prog()
+        elif k == "stash": self.refresh_stash()
         elif k == "log": self.refresh_logtab()
 
     # ---------- Panel ----------
@@ -1778,6 +1802,14 @@ class App:
         if s.get("speak_verdict"): self.speak_verdict(verdict, item, res, note)
         elif s.get("sound"): self.sounds.play(verdict, force=True)
         if s.get("log_csv"): self.log(item, verdict, res)
+        if s.get("stash_record", True) and valid_item(item):
+            try:
+                rec, new = self.stash.add(item, verdict, res[0][1] if res else None, res[0][0] if res else None, GAME)
+                if rec:
+                    self.stash.save()
+                    if self.current_tab() == "stash": self.refresh_stash()
+            except Exception:
+                log.exception("Stash add failed")
         log.info("Scan: %r -> %s (%s %s%%) slot=%s", item["name"][:50], verdict,
                  res[0][1] if res else "-", res[0][0] if res else 0, item.get("slot") or "-")
 
@@ -2742,7 +2774,7 @@ class App:
         self.task_tv.bind("<Double-1>", self.on_task_double)
         self.task_tv.bind("<Return>", self.on_task_double)
         self.task_tv.bind("<<TreeviewSelect>>", self.show_task_how)
-        self.task_tv.bind("<space>", lambda e=None: self.toggle_task_done())
+        self.task_tv.bind("<space>", lambda e=None: e is not None and self.toggle_task_done())
         # sağ: önizleme kartı
         card = tk.Frame(rf, bg=PAL["surface"], highlightthickness=1, highlightbackground=PAL["border"])
         card.pack(fill="both", expand=True, padx=(8, 0))
@@ -2754,7 +2786,7 @@ class App:
         self.how_lbl = tk.Label(card, text="", bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 10), wraplength=420,
                                 justify="left", anchor="nw")
         self.how_lbl.pack(fill="both", expand=True, padx=14, pady=8)
-        card.bind("<Configure>", lambda e: [w.config(wraplength=max(160, e.width - 30)) for w in (self.prev_title, self.how_lbl)])
+        card.bind("<Configure>", lambda e=None: e is not None and [w.config(wraplength=max(160, e.width - 30)) for w in (self.prev_title, self.how_lbl)])
         pb = tk.Frame(card, bg=PAL["surface"]); pb.pack(fill="x", padx=12, pady=(0, 12))
         ttk.Button(pb, text=ui_theme.with_icon(t("tasks.details"), "🔍"), style="Accent.TButton", command=self.on_task_double).pack(side="left")
         self.how_btn = ttk.Button(pb, text=ui_theme.with_icon(t("tasks.open_source"), "🔗"), command=self.open_how_source, state="disabled")
@@ -3467,11 +3499,12 @@ class App:
         self.set_nb = ttk.Notebook(outer); self.set_nb.pack(fill="both", expand=True, padx=8, pady=(8, 0))
         P = {}
         for key, icon in (("general", "⚙"), ("fx", "✨"), ("scan", "🎯"), ("display", "🖥"), ("ocr", "🔍"), ("overlay", "🪟"),
-                          ("sync", "⭐"), ("logs", "📝")):
+                          ("sync", "🔄"), ("premium", "⭐"), ("logs", "📝")):
             holder = ttk.Frame(self.set_nb); self.set_nb.add(holder, text=f" {icon} {t('setpage.' + key)} ")
             P[key] = ui_theme.scrollable(holder, PAL["bg"])
-        self._set_keys = ["general", "fx", "scan", "display", "ocr", "overlay", "sync", "logs"]
+        self._set_keys = ["general", "fx", "scan", "display", "ocr", "overlay", "sync", "premium", "logs"]
         self.build_fx_box(P["fx"], st)
+        self.build_premium_box(P["premium"], st)
         if getattr(self, "_set_page", None) in self._set_keys:
             self.set_nb.select(self._set_keys.index(self._set_page))
         f = P["general"]
@@ -4125,6 +4158,267 @@ class App:
         self.refresh_logtab()
 
     # ---------- Yardım / help ----------
+    # ---------- Premium ----------
+    def premium_gate(self, parent, feature):
+        """Özellik açıksa True. Değilse yerine kilit kartı koyar ve False döner."""
+        if self.ent.has(feature): return True
+        box = tk.Frame(parent, bg=PAL["surface"], highlightthickness=1, highlightbackground=PAL["accent"])
+        box.pack(fill="x", padx=4, pady=6)
+        tk.Label(box, text="⭐ " + t("prem.locked") + " — " + t("feat." + feature), bg=PAL["surface"], fg=PAL["accent"],
+                 font=(ui_theme.FONT_SEMI, 11), anchor="w").pack(fill="x", padx=10, pady=(8, 2))
+        tk.Label(box, text=t("prem.locked_hint"), bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 10),
+                 anchor="w", justify="left", wraplength=700).pack(fill="x", padx=10)
+        ttk.Button(box, text=t("prem.open"), command=self.open_premium_page).pack(anchor="w", padx=10, pady=8)
+        return False
+
+    def open_premium_page(self):
+        self.nb.select(self.tab_keys.index("settings"))
+        if "premium" in getattr(self, "_set_keys", []): self.set_nb.select(self._set_keys.index("premium"))
+
+    def build_premium_box(self, f, st):
+        pb = ttk.LabelFrame(f, text=t("prem.box")); pb.pack(fill="x", padx=10, pady=(10, 6))
+        r = ttk.Frame(pb); r.pack(fill="x", padx=8, pady=8)
+        ttk.Label(r, text=t("prem.key")).pack(side="left")
+        self.lic_var = tk.StringVar(value=st.get("license_key", ""))
+        ttk.Entry(r, textvariable=self.lic_var, width=70).pack(side="left", padx=6, fill="x", expand=True)
+        ttk.Button(r, text=ui_theme.with_icon(t("prem.activate"), "✔"), command=self.activate_license,
+                   style="Accent.TButton").pack(side="left")
+        self.lic_status = ttk.Label(pb, text="", foreground=PAL["muted"]); self.lic_status.pack(anchor="w", padx=12, pady=(0, 8))
+        self._lic_status_text()
+        fb = ttk.LabelFrame(f, text=t("prem.features")); fb.pack(fill="x", padx=10, pady=6)
+        for name, tier in features.FEATURES.items():
+            row = tk.Frame(fb, bg=PAL["bg"]); row.pack(fill="x", padx=10, pady=1)
+            ok = self.ent.has(name)
+            soon = name in features.COMING
+            tk.Label(row, text=("⏳ " if soon else "✔ " if ok else "🔒 ") + t("feat." + name) + (f"  ({t('prem.soon')})" if soon else ""),
+                     bg=PAL["bg"], fg=PAL["fg"] if ok and not soon else PAL["muted"],
+                     font=(ui_theme.FONT, 10), anchor="w").pack(side="left")
+            tk.Label(row, text=t("prem." + tier), bg=PAL["bg"], fg=PAL["accent"] if tier == "premium" else PAL["muted"],
+                     font=(ui_theme.FONT_SEMI, 9)).pack(side="right")
+        ttk.Label(f, text=t("prem.note"), foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=14, pady=8)
+
+    def _lic_status_text(self):
+        e = self.ent
+        if e.valid:
+            exp = t("prem.exp", date=e.expires()) if e.expires() else t("prem.never")
+            txt = t("prem.status_ok", name=e.payload.get("name", ""), exp=exp)
+        elif e.reason == "empty":
+            txt = t("prem.status_free")
+        elif e.reason == "expired":
+            txt = t("prem.expired", date=e.expires() or "?")
+        else:
+            txt = t("prem.bad_" + ("signature" if e.reason == "signature" else "format"))
+        self.lic_status.config(text=txt)
+
+    def activate_license(self):
+        key = self.lic_var.get().strip()
+        self.ent.set_key(key)
+        self.cfg["settings"]["license_key"] = key if (self.ent.valid or not key) else self.cfg["settings"].get("license_key", "")
+        save_cfg(self.cfg)
+        log.info("License: %s (%s)", self.ent.tier, self.ent.reason)
+        if self.ent.valid or not key:
+            self.rebuild_ui(tab="settings"); self.open_premium_page()
+        else:
+            self._lic_status_text()
+
+    # ---------- Sandık (envanter) ----------
+    def build_stash(self):
+        f = self.tabs["stash"]
+        self.st_nb = ttk.Notebook(f); self.st_nb.pack(fill="both", expand=True, padx=8, pady=8)
+        pages = {}
+        for key, icon in (("inv", "🗄"), ("opt", "🧮"), ("audit", "🧾")):
+            holder = ttk.Frame(self.st_nb); self.st_nb.add(holder, text=f" {icon} {t('stash.page_' + key)} ")
+            pages[key] = holder
+        self.st_nb.bind("<<NotebookTabChanged>>", lambda e=None: self.refresh_stash())
+        # envanter
+        p = pages["inv"]
+        bar = ttk.Frame(p); bar.pack(fill="x", padx=8, pady=8)
+        self.st_rec = tk.BooleanVar(value=bool(self.cfg["settings"].get("stash_record", True)))
+        ttk.Checkbutton(bar, text=t("stash.record"), variable=self.st_rec, command=self._stash_rec_toggle).pack(side="left")
+        ttk.Label(bar, text=t("col.slot") + ":").pack(side="left", padx=(16, 2))
+        self.st_slot = tk.StringVar(value=t("stash.all_slots"))
+        cb = ttk.Combobox(bar, textvariable=self.st_slot, state="readonly", width=14,
+                          values=[t("stash.all_slots")] + [slot_name(x) for x in engine.ALL_SLOTS])
+        cb.pack(side="left"); cb.bind("<<ComboboxSelected>>", lambda e=None: self.refresh_stash())
+        self.st_count = ttk.Label(bar, text="", foreground=PAL["muted"]); self.st_count.pack(side="left", padx=12)
+        bar2 = ttk.Frame(p); bar2.pack(fill="x", padx=8)
+        ttk.Button(bar2, text="🔨 " + t("stash.dismantled"), command=lambda: self._stash_mark("dismantled")).pack(side="left")
+        ttk.Button(bar2, text="✖ " + t("stash.delete"), command=self._stash_delete).pack(side="left", padx=6)
+        ttk.Button(bar2, text="⇩ " + t("stash.import"), command=self._stash_import).pack(side="left")
+        ttk.Button(bar2, text="📤 " + t("stash.export") + ("" if self.ent.has("stash_export") else " ⭐"),
+                   command=self._stash_export).pack(side="left", padx=6)
+        ttk.Button(bar2, text="🧹 " + t("stash.clear"), command=self._stash_clear).pack(side="right")
+        cols = ("slot", "item", "src", "attrs", "verdict", "best", "time")
+        tv = self.st_tv = ttk.Treeview(p, columns=cols, show="headings", selectmode="extended")
+        widths = {"slot": 90, "item": 200, "src": 170, "attrs": 330, "verdict": 120, "best": 220, "time": 130}
+        for c in cols:
+            tv.heading(c, text=t("stash.col_" + c)); tv.column(c, width=widths[c], anchor="w", stretch=c in ("attrs", "best"))
+        for v, col in VFG.items(): tv.tag_configure(v, foreground=col)
+        tv.pack(fill="both", expand=True, padx=8, pady=8)
+        ttk.Label(p, text=t("stash.hint"), foreground=PAL["muted"], wraplength=1000, justify="left").pack(anchor="w", padx=12, pady=(0, 8))
+        # optimize
+        p = pages["opt"]
+        ob = ttk.Frame(p); ob.pack(fill="x", padx=8, pady=8)
+        ttk.Label(ob, text=t("label.build")).pack(side="left")
+        self.opt_b = ttk.Combobox(ob, state="readonly", width=48, values=[b["name"] for b in self.cfg["builds"]])
+        self.opt_b.pack(side="left", padx=6)
+        a0 = active_build(self.cfg)
+        if a0: self.opt_b.set(a0["name"])
+        self.opt_b.bind("<<ComboboxSelected>>", lambda e=None: (self.set_active_build(self.opt_b.get()), self.refresh_stash()))
+        self.opt_sum = ttk.Label(p, text="", style="Section.TLabel"); self.opt_sum.pack(anchor="w", padx=12)
+        self.opt_bar = ttk.Progressbar(p, maximum=100); self.opt_bar.pack(fill="x", padx=12, pady=4)
+        self.opt_next = ttk.Label(p, text="", foreground=PAL["accent"], wraplength=1000, justify="left"); self.opt_next.pack(anchor="w", padx=12)
+        cols = ("slot", "item", "fit", "checks")
+        self.opt_tv = ttk.Treeview(p, columns=cols, show="headings", height=8)
+        for c, w in zip(cols, (100, 240, 70, 560)):
+            self.opt_tv.heading(c, text=t("opt.col_" + c)); self.opt_tv.column(c, width=w, anchor="w", stretch=c == "checks")
+        self.opt_tv.tag_configure("done", foreground=VFG.get("KEEP", PAL["fg"]))
+        self.opt_tv.tag_configure("miss", foreground=VFG.get("DISMANTLE", PAL["fg"]))
+        self.opt_tv.pack(fill="x", padx=8, pady=6)
+        low = ttk.Frame(p); low.pack(fill="both", expand=True, padx=8, pady=4)
+        lf = ttk.LabelFrame(low, text=t("opt.recal_title")); lf.pack(side="left", fill="both", expand=True, padx=(0, 4))
+        rf = ttk.LabelFrame(low, text=t("opt.rank_title")); rf.pack(side="left", fill="both", expand=True, padx=(4, 0))
+        self.opt_recal_box, self.opt_rank_box = lf, rf
+        self.opt_recal = self.opt_rank = None
+        if self.premium_gate(lf, "recal_advisor"):
+            self.opt_recal = tk.Text(lf, height=8, bg=PAL["surface"], fg=PAL["fg"], relief="flat", wrap="word", font=(ui_theme.FONT, 10))
+            self.opt_recal.pack(fill="both", expand=True, padx=6, pady=6)
+        if self.premium_gate(rf, "optimizer_all"):
+            self.opt_rank = tk.Text(rf, height=8, bg=PAL["surface"], fg=PAL["fg"], relief="flat", wrap="word", font=(ui_theme.FONT, 10))
+            self.opt_rank.pack(fill="both", expand=True, padx=6, pady=6)
+        # denetim
+        p = pages["audit"]
+        ab = ttk.Frame(p); ab.pack(fill="x", padx=8, pady=8)
+        ttk.Button(ab, text="↻ " + t("audit.refresh"), command=self.refresh_stash).pack(side="left")
+        ttk.Button(ab, text="🔨 " + t("audit.mark_all"), command=self._audit_mark_all).pack(side="left", padx=6)
+        self.audit_txt = tk.Text(p, bg=PAL["surface"], fg=PAL["fg"], relief="flat", wrap="word", font=(ui_theme.FONT, 10))
+        self.audit_txt.tag_configure("h", font=(ui_theme.FONT_SEMI, 12), foreground=PAL["accent"])
+        self.audit_txt.pack(fill="both", expand=True, padx=8, pady=(0, 8))
+        self._audit = None
+        self.refresh_stash()
+
+    def _stash_rec_toggle(self):
+        self.cfg["settings"]["stash_record"] = bool(self.st_rec.get()); save_cfg(self.cfg)
+
+    @staticmethod
+    def _attrs_short(r):
+        q = r.get("quality") or {}
+        return ", ".join(f"{attr_name(k)} {v:g}" + (f" ({q[k]}%)" if k in q else "") for k, v in (r.get("attrs") or {}).items())
+
+    def refresh_stash(self):
+        if not hasattr(self, "st_tv"): return
+        items = self.stash.owned()
+        sel = self.st_slot.get()
+        slot = next((x for x in engine.ALL_SLOTS if slot_name(x) == sel), None)
+        tv = self.st_tv; tv.delete(*tv.get_children())
+        for r in sorted(items, key=lambda r: (engine.ALL_SLOTS.index(r["slot"]) if r.get("slot") in engine.ALL_SLOTS else 99,
+                                              r.get("name") or "")):
+            if slot and r.get("slot") != slot: continue
+            v = r.get("verdict") or "REVIEW"
+            tv.insert("", "end", iid=r["id"], tags=(v,), values=(
+                slot_name(r.get("slot") or ""), r.get("name") or "?", r.get("gear_set") or r.get("brand") or "",
+                self._attrs_short(r), verdict_label(v),
+                (r.get("best") or "") + (f" ({r['score']}%)" if r.get("score") is not None else ""), (r.get("seen") or "")[:16].replace("T", " ")))
+        from collections import Counter
+        c = Counter(r.get("verdict") or "REVIEW" for r in items)
+        self.st_count.config(text=t("stash.count", n=len(items), keep=c.get("KEEP", 0) + c.get("CONSIDER", 0),
+                                    dis=c.get("DISMANTLE", 0), rev=c.get("REVIEW", 0)))
+        try: page = self.st_nb.index(self.st_nb.select())
+        except Exception: page = 0
+        if page == 1: self._refresh_opt(items)
+        elif page == 2: self._refresh_audit(items)
+
+    def _refresh_opt(self, items):
+        b = build_by_name(self.cfg, self.opt_b.get()) or active_build(self.cfg)
+        if not b: return
+        plan = plan_of(b)
+        r = stash.optimize(b, plan, items, GAME)
+        self.opt_sum.config(text=t("opt.summary", build=b["name"], pct=r["completion"], done=r["done"], total=r["total"]))
+        self.opt_bar["value"] = r["completion"]
+        nxt = ", ".join(f"{slot_name(s)} ({req_lines_short(req)})" for s, _g, req in r["next_drop"])
+        self.opt_next.config(text=t("opt.next", list=nxt) if nxt else "")
+        tv = self.opt_tv; tv.delete(*tv.get_children())
+        for s, v in r["slots"].items():
+            it = v["item"]
+            tv.insert("", "end", tags=("done" if v["done"] else "miss" if not it else "",), values=(
+                slot_name(s), (it.get("name") if it else t("opt.none")), f"{v['fit']}%" if it else "—",
+                "  ".join(check_lines(v["checks"])) if it else req_lines_short(v["req"])))
+        if self.opt_recal is not None:
+            self.opt_recal.config(state="normal"); self.opt_recal.delete("1.0", "end")
+            adv = stash.recal_advice(r, items, GAME)
+            for a in adv:
+                self.opt_recal.insert("end", "• " + t("opt.recal_line", slot=slot_name(a["slot"]), target=a["target"],
+                                                       attr=attr_name(a["attr"]), have=a["have"], q=a["quality"], donor=a["donor"]) + "\n")
+            if not adv: self.opt_recal.insert("end", t("opt.recal_none") + "\n")
+            self.opt_recal.insert("end", "\n" + t("opt.recal_note")); self.opt_recal.config(state="disabled")
+        if self.opt_rank is not None:
+            self.opt_rank.config(state="normal"); self.opt_rank.delete("1.0", "end")
+            for pct, name, rr in stash.rank_builds(self.cfg["builds"], plan_of, items, GAME)[:10]:
+                self.opt_rank.insert("end", f"{pct:3d}%  {name}  ({rr['done']}/{rr['total']})\n")
+            self.opt_rank.config(state="disabled")
+
+    def _refresh_audit(self, items):
+        T = self.audit_txt; T.config(state="normal"); T.delete("1.0", "end")
+        if not items:
+            T.insert("end", t("audit.empty")); T.config(state="disabled"); return
+        a = self._audit = stash.audit(items, self.cfg["builds"], plan_of, GAME)
+        T.insert("end", t("audit.title") + "\n", "h")
+        T.insert("end", t("audit.summary", n=a["total"], prot=a["protected"]) + "\n")
+        T.insert("end", "  " + "  ·  ".join(f"{verdict_label(k)}: {v}" for k, v in a["counts"].items()) + "\n\n")
+        T.insert("end", t("audit.dismantle", n=len(a["dismantle"])) + "\n", "h")
+        for r in a["dismantle"]:
+            T.insert("end", f"  🔨 {r.get('name')} ({slot_name(r.get('slot') or '')}) — {self._attrs_short(r)}\n")
+        T.insert("end", "\n" + t("audit.dups", n=len(a["duplicates"])) + "\n", "h")
+        for best, rest in a["duplicates"]:
+            T.insert("end", "  " + t("audit.dup_line", name=best.get("name"), slot=slot_name(best.get("slot") or ""), n=len(rest)) + "\n")
+        T.insert("end", "\n" + t("audit.library", n=len(a["library"])) + "\n", "h")
+        for r, k, q in a["library"]:
+            T.insert("end", "  📚 " + t("audit.lib_line", name=r.get("name"), attr=attr_name(k), q=q) + "\n")
+        if a["ranks"]:
+            T.insert("end", "\n" + t("opt.rank_title") + "\n", "h")
+            for pct, name, rr in a["ranks"][:5]:
+                T.insert("end", f"  {pct:3d}%  {name}\n")
+        T.config(state="disabled")
+
+    def _stash_selected(self):
+        return list(self.st_tv.selection()) if hasattr(self, "st_tv") else []
+
+    def _stash_mark(self, status):
+        ids = self._stash_selected()
+        if not ids: return
+        for rid in ids: self.stash.mark(rid, status)
+        self.stash.save(); self.refresh_stash()
+
+    def _stash_delete(self):
+        ids = self._stash_selected()
+        if not ids: return
+        for rid in ids: self.stash.remove(rid)
+        self.stash.save(); self.refresh_stash()
+
+    def _stash_import(self):
+        n = self.stash.import_progress(self.progress, GAME) if GAME.ok else 0
+        self.stash.save(); self.refresh_stash()
+        messagebox.showinfo(APP_NAME, t("stash.imported", n=n))
+
+    def _stash_clear(self):
+        if not messagebox.askyesno(APP_NAME, t("stash.clear_q")): return
+        self.stash.clear(); self.stash.save(); self.refresh_stash()
+
+    def _stash_export(self):
+        if not self.ent.has("stash_export"):
+            return messagebox.showinfo(APP_NAME, t("prem.locked") + "\n\n" + t("prem.locked_hint"))
+        p = filedialog.asksaveasfilename(defaultextension=".csv", initialfile="td2_stash.csv", filetypes=[("CSV", "*.csv")])
+        if not p: return
+        stash.export_csv(self.stash.owned(), p)
+        messagebox.showinfo(APP_NAME, t("stash.exported", path=p))
+
+    def _audit_mark_all(self):
+        a = self._audit or stash.audit(self.stash.owned(), self.cfg["builds"], plan_of, GAME)
+        if not a["dismantle"]: return
+        if not messagebox.askyesno(APP_NAME, t("audit.mark_q", n=len(a["dismantle"]))): return
+        for r in a["dismantle"]: self.stash.mark(r["id"], "dismantled")
+        self.stash.save(); self._audit = None; self.refresh_stash()
+
     def build_help(self):
         """Yardım metni dil dosyasındaki help.body anahtarından gelir."""
         f = self.tabs["help"]
