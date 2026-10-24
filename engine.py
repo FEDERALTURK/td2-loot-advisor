@@ -92,11 +92,34 @@ def item_weapon_type(item, text):
     return None
 
 
+def normalize_build(build, game):
+    """Build verisini oyun kütüphanesine göre düzeltir: talent listesine yazılmış eşya adlarını (named/egzotik:
+    Equalizer, Chainkiller, Kingbreaker, Catharsis …) 'items' listesine taşır; kütüphanede olmayan talent'leri
+    'unknown' olarak işaretler. Dönüş: (değişti mi, bilinmeyenler)."""
+    if not game or not game.ok: return False, []
+    tal_names = {gamedata.nrm(n) for n, _, _ in game.talents}
+    item_names = {n: canon for n, canon, kind in game.names if kind in ("exotic", "named", "weapon")}
+    changed, unknown = False, []
+    items = list(build.get("items", []))
+    for t_name in list(build.get("talents", {})):
+        n = gamedata.nrm(t_name)
+        core = re.sub(r"^perfect(ly)? ", "", n)
+        if n in tal_names or core in tal_names:
+            continue
+        if n in item_names:
+            items.append(item_names[n]); build["talents"].pop(t_name); changed = True
+        else:
+            unknown.append(t_name)
+    if items != build.get("items", []):
+        build["items"] = list(dict.fromkeys(items)); changed = True
+    return changed, unknown
+
+
 def build_mentions(build, name):
     """Egzotik/named eşyanın adı build'de geçiyor mu (set listesi, talent, açıklama)?"""
     n = gamedata.nrm(name)
     if len(n) < 4: return False
-    hay = " ".join([build.get("name", "")] + build.get("sets_or_brands", []) + list(build.get("talents", {})) +
+    hay = " ".join([build.get("name", "")] + build.get("sets_or_brands", []) + list(build.get("talents", {})) + build.get("items", []) +
                    [str(build.get("meta", {}).get("summary", {}).get("en", ""))])
     return n in gamedata.nrm(hay)
 
@@ -114,39 +137,91 @@ def set_hit(item, build, low):
 
 
 # ---------------------------------------------------------------- puanlama
+CORE_ATTRS = ("weapon_damage", "armor", "skill_tier")
+TALENT_SLOTS = ("Chest", "Backpack")
+
+
+def _q(item, k, r, game):
+    v = item["attrs"][k]
+    good = float(r.get("good_at") or 0) or (game.max_of(k) or 0) * 0.9
+    return (min(1.0, v / good) if good else item.get("quality", {}).get(k, 100) / 100), v
+
+
 def score_gear(item, build, low, game):
-    """(yüzde, gerekçeler). Set/marka eşleşmesi, attribute kalitesi, talent."""
-    why, got, mx = [], 0.0, 0.0
+    """(yüzde, gerekçeler). Eşyanın TAŞIYABİLECEĞİ şeylere göre puanlar:
+    - set/marka (build'deki set, marka ya da build'de adı geçen named/egzotik),
+    - 1 çekirdek (core) attribute: build'in tercih ettiği çekirdek mi,
+    - küçük attribute'lar: gear set parçasında 1, marka/named/egzotikte 2 yuva — build'in en önemli
+      attribute'larıyla karşılaştırılır (ulaşılamayacak tam puan istenmez),
+    - talent yalnızca göğüs/sırt çantasında (ve kartta talent varsa) sayılır.
+    Uzmanlık (expertise) bonusları attribute değildir ve sayılmaz."""
+    why = []
     if build.get("slots") and item.get("slot") and item["slot"] not in build["slots"]:
         return 0, ["slot ✗"]
-    bonus = float(build.get("set_bonus", 0) or 0)
-    if build.get("sets_or_brands"):
-        mx += bonus
-        hit = set_hit(item, build, low)
-        if hit:
-            got += bonus; why.append(f"✔ {hit}")
+    parts = []                                                # (ağırlık, 0-1)
     attrs = build.get("attributes", {})
-    for k, r in sorted(attrs.items(), key=lambda kv: -kv[1].get("weight", 0)):
-        w = float(r.get("weight", 1)) * 10
-        mx += w
-        if k in item.get("attrs", {}):
-            v = item["attrs"][k]
-            good = float(r.get("good_at") or 0) or (game.max_of(k) or 0) * 0.9
-            q = min(1.0, v / good) if good else item.get("quality", {}).get(k, 100) / 100
-            got += w * q
-            why.append(f"{k} {v:g} ({round(q * 100)}%)")
+    name_n = gamedata.nrm(item.get("name", ""))
+    listed = any(gamedata.nrm(x) == name_n for x in build.get("items", [])) and len(name_n) > 3
+    set_known = bool(item.get("brand") or item.get("gear_set") or item.get("known") in ("exotic", "named"))
+    hit = set_hit(item, build, low)
+    if listed:
+        parts.append((30, 1.0)); why.append(f"✔ {item['name']}")
+    elif build.get("sets_or_brands") and set_known:           # set/marka okunamadıysa (kart kaydırılmış) puanlanmaz
+        # set build'leri 4 set parçası + 2 serbest yuva kullanır: başka marka/set parçası "serbest yuva" adayıdır
+        parts.append((30, 1.0 if hit else 0.35))
+        why.append(f"✔ {hit}" if hit else "set ✗ (flex)")
+    # çekirdek
+    cores = sorted(((k, r) for k, r in attrs.items() if k in CORE_ATTRS), key=lambda kv: -float(kv[1].get("weight", 1)))
+    have_core = [k for k in item.get("attrs", {}) if k in CORE_ATTRS]
+    if cores and have_core:
+        want = cores[0][0]
+        k = have_core[0]
+        if k in attrs:
+            q, v = _q(item, k, attrs[k], game)
+            rel = float(attrs[k].get("weight", 1)) / max(float(cores[0][1].get("weight", 1)), 0.1)
+            parts.append((25, q * min(1.0, rel))); why.append(f"{k} {v:g} ({round(q * 100)}%)")
+        else:
+            parts.append((25, 0.0)); why.append(f"core {k} ✗ ({want})")
+    # küçük attribute'lar
+    minors_b = sorted(((k, r) for k, r in attrs.items() if k not in CORE_ATTRS), key=lambda kv: -float(kv[1].get("weight", 1)))
+    n_slots = 1 if (item.get("gear_set") and not item.get("brand")) else 2
+    ideal = sum(float(r.get("weight", 1)) for _, r in minors_b[:n_slots])
+    have = [(k, attrs[k]) for k in item.get("attrs", {}) if k not in CORE_ATTRS and k in attrs]
+    if ideal:
+        got = 0.0
+        for k, r in sorted(have, key=lambda kv: -float(kv[1].get("weight", 1)))[:n_slots]:
+            q, v = _q(item, k, r, game)
+            got += float(r.get("weight", 1)) * q; why.append(f"{k} {v:g} ({round(q * 100)}%)")
+        parts.append((35, min(1.0, got / ideal)))
+    # talent
     tals = build.get("talents", {})
-    if tals:
+    slot = item.get("slot")
+    if tals and (slot in TALENT_SLOTS or (not slot and item.get("talents"))):
         top = max(tals.values())
-        mx += top * 10
-        have = {gamedata.nrm(x) for x in item.get("talents", [])}
-        hits = [(n, w) for n, w in tals.items() if gamedata.nrm(n) in have]
+        have_t = {gamedata.nrm(x) for x in item.get("talents", [])}
+        hits = [(n, w) for n, w in tals.items() if gamedata.nrm(n) in have_t]
+        if listed and not hits: hits = [(item["name"], top)]
         if hits:
-            n, w = max(hits, key=lambda h: h[1]); got += w * 10; why.append(f"talent {n}")
-    pct = round(min(100, got / mx * 100)) if mx else 0
-    if build.get("sets_or_brands") and (item.get("brand") or item.get("gear_set")) and not set_hit(item, build, low):
-        pct = round(pct * 0.6); why.insert(0, "set ✗")          # başka bir set/marka: build'e uymaz
+            n, w = max(hits, key=lambda h: h[1]); parts.append((15, w / top)); why.append(f"talent {n}")
+        else:
+            parts.append((15, 0.0))
+    tot = sum(w for w, _ in parts)
+    pct = round(100 * sum(w * v for w, v in parts) / tot) if tot else 0
     return pct, why
+
+
+def score_mod(item, build, game):
+    """Gear mod: modun istatistiği build'de isteniyor mu, rulo ne kadar iyi?"""
+    vals = dict(item.get("attrs", {})); vals.update(item.get("mod_attrs", {}))
+    best, why = 0, []
+    for k, v in vals.items():
+        r = build.get("attributes", {}).get(k)
+        if not r: continue
+        mx = game.max_of(k) or v
+        q = min(1.0, v / mx) if mx else 1.0
+        sc = round(100 * q * min(1.0, 0.55 + 0.15 * float(r.get("weight", 1))))
+        if sc > best: best, why = sc, [f"{k} {v:g} ({round(q * 100)}%)"]
+    return best, why
 
 
 def score_weapon(item, build, text, game):
@@ -185,7 +260,11 @@ def evaluate(item, text, cfg, game):
     low = gamedata.nrm(text)
     res = []
     for b in cfg["builds"]:
-        if item.get("kind") == "weapon":
+        if item.get("kind") == "gear_mod":
+            pct, why = score_mod(item, b, game)
+        elif item.get("kind") in ("weapon_mod", "skill_mod", "cosmetic", "material", "consumable", "cache"):
+            pct, why = 0, []
+        elif item.get("kind") == "weapon":
             pct, why = score_weapon(item, b, text, game)
         else:
             pct, why = score_gear(item, b, low, game)
@@ -198,6 +277,19 @@ def decide(item, res, cfg):
     """(karar, not anahtarı, not parametreleri)."""
     st = cfg["settings"]
     best = res[0][0] if res else 0
+    kind = item.get("kind")
+    if kind in ("weapon_mod", "skill_mod", "cosmetic", "material", "consumable", "cache"):
+        return "REVIEW", "note.kind_" + kind, {}               # build kararı gerekmeyen eşya: kırma önerilmez
+    if item.get("spec"):
+        return "KEEP", "note.spec_weapon", {"spec": item["spec"]}
+    if item.get("name") in ("?", "", None) and not item.get("attrs") and not item.get("talents") and kind in ("gear", "weapon"):
+        return "REVIEW", "note.no_item", {}                   # eşya kartı değil (menü, harita, Summit ekranı …)
+    if item.get("partial"):
+        return "REVIEW", "note.partial_card", {}
+    if kind == "gear_mod":
+        if best >= st["keep_threshold"]: return "KEEP", None, {}
+        if best >= st["consider_threshold"]: return "CONSIDER", None, {}
+        return "DISMANTLE", None, {}
     rare = {"EXOTIC", "NAMED"} & set(item.get("rarity", []))
     if rare:
         users = [b["name"] for b in cfg["builds"] if build_mentions(b, item.get("name", ""))]
@@ -206,6 +298,8 @@ def decide(item, res, cfg):
         if best >= st["keep_threshold"]:
             return "KEEP", None, {}
         return "REVIEW", "note.rare_unused", {}
+    if "NAMED" in item.get("rarity", []) and best < st["consider_threshold"]:
+        return "CONSIDER", "note.named_unused", {}                # named: önce kütüphane/kalibrasyon için bak
     if "PROTOTYPE" in item.get("rarity", []) and best >= st["consider_threshold"]:
         return "KEEP", None, {}
     if best >= st["keep_threshold"]:

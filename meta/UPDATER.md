@@ -53,6 +53,10 @@ indirir; bu yüzden **doğruluk hızdan önemlidir**.
   pulse_resistance, skill_damage, skill_haste, skill_duration, skill_health, repair_skills,
   status_effects, skill_tier). Bilinmeyen anahtarı uygulama atar.
 - `weight` 0-5, `talents` değerleri 0-10. Set/talent adlarını oyundaki İngilizce adla yaz.
+- `talents` YALNIZCA talent adı içerir (Obliterate, Glass Cannon, Perfect Fast Hands …). Named/egzotik
+  EŞYA adları (Equalizer, Chainkiller, Kingbreaker, Catharsis, St. Elmo's Engine …) `items` listesine yazılır.
+  Her adı `meta/game_data.json` içindeki `gear_talents` / `weapon_talents` / `named` / `exotics` ile karşılaştır;
+  listede olmayan bir ad yazma (uygulama bilinmeyen talent'leri yok sayar).
 - `summary` en az `en` içermeli; `tr` de yazılması önerilir. Diğer diller isteğe bağlı.
 - Kaynak bağlantıları yalnızca `https://`. Metin kopyalama; kısa, kendi cümlenle özetle.
 

@@ -12,7 +12,7 @@ respect to Ubisoft's stance on overlay/automation tools.
 
 See README.md for setup and usage.
 """
-import csv, ctypes, json, logging, logging.handlers, os, queue, re, shutil, sys, threading, time
+import csv, ctypes, json, logging, logging.handlers, os, queue, re, shutil, subprocess, sys, threading, time
 import urllib.error, urllib.request
 import tkinter as tk
 from collections import Counter
@@ -584,18 +584,94 @@ class Recorder:
 
 
 _WHISPER = {"key": None, "model": None}
+STT_LANGS = {"tr": "tr", "en": "en", "de": "de", "fr": "fr", "es": "es", "it": "it", "pt": "pt", "ru": "ru", "pl": "pl", "nl": "nl"}
+
 
 def transcribe(audio, cfg):
-    """Yerel konuşma tanıma (faster-whisper). İlk çalıştırmada model bir kez indirilir."""
-    from faster_whisper import WhisperModel
+    """Konuşma tanıma. 1) faster-whisper (yerel, en iyi), 2) yoksa Windows'un kendi konuşma tanıması (System.Speech).
+    Dil arayüz dilini izler. Hata ayrıntısı logs/app.log'a yazılır."""
+    lang = STT_LANGS.get(i18n.current_language(), "en")
+    try:
+        from faster_whisper import WhisperModel
+    except Exception as e:
+        log.warning("faster-whisper not available (%s: %s) — Python %s; trying Windows speech recognition",
+                    type(e).__name__, e, sys.version.split()[0])
+        return windows_stt(audio, lang)
     st = cfg["settings"]
     key = (st["stt_model"], st["stt_device"])
     if _WHISPER["key"] != key:
-        _WHISPER["model"] = WhisperModel(st["stt_model"], device=st["stt_device"],
-                                         compute_type="float16" if st["stt_device"] == "cuda" else "int8")
+        log.info("Loading Whisper model %s on %s (first time downloads the model)", *key)
+        try:
+            _WHISPER["model"] = WhisperModel(st["stt_model"], device=st["stt_device"],
+                                             compute_type="float16" if st["stt_device"] == "cuda" else "int8")
+        except Exception as e:
+            if st["stt_device"] != "cpu":                  # CUDA/cuDNN yoksa CPU'ya düş
+                log.warning("Whisper on %s failed (%s); falling back to CPU", st["stt_device"], e)
+                _WHISPER["model"] = WhisperModel(st["stt_model"], device="cpu", compute_type="int8")
+            else:
+                raise
         _WHISPER["key"] = key
-    segs, _ = _WHISPER["model"].transcribe(audio, language="tr", vad_filter=True)
+    segs, _ = _WHISPER["model"].transcribe(audio, language=lang, vad_filter=True)
     return " ".join(s.text.strip() for s in segs).strip()
+
+
+def windows_stt(audio, lang):
+    """Windows'ta kurulu konuşma tanıyıcı ile (çevrimdışı) metne çevirir. Ek paket gerekmez."""
+    if os.name != "nt":
+        raise RuntimeError(t("err.no_stt"))
+    import tempfile, wave
+    import numpy as np
+    path = Path(tempfile.gettempdir()) / "td2_voice.wav"
+    with wave.open(str(path), "wb") as w:
+        w.setnchannels(1); w.setsampwidth(2); w.setframerate(16000)
+        w.writeframes((np.clip(audio, -1, 1) * 32767).astype("<i2").tobytes())
+    ps = ("[Console]::OutputEncoding=[Text.Encoding]::UTF8; Add-Type -AssemblyName System.Speech; "
+          "$rs=[System.Speech.Recognition.SpeechRecognitionEngine]::InstalledRecognizers(); "
+          f"$p=$rs | Where-Object {{ $_.Culture.Name -like '{lang}*' }} | Select-Object -First 1; "
+          "if(-not $p){$p=$rs | Select-Object -First 1}; if(-not $p){Write-Output '__NONE__'; exit}; "
+          "$e=New-Object System.Speech.Recognition.SpeechRecognitionEngine($p); "
+          "$e.LoadGrammar((New-Object System.Speech.Recognition.DictationGrammar)); "
+          f"$e.SetInputToWaveFile('{path}'); $o=@(); while($r=$e.Recognize()){{$o+=$r.Text}}; "
+          "Write-Output ('__CULTURE__'+$p.Culture.Name); Write-Output ($o -join ' ')")
+    r = subprocess.run(["powershell", "-NoProfile", "-NonInteractive", "-Command", ps], capture_output=True,
+                       timeout=90, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+    out = r.stdout.decode("utf-8", "replace").strip().splitlines()
+    if r.returncode != 0 or not out:
+        raise RuntimeError("Windows speech: " + r.stderr.decode("utf-8", "replace").strip()[:200])
+    if out[0].strip() == "__NONE__":
+        raise RuntimeError(t("err.no_stt"))
+    culture = out[0].replace("__CULTURE__", "").strip()
+    if not culture.lower().startswith(lang):
+        log.warning("Windows speech recognizer for %r not installed; used %s", lang, culture)
+    return " ".join(out[1:]).strip()
+
+
+def voice_diagnostics(cfg):
+    """Sesli komut bileşenlerini tek tek dener; satır listesi döner (Asistan → Ses testi)."""
+    rows = [f"Python {sys.version.split()[0]} ({sys.executable})"]
+    for mod in ("pyttsx3", "sounddevice", "numpy", "faster_whisper"):
+        try:
+            m = __import__(mod); rows.append(f"✔ {mod} {getattr(m, '__version__', '')}")
+        except Exception as e:
+            rows.append(f"✖ {mod}: {type(e).__name__}: {e}")
+    try:
+        import sounddevice as sd
+        dev = sd.query_devices(kind="input"); rows.append(f"✔ mic: {dev['name']}")
+    except Exception as e:
+        rows.append(f"✖ mic: {e}")
+    if os.name == "nt":
+        try:
+            r = subprocess.run(["powershell", "-NoProfile", "-Command",
+                                "Add-Type -AssemblyName System.Speech; [System.Speech.Recognition.SpeechRecognitionEngine]::InstalledRecognizers() | % { $_.Culture.Name }"],
+                               capture_output=True, timeout=30, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+            names = r.stdout.decode("utf-8", "replace").split()
+            rows.append(("✔ " if names else "✖ ") + "Windows speech: " + (", ".join(names) or "—"))
+        except Exception as e:
+            rows.append(f"✖ Windows speech: {e}")
+    if "faster_whisper" not in " ".join(r for r in rows if r.startswith("✔")) and sys.version_info >= (3, 14):
+        rows.append(t("ai.diag_py"))
+    for r in rows: log.info("Voice diag: %s", r)
+    return rows
 
 
 def http_json(url, body, headers=None, timeout=120):
@@ -908,6 +984,7 @@ class App:
             stg["language"] = active; save_cfg(self.cfg)
         log.info("Language: %s (%s)", active, i18n.language_name(active))
         self.progress, self.tasks = load_progress(), load_tasks()
+        self.normalize_builds()
         apply_ocr_settings(stg)
         log.info("Display profile: %s, OCR threshold %s, scale %s", active_profile(stg)[0], gamedata.THRESHOLD, gamedata.SCALE or "auto")
         self.tess = find_tesseract(self.cfg)
@@ -934,6 +1011,16 @@ class App:
         log.info("UI ready — language=%s, tesseract=%s", i18n.current_language(), self.tess or "NOT FOUND")
         if not self.tess:
             messagebox.showwarning(APP_NAME, t("msg.no_tesseract"))
+
+    def normalize_builds(self):
+        """Build'lerdeki talent/eşya karışıklığını oyun kütüphanesine göre düzeltir (Equalizer → items)."""
+        changed = False
+        for b in self.cfg["builds"]:
+            ch, unk = engine.normalize_build(b, GAME)
+            changed |= ch
+            if unk: log.warning("Build %r: unknown talents %s (not in game library)", b["name"], unk)
+        if changed:
+            save_cfg(self.cfg); log.info("Builds normalized against game library")
 
     def build_ui(self):
         """Tema + başlık bandı + tüm sekmeler. Tema/dil değişince rebuild_ui() ile yeniden kurulur."""
@@ -1096,7 +1183,7 @@ class App:
     def show_result(self, text, item, verdict, res, note=None, debug=False, diff=None):
         self.last_shown = (text, item, verdict, res, note, debug, diff)
         self.verdict_lbl.config(text=verdict_label(verdict), bg=COLORS[verdict])
-        kind = t("panel.kind_weapon") if item.get("kind") == "weapon" else (t("panel.kind_gear") if item.get("kind") else "")
+        kind = t("kind." + item["kind"]) if item.get("kind") else ""
         self.item_lbl.config(text=item["name"] + ("  [" + ", ".join(item["rarity"]) + "]" if item["rarity"] else "") +
                              (f"  ·  {slot_name(item['slot'])}" if item.get("slot") else "") + (f"  ·  {kind}" if kind else ""))
         notes = [n for n in (item.get("_note"), note) if n]
@@ -1267,6 +1354,7 @@ class App:
             (APPLOG_DIR / "last_ocr.txt").write_text(text, encoding="utf-8")
         except Exception:
             pass
+        text, item, verdict, res = self.merge_scrolled(text, item, verdict, res)
         sig = signature(item)
         if auto:
             if not valid_item(item): return
@@ -1280,6 +1368,27 @@ class App:
             self.last_card_screen = None
         self.last_sig, self.last_time = sig, time.time()
         self.results.put(("ok", text, item, verdict, res, sig))
+
+    def merge_scrolled(self, text, item, verdict, res):
+        """Uzun kartlar ekrana sığmaz; oyuncu kartı kaydırır. Aynı eşyanın ardışık okumaları birleştirilir:
+        önce üst kısım (ad, set, çekirdek), sonra alt kısım (attribute, mod, talent) okunur → tek eşya."""
+        now = time.time()
+        prev = getattr(self, "card_session", None)
+        kind_ok = item.get("kind") in ("gear", "weapon")
+        if prev and now - prev["t"] < 60 and kind_ok:
+            same = item["name"] not in ("?", "") and gamedata.nrm(item["name"]) == gamedata.nrm(prev["item"]["name"])
+            cont = item.get("partial") and not prev["item"].get("partial")
+            if (same or cont) and prev["text"].strip() != text.strip():
+                merged_text = prev["text"] + "\n" + text
+                item2, verdict2, res2 = evaluate(merged_text, self.cfg)
+                if item2["name"] not in ("?", ""):
+                    item2["_merged"] = True
+                    item2["_note"] = "; ".join(x for x in (item2.get("_note"), t("note.merged")) if x)
+                    log.info("Scrolled card merged: %r (%d attrs)", item2["name"], len(item2.get("attrs", {})))
+                    text, item, verdict, res = merged_text, item2, verdict2, res2
+        if kind_ok and item["name"] not in ("?", "") and not item.get("partial"):
+            self.card_session = {"t": now, "item": item, "text": text}
+        return text, item, verdict, res
 
     def scan_area(self):
         """Taranacak alan: tüm ekran (oyunun olduğu ana monitör) ya da seçilen bölge."""
@@ -1799,11 +1908,12 @@ class App:
         av_box = tk.Frame(mid, bg=PAL["surface"], highlightthickness=1, highlightbackground=PAL["border"])
         av_box.pack(side="left", fill="y", padx=(4, 8), pady=6)
         tk.Label(av_box, text="🧍 " + t("v3d.agent"), bg=PAL["surface"], fg=PAL["fg"], font=(ui_theme.FONT_SEMI, 11)).pack(anchor="w", padx=10, pady=(8, 0))
-        self.agent3d = view3d.AgentView(av_box, bg=PAL["surface"], width=300, height=380)
+        self.agent3d = view3d.AgentView(av_box, bg=PAL["surface"], width=360, height=420)
         self.agent3d.pack(padx=6, pady=4)
         self.agent3d.on_pick = self._pick_slot3d
+        self.agent3d.set_labels({x: slot_name(x) for x in engine.ALL_SLOTS})
         tk.Label(av_box, text=t("v3d.agent_hint"), bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 9),
-                 wraplength=290, justify="left").pack(anchor="w", padx=10, pady=(0, 8))
+                 wraplength=350, justify="left").pack(anchor="w", padx=10, pady=(0, 8))
         self.agent3d.spin()
         self.sel_slot = None
         self.slot_grid = ttk.Frame(mid); self.slot_grid.pack(side="left", fill="both", expand=True)
@@ -1972,6 +2082,7 @@ class App:
         self.chat_in.bind("<Return>", lambda e: self.send_chat())
         ttk.Button(row, text=ui_theme.with_icon(t("btn.send"), "➤"), command=self.send_chat, style="Accent.TButton").pack(side="left", padx=4)
         ttk.Button(row, text=t("ai.talk"), command=self.toggle_voice).pack(side="left")
+        ttk.Button(row, text=ui_theme.with_icon(t("ai.diag"), "🩺"), command=self.run_voice_diag).pack(side="left", padx=(4, 0))
         ttk.Button(row, text=ui_theme.with_icon(t("btn.clear"), "🧹"), command=self.clear_chat).pack(side="left", padx=4)
         self.vstatus = ttk.Label(f, text="", foreground=PAL["warning"]); self.vstatus.pack(anchor="w", padx=12)
 
@@ -2112,7 +2223,16 @@ class App:
             else:
                 self.finish_voice()
         except Exception as e:
+            log.exception("Microphone failed")
             self.results.put(("vstatus", t("err.mic", e=e)))
+
+    def run_voice_diag(self):
+        self.vstatus.config(text=t("ai.diag_running"))
+        def work():
+            rows = voice_diagnostics(self.cfg)
+            self.results.put(("chat", "sys", "\n".join(rows)))
+            self.results.put(("vstatus", ""))
+        threading.Thread(target=work, daemon=True).start()
 
     def finish_voice(self):
         if self.voice_busy: return
@@ -2126,6 +2246,7 @@ class App:
                 text = transcribe(audio, self.cfg)
                 self.results.put(("voice", text) if text else ("vstatus", t("ai.not_understood")))
             except Exception as e:
+                log.exception("Voice command failed")
                 self.results.put(("vstatus", t("err.stt", e=e)))
             finally:
                 self.voice_busy = False
@@ -2550,6 +2671,7 @@ class App:
         feed, source = res
         cur_name = self.cur["name"] if self.cur else None
         summary = meta_sync.apply(self.cfg, feed, source)
+        self.normalize_builds()
         for old, new in summary["renames"].items():         # ilerleme kayıtlarını yeni ada taşı
             if old in self.progress and new not in self.progress:
                 self.progress[new] = self.progress.pop(old)
@@ -2755,7 +2877,19 @@ class App:
 
     # ---------- Ayarlar ----------
     def build_settings(self):
-        f, st = ui_theme.scrollable(self.tabs["settings"], PAL["bg"]), self.cfg["settings"]
+        st = self.cfg["settings"]
+        # Ayarlar alt sekmelere ayrıldı: Genel · Tarama · Ekran ve oyun · OCR · Bindirme · Senkron · Kayıt
+        outer = self.tabs["settings"]
+        bar = ttk.Frame(outer); bar.pack(side="bottom", fill="x", padx=10, pady=8)
+        ttk.Button(bar, text=ui_theme.with_icon(t("set.save"), "💾"), command=self.save_settings, style="Accent.TButton").pack(side="left")
+        ttk.Label(bar, text=t("set.save_hint"), foreground=PAL["muted"]).pack(side="left", padx=12)
+        self.set_nb = ttk.Notebook(outer); self.set_nb.pack(fill="both", expand=True, padx=8, pady=(8, 0))
+        P = {}
+        for key, icon in (("general", "⚙"), ("scan", "🎯"), ("display", "🖥"), ("ocr", "🔍"), ("overlay", "🪟"),
+                          ("sync", "⭐"), ("logs", "📝")):
+            holder = ttk.Frame(self.set_nb); self.set_nb.add(holder, text=f" {icon} {t('setpage.' + key)} ")
+            P[key] = ui_theme.scrollable(holder, PAL["bg"])
+        f = P["general"]
         keys = ("hotkey", "keep_threshold", "consider_threshold", "overlay_seconds", "auto_interval_ms",
                 "ocr_lang", "tesseract_cmd", "log_max_kb", "log_backups")
         self.sv = {k: tk.StringVar(value=str(st.get(k, ""))) for k in keys + ("overlay_corner", "log_level")}
@@ -2778,7 +2912,7 @@ class App:
                   justify="left").pack(anchor="w", padx=8, pady=(0, 6))
 
         # ---- Meta build senkronu ----
-        mb = ttk.LabelFrame(f, text=t("meta.box")); mb.pack(fill="x", padx=10, pady=6)
+        mb = ttk.LabelFrame(P["sync"], text=t("meta.box")); mb.pack(fill="x", padx=10, pady=6)
         rm = ttk.Frame(mb); rm.pack(fill="x", padx=8, pady=6)
         self.bv["meta_sync"] = tk.BooleanVar(value=bool(st.get("meta_sync", True)))
         ttk.Checkbutton(rm, text=t("meta.enable"), variable=self.bv["meta_sync"]).pack(side="left")
@@ -2793,7 +2927,7 @@ class App:
                   justify="left").pack(anchor="w", padx=8, pady=(0, 6))
 
         # ---- Ekran ve oyun / display & game ----
-        self.build_display_box(f, st)
+        self.build_display_box(P, st)
 
         # ---- Görünüm / appearance ----
         ap = ttk.LabelFrame(f, text=t("set.appearance_box")); ap.pack(fill="x", padx=10, pady=6)
@@ -2815,7 +2949,7 @@ class App:
                   justify="left").pack(anchor="w", padx=8, pady=(0, 6))
 
         # ---- Tarama / scanning ----
-        gb = ttk.LabelFrame(f, text=t("set.scan_box")); gb.pack(fill="x", padx=10, pady=6)
+        gb = ttk.LabelFrame(P["scan"], text=t("set.scan_box")); gb.pack(fill="x", padx=10, pady=6)
         rows = [(t("mode.hotkey"), "hotkey"), (t("set.keep_threshold"), "keep_threshold"),
                 (t("set.consider_threshold"), "consider_threshold"), (t("set.overlay_seconds"), "overlay_seconds"),
                 (t("set.auto_interval"), "auto_interval_ms"), (t("set.ocr_lang"), "ocr_lang"),
@@ -2837,7 +2971,7 @@ class App:
             ttk.Checkbutton(gb, text=lab, variable=self.bv[k]).grid(row=8 + i, column=0, columnspan=2, sticky="w", padx=10)
 
         # ---- Günlük kayıt / logging ----
-        lg = ttk.LabelFrame(f, text=t("set.log_box")); lg.pack(fill="x", padx=10, pady=6)
+        lg = ttk.LabelFrame(P["logs"], text=t("set.log_box")); lg.pack(fill="x", padx=10, pady=6)
         r1 = ttk.Frame(lg); r1.pack(fill="x", padx=8, pady=6)
         ttk.Label(r1, text=t("set.log_level")).pack(side="left")
         ttk.Combobox(r1, textvariable=self.sv["log_level"], values=["DEBUG", "INFO", "WARNING", "ERROR"],
@@ -2847,11 +2981,10 @@ class App:
         ttk.Label(r1, text=t("set.log_backups")).pack(side="left", padx=(12, 2))
         ttk.Entry(r1, textvariable=self.sv["log_backups"], width=5).pack(side="left")
 
-        ttk.Button(f, text=t("set.save"), command=self.save_settings, style="Accent.TButton").pack(anchor="w", padx=12, pady=12)
 
     # ---------- Ekran ve oyun ----------
-    def build_display_box(self, f, st):
-        db = ttk.LabelFrame(f, text=t("disp.box")); db.pack(fill="x", padx=10, pady=6)
+    def build_display_box(self, P, st):
+        db = ttk.LabelFrame(P["display"], text=t("disp.box")); db.pack(fill="x", padx=10, pady=6)
         mw, mh = display.monitor_size()
         det = display.detect_profile(mw, mh)
         r1 = ttk.Frame(db); r1.pack(fill="x", padx=8, pady=(6, 2))
@@ -2864,7 +2997,10 @@ class App:
         self.prof_var = tk.StringVar(value=labels[self._prof_keys.index(cur)] if cur in self._prof_keys else labels[0])
         pcb = ttk.Combobox(r2, textvariable=self.prof_var, values=labels, width=34, state="readonly"); pcb.pack(side="left", padx=6)
         self._prof_labels = labels
-        pcb.bind("<<ComboboxSelected>>", lambda e: self._apply_profile_defaults())
+        pcb.bind("<<ComboboxSelected>>", lambda e: (self._apply_profile_defaults(), self._profile_warn()))
+        self.prof_warn = ttk.Label(db, text="", foreground=PAL["warning"], wraplength=900, justify="left")
+        self.prof_warn.pack(anchor="w", padx=12)
+        self._profile_warn()
 
         # oyun ayar dosyası (yalnız okuma)
         gx = ttk.Frame(db); gx.pack(fill="x", padx=8, pady=(8, 2))
@@ -2875,9 +3011,8 @@ class App:
         self.refresh_game_settings()
 
         # OCR ince ayar
-        oc = ttk.Frame(db); oc.pack(fill="x", padx=8, pady=(8, 2))
-        ttk.Label(oc, text="🔍 " + t("ocr.box"), style="Section.TLabel").pack(side="left")
-        o2 = ttk.Frame(db); o2.pack(fill="x", padx=8, pady=4)
+        ob = ttk.LabelFrame(P["ocr"], text=t("ocr.box")); ob.pack(fill="x", padx=10, pady=(10, 6))
+        o2 = ttk.Frame(ob); o2.pack(fill="x", padx=8, pady=4)
         ttk.Label(o2, text=t("ocr.threshold")).pack(side="left")
         self.ocr_thr = tk.IntVar(value=int(st.get("ocr_threshold", 170)))
         thr_lbl = ttk.Label(o2, text=str(self.ocr_thr.get()), width=4)
@@ -2886,7 +3021,7 @@ class App:
         thr_lbl.pack(side="left")
         ttk.Label(o2, text=t("ocr.scale")).pack(side="left", padx=(16, 2))
         self.ocr_scale_var = tk.StringVar(value=t("ocr.auto") if st.get("ocr_scale", "auto") == "auto" else str(st.get("ocr_scale")))
-        ttk.Combobox(o2, textvariable=self.ocr_scale_var, values=[t("ocr.auto"), "1.0", "1.25", "1.5", "1.75", "2.0", "2.5"],
+        ttk.Combobox(o2, textvariable=self.ocr_scale_var, values=[t("ocr.auto"), "1.0", "1.25", "1.5", "1.75", "2.0", "2.5", "3.0", "4.0", "6.0"],
                      width=8).pack(side="left")
         ttk.Label(o2, text="PSM").pack(side="left", padx=(16, 2))
         self.ocr_psm_var = tk.StringVar(value=str(st.get("ocr_psm", 6)))
@@ -2894,16 +3029,15 @@ class App:
         ttk.Label(o2, text=t("ocr.passes")).pack(side="left", padx=(16, 2))
         self.ocr_pass_var = tk.StringVar(value=str(st.get("ocr_passes", 3)))
         ttk.Combobox(o2, textvariable=self.ocr_pass_var, values=["1", "2", "3"], width=4, state="readonly").pack(side="left")
-        o3 = ttk.Frame(db); o3.pack(fill="x", padx=8, pady=4)
+        o3 = ttk.Frame(ob); o3.pack(fill="x", padx=8, pady=4)
         ttk.Button(o3, text=ui_theme.with_icon(t("ocr.calibrate"), "🎯"), command=self.auto_calibrate_ocr).pack(side="left")
         ttk.Button(o3, text=ui_theme.with_icon(t("ocr.preview"), "👁"), command=self.ocr_preview).pack(side="left", padx=8)
         self.ocr_msg = ttk.Label(o3, text="", foreground=PAL["muted"]); self.ocr_msg.pack(side="left", padx=8)
-        ttk.Label(db, text=t("ocr.note"), foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=12, pady=(0, 4))
+        ttk.Label(ob, text=t("ocr.note"), foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=12, pady=(0, 4))
 
         # bindirme
-        ov = ttk.Frame(db); ov.pack(fill="x", padx=8, pady=(8, 2))
-        ttk.Label(ov, text="🪟 " + t("overlay.box"), style="Section.TLabel").pack(side="left")
-        o4 = ttk.Frame(db); o4.pack(fill="x", padx=8, pady=(4, 8))
+        ovb = ttk.LabelFrame(P["overlay"], text=t("overlay.box")); ovb.pack(fill="x", padx=10, pady=(10, 6))
+        o4 = ttk.Frame(ovb); o4.pack(fill="x", padx=8, pady=(8, 8))
         ttk.Label(o4, text=t("overlay.mode")).pack(side="left")
         self.ov_mode = tk.StringVar(value=t("overlay.mode_card") if st.get("overlay_mode", "card") == "card" else t("overlay.mode_corner"))
         ttk.Combobox(o4, textvariable=self.ov_mode, values=[t("overlay.mode_card"), t("overlay.mode_corner")], width=24,
@@ -2915,6 +3049,12 @@ class App:
         self.ov_size = tk.DoubleVar(value=float(st.get("overlay_size", 1.0)))
         ttk.Scale(o4, from_=0.7, to=1.6, variable=self.ov_size, length=120).pack(side="left")
         ttk.Button(o4, text=ui_theme.with_icon(t("overlay.test"), "▶"), command=self.overlay_test).pack(side="left", padx=12)
+        ttk.Label(ovb, text=t("overlay.note"), foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=12, pady=(0, 8))
+
+    def _profile_warn(self):
+        key = self._profile_key()
+        w = display.profile_warning(key, *display.monitor_size()) if key != "auto" else None
+        self.prof_warn.config(text=("⚠ " + t(w[0], **w[1])) if w else "")
 
     def _profile_key(self):
         try: return self._prof_keys[self._prof_labels.index(self.prof_var.get())]

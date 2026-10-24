@@ -52,6 +52,12 @@ How the feeds are researched and scored: [`meta/UPDATER.md`](meta/UPDATER.md).
 
 **Recommended game settings:** English game language, HDR off, borderless window, game resolution = monitor resolution.
 
+## Game library / Oyun kütüphanesi
+
+`meta/game_data.json` lists every gear set, brand, named and exotic item (with slot), weapon (with type), weapon and gear talents, gear mods and weapon mods, skills, specialization weapons and attribute max values. The app uses it to tell gear from weapons, mods, cosmetics and specialization weapons, to ignore expertise bonuses, and to merge scrolled (long) item cards.
+
+Data sources: [The Division Wiki](https://thedivision.fandom.com) and [mx-division-builds](https://github.com/mxswat/mx-division-builds) by mxswat (data under CC BY-NC-SA 4.0 — non-commercial use with attribution).
+
 ## License
 
 MIT — see [`LICENSE`](LICENSE).

@@ -85,11 +85,31 @@ class Scene3D(tk.Canvas):
     def color_of(self, color, tag):
         return color
 
+    bg_top, bg_bottom = None, None          # dikey gradyan (ör. "#1b1f27", "#0d0f13")
+    anchors = ()                            # [(etiket, (x, y, z), yazı)] → 3D noktaya bağlı etiket
+
+    def _gradient(self, w, h):
+        if not self.bg_top: return
+        a, b = _hex(self.bg_top), _hex(self.bg_bottom or self.bg_top)
+        steps = 28
+        for i in range(steps):
+            k = i / (steps - 1)
+            c = "#%02x%02x%02x" % tuple(int(a[j] + (b[j] - a[j]) * k) for j in range(3))
+            self.create_rectangle(0, h * i / steps, w, h * (i + 1) / steps + 1, fill=c, outline="")
+
+    def label_color(self, tag):
+        return "#cfd5df"
+
+    def draw_under(self, w, h, f):
+        pass
+
     def render(self):
         if not self._alive: return
         self.delete("all"); self._ids = {}
         w, h = max(50, self.winfo_width()), max(50, self.winfo_height())
+        self._gradient(w, h)
         f = min(w, h) * 1.15 * self.zoom
+        self.draw_under(w, h, f)
         lx, ly, lz = self.light; ln = math.sqrt(lx * lx + ly * ly + lz * lz); lx, ly, lz = lx / ln, ly / ln, lz / ln
         polys = []
         for pts, color, tag in self.faces:
@@ -108,6 +128,16 @@ class Scene3D(tk.Canvas):
             if tag: self._ids[i] = tag
         for txt, x, y, col in self.labels:
             self.create_text(x, y, text=txt, fill=col, font=("Segoe UI", 9), anchor="nw")
+        for tag, p3, txt in self.anchors:               # yuva etiketleri: parçadan dışarı çizgi + yazı
+            x, y, z, _ = self.project(p3, w, h, f)
+            side = 1 if x >= w / 2 else -1
+            lx = x + side * 34; ly = y - 10
+            col = self.label_color(tag)
+            self.create_line(x, y, lx, ly, lx + side * 8, ly, fill=col, width=1)
+            self.create_oval(x - 2.5, y - 2.5, x + 2.5, y + 2.5, fill=col, outline="")
+            i = self.create_text(lx + side * 11, ly, text=txt, fill=col, font=("Segoe UI Semibold", 9),
+                                 anchor="w" if side > 0 else "e")
+            self._ids[i] = tag
 
 
 SLOT_POS = {}
@@ -116,32 +146,72 @@ SLOT_POS = {}
 class AgentView(Scene3D):
     """3D ajan modeli; yuva durumları: {"Mask": "ok"|"miss"|"off", …}."""
     COLORS = {"ok": "#22c55e", "miss": "#ef4444", "off": "#4b5263", "sel": "#ff6d10"}
+    LABELS = {}                              # {"Mask": "Maske", …} — arayüz dilinde yuva adları (dışarıdan verilir)
 
     def __init__(self, parent, **kw):
         super().__init__(parent, **kw)
         self.status, self.selected, self._pulse = {}, None, 0.0
-        self.center_y, self.zoom = 1.0, 1.75
-        body, dark, skin = "#2a2f3a", "#1c2029", "#3a3f4b"
+        self.center_y, self.zoom = 1.05, 1.55
+        self.bg_top, self.bg_bottom = "#1d2230", "#0b0d12"
+        cloth, cloth2, skin, boot, metal = "#2c3340", "#232934", "#6b5446", "#16191f", "#3b414d"
         F = []
-        F += box(0, 2.15, 0, 0.55, 0.6, 0.55, skin)                       # baş
-        F += box(0, 2.05, -0.3, 0.6, 0.38, 0.12, "#555", "Mask")          # maske (yüz önü)
-        F += box(0, 1.35, 0, 1.0, 1.0, 0.5, body)                         # gövde
-        F += box(0, 1.4, -0.29, 0.95, 0.85, 0.1, "#555", "Chest")         # zırh yeleği
-        F += box(0, 1.45, 0.42, 0.8, 0.9, 0.35, "#555", "Backpack")       # sırt çantası
+        # baş + kask
+        F += box(0, 2.18, 0, 0.42, 0.48, 0.42, skin)
+        F += box(0, 2.45, 0.02, 0.5, 0.14, 0.5, cloth2)                      # bere / kep
+        F += box(0, 1.92, 0, 0.2, 0.12, 0.2, skin)                           # boyun
+        F += box(0, 2.1, -0.24, 0.46, 0.26, 0.1, "#555", "Mask")              # maske
+        # gövde
+        F += box(0, 1.45, 0, 0.82, 0.8, 0.42, cloth)                         # gövde üst
+        F += box(0, 0.98, 0, 0.7, 0.2, 0.38, cloth2)                         # bel / kemer
+        F += box(0, 1.5, -0.25, 0.86, 0.66, 0.1, "#555", "Chest")             # yelek ön plaka
+        F += box(0, 1.5, 0.25, 0.86, 0.66, 0.08, "#555", "Chest")             # yelek arka
+        F += box(0, 1.5, 0.48, 0.66, 0.78, 0.34, "#555", "Backpack")          # sırt çantası
+        F += box(0, 1.98, 0.5, 0.5, 0.16, 0.26, "#555", "Backpack")           # çanta üst rulo
         for sx in (-1, 1):
-            F += box(0.68 * sx, 1.35, 0, 0.3, 0.9, 0.32, body)            # kollar
-            F += box(0.7 * sx, 0.78, 0, 0.34, 0.26, 0.36, "#555", "Gloves")
-            F += box(0.25 * sx, 0.35, 0, 0.36, 1.0, 0.38, dark)           # bacaklar
-            F += box(0.25 * sx, 0.3, -0.21, 0.34, 0.24, 0.08, "#555", "Kneepads")
-        F += box(0.62, 0.85, -0.02, 0.18, 0.42, 0.26, "#555", "Holster")  # kılıf (sağ kalça)
-        F += box(-0.62, 0.92, 0.0, 0.12, 0.34, 0.2, "#555", "Sidearm")    # tabanca (sol kalça)
-        F += box(-0.2, 1.25, -0.55, 1.6, 0.16, 0.14, "#555", "Weapon")    # ana silah (göğüs önünde)
-        F += box(0, -0.2, 0, 1.2, 0.06, 0.8, "#15181f")                   # zemin plakası
+            F += box(0.55 * sx, 1.74, 0, 0.32, 0.18, 0.4, cloth2)            # omuz
+            F += box(0.6 * sx, 1.45, 0, 0.22, 0.48, 0.24, cloth)             # üst kol
+            F += box(0.62 * sx, 1.05, -0.04, 0.2, 0.4, 0.22, cloth2)         # ön kol
+            F += box(0.63 * sx, 0.78, -0.06, 0.24, 0.2, 0.26, "#555", "Gloves")
+            F += box(0.22 * sx, 0.62, 0, 0.3, 0.52, 0.32, cloth)             # uyluk
+            F += box(0.22 * sx, 0.12, 0, 0.27, 0.48, 0.28, cloth2)           # baldır
+            F += box(0.22 * sx, 0.36, -0.18, 0.28, 0.2, 0.08, "#555", "Kneepads")
+            F += box(0.22 * sx, -0.18, -0.04, 0.3, 0.14, 0.4, boot)          # bot
+        F += box(0.43, 0.62, -0.02, 0.12, 0.34, 0.24, "#555", "Holster")      # kılıf (sağ uyluk)
+        F += box(0.46, 0.78, -0.02, 0.1, 0.16, 0.12, metal)                  # tabanca kabzası kılıfta
+        F += box(-0.43, 0.98, 0.0, 0.08, 0.22, 0.14, "#555", "Sidearm")       # tabanca (sol bel)
+        # ana silah: gövde, namlu, şarjör, dipçik, nişangah
+        F += box(-0.15, 1.28, -0.5, 1.0, 0.14, 0.12, "#555", "Weapon")
+        F += box(-0.82, 1.3, -0.5, 0.4, 0.05, 0.05, "#555", "Weapon")
+        F += box(-0.05, 1.12, -0.5, 0.1, 0.2, 0.08, "#555", "Weapon")
+        F += box(0.45, 1.3, -0.5, 0.26, 0.12, 0.1, "#555", "Weapon")
+        F += box(-0.15, 1.39, -0.5, 0.18, 0.07, 0.07, "#555", "Weapon")
+        # zemin: koyu disk + turuncu halka
+        F += box(0, -0.29, 0, 1.25, 0.04, 1.25, "#12151b")
         self.faces = F
+        self.anchors = [("Mask", (0, 2.1, -0.3), "Mask"), ("Chest", (0.3, 1.6, -0.31), "Chest"),
+                        ("Backpack", (-0.3, 1.7, 0.66), "Backpack"), ("Gloves", (0.63, 0.78, -0.2), "Gloves"),
+                        ("Holster", (0.5, 0.6, -0.15), "Holster"), ("Kneepads", (-0.22, 0.36, -0.23), "Kneepads"),
+                        ("Weapon", (-0.9, 1.3, -0.52), "Weapon"), ("Sidearm", (-0.48, 0.98, 0.0), "Sidearm")]
+
+    def set_labels(self, names):
+        self.anchors = [(tag, p, names.get(tag, txt)) for tag, p, txt in self.anchors]
 
     def set_status(self, status, selected=None):
         self.status, self.selected = dict(status), selected
         self.render()
+
+    def label_color(self, tag):
+        if tag == self.selected: return self.COLORS["sel"]
+        st = self.status.get(tag, "off")
+        return {"ok": "#4ade80", "miss": "#f87171", "off": "#8d95a5"}.get(st, "#cfd5df")
+
+    def draw_under(self, w, h, f):
+        pts = []
+        for a in range(0, 361, 10):                                       # zemin halkası (turuncu, hafif nabız)
+            r = 0.8 + 0.03 * math.sin(self._pulse * 0.4)
+            x, y, z, _ = self.project((r * math.cos(math.radians(a)), -0.27, r * math.sin(math.radians(a))), w, h, f)
+            pts += [x, y]
+        self.create_line(*pts, fill="#ff6d10", width=2, smooth=True)
 
     def color_of(self, color, tag):
         if not tag: return color
@@ -165,8 +235,9 @@ class Bars3D(Scene3D):
         super().__init__(parent, **kw)
         self.yaw, self.pitch = 0.75, -0.55
         self.auto_spin = False
+        self.bg_top, self.bg_bottom = "#1d2230", "#0b0d12"
         self.center_y = 0.3
-        self.zoom = 1.45
+        self.zoom = 1.2
 
     def set_data(self, rows, cols, values):
         """values[r][c] = 0..100 ya da None."""
@@ -180,7 +251,7 @@ class Bars3D(Scene3D):
                 if v is None:
                     F += box(x, -0.02, z, s * 0.7, 0.04, s * 0.7, "#2a2f3a")
                     continue
-                hgt = max(0.04, v / 100 * 2.2)
+                hgt = max(0.04, v / 100 * 1.5)
                 col = "#22c55e" if v >= 70 else "#eab308" if v >= 40 else "#ef4444"
                 F += box(x, hgt / 2 - 0.4, z, s * 0.7, hgt, s * 0.7, col, f"{rows[r]} · {cols[c]}: {v}%")
         F += box(0, -0.45, 0, nc * s + 0.2, 0.05, nr * s + 0.2, "#15181f")

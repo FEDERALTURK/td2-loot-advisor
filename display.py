@@ -29,6 +29,12 @@ def set_dpi_aware():
 # ocr_scale: kart görüntüsünün büyütme oranı; threshold: yazı/zemin ayırma eşiği (0-255);
 # card_w: kartın ekran genişliğine oranı (kart bulunamazsa tahmin); ui: arayüz/bindirme ölçeği
 PROFILES = {
+    "426x240": {"label": "426×240 (240p — OCR güvenilmez / unreliable)", "ocr_scale": 6.0, "threshold": 150, "card_w": 0.30, "ui": 0.5, "low": True},
+    "640x480": {"label": "640×480 (480p 4:3)", "ocr_scale": 4.0, "threshold": 155, "card_w": 0.32, "ui": 0.6, "low": True},
+    "854x480": {"label": "854×480 (480p 16:9)", "ocr_scale": 4.0, "threshold": 155, "card_w": 0.30, "ui": 0.6, "low": True},
+    "1280x720": {"label": "1280×720 (720p HD)", "ocr_scale": 3.0, "threshold": 160, "card_w": 0.28, "ui": 0.75},
+    "1366x768": {"label": "1366×768 (WXGA)", "ocr_scale": 2.75, "threshold": 160, "card_w": 0.28, "ui": 0.8},
+    "1600x900": {"label": "1600×900 (HD+)", "ocr_scale": 2.5, "threshold": 162, "card_w": 0.27, "ui": 0.9},
     "1920x1080": {"label": "1920×1080 (16:9 Full HD)", "ocr_scale": 2.0, "threshold": 165, "card_w": 0.27, "ui": 1.0},
     "2560x1080": {"label": "2560×1080 (21:9)", "ocr_scale": 2.0, "threshold": 165, "card_w": 0.20, "ui": 1.0},
     "2560x1440": {"label": "2560×1440 (16:9 QHD)", "ocr_scale": 1.5, "threshold": 170, "card_w": 0.21, "ui": 1.2},
@@ -37,6 +43,17 @@ PROFILES = {
     "5120x1440": {"label": "5120×1440 (32:9)", "ocr_scale": 1.5, "threshold": 170, "card_w": 0.11, "ui": 1.2},
     "3840x2160": {"label": "3840×2160 (16:9 4K)", "ocr_scale": 1.0, "threshold": 175, "card_w": 0.21, "ui": 1.6},
 }
+
+
+def profile_warning(key, mon_w, mon_h):
+    """Seçilen profil monitöre uymuyorsa ya da OCR için çok düşükse uyarı anahtarı."""
+    p = PROFILES.get(key)
+    if not p: return None
+    if p.get("low"): return ("disp.low_res", {})
+    w, h = map(int, key.split("x"))
+    if (w, h) != (mon_w, mon_h) and abs(h - mon_h) > 100:
+        return ("disp.profile_mismatch", {"prof": p["label"], "mon": f"{mon_w}×{mon_h}"})
+    return None
 
 
 def detect_profile(width, height):

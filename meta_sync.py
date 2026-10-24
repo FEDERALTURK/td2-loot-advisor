@@ -107,6 +107,7 @@ def validate(feed, known_attrs):
             "sets_or_brands": [_text(s, 60) for s in (b.get("sets_or_brands") or [])[:6] if _text(s, 60)],
             "set_bonus": round(_num(b.get("set_bonus"), 0, 50, 0), 1),
             "attributes": attrs, "talents": talents,
+            "items": [_text(x, 60) for x in (b.get("items") or [])[:8] if _text(x, 60)],
             "meta": {"mode": _text(b.get("mode"), 60), "role": _text(b.get("role"), 20),
                      "popularity": int(_num(b.get("popularity"), 0, 100, 0)),
                      "summary": {str(l)[:5]: _text(s, 300) for l, s in (b.get("summary") or {}).items()},
@@ -155,7 +156,7 @@ def merge(builds, feed, hidden=()):
 
 
 def _comparable(b):
-    return json.dumps({k: b.get(k) for k in ("name", "sets_or_brands", "set_bonus", "attributes", "talents", "meta")},
+    return json.dumps({k: b.get(k) for k in ("name", "sets_or_brands", "set_bonus", "attributes", "talents", "items", "meta")},
                       sort_keys=True, ensure_ascii=False)
 
 
