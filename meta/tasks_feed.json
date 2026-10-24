@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "version": "2026-10-24.3",
-  "updated": "2026-10-23T23:30:00Z",
+  "version": "2026-10-24.4",
+  "updated": "2026-10-24T01:36:28Z",
   "season": "Year 8 Season 3 – Red Horizon",
   "resets": {
     "daily_hour_utc": 8,
@@ -345,6 +345,105 @@
         "ru": "С The Crooked Man придётся сразиться трижды. ECHO: сбейте 5 фальшивых воронов, мигающих красным (крыши, флагштоки; места меняются; помогает комната видеонаблюдения в больнице), чтобы открыть подвал. Трофей на рюкзак: в морге похоронного бюро введите 4 звуковые волны ноутбуков в порядке считалки.",
         "pl": "Z The Crooked Man walczysz trzy razy. ECHO: zestrzel 5 fałszywych kruków migających na czerwono (dachy, maszty; losowe miejsca; pomaga pokój CCTV w szpitalu), by otworzyć piwnicę. Trofeum na plecak: w kostnicy domu pogrzebowego wprowadź 4 fale dźwiękowe laptopów w kolejności z wyliczanki.",
         "nl": "Je vecht drie keer tegen The Crooked Man. ECHO: schiet de 5 rood knipperende nepraven neer (daken, vlaggenmasten; wisselende plekken; de CCTV-kamer in het ziekenhuis helpt) om de kelder te openen. Rugzaktrofee: voer in het mortuarium van de uitvaartonderneming de 4 laptop-golfpatronen in de volgorde van het rijmpje in."
+      }
+    },
+    {
+      "id": "y8s3-redmoon-revenant-bounties",
+      "cat": "projects",
+      "kind": "seasonal",
+      "until": "2026-11-03T08:00Z",
+      "source": {
+        "url": "https://www.ubisoft.com/en-gb/game/the-division/the-division-2/news-updates/7uzKuy4iB0MtOJfsXAr3TO/tuy8s32-red-moon-unleashed-creator-collaboration-escalation-updates-more"
+      },
+      "text": {
+        "en": "Red Moon Unleashed (until Nov 3): defeat all 6 Revenant Bounty bosses for the event commendation and the Necromancer Arm Patch",
+        "tr": "Red Moon Unleashed (3 Kasım'a kadar): etkinlik madalyası ve Necromancer Arm Patch için 6 Revenant Bounty bossunun hepsini yen",
+        "de": "Red Moon Unleashed (bis 3. Nov.): alle 6 Revenant-Bounty-Bosse besiegen für die Event-Belobigung und den Necromancer Arm Patch",
+        "fr": "Red Moon Unleashed (jusqu'au 3 nov.) : vaincre les 6 boss des Revenant Bounties pour la distinction de l'événement et le Necromancer Arm Patch",
+        "es": "Red Moon Unleashed (hasta el 3 nov.): derrota a los 6 jefes de las Revenant Bounties para la mención del evento y el Necromancer Arm Patch",
+        "it": "Red Moon Unleashed (fino al 3 nov.): sconfiggi tutti i 6 boss delle Revenant Bounty per l'encomio dell'evento e il Necromancer Arm Patch",
+        "pt": "Red Moon Unleashed (até 3 nov.): derrote os 6 chefes das Revenant Bounties para a comenda do evento e o Necromancer Arm Patch",
+        "ru": "Red Moon Unleashed (до 3 нояб.): победите всех 6 боссов Revenant Bounty — награда события и нашивка Necromancer Arm Patch",
+        "pl": "Red Moon Unleashed (do 3 lis.): pokonaj wszystkich 6 bossów Revenant Bounty, aby zdobyć wyróżnienie wydarzenia i Necromancer Arm Patch",
+        "nl": "Red Moon Unleashed (tot 3 nov.): versla alle 6 Revenant Bounty-bazen voor de eventonderscheiding en de Necromancer Arm Patch"
+      },
+      "how": {
+        "en": "Revenant Bounties drop from Moon Cultists, which replace normal patrols in the open world. Each finished bounty gives one Event Key and a chance at its featured exotic or an Exotic Cache. Bounty kills do not count toward Cultist key kills.",
+        "tr": "Revenant Bounty'ler açık dünyada normal devriyelerin yerini alan Moon Cultist'lerden düşer. Biten her bounty 1 Event Key ve öne çıkan egzotik ya da Exotic Cache şansı verir. Bounty öldürmeleri Cultist anahtar sayacına yazılmaz.",
+        "de": "Revenant Bounties droppen von Moon Cultists, die in der offenen Welt normale Patrouillen ersetzen. Jede erledigte Bounty gibt einen Event Key und eine Chance auf ihr Exotic oder einen Exotic Cache. Bounty-Kills zählen nicht für Cultist-Keys.",
+        "fr": "Les Revenant Bounties tombent sur les Moon Cultists, qui remplacent les patrouilles en monde ouvert. Chaque bounty terminée donne une Event Key et une chance d'obtenir son exotique ou un Exotic Cache. Ses éliminations ne comptent pas pour les clés Cultist.",
+        "es": "Las Revenant Bounties caen de los Moon Cultists, que sustituyen a las patrullas en el mundo abierto. Cada una completada da una Event Key y opción a su exótica o a un Exotic Cache. Sus bajas no cuentan para las llaves de Cultists.",
+        "it": "Le Revenant Bounty cadono dai Moon Cultist, che sostituiscono le pattuglie nel mondo aperto. Ogni bounty completata dà una Event Key e una possibilità per la sua esotica o un Exotic Cache. Le sue uccisioni non contano per le chiavi Cultist.",
+        "pt": "As Revenant Bounties caem dos Moon Cultists, que substituem as patrulhas no mundo aberto. Cada uma concluída dá uma Event Key e chance da exótica destacada ou de um Exotic Cache. As abates dela não contam para as chaves de Cultists.",
+        "ru": "Revenant Bounty выпадают с Moon Cultist, которые заменяют обычные патрули в открытом мире. Каждая выполненная даёт Event Key и шанс на её экзотику или Exotic Cache. Убийства в ней не идут в счёт ключей за культистов.",
+        "pl": "Revenant Bounty wypadają z Moon Cultists, którzy zastępują zwykłe patrole w otwartym świecie. Każda ukończona daje Event Key i szansę na jej egzotyk lub Exotic Cache. Zabójstwa w niej nie liczą się do kluczy za kultystów.",
+        "nl": "Revenant Bounties vallen van Moon Cultists, die in de open wereld de gewone patrouilles vervangen. Elke voltooide bounty geeft een Event Key en kans op het bijbehorende exotic of een Exotic Cache. Kills ervan tellen niet mee voor Cultist-keys."
+      }
+    },
+    {
+      "id": "y8s3-redmoon-key-track",
+      "cat": "projects",
+      "kind": "seasonal",
+      "until": "2026-11-03T08:00Z",
+      "source": {
+        "url": "https://www.theclick.gg/the-division-2-red-moon-unleashed-event-keys/"
+      },
+      "text": {
+        "en": "Red Moon Unleashed: contribute up to 200 Red Moon Keys to the personal track (Scorpio at 20, Caretaker at 100, backpack trophy at 200)",
+        "tr": "Red Moon Unleashed: kişisel ilerlemeye 200'e kadar Red Moon Key bağışla (20'de Scorpio, 100'de Caretaker, 200'de sırt çantası trophy)",
+        "de": "Red Moon Unleashed: bis zu 200 Red Moon Keys in den persönlichen Fortschritt einzahlen (Scorpio bei 20, Caretaker bei 100, Rucksack-Trophäe bei 200)",
+        "fr": "Red Moon Unleashed : verser jusqu'à 200 Red Moon Keys dans la progression personnelle (Scorpio à 20, Caretaker à 100, trophée de sac à 200)",
+        "es": "Red Moon Unleashed: aporta hasta 200 Red Moon Keys al progreso personal (Scorpio a las 20, Caretaker a las 100, trofeo de mochila a las 200)",
+        "it": "Red Moon Unleashed: versa fino a 200 Red Moon Keys nel percorso personale (Scorpio a 20, Caretaker a 100, trofeo zaino a 200)",
+        "pt": "Red Moon Unleashed: contribua até 200 Red Moon Keys na trilha pessoal (Scorpio com 20, Caretaker com 100, troféu de mochila com 200)",
+        "ru": "Red Moon Unleashed: вложите до 200 Red Moon Keys в личную шкалу (Scorpio за 20, Caretaker за 100, трофей для рюкзака за 200)",
+        "pl": "Red Moon Unleashed: przekaż do 200 Red Moon Keys na ścieżkę osobistą (Scorpio przy 20, Caretaker przy 100, trofeum plecaka przy 200)",
+        "nl": "Red Moon Unleashed: draag tot 200 Red Moon Keys bij aan je persoonlijke track (Scorpio bij 20, Caretaker bij 100, rugzaktrofee bij 200)"
+      },
+      "how": {
+        "en": "Kill Moon Cultists on Heroic: 10 kills per key, halved by the Daily Key Boost for your first 150 kills each day (resets 08:00 UTC). Necromancer and Risen Hunter bosses give a key too. Unused keys disappear when the event ends.",
+        "tr": "Moon Cultist'leri Heroic'te öldür: anahtar başına 10 öldürme, Daily Key Boost her gün ilk 150 öldürmede bunu yarıya indirir (08:00 UTC sıfırlanır). Necromancer ve Risen Hunter bossları da anahtar verir. Etkinlik bitince harcanmamış anahtarlar silinir.",
+        "de": "Moon Cultists auf Heroisch töten: 10 Kills pro Key, der Daily Key Boost halbiert das für die ersten 150 Kills pro Tag (Reset 08:00 UTC). Necromancer- und Risen-Hunter-Bosse geben ebenfalls einen Key. Unbenutzte Keys verfallen zum Eventende.",
+        "fr": "Tuez des Moon Cultists en Héroïque : 10 éliminations par clé, divisées par deux par le Daily Key Boost pour les 150 premières du jour (reset 08:00 UTC). Les boss Necromancer et Risen Hunter donnent aussi une clé. Les clés non utilisées disparaissent à la fin.",
+        "es": "Mata Moon Cultists en Heroico: 10 bajas por llave, a la mitad con el Daily Key Boost en tus primeras 150 bajas del día (reinicio 08:00 UTC). Los jefes Necromancer y Risen Hunter también dan llave. Las llaves sin usar se pierden al terminar.",
+        "it": "Uccidi Moon Cultist a Eroico: 10 uccisioni per chiave, dimezzate dal Daily Key Boost per le prime 150 del giorno (reset 08:00 UTC). Anche i boss Necromancer e Risen Hunter danno una chiave. Le chiavi non usate spariscono a fine evento.",
+        "pt": "Mate Moon Cultists no Heroico: 10 abates por chave, metade com o Daily Key Boost nos primeiros 150 do dia (reset 08:00 UTC). Os chefes Necromancer e Risen Hunter também dão chave. Chaves não usadas somem no fim do evento.",
+        "ru": "Убивайте Moon Cultist на «Героической»: 10 убийств за ключ, Daily Key Boost вдвое снижает это для первых 150 убийств в день (сброс 08:00 UTC). Боссы Necromancer и Risen Hunter тоже дают ключ. Неиспользованные ключи сгорают в конце события.",
+        "pl": "Zabijaj Moon Cultists na Heroicznym: 10 zabójstw na klucz, Daily Key Boost zmniejsza to o połowę dla pierwszych 150 dziennie (reset 08:00 UTC). Bossowie Necromancer i Risen Hunter też dają klucz. Niewykorzystane klucze przepadają po wydarzeniu.",
+        "nl": "Dood Moon Cultists op Heroic: 10 kills per key, gehalveerd door de Daily Key Boost voor je eerste 150 kills per dag (reset 08:00 UTC). Necromancer- en Risen Hunter-bazen geven ook een key. Ongebruikte keys vervallen aan het eind."
+      }
+    },
+    {
+      "id": "y8s3-creator-collab-projects",
+      "cat": "projects",
+      "kind": "seasonal",
+      "until": "2026-11-03T08:00Z",
+      "source": {
+        "url": "https://www.ubisoft.com/en-gb/game/the-division/the-division-2/news-updates/7uzKuy4iB0MtOJfsXAr3TO/tuy8s32-red-moon-unleashed-creator-collaboration-escalation-updates-more"
+      },
+      "text": {
+        "en": "Creator Collaboration (PurePrime, SOLIDFPS, Widdz): 6 projects per creator, one unlocks each day, done in order; open until Nov 3",
+        "tr": "Creator Collaboration (PurePrime, SOLIDFPS, Widdz): her yayıncı için 6 proje, her gün biri açılır, sırayla yapılır; 3 Kasım'a kadar açık",
+        "de": "Creator Collaboration (PurePrime, SOLIDFPS, Widdz): 6 Projekte pro Creator, täglich wird eins freigeschaltet, in Reihenfolge; offen bis 3. Nov.",
+        "fr": "Creator Collaboration (PurePrime, SOLIDFPS, Widdz) : 6 projets par créateur, un se débloque chaque jour, à faire dans l'ordre ; ouvert jusqu'au 3 nov.",
+        "es": "Creator Collaboration (PurePrime, SOLIDFPS, Widdz): 6 proyectos por creador, uno se desbloquea cada día, en orden; abierto hasta el 3 nov.",
+        "it": "Creator Collaboration (PurePrime, SOLIDFPS, Widdz): 6 progetti per creator, uno si sblocca ogni giorno, in ordine; aperto fino al 3 nov.",
+        "pt": "Creator Collaboration (PurePrime, SOLIDFPS, Widdz): 6 projetos por criador, um libera por dia, em ordem; aberto até 3 nov.",
+        "ru": "Creator Collaboration (PurePrime, SOLIDFPS, Widdz): по 6 проектов на автора, каждый день открывается один, по порядку; доступно до 3 нояб.",
+        "pl": "Creator Collaboration (PurePrime, SOLIDFPS, Widdz): 6 projektów na twórcę, codziennie odblokowuje się jeden, po kolei; dostępne do 3 lis.",
+        "nl": "Creator Collaboration (PurePrime, SOLIDFPS, Widdz): 6 projecten per creator, elke dag komt er één vrij, op volgorde; open tot 3 nov."
+      },
+      "how": {
+        "en": "Each project has five activities inside one named zone. Projects stay available after unlocking, so you can catch up on missed days before Nov 3.",
+        "tr": "Her projede tek bir bölgede beş etkinlik var. Açılan projeler kalır; kaçırdığın günleri 3 Kasım'dan önce telafi edebilirsin.",
+        "de": "Jedes Projekt hat fünf Aktivitäten in einer bestimmten Zone. Freigeschaltete Projekte bleiben verfügbar, verpasste Tage lassen sich bis 3. Nov. nachholen.",
+        "fr": "Chaque projet comporte cinq activités dans une zone précise. Les projets débloqués restent disponibles : rattrapez les jours manqués avant le 3 nov.",
+        "es": "Cada proyecto tiene cinco actividades en una zona concreta. Los proyectos desbloqueados siguen disponibles, así que puedes ponerte al día antes del 3 nov.",
+        "it": "Ogni progetto ha cinque attività in una zona specifica. I progetti sbloccati restano disponibili: recupera i giorni persi prima del 3 nov.",
+        "pt": "Cada projeto tem cinco atividades em uma zona específica. Projetos liberados continuam disponíveis; recupere dias perdidos antes de 3 nov.",
+        "ru": "В каждом проекте пять заданий в одной указанной зоне. Открытые проекты не исчезают — пропущенные дни можно догнать до 3 нояб.",
+        "pl": "Każdy projekt ma pięć aktywności w jednej wskazanej strefie. Odblokowane projekty zostają, więc zaległe dni nadrobisz przed 3 lis.",
+        "nl": "Elk project heeft vijf activiteiten in één aangewezen zone. Vrijgespeelde projecten blijven beschikbaar, dus gemiste dagen kun je vóór 3 nov. inhalen."
       }
     }
   ],
@@ -821,6 +920,38 @@
         "nl": "Projecten voor invaded-/prioriteitsmissies vragen bepaalde hoofdmissies op hoge moeilijkheid (Hard, Challenging, Legendary, Heroic). Start ze via de missielijst op de kaart (Invaded-filter) met de gevraagde moeilijkheid."
       },
       "source": "https://thedivision.fandom.com/wiki/Projects"
+    },
+    {
+      "id": "red-moon",
+      "match": [
+        "red moon",
+        "moon cultist",
+        "revenant",
+        "kızıl ay",
+        "roter mond",
+        "lune rouge",
+        "luna roja",
+        "luna rossa",
+        "lua vermelha",
+        "красная луна",
+        "czerwony księżyc",
+        "rode maan"
+      ],
+      "tip": {
+        "en": "Kill Moon Cultists on Heroic: 10 kills per key, halved by the Daily Key Boost for your first 150 kills each day (resets 08:00 UTC). Necromancer and Risen Hunter bosses give a key too. Unused keys disappear when the event ends.",
+        "tr": "Moon Cultist'leri Heroic'te öldür: anahtar başına 10 öldürme, Daily Key Boost her gün ilk 150 öldürmede bunu yarıya indirir (08:00 UTC sıfırlanır). Necromancer ve Risen Hunter bossları da anahtar verir. Etkinlik bitince harcanmamış anahtarlar silinir.",
+        "de": "Moon Cultists auf Heroisch töten: 10 Kills pro Key, der Daily Key Boost halbiert das für die ersten 150 Kills pro Tag (Reset 08:00 UTC). Necromancer- und Risen-Hunter-Bosse geben ebenfalls einen Key. Unbenutzte Keys verfallen zum Eventende.",
+        "fr": "Tuez des Moon Cultists en Héroïque : 10 éliminations par clé, divisées par deux par le Daily Key Boost pour les 150 premières du jour (reset 08:00 UTC). Les boss Necromancer et Risen Hunter donnent aussi une clé. Les clés non utilisées disparaissent à la fin.",
+        "es": "Mata Moon Cultists en Heroico: 10 bajas por llave, a la mitad con el Daily Key Boost en tus primeras 150 bajas del día (reinicio 08:00 UTC). Los jefes Necromancer y Risen Hunter también dan llave. Las llaves sin usar se pierden al terminar.",
+        "it": "Uccidi Moon Cultist a Eroico: 10 uccisioni per chiave, dimezzate dal Daily Key Boost per le prime 150 del giorno (reset 08:00 UTC). Anche i boss Necromancer e Risen Hunter danno una chiave. Le chiavi non usate spariscono a fine evento.",
+        "pt": "Mate Moon Cultists no Heroico: 10 abates por chave, metade com o Daily Key Boost nos primeiros 150 do dia (reset 08:00 UTC). Os chefes Necromancer e Risen Hunter também dão chave. Chaves não usadas somem no fim do evento.",
+        "ru": "Убивайте Moon Cultist на «Героической»: 10 убийств за ключ, Daily Key Boost вдвое снижает это для первых 150 убийств в день (сброс 08:00 UTC). Боссы Necromancer и Risen Hunter тоже дают ключ. Неиспользованные ключи сгорают в конце события.",
+        "pl": "Zabijaj Moon Cultists na Heroicznym: 10 zabójstw na klucz, Daily Key Boost zmniejsza to o połowę dla pierwszych 150 dziennie (reset 08:00 UTC). Bossowie Necromancer i Risen Hunter też dają klucz. Niewykorzystane klucze przepadają po wydarzeniu.",
+        "nl": "Dood Moon Cultists op Heroic: 10 kills per key, gehalveerd door de Daily Key Boost voor je eerste 150 kills per dag (reset 08:00 UTC). Necromancer- en Risen Hunter-bazen geven ook een key. Ongebruikte keys vervallen aan het eind."
+      },
+      "source": {
+        "url": "https://www.theclick.gg/the-division-2-red-moon-unleashed-event-keys/"
+      }
     }
   ],
   "wiki": {
