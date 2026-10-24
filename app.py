@@ -1723,7 +1723,7 @@ class App:
                     if s == "Sidearm": types = [x for x in types if x == "pistol"] or ["pistol"]
                     need = ", ".join(engine.TYPE_LABEL.get(x, x) for x in types)
                     wn = {gamedata.nrm(n) for n in GAME.data.get("weapon_talents", [])} if GAME.ok else set()
-                    top = ", ".join(n for n in (b or {}).get("talents", {}) if gamedata.nrm(n).replace("perfect ", "") in wn][:3]
+                    top = ", ".join([n for n in (b or {}).get("talents", {}) if gamedata.nrm(n).replace("perfect ", "") in wn][:3])
                 else:
                     need = ", ".join(b.get("sets_or_brands", [])[:3]) if b else ""
                     top = ", ".join(attr_name(k) for k, _ in sorted((b or {}).get("attributes", {}).items(), key=lambda kv: -kv[1].get("weight", 0))[:3])
