@@ -751,9 +751,12 @@
   "fx.open_videos": "Ouvrir le dossier vidéos",
   "fx.video_state": "{n} vidéo(s) · lecteur : {be}",
   "fx.no_backend": "installe le paquet optionnel 'av' (run.bat le fait)",
-  "fx.video_note": "Lit tes propres clips (ex. enregistrements dans Vidéos\\Captures) sans son derrière l'en-tête. L'appli ne télécharge pas de bandes-annonces.",
+  "fx.video_note": "Lit des clips sans son derrière l'en-tête. L'appli crée ses propres fonds animés (scan hexagonal, radar, ville enneigée, braises, carte tactique, orage — dessinés en code, sans images du jeu). « Multiplier » ajoute 6 variantes ; tu peux aussi ajouter tes enregistrements.",
   "fx.apply": "Appliquer les effets",
   "fx.videos": "Vidéos",
   "setpage.fx": "Effets",
-  "disp.restarting": "Passage à {prof} — l'appli se rouvre dans un instant…"
+  "disp.restarting": "Passage à {prof} — l'appli se rouvre dans un instant…",
+  "fx.multiply": "Multiplier les vidéos (+6)",
+  "fx.generating": "Création des vidéos… {pct}%",
+  "fx.generated": "{n} nouvelle(s) vidéo(s) prête(s)"
 }

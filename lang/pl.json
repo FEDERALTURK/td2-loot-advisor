@@ -751,9 +751,12 @@
   "fx.open_videos": "Otwórz folder wideo",
   "fx.video_state": "Filmy w folderze: {n} · odtwarzacz: {be}",
   "fx.no_backend": "zainstaluj opcjonalny pakiet 'av' (robi to run.bat)",
-  "fx.video_note": "Odtwarza twoje klipy (np. nagrania z Wideo\\Przechwycone) bez dźwięku za nagłówkiem. Program nie pobiera zwiastunów.",
+  "fx.video_note": "Odtwarza klipy bez dźwięku za nagłówkiem. Program tworzy własne animowane tła (skan heksagonalny, radar, zimowe miasto, iskry, mapa taktyczna, burza — rysowane kodem, bez materiału z gry). „Powiel” dodaje 6 wariantów; możesz też dodać własne nagrania.",
   "fx.apply": "Zastosuj efekty",
   "fx.videos": "Wideo",
   "setpage.fx": "Efekty",
-  "disp.restarting": "Przełączanie na {prof} — program za chwilę uruchomi się ponownie…"
+  "disp.restarting": "Przełączanie na {prof} — program za chwilę uruchomi się ponownie…",
+  "fx.multiply": "Powiel wideo (+6)",
+  "fx.generating": "Tworzenie wideo w tle… {pct}%",
+  "fx.generated": "Gotowe nowe wideo w tle: {n}"
 }

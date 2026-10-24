@@ -530,9 +530,12 @@
   "fx.open_videos": "Open video folder",
   "fx.video_state": "{n} video(s) in the folder · player: {be}",
   "fx.no_backend": "install the optional 'av' package (run.bat does it)",
-  "fx.video_note": "Plays your own clips (e.g. gameplay recordings from Videos\\Captures) silently behind the header. The app does not download game trailers; add your own recordings.",
+  "fx.video_note": "Plays clips silently behind the header. The app makes its own original animated backgrounds (hex scan, radar, winter city, embers, tactical map, storm — drawn in code, no game footage). 'Multiply' adds 6 new variations; you can also add your own recordings.",
   "fx.apply": "Apply effects",
   "fx.videos": "Videos",
   "setpage.fx": "Effects",
-  "disp.restarting": "Switching to {prof} — the app reopens in a moment…"
+  "disp.restarting": "Switching to {prof} — the app reopens in a moment…",
+  "fx.multiply": "Multiply videos (+6)",
+  "fx.generating": "Making background videos… {pct}%",
+  "fx.generated": "{n} new background video(s) ready"
 }

@@ -832,9 +832,12 @@
   "fx.open_videos": "Video klasörünü aç",
   "fx.video_state": "Klasörde {n} video · oynatıcı: {be}",
   "fx.no_backend": "isteğe bağlı 'av' paketini kur (run.bat kurar)",
-  "fx.video_note": "Kendi kayıtlarını (ör. Videolar\\Captures içindeki oyun kayıtları) başlık bandının arkasında sessiz oynatır. Program oyun fragmanı indirmez; kendi kayıtlarını ekle.",
+  "fx.video_note": "Başlık bandının arkasında sessiz oynatır. Program kendi özgün animasyonlu arka planlarını üretir (altıgen tarama, radar, karlı şehir, kıvılcımlar, taktik harita, fırtına — kodla çizilir, oyun görüntüsü yok). 'Çoğalt' 6 yeni çeşit ekler; kendi kayıtlarını da ekleyebilirsin.",
   "fx.apply": "Efektleri uygula",
   "fx.videos": "Videolar",
   "setpage.fx": "Efektler",
-  "disp.restarting": "{prof} uygulanıyor — program birazdan yeniden açılacak…"
+  "disp.restarting": "{prof} uygulanıyor — program birazdan yeniden açılacak…",
+  "fx.multiply": "Videoları çoğalt (+6)",
+  "fx.generating": "Arka plan videoları hazırlanıyor… %{pct}",
+  "fx.generated": "{n} yeni arka plan videosu hazır"
 }

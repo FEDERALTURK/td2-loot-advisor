@@ -56,7 +56,7 @@ How the feeds are researched and scored: [`meta/UPDATER.md`](meta/UPDATER.md).
 
 - **Build sheet (Builds → 📋):** every slot shows what to farm — gear-set piece / brand / named or exotic item, core attribute, attributes, chest/backpack talent, weapon type and talent — next to the piece you already have with ✔/✖ per requirement.
 - **Active build:** chosen in Panel, Builds or Missing pieces (shared). Every scan is checked against the active build's slot requirements; fitting drops are recorded automatically and the app tells you when the build is complete.
-- **Effects (Settings → ✨, all optional):** custom mouse cursor (generic sights and weapon silhouettes or your own image), mouse trail, animated menu transitions, and a silent background video behind the header made from **your own** clips (`art/videos`, needs the optional `av` package).
+- **Effects (Settings → ✨, all optional):** custom mouse cursor (generic sights and weapon silhouettes or your own image), mouse trail, animated menu transitions, and a silent background video behind the header. On first start the app renders its own original animated backgrounds (hex scan, radar, winter city, embers, tactical map, storm — drawn in code, no game footage) into `art/videos`; **Multiply videos** adds 6 more variations. Your own recordings work too. Needs the optional `av` package (run.bat installs it). `python bgvideo.py art/videos` renders them from the command line.
 - **Any screen size:** resolution profiles from 240p to 4K resize the window and scale the text; changing the profile reopens the app in ~2 seconds.
 
 ## Game library / Oyun kütüphanesi

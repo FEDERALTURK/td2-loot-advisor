@@ -751,9 +751,12 @@
   "fx.open_videos": "Videomap openen",
   "fx.video_state": "{n} video('s) · speler: {be}",
   "fx.no_backend": "installeer het optionele pakket 'av' (run.bat doet dit)",
-  "fx.video_note": "Speelt je eigen clips (bijv. opnames uit Video's\\Opnamen) zonder geluid achter de kop af. De app downloadt geen trailers.",
+  "fx.video_note": "Speelt clips zonder geluid achter de kop af. De app maakt eigen geanimeerde achtergronden (hexscan, radar, winterstad, vonken, tactische kaart, storm — met code getekend, geen gamebeelden). 'Vermenigvuldigen' voegt 6 varianten toe; je kunt ook eigen opnames toevoegen.",
   "fx.apply": "Effecten toepassen",
   "fx.videos": "Video's",
   "setpage.fx": "Effecten",
-  "disp.restarting": "Overschakelen naar {prof} — de app opent zo opnieuw…"
+  "disp.restarting": "Overschakelen naar {prof} — de app opent zo opnieuw…",
+  "fx.multiply": "Video's vermenigvuldigen (+6)",
+  "fx.generating": "Achtergrondvideo's maken… {pct}%",
+  "fx.generated": "{n} nieuwe achtergrondvideo('s) klaar"
 }

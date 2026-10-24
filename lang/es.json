@@ -751,9 +751,12 @@
   "fx.open_videos": "Abrir carpeta de vídeos",
   "fx.video_state": "{n} vídeo(s) · reproductor: {be}",
   "fx.no_backend": "instala el paquete opcional 'av' (run.bat lo hace)",
-  "fx.video_note": "Reproduce tus propios clips (p. ej. grabaciones de Vídeos\\Capturas) sin sonido tras la cabecera. La app no descarga tráileres.",
+  "fx.video_note": "Reproduce clips sin sonido tras la cabecera. La app crea sus propios fondos animados (escaneo hexagonal, radar, ciudad nevada, brasas, mapa táctico, tormenta — dibujados con código, sin imágenes del juego). «Multiplicar» añade 6 variantes; también puedes añadir tus grabaciones.",
   "fx.apply": "Aplicar efectos",
   "fx.videos": "Vídeos",
   "setpage.fx": "Efectos",
-  "disp.restarting": "Cambiando a {prof} — la app se reabrirá enseguida…"
+  "disp.restarting": "Cambiando a {prof} — la app se reabrirá enseguida…",
+  "fx.multiply": "Multiplicar vídeos (+6)",
+  "fx.generating": "Creando vídeos de fondo… {pct}%",
+  "fx.generated": "{n} vídeo(s) nuevo(s) listo(s)"
 }

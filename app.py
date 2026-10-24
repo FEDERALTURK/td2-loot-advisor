@@ -35,6 +35,7 @@ import engine
 import display
 import view3d
 import fx
+import bgvideo
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
@@ -1143,7 +1144,10 @@ class App:
                 if self.video.start():
                     self.banner.start_video(); log.info("Background video on (%s)", fx.video_backend())
                 else:
-                    log.info("Background video off: %s", self.video.error); self.video = None
+                    log.info("Background video off: %s", self.video.error)
+                    if self.video.error == "no_videos" and fx.video_backend() == "av":
+                        self.make_videos()                         # ilk açılış: özgün arka plan videolarını üret
+                    self.video = None
 
     def normalize_builds(self):
         """Build'lerdeki talent/eşya karışıklığını oyun kütüphanesine göre düzeltir (Equalizer → items)."""
@@ -3335,10 +3339,12 @@ class App:
         ttk.Scale(r4, from_=0.0, to=0.85, variable=self.fx_dim, length=160).pack(side="left")
         ttk.Button(r4, text=ui_theme.with_icon(t("fx.add_video"), "➕"), command=self.add_video).pack(side="left", padx=(16, 4))
         ttk.Button(r4, text=ui_theme.with_icon(t("fx.open_videos"), "📂"), command=lambda: self.open_folder(ART_DIR / "videos")).pack(side="left")
+        ttk.Button(r4, text=ui_theme.with_icon(t("fx.multiply"), "🎬"), command=lambda: self.make_videos(count=6)).pack(side="left", padx=(8, 0))
         n = len(fx.list_videos(ART_DIR / "videos"))
         be = fx.video_backend()
         state = t("fx.video_state", n=n, be=be or "—") + ("" if be else "  ·  " + t("fx.no_backend"))
-        ttk.Label(vd, text=state, foreground=PAL["warning"] if not be or not n else PAL["muted"]).pack(anchor="w", padx=12)
+        self.fx_vstate = ttk.Label(vd, text=state, foreground=PAL["warning"] if not be or not n else PAL["muted"])
+        self.fx_vstate.pack(anchor="w", padx=12)
         ttk.Label(vd, text=t("fx.video_note"), foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=12, pady=(2, 8))
         ttk.Button(f, text=ui_theme.with_icon(t("fx.apply"), "✨"), command=self.save_fx, style="Accent.TButton").pack(anchor="w", padx=12, pady=8)
 
@@ -3354,6 +3360,39 @@ class App:
 
     def save_fx(self):
         self._fx_from_ui(); save_cfg(self.cfg); self.apply_fx(); self.toast(t("msg.settings_saved"))
+
+    def make_videos(self, count=None):
+        """Özgün (koddan çizilen) arka plan videoları üretir; count verilirse yeni çeşitlerle çoğaltır."""
+        if getattr(self, "_vid_busy", False): return
+        if fx.video_backend() != "av":
+            return messagebox.showinfo(APP_NAME, t("fx.no_backend"))
+        self._vid_busy, self._vid_prog = True, 0.0
+        def work():
+            try:
+                made = bgvideo.generate(ART_DIR / "videos", count=count, start_seed=int(time.time()) if count else None,
+                                        progress=lambda f: setattr(self, "_vid_prog", f))
+                log.info("Background videos generated: %d", len(made))
+                self._vid_made = len(made)
+            except Exception:
+                log.exception("Background video generation failed"); self._vid_made = -1
+            finally:
+                self._vid_busy = False
+        threading.Thread(target=work, daemon=True).start()
+        self._vid_poll()
+
+    def _vid_poll(self):
+        if getattr(self, "_vid_busy", False):
+            try: self.banner.toast_text = t("fx.generating", pct=int(self._vid_prog * 100)); self.banner._redraw_overlay_only()
+            except Exception: pass
+            self.root.after(700, self._vid_poll); return
+        try: self.banner.toast_text = ""
+        except Exception: pass
+        n = getattr(self, "_vid_made", 0)
+        if n >= 0:
+            self.toast(t("fx.generated", n=n))
+            if hasattr(self, "fx_vstate"):
+                self.fx_vstate.config(text=t("fx.video_state", n=len(fx.list_videos(ART_DIR / "videos")), be=fx.video_backend() or "—"))
+            if not getattr(self, "video", None): self.apply_fx()
 
     def add_video(self):
         paths = filedialog.askopenfilenames(initialdir=str(Path.home() / "Videos"),

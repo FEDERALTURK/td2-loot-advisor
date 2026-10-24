@@ -755,9 +755,12 @@
   "fx.open_videos": "Videoordner öffnen",
   "fx.video_state": "{n} Video(s) im Ordner · Player: {be}",
   "fx.no_backend": "optionales Paket 'av' installieren (run.bat erledigt das)",
-  "fx.video_note": "Spielt deine eigenen Clips (z. B. Aufnahmen aus Videos\\Captures) stumm hinter der Kopfzeile ab. Die App lädt keine Trailer herunter.",
+  "fx.video_note": "Spielt Clips stumm hinter der Kopfzeile. Die App erstellt eigene animierte Hintergründe (Hex-Scan, Radar, Winterstadt, Funken, Taktikkarte, Sturm — per Code gezeichnet, kein Spielmaterial). „Vervielfachen“ fügt 6 Varianten hinzu; eigene Aufnahmen gehen auch.",
   "fx.apply": "Effekte anwenden",
   "fx.videos": "Videos",
   "setpage.fx": "Effekte",
-  "disp.restarting": "Wechsel zu {prof} — die App startet gleich neu…"
+  "disp.restarting": "Wechsel zu {prof} — die App startet gleich neu…",
+  "fx.multiply": "Videos vervielfachen (+6)",
+  "fx.generating": "Hintergrundvideos werden erstellt… {pct}%",
+  "fx.generated": "{n} neue Hintergrundvideo(s) bereit"
 }

@@ -751,9 +751,12 @@
   "fx.open_videos": "Apri cartella video",
   "fx.video_state": "{n} video · lettore: {be}",
   "fx.no_backend": "installa il pacchetto opzionale 'av' (lo fa run.bat)",
-  "fx.video_note": "Riproduce i tuoi clip (es. registrazioni in Video\\Acquisizioni) senza audio dietro l'intestazione. L'app non scarica trailer.",
+  "fx.video_note": "Riproduce clip senza audio dietro l'intestazione. L'app crea i propri sfondi animati (scansione esagonale, radar, città innevata, braci, mappa tattica, tempesta — disegnati via codice, nessun filmato del gioco). «Moltiplica» aggiunge 6 varianti; puoi aggiungere anche le tue registrazioni.",
   "fx.apply": "Applica effetti",
   "fx.videos": "Video",
   "setpage.fx": "Effetti",
-  "disp.restarting": "Passaggio a {prof} — l'app si riapre tra un attimo…"
+  "disp.restarting": "Passaggio a {prof} — l'app si riapre tra un attimo…",
+  "fx.multiply": "Moltiplica video (+6)",
+  "fx.generating": "Creazione video di sfondo… {pct}%",
+  "fx.generated": "{n} nuovo/i video pronto/i"
 }
