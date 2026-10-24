@@ -5,7 +5,7 @@ Benzer projelerden alınan dersler:
 - d4lf: oyun içi ayar şartları (HDR kapalı, İngilizce, kenarlıksız pencere) kontrol edilip kullanıcı uyarılır.
 - RatScanner: oyun üstü bilgi kartı için kenarlıksız/pencereli mod gerekir.
 
-Oyun ayarları `Belgeler\\My Games\\Tom Clancy's The Division 2\\GFXSettings*.xml` dosyasından OKUNUR;
+Oyun ayarları `Belgeler\\My Games\\Tom Clancy's The Division 2\\state.cfg` (+ graphic settings.cfg, ui config.cfg) dosyalarından OKUNUR;
 dosyaya yazılmaz, oyuna/belleğe dokunulmaz.
 """
 import ctypes
@@ -69,10 +69,79 @@ def settings_dir():
     return None
 
 
+def parse_cfg(text):
+    """Snowdrop (The Division 2) .cfg dosyaları Lua tablosu biçimindedir: { key = value, ["a b"] = 1, t = { … } }.
+    Küçük, güvenli bir ayrıştırıcı (kod çalıştırmaz)."""
+    tok = re.findall(r'"(?:[^"\\]|\\.)*"|\[|\]|\{|\}|=|,|[^\s\[\]{}=,]+', text)
+    pos = [0]
+
+    def val():
+        t = tok[pos[0]]; pos[0] += 1
+        if t == "{": return table()
+        if t.startswith('"'): return t[1:-1]
+        if t == "true": return True
+        if t == "false": return False
+        try: return int(t)
+        except ValueError:
+            try: return float(t)
+            except ValueError: return t
+
+    def table():
+        out, arr = {}, []
+        while pos[0] < len(tok) and tok[pos[0]] != "}":
+            t = tok[pos[0]]
+            if t == ",": pos[0] += 1; continue
+            if t == "[":                                    # ["anahtar"] = değer
+                pos[0] += 1; k = val()                      # anahtar
+                pos[0] += 2                                 # "]" ve "="
+                out[k] = val(); continue
+            if pos[0] + 1 < len(tok) and tok[pos[0] + 1] == "=":
+                k = t.strip('"'); pos[0] += 2; out[k] = val(); continue
+            arr.append(val())
+        pos[0] += 1
+        return out if out or not arr else arr
+
+    if not tok or tok[0] != "{": return {}
+    pos[0] = 1
+    try: return table()
+    except (IndexError, ValueError): return {}
+
+
+def _read_cfg(path):
+    try: return parse_cfg(Path(path).read_text(encoding="utf-8", errors="ignore"))
+    except OSError: return {}
+
+
 def read_game_settings(folder=None):
-    """{'file', 'width', 'height', 'refresh', 'display_mode', 'hdr', 'options'} ya da None."""
+    """{'file', 'width', 'height', 'refresh', 'display_mode', 'hdr', 'language', 'view_scale', 'enlarge_ui', 'dx12'} ya da None.
+    The Division 2: state.cfg (çözünürlük, pencere modu, HDR, dil), graphic settings.cfg (görüntü ölçeği),
+    ui config.cfg (arayüz büyütme). Eski sürümler için GFXSettings*.xml de denenir. Hepsi YALNIZCA okunur."""
     d = Path(folder) if folder else settings_dir()
     if not d or not d.is_dir(): return None
+    state = d / "state.cfg"
+    if state.exists():
+        st = _read_cfg(state)
+        g = st.get("graphics", {}) if isinstance(st, dict) else {}
+        if not g: return {"file": str(state), "error": "unreadable"}
+        windowed = bool(g.get("windowed"))
+        act = g.get("windowedSettings" if windowed else "fullscreenSettings", {}) or {}
+        out = {"file": str(state), "options": {}}
+        if act.get("width"): out["width"], out["height"] = int(act["width"]), int(act.get("height", 0))
+        try: out["refresh"] = round(act["refresh-rate-numerator"] / max(1, act["refresh-rate-denominator"]))
+        except (KeyError, TypeError): pass
+        out["display_mode"] = ("Borderless" if act.get("fullscreen") else "Windowed") if windowed else "Fullscreen"
+        hdr = g.get("hdr")
+        out["hdr"] = None if hdr is None else str(hdr).lower() not in ("off", "0", "false")
+        out["dx12"] = g.get("dx12")
+        loc = st.get("localization", {})
+        if isinstance(loc, dict) and "mainLanguage" in loc: out["language"] = loc["mainLanguage"]
+        gs = _read_cfg(d / "graphic settings.cfg")
+        if isinstance(gs, dict):
+            out["view_scale"] = gs.get("view scale"); out["preset"] = gs.get("preset")
+        ui = _read_cfg(d / "ui config.cfg")
+        if isinstance(ui, dict):
+            out["enlarge_ui"] = ui.get("enlarge ui"); out["dual_monitor"] = ui.get("dual monitor mode")
+        return out
     files = sorted(d.glob("GFXSettings*.xml"), key=lambda p: p.stat().st_mtime, reverse=True)
     if not files: return None
     f = files[0]
@@ -113,6 +182,10 @@ def recommendations(game, mon_w, mon_h):
         tips.append(("disp.exclusive", {}))
     if game.get("width") and game.get("height") and (game["width"], game["height"]) != (mon_w, mon_h):
         tips.append(("disp.res_mismatch", {"game": f"{game['width']}×{game['height']}", "mon": f"{mon_w}×{mon_h}"}))
+    if game.get("language") not in (None, 0):
+        tips.append(("disp.lang_not_en", {"n": game["language"]}))
+    if game.get("enlarge_ui"):
+        tips.append(("disp.enlarge_ui", {}))
     if not tips:
         tips.append(("disp.all_good", {}))
     return tips

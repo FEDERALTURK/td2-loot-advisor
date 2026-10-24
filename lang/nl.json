@@ -615,7 +615,7 @@
   "disp.mode": "Weergavemodus: {m}",
   "disp.on": "aan",
   "disp.off": "uit",
-  "disp.not_found": "Instellingenbestand van The Division 2 niet gevonden (Documenten\\My Games\\Tom Clancy's The Division 2). Start de game één keer.",
+  "disp.not_found": "Instellingen van The Division 2 niet gevonden (Documenten\\My Games\\Tom Clancy's The Division 2\\state.cfg). Start de game één keer.",
   "disp.requirements": "Aanbevolen: game in het Engels, HDR uit, randloos venster, gameresolutie = monitorresolutie.",
   "disp.profile_applied": "Profielwaarden geladen: {prof} (klik Opslaan)",
   "disp.no_game_file": "Instellingenbestand niet gevonden — de tool werkt toch, aanbevelingen kunnen niet worden gecontroleerd.",
@@ -644,5 +644,10 @@
   "overlay.alpha": "Dekking:",
   "overlay.size": "Grootte:",
   "overlay.test": "Testen",
-  "ocr.passes": "Passes:"
+  "ocr.passes": "Passes:",
+  "disp.lang_not_en": "De gametaal is mogelijk geen Engels (index {n}) — namen worden in het Engels herkend; zet de game op Engels.",
+  "disp.enlarge_ui": "‘UI vergroten’ staat aan — kaarten zijn groter; de OCR-schaal wordt automatisch bepaald, voer één keer automatisch kalibreren uit.",
+  "disp.preset": "Voorinstelling: {p}",
+  "disp.view_scale": "Renderschaal: {v}",
+  "disp.ui_enlarge": "UI vergroten: {v}"
 }

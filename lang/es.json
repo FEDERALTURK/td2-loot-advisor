@@ -615,7 +615,7 @@
   "disp.mode": "Modo de pantalla: {m}",
   "disp.on": "activado",
   "disp.off": "desactivado",
-  "disp.not_found": "No se encontró el archivo de ajustes de The Division 2 (Documentos\\My Games\\Tom Clancy's The Division 2). Inicia el juego una vez.",
+  "disp.not_found": "No se encontraron los ajustes de The Division 2 (Documentos\\My Games\\Tom Clancy's The Division 2\\state.cfg). Inicia el juego una vez.",
   "disp.requirements": "Recomendado: juego en inglés, HDR desactivado, ventana sin bordes, resolución del juego = resolución del monitor.",
   "disp.profile_applied": "Valores del perfil cargados: {prof} (pulsa Guardar)",
   "disp.no_game_file": "Archivo de ajustes no encontrado — la herramienta funciona igual, no se pueden comprobar las recomendaciones.",
@@ -644,5 +644,10 @@
   "overlay.alpha": "Opacidad:",
   "overlay.size": "Tamaño:",
   "overlay.test": "Probar",
-  "ocr.passes": "Pasadas:"
+  "ocr.passes": "Pasadas:",
+  "disp.lang_not_en": "Puede que el idioma del juego no sea inglés (índice {n}) — los nombres se reconocen en inglés; pon el juego en inglés.",
+  "disp.enlarge_ui": "«Ampliar interfaz» está activado — las tarjetas son más grandes; la escala OCR se detecta sola, ejecuta la calibración automática una vez.",
+  "disp.preset": "Preajuste: {p}",
+  "disp.view_scale": "Escala de renderizado: {v}",
+  "disp.ui_enlarge": "Ampliar interfaz: {v}"
 }

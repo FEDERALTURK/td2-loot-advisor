@@ -615,7 +615,7 @@
   "disp.mode": "Mode d'affichage : {m}",
   "disp.on": "activé",
   "disp.off": "désactivé",
-  "disp.not_found": "Fichier de réglages de The Division 2 introuvable (Documents\\My Games\\Tom Clancy's The Division 2). Lancez le jeu une fois.",
+  "disp.not_found": "Réglages de The Division 2 introuvables (Documents\\My Games\\Tom Clancy's The Division 2\\state.cfg). Lancez le jeu une fois.",
   "disp.requirements": "Recommandé : jeu en anglais, HDR désactivé, mode fenêtré sans bordure, résolution du jeu = résolution de l'écran.",
   "disp.profile_applied": "Valeurs du profil chargées : {prof} (cliquez Enregistrer)",
   "disp.no_game_file": "Fichier de réglages introuvable — l'outil fonctionne quand même, les recommandations ne peuvent pas être vérifiées.",
@@ -644,5 +644,10 @@
   "overlay.alpha": "Opacité :",
   "overlay.size": "Taille :",
   "overlay.test": "Tester",
-  "ocr.passes": "Passes :"
+  "ocr.passes": "Passes :",
+  "disp.lang_not_en": "La langue du jeu n'est peut-être pas l'anglais (index {n}) — les noms d'objets sont reconnus en anglais ; passez le jeu en anglais.",
+  "disp.enlarge_ui": "« Agrandir l'interface » est activé — les cartes sont plus grandes ; l'échelle OCR est détectée automatiquement, lancez le calibrage auto une fois.",
+  "disp.preset": "Préréglage : {p}",
+  "disp.view_scale": "Échelle de rendu : {v}",
+  "disp.ui_enlarge": "Agrandir l'interface : {v}"
 }

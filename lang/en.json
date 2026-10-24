@@ -394,7 +394,7 @@
   "disp.mode": "Display mode: {m}",
   "disp.on": "on",
   "disp.off": "off",
-  "disp.not_found": "The Division 2 settings file was not found (Documents\\My Games\\Tom Clancy's The Division 2). Start the game once.",
+  "disp.not_found": "The Division 2 settings were not found (Documents\\My Games\\Tom Clancy's The Division 2\\state.cfg). Start the game once.",
   "disp.requirements": "Recommended: game language English, HDR off, borderless/windowed mode, game resolution = monitor resolution.",
   "disp.profile_applied": "Profile values loaded: {prof} (press Save)",
   "disp.no_game_file": "Game settings file not found — the tool still works, recommendations cannot be checked.",
@@ -423,5 +423,10 @@
   "overlay.alpha": "Opacity:",
   "overlay.size": "Size:",
   "overlay.test": "Test",
-  "ocr.passes": "Passes:"
+  "ocr.passes": "Passes:",
+  "disp.lang_not_en": "Game language may not be English (language index {n}) — item names are matched in English; set the game to English for best results.",
+  "disp.enlarge_ui": "\"Enlarge UI\" is on — item cards are bigger; OCR scale is detected automatically, run Auto calibrate once.",
+  "disp.preset": "Preset: {p}",
+  "disp.view_scale": "Render scale: {v}",
+  "disp.ui_enlarge": "Enlarge UI: {v}"
 }

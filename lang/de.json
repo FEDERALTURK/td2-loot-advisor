@@ -619,7 +619,7 @@
   "disp.mode": "Anzeigemodus: {m}",
   "disp.on": "an",
   "disp.off": "aus",
-  "disp.not_found": "Einstellungsdatei von The Division 2 nicht gefunden (Dokumente\\My Games\\Tom Clancy's The Division 2). Spiel einmal starten.",
+  "disp.not_found": "Einstellungen von The Division 2 nicht gefunden (Dokumente\\My Games\\Tom Clancy's The Division 2\\state.cfg). Spiel einmal starten.",
   "disp.requirements": "Empfohlen: Spielsprache Englisch, HDR aus, randloses Fenster, Spielauflösung = Monitorauflösung.",
   "disp.profile_applied": "Profilwerte geladen: {prof} (Speichern drücken)",
   "disp.no_game_file": "Einstellungsdatei nicht gefunden — das Tool funktioniert trotzdem, Empfehlungen können nicht geprüft werden.",
@@ -648,5 +648,10 @@
   "overlay.alpha": "Deckkraft:",
   "overlay.size": "Größe:",
   "overlay.test": "Testen",
-  "ocr.passes": "Durchgänge:"
+  "ocr.passes": "Durchgänge:",
+  "disp.lang_not_en": "Spielsprache ist evtl. nicht Englisch (Sprachindex {n}) — Gegenstandsnamen werden auf Englisch erkannt; Spiel auf Englisch stellen.",
+  "disp.enlarge_ui": "„UI vergrößern“ ist an — Karten sind größer; die OCR-Skalierung wird automatisch erkannt, einmal Auto-Kalibrierung ausführen.",
+  "disp.preset": "Voreinstellung: {p}",
+  "disp.view_scale": "Renderskalierung: {v}",
+  "disp.ui_enlarge": "UI vergrößern: {v}"
 }

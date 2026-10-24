@@ -696,7 +696,7 @@
   "disp.mode": "Görüntü modu: {m}",
   "disp.on": "açık",
   "disp.off": "kapalı",
-  "disp.not_found": "The Division 2 ayar dosyası bulunamadı (Belgeler\\My Games\\Tom Clancy's The Division 2). Oyunu bir kez başlatın.",
+  "disp.not_found": "The Division 2 ayarları bulunamadı (Belgeler\\My Games\\Tom Clancy's The Division 2\\state.cfg). Oyunu bir kez başlatın.",
   "disp.requirements": "Önerilen: oyun dili İngilizce, HDR kapalı, kenarlıksız/pencereli mod, oyun çözünürlüğü = monitör çözünürlüğü.",
   "disp.profile_applied": "Profil değerleri yüklendi: {prof} (Kaydet'e basın)",
   "disp.no_game_file": "Oyun ayar dosyası bulunamadı — program yine çalışır, öneriler kontrol edilemez.",
@@ -725,5 +725,10 @@
   "overlay.alpha": "Saydamlık:",
   "overlay.size": "Boyut:",
   "overlay.test": "Dene",
-  "ocr.passes": "Geçiş:"
+  "ocr.passes": "Geçiş:",
+  "disp.lang_not_en": "Oyun dili İngilizce olmayabilir (dil numarası {n}) — eşya adları İngilizce eşleştirilir; en iyi sonuç için oyunu İngilizce yapın.",
+  "disp.enlarge_ui": "\"Arayüzü büyüt\" açık — eşya kartları daha büyük; OCR ölçeği otomatik algılanır, bir kez Otomatik ayarla'yı çalıştırın.",
+  "disp.preset": "Ön ayar: {p}",
+  "disp.view_scale": "Görüntü ölçeği: {v}",
+  "disp.ui_enlarge": "Arayüzü büyüt: {v}"
 }

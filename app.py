@@ -2939,8 +2939,12 @@ class App:
             if g.get("width"): parts.append(t("disp.game_res", res=f"{g['width']}×{g['height']}" + (f" @{g['refresh']}Hz" if g.get("refresh") else "")))
             if g.get("display_mode"): parts.append(t("disp.mode", m=g["display_mode"]))
             if g.get("hdr") is not None: parts.append("HDR: " + (t("disp.on") if g["hdr"] else t("disp.off")))
+            if g.get("dx12") is not None: parts.append("DX12: " + (t("disp.on") if g["dx12"] else t("disp.off")))
+            if g.get("preset"): parts.append(t("disp.preset", p=g["preset"]))
+            if g.get("view_scale") is not None: parts.append(t("disp.view_scale", v=f"{float(g['view_scale']) * 100:.0f}%"))
+            if g.get("enlarge_ui") is not None: parts.append(t("disp.ui_enlarge", v=t("disp.on") if g["enlarge_ui"] else t("disp.off")))
             self.gfx_lbl.config(text="   ·   ".join(parts))
-            log.info("Game settings: %s", {k: g.get(k) for k in ("file", "width", "height", "display_mode", "hdr")})
+            log.info("Game settings: %s", {k: g.get(k) for k in ("file", "width", "height", "refresh", "display_mode", "hdr", "dx12", "language", "view_scale", "enlarge_ui")})
         else:
             self.gfx_lbl.config(text=t("disp.not_found"))
         tips = [x for x in display.recommendations(g, mw, mh) if x[0] != "disp.no_game_file"]
