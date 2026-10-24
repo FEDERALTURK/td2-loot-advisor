@@ -133,3 +133,8 @@ Kategoriler oyundaki menülerle birebir aynıdır (başka kategori kullanma):
 - Yeni sezonda gelen egzotik/named/set/talent'i ekle (wiki "Red Horizon" sayfasındaki *New Weapons, Gear,
   and Talents* bölümü iyi bir kaynak). Mevcut adları silme; `version`'ı artır.
 - `max` değerlerini yalnızca resmî yama notu bir değişiklik söylerse güncelle.
+- v3 alanları (2026-10-24.5): `items` (named/egzotik ekipman → `slot`, `quality`, `brand`, `talent`),
+  `weapon_index` (silah adı → `type`, `quality`; uzmanlık tabancaları `quality: specialization`, `spec`),
+  `specialization_weapons`, `weapon_mods`, `gear_mods`, `skills`, `item_kinds`, `ui_words`.
+  Yeni named/egzotik eklerken `items` / `weapon_index` içine de yuva/tür ile ekle. Dosyayı baştan YAZMA:
+  mevcut JSON'u oku, yalnızca ekle, `version`'ı artır (ör. 2026-10-25.1). Hiçbir listeden kayıt silme.
