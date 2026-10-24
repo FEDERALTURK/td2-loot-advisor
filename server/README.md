@@ -3,6 +3,12 @@
 Cloudflare Workers + D1 (ücretsiz katman yeterli). Uygulama düşüşleri buraya gönderir; premium kullanıcılar
 "hangi aktivitede ne düşüyor" istatistiğini buradan okur. Sunucu IP saklamaz, istemci kimliğini tuzlu özetle tutar.
 
+## Yayındaki sunucu
+
+`https://td2-stats.td2loot.workers.dev` (Cloudflare panelinden kuruldu: D1 `td2stats`, bağlama `DB`,
+değişkenler `LICENSE_PUBKEY` ve gizli `HASH_SALT`). Uygulamanın varsayılan adresi budur (`dropstats.DEFAULT_URL`).
+Kod güncellemesi: Workers & Pages → td2-stats → Edit code → `worker.js` içeriğini yapıştır → Deploy.
+
 ## Kurulum (bir kez, ~10 dakika)
 
 Gerekenler: Node.js 18+ ve ücretsiz bir Cloudflare hesabı.

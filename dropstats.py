@@ -19,7 +19,7 @@ import uuid
 
 log = logging.getLogger("td2.drops")
 
-DEFAULT_URL = ""          # yayına alınınca: "https://td2-stats.<hesap>.workers.dev"
+DEFAULT_URL = "https://td2-stats.td2loot.workers.dev"   # topluluk sunucusu (server/); Ayarlar'dan değiştirilebilir
 ACTIVITIES = ["none", "open_world", "mission", "legendary", "countdown", "summit", "incursion", "raid", "dark_zone",
               "conflict", "descent", "manhunt", "control_point", "bounty", "season", "caches", "crafting"]
 KINDS = ("gear", "weapon", "gear_mod", "weapon_mod", "skill_mod")
