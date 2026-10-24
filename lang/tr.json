@@ -876,5 +876,7 @@
   "grp.mission": "Görev {n}",
   "fx.speed": "Hız:",
   "fx.preview": "Önizle",
-  "fx.webp_note": "{n} .mp4 dosyası için isteğe bağlı 'av' paketi gerekiyor (run.bat ile başlat); yerine animasyonlu .webp sürümleri kullanılıyor."
+  "fx.webp_note": "{n} .mp4 dosyası için isteğe bağlı 'av' paketi gerekiyor (run.bat ile başlat); yerine animasyonlu .webp sürümleri kullanılıyor.",
+  "fx.watch_box": "Arka plan: ajan saati",
+  "fx.watch_note": "Panellerin ve listelerin arkasında tüm pencereyi animasyonlu bir ajan saatiyle doldurur (saat, halkalar, saniye çizgileri). Dış halkadaki turuncu ışık fareni hangi yöne götürürsen oraya döner. Kartlar opak kalır, yazılar okunur. Açıkken başlık videosu durur. Windows ve koyu temalarda çalışır."
 }

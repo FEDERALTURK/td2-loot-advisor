@@ -795,5 +795,7 @@
   "grp.mission": "Missione {n}",
   "fx.speed": "Velocità:",
   "fx.preview": "Anteprima",
-  "fx.webp_note": "{n} file .mp4 richiedono il pacchetto opzionale 'av' (avvia con run.bat); si usano le versioni .webp animate."
+  "fx.webp_note": "{n} file .mp4 richiedono il pacchetto opzionale 'av' (avvia con run.bat); si usano le versioni .webp animate.",
+  "fx.watch_box": "Sfondo: orologio da agente",
+  "fx.watch_note": "Riempie l'intera finestra dietro pannelli ed elenchi con un orologio da agente animato (ora, anelli, tacche dei secondi). La luce arancione sull'anello esterno segue il mouse. Le schede restano opache e leggibili. Mentre è attivo, il video dell'intestazione è in pausa. Windows, temi scuri."
 }

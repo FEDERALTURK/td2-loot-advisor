@@ -795,5 +795,7 @@
   "grp.mission": "Missie {n}",
   "fx.speed": "Snelheid:",
   "fx.preview": "Voorbeeld",
-  "fx.webp_note": "{n} .mp4-bestand(en) hebben het optionele pakket 'av' nodig (start met run.bat); geanimeerde .webp-versies worden gebruikt."
+  "fx.webp_note": "{n} .mp4-bestand(en) hebben het optionele pakket 'av' nodig (start met run.bat); geanimeerde .webp-versies worden gebruikt.",
+  "fx.watch_box": "Achtergrond: agentenhorloge",
+  "fx.watch_note": "Vult het hele venster achter panelen en lijsten met een geanimeerd agentenhorloge (tijd, ringen, secondestreepjes). Het oranje licht op de buitenring draait naar je muis. Kaarten blijven dekkend en leesbaar. Zolang het aan staat, pauzeert de kopvideo. Windows, donkere thema's."
 }

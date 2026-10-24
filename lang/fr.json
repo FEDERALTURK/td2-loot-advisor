@@ -795,5 +795,7 @@
   "grp.mission": "Mission {n}",
   "fx.speed": "Vitesse :",
   "fx.preview": "Aperçu",
-  "fx.webp_note": "{n} fichier(s) .mp4 nécessitent le paquet optionnel 'av' (lance run.bat) ; les versions .webp animées sont utilisées à la place."
+  "fx.webp_note": "{n} fichier(s) .mp4 nécessitent le paquet optionnel 'av' (lance run.bat) ; les versions .webp animées sont utilisées à la place.",
+  "fx.watch_box": "Arrière-plan : montre d'agent",
+  "fx.watch_note": "Remplit toute la fenêtre derrière les panneaux et listes avec une montre d'agent animée (heure, anneaux, graduations). La lumière orange de l'anneau extérieur suit ta souris. Les cartes restent opaques et lisibles. La vidéo d'en-tête est en pause pendant ce temps. Windows, thèmes sombres."
 }

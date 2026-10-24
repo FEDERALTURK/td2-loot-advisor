@@ -574,5 +574,7 @@
   "grp.mission": "Mission {n}",
   "fx.speed": "Speed:",
   "fx.preview": "Preview",
-  "fx.webp_note": "{n} .mp4 file(s) need the optional 'av' package (start with run.bat); animated .webp versions are used instead."
+  "fx.webp_note": "{n} .mp4 file(s) need the optional 'av' package (start with run.bat); animated .webp versions are used instead.",
+  "fx.watch_box": "Background: agent watch",
+  "fx.watch_note": "Fills the whole window behind panels and lists with an animated agent watch (time, rings, second ticks). The orange light on the outer ring turns towards your mouse. Cards stay solid so text remains readable. While it is on, the header video is paused. Windows, dark themes."
 }

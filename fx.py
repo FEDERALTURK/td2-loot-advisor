@@ -392,3 +392,220 @@ class VideoFX:
                     self.error = f"{type(e).__name__}: {e}"
                     time.sleep(0.5)
         self.alive = False
+
+
+# ---------------------------------------------------------------- tüm pencere arka planı: ajan saati
+class AgentWatch:
+    """Canvas üzerinde çizilen, fareyi takip eden turuncu ajan saati (özgün tasarım, oyun logosu yok).
+    Halkalar, saniye çizgileri, dönen kesikli yaylar, saat/dakika/saniye yayları, ortada saat;
+    dış halkadaki turuncu ışık (kuyruklu) fare hangi yöndeyse oraya döner."""
+
+    def __init__(self, canvas, pointer_fn, color="#ff6d10", bg="#0f1116", dim=0.0):
+        self.cv, self.pointer_fn, self.c, self.bgc = canvas, pointer_fn, color, bg
+        self.dim = dim
+        self.angle = -90.0                  # ışığın açısı (derece, Tk: 0 = doğu, saat yönünün tersi pozitif)
+        self.alive, self._size, self._img = True, (0, 0), None
+        self.t0 = time.time()
+
+    def _col(self, k):
+        """k: 0 = arka plan, 1 = tam turuncu."""
+        r, g, b = _hex(self.c); br, bg_, bb = _hex(self.bgc)
+        k = max(0.0, min(1.0, k * (1 - self.dim)))
+        return "#%02x%02x%02x" % (int(br + (r - br) * k), int(bg_ + (g - bg_) * k), int(bb + (b - bb) * k))
+
+    def _grey(self, k):
+        br, bg_, bb = _hex(self.bgc)
+        k = k * (1 - self.dim)
+        return "#%02x%02x%02x" % (int(br + (110 - br) * k), int(bg_ + (118 - bg_) * k), int(bb + (132 - bb) * k))
+
+    def _backdrop(self, w, h):
+        """Statik zemin: radyal karanlık, altıgen ızgara, tarama çizgileri (PIL → PhotoImage)."""
+        from PIL import ImageTk
+        base = Image.new("RGB", (w, h), _hex(self.bgc))
+        d = ImageDraw.Draw(base)
+        r = 26
+        gcol = tuple(min(255, int(v * 1.25) + 4) for v in _hex(self.bgc))
+        y, row = -r, 0
+        while y < h + r:
+            x = -r + (r * 0.866 if row % 2 else 0)
+            while x < w + r:
+                d.polygon([(x + r * 0.9 * math.cos(math.radians(60 * k + 30)), y + r * 0.9 * math.sin(math.radians(60 * k + 30)))
+                           for k in range(6)], outline=gcol)
+                x += r * 1.732
+            y += r * 1.5; row += 1
+        for yy in range(0, h, 4):
+            d.line((0, yy, w, yy), fill=tuple(max(0, v - 3) for v in _hex(self.bgc)))
+        # merkezden dışa doğru kararan vinyet
+        cx, cy = self.center(w, h)
+        mask = Image.new("L", (w, h), 0)
+        md = ImageDraw.Draw(mask)
+        R = max(w, h)
+        for k in range(30, 0, -1):
+            rr = R * k / 30
+            md.ellipse((cx - rr, cy - rr, cx + rr, cy + rr), fill=int(255 * (1 - k / 30) ** 0.7))
+        dark = Image.new("RGB", (w, h), tuple(max(0, v - 8) for v in _hex(self.bgc)))
+        base = Image.composite(base, dark, mask)
+        self._img = ImageTk.PhotoImage(base)
+        return self._img
+
+    def center(self, w, h):
+        return w * 0.5, h * 0.54
+
+    def _arc(self, cx, cy, r, start, extent, color, width, tag="dyn"):
+        self.cv.create_arc(cx - r, cy - r, cx + r, cy + r, start=start, extent=extent, style="arc",
+                           outline=color, width=width, tags=tag)
+
+    def render(self):
+        if not self.alive: return
+        try:
+            w, h = max(100, self.cv.winfo_width()), max(100, self.cv.winfo_height())
+        except tk.TclError:
+            self.alive = False; return
+        cv = self.cv
+        if (w, h) != self._size:
+            self._size = (w, h)
+            cv.delete("all")
+            cv.create_image(0, 0, anchor="nw", image=self._backdrop(w, h), tags="bgimg")
+        cv.delete("dyn")
+        cx, cy = self.center(w, h)
+        R = min(w, h) * 0.40
+        now = time.time(); tt = now - self.t0
+        lt = time.localtime(now)
+        # fare yönü (yumuşak takip)
+        try:
+            px, py = self.pointer_fn()
+            target = math.degrees(math.atan2(-(py - cy), px - cx))
+        except Exception:
+            target = self.angle
+        diff = (target - self.angle + 540) % 360 - 180
+        self.angle += diff * 0.18
+        # dış çerçeve
+        for k, wd in ((1.12, 1), (1.06, 2)):
+            cv.create_oval(cx - R * k, cy - R * k, cx + R * k, cy + R * k, outline=self._grey(0.22), width=wd, tags="dyn")
+        # saniye çizgileri (60), saniyeye gelen turuncu
+        sec = lt.tm_sec + (now % 1)
+        for i in range(60):
+            a = math.radians(90 - i * 6)
+            long_ = i % 5 == 0
+            r0, r1 = R * (0.93 if long_ else 0.96), R * 1.0
+            near = max(0.0, 1 - ((sec - i) % 60) / 8)
+            col = self._col(0.35 + 0.65 * near) if near > 0 else self._grey(0.45 if long_ else 0.25)
+            cv.create_line(cx + r0 * math.cos(a), cy - r0 * math.sin(a), cx + r1 * math.cos(a), cy - r1 * math.sin(a),
+                           fill=col, width=3 if long_ else 1, tags="dyn")
+        # dönen kesikli yaylar
+        for k, (rr, spd, n, ext) in enumerate(((0.86, 12, 12, 18), (0.78, -7, 6, 34), (0.62, 20, 24, 6))):
+            for j in range(n):
+                self._arc(cx, cy, R * rr, (tt * spd + j * 360 / n) % 360, ext, self._col(0.28 + 0.1 * k), 2)
+        # saat / dakika / saniye yayları
+        hh = (lt.tm_hour % 12 + lt.tm_min / 60) / 12
+        mm = (lt.tm_min + sec / 60) / 60
+        for rr, frac, wd, k in ((0.70, hh, 6, 0.55), (0.66, mm, 4, 0.75), (0.735, sec / 60, 2, 1.0)):
+            self._arc(cx, cy, R * rr, 90, -360 * max(0.002, frac), self._col(k), wd)
+            self._arc(cx, cy, R * rr, 90 - 360 * frac, -(360 * (1 - frac)), self._grey(0.12), 1)
+        # genişleyen nabız halkası
+        p = (tt % 4) / 4
+        rr = R * (0.4 + 0.75 * p)
+        cv.create_oval(cx - rr, cy - rr, cx + rr, cy + rr, outline=self._col(0.5 * (1 - p)), width=2, tags="dyn")
+        # fareyi takip eden turuncu ışık + kuyruk + parıltı katmanları
+        A = self.angle
+        for k in range(6, 0, -1):                                   # kuyruk (ters yönde, solarak)
+            self._arc(cx, cy, R * 1.06, A - 18 - k * 9 * (1 if diff >= 0 else -1) * 0.6, 14, self._col(0.15 + 0.1 * (6 - k)), 3)
+        for wd, k in ((22, 0.18), (14, 0.35), (8, 0.7), (4, 1.0)):   # parıltı
+            self._arc(cx, cy, R * 1.06, A - 18, 36, self._col(k), wd)
+        ax, ay = cx + R * 1.06 * math.cos(math.radians(A)), cy - R * 1.06 * math.sin(math.radians(A))
+        for rad, k in ((12, 0.25), (7, 0.6), (4, 1.0)):
+            cv.create_oval(ax - rad, ay - rad, ax + rad, ay + rad, fill=self._col(k), outline="", tags="dyn")
+        ix, iy = cx + R * 0.55 * math.cos(math.radians(A)), cy - R * 0.55 * math.sin(math.radians(A))
+        cv.create_line(ix, iy, cx + R * 0.97 * math.cos(math.radians(A)), cy - R * 0.97 * math.sin(math.radians(A)),
+                       fill=self._col(0.45), width=1, dash=(4, 4), tags="dyn")
+        # merkez: saat
+        fs = max(14, int(R * 0.22))
+        cv.create_text(cx, cy - R * 0.06, text=time.strftime("%H:%M", lt), fill=self._col(1.0),
+                       font=("Segoe UI Semibold", fs), tags="dyn")
+        cv.create_text(cx + R * 0.34, cy - R * 0.02, text=time.strftime("%S", lt), fill=self._col(0.7),
+                       font=("Segoe UI Semibold", max(9, fs // 3)), tags="dyn", anchor="w")
+        cv.create_text(cx, cy + R * 0.16, text=time.strftime("%d.%m.%Y", lt), fill=self._grey(0.8),
+                       font=("Segoe UI", max(8, fs // 4)), tags="dyn")
+        cv.create_text(cx, cy - R * 0.33, text="◆ AGENT", fill=self._col(0.6), font=("Segoe UI Semibold", max(8, fs // 4)), tags="dyn")
+        cv.tag_raise("dyn")
+
+
+class WatchBackground:
+    """Windows: ana pencerenin ARKASINDA duran ikinci bir pencere ajan saatini çizer; ana pencerenin
+    zemin rengi (-transparentcolor) şeffaf yapılır → kartlar ve listeler okunur kalır, boşluklarda saat görünür.
+    Diğer sistemlerde (şeffaflık yok) kapalı kalır."""
+
+    def __init__(self, root, bg="#0f1116", color="#ff6d10", dim=0.0, fps=30):
+        self.root, self.bgc, self.color, self.dim, self.fps = root, bg, color, dim, fps
+        self.win = self.cv = self.watch = None
+        self.alive = False
+        self._geo = None
+
+    def start(self):
+        if self.alive or os.name != "nt": return False
+        try:
+            w = self.win = tk.Toplevel(self.root)
+            w.overrideredirect(True)
+            w.configure(bg=self.bgc)
+            self.cv = tk.Canvas(w, bg=self.bgc, highlightthickness=0, bd=0)
+            self.cv.pack(fill="both", expand=True)
+            self.watch = AgentWatch(self.cv, self._pointer, self.color, self.bgc, self.dim)
+            w.bind("<Button>", lambda e: self.root.focus_force())
+            w.update_idletasks()
+            self._style(w)
+            self.root.attributes("-transparentcolor", self.bgc)
+            self.alive = True
+            self._tick()
+            return True
+        except Exception:
+            self.stop(); return False
+
+    def _style(self, w):
+        try:
+            import ctypes
+            hwnd = ctypes.windll.user32.GetParent(w.winfo_id())
+            ex = ctypes.windll.user32.GetWindowLongW(hwnd, -20)
+            ctypes.windll.user32.SetWindowLongW(hwnd, -20, ex | 0x08000000 | 0x80)   # NOACTIVATE + TOOLWINDOW
+            self._hwnd = hwnd
+        except Exception:
+            self._hwnd = None
+
+    def _below_root(self):
+        try:
+            import ctypes
+            rh = ctypes.windll.user32.GetParent(self.root.winfo_id())
+            # SWP_NOMOVE|SWP_NOSIZE|SWP_NOACTIVATE: arka plan penceresini ana pencerenin hemen altına koy
+            ctypes.windll.user32.SetWindowPos(self._hwnd, rh, 0, 0, 0, 0, 0x0002 | 0x0001 | 0x0010)
+        except Exception:
+            pass
+
+    def _pointer(self):
+        x, y = self.root.winfo_pointerxy()
+        return x - self.root.winfo_rootx(), y - self.root.winfo_rooty()
+
+    def stop(self):
+        self.alive = False
+        try: self.root.attributes("-transparentcolor", "")
+        except Exception: pass
+        try:
+            if self.win: self.win.destroy()
+        except Exception:
+            pass
+        self.win = self.cv = self.watch = None
+
+    def _tick(self):
+        if not self.alive: return
+        try:
+            r = self.root
+            if r.state() in ("iconic", "withdrawn") or not r.winfo_viewable():
+                self.win.withdraw(); self.root.after(250, self._tick); return
+            if self.win.state() == "withdrawn": self.win.deiconify()
+            geo = (r.winfo_rootx(), r.winfo_rooty(), r.winfo_width(), r.winfo_height())
+            if geo != self._geo:
+                self._geo = geo
+                self.win.geometry(f"{geo[2]}x{geo[3]}+{geo[0]}+{geo[1]}")
+            self._below_root()
+            self.watch.render()
+        except Exception:
+            pass
+        self.root.after(int(1000 / self.fps), self._tick)

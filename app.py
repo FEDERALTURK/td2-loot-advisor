@@ -67,7 +67,7 @@ DEFAULTS = {"scan_mode": "hotkey", "auto_interval_ms": 700, "auto_record": True,
             "ui_theme": "dark", "ui_sounds": True, "bg_interval": 15,
             "fx_cursor": True, "fx_cursor_style": "crosshair", "fx_cursor_color": "#ff6d10", "fx_cursor_custom": "",
             "fx_trail": True, "fx_trail_color": "#ff6d10", "fx_trail_len": 18, "fx_transitions": True,
-            "fx_video": True, "fx_video_dim": 0.35, "fx_transition_ms": 650,
+            "fx_video": True, "fx_video_dim": 0.35, "fx_transition_ms": 650, "fx_bgwatch": True, "fx_bgwatch_dim": 0.0,
             "res_profile": "auto", "ocr_threshold": 170, "ocr_scale": "auto", "ocr_psm": 6, "ocr_passes": 3,
             "overlay_mode": "card", "overlay_alpha": 0.94, "overlay_size": 1.0, "ui_depth": True,
             "meta_sync": True, "meta_feed_url": "", "meta_last_try": 0, "meta_last_sync": "", "meta_version": "",
@@ -1264,11 +1264,22 @@ class App:
         elif tr:
             tr.stop(); self.trail_fx = None
         if float(st.get("fx_video_dim", 0.35)) > 0.7: st["fx_video_dim"] = 0.35     # eski sürümden kalan çok koyu ayar
+        # tüm pencere arka planı: ajan saati (Windows, koyu temalar)
+        wb = getattr(self, "watch_bg", None)
+        want = bool(st.get("fx_bgwatch", True)) and os.name == "nt" and PAL.get("mode") != "light"
+        if wb and (not want or wb.bgc != PAL["bg"] or wb.color != PAL["accent"] or wb.dim != float(st.get("fx_bgwatch_dim", 0.0))):
+            wb.stop(); self.watch_bg = wb = None
+        if want and not wb:
+            self.watch_bg = fx.WatchBackground(self.root, PAL["bg"], PAL["accent"], float(st.get("fx_bgwatch_dim", 0.0)))
+            if not self.watch_bg.start():
+                log.info("Agent watch background unavailable"); self.watch_bg = None
+        watch_on = bool(getattr(self, "watch_bg", None))
+        if hasattr(self, "banner"): self.banner.set_transparent(watch_on)
         v = getattr(self, "video", None)
         if v: v.stop(); self.video = None
         if hasattr(self, "banner"):
             self.banner.stop_video() if self.banner.video_on else None
-            if st.get("fx_video", True):
+            if st.get("fx_video", True) and not watch_on:
                 (ART_DIR / "videos").mkdir(parents=True, exist_ok=True)
                 self.video = fx.VideoFX(ART_DIR / "videos", self.banner.push_video, self.banner.video_size,
                                         dim=min(0.7, float(st.get("fx_video_dim", 0.35))))
@@ -3628,6 +3639,14 @@ class App:
         ttk.Button(ar, text=ui_theme.with_icon(t("fx.preview"), "▶"),
                    command=lambda: (setattr(self.fxbar, "duration", int(self.fx_tms.get())), self.fxbar.play())).pack(side="left", padx=8)
 
+        self.fxv["fx_bgwatch"] = tk.BooleanVar(value=bool(st.get("fx_bgwatch", True)))
+        self.fx_wdim = tk.DoubleVar(value=float(st.get("fx_bgwatch_dim", 0.0)))
+        wbx = ttk.LabelFrame(f, text="⌚ " + t("fx.watch_box")); wbx.pack(fill="x", padx=10, pady=6)
+        wr_ = ttk.Frame(wbx); wr_.pack(fill="x", padx=8, pady=6)
+        ttk.Checkbutton(wr_, text=t("fx.enable"), variable=self.fxv["fx_bgwatch"]).pack(side="left")
+        ttk.Label(wr_, text=t("fx.dim")).pack(side="left", padx=(16, 4))
+        ttk.Scale(wr_, from_=0.0, to=0.7, variable=self.fx_wdim, length=160).pack(side="left")
+        ttk.Label(wbx, text=t("fx.watch_note"), foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=12, pady=(0, 8))
         vd = ttk.LabelFrame(f, text="🎬 " + t("fx.video_box")); vd.pack(fill="x", padx=10, pady=6)
         r4 = ttk.Frame(vd); r4.pack(fill="x", padx=8, pady=6)
         ttk.Checkbutton(r4, text=t("fx.enable"), variable=self.fxv["fx_video"]).pack(side="left")
@@ -3655,6 +3674,7 @@ class App:
         st["fx_trail_len"] = int(self.fx_tlen.get())
         st["fx_video_dim"] = round(float(self.fx_dim.get()), 2)
         st["fx_transition_ms"] = int(self.fx_tms.get())
+        st["fx_bgwatch_dim"] = round(float(self.fx_wdim.get()), 2)
         if hasattr(self, "fxbar"): self.fxbar.duration = st["fx_transition_ms"]
 
     def save_fx(self):

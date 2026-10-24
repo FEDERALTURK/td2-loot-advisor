@@ -795,5 +795,7 @@
   "grp.mission": "Misión {n}",
   "fx.speed": "Velocidad:",
   "fx.preview": "Vista previa",
-  "fx.webp_note": "{n} archivo(s) .mp4 necesitan el paquete opcional 'av' (inicia con run.bat); se usan las versiones .webp animadas."
+  "fx.webp_note": "{n} archivo(s) .mp4 necesitan el paquete opcional 'av' (inicia con run.bat); se usan las versiones .webp animadas.",
+  "fx.watch_box": "Fondo: reloj de agente",
+  "fx.watch_note": "Llena toda la ventana detrás de paneles y listas con un reloj de agente animado (hora, anillos, marcas de segundos). La luz naranja del anillo exterior gira hacia tu ratón. Las tarjetas siguen opacas y legibles. Mientras está activo, el vídeo de la cabecera se pausa. Windows, temas oscuros."
 }

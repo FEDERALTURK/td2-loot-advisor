@@ -466,6 +466,7 @@ class Banner:
         self._size = (0, 0)
         self._grad_cache = {}
         self._vframe, self.video_on = None, False
+        self.transparent = False        # tüm pencere arka planı (ajan saati) açıkken bant şeffaf: yalnızca yazılar
         self.alive = True
         self.cv.bind("<Configure>", self._on_resize)
         self._ready = False
@@ -569,7 +570,17 @@ class Banner:
         self._show(Image.blend(a, b, (step + 1) / steps), keep=False)
         self._after("fade", 45, lambda: self._fade(a, b, step + 1, steps))
 
+    def set_transparent(self, on):
+        self.transparent = bool(on)
+        if self.alive:
+            if on:
+                self.cv.config(bg=self.pal.get("bg", "#0f1116")); self.cv.delete("all"); self._draw_overlay()
+            else:
+                self._resized()
+
     def _show(self, img, keep=True):
+        if self.transparent:
+            self.cv.delete("all"); self._draw_overlay(); return
         if keep: self.frame = img
         self.photo = ImageTk.PhotoImage(img)
         self.cv.delete("all")
@@ -610,6 +621,8 @@ class Banner:
             cv.tag_raise(tid)
 
     def _redraw_overlay_only(self):
+        if self.transparent:
+            self.cv.delete("all"); self._draw_overlay(); return
         if self.frame is not None:
             self._show(self.frame)
 

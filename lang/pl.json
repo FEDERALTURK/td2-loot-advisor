@@ -795,5 +795,7 @@
   "grp.mission": "Misja {n}",
   "fx.speed": "Szybkość:",
   "fx.preview": "Podgląd",
-  "fx.webp_note": "{n} plik(ów) .mp4 wymaga opcjonalnego pakietu 'av' (uruchom run.bat); używane są animowane wersje .webp."
+  "fx.webp_note": "{n} plik(ów) .mp4 wymaga opcjonalnego pakietu 'av' (uruchom run.bat); używane są animowane wersje .webp.",
+  "fx.watch_box": "Tło: zegarek agenta",
+  "fx.watch_note": "Wypełnia całe okno za panelami i listami animowanym zegarkiem agenta (czas, pierścienie, podziałka sekund). Pomarańczowe światło na zewnętrznym pierścieniu obraca się w stronę myszy. Karty pozostają nieprzezroczyste i czytelne. Gdy włączone, wideo w nagłówku jest wstrzymane. Windows, ciemne motywy."
 }

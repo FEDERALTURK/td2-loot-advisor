@@ -799,5 +799,7 @@
   "grp.mission": "Mission {n}",
   "fx.speed": "Tempo:",
   "fx.preview": "Vorschau",
-  "fx.webp_note": "{n} .mp4-Datei(en) brauchen das optionale Paket 'av' (mit run.bat starten); stattdessen werden animierte .webp-Versionen genutzt."
+  "fx.webp_note": "{n} .mp4-Datei(en) brauchen das optionale Paket 'av' (mit run.bat starten); stattdessen werden animierte .webp-Versionen genutzt.",
+  "fx.watch_box": "Hintergrund: Agentenuhr",
+  "fx.watch_note": "Füllt das ganze Fenster hinter Panels und Listen mit einer animierten Agentenuhr (Zeit, Ringe, Sekundenstriche). Das orange Licht am Außenring dreht sich zur Maus. Karten bleiben deckend und lesbar. Solange aktiv, pausiert das Kopfzeilenvideo. Windows, dunkle Themes."
 }
