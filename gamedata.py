@@ -57,7 +57,7 @@ class GameData:
                 continue
         d = self.data
         self.names = []                                   # (normal, kanonik, tür)
-        for kind, key in (("exotic", "exotics"), ("named", "named"), ("gear_set", "gear_sets"), ("brand", "brands")):
+        for kind, key in (("exotic", "exotics"), ("named", "named"), ("gear_set", "gear_sets"), ("brand", "brands"), ("weapon", "weapons")):
             for n in d.get(key, []):
                 self.names.append((nrm(n), n, kind))
         self.talents = [(nrm(n), n, "gear") for n in d.get("gear_talents", [])] + \
@@ -102,6 +102,11 @@ class GameData:
 
     def match_talents(self, lines, cutoff=0.86):
         found = []
+        idx = next((i for i, l in enumerate(lines) if re.match(r"^\W*talents?\b", nrm(l))), None)
+        if idx is not None:
+            lines = lines[idx + 1:]
+        else:
+            cutoff = max(cutoff, 0.93)
         for line in lines:
             l = nrm(line)
             if not l: continue
@@ -125,10 +130,11 @@ class GameData:
         for line in lines:
             # attribute satırı sayıyla başlar ("+5.9% Critical Hit Chance", "170,370 Armor");
             # talent açıklamaları ve marka bonusları ("1 piece: …") sayılmaz
-            if not re.match(r"^\W{0,3}[+-]?\d", line) or re.search(r"(?i)\bpieces?\b|\bfor \d+s\b|\bseconds?\b", line):
+            if not re.match(r"^[^A-Za-z]{0,8}?[+-]?\d", line) or re.search(r"(?i)\bpieces?\b|\bfor \d+s\b|\bseconds?\b", line):
                 continue
-            m = NUMBER.search(line)
-            if not m: continue
+            cands = list(NUMBER.finditer(line))
+            if not cands: continue
+            m = next((c for c in cands if c.group(2)), None) or next((c for c in cands if c.group(1)[:1] in "+-"), cands[0])
             raw = m.group(1)
             if re.fullmatch(r"[+-]?\d{1,3}([.,]\d{3})+", raw):        # 170,370 / 170.370 → binlik ayırıcı
                 raw = re.sub(r"[.,]", "", raw)
@@ -147,6 +153,22 @@ class GameData:
                 if r > br: key, br = k, r
             if key and br >= 0.8:
                 val = abs(val)
+                mx0 = self.max_of(key, prototype)
+                if mx0 and val > mx0 * 1.05 and not prototype and val <= mx0 * 1.5 * 1.05:
+                    pass                                      # olası prototype değeri: kabul
+                elif mx0 and val > mx0 * 1.05:
+                    raw2 = m.group(1).lstrip("+-")
+                    if raw2[:1] == "4" and len(raw2) > 1:      # "+" çoğu zaman "4" okunur: "411.1%" → "11.1%"
+                        try:
+                            v2 = float(raw2[1:].replace(",", "."))
+                        except ValueError:
+                            v2 = None
+                        if v2 is not None and v2 <= mx0 * 1.05:
+                            val = v2
+                        else:
+                            continue
+                    else:
+                        continue                              # imkânsız değer (OCR hatası)
                 if val > attrs.get(key, -1):
                     attrs[key] = val
                     mx = self.max_of(key, prototype)
@@ -192,13 +214,15 @@ def text_image(img):
     """Oyunun turuncu/beyaz yazısını koyu arka plandan ayıran ön işleme (OCR için)."""
     from PIL import ImageChops, ImageFilter, ImageOps, Image
     r, g, b = img.convert("RGB").split()
-    mx = ImageChops.lighter(ImageChops.lighter(r, g), b)            # renkli yazılar da parlak kalır
-    scale = 2 if mx.width < 700 else 1
-    if scale > 1: mx = mx.resize((mx.width * scale, mx.height * scale), Image.LANCZOS)
-    mx = ImageOps.autocontrast(mx, cutoff=1)
-    mx = ImageOps.invert(mx)                                          # koyu yazı, açık zemin
-    return mx.filter(ImageFilter.SHARPEN)
+    mx = ImageChops.lighter(ImageChops.lighter(r, g), b)            # beyaz/turuncu yazı parlak kalır
+    # 1440p'de kart yazıları ~20 px: 1,5× büyütmek Tesseract için en iyi sonucu verdi (gerçek oyun kartıyla ölçüldü)
+    scale = 2.0 if mx.height < 700 else 1.5 if mx.height < 2000 else 1.0
+    if scale != 1: mx = mx.resize((int(mx.width * scale), int(mx.height * scale)), Image.LANCZOS)
+    thr = THRESHOLD
+    return mx.point(lambda v: 0 if v >= thr else 255)                 # yazı siyah, yarı saydam zemin beyaz
 
+
+THRESHOLD = 170          # 0-255; oyun parlaklığı/HDR'a göre ayarlardan değiştirilebilir
 
 CARD_ANCHORS = {"core", "attributes", "attribute", "talents", "talent", "mods", "modifications", "stats", "brand", "gear"}
 
