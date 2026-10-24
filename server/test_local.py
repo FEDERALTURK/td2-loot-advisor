@@ -3,19 +3,19 @@
     cd server
     npx wrangler d1 execute td2stats --local --file schema.sql
     npx wrangler dev --local --port 8787          # ayrı pencerede
-    python test_local.py [lisans-anahtarı]
+    python test_local.py [lisans-anahtarı] [sunucu-adresi]
 """
 import hashlib, json, sys, urllib.error, urllib.request
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import features  # noqa: E402
 
-B = "http://127.0.0.1:8787"
+B = (sys.argv[2] if len(sys.argv) > 2 else "http://127.0.0.1:8787").rstrip("/")
 
 
 def req(path, data=None, hdr=None):
     r = urllib.request.Request(B + path, data=json.dumps(data).encode() if data is not None else None,
-                               headers={"content-type": "application/json", **(hdr or {})})
+                               headers={"content-type": "application/json", "user-agent": "TD2-Loot-Advisor-test", **(hdr or {})})
     try:
         with urllib.request.urlopen(r) as f: return f.status, json.loads(f.read())
     except urllib.error.HTTPError as e:

@@ -7,7 +7,7 @@ compatibility_date = "2026-09-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "td2stats"
-database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"   # npx wrangler d1 create td2stats çıktısındaki id
+database_id = "ff1ea665-e911-4048-9066-0e72de9589c8"   # td2stats (kendi hesabında: npx wrangler d1 create td2stats)
 
 [vars]
 # Lisans anahtarlarını doğrulayan açık anahtar (features.py PUBLIC_KEY_HEX ile aynı)
