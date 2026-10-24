@@ -51,6 +51,15 @@ Recommended game settings: English game language, borderless window, HDR off, ga
 - Premium: recalibration advisor (which attribute from which item; gear and weapon libraries kept apart, exotics never
   donors), every build ranked against your stash, CSV export.
 
+**Vendors, phone, sharing** (new)
+- Weekly vendors and today's targeted loot matched against your builds and stash: "Cassie sells a Future Initiative
+  glove that fits your healer build at 95%". Two sources: your own scans (Vendor mode: F8 on the vendor screen) and the
+  community [hi-dep Division 2 Database](https://hidep-division2.pages.dev/?view=vendor), read directly from its public
+  page on your computer (not copied into this repository). Refreshed once after the Tuesday reset. Premium.
+- Phone companion: a read-only page on your home Wi-Fi (secret-key address + QR) with the last verdict, the active
+  build and vendor matches. Premium.
+- Build sharing: a build becomes a short code (`TD2B-…`) and QR; Builds → Paste code adds it. Free.
+
 **Tasks**
 - Interface-language only, grouped, duplicates merged; double-click for steps and The Division Wiki pictures.
 - *Fetch with Claude* (Claude Code + web search), shared task feed (`meta/tasks_feed.json`) and a live wiki reader (`wiki_sync.py`).
@@ -96,6 +105,9 @@ Sources: [The Division Wiki](https://thedivision.fandom.com) (CC BY-SA) and
 | `gamedata.py` | Item recognition against the game library |
 | `ocr_backend.py` | OCR engines (RapidOCR / Tesseract), icon and rarity colour hints |
 | `stash.py` | Stash, audit report, build optimizer, recalibration advisor |
+| `vendor.py` | Weekly vendors, targeted loot, matching against builds |
+| `companion.py` | Phone companion (local read-only web page + QR) |
+| `share.py` | Build share codes |
 | `features.py` | Free/premium features, license key check (Ed25519) |
 | `tests/` | OCR test with real game cards (`tests/test_ocr.py`), license and optimizer tests (`tests/test_core.py`) |
 | `display.py` | Resolution profiles, game settings reader |

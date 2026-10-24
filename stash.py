@@ -15,7 +15,6 @@ import time
 import uuid
 
 import engine
-import gamedata
 
 GEAR = engine.GEAR_SLOTS
 ITEM_KINDS = ("gear", "weapon")
@@ -42,8 +41,11 @@ def sanitize(rec, game):
         try: v = float(v)
         except (TypeError, ValueError): continue
         if rec.get("kind") == "weapon" and k not in WEAPON_ATTRS: continue
-        mx = game.max_of(k, proto) if game and game.ok else None
-        if mx and v > mx * 1.6: continue
+        weapon = rec.get("kind") == "weapon"
+        named = bool({"NAMED", "EXOTIC"} & set(rec.get("rarity") or []))
+        lim = game.limit_of(k, proto, weapon, named) if game and game.ok else None
+        mx = game.max_of(k, proto, weapon) if game and game.ok else None
+        if lim and v > lim * 1.06: continue
         if mx and mx >= 1000 and v < mx * 0.02: continue   # armor/health gibi büyük sabit değerde "15": uzmanlık satırı ya da OCR hatası
         attrs[k] = v
         if mx: quality[k] = round(min(100.0, v / mx * 100))

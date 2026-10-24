@@ -10,3 +10,5 @@ av
 # Yeni OCR motoru (onerilen) / new OCR engine (recommended)
 onnxruntime
 rapidocr
+# QR kodu / QR codes (optional)
+qrcode

@@ -24,3 +24,5 @@ art/videos/
 tests/.game_cache.json
 private/
 tests/.stash_test.json
+vendor_cache.json
+stash.json

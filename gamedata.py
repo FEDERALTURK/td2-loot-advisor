@@ -85,9 +85,24 @@ class GameData:
     def ok(self):
         return bool(self.data)
 
-    def max_of(self, key, prototype=False):
-        m = self.data.get("attributes", {}).get(key, {}).get("max")
+    def max_of(self, key, prototype=False, weapon=False):
+        """Rulo kalitesi için en yüksek değer. Silahta yan attribute'un en yüksek rulosu (weapon_max)."""
+        a = self.data.get("attributes", {}).get(key, {})
+        m = (a.get("weapon_max") or a.get("max")) if weapon else a.get("max")
         return m * (self.data.get("prototype_multiplier", 1.5) if prototype else 1) if m else None
+
+    def limit_of(self, key, prototype=False, weapon=False, named=False):
+        """OCR denetimi için görülebilecek en yüksek değer (bunun üstü okuma hatasıdır).
+        Silah: çekirdekler dahil (SMG CHC 21, MMR HSD 111). Ekipman: en yüksek × 1,5 (prototype olabilir);
+        named/egzotik "perfect" attribute'larda × 2 (gözlenen: HSD %20)."""
+        a = self.data.get("attributes", {}).get(key, {})
+        if weapon:
+            m = a.get("weapon_limit") or a.get("weapon_max") or a.get("max")
+            return m * (self.data.get("prototype_multiplier", 1.5) if prototype else 1) if m else None
+        m = a.get("max")
+        if not m: return None
+        k = max(self.data.get("prototype_multiplier", 1.5), self.data.get("named_multiplier", 2.0) if named else 0)
+        return m * k
 
     # ------------------------------------------------------------ tanıma
     # Kart bölüm başlıkları (İngilizce oyun). Attribute yalnızca core / attributes / mods bölümlerinden okunur;
@@ -179,7 +194,7 @@ class GameData:
                     found.append((name, best[2]))
         return found
 
-    def parse_attr_line(self, line, prototype=False):
+    def parse_attr_line(self, line, prototype=False, weapon=False, named=False):
         """Tek satırdan (anahtar, değer) ya da None."""
         # attribute satırı sayıyla başlar ("+5.9% Critical Hit Chance", "170,370 Armor");
         # talent açıklamaları ve marka bonusları ("1 piece: …") sayılmaz
@@ -206,10 +221,8 @@ class GameData:
             if r > br: key, br = k, r
         if not key or br < 0.8: return None
         val = abs(val)
-        mx0 = self.max_of(key, prototype)
-        if mx0 and val > mx0 * 1.05 and not prototype and val <= mx0 * 1.5 * 1.05:
-            pass                                      # olası prototype değeri: kabul
-        elif mx0 and val > mx0 * 1.05:
+        mx0 = self.limit_of(key, prototype, weapon, named)
+        if mx0 and val > mx0 * 1.05:
             raw2 = m.group(1).lstrip("+-")
             if raw2[:1] == "4" and len(raw2) > 1:      # "+" çoğu zaman "4" okunur: "411.1%" → "11.1%"
                 try:
@@ -222,7 +235,7 @@ class GameData:
                 return None                           # imkânsız değer (OCR hatası)
         return key, val
 
-    def parse_attrs(self, lines, prototype=False, sections=None):
+    def parse_attrs(self, lines, prototype=False, sections=None, weapon=False, named=False):
         """(attrs, quality, mod_attrs). sections verilirse yalnızca core/attributes/mods bölümleri okunur."""
         attrs, quality, mods = {}, {}, {}
         rows = sections if sections is not None else [(None, l) for l in lines]
@@ -232,14 +245,14 @@ class GameData:
                 continue
             if not use_sections and re.search(r"(?i)expertise|proficien", line):
                 continue
-            kv = self.parse_attr_line(line, prototype)
+            kv = self.parse_attr_line(line, prototype, weapon, named)
             if not kv: continue
             key, val = kv
             target = mods if sec == "mods" else attrs
             if val > target.get(key, -1):
                 target[key] = val
                 if target is attrs:
-                    mx = self.max_of(key, prototype)
+                    mx = self.max_of(key, prototype, weapon)
                     if mx: quality[key] = round(min(100.0, val / mx * 100))
         return attrs, quality, mods
 
@@ -291,7 +304,8 @@ class GameData:
                 for w, s in self.slots.items():
                     if re.search(r"\b" + re.escape(w) + r"\b", scope): slot = s; break
                 if slot: break
-        attrs, quality, mod_attrs = self.parse_attrs(lines, "PROTOTYPE" in rarity, secs if has_sections else None)
+        attrs, quality, mod_attrs = self.parse_attrs(lines, "PROTOTYPE" in rarity, secs if has_sections else None,
+                                                     weapon=bool(is_weapon), named=bool({"NAMED", "EXOTIC"} & set(rarity)))
         talents = self.match_talents(lines)
         if not name:                                      # bilinen ad yoksa: marka/set + yuva ("Grupo Sombra Mask")
             base = sets.get("gear_set") or sets.get("brand")

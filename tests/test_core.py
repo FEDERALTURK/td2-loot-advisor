@@ -50,6 +50,32 @@ def test_sanitize():
     g = stash.sanitize({"kind": "gear", "attrs": {"armor": 15, "crit_chance": 6}}, G)
     assert "armor" not in g["attrs"] and g["quality"]["crit_chance"] == 100
 
+def test_weapon_limits():
+    G = _game()
+    assert G.parse_attr_line("+13.5% Critical Hit Chance", weapon=True) == ("crit_chance", 13.5)   # SMG: legal
+    assert G.parse_attr_line("+13.5% Critical Hit Chance") is None                                # gear: impossible
+    assert G.parse_attr_line("+20.0% Headshot Damage", named=True) == ("headshot_damage", 20.0)   # named "perfect"
+
+def test_share_roundtrip():
+    import share
+    b = {"name": "Striker", "sets_or_brands": ["Striker's Battlegear"], "attributes": {"crit_chance": {"weight": 2}},
+         "talents": {"Perfect Fast Hands": 3}, "items": ["Coyote's Mask"]}
+    d = share.decode(share.encode(b))
+    assert d["name"] == "Striker" and d["attributes"]["crit_chance"]["weight"] == 2 and d["items"] == ["Coyote's Mask"]
+    for bad in ("hello", "TD2B-!!!!"):
+        try: share.decode(bad); raise AssertionError("accepted " + bad)
+        except ValueError: pass
+
+def test_vendor_record():
+    import vendor
+    G = _game()
+    rec = {"category": "weapon", "rarity": "highend", "vendor_en": "Benitez", "name_en": "Tactical Vector SBR 9mm", "slot_key": "smg",
+           "lines": [{"line_type": "talent", "stat_en": "Future Perfect", "value_num": None},
+                     {"line_type": "attr", "stat_en": "Critical Hit Chance", "value_num": 13.5}]}
+    it = vendor.to_item(rec, G)
+    assert it["slot"] == "Weapon" and it["weapon_type"] == "Submachine Gun" and it["attrs"]["crit_chance"] == 13.5
+    assert it["talents"] == ["Future Perfect"]
+
 if __name__ == "__main__":
     fails = 0
     for n, f in list(globals().items()):

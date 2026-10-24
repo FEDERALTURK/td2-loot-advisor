@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "version": "2026-10-24.6",
+ "version": "2026-10-24.7",
  "source": "The Division Wiki (fandom) + mx-division-builds data (CC BY-NC-SA 4.0, mxswat) + manual",
  "prototype_multiplier": 1.5,
  "gear_sets": [
@@ -626,7 +626,9 @@
     "critical chance"
    ],
    "max": 6,
-   "unit": "%"
+   "unit": "%",
+   "weapon_max": 9.5,
+   "weapon_limit": 21
   },
   "crit_damage": {
    "aliases": [
@@ -635,21 +637,27 @@
     "critical damage"
    ],
    "max": 12,
-   "unit": "%"
+   "unit": "%",
+   "weapon_max": 10,
+   "weapon_limit": 17
   },
   "headshot_damage": {
    "aliases": [
     "headshot damage"
    ],
    "max": 10,
-   "unit": "%"
+   "unit": "%",
+   "weapon_max": 10,
+   "weapon_limit": 111
   },
   "weapon_handling": {
    "aliases": [
     "weapon handling"
    ],
    "max": 8,
-   "unit": "%"
+   "unit": "%",
+   "weapon_max": 8,
+   "weapon_limit": 8
   },
   "armor_regen": {
    "aliases": [
@@ -719,44 +727,58 @@
    "aliases": [
     "rate of fire"
    ],
-   "unit": "%"
+   "unit": "%",
+   "weapon_max": 5,
+   "weapon_limit": 5
   },
   "reload_speed": {
    "aliases": [
     "reload speed"
    ],
-   "unit": "%"
+   "unit": "%",
+   "weapon_max": 12,
+   "weapon_limit": 12
   },
   "magazine_size": {
    "aliases": [
     "magazine size"
    ],
-   "unit": "%"
+   "unit": "%",
+   "weapon_max": 12.5,
+   "weapon_limit": 12.5
   },
   "optimal_range": {
    "aliases": [
     "optimal range"
    ],
-   "unit": ""
+   "unit": "",
+   "weapon_max": 24,
+   "weapon_limit": 24
   },
   "damage_to_armor": {
    "aliases": [
     "damage to armor"
    ],
-   "unit": "%"
+   "unit": "%",
+   "weapon_max": 6,
+   "weapon_limit": 12
   },
   "damage_to_health": {
    "aliases": [
     "damage to health",
     "health damage"
    ],
-   "unit": "%"
+   "unit": "%",
+   "weapon_max": 10,
+   "weapon_limit": 21
   },
   "damage_to_elites": {
    "aliases": [
     "damage to elites"
    ],
-   "unit": "%"
+   "unit": "%",
+   "weapon_max": 10,
+   "weapon_limit": 10
   },
   "pulse_resistance": {
    "aliases": [
@@ -785,7 +807,9 @@
     "pistol damage"
    ],
    "unit": "%",
-   "max": 15
+   "max": 15,
+   "weapon_max": 15,
+   "weapon_limit": 15
   },
   "damage_out_of_cover": {
    "aliases": [
@@ -793,7 +817,9 @@
     "damage to target out of cover"
    ],
    "unit": "%",
-   "max": 10
+   "max": 10,
+   "weapon_max": 10,
+   "weapon_limit": 12
   },
   "armor_on_kill": {
    "aliases": [
@@ -874,7 +900,9 @@
    ],
    "max": 12,
    "core": false,
-   "unit": "%"
+   "unit": "%",
+   "weapon_max": 12,
+   "weapon_limit": 12
   },
   "accuracy": {
    "aliases": [
@@ -882,7 +910,9 @@
    ],
    "max": 12,
    "core": false,
-   "unit": "%"
+   "unit": "%",
+   "weapon_max": 12,
+   "weapon_limit": 12
   },
   "swap_speed": {
    "aliases": [
@@ -890,7 +920,9 @@
    ],
    "max": 6,
    "core": false,
-   "unit": "%"
+   "unit": "%",
+   "weapon_max": 15,
+   "weapon_limit": 15
   }
  },
  "weapon_types": [
@@ -3913,5 +3945,6 @@
    "40% Disrupt Resistance",
    "40% Pulse Resistance"
   ]
- }
+ },
+ "named_multiplier": 2.0
 }

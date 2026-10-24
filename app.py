@@ -39,6 +39,9 @@ import bgvideo
 import ocr_backend
 import features
 import stash
+import vendor
+import companion
+import share
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
@@ -51,6 +54,7 @@ ART_DIR = BASE / "art"   # arka planlar / amblemler / bayraklar (kullanıcı ken
 BUNDLE = Path(getattr(sys, "_MEIPASS", BASE))
 CFG_PATH, LOG_PATH, DEBUG_PATH, PROG_PATH = (BASE / n for n in ("builds.json", "loot_log.csv", "last_crop.png", "progress.json"))
 STASH_PATH = BASE / "stash.json"
+VENDOR_CACHE = BASE / "vendor_cache.json"
 APPLOG_DIR = BASE / "logs"
 APPLOG_PATH = APPLOG_DIR / "app.log"
 LOG_HEADER = ["time", "item", "verdict", "best_build", "score", "slot", "rarity"]
@@ -72,7 +76,7 @@ DEFAULTS = {"scan_mode": "hotkey", "auto_interval_ms": 700, "auto_record": True,
             "fx_cursor": True, "fx_cursor_style": "crosshair", "fx_cursor_color": "#ff6d10", "fx_cursor_custom": "",
             "fx_trail": True, "fx_trail_color": "#ff6d10", "fx_trail_len": 18, "fx_transitions": True,
             "fx_video": True, "fx_video_dim": 0.35, "fx_transition_ms": 650, "fx_bgwatch": True, "fx_bgwatch_dim": 0.0,
-            "res_profile": "auto", "ocr_engine": "auto", "license_key": "", "stash_record": True, "ocr_threshold": 170, "ocr_scale": "auto", "ocr_psm": 6, "ocr_passes": 3,
+            "res_profile": "auto", "ocr_engine": "auto", "license_key": "", "stash_record": True, "vendor_mode": False, "vendor_auto": True, "vendor_notified": "", "companion_port": 8765, "ocr_threshold": 170, "ocr_scale": "auto", "ocr_psm": 6, "ocr_passes": 3,
             "overlay_mode": "card", "overlay_alpha": 0.94, "overlay_size": 1.0, "ui_depth": True,
             "meta_sync": True, "meta_feed_url": "", "meta_last_try": 0, "meta_last_sync": "", "meta_version": "",
             "meta_hidden": [], "tasks_sync": True, "auto_reset_times": True,
@@ -1174,6 +1178,9 @@ class App:
         self.ent = features.Entitlements(stg.get("license_key", ""))
         log.info("Tier: %s (%s)", self.ent.tier, self.ent.reason)
         self.stash = stash.Stash(STASH_PATH)
+        self.vendor_week = vendor.load_cache(VENDOR_CACHE)
+        self.vendor_scans, self.vendor_hits, self.vendor_busy = [], [], False
+        self.companion, self.comp_state = None, {}
         if not self.stash.data.get("imported_progress"):          # eski sürümün kayıtları bir kez aktarılır
             try:
                 n = self.stash.import_progress(self.progress, GAME) if GAME.ok else 0
@@ -1204,6 +1211,7 @@ class App:
         self.meta_busy = False
         self.poll(); self.check_resets()
         self.root.after(2500, self.meta_sync_start)     # açılışı bekletmeden, günde bir
+        self.root.after(6000, lambda: self.vendor_refresh(auto=True))
         log.info("UI ready — language=%s, OCR=%s, tesseract=%s", i18n.current_language(), OCR.name, self.tess or "NOT FOUND")
         OCR.warm_up()
         if OCR.name == "tesseract" and not self.tess:
@@ -1802,7 +1810,12 @@ class App:
         if s.get("speak_verdict"): self.speak_verdict(verdict, item, res, note)
         elif s.get("sound"): self.sounds.play(verdict, force=True)
         if s.get("log_csv"): self.log(item, verdict, res)
-        if s.get("stash_record", True) and valid_item(item):
+        self._companion_update(item, verdict, res, note)
+        if s.get("vendor_mode") and valid_item(item) and item.get("kind") in ("gear", "weapon"):
+            it = dict(item, vendor=t("vend.ingame"), id="s:" + str(len(self.vendor_scans)))
+            self.vendor_scans.append(it)
+            if self.current_tab() == "stash": self.refresh_stash()
+        elif s.get("stash_record", True) and valid_item(item):
             try:
                 rec, new = self.stash.add(item, verdict, res[0][1] if res else None, res[0][0] if res else None, GAME)
                 if rec:
@@ -2006,6 +2019,9 @@ class App:
         bb2 = ttk.Frame(left); bb2.pack(fill="x")
         ttk.Button(bb2, text=t("build.export"), command=self.export_builds).pack(side="left", fill="x", expand=True)
         ttk.Button(bb2, text=t("build.import"), command=self.import_builds).pack(side="left", fill="x", expand=True, padx=(4, 0))
+        bb3 = ttk.Frame(left); bb3.pack(fill="x", pady=(4, 0))
+        ttk.Button(bb3, text="🔗 " + t("share.share"), command=self.share_build).pack(side="left", fill="x", expand=True)
+        ttk.Button(bb3, text="📥 " + t("share.paste"), command=self.import_build_code).pack(side="left", fill="x", expand=True, padx=(4, 0))
         ttk.Button(left, text=ui_theme.with_icon(t("meta.sync_now"), "⭐"), command=lambda: self.meta_sync_start(force=True, what=("builds",)),
                    style="Accent.TButton").pack(fill="x", pady=(6, 0))
         self.meta_info = ttk.Label(left, text=self.meta_status_text(), foreground=PAL["muted"], wraplength=300, justify="left")
@@ -3529,6 +3545,19 @@ class App:
         ttk.Label(lb, text=t("set.language_note"), foreground=PAL["muted"], wraplength=820,
                   justify="left").pack(anchor="w", padx=8, pady=(0, 6))
 
+        # ---- Telefon arkadaşı ----
+        cb_ = ttk.LabelFrame(P["sync"], text="📱 " + t("comp.box")); cb_.pack(fill="x", padx=10, pady=(10, 6))
+        if self.premium_gate(cb_, "companion"):
+            r = ttk.Frame(cb_); r.pack(fill="x", padx=8, pady=6)
+            self.comp_btn = ttk.Button(r, text="", command=self.toggle_companion, style="Accent.TButton"); self.comp_btn.pack(side="left")
+            ttk.Label(r, text=t("comp.port")).pack(side="left", padx=(12, 2))
+            self.comp_port = tk.StringVar(value=str(st.get("companion_port", 8765)))
+            ttk.Entry(r, textvariable=self.comp_port, width=7).pack(side="left")
+            self.comp_url = ttk.Label(r, text="", foreground=PAL["accent"]); self.comp_url.pack(side="left", padx=12)
+            self.comp_qr = tk.Label(cb_, bg=PAL["bg"]); self.comp_qr.pack(anchor="w", padx=12, pady=4)
+            ttk.Label(cb_, text=t("comp.note"), foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=12, pady=(0, 8))
+            self._companion_ui()
+
         # ---- Meta build senkronu ----
         mb = ttk.LabelFrame(P["sync"], text=t("meta.box")); mb.pack(fill="x", padx=10, pady=6)
         rm = ttk.Frame(mb); rm.pack(fill="x", padx=8, pady=6)
@@ -4221,12 +4250,210 @@ class App:
         else:
             self._lic_status_text()
 
+    # ---------- Satıcılar ----------
+    def _build_vendor_page(self, p):
+        top = ttk.Frame(p); top.pack(fill="x", padx=8, pady=8)
+        self.vend_mode = tk.BooleanVar(value=bool(self.cfg["settings"].get("vendor_mode")))
+        ttk.Checkbutton(top, text=t("vend.mode"), variable=self.vend_mode, command=self._vendor_mode_toggle).pack(side="left")
+        ttk.Button(top, text="🧹 " + t("vend.clear_scans"), command=self._vendor_clear_scans).pack(side="left", padx=8)
+        self.vend_btn = ttk.Button(top, text="↻ " + t("vend.refresh"), command=lambda: self.vendor_refresh(force=True))
+        self.vend_btn.pack(side="right")
+        self.vend_info = ttk.Label(p, text="", foreground=PAL["muted"], wraplength=1000, justify="left"); self.vend_info.pack(anchor="w", padx=12)
+        self.vend_tl = ttk.Label(p, text="", foreground=PAL["accent"], wraplength=1000, justify="left"); self.vend_tl.pack(anchor="w", padx=12, pady=(4, 0))
+        self.vend_tv = None
+        holder = ttk.Frame(p); holder.pack(fill="both", expand=True, padx=8, pady=6)
+        if self.premium_gate(holder, "vendor_watch"):
+            cols = ("build", "slot", "item", "vendor", "fit", "attrs")
+            tv = self.vend_tv = ttk.Treeview(holder, columns=cols, show="headings")
+            for c, w in zip(cols, (230, 90, 220, 110, 110, 420)):
+                tv.heading(c, text=t("vend.col_" + c)); tv.column(c, width=w, anchor="w", stretch=c in ("attrs", "build"))
+            tv.pack(fill="both", expand=True)
+        src = ttk.Frame(p); src.pack(fill="x", padx=12, pady=(0, 8))
+        ttk.Label(src, text=t("vend.source", src=vendor.SOURCE_NAME), foreground=PAL["muted"]).pack(side="left")
+        import webbrowser
+        ttk.Button(src, text="🌐", width=3, command=lambda: webbrowser.open(vendor.SOURCE_URL)).pack(side="left", padx=6)
+
+    def _vendor_mode_toggle(self):
+        self.cfg["settings"]["vendor_mode"] = bool(self.vend_mode.get()); save_cfg(self.cfg)
+        self.toast(t("vend.mode_on") if self.vend_mode.get() else t("vend.mode_off"))
+
+    def _vendor_clear_scans(self):
+        self.vendor_scans = []; self._vendor_match(); self.refresh_stash()
+
+    def vendor_refresh(self, force=False, auto=False):
+        """Haftalık listeyi indir (Salı sıfırlamasından sonra bir kez ya da elle) ve eşleştir."""
+        st = self.cfg["settings"]
+        if self.vendor_busy: return
+        if auto and not (st.get("vendor_auto", True) and self.ent.has("vendor_watch")): return
+        if not force and not vendor.stale(self.vendor_week):
+            self._vendor_match(notify=auto); return
+        self.vendor_busy = True
+        try: self.vend_info.config(text=t("vend.loading"))
+        except Exception: pass
+
+        def work():
+            try:
+                wk = vendor.fetch_week(); vendor.save_cache(VENDOR_CACHE, wk); err = None
+            except Exception as e:
+                wk, err = None, e
+            self.root.after(0, lambda: self._vendor_loaded(wk, err, auto))
+        threading.Thread(target=work, daemon=True).start()
+
+    def _vendor_loaded(self, wk, err, auto):
+        self.vendor_busy = False
+        if wk: self.vendor_week = wk
+        if err:
+            log.warning("Vendor feed failed: %s", err)
+            if not auto: messagebox.showwarning(APP_NAME, t("vend.failed", e=err))
+        self._vendor_match(notify=auto)
+        if self.current_tab() == "stash": self.refresh_stash()
+
+    def _vendor_items(self):
+        items = [vendor.to_item(r, GAME) for r in (self.vendor_week or {}).get("items", [])] if GAME.ok else []
+        return items + list(self.vendor_scans)
+
+    def _vendor_match(self, notify=False):
+        if not self.ent.has("vendor_watch") or not GAME.ok:
+            self.vendor_hits = []; return
+        try:
+            self.vendor_hits = vendor.match(self._vendor_items(), self.cfg["builds"], plan_of, self.stash.owned(), GAME)
+        except Exception:
+            log.exception("vendor match failed"); self.vendor_hits = []
+        st = self.cfg["settings"]; wk = (self.vendor_week or {}).get("week", "")
+        act = (active_build(self.cfg) or {}).get("name")
+        mine = [h for h in self.vendor_hits if h["build"] == act]
+        if notify and mine and st.get("vendor_notified") != wk:
+            st["vendor_notified"] = wk; save_cfg(self.cfg)
+            self.toast(t("vend.notify", n=len(mine), build=act))
+        self._companion_refresh_build()
+
+    def _refresh_vendor(self):
+        wk = self.vendor_week or {}
+        if wk:
+            when = time.strftime("%Y-%m-%d %H:%M", time.localtime(wk.get("fetched", 0)))
+            self.vend_info.config(text=t("vend.info", week=wk.get("week", "?"), n=len(wk.get("items", [])),
+                                         scans=len(self.vendor_scans), when=when))
+        else:
+            self.vend_info.config(text=t("vend.none", scans=len(self.vendor_scans)))
+        tl = vendor.target_loot_today(wk) if self.ent.has("vendor_watch") else []
+        self.vend_tl.config(text="\n".join(t("vend.target", ev=ev, loot=", ".join(loot), missions=", ".join(ms[:5]))
+                                           for ev, loot, ms, _d in tl))
+        if self.vend_tv is None: return
+        if not self.vendor_hits and (wk or self.vendor_scans): self._vendor_match()
+        tv = self.vend_tv; tv.delete(*tv.get_children())
+        act = (active_build(self.cfg) or {}).get("name")
+        for h in sorted(self.vendor_hits, key=lambda h: (h["build"] != act, -h["gain"])):
+            it = h["item"]
+            tv.insert("", "end", values=(("★ " if h["build"] == act else "") + h["build"], slot_name(h["slot"]), it.get("name"),
+                                         h.get("vendor") or "", f"{h['fit']}% ← {h['have']}%", self._attrs_short(it)))
+        if not self.vendor_hits:
+            tv.insert("", "end", values=("", "", t("vend.no_hits"), "", "", ""))
+
+    # ---------- Telefon arkadaşı ----------
+    def _companion_labels(self):
+        return {"build": t("comp.h_build"), "vendor": t("comp.h_vendor"), "waiting": t("comp.waiting"),
+                "offline": t("comp.offline"), "no_vendor": t("vend.no_hits")}
+
+    def _companion_update(self, item, verdict, res, note):
+        try:
+            q = item.get("quality") or {}
+            self.comp_state.update({
+                "verdict": verdict, "verdict_label": verdict_label(verdict), "note": note or item.get("_note") or "",
+                "best": f"{res[0][1]} {res[0][0]}%" if res else "",
+                "item": {"name": item.get("name"), "slot": slot_name(item.get("slot") or "") if item.get("slot") else "",
+                         "source": item.get("gear_set") or item.get("brand") or "",
+                         "attrs": [{"name": attr_name(k), "value": f"{v:g}", "q": q.get(k)} for k, v in (item.get("attrs") or {}).items()]},
+                "time": datetime.now().strftime("%H:%M:%S")})
+            self._companion_refresh_build()
+        except Exception:
+            log.debug("companion state failed", exc_info=True)
+
+    def _companion_refresh_build(self):
+        try:
+            b = active_build(self.cfg)
+            if b:
+                r = stash.optimize(b, plan_of(b), self.stash.owned(), GAME)
+                self.comp_state["build"] = {"name": b["name"], "completion": r["completion"],
+                                            "slots": [{"slot": slot_name(s), "item": (v["item"] or {}).get("name"), "fit": v["fit"],
+                                                       "done": v["done"]} for s, v in r["slots"].items()]}
+            act = (b or {}).get("name")
+            self.comp_state["vendor"] = [{"slot": slot_name(h["slot"]), "item": h["item"].get("name"), "vendor": h.get("vendor"),
+                                          "fit": h["fit"]} for h in self.vendor_hits if h["build"] == act][:6]
+        except Exception:
+            log.debug("companion build state failed", exc_info=True)
+
+    def toggle_companion(self):
+        if not self.ent.has("companion"): return
+        if self.companion and self.companion.running:
+            self.companion.stop(); self.companion = None
+        else:
+            try: port = max(1024, min(65535, int(self.comp_port.get())))
+            except ValueError: port = 8765
+            self.cfg["settings"]["companion_port"] = port; save_cfg(self.cfg)
+            self._companion_refresh_build()
+            try:
+                self.companion = companion.Companion(lambda: dict(self.comp_state), self._companion_labels(), port,
+                                                     lang=i18n.current_language())
+                self.companion.start()
+            except OSError as e:
+                self.companion = None
+                messagebox.showerror(APP_NAME, t("comp.port_busy", port=port, e=e))
+        self._companion_ui()
+
+    def _companion_ui(self):
+        if not hasattr(self, "comp_btn"): return
+        on = bool(self.companion and self.companion.running)
+        self.comp_btn.config(text=("⏹ " + t("comp.stop")) if on else ("▶ " + t("comp.start")))
+        self.comp_url.config(text=self.companion.url if on else "")
+        img = companion.qr_image(self.companion.url, 5) if on else None
+        if img is not None:
+            ph = ImageTk.PhotoImage(img); self.comp_qr.config(image=ph); self.comp_qr.image = ph
+        else:
+            self.comp_qr.config(image="", text=(t("comp.no_qr") if on else "")); self.comp_qr.image = None
+
+    # ---------- Build paylaşımı ----------
+    def share_build(self):
+        b = getattr(self, "cur", None)
+        if not b: return
+        code = share.encode(b)
+        self.root.clipboard_clear(); self.root.clipboard_append(code)
+        w = tk.Toplevel(self.root); w.title(t("share.title")); w.configure(bg=PAL["bg"])
+        ttk.Label(w, text=t("share.copied", name=b["name"]), style="Section.TLabel").pack(anchor="w", padx=14, pady=(12, 4))
+        txt = tk.Text(w, height=4, width=70, bg=PAL["surface"], fg=PAL["fg"], relief="flat", wrap="char", font=("Consolas", 9))
+        txt.insert("end", code); txt.config(state="disabled"); txt.pack(fill="x", padx=14)
+        img = companion.qr_image(code, 4)
+        if img is not None:
+            ph = ImageTk.PhotoImage(img); lb = tk.Label(w, image=ph, bg=PAL["bg"]); lb.image = ph; lb.pack(pady=8)
+        ttk.Label(w, text=t("share.note"), foreground=PAL["muted"], wraplength=520, justify="left").pack(anchor="w", padx=14, pady=(0, 12))
+
+    def import_build_code(self):
+        try: clip = self.root.clipboard_get()
+        except Exception: clip = ""
+        w = tk.Toplevel(self.root); w.title(t("share.paste")); w.configure(bg=PAL["bg"])
+        ttk.Label(w, text=t("share.paste_hint")).pack(anchor="w", padx=14, pady=(12, 4))
+        txt = tk.Text(w, height=5, width=70, bg=PAL["surface"], fg=PAL["fg"], relief="flat", wrap="char", font=("Consolas", 9))
+        txt.pack(fill="x", padx=14)
+        if share.PREFIX in clip: txt.insert("end", clip.strip())
+
+        def go():
+            try:
+                b = share.decode(txt.get("1.0", "end"))
+            except ValueError as e:
+                return messagebox.showerror(APP_NAME, t("share.bad", e=e), parent=w)
+            names = {x["name"] for x in self.cfg["builds"]}
+            base, i = b["name"], 2
+            while b["name"] in names: b["name"] = f"{base} ({i})"; i += 1
+            b.setdefault("sets_or_brands", []); b.setdefault("attributes", {}); b.setdefault("talents", {}); b.setdefault("set_bonus", 0)
+            self.cfg["builds"].append(b); self.normalize_builds(); save_cfg(self.cfg)
+            w.destroy(); self.refresh_builds(len(self.cfg["builds"]) - 1); self.toast(t("share.added", name=b["name"]))
+        ttk.Button(w, text="✔ " + t("share.add"), command=go, style="Accent.TButton").pack(anchor="w", padx=14, pady=10)
+
     # ---------- Sandık (envanter) ----------
     def build_stash(self):
         f = self.tabs["stash"]
         self.st_nb = ttk.Notebook(f); self.st_nb.pack(fill="both", expand=True, padx=8, pady=8)
         pages = {}
-        for key, icon in (("inv", "🗄"), ("opt", "🧮"), ("audit", "🧾")):
+        for key, icon in (("inv", "🗄"), ("opt", "🧮"), ("audit", "🧾"), ("vendor", "🏪")):
             holder = ttk.Frame(self.st_nb); self.st_nb.add(holder, text=f" {icon} {t('stash.page_' + key)} ")
             pages[key] = holder
         self.st_nb.bind("<<NotebookTabChanged>>", lambda e=None: self.refresh_stash())
@@ -4295,6 +4522,7 @@ class App:
         self.audit_txt.tag_configure("h", font=(ui_theme.FONT_SEMI, 12), foreground=PAL["accent"])
         self.audit_txt.pack(fill="both", expand=True, padx=8, pady=(0, 8))
         self._audit = None
+        self._build_vendor_page(pages["vendor"])
         self.refresh_stash()
 
     def _stash_rec_toggle(self):
@@ -4327,6 +4555,7 @@ class App:
         except Exception: page = 0
         if page == 1: self._refresh_opt(items)
         elif page == 2: self._refresh_audit(items)
+        elif page == 3: self._refresh_vendor()
 
     def _refresh_opt(self, items):
         b = build_by_name(self.cfg, self.opt_b.get()) or active_build(self.cfg)
@@ -4437,6 +4666,7 @@ class App:
 
     def on_close(self):
         self.stop(); self.speaker.close()
+        if self.companion: self.companion.stop()
         for name in ("video", "watch_bg", "trail_fx"):            # arka plan işleri / pencereleri
             obj = getattr(self, name, None)
             try: obj and obj.stop()

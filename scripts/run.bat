@@ -30,6 +30,8 @@ call :opt faster-whisper faster_whisper
 REM Yeni OCR motoru (onerilen; kurulamazsa Tesseract kullanilir) / new OCR engine (recommended; falls back to Tesseract)
 call :opt onnxruntime onnxruntime
 call :opt rapidocr rapidocr
+REM QR kodu (telefon arkadasi, build paylasimi) / QR codes (optional)
+call :opt qrcode qrcode
 REM Arka plan videosu (istege bagli) / background video (optional)
 call :opt av av
 

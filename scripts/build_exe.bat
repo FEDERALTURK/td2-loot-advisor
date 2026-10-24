@@ -19,7 +19,7 @@ REM Ses paketleri opsiyonel; kurulamazsa .exe sessiz surumle derlenir.
 REM Voice packages are optional; if they fail, the .exe is built without voice.
 %PY% -m pip install -r requirements-voice.txt
 REM Yeni OCR motoru (onerilen) / new OCR engine (recommended)
-%PY% -m pip install onnxruntime rapidocr
+%PY% -m pip install onnxruntime rapidocr qrcode
 %PY% -c "import ocr_backend; ocr_backend.Engine('rapidocr').text(__import__('PIL.Image').Image.new('RGB',(64,32)))"
 
 %PY% -m PyInstaller --onefile --noconsole --name TD2LootAdvisor ^
@@ -27,7 +27,7 @@ REM Yeni OCR motoru (onerilen) / new OCR engine (recommended)
   --add-data "lang;lang" ^
   --add-data "meta;meta" ^
   --hidden-import pyttsx3.drivers --hidden-import pyttsx3.drivers.sapi5 ^
-  --hidden-import ocr_backend --hidden-import features --hidden-import stash --hidden-import fx --hidden-import bgvideo --hidden-import view3d --hidden-import display ^
+  --hidden-import ocr_backend --hidden-import features --hidden-import stash --hidden-import vendor --hidden-import companion --hidden-import share --hidden-import fx --hidden-import bgvideo --hidden-import view3d --hidden-import display ^
   --collect-all rapidocr --collect-all onnxruntime --collect-all faster_whisper --collect-all ctranslate2 ^
   app.py
 

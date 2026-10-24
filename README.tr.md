@@ -62,6 +62,17 @@ tüm build'ler için **3D puan çubukları**. Uyan eşyalar otomatik kaydedilir;
 - Premium: **kalibrasyon danışmanı** (hangi attribute hangi eşyadan; silah ve ekipman kütüphaneleri ayrı, egzotik kaynak
   önerilmez), tüm build'lerin sandığa göre sıralaması, CSV dışa aktarma.
 
+### Satıcılar, telefon, paylaşım (yeni)
+- **Satıcılar** (Sandık → Satıcılar): haftalık satıcılar ve bugünün hedefli loot'u build'lerin ve sandığınla eşleştirilir:
+  "Cassie'de healer build'ine %95 uyan Future Initiative eldiveni var". İki kaynak: kendi taraman (**Satıcı modu**: satıcı
+  ekranında F8) ve topluluk verisi [hi-dep Division 2 Database](https://hidep-division2.pages.dev/?view=vendor) — senin
+  bilgisayarında herkese açık sayfasından doğrudan okunur, bu depoya kopyalanmaz. Salı sıfırlamasından sonra bir kez yenilenir.
+  Premium.
+- **Telefon arkadaşı** (Ayarlar → Senkron): ev Wi-Fi'nde yalnız okunur bir sayfa (gizli anahtarlı adres + QR): son karar,
+  aktif build ve satıcı eşleşmeleri. Premium.
+- **Build paylaşımı** (Build'ler → 🔗 Paylaş): build kısa bir koda (`TD2B-…`) ve QR'a dönüşür; Build'ler → Kodu yapıştır ile
+  eklenir. Ücretsiz.
+
 ### Görevler
 - Yalnızca **arayüz dilinde**, gruplu ve kısa: Journey görevleri, Manhunt scout'ları, Gizli Görevler,
   günlük/haftalık projeler. Farklı kaynaklardan gelen aynı görev tek satır görünür.
@@ -115,6 +126,9 @@ Kaynaklar: The Division Wiki ve mx-division-builds verisi (CC BY-NC-SA 4.0).
 | `gamedata.py` | Eşya tanıma (oyun verisiyle) |
 | `ocr_backend.py` | OCR motorları (RapidOCR / Tesseract), simge ve nadirlik renk ipuçları |
 | `stash.py` | Sandık, denetim raporu, build optimize edici, kalibrasyon danışmanı |
+| `vendor.py` | Haftalık satıcılar, hedefli loot, build eşleştirme |
+| `companion.py` | Telefon arkadaşı (yerel, yalnız okunur web sayfası + QR) |
+| `share.py` | Build paylaşım kodları |
 | `features.py` | Ücretsiz/premium özellikler, lisans anahtarı doğrulama (Ed25519) |
 | `tests/` | Gerçek kartlarla OCR testi (`tests/test_ocr.py`), lisans ve optimize edici testleri (`tests/test_core.py`) |
 | `display.py` | Çözünürlük profilleri, oyun ayar dosyası okuyucu |
