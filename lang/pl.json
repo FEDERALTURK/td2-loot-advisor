@@ -559,5 +559,7 @@
   "wiki.none": "📚 Wiki jeszcze nieodczytana.",
   "wiki.synced": "Wiki: {added} nowych, {removed} usuniętych",
   "wiki.failed": "Brak dostępu do wiki (offline?).",
-  "wiki.note": "Wiki The Division (thedivision.fandom.com) jest czytana na żywo z twojego komputera: zwiadowcy obławy bieżącego sezonu, tajne zadania (ze wskazówkami do zagadek/ECHO) i datowane projekty sezonowe. Gdy zaczyna się nowy sezon, aplikacja sama przechodzi na nową stronę. Wiki jest po angielsku; jeśli w Asystencie wybrano AI, zadania są tłumaczone. Treść CC BY-SA, każde zadanie linkuje do źródła (📚)."
+  "wiki.note": "Wiki The Division (thedivision.fandom.com) jest czytana na żywo z twojego komputera: zwiadowcy obławy bieżącego sezonu, tajne zadania (ze wskazówkami do zagadek/ECHO) i datowane projekty sezonowe. Gdy zaczyna się nowy sezon, aplikacja sama przechodzi na nową stronę. Wiki jest po angielsku; jeśli w Asystencie wybrano AI, zadania są tłumaczone. Treść CC BY-SA, każde zadanie linkuje do źródła (📚).",
+  "scan.minimized": "Okno aplikacji zasłaniało obszar skanowania, więc zostało zminimalizowane, by nie czytać własnego tekstu.",
+  "panel.quality": "📊 Wartości (względem maksimum w grze):"
 }

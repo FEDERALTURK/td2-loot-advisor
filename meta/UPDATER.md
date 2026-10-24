@@ -120,3 +120,12 @@ Kategoriler oyundaki menülerle birebir aynıdır (başka kategori kullanma):
   görevini tekrar göstermez. Biçim: `wiki-<sezon-slug>-scout-<n>`, `wiki-ca-<görev-slug>`
   (ör. `wiki-red-horizon-scout-9`, `wiki-ca-georgetown-dead-zone`).
 - Bulut ortamı fandom.com'a doğrudan erişemeyebilir; o durumda wiki içeriğini başka kaynaklardan doğrula.
+
+---
+
+# Oyun verisi — `meta/game_data.json`
+- Eşya tanıma sözlüğü: `gear_sets`, `brands`, `exotics`, `named`, `gear_talents`, `weapon_talents`,
+  `attributes` (`aliases`, `max`, `core`, `unit`), `weapon_types`, `slots`, `prototype_multiplier`.
+- Yeni sezonda gelen egzotik/named/set/talent'i ekle (wiki "Red Horizon" sayfasındaki *New Weapons, Gear,
+  and Talents* bölümü iyi bir kaynak). Mevcut adları silme; `version`'ı artır.
+- `max` değerlerini yalnızca resmî yama notu bir değişiklik söylerse güncelle.

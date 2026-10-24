@@ -22,6 +22,7 @@ REM Voice packages are optional; if they fail, the .exe is built without voice.
 %PY% -m PyInstaller --onefile --noconsole --name TD2LootAdvisor ^
   --add-data "builds.json;." ^
   --add-data "lang;lang" ^
+  --add-data "meta;meta" ^
   --hidden-import pyttsx3.drivers --hidden-import pyttsx3.drivers.sapi5 ^
   --collect-all faster_whisper --collect-all ctranslate2 ^
   app.py

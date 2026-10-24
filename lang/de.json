@@ -563,5 +563,7 @@
   "wiki.none": "📚 Wiki noch nicht gelesen.",
   "wiki.synced": "Wiki: {added} neu, {removed} entfernt",
   "wiki.failed": "Wiki nicht erreichbar (offline?).",
-  "wiki.note": "Das Division-Wiki (thedivision.fandom.com) wird live von deinem PC gelesen: Manhunt-Scouts der aktuellen Saison, Classified Assignments (mit Rätsel-/ECHO-Tipps) und datierte Saisonprojekte. Bei einer neuen Saison wechselt die App selbst zur neuen Seite. Das Wiki ist englisch; ist im Assistenten eine KI gewählt, werden Aufgaben übersetzt. Inhalt CC BY-SA, jede Aufgabe verlinkt die Quelle (📚)."
+  "wiki.note": "Das Division-Wiki (thedivision.fandom.com) wird live von deinem PC gelesen: Manhunt-Scouts der aktuellen Saison, Classified Assignments (mit Rätsel-/ECHO-Tipps) und datierte Saisonprojekte. Bei einer neuen Saison wechselt die App selbst zur neuen Seite. Das Wiki ist englisch; ist im Assistenten eine KI gewählt, werden Aufgaben übersetzt. Inhalt CC BY-SA, jede Aufgabe verlinkt die Quelle (📚).",
+  "scan.minimized": "Das App-Fenster lag über dem Scanbereich und wurde minimiert, damit es nicht seinen eigenen Text liest.",
+  "panel.quality": "📊 Werte (im Vergleich zum Spielmaximum):"
 }

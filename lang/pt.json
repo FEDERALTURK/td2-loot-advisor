@@ -559,5 +559,7 @@
   "wiki.none": "📚 Wiki ainda não lida.",
   "wiki.synced": "Wiki: {added} novas, {removed} removidas",
   "wiki.failed": "Wiki inacessível (offline?).",
-  "wiki.note": "A wiki de The Division (thedivision.fandom.com) é lida ao vivo do seu PC: batedores da caçada da temporada, missões confidenciais (com dicas de enigmas/ECHO) e projetos sazonais com data. Quando uma nova temporada começa, o app muda sozinho de página. A wiki é em inglês; se você escolher uma IA no Assistente, as tarefas são traduzidas. Conteúdo CC BY-SA, cada tarefa leva à fonte (📚)."
+  "wiki.note": "A wiki de The Division (thedivision.fandom.com) é lida ao vivo do seu PC: batedores da caçada da temporada, missões confidenciais (com dicas de enigmas/ECHO) e projetos sazonais com data. Quando uma nova temporada começa, o app muda sozinho de página. A wiki é em inglês; se você escolher uma IA no Assistente, as tarefas são traduzidas. Conteúdo CC BY-SA, cada tarefa leva à fonte (📚).",
+  "scan.minimized": "A janela do app cobria a área de leitura; foi minimizada para não ler o próprio texto.",
+  "panel.quality": "📊 Valores (em relação ao máximo do jogo):"
 }

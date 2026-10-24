@@ -559,5 +559,7 @@
   "wiki.none": "📚 Wiki pas encore lu.",
   "wiki.synced": "Wiki : {added} nouveaux, {removed} retirés",
   "wiki.failed": "Wiki injoignable (hors ligne ?).",
-  "wiki.note": "Le wiki The Division (thedivision.fandom.com) est lu en direct depuis votre PC : éclaireurs de traque de la saison, missions classifiées (avec astuces d’énigmes/ECHO) et projets saisonniers datés. À chaque nouvelle saison, l’app passe seule à la nouvelle page. Le wiki est en anglais ; si une IA est choisie dans l’Assistant, les tâches sont traduites. Contenu CC BY-SA, chaque tâche renvoie à sa source (📚)."
+  "wiki.note": "Le wiki The Division (thedivision.fandom.com) est lu en direct depuis votre PC : éclaireurs de traque de la saison, missions classifiées (avec astuces d’énigmes/ECHO) et projets saisonniers datés. À chaque nouvelle saison, l’app passe seule à la nouvelle page. Le wiki est en anglais ; si une IA est choisie dans l’Assistant, les tâches sont traduites. Contenu CC BY-SA, chaque tâche renvoie à sa source (📚).",
+  "scan.minimized": "La fenêtre de l’app couvrait la zone de scan ; elle a été réduite pour ne pas lire son propre texte.",
+  "panel.quality": "📊 Valeurs (par rapport au maximum du jeu) :"
 }

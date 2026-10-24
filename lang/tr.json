@@ -640,5 +640,7 @@
   "wiki.none": "📚 Wiki henüz okunmadı.",
   "wiki.synced": "Wiki: {added} yeni, {removed} kaldırıldı",
   "wiki.failed": "Wiki'ye ulaşılamadı (internet?).",
-  "wiki.note": "The Division Wiki (thedivision.fandom.com) senin bilgisayarından canlı okunur: güncel sezonun Manhunt Scout'ları, Classified Assignment'lar (bulmaca/ECHO ipuçlarıyla) ve tarihli sezon projeleri. Yeni sezon açılınca program kendiliğinden yeni sayfaya geçer. Wiki İngilizcedir; Asistan sekmesinde bir yapay zekâ seçiliyse görevler senin diline çevrilir. İçerik CC BY-SA, her görev kaynağına bağlantı verir (📚)."
+  "wiki.note": "The Division Wiki (thedivision.fandom.com) senin bilgisayarından canlı okunur: güncel sezonun Manhunt Scout'ları, Classified Assignment'lar (bulmaca/ECHO ipuçlarıyla) ve tarihli sezon projeleri. Yeni sezon açılınca program kendiliğinden yeni sayfaya geçer. Wiki İngilizcedir; Asistan sekmesinde bir yapay zekâ seçiliyse görevler senin diline çevrilir. İçerik CC BY-SA, her görev kaynağına bağlantı verir (📚).",
+  "scan.minimized": "Program penceresi tarama alanının üstündeydi; kendi yazısını okumasın diye küçültüldü.",
+  "panel.quality": "📊 Rulo (oyundaki en yüksek değere göre):"
 }

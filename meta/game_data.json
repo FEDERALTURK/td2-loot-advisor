@@ -1,0 +1,652 @@
+{
+ "schema": 1,
+ "version": "2026-10-24.1",
+ "source": "The Division Wiki (thedivision.fandom.com, CC BY-SA) + game values",
+ "prototype_multiplier": 1.5,
+ "gear_sets": [
+  "Aces & Eights",
+  "Aegis",
+  "AlphaBridge",
+  "Breaking Point",
+  "Concentrated Company",
+  "Eclipse Protocol",
+  "Ember Engine",
+  "Foundry Bulwark",
+  "Future Initiative",
+  "Hard Wired",
+  "Heartbreaker",
+  "Hotshot",
+  "Hunter's Fury",
+  "Measured Assembly",
+  "Negotiator's Dilemma",
+  "Ongoing Directive",
+  "Ortiz: Exuro",
+  "Ortiz: Reficere",
+  "Rigger",
+  "Striker's Battlegear",
+  "System Corruption",
+  "Tip Of The Spear",
+  "Tipping Scales",
+  "True Patriot",
+  "Umbra Initiative",
+  "Virtuoso",
+  "Cavalier",
+  "Core Strength",
+  "Refactor"
+ ],
+ "brands": [
+  "5.11 Tactical",
+  "Airaldi Holdings",
+  "Alps Summit Armament",
+  "Badger Tuff",
+  "Belstone Armory",
+  "Brazos de Arcabuz",
+  "China Light Industries Corporation",
+  "Douglas & Harding",
+  "Electrique",
+  "Empress International",
+  "Fenris Group AB",
+  "Gila Guard",
+  "Golan Gear",
+  "Grupo Sombra S.A.",
+  "Habsburg Guard",
+  "Hana-U Corporation",
+  "Imminence Armaments",
+  "Legatus S.p.A.",
+  "Murakami Industries",
+  "Overlord Armaments",
+  "Palisade Steelworks",
+  "Petrov Defense Group",
+  "Richter & Kaiser GmbH",
+  "Sokolov Concern",
+  "Uzina Getica",
+  "Walker, Harris & Co.",
+  "Wyvern Wear",
+  "Yaahl Gear",
+  "Česká Výroba S.R.O.",
+  "Lengmo",
+  "Shiny Monkey Gear"
+ ],
+ "exotics": [
+  "Acosta's Go-Bag",
+  "Agitator",
+  "Backfire",
+  "Barrett's Bulletproof Vest",
+  "Big Alejandro",
+  "Birdie's Quick Fix Pack",
+  "Blacklisters",
+  "Bloody Knuckles",
+  "Bluescreen",
+  "BTSU Datagloves",
+  "Bullfrog",
+  "Busy Little Bee",
+  "Caduceus",
+  "Capacitor",
+  "Cassidy",
+  "Catharsis",
+  "Centurion",
+  "Chameleon",
+  "Collector",
+  "Colonel Bliss's Holster",
+  "Coyote's Mask",
+  "Diamondback",
+  "Doctor Home",
+  "Dodge City Gunslinger's Holster",
+  "Dread Edict",
+  "Eagle Bearer",
+  "Fafnir",
+  "Ferro's Oxygen Mask",
+  "Golden Rhino",
+  "Harrier Pride",
+  "Imperial Dynasty",
+  "Iron Lung",
+  "Iron Will",
+  "Lady Death",
+  "Liberty",
+  "Lullaby",
+  "Mantis",
+  "Memento",
+  "Merciless",
+  "Mosquito",
+  "Nemesis",
+  "NinjaBike Messenger Bag",
+  "NinjaBike Messenger Kneepads",
+  "Nurse's Kneepads",
+  "Ouroboros",
+  "Oxpecker",
+  "Pakhan",
+  "Pestilence",
+  "Pristine Example",
+  "Ravenous",
+  "Regulus",
+  "Ridgeway's Pride",
+  "Ruthless",
+  "Sacrum Imperium",
+  "Sawyer's Kneepads",
+  "Scorpio",
+  "Sharpshooter",
+  "Sheriff",
+  "Shocker Punch",
+  "Shortbow Championship Pads",
+  "St. Elmo's Engine",
+  "Strega",
+  "Sweet Dreams",
+  "Tardigrade Armor System",
+  "The Bighorn",
+  "The Chatterbox",
+  "Tinkerer",
+  "Vile",
+  "Vindicator",
+  "Waveform",
+  "Bullet King",
+  "Overlord",
+  "Grudge",
+  "Rock n' Roll"
+ ],
+ "named": [
+  "Anarchist's Cookbook",
+  "Backbone",
+  "Bulldog",
+  "Cap'n",
+  "Force Multiplier",
+  "Hermano",
+  "Keeper",
+  "Lavoisier",
+  "Melon Baller",
+  "Momma Badger",
+  "Percussive Maintenance",
+  "Proxy",
+  "Strategic Alignment",
+  "The Courier",
+  "The Gift",
+  "The Setup",
+  "Vigil",
+  "Bober",
+  "Caesar's Guard",
+  "Carpenter",
+  "Chainkiller",
+  "Cherished",
+  "Closer",
+  "Combustor",
+  "Equalizer",
+  "Everyday Carrier",
+  "Henri",
+  "Impetus",
+  "Pointman",
+  "Rushdown",
+  "Sleight",
+  "The Sacrifice",
+  "Trick Shot",
+  "Zero F's",
+  "Contractor's Gloves",
+  "Deathgrips",
+  "Eagle's Grasp",
+  "Firm Handshake",
+  "Skulls MC Gloves",
+  "Ammo Dump",
+  "Claws Out",
+  "Forge",
+  "Picaro's Holster",
+  "Salvo",
+  "Spot-On",
+  "Cloak",
+  "Fox's Prayer",
+  "Grease",
+  "Chill Out",
+  "Nightwatcher",
+  "Punch Drunk",
+  "The Hollow Man",
+  "Visionario",
+  "Achilles",
+  "Adrestia",
+  "Artist's Tool",
+  "Backup Boomstick",
+  "Baker's Dozen",
+  "Big Show",
+  "Black Friday",
+  "Boomstick",
+  "Born Great",
+  "Brain Break",
+  "Brutus",
+  "Burn Out",
+  "Cabaret",
+  "Carnage",
+  "Cold Relations",
+  "Commando",
+  "Cricket",
+  "Cuélebre",
+  "Damascus",
+  "Dare",
+  "Dark Winter",
+  "Defiler",
+  "Designated Hitter",
+  "Diceros Special",
+  "Eir",
+  "Ekim's Long Stick",
+  "Emeline's Guard",
+  "Enforcer",
+  "Everlasting Gaze",
+  "Firestarter",
+  "First Bloom",
+  "First Sight",
+  "Free Republic",
+  "Glory Daze",
+  "Goalie",
+  "Good Times",
+  "Grown Great",
+  "Handbasket",
+  "Harmony",
+  "Hildr",
+  "Historian",
+  "Hungry Hog",
+  "Incendia",
+  "Instigator",
+  "Invisible Hand",
+  "Kingbreaker",
+  "Lefty",
+  "Lexington",
+  "Liberator",
+  "Lichtenberg",
+  "Lightning Rod",
+  "Like Glue",
+  "Lockdown",
+  "Lud",
+  "Manic",
+  "Maxim 9",
+  "Mechanical Animal",
+  "Medved",
+  "Midas",
+  "Mozambique Special",
+  "New Reliable",
+  "Oh Carol",
+  "Orbit",
+  "Pinprick",
+  "Prophet",
+  "Pyromaniac",
+  "Quickstep",
+  "Quiet Roar",
+  "Relic",
+  "Rusty",
+  "Safety Distance",
+  "Savage Wolverine",
+  "Scalpel",
+  "Sharpshooter 93R",
+  "Shield Splinterer",
+  "Showstopper",
+  "Shroud",
+  "Sleipnir",
+  "Stage Left",
+  "Steamer",
+  "Steel & Sons ACR",
+  "Surge",
+  "Survivalist D50",
+  "Swap Chain",
+  "Tabula Rasa",
+  "Teapot",
+  "Tempest",
+  "Tenebrae",
+  "Test Subject",
+  "The Apartment",
+  "The Archivist",
+  "The Claw",
+  "The Darkness",
+  "The Drill",
+  "The Harvest",
+  "The Mop",
+  "The Railsplitter",
+  "The Send-Off",
+  "The Sleigher",
+  "The Stinger",
+  "The Virginian",
+  "The White Death",
+  "Thompson M1928",
+  "Thorn",
+  "Tommy Gun",
+  "Trader",
+  "Tsunami",
+  "Urban MDR",
+  "Vertigo",
+  "Warlord",
+  "Whiplash",
+  "Whisper"
+ ],
+ "gear_talents": [
+  "Obliterate",
+  "Glass Cannon",
+  "Unbreakable",
+  "Vanguard",
+  "Intimidate",
+  "Headhunter",
+  "Spotter",
+  "Braced",
+  "Focus",
+  "Kinetic Momentum",
+  "Tamper Proof",
+  "Trauma",
+  "Overwatch",
+  "Clutch",
+  "Gunslinger",
+  "Skilled",
+  "Overclock",
+  "Protected Reload",
+  "Tag Team",
+  "Reassigned",
+  "Explosive Delivery",
+  "Mad Bomber",
+  "Companion",
+  "Vigilance",
+  "Composure",
+  "Concussion",
+  "Combined Arms",
+  "Adrenaline Rush",
+  "Bloodsucker",
+  "Wicked",
+  "Galvanize",
+  "Leadership",
+  "Opportunistic",
+  "Protector",
+  "Calculated",
+  "Shock and Awe",
+  "Energize",
+  "Safeguard",
+  "Unstoppable Force",
+  "Versatile",
+  "Creeping Death",
+  "Field Medic",
+  "Tech Support",
+  "Perfectionist",
+  "Spark",
+  "Resolved"
+ ],
+ "weapon_talents": [
+  "Allegro",
+  "Back and Forth",
+  "Behind You",
+  "Boomerang",
+  "Boiling Point",
+  "Breadbasket",
+  "Close & Personal",
+  "Determined",
+  "Eyeless",
+  "Extra",
+  "Fast Hands",
+  "Finisher",
+  "First Blood",
+  "Flatline",
+  "Frenzy",
+  "Future Perfect",
+  "Head Scratcher",
+  "Ignited",
+  "Immobilize",
+  "In Sync",
+  "Jazz Hands",
+  "Killer",
+  "Lucky Shot",
+  "Measured",
+  "Naked",
+  "Near Sighted",
+  "On Empty",
+  "Optimist",
+  "Outsider",
+  "Overflowing",
+  "Overwhelm",
+  "Perpetuation",
+  "Precision Strike",
+  "Preservation",
+  "Pressure Point",
+  "Pummel",
+  "Pumped Up",
+  "Ranger",
+  "Reformation",
+  "Rifleman",
+  "Sadist",
+  "Salvage",
+  "Sledgehammer",
+  "Soft Spot",
+  "Spike",
+  "Steady Handed",
+  "Strained",
+  "Streamline",
+  "Thunder Strike",
+  "Unhinged",
+  "Unwavering",
+  "Vindictive",
+  "Brazen",
+  "Optimized",
+  "Swift",
+  "Accurate",
+  "Stabilize",
+  "Capacitance",
+  "Disruptor Rounds",
+  "Primer Rounds",
+  "Sandman",
+  "Septic Shock",
+  "Bullet Hell",
+  "Payment in Kind",
+  "Big Game Hunter",
+  "Distance",
+  "Breathe Free"
+ ],
+ "attributes": {
+  "weapon_damage": {
+   "aliases": [
+    "weapon damage"
+   ],
+   "max": 15,
+   "core": true,
+   "unit": "%"
+  },
+  "armor": {
+   "aliases": [
+    "armor"
+   ],
+   "max": 170370,
+   "core": true,
+   "unit": ""
+  },
+  "skill_tier": {
+   "aliases": [
+    "skill tier"
+   ],
+   "max": 1,
+   "core": true,
+   "unit": ""
+  },
+  "crit_chance": {
+   "aliases": [
+    "critical hit chance",
+    "crit hit chance",
+    "critical chance"
+   ],
+   "max": 6,
+   "unit": "%"
+  },
+  "crit_damage": {
+   "aliases": [
+    "critical hit damage",
+    "crit hit damage",
+    "critical damage"
+   ],
+   "max": 12,
+   "unit": "%"
+  },
+  "headshot_damage": {
+   "aliases": [
+    "headshot damage"
+   ],
+   "max": 10,
+   "unit": "%"
+  },
+  "weapon_handling": {
+   "aliases": [
+    "weapon handling"
+   ],
+   "max": 8,
+   "unit": "%"
+  },
+  "armor_regen": {
+   "aliases": [
+    "armor regeneration",
+    "armor regen"
+   ],
+   "max": 4925,
+   "unit": ""
+  },
+  "hazard_protection": {
+   "aliases": [
+    "hazard protection"
+   ],
+   "max": 10,
+   "unit": "%"
+  },
+  "health": {
+   "aliases": [
+    "health"
+   ],
+   "max": 18935,
+   "unit": ""
+  },
+  "explosive_resist": {
+   "aliases": [
+    "explosive resistance"
+   ],
+   "max": 10,
+   "unit": "%"
+  },
+  "skill_damage": {
+   "aliases": [
+    "skill damage"
+   ],
+   "max": 10,
+   "unit": "%"
+  },
+  "skill_haste": {
+   "aliases": [
+    "skill haste"
+   ],
+   "max": 12,
+   "unit": "%"
+  },
+  "repair_skills": {
+   "aliases": [
+    "repair skills"
+   ],
+   "max": 20,
+   "unit": "%"
+  },
+  "status_effects": {
+   "aliases": [
+    "status effects"
+   ],
+   "max": 10,
+   "unit": "%"
+  },
+  "skill_duration": {
+   "aliases": [
+    "skill duration"
+   ],
+   "max": 10,
+   "unit": "%"
+  },
+  "rate_of_fire": {
+   "aliases": [
+    "rate of fire"
+   ],
+   "unit": "%"
+  },
+  "reload_speed": {
+   "aliases": [
+    "reload speed"
+   ],
+   "unit": "%"
+  },
+  "magazine_size": {
+   "aliases": [
+    "magazine size"
+   ],
+   "unit": "%"
+  },
+  "optimal_range": {
+   "aliases": [
+    "optimal range"
+   ],
+   "unit": ""
+  },
+  "damage_to_armor": {
+   "aliases": [
+    "damage to armor"
+   ],
+   "unit": "%"
+  },
+  "damage_to_health": {
+   "aliases": [
+    "damage to health",
+    "health damage"
+   ],
+   "unit": "%"
+  },
+  "damage_to_elites": {
+   "aliases": [
+    "damage to elites"
+   ],
+   "unit": "%"
+  },
+  "pulse_resistance": {
+   "aliases": [
+    "pulse resistance"
+   ],
+   "unit": "%"
+  },
+  "skill_health": {
+   "aliases": [
+    "skill health"
+   ],
+   "unit": "%"
+  },
+  "weapon_type_damage": {
+   "aliases": [
+    "assault rifle damage",
+    "ar damage",
+    "smg damage",
+    "submachine gun damage",
+    "lmg damage",
+    "light machine gun damage",
+    "rifle damage",
+    "marksman rifle damage",
+    "mmr damage",
+    "shotgun damage",
+    "pistol damage"
+   ],
+   "unit": "%"
+  },
+  "damage_out_of_cover": {
+   "aliases": [
+    "dmg to target out of cover",
+    "damage to target out of cover"
+   ],
+   "unit": "%"
+  }
+ },
+ "weapon_types": [
+  "Assault Rifle",
+  "Submachine Gun",
+  "Light Machine Gun",
+  "Light Machinegun",
+  "Shotgun",
+  "Marksman Rifle",
+  "Rifle",
+  "Pistol",
+  "Sidearm"
+ ],
+ "slots": {
+  "mask": "Mask",
+  "backpack": "Backpack",
+  "body armor": "Chest",
+  "chest": "Chest",
+  "vest": "Chest",
+  "gloves": "Gloves",
+  "holster": "Holster",
+  "kneepads": "Kneepads",
+  "knee pads": "Kneepads"
+ }
+}

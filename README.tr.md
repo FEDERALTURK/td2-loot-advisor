@@ -36,6 +36,7 @@ Thedivision2program/
 ├── ui_theme.py         ← tema, renkler ve arayüz sesleri
 ├── ui_art.py           ← üst bant: arka planlar, build amblemleri, bayraklar
 ├── meta_sync.py        ← günlük meta build + görev senkronu
+├── gamedata.py         ← oyun verisi + eşya tanıma motoru
 ├── wiki_sync.py        ← The Division Wiki canlı okuyucu (sezon, Manhunt, Classified Assignment)
 ├── meta/               ← meta_builds.json (merkezi akış) + UPDATER.md (güncelleme kuralları)
 ├── art/                ← görseller (ilk açılışta oluşur; kendi görsellerini ekleyebilirsin)
@@ -160,6 +161,24 @@ bir kütüphane gerektirmez.
   `art/flags/<dil kodu>.png` (örn. `tr.png`).
 - Resmî Ubisoft logoları ve set amblemleri telif hakkı nedeniyle pakete eklenmedi; görseller bu
   uygulama için özgün olarak çizildi. Klasörü **Ayarlar → Görünüm → Görsel klasörünü aç** ile açabilirsin.
+
+
+## Eşya tanıma: oyun verisiyle doğrulama
+
+Ekran okuma (OCR) tek başına gürültülüdür. Program okunan metni **gerçek oyun verisiyle** düzeltir
+(`gamedata.py` + `meta/game_data.json`, kaynak: The Division Wiki):
+
+- **Bilinen adlar:** tüm gear set'ler, marka setleri, egzotikler ve named eşyalar → bozuk okunan ad en yakın gerçek
+  ada eşlenir (ör. "Strikers Gtoves" → *Striker's Battlegear*, eldiven).
+- **Talent'ler** (silah + ekipman, *Perfect* sürümleri dahil) ve **attribute'lar**; her attribute oyundaki
+  **en yüksek değere göre yüzde** olarak gösterilir (Critical Hit Chance en fazla %6, Weapon Damage %15,
+  Armor 170.370; Prototype ×1,5). Panelde "📊 Rulo" satırı.
+- **Tür ve yuva:** silah/ekipman, Mask/Chest/Backpack/Gloves/Holster/Kneepads, Weapon/Sidearm.
+- **Kart bulma:** seçilen bölge envanter listesini de içeriyorsa program eşya kartını (Core Stats / Attributes /
+  Talents başlıklarından) kendisi bulup sadece onu okur; konumu hatırlar.
+- **Kendi penceresini okumaz:** tarama başlarken program penceresi bölgenin üstündeyse küçülür; bildirim kartı
+  bölgenin dışındaki bir köşeye konur.
+- Oyun verisi ortak listeden (GitHub) günlük güncellenir; oyunun belleğine dokunulmaz.
 
 ## Meta build senkronu (günlük, otomatik)
 
@@ -381,6 +400,8 @@ gibi küçük bir model seç.
 | `ui_art.py` | Üst bant: dönen arka planlar, build amblemleri, bayraklar |
 | `meta_sync.py` | Günlük meta build + görev senkronu (indir, doğrula, birleştir) |
 | `wiki_sync.py` | The Division Wiki canlı okuyucu |
+| `gamedata.py` | Oyun verisiyle eşya tanıma (ad, set, talent, rulo kalitesi) |
+| `meta/game_data.json` | Oyun verisi sözlüğü (wiki + oyun değerleri) |
 | `meta/meta_builds.json` | Merkezi meta akışı (depoda günlük güncellenir) |
 | `meta_cache.json` | Son indirilen meta listesi (otomatik oluşur) |
 | `art/` | Arka plan / amblem / bayrak görselleri (kullanıcı ekleyebilir) |

@@ -559,5 +559,7 @@
   "wiki.none": "📚 Wiki non ancora letta.",
   "wiki.synced": "Wiki: {added} nuove, {removed} rimosse",
   "wiki.failed": "Wiki non raggiungibile (offline?).",
-  "wiki.note": "La wiki di The Division (thedivision.fandom.com) viene letta dal vivo dal tuo PC: esploratori della caccia della stagione, incarichi classificati (con suggerimenti per enigmi/ECHO) e progetti stagionali datati. A ogni nuova stagione l’app passa da sola alla nuova pagina. La wiki è in inglese; se scegli un’IA nell’Assistente le attività vengono tradotte. Contenuto CC BY-SA, ogni attività rimanda alla fonte (📚)."
+  "wiki.note": "La wiki di The Division (thedivision.fandom.com) viene letta dal vivo dal tuo PC: esploratori della caccia della stagione, incarichi classificati (con suggerimenti per enigmi/ECHO) e progetti stagionali datati. A ogni nuova stagione l’app passa da sola alla nuova pagina. La wiki è in inglese; se scegli un’IA nell’Assistente le attività vengono tradotte. Contenuto CC BY-SA, ogni attività rimanda alla fonte (📚).",
+  "scan.minimized": "La finestra dell’app copriva l’area di scansione: è stata ridotta per non leggere il proprio testo.",
+  "panel.quality": "📊 Valori (rispetto al massimo del gioco):"
 }

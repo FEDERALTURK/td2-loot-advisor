@@ -30,6 +30,7 @@ import ui_theme
 import ui_art
 import meta_sync
 import wiki_sync
+import gamedata
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
@@ -152,6 +153,22 @@ NUM = re.compile(r"(\d+(?:[.,]\d+)?)")
 def norm(s):
     return re.sub(r"[^a-z0-9&' ]+", " ", s.lower()).strip()
 
+GAME_DATA_CACHE = BASE / "game_data_cache.json"
+GAME = gamedata.GameData(GAME_DATA_CACHE, BASE / "meta" / "game_data.json", BUNDLE / "meta" / "game_data.json")
+
+def ocr_data(img):
+    return pytesseract.image_to_data(img, config="--psm 11", output_type=pytesseract.Output.DICT)
+
+def read_item_text(img, lang, card_x=None):
+    """Eşya kartını okur. card_x: kartın bölge içindeki sol kenarı (oran, önbellek).
+    (metin, kullanılan oran) döner."""
+    if card_x is None:
+        crop = gamedata.card_crop(img, ocr_data)
+        card_x = (img.width - crop.width) / img.width
+    else:
+        crop = img.crop((int(card_x * img.width), 0, img.width, img.height))
+    return pytesseract.image_to_string(gamedata.text_image(crop), lang=lang, config="--psm 6"), card_x
+
 def grab(region):
     with mss.mss() as sct:
         s = sct.grab(region)
@@ -166,7 +183,7 @@ def preprocess(img):
     return g
 
 def ocr(img, lang):
-    return pytesseract.image_to_string(preprocess(img), lang=lang, config="--psm 6")
+    return pytesseract.image_to_string(gamedata.text_image(img), lang=lang, config="--psm 6")
 
 def thumb(img):
     return list(ImageOps.grayscale(img).resize((24, 24)).getdata())
@@ -188,6 +205,18 @@ def detect_slot(lines):
     return None
 
 def parse_item(text, cfg):
+    """Oyun verisi varsa onunla tanır (bilinen ad/marka/set/talent + rulo kalitesi), yoksa eski yöntem."""
+    if GAME.ok:
+        item = GAME.recognize(text)
+        known = {tal for b in cfg["builds"] for tal in b["talents"]}      # build'deki özel adlar da sayılsın
+        low = text.lower()
+        for tal in known:
+            if tal not in item["talents"] and find_talent(tal, low, [l for l in text.splitlines() if l.strip()]):
+                item["talents"].append(tal)
+        return item
+    return parse_item_legacy(text, cfg)
+
+def parse_item_legacy(text, cfg):
     lines = [l.strip() for l in text.splitlines() if l.strip()]
     low = text.lower()
     item = {"name": lines[0] if lines else "?", "rarity": [], "attrs": {}, "talents": [], "slot": detect_slot(lines)}
@@ -213,13 +242,26 @@ def signature(item):
     return item["name"].lower() + "|" + ",".join(f"{k}={v:g}" for k, v in sorted(item["attrs"].items())) + "|" + ",".join(sorted(item["talents"]))
 
 def valid_item(item):
+    if "confidence" in item:                      # oyun verisiyle tanındıysa: güven eşiği
+        return item["confidence"] >= 0.5 and item["name"] != "?"
     letters = sum(c.isalpha() for c in item["name"])
     return letters >= 4 and (len(item["attrs"]) >= 1 or item["rarity"])
+
+def set_matches(item, names, low):
+    """Build'in set/marka adı eşyada var mı? Önce tanınan marka/set, yoksa metinde arar."""
+    have = [gamedata.nrm(x) for x in (item.get("brand"), item.get("gear_set"), item.get("name")) if x]
+    for n in names:
+        nn = gamedata.nrm(n)
+        if not nn: continue
+        if any(nn == h or (len(nn) >= 5 and (nn in h or h in nn)) or gamedata.ratio(nn, h) >= 0.86 for h in have):
+            return True
+        if nn in gamedata.nrm(low): return True
+    return False
 
 def score_build(item, b, low):
     raw, why = 0.0, []
     maxp = b.get("set_bonus", 0)
-    if b["sets_or_brands"] and any(n.lower() in low for n in b["sets_or_brands"]):
+    if b["sets_or_brands"] and set_matches(item, b["sets_or_brands"], low):
         raw += b["set_bonus"]; why.append(t("why.set_match"))
     aw = sorted((a["weight"] for a in b["attributes"].values()), reverse=True)
     tw = sorted(b["talents"].values(), reverse=True)
@@ -227,11 +269,12 @@ def score_build(item, b, low):
     for k, r in b["attributes"].items():
         if k in item["attrs"]:
             v, good = item["attrs"][k], r["good_at"]
-            ratio = v / good if good else 1
+            ratio = v / good if good else (item.get("quality", {}).get(k, 100) / 100)
             raw += r["weight"] * 10 * min(ratio, 1.0)
             why.append(f"{k} {v:g} [" + (t("rate.good") if ratio >= 1 else t("rate.ok") if ratio >= .6 else t("rate.low")) + "]")
+    have_tal = {gamedata.nrm(x) for x in item["talents"]}
     for tal, w in b["talents"].items():
-        if tal in item["talents"]:
+        if gamedata.nrm(tal) in have_tal:
             raw += w * 10; why.append(f"talent: {tal}")
     return (round(min(100, raw / maxp * 100)) if maxp else 0), why
 
@@ -930,7 +973,14 @@ class App:
         self.item_lbl.config(text=item["name"] + ("  [" + ", ".join(item["rarity"]) + "]" if item["rarity"] else "") +
                              (f"  ({item['slot']})" if item.get("slot") else ""))
         self.note_lbl.config(text=note or "")
-        body = "\n".join(f"{p:3d}%  {n}\n        {', '.join(w) if w else '-'}" for p, n, w in res[:5])
+        body = ""
+        if item.get("quality"):
+            body += t("panel.quality") + "  " + "  ·  ".join(f"{k} {item['attrs'][k]:g} ({q}%)" for k, q in item["quality"].items()) + "\n"
+        if item.get("brand") or item.get("gear_set"):
+            body += "🏷  " + " / ".join(x for x in (item.get("gear_set"), item.get("brand")) if x) + \
+                    (f"   ·   {', '.join(item['talents'])}" if item.get("talents") else "") + "\n"
+        if body: body += "\n"
+        body += "\n".join(f"{p:3d}%  {n}\n        {', '.join(w) if w else '-'}" for p, n, w in res[:5])
         if diff:
             body += t("panel.roll_header") + "\n".join("  " + d for d in diff)
         if debug:
@@ -968,6 +1018,11 @@ class App:
             threading.Thread(target=self.auto_loop, args=(self.auto_stop,), daemon=True).start()
         self.running = True; self.btn_run.config(text=t("btn.stop"), style="Danger.TButton"); self.refresh_status()
         if not quiet: self.sounds.play("start")
+        self.card_x = None
+        if self.window_overlaps_region():
+            log.info("Main window overlaps the scan region: minimizing")
+            self.toast(t("scan.minimized"))
+            self.root.after(1200, self.root.iconify)
         log.info("Scanning started (mode=%s)", self.cfg["settings"]["scan_mode"])
 
     def stop(self, quiet=False):
@@ -976,6 +1031,22 @@ class App:
         self.running = False; self.btn_run.config(text=t("btn.start"), style="Success.TButton"); self.refresh_status()
         if hasattr(self, "sounds") and not quiet: self.sounds.play("stop")
         log.info("Scanning stopped")
+
+    def region_rect(self):
+        r = self.cfg["settings"].get("region") or {}
+        return (r.get("left", 0), r.get("top", 0), r.get("left", 0) + r.get("width", 0), r.get("top", 0) + r.get("height", 0))
+
+    @staticmethod
+    def rects_overlap(a, b):
+        return a[0] < b[2] and b[0] < a[2] and a[1] < b[3] and b[1] < a[3]
+
+    def window_overlaps_region(self):
+        try:
+            self.root.update_idletasks()
+            x, y = self.root.winfo_rootx(), self.root.winfo_rooty()
+            return self.rects_overlap((x, y, x + self.root.winfo_width(), y + self.root.winfo_height()), self.region_rect())
+        except Exception:
+            return False
 
     def trigger(self):  # pynput thread'inden de çağrılır: tk'ya dokunma
         region = self.cfg["settings"].get("region")
@@ -994,8 +1065,12 @@ class App:
         s = self.cfg["settings"]
         if s.get("save_debug_crop"):
             img.save(DEBUG_PATH)
-        text = ocr(img, s["ocr_lang"])
+        text, cx = read_item_text(img, s["ocr_lang"], getattr(self, "card_x", None))
         item, verdict, res = evaluate(text, self.cfg)
+        if getattr(self, "card_x", None) is not None and not valid_item(item):
+            text, cx = read_item_text(img, s["ocr_lang"], None)          # kart yer değiştirmiş olabilir: yeniden bul
+            item, verdict, res = evaluate(text, self.cfg)
+        if valid_item(item): self.card_x = cx
         sig = signature(item)
         if auto:
             if not valid_item(item): return
@@ -1114,8 +1189,14 @@ class App:
             tk.Label(body, text="\n".join(L), justify="left", fg=mu, bg=dark, font=(ui_theme.FONT, 10)).pack(anchor="w", pady=(6, 0))
         w.update_idletasks()
         sw, sh = self.root.winfo_screenwidth(), self.root.winfo_screenheight()
-        c = self.cfg["settings"]["overlay_corner"]
-        w.geometry(f"+{sw - w.winfo_width() - 30 if 'right' in c else 30}+{60 if 'top' in c else sh - w.winfo_height() - 80}")
+        ww, wh = w.winfo_width(), w.winfo_height()
+        pos = lambda c: (sw - ww - 30 if "right" in c else 30, 60 if "top" in c else sh - wh - 80)
+        want = self.cfg["settings"]["overlay_corner"]
+        corners = [want] + [c for c in ("top_left", "bottom_left", "bottom_right", "top_right") if c != want]
+        reg = self.region_rect()
+        c = next((c for c in corners if not self.rects_overlap((*pos(c), pos(c)[0] + ww, pos(c)[1] + wh), reg)), want)
+        x, y = pos(c)                                         # kart, okunan bölgenin üstüne düşmesin
+        w.geometry(f"+{x}+{y}")
         click_through(w)
         if self.overlay_job: self.root.after_cancel(self.overlay_job)
         self.overlay_job = self.root.after(int(float(self.cfg["settings"]["overlay_seconds"]) * 1000), w.destroy)
@@ -1154,7 +1235,7 @@ class App:
         p = filedialog.askopenfilename(filetypes=[(t("word.image"), "*.png *.jpg *.jpeg *.bmp")])
         if not p: return
         try:
-            text = ocr(Image.open(p).convert("RGB"), self.cfg["settings"]["ocr_lang"])
+            text, _ = read_item_text(Image.open(p).convert("RGB"), self.cfg["settings"]["ocr_lang"])
             item, verdict, res = evaluate(text, self.cfg)
             self.show_result(text, item, verdict, res, debug=True)
         except Exception as e:
@@ -1874,6 +1955,16 @@ class App:
                 if not on: continue
                 try: out[kind] = (fn(self.cfg, cache, APP_VERSION, force=force), None)
                 except Exception as e: out[kind] = (None, e)
+            if do_b:     # oyun verisi (adlar, talent'ler, en yüksek değerler) — aynı depodan
+                try:
+                    urls = [u.replace("meta_builds.json", "game_data.json") for u in meta_sync.configured_urls(st.get("meta_feed_url", ""))
+                            if u.endswith("meta_builds.json")]
+                    gd, _ = meta_sync.fetch(urls, APP_VERSION)
+                    if gd.get("schema") == 1 and gd.get("attributes") and gd.get("exotics"):
+                        GAME_DATA_CACHE.write_text(json.dumps(gd, ensure_ascii=False), encoding="utf-8")
+                        out["game"] = (gd.get("version"), None)
+                except Exception as e:
+                    log.debug("Game data fetch failed: %s", e)
             if do_w:     # wiki: ortak listenin söylediği sezon sayfasından başla (yeni sezona kendisi geçer)
                 res_t = out.get("tasks", (None, None))[0]          # (feed, kaynak) ya da None
                 start = res_t[0].get("wiki_season", "") if res_t else ""
@@ -1895,6 +1986,10 @@ class App:
         if "wiki" in out:
             m = self.wiki_sync_done(*out["wiki"], verbose)
             if m: msgs.append(m)
+        if "game" in out:
+            global GAME
+            GAME = gamedata.GameData(GAME_DATA_CACHE, BASE / "meta" / "game_data.json", BUNDLE / "meta" / "game_data.json")
+            log.info("Game data loaded: version %s", GAME.data.get("version"))
         if msgs: self.toast("  ·  ".join(msgs))
 
     def tasks_sync_done(self, res, err, verbose):
