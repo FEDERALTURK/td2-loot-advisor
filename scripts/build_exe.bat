@@ -18,14 +18,17 @@ echo Kullanilan Python / Python in use: %PY%
 REM Ses paketleri opsiyonel; kurulamazsa .exe sessiz surumle derlenir.
 REM Voice packages are optional; if they fail, the .exe is built without voice.
 %PY% -m pip install -r requirements-voice.txt
+REM Yeni OCR motoru (onerilen) / new OCR engine (recommended)
+%PY% -m pip install onnxruntime rapidocr
+%PY% -c "import ocr_backend; ocr_backend.Engine('rapidocr').text(__import__('PIL.Image').Image.new('RGB',(64,32)))"
 
 %PY% -m PyInstaller --onefile --noconsole --name TD2LootAdvisor ^
   --add-data "builds.json;." ^
   --add-data "lang;lang" ^
   --add-data "meta;meta" ^
   --hidden-import pyttsx3.drivers --hidden-import pyttsx3.drivers.sapi5 ^
-  --hidden-import fx --hidden-import bgvideo --hidden-import view3d --hidden-import display ^
-  --collect-all faster_whisper --collect-all ctranslate2 ^
+  --hidden-import ocr_backend --hidden-import fx --hidden-import bgvideo --hidden-import view3d --hidden-import display ^
+  --collect-all rapidocr --collect-all onnxruntime --collect-all faster_whisper --collect-all ctranslate2 ^
   app.py
 
 copy /Y builds.json dist\builds.json
@@ -40,5 +43,5 @@ echo   dist\builds.json  - ayarlar + build kurallari / settings + build rules
 echo   dist\lang\        - dil dosyalari / language files
 echo   dist\meta\        - oyun kutuphanesi ve gunluk listeler / game library and feeds
 echo Arka plan videolari ilk acilista otomatik uretilir / background videos are generated on first start.
-echo Not: Tesseract OCR ayrica kurulu olmali / must be installed separately.
+echo Not: RapidOCR pakete dahil; Tesseract yalniz yedek olarak gerekir / RapidOCR is bundled; Tesseract is only a fallback.
 pause

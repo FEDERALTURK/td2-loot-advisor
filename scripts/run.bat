@@ -27,6 +27,9 @@ call :opt pyttsx3 pyttsx3
 call :opt sounddevice sounddevice
 call :opt numpy numpy
 call :opt faster-whisper faster_whisper
+REM Yeni OCR motoru (onerilen; kurulamazsa Tesseract kullanilir) / new OCR engine (recommended; falls back to Tesseract)
+call :opt onnxruntime onnxruntime
+call :opt rapidocr rapidocr
 REM Arka plan videosu (istege bagli) / background video (optional)
 call :opt av av
 
@@ -46,7 +49,7 @@ findstr /x /c:"%1" optional_skip.txt >nul 2>&1 && exit /b 0
 echo Opsiyonel paket kuruluyor / installing optional package: %1
 %PY% -m pip install %1 >nul 2>&1
 if errorlevel 1 (
-  echo [UYARI] %1 kurulamadi, ilgili ses ozelligi kapali. / %1 could not be installed, that voice feature is off.
+  echo [UYARI] %1 kurulamadi, ilgili ozellik kapali. / %1 could not be installed, that feature is off.
   echo %1>>optional_skip.txt
 )
 exit /b 0

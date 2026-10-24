@@ -841,5 +841,11 @@
   "fx.preview": "Önizle",
   "fx.webp_note": "{n} .mp4 dosyası için isteğe bağlı 'av' paketi gerekiyor (run.bat ile başlat); yerine animasyonlu .webp sürümleri kullanılıyor.",
   "fx.watch_box": "Arka plan: ajan saati",
-  "fx.watch_note": "Panellerin ve listelerin arkasında tüm pencereyi animasyonlu bir ajan saatiyle doldurur (saat, halkalar, saniye çizgileri). Dış halkadaki turuncu ışık fareni hangi yöne götürürsen oraya döner. Kartlar opak kalır, yazılar okunur. Açıkken başlık videosu durur. Windows ve koyu temalarda çalışır."
+  "fx.watch_note": "Panellerin ve listelerin arkasında tüm pencereyi animasyonlu bir ajan saatiyle doldurur (saat, halkalar, saniye çizgileri). Dış halkadaki turuncu ışık fareni hangi yöne götürürsen oraya döner. Kartlar opak kalır, yazılar okunur. Açıkken başlık videosu durur. Windows ve koyu temalarda çalışır.",
+  "ocr.engine": "OCR motoru:",
+  "ocr.engine_auto": "Otomatik (önerilen)",
+  "ocr.active": "Etkin: {name}",
+  "ocr.rapid_missing": "RapidOCR kurulu değil — programı scripts\\run.bat ile aç (kendisi kurar) ya da: pip install rapidocr onnxruntime",
+  "ocr.note_rapid": "RapidOCR renkli görüntüyü doğrudan okur, eşik kullanılmaz. Ölçek, Geçiş, Otomatik ayarla ve Önizle çalışır (Önizle bulunan satırları kutu olarak çizer).",
+  "note.color_exotic": "Kartın rengi egzotik gibi görünüyor — kırmadan önce kontrol et."
 }

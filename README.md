@@ -11,10 +11,11 @@ Türkçe tam kılavuz: [`README.tr.md`](README.tr.md).
 
 ## Install (Windows)
 
-1. Install **Python 3.13** (3.12 works) and **Tesseract OCR** (UB Mannheim build, default path `C:\Program Files\Tesseract-OCR`).
+1. Install **Python 3.13** (3.12 works). The OCR engine (RapidOCR) is installed automatically by `run.bat`.
+   **Tesseract OCR** is optional — only a fallback (UB Mannheim build, `C:\Program Files\Tesseract-OCR`).
 2. **Code → Download ZIP**, extract.
 3. Start with **`scripts\run.bat`** — it picks the right Python, installs the required packages and tries the optional
-   ones (voice: pyttsx3, sounddevice, faster-whisper; video: av).
+   ones (OCR: rapidocr, onnxruntime; voice: pyttsx3, sounddevice, faster-whisper; video: av).
 4. Optional: `scripts\build_exe.bat` builds a single `.exe`; `scripts\install_claude_code.bat` sets up Claude Code for
    the assistant and *Fetch with Claude* (uses a Claude subscription, no API key).
 
@@ -24,6 +25,11 @@ Recommended game settings: English game language, borderless window, HDR off, ga
 ## Features
 
 **Scanning & decisions**
+- **RapidOCR (PP-OCR) engine**: reads the colour card directly, no threshold tuning. Measured on real cards
+  (`tests/test_ocr.py`): all attributes right at 1440p, 1080p, 720p and 480p (8/8) versus 3/8 for Tesseract.
+  Tesseract stays as a fallback and can be chosen in Settings → OCR.
+- Colour hints: attribute icon colour (red = offensive, blue = defensive, yellow = skill) and the card's rarity stripe;
+  if the card colour looks exotic the app never says "dismantle".
 - Finds the item card anywhere on screen (21:9 and 32:9 included); multi-pass OCR; long scrolled cards are merged.
 - Section-aware reading: core/attributes/mods only — expertise bonuses and set descriptions are ignored.
 - Item kinds: gear, weapon, gear mod, weapon mod, skill mod, cosmetic, material, specialization weapon; exotics are never "dismantle".
@@ -42,7 +48,8 @@ Recommended game settings: English game language, borderless window, HDR off, ga
 
 **Display, OCR & effects**
 - Resolution profiles 240p–4K (window and text scale; DPI-aware), game-settings check (read only).
-- OCR threshold/scale/PSM/passes, auto calibration, live preview.
+- OCR engine choice, scale/passes (and threshold/PSM for Tesseract), auto calibration, live preview with detected lines.
+  240p cards are physically too small to read (≈3 px letters); 480p is the practical minimum.
 - Optional effects: custom cursor (generic sights/weapon silhouettes or your own image), mouse trail, menu transitions,
   full-window **agent-watch background** whose orange light follows the mouse (Windows, dark themes),
   original procedural header videos (`bgvideo.py`; animated WebP when `av` is not installed).
@@ -70,6 +77,8 @@ Sources: [The Division Wiki](https://thedivision.fandom.com) (CC BY-SA) and
 | `app.py` | UI and application |
 | `engine.py` | Decision engine, build plan, card finder |
 | `gamedata.py` | Item recognition against the game library |
+| `ocr_backend.py` | OCR engines (RapidOCR / Tesseract), icon and rarity colour hints |
+| `tests/` | OCR regression test with real game cards (`python tests/test_ocr.py`) |
 | `display.py` | Resolution profiles, game settings reader |
 | `fx.py`, `bgvideo.py`, `view3d.py`, `ui_art.py`, `ui_theme.py` | Effects, background videos, 3D, art, theme |
 | `meta_sync.py`, `wiki_sync.py` | Daily feeds, live wiki reader |

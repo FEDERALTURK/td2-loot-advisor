@@ -13,11 +13,11 @@ senin dilinde gösterir. 10 dil; herkes kendi dilini ekleyebilir.
 
 ## Kurulum
 
-1. **Python 3.13** (önerilen; 3.12 da olur) ve **Tesseract OCR** kur
-   (UB Mannheim sürümü, varsayılan yol `C:\Program Files\Tesseract-OCR`).
+1. **Python 3.13** kur (önerilen; 3.12 da olur). OCR motorunu (RapidOCR) `run.bat` kendisi kurar.
+   **Tesseract OCR** artık isteğe bağlı, yalnızca yedek (UB Mannheim sürümü, `C:\Program Files\Tesseract-OCR`).
 2. Depoyu indir: **Code → Download ZIP**, bir klasöre çıkar.
 3. **`scripts\run.bat`** ile başlat. İlk açılışta gerekli paketleri kurar; sesli komut ve video için
-   isteğe bağlı paketleri (pyttsx3, sounddevice, faster-whisper, av) dener. Kurulamayan paket atlanır.
+   isteğe bağlı paketleri (rapidocr, onnxruntime, pyttsx3, sounddevice, faster-whisper, av) dener. Kurulamayan paket atlanır.
    > Programı her zaman run.bat ile aç: doğru Python sürümünü (3.13) seçer. app.py'ye çift tıklamak
    > bilgisayardaki en yeni Python'u kullanır; orada ses/video paketleri olmayabilir.
 4. İsteğe bağlı: `scripts\build_exe.bat` tek dosyalık `.exe` üretir; `scripts\install_claude_code.bat`
@@ -72,7 +72,11 @@ Genel · **Efektler** · Tarama · **Ekran ve oyun** · **OCR** · Bindirme · S
 
 - **Ekran ve oyun:** 240p'den 4K'ya çözünürlük profilleri (pencere ve yazılar ekrana göre ölçeklenir; değişince
   program ~2 sn'de yeniden açılır), oyun ayar dosyası kontrolü (yalnız okuma).
-- **OCR:** eşik, ölçek, PSM, çoklu geçiş, **Otomatik ayarla** (son kartta en iyi ayarı bulur), canlı **Önizle**.
+- **OCR:** motor seçimi (**RapidOCR** önerilen; Tesseract yedek), ölçek, çoklu geçiş (Tesseract'ta eşik ve PSM),
+  **Otomatik ayarla**, canlı **Önizle** (RapidOCR'da bulunan satırları kutuyla gösterir).
+  Gerçek kartlarla ölçüm (`tests/test_ocr.py`): RapidOCR 1440p/1080p/720p/480p'de tüm attribute'ları doğru okudu (8/8),
+  Tesseract 3/8. 240p'de kart yazısı fiziksel olarak okunamayacak kadar küçük; pratik alt sınır 480p.
+  Kartın rengi egzotik görünüyorsa program asla "KIR" demez.
 - **Efektler:** özel fare imleci (genel nişangâh/silah siluetleri ya da kendi resmin), fare izi, menü geçişleri
   (hız ayarlı), **arka planda ajan saati** (tüm pencere; turuncu ışık fareyi takip eder) ve başlık videosu
   (program kendi özgün animasyonlarını üretir; "Videoları çoğalt" yenilerini ekler). Hepsi kapatılabilir.
@@ -92,6 +96,8 @@ Kaynaklar: The Division Wiki ve mx-division-builds verisi (CC BY-NC-SA 4.0).
 | `app.py` | Arayüz ve uygulama |
 | `engine.py` | Karar motoru, build planı, kart bulucu |
 | `gamedata.py` | Eşya tanıma (oyun verisiyle) |
+| `ocr_backend.py` | OCR motorları (RapidOCR / Tesseract), simge ve nadirlik renk ipuçları |
+| `tests/` | Gerçek oyun kartlarıyla OCR testi (`python tests/test_ocr.py`) |
 | `display.py` | Çözünürlük profilleri, oyun ayar dosyası okuyucu |
 | `fx.py`, `bgvideo.py`, `view3d.py`, `ui_art.py`, `ui_theme.py` | Efektler, arka plan videoları, 3D, görseller, tema |
 | `meta_sync.py`, `wiki_sync.py` | Günlük meta/görev senkronu, canlı wiki okuyucu |
@@ -116,7 +122,7 @@ Kayıtlı build, görev ve ilerleme sabit kimliklerle tutulduğu için dil deği
 | Sesli komut çalışmıyor | Programı run.bat ile aç; Asistan → **🩺 Ses testi**; ayrıntı `logs\app.log`. |
 | Arka plan videosu/saat yok | Ayarlar → Efektler'de açık mı? Ajan saati Windows ve koyu temada çalışır. |
 | Bindirme görünmüyor | Oyunu kenarlıksız pencerede çalıştır (tam ekranda Windows gizleyebilir). |
-| Tesseract bulunamadı | Ayarlar → Tarama → Tesseract yolu. |
+| Tesseract bulunamadı | RapidOCR kuruluysa gerekmez (Ayarlar → OCR → motor). Değilse run.bat ile aç ya da Tesseract yolunu gir. |
 
 ## Lisans
 

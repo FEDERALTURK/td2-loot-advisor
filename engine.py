@@ -31,13 +31,14 @@ ALL_SLOTS = GEAR_SLOTS + ["Weapon", "Sidearm"]
 CARD_ANCHORS = {"core", "attributes", "attribute", "talents", "talent", "mods", "modifications", "stats"}
 
 
-def find_card(img, ocr_data_fn):
-    """Eşya kartının (x0, y0, x1, y1) sınırları ya da None. img: tüm ekran ya da seçilen bölge."""
+def find_card(img, ocr_data_fn, preprocess=True):
+    """Eşya kartının (x0, y0, x1, y1) sınırları ya da None. img: tüm ekran ya da seçilen bölge.
+    preprocess=False: OCR motoru ham renkli görüntüyü daha iyi okuyorsa (RapidOCR)."""
     from PIL import Image
     W, H = img.size
     k = max(1, -(-W // 1400))                                   # 3440 → 1147 px genişlikte ara
     small = img.resize((W // k, H // k), Image.BILINEAR) if k > 1 else img
-    pre = gamedata.text_image(small)
+    pre = gamedata.text_image(small) if preprocess else small
     sc = pre.width / small.width
     d = ocr_data_fn(pre)
     words = []
@@ -57,7 +58,10 @@ def find_card(img, ocr_data_fn):
     x0 = min(a[1] for a in col)
     top = min(a[2] for a in col)
     # kartın genişliği: başlık sütunundan sağa doğru, aynı satırlardaki kelimelerin en sağı
-    inside = [w for w in words if x0 - 0.01 * W <= w[1] <= x0 + 0.30 * W and w[2] >= top - 0.25 * H]
+    # tam ekranda kart ekranın ~%17'si: sağdaki başka paneller karışmasın diye 0.30W ile sınırla.
+    # Kırpılmış kart / küçük bölge verildiyse (W < 1600 px) kart görüntünün büyük kısmıdır: sınır yok.
+    reach = 0.30 * W if W >= 1600 else W
+    inside = [w for w in words if x0 - 0.01 * W <= w[1] <= x0 + reach and w[2] >= top - 0.25 * H]
     x1 = max((w[1] + w[3] for w in inside), default=x0 + 0.18 * W)
     y1 = max((w[2] + w[4] for w in inside), default=H)
     pad = 0.012 * W

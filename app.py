@@ -36,6 +36,7 @@ import display
 import view3d
 import fx
 import bgvideo
+import ocr_backend
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
@@ -68,7 +69,7 @@ DEFAULTS = {"scan_mode": "hotkey", "auto_interval_ms": 700, "auto_record": True,
             "fx_cursor": True, "fx_cursor_style": "crosshair", "fx_cursor_color": "#ff6d10", "fx_cursor_custom": "",
             "fx_trail": True, "fx_trail_color": "#ff6d10", "fx_trail_len": 18, "fx_transitions": True,
             "fx_video": True, "fx_video_dim": 0.35, "fx_transition_ms": 650, "fx_bgwatch": True, "fx_bgwatch_dim": 0.0,
-            "res_profile": "auto", "ocr_threshold": 170, "ocr_scale": "auto", "ocr_psm": 6, "ocr_passes": 3,
+            "res_profile": "auto", "ocr_engine": "auto", "ocr_threshold": 170, "ocr_scale": "auto", "ocr_psm": 6, "ocr_passes": 3,
             "overlay_mode": "card", "overlay_alpha": 0.94, "overlay_size": 1.0, "ui_depth": True,
             "meta_sync": True, "meta_feed_url": "", "meta_last_try": 0, "meta_last_sync": "", "meta_version": "",
             "meta_hidden": [], "tasks_sync": True, "auto_reset_times": True,
@@ -251,6 +252,52 @@ def apply_ocr_settings(st):
     sc = st.get("ocr_scale", "auto")
     try: gamedata.SCALE = None if sc in ("auto", "", None) else float(sc)
     except (TypeError, ValueError): gamedata.SCALE = None
+    make_ocr(st)
+
+
+OCR = None
+
+
+def make_ocr(st):
+    """Seçili OCR motoru (otomatik: RapidOCR kuruluysa o, yoksa Tesseract)."""
+    global OCR
+    rec = ocr_backend.GAME_LANG_TO_REC.get(st.get("game_lang", "en"), "en")
+    OCR = ocr_backend.Engine(st.get("ocr_engine", "auto"), rec_lang=rec, tess_lang=st.get("ocr_lang", "eng"),
+                             tess_config=ocr_config(st), preprocess=gamedata.text_image)
+    return OCR
+
+
+def ocr_scale():
+    """Kullanıcı ölçeği sabitlediyse o, yoksa motorun kendi otomatik ölçeği."""
+    return gamedata.SCALE
+
+
+def read_card(img, scale=None):
+    """Kart metni ve satır kutuları: (metin, [(satır, kutu, güven)])."""
+    lines = OCR.lines(img, ocr_scale() if scale is None else scale)
+    return "\n".join(l for l, _, _ in lines), lines
+
+
+def find_card(img):
+    return engine.find_card(img, OCR.data, preprocess=OCR.name == "tesseract")
+
+
+def color_hints(card, lines, item, verdict):
+    """Simge/şerit renkleri (yalnız RapidOCR satır kutularıyla): nadirlik ipucu ve güvenlik ağı.
+    Kart rengi egzotik gösterip yazı egzotik demiyorsa asla KIR denmez (KONTROL ET)."""
+    if not lines or not any(b != (0, 0, 0, 0) for _, b, _ in lines) or not isinstance(item, dict):
+        return verdict
+    try:
+        rc = ocr_backend.rarity_color(card, lines)
+        icons = [c for _, c in ocr_backend.icon_colors(card, lines) if c]
+    except Exception:
+        log.debug("color hints failed", exc_info=True); return verdict
+    item["_rarity_color"], item["_icons"] = rc, icons
+    log.debug("Color hints: rarity=%s icons=%s", rc, icons)
+    if rc == "EXOTIC" and "EXOTIC" not in (item.get("rarity") or []) and verdict == "DISMANTLE":
+        item["_note"] = ((item.get("_note") or "") + " " + t("note.color_exotic")).strip()
+        return "REVIEW"
+    return verdict
 
 
 def ocr_config(st):
@@ -268,7 +315,7 @@ def ocr_quality(text):
 
 
 def ocr_data(img):
-    return pytesseract.image_to_data(img, config="--psm 11", output_type=pytesseract.Output.DICT)
+    return OCR.data(img)
 
 def foreground_title():
     """Öndeki pencerenin başlığı (yalnız Windows; başka sistemde boş)."""
@@ -292,8 +339,8 @@ def grab(region):
         s = sct.grab(region)
         return Image.frombytes("RGB", s.size, s.rgb)
 
-def ocr(img, lang):
-    return pytesseract.image_to_string(gamedata.text_image(img), lang=lang, config="--psm 6")
+def ocr(img, lang=None):
+    return OCR.text(img)
 
 def thumb(img):
     return list(ImageOps.grayscale(img).resize((24, 24)).getdata())
@@ -1134,8 +1181,9 @@ class App:
         self.meta_busy = False
         self.poll(); self.check_resets()
         self.root.after(2500, self.meta_sync_start)     # açılışı bekletmeden, günde bir
-        log.info("UI ready — language=%s, tesseract=%s", i18n.current_language(), self.tess or "NOT FOUND")
-        if not self.tess:
+        log.info("UI ready — language=%s, OCR=%s, tesseract=%s", i18n.current_language(), OCR.name, self.tess or "NOT FOUND")
+        OCR.warm_up()
+        if OCR.name == "tesseract" and not self.tess:
             messagebox.showwarning(APP_NAME, t("msg.no_tesseract"))
 
     def restart_app(self, tab=None, page=None):
@@ -1571,30 +1619,37 @@ class App:
         box = getattr(self, "card_box", None)
         tried_fresh = False
         if box is None:
-            box = engine.find_card(img, ocr_data); tried_fresh = True
+            box = find_card(img); tried_fresh = True
         card = img.crop(box) if box else img
-        text = pytesseract.image_to_string(gamedata.text_image(card), lang=s["ocr_lang"], config=ocr_config(s))
+        text, lines = read_card(card)
         item, verdict, res = evaluate(text, self.cfg)
         if not valid_item(item) and not tried_fresh:                  # kart yer değiştirmiş: yeniden bul
-            box = engine.find_card(img, ocr_data)
+            box = find_card(img)
             card = img.crop(box) if box else img
-            text = pytesseract.image_to_string(gamedata.text_image(card), lang=s["ocr_lang"], config=ocr_config(s))
+            text, lines = read_card(card)
             item, verdict, res = evaluate(text, self.cfg)
         self.card_box = box if valid_item(item) else None
         try: passes = max(1, min(3, int(s.get("ocr_passes", 3))))
         except (TypeError, ValueError): passes = 3
         fresh = not (auto and signature(item) == self.last_sig and time.time() - self.last_time < DEDUP_SECONDS)
         if passes > 1 and valid_item(item) and fresh:
-            # çoklu geçiş: aynı kart farklı eşiklerle okunur, en çok bilgi tanınan metin seçilir
-            # (gerçek 3440×1440 kartta tek eşik bazen bir satırı kaçırıyor; 2-3 geçiş bunu kapatıyor)
+            # çoklu geçiş: aynı kart farklı eşik (Tesseract) ya da ölçekle (RapidOCR) yeniden okunur,
+            # en çok bilgi tanınan metin seçilir (gerçek 3440×1440 kartta tek okuma bazen bir satırı kaçırıyor)
             best_q, best_t = ocr_quality(text), text
             base = gamedata.THRESHOLD
             try:
-                for th in (base + 10, base - 40)[:passes - 1]:
-                    gamedata.THRESHOLD = max(90, min(235, th))
-                    tx = pytesseract.image_to_string(gamedata.text_image(card), lang=s["ocr_lang"], config=ocr_config(s))
-                    q = ocr_quality(tx)
-                    if q > best_q: best_q, best_t = q, tx
+                if OCR.name == "rapidocr":
+                    a = ocr_scale() or ocr_backend.Engine.auto_scale(card)
+                    for sc in [x for x in (2.0, 1.0, 1.5) if abs(x - a) > 0.1][:passes - 1]:
+                        tx, _ = read_card(card, scale=sc)
+                        q = ocr_quality(tx)
+                        if q > best_q: best_q, best_t = q, tx
+                else:
+                    for th in (base + 10, base - 40)[:passes - 1]:
+                        gamedata.THRESHOLD = max(90, min(235, th))
+                        tx, _ = read_card(card)
+                        q = ocr_quality(tx)
+                        if q > best_q: best_q, best_t = q, tx
             finally:
                 gamedata.THRESHOLD = base
             if best_t is not text:
@@ -1607,6 +1662,7 @@ class App:
         except Exception:
             pass
         text, item, verdict, res = self.merge_scrolled(text, item, verdict, res)
+        verdict = color_hints(card, lines, item, verdict)
         sig = signature(item)
         if auto:
             if not valid_item(item): return
@@ -1890,11 +1946,11 @@ class App:
         if not p: return
         try:
             img = Image.open(p).convert("RGB")
-            box = engine.find_card(img, ocr_data)                 # taramayla aynı yol: kartı bul, kırp, oku
+            box = find_card(img)                                  # taramayla aynı yol: kartı bul, kırp, oku
             card = img.crop(box) if box else img
-            st = self.cfg["settings"]
-            text = pytesseract.image_to_string(gamedata.text_image(card), lang=st["ocr_lang"], config=ocr_config(st))
+            text, lines = read_card(card)
             item, verdict, res = evaluate(text, self.cfg)
+            verdict = color_hints(card, lines, item, verdict)
             self.last_card_img = card
             self.show_result(text, item, verdict, res, debug=True)
         except Exception as e:
@@ -2666,7 +2722,7 @@ class App:
         self.task_q = tk.StringVar()
         ttk.Label(head, text="🔎").pack(side="left", padx=(14, 2))
         qe = ttk.Entry(head, textvariable=self.task_q, width=24); qe.pack(side="left")
-        qe.bind("<KeyRelease>", lambda e: self.refresh_tasks())
+        qe.bind("<KeyRelease>", lambda e=None: self.refresh_tasks())
         self.hide_done = tk.BooleanVar(value=bool(st.get("tasks_hide_done", False)))
         ttk.Checkbutton(head, text=t("tasks.hide_done"), variable=self.hide_done,
                         command=lambda: (st.__setitem__("tasks_hide_done", self.hide_done.get()), save_cfg(self.cfg), self.refresh_tasks())).pack(side="left", padx=12)
@@ -2686,7 +2742,7 @@ class App:
         self.task_tv.bind("<Double-1>", self.on_task_double)
         self.task_tv.bind("<Return>", self.on_task_double)
         self.task_tv.bind("<<TreeviewSelect>>", self.show_task_how)
-        self.task_tv.bind("<space>", lambda e: self.toggle_task_done())
+        self.task_tv.bind("<space>", lambda e=None: self.toggle_task_done())
         # sağ: önizleme kartı
         card = tk.Frame(rf, bg=PAL["surface"], highlightthickness=1, highlightbackground=PAL["border"])
         card.pack(fill="both", expand=True, padx=(8, 0))
@@ -3688,6 +3744,15 @@ class App:
 
         # OCR ince ayar
         ob = ttk.LabelFrame(P["ocr"], text=t("ocr.box")); ob.pack(fill="x", padx=10, pady=(10, 6))
+        o1 = ttk.Frame(ob); o1.pack(fill="x", padx=8, pady=(8, 4))
+        ttk.Label(o1, text=t("ocr.engine")).pack(side="left")
+        self._ocr_engines = {"auto": t("ocr.engine_auto"), "rapidocr": "RapidOCR (PP-OCR)", "tesseract": "Tesseract"}
+        self.ocr_engine_var = tk.StringVar(value=self._ocr_engines.get(st.get("ocr_engine", "auto"), self._ocr_engines["auto"]))
+        ttk.Combobox(o1, textvariable=self.ocr_engine_var, values=list(self._ocr_engines.values()), width=26,
+                     state="readonly").pack(side="left", padx=6)
+        eng_txt = t("ocr.active", name="RapidOCR" if OCR.name == "rapidocr" else "Tesseract")
+        if not ocr_backend.rapid_available(): eng_txt += "  —  " + t("ocr.rapid_missing")
+        ttk.Label(o1, text=eng_txt, foreground=PAL["muted"], wraplength=640, justify="left").pack(side="left", padx=10)
         o2 = ttk.Frame(ob); o2.pack(fill="x", padx=8, pady=4)
         ttk.Label(o2, text=t("ocr.threshold")).pack(side="left")
         self.ocr_thr = tk.IntVar(value=int(st.get("ocr_threshold", 170)))
@@ -3709,7 +3774,8 @@ class App:
         ttk.Button(o3, text=ui_theme.with_icon(t("ocr.calibrate"), "🎯"), command=self.auto_calibrate_ocr).pack(side="left")
         ttk.Button(o3, text=ui_theme.with_icon(t("ocr.preview"), "👁"), command=self.ocr_preview).pack(side="left", padx=8)
         self.ocr_msg = ttk.Label(o3, text="", foreground=PAL["muted"]); self.ocr_msg.pack(side="left", padx=8)
-        ttk.Label(ob, text=t("ocr.note"), foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=12, pady=(0, 4))
+        ttk.Label(ob, text=t("ocr.note_rapid") if OCR.name == "rapidocr" else t("ocr.note"), foreground=PAL["muted"],
+                  wraplength=900, justify="left").pack(anchor="w", padx=12, pady=(0, 4))
 
         # bindirme
         ovb = ttk.LabelFrame(P["overlay"], text=t("overlay.box")); ovb.pack(fill="x", padx=10, pady=(10, 6))
@@ -3786,19 +3852,23 @@ class App:
         """Son okunan kart üzerinde eşik × ölçek denenir, en çok bilgiyi tanıyan ayar seçilir."""
         img = self._calib_image()
         if img is None: return messagebox.showinfo(APP_NAME, t("ocr.need_card"))
-        if not self.tess: return messagebox.showwarning(APP_NAME, t("msg.no_tesseract"))
+        if OCR.name == "tesseract" and not self.tess: return messagebox.showwarning(APP_NAME, t("msg.no_tesseract"))
         self.ocr_msg.config(text=t("ocr.calibrating")); self.root.update_idletasks()
-        lang, cfgs = self.cfg["settings"]["ocr_lang"], ocr_config(self.cfg["settings"])
 
         def work():
             old_t, old_s = gamedata.THRESHOLD, gamedata.SCALE
-            best = (-1, 170, None)
+            best = (-1, old_t, None)
             try:
+                if OCR.name == "rapidocr":                # renkli görüntüyü okur: eşik yok, yalnız ölçek denenir
+                    for sc in (1.0, 1.25, 1.5, 2.0, 2.5):
+                        q = ocr_quality(read_card(img, scale=sc)[0])
+                        log.debug("calib rapidocr scale=%s quality=%.2f", sc, q)
+                        if q > best[0]: best = (q, old_t, sc)
+                    return self.root.after(0, lambda: self._calib_done(best))
                 for sc in (1.25, 1.5, 2.0):
                     for th in range(130, 215, 20):
                         gamedata.THRESHOLD, gamedata.SCALE = th, sc
-                        txt = pytesseract.image_to_string(gamedata.text_image(img), lang=lang, config=cfgs)
-                        q = ocr_quality(txt)
+                        q = ocr_quality(read_card(img)[0])
                         log.debug("calib thr=%s scale=%s quality=%.2f", th, sc, q)
                         if q > best[0]: best = (q, th, sc)
             finally:
@@ -3838,11 +3908,17 @@ class App:
             try: gamedata.SCALE = None if sc in ("", "auto", t("ocr.auto")) else float(sc)
             except ValueError: gamedata.SCALE = None
             try:
-                pre = gamedata.text_image(img)
+                if OCR.name == "rapidocr":
+                    out, lines = read_card(img)
+                    pre = img.copy(); dr = ImageDraw.Draw(pre)
+                    for _, b, c in lines:
+                        dr.rectangle(b, outline=(60, 220, 120) if c > 0.8 else (255, 170, 40), width=max(1, img.height // 400))
+                else:
+                    pre = gamedata.text_image(img)
+                    out = read_card(img)[0] if self.tess else ""
                 kk = h / pre.height
                 ph = ImageTk.PhotoImage(pre.resize((max(1, int(pre.width * kk)), h)))
                 l2.config(image=ph); l2.image = ph
-                out = pytesseract.image_to_string(pre, lang=self.cfg["settings"]["ocr_lang"], config=ocr_config(self.cfg["settings"])) if self.tess else ""
             finally:
                 gamedata.THRESHOLD, gamedata.SCALE = old_t, old_s
             txt.delete("1.0", "end"); txt.insert("end", out)
@@ -3914,6 +3990,7 @@ class App:
             st["ocr_scale"] = "auto" if sc in ("", "auto", t("ocr.auto")) else float(sc)
             st["ocr_psm"] = int(self.ocr_psm_var.get())
             st["ocr_passes"] = int(self.ocr_pass_var.get())
+            st["ocr_engine"] = next((k for k, v in self._ocr_engines.items() if v == self.ocr_engine_var.get()), "auto")
             st["overlay_alpha"] = round(float(self.ov_alpha.get()), 2)
             st["overlay_size"] = round(float(self.ov_size.get()), 2)
         except Exception as e:
