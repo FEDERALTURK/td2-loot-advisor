@@ -13,8 +13,6 @@ Kullanıcı kendi görsellerini ekleyebilir:
   art/emblems/<build adı>.png    → o build'in amblemi yerine kullanılır
   art/flags/<dil kodu>.png       → o dilin bayrağı yerine kullanılır
 """
-import colorsys
-import hashlib
 import math
 import random
 import re

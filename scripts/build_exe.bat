@@ -24,16 +24,21 @@ REM Voice packages are optional; if they fail, the .exe is built without voice.
   --add-data "lang;lang" ^
   --add-data "meta;meta" ^
   --hidden-import pyttsx3.drivers --hidden-import pyttsx3.drivers.sapi5 ^
+  --hidden-import fx --hidden-import bgvideo --hidden-import view3d --hidden-import display ^
   --collect-all faster_whisper --collect-all ctranslate2 ^
   app.py
 
 copy /Y builds.json dist\builds.json
 if not exist dist\lang mkdir dist\lang
 copy /Y lang\*.json dist\lang\
+if not exist dist\meta mkdir dist\meta
+copy /Y meta\*.json dist\meta\
 
 echo.
 echo Bitti / Done: dist\TD2LootAdvisor.exe
 echo   dist\builds.json  - ayarlar + build kurallari / settings + build rules
 echo   dist\lang\        - dil dosyalari / language files
+echo   dist\meta\        - oyun kutuphanesi ve gunluk listeler / game library and feeds
+echo Arka plan videolari ilk acilista otomatik uretilir / background videos are generated on first start.
 echo Not: Tesseract OCR ayrica kurulu olmali / must be installed separately.
 pause

@@ -2,4 +2,3 @@ mss
 pillow
 pytesseract
 pynput
-pygetwindow

@@ -62,7 +62,7 @@ DEFAULTS = {"scan_mode": "hotkey", "auto_interval_ms": 700, "auto_record": True,
             "sound": True, "save_debug_crop": True, "log_csv": True, "overlay_corner": "top_right",
             "overlay_seconds": 8, "keep_threshold": 70, "consider_threshold": 40, "hotkey": "<f8>", "ocr_lang": "eng",
             "daily_reset_hour": 2, "weekly_reset_day": 1, "weekly_reset_hour": 2,  # weekly_reset_day: 0=Monday
-            "chatgpt_window_title": "ChatGPT", "chatgpt_hotkey": "<f10>", "chatgpt_wait_seconds": 15,
+            "tasks_hotkey": "<f10>",
             "language": "", "log_level": "INFO", "log_max_kb": 1024, "log_backups": 3,
             "ui_theme": "dark", "ui_sounds": True, "bg_interval": 15,
             "fx_cursor": True, "fx_cursor_style": "crosshair", "fx_cursor_color": "#ff6d10", "fx_cursor_custom": "",
@@ -107,16 +107,45 @@ def setup_logging(level="INFO", max_kb=1024, backups=3):
 
 
 # ───────────── dosyalar ─────────────
+OBSOLETE_SETTINGS = ("chatgpt_window_title", "chatgpt_wait_seconds", "chatgpt_region", "chatgpt_prompt", "chatgpt_hotkey")
+
+
 def load_cfg():
-    with open(CFG_PATH, encoding="utf-8") as f:
-        cfg = json.load(f)
+    """builds.json'u okur; bozuksa yedekleyip varsayılanla başlar, eski ayarları taşır."""
+    try:
+        with open(CFG_PATH, encoding="utf-8") as f:
+            cfg = json.load(f)
+        if not isinstance(cfg, dict) or "builds" not in cfg: raise ValueError("bad config")
+    except Exception as e:
+        bak = CFG_PATH.with_suffix(f".broken-{int(time.time())}.json")
+        try: shutil.copy(CFG_PATH, bak)
+        except Exception: pass
+        src = BUNDLE / "builds.json"
+        cfg = json.loads(src.read_text(encoding="utf-8")) if src.exists() and src != CFG_PATH else {"builds": [], "attributes": {}, "settings": {}}
+        logging.getLogger("td2").warning("builds.json unreadable (%s); backup %s, starting from defaults", e, bak.name)
+    cfg.setdefault("settings", {}); cfg.setdefault("builds", []); cfg.setdefault("attributes", {})
+    st = cfg["settings"]
+    if st.get("chatgpt_hotkey") and "tasks_hotkey" not in st:      # eski ChatGPT kısayolu → Claude görev getirme
+        st["tasks_hotkey"] = st["chatgpt_hotkey"]
+    for k in OBSOLETE_SETTINGS: st.pop(k, None)
     for k, v in DEFAULTS.items():
-        cfg["settings"].setdefault(k, v)
+        st.setdefault(k, v)
+    for b in cfg["builds"]:
+        b.setdefault("sets_or_brands", []); b.setdefault("attributes", {}); b.setdefault("talents", {})
     return cfg
 
 def save_cfg(cfg):
     with open(CFG_PATH, "w", encoding="utf-8") as f:
         json.dump(cfg, f, indent=2, ensure_ascii=False)
+
+def check_hotkey(spec):
+    """Kısayol biçimini doğrular (pynput yoksa doğrulama atlanır, kayıt engellenmez)."""
+    try:
+        from pynput import keyboard
+    except Exception:
+        return
+    keyboard.HotKey.parse(spec)
+
 
 def load_progress():
     try:
@@ -241,16 +270,6 @@ def ocr_quality(text):
 def ocr_data(img):
     return pytesseract.image_to_data(img, config="--psm 11", output_type=pytesseract.Output.DICT)
 
-def read_item_text(img, lang, card_x=None):
-    """Eşya kartını okur. card_x: kartın bölge içindeki sol kenarı (oran, önbellek).
-    (metin, kullanılan oran) döner."""
-    if card_x is None:
-        crop = gamedata.card_crop(img, ocr_data)
-        card_x = (img.width - crop.width) / img.width
-    else:
-        crop = img.crop((int(card_x * img.width), 0, img.width, img.height))
-    return pytesseract.image_to_string(gamedata.text_image(crop), lang=lang, config="--psm 6"), card_x
-
 def foreground_title():
     """Öndeki pencerenin başlığı (yalnız Windows; başka sistemde boş)."""
     if os.name != "nt": return ""
@@ -272,14 +291,6 @@ def grab(region):
     with mss.mss() as sct:
         s = sct.grab(region)
         return Image.frombytes("RGB", s.size, s.rgb)
-
-def preprocess(img):
-    g = ImageOps.grayscale(img)
-    g = g.resize((g.width * 2, g.height * 2), Image.LANCZOS)
-    g = ImageOps.autocontrast(g)
-    if sum(g.resize((32, 32)).getdata()) / 1024 < 128:
-        g = ImageOps.invert(g)
-    return g
 
 def ocr(img, lang):
     return pytesseract.image_to_string(gamedata.text_image(img), lang=lang, config="--psm 6")
@@ -533,13 +544,6 @@ def click_through(win):
         hwnd = ctypes.windll.user32.GetParent(win.winfo_id())
         st = ctypes.windll.user32.GetWindowLongW(hwnd, -20)
         ctypes.windll.user32.SetWindowLongW(hwnd, -20, st | 0x80000 | 0x20)
-    except Exception:
-        pass
-
-def beep(verdict):
-    try:
-        import winsound
-        winsound.Beep({"KEEP": 1200, "CONSIDER": 800, "REVIEW": 1000, "DISMANTLE": 400}.get(verdict, 600), 120)
     except Exception:
         pass
 
@@ -999,7 +1003,7 @@ TASK_IMG_DIR = BASE / "cache" / "task_images"
 
 def load_task_images(task, n=3):
     """Wiki'den görevle ilgili görseller (diskte önbellekli). [(PIL.Image, başlık)]."""
-    import hashlib, io
+    import hashlib
     title, search = task_image_query(task)
     key = hashlib.sha1(f"{title}|{search}".encode("utf-8")).hexdigest()[:16]
     TASK_IMG_DIR.mkdir(parents=True, exist_ok=True)
@@ -1089,84 +1093,9 @@ def translate_task_text(app, text):
     return builtin_task_translate(text), t("src.dict")
 
 
-# ───────────── ChatGPT otomasyonu ─────────────
-# NOT: Bu, kurulu ChatGPT uygulamana senin yerine yazıp Enter'a basan ve ekrandaki
-# yanıtı OCR ile okuyan bir masaüstü makrosudur (klavye/pencere otomasyonu).
-# ChatGPT'nin API'sine veya hesabına dokunmaz, OpenAI'ın sunucusuna bağlanmaz.
-# Doğruluk tamamen ChatGPT'nin o an verdiği yanıta bağlıdır: model internete
-# bakmıyorsa ya da TD2'nin güncel içeriğini bilmiyorsa EMİN OLMADIĞI BİLGİYİ
-# UYDURABİLİR. Bu yüzden önemli görevlerde oyun içi metinle karşılaştır.
-# Başlıklar her dilde SABİT İNGİLİZCE istenir, sadece görev metni çevrilir;
-# böylece ayrıştırma dilden bağımsız çalışır.
-# Headings are always requested in English so parsing works in every language.
-GPT_HEADINGS = {"DAILY": "daily", "WEEKLY": "weekly", "JOURNEY": "journey",
-                "GLOBAL EVENT": "global_event", "MANHUNT": "manhunt", "OTHER": "other"}
-GPT_EMPTY_MARKERS = {"none", "-", "n/a", "yok", "aucun", "keine", "ninguno",
-                     "nessuno", "nenhum", "нет", "brak", "なし", "没有", "없음"}
-
-def default_gpt_prompt():
-    """ChatGPT'ye gönderilecek hazır istek; yanıt kullanıcının dilinde istenir."""
-    lang = i18n.english_name()
-    return (
-        "List the daily projects, weekly projects, current Season / Seasonal Journey steps "
-        "and any active Manhunt objectives that are live in "
-        "Tom Clancy's The Division 2 today ({date}). For each one add a short note on how to complete it.\n"
-        "Do not invent anything: if you cannot access current information or are unsure, write "
-        "\"not sure about this\" instead of guessing.\n"
-        f"Write the task text and the how-to notes in {lang}.\n"
-        "Keep the section headings EXACTLY as below — English, capitals. "
-        "Reply in this format only, with no other commentary:\n"
-        "DAILY:\n- <task>: <how to do it>\n"
-        "WEEKLY:\n- <task>: <how to do it>\n"
-        "JOURNEY:\n- <task>: <how to do it>\n"
-        "MANHUNT:\n- <task>: <how to do it>\n"
-        "If a section has nothing active, put '- none' under it.")
-
-def parse_gpt_answer(text):
-    """Yanıtı kategori kimliklerine ayırır. Başlıkların İngilizce olması beklenir."""
-    cur, out = "other", {c: [] for c in set(GPT_HEADINGS.values())}
-    for raw in text.splitlines():
-        line = raw.strip()
-        if not line:
-            continue
-        head = line.rstrip(":").strip().upper()
-        hit = next((v for k, v in GPT_HEADINGS.items() if head == k or head.startswith(k + " ")), None)
-        if hit:
-            cur = hit; continue
-        item = re.sub(r"^[-•*]\s*", "", line)
-        item = re.sub(r"^\d+[.)]\s+", "", item).strip()
-        if item and item.lower() not in GPT_EMPTY_MARKERS:
-            out[cur].append(item)
-    return out
-
-def find_and_focus_window(title_hint):
-    import pygetwindow as gw
-    wins = [w for w in gw.getAllWindows() if title_hint.lower() in w.title.lower() and w.title.strip()]
-    if not wins:
-        raise RuntimeError(t("gpt.err.nowindow", title=title_hint))
-    win = wins[0]
-    try:
-        if win.isMinimized: win.restore()
-        win.activate()
-    except Exception:
-        pass
-    return win
-
-def type_and_send(text):
-    from pynput.keyboard import Controller, Key
-    kb = Controller()
-    time.sleep(0.6)  # pencere odaklanması için kısa bekleme
-    kb.type(text)
-    time.sleep(0.2)
-    kb.tap(Key.enter)
-
-
 # ───────────── Uygulama ─────────────
 class App:
     def __init__(self):
-        if os.name == "nt":
-            try: ctypes.windll.shcore.SetProcessDpiAwareness(2)
-            except Exception: pass
         self.cfg = load_cfg()
         stg = self.cfg["settings"]
         setup_logging(stg.get("log_level", "INFO"), stg.get("log_max_kb", 1024), stg.get("log_backups", 3))
@@ -1577,7 +1506,7 @@ class App:
             hk = {self.cfg["settings"]["hotkey"]: self.trigger}
             vh = self.cfg["settings"].get("voice_hotkey")
             if vh and vh not in hk: hk[vh] = self.toggle_voice
-            gh = self.cfg["settings"].get("chatgpt_hotkey")
+            gh = self.cfg["settings"].get("tasks_hotkey")
             if gh and gh not in hk: hk[gh] = self.run_claude_fetch
             self.listener = keyboard.GlobalHotKeys(hk)
             self.listener.start()
@@ -1767,12 +1696,12 @@ class App:
                     self.task_in.delete("1.0", "end"); self.tr_status.config(text=t("task.added_src", n=len(r[2]), src=r[2][0]["src"]))
                     self.refresh_tasks()
                     continue
-                if r[0] == "gpt_status":
-                    self.gpt_status.config(text=r[1]); continue
+                if r[0] == "cl_status":
+                    self.cl_status.config(text=r[1]); continue
                 if r[0] == "claude_tasks":
                     self.apply_claude_tasks(r[1], r[2]); continue
-                if r[0] == "gpt_raw":
-                    self.gpt_raw.config(state="normal"); self.gpt_raw.delete("1.0", "end"); self.gpt_raw.insert("end", r[1]); self.gpt_raw.config(state="disabled")
+                if r[0] == "cl_raw":
+                    self.cl_raw.config(state="normal"); self.cl_raw.delete("1.0", "end"); self.cl_raw.insert("end", r[1]); self.cl_raw.config(state="disabled")
                     continue
                 self.handle_result(*r[1:])
         except queue.Empty:
@@ -1960,8 +1889,13 @@ class App:
         p = filedialog.askopenfilename(filetypes=[(t("word.image"), "*.png *.jpg *.jpeg *.bmp")])
         if not p: return
         try:
-            text, _ = read_item_text(Image.open(p).convert("RGB"), self.cfg["settings"]["ocr_lang"])
+            img = Image.open(p).convert("RGB")
+            box = engine.find_card(img, ocr_data)                 # taramayla aynı yol: kartı bul, kırp, oku
+            card = img.crop(box) if box else img
+            st = self.cfg["settings"]
+            text = pytesseract.image_to_string(gamedata.text_image(card), lang=st["ocr_lang"], config=ocr_config(st))
             item, verdict, res = evaluate(text, self.cfg)
+            self.last_card_img = card
             self.show_result(text, item, verdict, res, debug=True)
         except Exception as e:
             messagebox.showerror(APP_NAME, str(e))
@@ -2415,7 +2349,6 @@ class App:
         name = self.pb.get()
         b = next((x for x in self.cfg["builds"] if x["name"] == name), None)
         slots = build_slots(self.cfg, name) if b else engine.ALL_SLOTS
-        prog = self.progress.get(name, {})
         have = 0
         status3d = {}
         stt = self.build_status(b) if b else {x: ("missing", None, []) for x in engine.ALL_SLOTS}
@@ -2695,8 +2628,7 @@ class App:
     def save_ai_settings(self):
         st = self.cfg["settings"]
         try:
-            from pynput import keyboard
-            keyboard.HotKey.parse(self.av["voice_hotkey"].get())
+            check_hotkey(self.av["voice_hotkey"].get())
             st["tts_rate"] = int(float(self.av["tts_rate"].get()))
         except Exception as e:
             return messagebox.showerror(APP_NAME, t("err.bad_setting", e=e))
@@ -2805,13 +2737,13 @@ class App:
         self.cl_replace = tk.BooleanVar(value=bool(st.get("claude_tasks_replace", True)))
         ttk.Checkbutton(cr, text=t("cl.replace"), variable=self.cl_replace).pack(side="left", padx=12)
         ttk.Label(cr, text=t("cl.hotkey")).pack(side="left", padx=(12, 2))
-        self.gv = {"chatgpt_hotkey": tk.StringVar(value=str(st.get("chatgpt_hotkey", "<f10>")))}
-        ttk.Entry(cr, textvariable=self.gv["chatgpt_hotkey"], width=8).pack(side="left")
-        ttk.Button(cr, text=t("btn.save_short"), command=self.save_gpt_settings).pack(side="left", padx=6)
-        self.gpt_status = ttk.Label(cb, text=self.claude_cli_state(), foreground=PAL["muted"], wraplength=900, justify="left")
-        self.gpt_status.pack(anchor="w", padx=8)
+        self.gv = {"tasks_hotkey": tk.StringVar(value=str(st.get("tasks_hotkey", "<f10>")))}
+        ttk.Entry(cr, textvariable=self.gv["tasks_hotkey"], width=8).pack(side="left")
+        ttk.Button(cr, text=t("btn.save_short"), command=self.save_task_fetch_settings).pack(side="left", padx=6)
+        self.cl_status = ttk.Label(cb, text=self.claude_cli_state(), foreground=PAL["muted"], wraplength=900, justify="left")
+        self.cl_status.pack(anchor="w", padx=8)
         ttk.Label(cb, text=t("cl.raw"), foreground=PAL["muted"]).pack(anchor="w", padx=8, pady=(8, 0))
-        self.gpt_raw = tk.Text(cb, height=10, state="disabled", wrap="word", font=("Consolas", 9)); self.gpt_raw.pack(fill="x", padx=8, pady=(0, 8))
+        self.cl_raw = tk.Text(cb, height=10, state="disabled", wrap="word", font=("Consolas", 9)); self.cl_raw.pack(fill="x", padx=8, pady=(0, 8))
 
         # ---- sıfırlama ve senkron
         S = ui_theme.scrollable(pg["sync"], PAL["bg"])
@@ -2854,14 +2786,13 @@ class App:
     def claude_cli_state(self):
         return t("cl.ready") if find_claude_cli() else t("ai.cc_missing")
 
-    def save_gpt_settings(self):
+    def save_task_fetch_settings(self):
         st = self.cfg["settings"]
         try:
-            from pynput import keyboard
-            keyboard.HotKey.parse(self.gv["chatgpt_hotkey"].get())
+            check_hotkey(self.gv["tasks_hotkey"].get())
         except Exception as e:
             return messagebox.showerror(APP_NAME, t("err.bad_setting", e=e))
-        st["chatgpt_hotkey"] = self.gv["chatgpt_hotkey"].get().strip()
+        st["tasks_hotkey"] = self.gv["tasks_hotkey"].get().strip()
         st["claude_tasks_replace"] = bool(self.cl_replace.get())
         save_cfg(self.cfg)
         if self.running: self.stop(); self.start()
@@ -2876,20 +2807,20 @@ class App:
         st = self.cfg["settings"]
         try:
             if not find_claude_cli():
-                return self.results.put(("gpt_status", t("ai.cc_missing")))
-            self.results.put(("gpt_status", t("cl.working")))
+                return self.results.put(("cl_status", t("ai.cc_missing")))
+            self.results.put(("cl_status", t("cl.working")))
             raw = ask_claude_code(st.get("claude_code_model", ""), claude_tasks_prompt(),
                                   [{"role": "user", "content": "List the current Division 2 Journey, Manhunt and project tasks as JSON."}],
                                   timeout=420, tools="WebSearch,WebFetch", max_turns=12)
-            self.results.put(("gpt_raw", raw))
+            self.results.put(("cl_raw", raw))
             parsed, season = parse_claude_tasks(raw)
             total = sum(len(v) for v in parsed.values())
             if not total:
-                return self.results.put(("gpt_status", t("cl.nothing")))
+                return self.results.put(("cl_status", t("cl.nothing")))
             self.results.put(("claude_tasks", parsed, season))
         except Exception as e:
             log.exception("Claude task fetch failed")
-            self.results.put(("gpt_status", t("err.generic", e=e)))
+            self.results.put(("cl_status", t("err.generic", e=e)))
         finally:
             self._cl_busy = False
 
@@ -2905,7 +2836,7 @@ class App:
                 if gamedata.nrm(x["en"]) in have: continue
                 cur.append(x); have.add(gamedata.nrm(x["en"])); added += 1
         save_tasks(self.tasks); self.refresh_tasks()
-        self.gpt_status.config(text=t("cl.added", n=added, season=season or "—"))
+        self.cl_status.config(text=t("cl.added", n=added, season=season or "—"))
         log.info("Claude tasks: %d added (season %s)", added, season)
         self.translate_wiki_tasks()
 
@@ -3370,7 +3301,8 @@ class App:
                 try:
                     text = ocr(grab(region), self.cfg["settings"]["ocr_lang"])
                 except Exception as e:
-                    return self.root.after(0, lambda: messagebox.showerror(APP_NAME, t("err.read", e=e)))
+                    err = e
+                    return self.root.after(0, lambda: messagebox.showerror(APP_NAME, t("err.read", e=err)))
                 self.root.after(0, lambda: self._projects_text(text))
             self.root.withdraw(); self.root.after(2500, lambda: (threading.Thread(target=go, daemon=True).start(),
                                                                  self.root.after(1200, self.root.deiconify)))
@@ -3972,8 +3904,7 @@ class App:
     def save_settings(self):
         st = self.cfg["settings"]
         try:
-            from pynput import keyboard
-            keyboard.HotKey.parse(self.sv["hotkey"].get())
+            check_hotkey(self.sv["hotkey"].get())
             for k in ("keep_threshold", "consider_threshold", "overlay_seconds", "auto_interval_ms"): st[k] = float(self.sv[k].get())
             st["log_max_kb"] = max(16, int(float(self.sv["log_max_kb"].get())))
             st["log_backups"] = max(0, int(float(self.sv["log_backups"].get())))
@@ -4126,11 +4057,20 @@ class App:
         body = t("help.body")
         if body == "help.body":          # dil dosyasında yoksa İngilizceye düşülmüş olmalı
             body = "Help text is missing from this language file."
-        box.insert("end", body)
+        box.configure(bg=PAL["surface"], fg=PAL["fg"], relief="flat", padx=18, pady=14, spacing3=4)
+        box.tag_configure("h", foreground=PAL["accent"], font=(ui_theme.FONT_SEMI, 12), spacing1=10)
+        for line in body.splitlines(True):              # BÜYÜK HARFLİ satırlar başlık
+            plain = line.strip()
+            box.insert("end", line, ("h",) if plain and plain == plain.upper() and any(c.isalpha() for c in plain) else ())
         box.config(state="disabled")
 
     def on_close(self):
-        self.stop(); self.speaker.close(); self.root.destroy()
+        self.stop(); self.speaker.close()
+        for name in ("video", "watch_bg", "trail_fx"):            # arka plan işleri / pencereleri
+            obj = getattr(self, name, None)
+            try: obj and obj.stop()
+            except Exception: pass
+        self.root.destroy()
 
 
 if __name__ == "__main__":

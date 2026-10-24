@@ -35,12 +35,12 @@ class Scene3D(tk.Canvas):
         self.light = (0.4, -0.7, -0.6)
         self._drag, self._ids, self.labels = None, {}, []
         self.bind("<ButtonPress-1>", self._press); self.bind("<B1-Motion>", self._move)
-        self.bind("<ButtonRelease-1>", self._release); self.bind("<Configure>", lambda e: self.render())
+        self.bind("<ButtonRelease-1>", self._release); self.bind("<Configure>", lambda e=None: self.render())
         self.bind("<MouseWheel>", self._wheel)
         self.on_pick = None
         self.auto_spin = True
         self._alive = True
-        self.bind("<Destroy>", lambda e: setattr(self, "_alive", False))
+        self.bind("<Destroy>", lambda e=None: setattr(self, "_alive", False))
 
     # --- etkileşim
     def _press(self, e): self._drag = (e.x, e.y, False)
@@ -241,7 +241,7 @@ class Bars3D(Scene3D):
 
     def set_data(self, rows, cols, values):
         """values[r][c] = 0..100 ya da None."""
-        F, labels = [], []
+        F = []
         nr, nc = max(1, len(rows)), max(1, len(cols))
         s = 3.2 / max(nr, nc)
         for r in range(nr):

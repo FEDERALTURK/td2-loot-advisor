@@ -10,7 +10,6 @@ Sesler ilk açılışta küçük WAV dosyaları olarak üretilir (sounds/ klasö
 Windows'ta winsound ile arka planda çalınır; diğer sistemlerde sessizdir.
 """
 import math
-import os
 import struct
 import time
 import wave

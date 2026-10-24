@@ -317,7 +317,7 @@ class GameData:
 # ---------------------------------------------------------------- ekran görüntüsü yardımcıları
 def text_image(img):
     """Oyunun turuncu/beyaz yazısını koyu arka plandan ayıran ön işleme (OCR için)."""
-    from PIL import ImageChops, ImageFilter, ImageOps, Image
+    from PIL import ImageChops, Image
     r, g, b = img.convert("RGB").split()
     mx = ImageChops.lighter(ImageChops.lighter(r, g), b)            # beyaz/turuncu yazı parlak kalır
     # 1440p'de kart yazıları ~20 px: 1,5× büyütmek Tesseract için en iyi sonucu verdi (gerçek oyun kartıyla ölçüldü)
@@ -332,24 +332,3 @@ def text_image(img):
 THRESHOLD = 170          # 0-255; oyun parlaklığı/HDR'a göre ayarlardan değiştirilebilir
 SCALE = None             # None = otomatik (kart yüksekliğine göre); ayarlardan sabitlenebilir
 
-CARD_ANCHORS = {"core", "attributes", "attribute", "talents", "talent", "mods", "modifications", "stats", "brand", "gear"}
-
-
-def card_crop(img, ocr_data_fn):
-    """Bölge envanter listesi + eşya kartını birlikte içeriyorsa sadece kartı kırpar.
-    Kart başlıklarını (Core Stats, Attributes, Talents…) bulup onların solundan keser."""
-    try:
-        from PIL import Image
-        k = max(1, -(-img.width // 800))                              # hızlı olsun: ~800 px genişliğe küçült
-        small = img.resize((img.width // k, img.height // k), Image.BILINEAR) if k > 1 else img
-        f = img.width / small.width
-        d = ocr_data_fn(text_image(small))
-        sc = 2 if small.width < 700 else 1
-        xs = [d["left"][i] / sc for i, w in enumerate(d["text"])
-              if nrm(w) in CARD_ANCHORS and float(d["conf"][i] or 0) > 40]
-        if not xs: return img
-        x0 = max(0, int(min(xs) * f) - int(0.04 * img.width))
-        if x0 < 0.12 * img.width: return img                             # zaten kart
-        return img.crop((x0, 0, img.width, img.height))
-    except Exception:
-        return img

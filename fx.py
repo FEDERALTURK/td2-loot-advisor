@@ -288,7 +288,7 @@ class Transition:
 def video_backend():
     """av / cv2 varsa mp4 de oynar; yoksa 'pil' (yalnızca .webp/.gif animasyonları, ek paket gerekmez)."""
     try:
-        import av  # noqa: F401
+        import av  # noqa: F401  (yalnızca var mı diye)
         return "av"
     except Exception:
         pass
@@ -368,7 +368,6 @@ class VideoFX:
     def _run(self):
         from PIL import ImageOps
         be = video_backend()
-        last = None
         while self.alive:
             vids = list_videos(self.folder)
             if not vids: break

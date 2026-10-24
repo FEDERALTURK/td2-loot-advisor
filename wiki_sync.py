@@ -222,7 +222,7 @@ def parse_project_events(season, text, now=None):
     for title, body in [(t, b) for _, t, b in sections(text)]:
         b = clean(body)
         for m in re.finditer(r"([^.]*?\bProject(?: Chain)?\b[^.]*?\bfrom ([A-Z][a-z]+ \d{1,2}) to ([A-Z][a-z]+ \d{1,2})[^.]*\.)", b):
-            start, end = parse_date(m.group(2), year), parse_date(m.group(3), year)
+            end = parse_date(m.group(3), year)
             if not end: continue
             end = end + timedelta(hours=8)                            # resmî sıfırlama saati
             if end <= now: continue
