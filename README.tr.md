@@ -36,6 +36,7 @@ Thedivision2program/
 ├── ui_theme.py         ← tema, renkler ve arayüz sesleri
 ├── ui_art.py           ← üst bant: arka planlar, build amblemleri, bayraklar
 ├── meta_sync.py        ← günlük meta build + görev senkronu
+├── engine.py           ← karar motoru v2 + eşya kartı bulucu (21:9 dahil)
 ├── gamedata.py         ← oyun verisi + eşya tanıma motoru
 ├── wiki_sync.py        ← The Division Wiki canlı okuyucu (sezon, Manhunt, Classified Assignment)
 ├── meta/               ← meta_builds.json (merkezi akış) + UPDATER.md (güncelleme kuralları)
@@ -162,6 +163,26 @@ bir kütüphane gerektirmez.
 - Resmî Ubisoft logoları ve set amblemleri telif hakkı nedeniyle pakete eklenmedi; görseller bu
   uygulama için özgün olarak çizildi. Klasörü **Ayarlar → Görünüm → Görsel klasörünü aç** ile açabilirsin.
 
+
+
+## Panel, Build'ler ve Eksik Parça (v2) — geniş ekran (21:9, 3440×1440) desteği
+
+- **Panel:** iki sütun. Solda kontroller, büyük karar kartı ve **okunan eşya kartının küçük resmi** (programın
+  gerçekte neyi okuduğunu görürsün); sağda eşya tablosu (özellik · değer · oyundaki max · kalite çubuğu),
+  set/marka + talent'ler, tanıma güveni ve **build eşleşmeleri** tablosu (puan + nedenleri).
+- **Kaynak: Tüm ekran (önerilen)** — bölge seçmeden çalışır. Program 3440×1440 dahil her çözünürlükte eşya kartını
+  ekranda kendisi bulur (Core Stats / Attributes / Talents hizasından), sınırlarını hatırlar; kart yer değiştirirse
+  yeniden bulur. İstersen *Seçili bölge* moduna geçebilirsin.
+- **Karar motoru v2** (`engine.py`): ekipmanda set/marka eşleşmesi (başka set/marka ise puan düşer), attribute'lar
+  oyundaki en yüksek değere göre, talent; **silahlarda** silah türü (build adından tahmin ya da build'de seçilen tür)
+  + silah talent'i + rulolar. Egzotik/named eşya build'inde geçiyorsa **SAKLA**, geçmiyorsa açıklamalı **KONTROL ET**.
+- **Build'ler:** set/marka ve talent'ler oyun verisinden seçilir (yazım hatası olmaz), attribute eklerken oyundaki
+  max ve önerilen "iyi değer" (%90) otomatik gelir, yuvalar onay kutusu, **silah türleri** seçilebilir,
+  *Son taranan eşyayla test et* ile build'in o eşyaya verdiği puan ve nedenleri görülür; arama ve çoğaltma var.
+- **Eksik Parça:** seçili build'in 8 yuvası (6 zırh + silah + tabanca) kart olarak; dolu kartta parça, set/marka,
+  puan, tarih ve rulolar (kalite %), boş kartta neyin arandığı (set/marka ya da silah türü + öncelikli özellikler).
+  Her kartta *Son taramayı koy* / *Temizle*; altta tüm build'lerin eksik yuvaları.
+- Teşhis için her taramada `last_card.png` (okunan kart) ve `logs/last_ocr.txt` (okunan metin) kaydedilir.
 
 ## Eşya tanıma: oyun verisiyle doğrulama
 
@@ -400,6 +421,7 @@ gibi küçük bir model seç.
 | `ui_art.py` | Üst bant: dönen arka planlar, build amblemleri, bayraklar |
 | `meta_sync.py` | Günlük meta build + görev senkronu (indir, doğrula, birleştir) |
 | `wiki_sync.py` | The Division Wiki canlı okuyucu |
+| `engine.py` | Karar motoru v2 ve ekranda eşya kartı bulma |
 | `gamedata.py` | Oyun verisiyle eşya tanıma (ad, set, talent, rulo kalitesi) |
 | `meta/game_data.json` | Oyun verisi sözlüğü (wiki + oyun değerleri) |
 | `meta/meta_builds.json` | Merkezi meta akışı (depoda günlük güncellenir) |

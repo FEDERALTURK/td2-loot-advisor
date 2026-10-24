@@ -16,3 +16,5 @@ build/
 dist/
 *.spec
 .venv/
+last_card.png
+game_data_cache.json

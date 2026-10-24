@@ -31,6 +31,7 @@ import ui_art
 import meta_sync
 import wiki_sync
 import gamedata
+import engine
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
@@ -62,7 +63,7 @@ DEFAULTS = {"scan_mode": "hotkey", "auto_interval_ms": 700, "auto_record": True,
             "ui_theme": "dark", "ui_sounds": True, "bg_interval": 15,
             "meta_sync": True, "meta_feed_url": "", "meta_last_try": 0, "meta_last_sync": "", "meta_version": "",
             "meta_hidden": [], "tasks_sync": True, "auto_reset_times": True,
-            "wiki_sync": True, "wiki_last_try": 0, "only_game_active": True}
+            "wiki_sync": True, "wiki_last_try": 0, "only_game_active": True, "scan_source": "screen"}
 AUTO_STABLE, AUTO_CHANGE, DEDUP_SECONDS, UPGRADE_MARGIN = 4, 8, 30, 3
 
 if not CFG_PATH.exists() and (BUNDLE / "builds.json").exists():
@@ -155,6 +156,16 @@ def norm(s):
 
 GAME_DATA_CACHE = BASE / "game_data_cache.json"
 GAME = gamedata.GameData(GAME_DATA_CACHE, BASE / "meta" / "game_data.json", BUNDLE / "meta" / "game_data.json")
+
+SLOT_ICONS = {"Mask": "🎭", "Chest": "🦺", "Backpack": "🎒", "Gloves": "🧤", "Holster": "🔫", "Kneepads": "🦵",
+              "Weapon": "🔫", "Sidearm": "🔫"}
+
+def attr_name(k):
+    """Attribute anahtarının okunur adı (oyundaki İngilizce ad)."""
+    if GAME.ok:
+        al = GAME.data.get("attributes", {}).get(k, {}).get("aliases")
+        if al: return al[0].title()
+    return k.replace("_", " ").title()
 
 def ocr_data(img):
     return pytesseract.image_to_data(img, config="--psm 11", output_type=pytesseract.Output.DICT)
@@ -296,6 +307,16 @@ def score_build(item, b, low):
     return (round(min(100, raw / maxp * 100)) if maxp else 0), why
 
 def evaluate(text, cfg):
+    if GAME.ok:
+        item = parse_item(text, cfg)
+        item["_text"] = text
+        res = engine.evaluate(item, text, cfg, GAME)
+        verdict, nk, npar = engine.decide(item, res, cfg)
+        item["_note"] = t(nk, **npar) if nk else ""
+        return item, verdict, res
+    return evaluate_legacy(text, cfg)
+
+def evaluate_legacy(text, cfg):
     item, low = parse_item(text, cfg), text.lower()
     res = []
     for b in cfg["builds"]:
@@ -831,7 +852,9 @@ class App:
         self.speaker, self.rec, self.voice_busy, self.chat_hist = Speaker(), Recorder(), False, []
 
         self.root = tk.Tk()
-        self.root.title(f"{APP_NAME} v{APP_VERSION}"); self.root.geometry("1040x840"); self.root.minsize(880, 700)
+        self.root.title(f"{APP_NAME} v{APP_VERSION}"); self.root.minsize(880, 700)
+        sw, sh = self.root.winfo_screenwidth(), self.root.winfo_screenheight()
+        self.root.geometry("1700x1080" if sw >= 3000 and sh >= 1300 else "1360x900" if sw >= 1900 else "1040x840")
         self.sounds = ui_theme.Sounds(BASE / "sounds", enabled=bool(stg.get("ui_sounds", True)))
         ui_theme.bind_click_sounds(self.root, self.sounds)
         self.build_ui()
@@ -938,35 +961,106 @@ class App:
 
     # ---------- Panel ----------
     def build_dash(self):
+        """Panel v2 — geniş ekran (21:9) için iki sütun: solda kontrol + karar, sağda eşya kartı ve build eşleşmeleri."""
         f = self.tabs["dash"]
-        top = ttk.Frame(f); top.pack(fill="x", padx=12, pady=(14, 6))
+        st = self.cfg["settings"]
+        paned = ttk.Panedwindow(f, orient="horizontal"); paned.pack(fill="both", expand=True, padx=10, pady=10)
+        left, right = ttk.Frame(paned), ttk.Frame(paned)
+        paned.add(left, weight=2); paned.add(right, weight=3)
+
+        top = ttk.Frame(left); top.pack(fill="x")
         self.btn_run = ttk.Button(top, text=t("btn.start"), command=self.toggle, style="Success.TButton"); self.btn_run.pack(side="left")
-        ttk.Button(top, text=t("btn.scan_now") if not t("btn.scan_now")[:1].isalnum() else "🔍 " + t("btn.scan_now"),
-                   command=self.trigger, style="Accent.TButton").pack(side="left", padx=8)
+        ttk.Button(top, text="🔍 " + t("btn.scan_now"), command=self.trigger, style="Accent.TButton").pack(side="left", padx=6)
         ttk.Button(top, text=ui_theme.with_icon(t("btn.pick_region"), "⛶"), command=self.calibrate).pack(side="left")
-        ttk.Button(top, text=ui_theme.with_icon(t("btn.test_image"), "🖼"), command=self.test_image).pack(side="left", padx=8)
-        mode = ttk.Frame(f); mode.pack(fill="x", padx=12, pady=(2, 0))
+        ttk.Button(top, text=ui_theme.with_icon(t("btn.test_image"), "🖼"), command=self.test_image).pack(side="left", padx=6)
+
+        src = ttk.Frame(left); src.pack(fill="x", pady=(8, 0))
+        ttk.Label(src, text=t("panel.source"), foreground=PAL["muted"]).pack(side="left")
+        self.src_var = tk.StringVar(value=st.get("scan_source", "screen"))
+        for txt, val in ((t("panel.src_screen"), "screen"), (t("panel.src_region"), "region")):
+            ttk.Radiobutton(src, text=txt, value=val, variable=self.src_var, command=self.change_source).pack(side="left", padx=6)
+        mode = ttk.Frame(left); mode.pack(fill="x", pady=(2, 0))
         ttk.Label(mode, text=t("panel.scan_mode"), foreground=PAL["muted"]).pack(side="left")
-        self.mode_var = tk.StringVar(value=self.cfg["settings"]["scan_mode"])
+        self.mode_var = tk.StringVar(value=st["scan_mode"])
         for txt, val in ((t("mode.hotkey"), "hotkey"), (t("mode.auto"), "auto")):
-            ttk.Radiobutton(mode, text=txt, value=val, variable=self.mode_var, command=self.change_mode).pack(side="left", padx=8)
-        self.status = ttk.Label(f, foreground=PAL["muted"]); self.status.pack(anchor="w", padx=14, pady=(4, 2))
-        # Karar kartı
-        card = ttk.Frame(f, style="Card.TFrame", padding=(0, 0, 0, 12)); card.pack(fill="x", padx=12, pady=(6, 8))
+            ttk.Radiobutton(mode, text=txt, value=val, variable=self.mode_var, command=self.change_mode).pack(side="left", padx=6)
+        self.status = ttk.Label(left, foreground=PAL["muted"], wraplength=560, justify="left"); self.status.pack(anchor="w", pady=(4, 2))
+
+        card = ttk.Frame(left, style="Card.TFrame", padding=(0, 0, 0, 12)); card.pack(fill="x", pady=(6, 8))
         self.verdict_lbl = tk.Label(card, text=verdict_label("IDLE"), bg=COLORS["IDLE"], fg="white",
-                                    font=(ui_theme.FONT_SEMI, 30), pady=18)
+                                    font=(ui_theme.FONT_SEMI, 34), pady=20)
         self.verdict_lbl.pack(fill="x")
-        self.item_lbl = ttk.Label(card, text="—", style="Item.TLabel"); self.item_lbl.pack(anchor="w", padx=16, pady=(10, 0))
-        self.note_lbl = ttk.Label(card, text="", style="Note.TLabel"); self.note_lbl.pack(anchor="w", padx=16)
-        # Oturum sayaçları (renkli rozetler)
-        chips = ttk.Frame(f); chips.pack(fill="x", padx=12, pady=(0, 4))
+        self.item_lbl = ttk.Label(card, text="—", style="Item.TLabel", wraplength=560); self.item_lbl.pack(anchor="w", padx=16, pady=(10, 0))
+        self.note_lbl = ttk.Label(card, text="", style="Note.TLabel", wraplength=560, justify="left"); self.note_lbl.pack(anchor="w", padx=16)
+        chips = ttk.Frame(left); chips.pack(fill="x", pady=(0, 6))
         self.count_chips = {}
         for v in ("KEEP", "CONSIDER", "DISMANTLE", "REVIEW"):
             lb = tk.Label(chips, bg=PAL["surface"], fg=VFG[v], font=(ui_theme.FONT_SEMI, 10), padx=12, pady=5)
             lb.pack(side="left", padx=(0, 8)); self.count_chips[v] = lb
-        self.out = tk.Text(f, height=11, state="disabled", font=("Consolas", 10), wrap="word"); self.out.pack(fill="both", expand=True, padx=12, pady=(4, 12))
-        self.stats = ttk.Label(f)   # eski sayaç satırı (artık rozetlerde gösteriliyor)
+        ttk.Label(left, text=t("panel.card_preview"), style="Section.TLabel").pack(anchor="w", pady=(6, 2))
+        self.card_img_lbl = tk.Label(left, bg=PAL["surface"], text=t("panel.no_card"), fg=PAL["muted"], height=12)
+        self.card_img_lbl.pack(fill="both", expand=True)
+
+        ttk.Label(right, text=t("panel.item_box"), style="Section.TLabel").pack(anchor="w")
+        self.item_tv = ttk.Treeview(right, columns=("a", "v", "m", "q"), show="headings", height=8)
+        for c, hd, w in (("a", t("panel.col_attr"), 220), ("v", t("panel.col_value"), 110), ("m", t("panel.col_max"), 110), ("q", t("panel.col_quality"), 220)):
+            self.item_tv.heading(c, text=hd); self.item_tv.column(c, width=w, anchor="w" if c in ("a", "q") else "center")
+        self.item_tv.pack(fill="x", pady=(2, 4))
+        self.tal_lbl = ttk.Label(right, text="", wraplength=900, justify="left"); self.tal_lbl.pack(anchor="w", pady=(0, 8))
+        ttk.Label(right, text=t("panel.matches"), style="Section.TLabel").pack(anchor="w")
+        self.match_tv = ttk.Treeview(right, columns=("p", "b", "w"), show="headings", height=8)
+        for c, hd, w in (("p", "%", 60), ("b", t("panel.col_build"), 280), ("w", t("panel.col_why"), 560)):
+            self.match_tv.heading(c, text=hd); self.match_tv.column(c, width=w, anchor="center" if c == "p" else "w")
+        self.match_tv.pack(fill="x", pady=(2, 6))
+        dbg = ttk.Frame(right); dbg.pack(fill="x")
+        self.dbg_var = tk.BooleanVar(value=False)
+        ttk.Checkbutton(dbg, text=t("panel.show_ocr"), variable=self.dbg_var, command=lambda: self.last_shown and self.show_result(*self.last_shown)).pack(side="left")
+        self.out = tk.Text(right, height=8, state="disabled", font=("Consolas", 10), wrap="word"); self.out.pack(fill="both", expand=True, pady=(4, 0))
+        self.stats = ttk.Label(f)
+        self.last_shown = None
         self.refresh_counts(); self.refresh_status()
+
+    def change_source(self):
+        self.cfg["settings"]["scan_source"] = self.src_var.get(); save_cfg(self.cfg)
+        self.card_box = None; self.refresh_status()
+
+    def show_result(self, text, item, verdict, res, note=None, debug=False, diff=None):
+        self.last_shown = (text, item, verdict, res, note, debug, diff)
+        self.verdict_lbl.config(text=verdict_label(verdict), bg=COLORS[verdict])
+        kind = t("panel.kind_weapon") if item.get("kind") == "weapon" else (t("panel.kind_gear") if item.get("kind") else "")
+        self.item_lbl.config(text=item["name"] + ("  [" + ", ".join(item["rarity"]) + "]" if item["rarity"] else "") +
+                             (f"  ·  {slot_name(item['slot'])}" if item.get("slot") else "") + (f"  ·  {kind}" if kind else ""))
+        notes = [n for n in (item.get("_note"), note) if n]
+        self.note_lbl.config(text="\n".join("» " + n for n in notes))
+        self.item_tv.delete(*self.item_tv.get_children())
+        proto = "PROTOTYPE" in item.get("rarity", [])
+        for k, v in item.get("attrs", {}).items():
+            mx = GAME.max_of(k, proto) if GAME.ok else None
+            q = item.get("quality", {}).get(k)
+            bar = ("█" * round((q or 0) / 10)).ljust(10, "░") + f"  {q}%" if q is not None else "—"
+            self.item_tv.insert("", "end", values=(attr_name(k), f"{v:g}", f"{mx:g}" if mx else "—", bar))
+        bits = []
+        if item.get("gear_set") or item.get("brand"):
+            bits.append("🏷 " + " / ".join(x for x in (item.get("gear_set"), item.get("brand")) if x))
+        if item.get("talents"): bits.append("✦ " + ", ".join(item["talents"]))
+        if "confidence" in item: bits.append(t("panel.confidence", pct=round(item["confidence"] * 100)))
+        self.tal_lbl.config(text="     ".join(bits))
+        self.match_tv.delete(*self.match_tv.get_children())
+        for p, n, w in res[:8]:
+            self.match_tv.insert("", "end", values=(p, n, ", ".join(w) if w else "—"))
+        body = ""
+        if diff: body += t("panel.roll_header").strip() + "\n" + "\n".join("  " + d for d in diff) + "\n"
+        if debug or (hasattr(self, "dbg_var") and self.dbg_var.get()):
+            body += t("panel.ocr_text") + text + t("panel.parsed") + json.dumps(item, ensure_ascii=False, indent=1)
+        self.out.config(state="normal"); self.out.delete("1.0", "end"); self.out.insert("end", body); self.out.config(state="disabled")
+        img = getattr(self, "last_card_img", None)
+        if img is not None:
+            try:
+                th = img.copy(); th.thumbnail((520, 640))
+                self._card_photo = ImageTk.PhotoImage(th)
+                self.card_img_lbl.config(image=self._card_photo, text="", height=0)
+            except Exception:
+                pass
 
     def refresh_status(self):
         r = self.cfg["settings"].get("region")
@@ -975,7 +1069,8 @@ class App:
         self.status.config(text=t("status.line",
                                   state=t("state.running") if self.running else t("state.stopped"),
                                   mode=mode,
-                                  region=f"{r['width']}x{r['height']}" if r else t("state.not_set")))
+                                  region=(t("panel.src_screen_short") if st.get("scan_source", "screen") == "screen"
+                                          else (f"{r['width']}x{r['height']}" if r else t("state.not_set")))))
         self.refresh_header()
 
     def refresh_counts(self):
@@ -984,25 +1079,6 @@ class App:
                                   dismantle=c["DISMANTLE"], review=c["REVIEW"]))
         for v, lb in getattr(self, "count_chips", {}).items():
             lb.config(text=f"{verdict_label(v)}  {c[v]}")
-
-    def show_result(self, text, item, verdict, res, note=None, debug=False, diff=None):
-        self.verdict_lbl.config(text=verdict_label(verdict), bg=COLORS[verdict])
-        self.item_lbl.config(text=item["name"] + ("  [" + ", ".join(item["rarity"]) + "]" if item["rarity"] else "") +
-                             (f"  ({item['slot']})" if item.get("slot") else ""))
-        self.note_lbl.config(text=note or "")
-        body = ""
-        if item.get("quality"):
-            body += t("panel.quality") + "  " + "  ·  ".join(f"{k} {item['attrs'][k]:g} ({q}%)" for k, q in item["quality"].items()) + "\n"
-        if item.get("brand") or item.get("gear_set"):
-            body += "🏷  " + " / ".join(x for x in (item.get("gear_set"), item.get("brand")) if x) + \
-                    (f"   ·   {', '.join(item['talents'])}" if item.get("talents") else "") + "\n"
-        if body: body += "\n"
-        body += "\n".join(f"{p:3d}%  {n}\n        {', '.join(w) if w else '-'}" for p, n, w in res[:5])
-        if diff:
-            body += t("panel.roll_header") + "\n".join("  " + d for d in diff)
-        if debug:
-            body += t("panel.ocr_text") + text + t("panel.parsed") + json.dumps(item, ensure_ascii=False, indent=1)
-        self.out.config(state="normal"); self.out.delete("1.0", "end"); self.out.insert("end", body); self.out.config(state="disabled")
 
     # ---------- çalıştırma ----------
     def change_mode(self):
@@ -1015,7 +1091,7 @@ class App:
         self.stop() if self.running else self.start()
 
     def start(self, quiet=False):
-        if not self.cfg["settings"].get("region"):
+        if self.cfg["settings"].get("scan_source", "screen") == "region" and not self.cfg["settings"].get("region"):
             return messagebox.showinfo(APP_NAME, t("msg.pick_region_first"))
         try:
             from pynput import keyboard
@@ -1035,7 +1111,7 @@ class App:
             threading.Thread(target=self.auto_loop, args=(self.auto_stop,), daemon=True).start()
         self.running = True; self.btn_run.config(text=t("btn.stop"), style="Danger.TButton"); self.refresh_status()
         if not quiet: self.sounds.play("start")
-        self.card_x = None
+        self.card_x = None; self.card_box = None
         if self.window_overlaps_region():
             log.info("Main window overlaps the scan region: minimizing")
             self.toast(t("scan.minimized"))
@@ -1050,7 +1126,7 @@ class App:
         log.info("Scanning stopped")
 
     def region_rect(self):
-        r = self.cfg["settings"].get("region") or {}
+        r = self.scan_area() or {}
         return (r.get("left", 0), r.get("top", 0), r.get("left", 0) + r.get("width", 0), r.get("top", 0) + r.get("height", 0))
 
     @staticmethod
@@ -1066,7 +1142,7 @@ class App:
             return False
 
     def trigger(self):  # pynput thread'inden de çağrılır: tk'ya dokunma
-        region = self.cfg["settings"].get("region")
+        region = self.scan_area()
         if region and self.cfg["settings"].get("only_game_active", True) and not game_active():
             return log.info("Hotkey ignored: game window is not in front")
         if region and not self.lock.locked():
@@ -1084,24 +1160,46 @@ class App:
         s = self.cfg["settings"]
         if s.get("save_debug_crop"):
             img.save(DEBUG_PATH)
-        text, cx = read_item_text(img, s["ocr_lang"], getattr(self, "card_x", None))
+        box = getattr(self, "card_box", None)
+        tried_fresh = False
+        if box is None:
+            box = engine.find_card(img, ocr_data); tried_fresh = True
+        card = img.crop(box) if box else img
+        text = pytesseract.image_to_string(gamedata.text_image(card), lang=s["ocr_lang"], config="--psm 6")
         item, verdict, res = evaluate(text, self.cfg)
-        if getattr(self, "card_x", None) is not None and not valid_item(item):
-            text, cx = read_item_text(img, s["ocr_lang"], None)          # kart yer değiştirmiş olabilir: yeniden bul
+        if not valid_item(item) and not tried_fresh:                  # kart yer değiştirmiş: yeniden bul
+            box = engine.find_card(img, ocr_data)
+            card = img.crop(box) if box else img
+            text = pytesseract.image_to_string(gamedata.text_image(card), lang=s["ocr_lang"], config="--psm 6")
             item, verdict, res = evaluate(text, self.cfg)
-        if valid_item(item): self.card_x = cx
+        self.card_box = box if valid_item(item) else None
+        try:
+            card.save(BASE / "last_card.png")
+            (APPLOG_DIR / "last_ocr.txt").write_text(text, encoding="utf-8")
+        except Exception:
+            pass
         sig = signature(item)
         if auto:
             if not valid_item(item): return
             if sig == self.last_sig and time.time() - self.last_time < DEDUP_SECONDS: return
+        self.last_card_img = card
         self.last_sig, self.last_time = sig, time.time()
         self.results.put(("ok", text, item, verdict, res, sig))
+
+    def scan_area(self):
+        """Taranacak alan: tüm ekran (oyunun olduğu ana monitör) ya da seçilen bölge."""
+        st = self.cfg["settings"]
+        if st.get("scan_source", "screen") == "region" and st.get("region"):
+            return st["region"]
+        with mss.mss() as sct:
+            m = sct.monitors[1]
+        return {"left": m["left"], "top": m["top"], "width": m["width"], "height": m["height"]}
 
     def auto_loop(self, stop):
         prev = last_done = None; stable = 0
         while not stop.is_set():
             try:
-                region = self.cfg["settings"].get("region")
+                region = self.scan_area()
                 if region and self.cfg["settings"].get("only_game_active", True) and not game_active():
                     prev = None; stable = 0                     # oyun önde değil: okuma yapma
                 elif region:
@@ -1171,6 +1269,9 @@ class App:
 
     def record(self, bname, slot, score, item, sig):
         self.progress.setdefault(bname, {})[slot] = {"item": item["name"], "score": score, "sig": sig, "attrs": item.get("attrs", {}),
+                                                     "quality": item.get("quality", {}), "brand": item.get("brand"),
+                                                     "gear_set": item.get("gear_set"), "talents": item.get("talents", []),
+                                                     "rarity": item.get("rarity", []),
                                                      "time": datetime.now().isoformat(timespec="seconds")}
         save_progress(self.progress)
         if self.current_tab() == "progress": self.refresh_prog()
@@ -1200,6 +1301,7 @@ class App:
         tk.Label(body, text=item["name"][:42], fg=fg, bg=dark, font=(ui_theme.FONT_SEMI, 11)).pack(anchor="w")
         L = []
         if item["rarity"]: L.append("[" + ", ".join(item["rarity"]) + "]")
+        if item.get("_note"): L.append("» " + item["_note"])
         if note: L.append("» " + note)
         if verdict == "REVIEW": L.append(t("panel.rare_warning"))
         for p, n, _ in res[:3]:
@@ -1262,47 +1364,102 @@ class App:
         except Exception as e:
             messagebox.showerror(APP_NAME, str(e))
 
-    # ---------- Build editörü ----------
+    # ---------- Build editörü (v2) ----------
     def build_builds(self):
+        """Build'ler v2: oyun verisinden seçmeli set/marka, attribute (oyun max'ı ile), talent ve silah türü."""
         f = self.tabs["builds"]
-        left = ttk.Frame(f); left.pack(side="left", fill="y", padx=8, pady=8)
-        self.lb = tk.Listbox(left, width=30, exportselection=False); self.lb.pack(fill="y", expand=True)
-        self.lb.bind("<<ListboxSelect>>", self.on_pick)
-        ttk.Button(left, text=ui_theme.with_icon(t("build.new"), "➕"), command=self.new_build).pack(fill="x", pady=2)
-        ttk.Button(left, text=ui_theme.with_icon(t("build.delete"), "🗑"), command=self.del_build).pack(fill="x")
-        ttk.Separator(left).pack(fill="x", pady=6)
-        ttk.Button(left, text=t("build.export"), command=self.export_builds).pack(fill="x")
-        ttk.Button(left, text=t("build.import"), command=self.import_builds).pack(fill="x", pady=2)
-        ttk.Separator(left).pack(fill="x", pady=6)
+        paned = ttk.Panedwindow(f, orient="horizontal"); paned.pack(fill="both", expand=True, padx=8, pady=8)
+        left = ttk.Frame(paned); paned.add(left, weight=1)
+        self.b_search = tk.StringVar()
+        se = ttk.Entry(left, textvariable=self.b_search); se.pack(fill="x", pady=(0, 4))
+        se.bind("<KeyRelease>", lambda e: self.refresh_builds(keep=True))
+        self.lb = tk.Listbox(left, exportselection=False, font=(ui_theme.FONT, 11))
+        self.lb.pack(fill="both", expand=True); self.lb.bind("<<ListboxSelect>>", self.on_pick)
+        bb = ttk.Frame(left); bb.pack(fill="x", pady=4)
+        ttk.Button(bb, text=ui_theme.with_icon(t("build.new"), "➕"), command=self.new_build).pack(side="left", fill="x", expand=True)
+        ttk.Button(bb, text=ui_theme.with_icon(t("build.duplicate"), "⧉"), command=self.dup_build).pack(side="left", fill="x", expand=True, padx=4)
+        ttk.Button(bb, text=ui_theme.with_icon(t("build.delete"), "🗑"), command=self.del_build).pack(side="left", fill="x", expand=True)
+        bb2 = ttk.Frame(left); bb2.pack(fill="x")
+        ttk.Button(bb2, text=t("build.export"), command=self.export_builds).pack(side="left", fill="x", expand=True)
+        ttk.Button(bb2, text=t("build.import"), command=self.import_builds).pack(side="left", fill="x", expand=True, padx=(4, 0))
         ttk.Button(left, text=ui_theme.with_icon(t("meta.sync_now"), "⭐"), command=lambda: self.meta_sync_start(force=True, what=("builds",)),
-                   style="Accent.TButton").pack(fill="x")
-        self.meta_info = ttk.Label(left, text=self.meta_status_text(), foreground=PAL["muted"], wraplength=220, justify="left")
+                   style="Accent.TButton").pack(fill="x", pady=(6, 0))
+        self.meta_info = ttk.Label(left, text=self.meta_status_text(), foreground=PAL["muted"], wraplength=300, justify="left")
         self.meta_info.pack(fill="x", pady=(4, 0))
-        r = ttk.Frame(f); r.pack(side="left", fill="both", expand=True, padx=8, pady=8)
-        self.v_name, self.v_sets, self.v_bonus, self.v_slots = (tk.StringVar() for _ in range(4))
-        for i, (lab, var) in enumerate((("Ad", self.v_name), (t("build.sets"), self.v_sets), (t("build.set_bonus"), self.v_bonus),
-                                        (t("build.slots"), self.v_slots))):
-            ttk.Label(r, text=lab).grid(row=i, column=0, sticky="w"); ttk.Entry(r, textvariable=var, width=42).grid(row=i, column=1, sticky="w", pady=2)
-        ttk.Label(r, text=t("build.attr_rules")).grid(row=4, column=0, columnspan=2, sticky="w", pady=(10, 0))
-        self.ta = ttk.Treeview(r, columns=("k", "w", "g"), show="headings", height=6)
-        for c, hd in (("k", t("build.attr")), ("w", t("build.weight")), ("g", t("build.goodval"))): self.ta.heading(c, text=hd); self.ta.column(c, width=110)
-        self.ta.grid(row=5, column=0, columnspan=2, sticky="ew"); self.ta.bind("<<TreeviewSelect>>", self.pick_attr)
-        af = ttk.Frame(r); af.grid(row=6, column=0, columnspan=2, sticky="w", pady=3)
-        self.v_ak, self.v_aw, self.v_ag = tk.StringVar(), tk.StringVar(value="1"), tk.StringVar(value="5")
-        ttk.Combobox(af, textvariable=self.v_ak, width=18, values=list(self.cfg["attributes"])).pack(side="left")
-        ttk.Entry(af, textvariable=self.v_aw, width=6).pack(side="left", padx=4); ttk.Entry(af, textvariable=self.v_ag, width=6).pack(side="left")
-        ttk.Button(af, text=ui_theme.with_icon(t("btn.add_update"), "✚"), command=self.set_attr).pack(side="left", padx=4); ttk.Button(af, text=ui_theme.with_icon(t("btn.delete"), "🗑"), command=self.del_attr).pack(side="left")
-        ttk.Label(r, text=t("build.talents")).grid(row=7, column=0, columnspan=2, sticky="w", pady=(10, 0))
-        self.tt = ttk.Treeview(r, columns=("n", "w"), show="headings", height=5)
-        self.tt.heading("n", text=t("build.talent")); self.tt.heading("w", text=t("build.weight")); self.tt.column("n", width=220); self.tt.column("w", width=80)
-        self.tt.grid(row=8, column=0, columnspan=2, sticky="ew"); self.tt.bind("<<TreeviewSelect>>", self.pick_tal)
-        tf = ttk.Frame(r); tf.grid(row=9, column=0, columnspan=2, sticky="w", pady=3)
+
+        holder = ttk.Frame(paned); paned.add(holder, weight=3)
+        r = ui_theme.scrollable(holder, PAL["bg"])
+        names = (GAME.data.get("gear_sets", []) + GAME.data.get("brands", [])) if GAME.ok else []
+
+        g = ttk.LabelFrame(r, text=t("build.sec_general")); g.pack(fill="x", padx=6, pady=(0, 8))
+        self.v_name, self.v_bonus = tk.StringVar(), tk.StringVar()
+        ttk.Label(g, text=t("build.name")).grid(row=0, column=0, sticky="w", padx=8, pady=4)
+        ttk.Entry(g, textvariable=self.v_name, width=48).grid(row=0, column=1, columnspan=3, sticky="w", pady=4)
+        ttk.Label(g, text=t("build.sets")).grid(row=1, column=0, sticky="nw", padx=8, pady=4)
+        self.sets_lb = tk.Listbox(g, height=4, width=34, exportselection=False); self.sets_lb.grid(row=1, column=1, rowspan=2, sticky="w", pady=4)
+        self.v_setpick = tk.StringVar()
+        ttk.Combobox(g, textvariable=self.v_setpick, values=names, width=30).grid(row=1, column=2, sticky="w", padx=6)
+        sb = ttk.Frame(g); sb.grid(row=2, column=2, sticky="w", padx=6)
+        ttk.Button(sb, text="✚", width=3, command=self.add_set).pack(side="left")
+        ttk.Button(sb, text="🗑", width=3, command=self.del_set).pack(side="left", padx=4)
+        ttk.Label(g, text=t("build.set_bonus")).grid(row=3, column=0, sticky="w", padx=8, pady=4)
+        ttk.Spinbox(g, textvariable=self.v_bonus, from_=0, to=50, width=6).grid(row=3, column=1, sticky="w")
+        ttk.Label(g, text=t("build.slots")).grid(row=4, column=0, sticky="nw", padx=8, pady=4)
+        slf = ttk.Frame(g); slf.grid(row=4, column=1, columnspan=3, sticky="w")
+        self.v_slots = {}
+        for i, s in enumerate(engine.ALL_SLOTS):
+            self.v_slots[s] = tk.BooleanVar(value=True)
+            ttk.Checkbutton(slf, text=slot_name(s), variable=self.v_slots[s]).grid(row=i // 4, column=i % 4, sticky="w", padx=(0, 14))
+
+        a = ttk.LabelFrame(r, text=t("build.attr_rules")); a.pack(fill="x", padx=6, pady=8)
+        self.ta = ttk.Treeview(a, columns=("k", "w", "g", "m"), show="headings", height=7)
+        for c, hd, w in (("k", t("build.attr"), 240), ("w", t("build.weight"), 90), ("g", t("build.goodval"), 110), ("m", t("panel.col_max"), 110)):
+            self.ta.heading(c, text=hd); self.ta.column(c, width=w, anchor="w" if c == "k" else "center")
+        self.ta.pack(fill="x", padx=8, pady=(6, 2)); self.ta.bind("<<TreeviewSelect>>", self.pick_attr)
+        af = ttk.Frame(a); af.pack(fill="x", padx=8, pady=(2, 8))
+        self.attr_keys = list(GAME.data.get("attributes", {}).keys()) if GAME.ok else list(self.cfg["attributes"])
+        self.v_ak, self.v_aw, self.v_ag = tk.StringVar(), tk.StringVar(value="2"), tk.StringVar()
+        ak = ttk.Combobox(af, textvariable=self.v_ak, width=32, state="readonly", values=[attr_name(k) for k in self.attr_keys])
+        ak.pack(side="left"); ak.bind("<<ComboboxSelected>>", self.attr_default_good)
+        ttk.Label(af, text=t("build.weight")).pack(side="left", padx=(10, 2))
+        ttk.Spinbox(af, textvariable=self.v_aw, from_=0, to=5, increment=0.5, width=5).pack(side="left")
+        ttk.Label(af, text=t("build.goodval")).pack(side="left", padx=(10, 2))
+        ttk.Entry(af, textvariable=self.v_ag, width=9).pack(side="left")
+        ttk.Button(af, text=ui_theme.with_icon(t("btn.add_update"), "✚"), command=self.set_attr).pack(side="left", padx=6)
+        ttk.Button(af, text=ui_theme.with_icon(t("btn.delete"), "🗑"), command=self.del_attr).pack(side="left")
+
+        tl = ttk.LabelFrame(r, text=t("build.talents")); tl.pack(fill="x", padx=6, pady=8)
+        self.tt = ttk.Treeview(tl, columns=("n", "k", "w"), show="headings", height=6)
+        for c, hd, w in (("n", t("build.talent"), 260), ("k", t("build.talent_kind"), 120), ("w", t("build.weight"), 90)):
+            self.tt.heading(c, text=hd); self.tt.column(c, width=w, anchor="w" if c == "n" else "center")
+        self.tt.pack(fill="x", padx=8, pady=(6, 2)); self.tt.bind("<<TreeviewSelect>>", self.pick_tal)
+        tf = ttk.Frame(tl); tf.pack(fill="x", padx=8, pady=(2, 8))
+        tal_names = []
+        if GAME.ok:
+            for n in GAME.data.get("gear_talents", []) + GAME.data.get("weapon_talents", []):
+                tal_names += [n, "Perfect " + n]
         self.v_tn, self.v_tw = tk.StringVar(), tk.StringVar(value="2")
-        ttk.Entry(tf, textvariable=self.v_tn, width=26).pack(side="left"); ttk.Entry(tf, textvariable=self.v_tw, width=6).pack(side="left", padx=4)
-        ttk.Button(tf, text=ui_theme.with_icon(t("btn.add_update"), "✚"), command=self.set_tal).pack(side="left"); ttk.Button(tf, text=ui_theme.with_icon(t("btn.delete"), "🗑"), command=self.del_tal).pack(side="left", padx=4)
-        ttk.Button(r, text=t("btn.save"), command=self.save_build, style="Accent.TButton").grid(row=10, column=0, sticky="w", pady=12)
-        self.meta_detail = ttk.Label(r, text="", foreground=PAL["muted"], wraplength=560, justify="left")
-        self.meta_detail.grid(row=11, column=0, columnspan=2, sticky="w")
+        ttk.Combobox(tf, textvariable=self.v_tn, width=32, values=sorted(set(tal_names))).pack(side="left")
+        ttk.Label(tf, text=t("build.weight")).pack(side="left", padx=(10, 2))
+        ttk.Spinbox(tf, textvariable=self.v_tw, from_=0, to=10, increment=0.5, width=5).pack(side="left")
+        ttk.Button(tf, text=ui_theme.with_icon(t("btn.add_update"), "✚"), command=self.set_tal).pack(side="left", padx=6)
+        ttk.Button(tf, text=ui_theme.with_icon(t("btn.delete"), "🗑"), command=self.del_tal).pack(side="left")
+
+        wp = ttk.LabelFrame(r, text=t("build.weapons")); wp.pack(fill="x", padx=6, pady=8)
+        wf = ttk.Frame(wp); wf.pack(fill="x", padx=8, pady=6)
+        self.v_wtypes = {}
+        for i, (key, label) in enumerate(engine.TYPE_LABEL.items()):
+            self.v_wtypes[key] = tk.BooleanVar(value=False)
+            ttk.Checkbutton(wf, text=label, variable=self.v_wtypes[key]).grid(row=i // 4, column=i % 4, sticky="w", padx=(0, 16))
+        self.wtype_hint = ttk.Label(wp, text="", foreground=PAL["muted"]); self.wtype_hint.pack(anchor="w", padx=8, pady=(0, 6))
+
+        act = ttk.Frame(r); act.pack(fill="x", padx=6, pady=(4, 6))
+        ttk.Button(act, text=t("btn.save"), command=self.save_build, style="Accent.TButton").pack(side="left")
+        ttk.Button(act, text=ui_theme.with_icon(t("build.test_last"), "🧪"), command=self.test_build_last).pack(side="left", padx=8)
+        self.test_lbl = ttk.Label(r, text="", wraplength=900, justify="left"); self.test_lbl.pack(anchor="w", padx=8)
+        self.meta_detail = ttk.Label(r, text="", foreground=PAL["muted"], wraplength=900, justify="left")
+        self.meta_detail.pack(anchor="w", padx=8, pady=(6, 0))
+        self._lb_index = []
         self.refresh_builds()
 
     def export_builds(self):
@@ -1333,11 +1490,17 @@ class App:
         save_cfg(self.cfg); self.refresh_builds(len(self.cfg["builds"]) - 1)
         messagebox.showinfo(APP_NAME, t("build.imported", n=len(incoming)))
 
-    def refresh_builds(self, select=0):
-        self.lb.delete(0, "end")
-        for b in self.cfg["builds"]: self.lb.insert("end", self.build_label(b))
-        if self.cfg["builds"]:
-            self.lb.selection_set(min(select, len(self.cfg["builds"]) - 1)); self.on_pick()
+    def refresh_builds(self, select=0, keep=False):
+        if keep and self.cur in self.cfg["builds"]:
+            select = self.cfg["builds"].index(self.cur)
+        q = gamedata.nrm(self.b_search.get()) if hasattr(self, "b_search") else ""
+        self.lb.delete(0, "end"); self._lb_index = []
+        for i, b in enumerate(self.cfg["builds"]):
+            if q and q not in gamedata.nrm(b["name"] + " " + " ".join(b.get("sets_or_brands", []))): continue
+            self.lb.insert("end", self.build_label(b)); self._lb_index.append(i)
+        if self._lb_index:
+            pos = self._lb_index.index(select) if select in self._lb_index else 0
+            self.lb.selection_set(pos); self.lb.see(pos); self.on_pick()
         if hasattr(self, "pb"): self.pb["values"] = [b["name"] for b in self.cfg["builds"]]
 
     @staticmethod
@@ -1347,13 +1510,25 @@ class App:
         pop = b.get("meta", {}).get("popularity", 0)
         return f"{'🔒' if b.get('meta_locked') else '⭐'} {b['name']}" + (f"  🔥{pop}" if pop else "")
 
-    def on_pick(self, event=None):
+    def selected_build_index(self):
         s = self.lb.curselection()
-        if not s: return
-        self.cur = self.cfg["builds"][s[0]]
+        return self._lb_index[s[0]] if s and s[0] < len(self._lb_index) else None
+
+    def on_pick(self, event=None):
+        i = self.selected_build_index()
+        if i is None: return
+        self.cur = self.cfg["builds"][i]
         if event is not None: self.flash_build(self.cur)   # kullanıcı tıkladıysa amblem 5 sn
-        self.v_name.set(self.cur["name"]); self.v_sets.set(", ".join(self.cur["sets_or_brands"]))
-        self.v_bonus.set(str(self.cur.get("set_bonus", 0))); self.v_slots.set(", ".join(self.cur.get("slots", [])))
+        self.v_name.set(self.cur["name"]); self.v_bonus.set(str(self.cur.get("set_bonus", 0)))
+        self.sets_lb.delete(0, "end")
+        for s in self.cur.get("sets_or_brands", []): self.sets_lb.insert("end", s)
+        slots = self.cur.get("slots") or engine.ALL_SLOTS
+        for s, v in self.v_slots.items(): v.set(s in slots)
+        types = (self.cur.get("weapons") or {}).get("types", [])
+        for k, v in self.v_wtypes.items(): v.set(k in types)
+        guess = engine.weapon_types_of(self.cur) if not types else []
+        self.wtype_hint.config(text=t("build.wtype_guess", types=", ".join(engine.TYPE_LABEL[x] for x in guess)) if guess else "")
+        self.test_lbl.config(text="")
         self.refresh_trees()
         if hasattr(self, "meta_detail"): self.meta_detail.config(text=self.meta_detail_text(self.cur))
 
@@ -1372,28 +1547,59 @@ class App:
 
     def refresh_trees(self):
         self.ta.delete(*self.ta.get_children()); self.tt.delete(*self.tt.get_children())
-        for k, r in self.cur["attributes"].items(): self.ta.insert("", "end", values=(k, r["weight"], r["good_at"]))
-        for n, w in self.cur["talents"].items(): self.tt.insert("", "end", values=(n, w))
+        for k, r in self.cur["attributes"].items():
+            mx = GAME.max_of(k) if GAME.ok else None
+            self.ta.insert("", "end", iid=k, values=(attr_name(k), r["weight"], r.get("good_at", ""), f"{mx:g}" if mx else "—"))
+        wnames = {gamedata.nrm(n) for n in GAME.data.get("weapon_talents", [])} if GAME.ok else set()
+        for n, w in self.cur["talents"].items():
+            kind = t("build.kind_weapon") if gamedata.nrm(n).replace("perfect ", "") in wnames else t("build.kind_gear")
+            self.tt.insert("", "end", iid=n, values=(n, kind, w))
+
+    def add_set(self):
+        v = self.v_setpick.get().strip()
+        if v and v not in self.sets_lb.get(0, "end"): self.sets_lb.insert("end", v)
+
+    def del_set(self):
+        s = self.sets_lb.curselection()
+        if s: self.sets_lb.delete(s[0])
+
+    def attr_key_from_label(self, label):
+        return next((k for k in self.attr_keys if attr_name(k) == label), label)
+
+    def attr_default_good(self, _=None):
+        k = self.attr_key_from_label(self.v_ak.get())
+        mx = GAME.max_of(k) if GAME.ok else None
+        if mx and not self.v_ag.get(): self.v_ag.set(f"{mx * 0.9:g}")
+        elif mx: self.v_ag.set(f"{mx * 0.9:g}")
 
     def pick_attr(self, _=None):
         s = self.ta.selection()
         if s:
-            v = self.ta.item(s[0])["values"]; self.v_ak.set(v[0]); self.v_aw.set(v[1]); self.v_ag.set(v[2])
+            r = self.cur["attributes"].get(s[0], {})
+            self.v_ak.set(attr_name(s[0])); self.v_aw.set(r.get("weight", 1)); self.v_ag.set(r.get("good_at", ""))
 
     def pick_tal(self, _=None):
         s = self.tt.selection()
-        if s: self.v_tn.set(self.tt.item(s[0])["values"][0]); self.v_tw.set(self.tt.item(s[0])["values"][1])
+        if s: self.v_tn.set(s[0]); self.v_tw.set(self.cur["talents"].get(s[0], 2))
 
     def set_attr(self):
-        try: self.cur["attributes"][self.v_ak.get()] = {"weight": float(self.v_aw.get()), "good_at": float(self.v_ag.get())}
-        except ValueError: return messagebox.showerror(APP_NAME, t("build.err_weight_val"))
+        k = self.attr_key_from_label(self.v_ak.get())
+        if not k: return
+        try:
+            mx = GAME.max_of(k) if GAME.ok else None
+            good = float(self.v_ag.get()) if self.v_ag.get().strip() else (mx * 0.9 if mx else 0)
+            self.cur["attributes"][k] = {"weight": float(self.v_aw.get()), "good_at": round(good, 2)}
+        except ValueError:
+            return messagebox.showerror(APP_NAME, t("build.err_weight_val"))
         self.refresh_trees()
 
     def del_attr(self):
-        self.cur["attributes"].pop(self.v_ak.get(), None); self.refresh_trees()
+        self.cur["attributes"].pop(self.attr_key_from_label(self.v_ak.get()), None); self.refresh_trees()
 
     def set_tal(self):
-        try: self.cur["talents"][self.v_tn.get().strip()] = float(self.v_tw.get())
+        n = self.v_tn.get().strip()
+        if not n: return
+        try: self.cur["talents"][n] = float(self.v_tw.get())
         except ValueError: return messagebox.showerror(APP_NAME, t("build.err_weight"))
         self.refresh_trees()
 
@@ -1404,83 +1610,146 @@ class App:
         self.cfg["builds"].append({"name": t("build.new_name"), "sets_or_brands": [], "set_bonus": 0, "attributes": {}, "talents": {}})
         self.refresh_builds(len(self.cfg["builds"]) - 1)
 
+    def dup_build(self):
+        i = self.selected_build_index()
+        if i is None: return
+        b = json.loads(json.dumps(self.cfg["builds"][i]))
+        for k in ("meta_id", "meta_locked", "meta"): b.pop(k, None)
+        b["name"] += " (2)"
+        self.cfg["builds"].insert(i + 1, b); save_cfg(self.cfg); self.refresh_builds(i + 1)
+
     def del_build(self):
-        s = self.lb.curselection()
-        if s and messagebox.askyesno(APP_NAME, t("build.delete_confirm")):
-            mid = self.cfg["builds"][s[0]].get("meta_id")
+        i = self.selected_build_index()
+        if i is not None and messagebox.askyesno(APP_NAME, t("build.delete_confirm")):
+            mid = self.cfg["builds"][i].get("meta_id")
             if mid:   # silinen meta build bir sonraki senkronda geri gelmesin
                 hid = self.cfg["settings"].setdefault("meta_hidden", [])
                 if mid not in hid: hid.append(mid)
-            del self.cfg["builds"][s[0]]; save_cfg(self.cfg); self.refresh_builds()
+            del self.cfg["builds"][i]; save_cfg(self.cfg); self.refresh_builds()
 
     def save_build(self):
-        s = self.lb.curselection()
-        if not s: return
+        i = self.selected_build_index()
+        if i is None: return
         try: bonus = float(self.v_bonus.get() or 0)
         except ValueError: return messagebox.showerror(APP_NAME, t("build.err_bonus"))
-        slots = [x.strip().capitalize() for x in self.v_slots.get().split(",") if x.strip()]
-        bad = [x for x in slots if x not in ALL_SLOTS]
-        if bad: return messagebox.showerror(APP_NAME, t("build.bad_slot", bad=bad, valid=", ".join(ALL_SLOTS)))
         old = self.cur["name"]; new = self.v_name.get().strip() or t("word.unnamed")
-        self.cur.update(name=new, set_bonus=bonus, sets_or_brands=[x.strip() for x in self.v_sets.get().split(",") if x.strip()])
-        if slots: self.cur["slots"] = slots
+        slots = [s for s, v in self.v_slots.items() if v.get()]
+        self.cur.update(name=new, set_bonus=bonus, sets_or_brands=list(self.sets_lb.get(0, "end")))
+        if slots and len(slots) < len(engine.ALL_SLOTS): self.cur["slots"] = slots
         else: self.cur.pop("slots", None)
+        types = [k for k, v in self.v_wtypes.items() if v.get()]
+        if types: self.cur.setdefault("weapons", {})["types"] = types
+        elif "weapons" in self.cur: self.cur["weapons"].pop("types", None)
         if self.cur.get("meta_id"): self.cur["meta_locked"] = True   # artık senkron bu build'i değiştirmez
         if old != new and old in self.progress:
             self.progress[new] = self.progress.pop(old); save_progress(self.progress)
-        save_cfg(self.cfg); self.refresh_builds(s[0]); messagebox.showinfo(APP_NAME, t("msg.saved"))
+        save_cfg(self.cfg); self.refresh_builds(i); self.toast(t("msg.saved"))
 
-    # ---------- Eksik parça takibi ----------
+    def test_build_last(self):
+        if not self.last_scan: return self.test_lbl.config(text=t("prog.no_scan_yet"))
+        item, res, sig = self.last_scan
+        text = item.get("_text", "")
+        if item.get("kind") == "weapon":
+            pct, why = engine.score_weapon(item, self.cur, text, GAME)
+        else:
+            pct, why = engine.score_gear(item, self.cur, gamedata.nrm(text), GAME)
+        self.test_lbl.config(text=t("build.test_result", item=item["name"], pct=pct) + "\n" + (", ".join(why) or "—"))
+
+    # ---------- Eksik parça (v2) ----------
     def build_prog(self):
+        """Eksik Parça v2: seçili build'in 8 yuvası kart olarak; her kartta parça, set/marka, puan ve rulolar."""
         f = self.tabs["progress"]
         bar = ttk.Frame(f); bar.pack(fill="x", padx=10, pady=10)
         ttk.Label(bar, text=t("label.build")).pack(side="left")
-        self.pb = ttk.Combobox(bar, state="readonly", width=40, values=[b["name"] for b in self.cfg["builds"]])
+        self.pb = ttk.Combobox(bar, state="readonly", width=48, values=[b["name"] for b in self.cfg["builds"]])
         self.pb.pack(side="left", padx=6); self.pb.bind("<<ComboboxSelected>>", lambda e: self.refresh_prog())
         if self.cfg["builds"]: self.pb.current(0)
+        ttk.Button(bar, text=ui_theme.with_icon(t("prog.reset_build"), "↺"), command=self.reset_build_prog).pack(side="right")
         self.pg_lbl = ttk.Label(f, style="Section.TLabel"); self.pg_lbl.pack(anchor="w", padx=12)
         self.pbar = ttk.Progressbar(f, maximum=100); self.pbar.pack(fill="x", padx=12, pady=6)
-        self.tp = ttk.Treeview(f, columns=("s", "d", "i", "k"), show="headings", height=8)
-        for c, hd, w in (("s", t("col.slot"), 100), ("d", t("col.status"), 100), ("i", t("col.item"), 320), ("k", t("col.score"), 70)): self.tp.heading(c, text=hd); self.tp.column(c, width=w)
-        self.tp.tag_configure("miss", foreground=PAL["danger"]); self.tp.tag_configure("ok", foreground=PAL["success"])
-        self.tp.pack(fill="x", padx=12)
-        b2 = ttk.Frame(f); b2.pack(fill="x", padx=12, pady=8)
-        ttk.Button(b2, text=ui_theme.with_icon(t("prog.save_last"), "📥"), command=self.save_last_scan).pack(side="left")
-        ttk.Button(b2, text=ui_theme.with_icon(t("prog.clear_slot"), "✖"), command=self.clear_slot).pack(side="left", padx=6)
-        ttk.Button(b2, text=ui_theme.with_icon(t("prog.reset_build"), "↺"), command=self.reset_build_prog).pack(side="left")
-        self.miss_lbl = tk.Text(f, height=9, state="disabled", font=("Segoe UI", 10)); self.miss_lbl.pack(fill="both", expand=True, padx=12, pady=(4, 10))
+        self.slot_grid = ttk.Frame(f); self.slot_grid.pack(fill="x", padx=8, pady=4)
+        cols = 4
+        for c in range(cols): self.slot_grid.columnconfigure(c, weight=1, uniform="slot")
+        self.slot_cards = {}
+        for i, s in enumerate(engine.ALL_SLOTS):
+            box = tk.Frame(self.slot_grid, bg=PAL["surface"], highlightthickness=2, highlightbackground=PAL["border"], padx=12, pady=10)
+            box.grid(row=i // cols, column=i % cols, sticky="nsew", padx=6, pady=6)
+            head = tk.Label(box, text=SLOT_ICONS.get(s, "•") + "  " + slot_name(s), bg=PAL["surface"], fg=PAL["fg"],
+                            font=(ui_theme.FONT_SEMI, 12), anchor="w")
+            head.pack(fill="x")
+            body = tk.Label(box, text="", bg=PAL["surface"], fg=PAL["muted"], justify="left", anchor="w",
+                            font=(ui_theme.FONT, 10), wraplength=360)
+            body.pack(fill="x", pady=(4, 6))
+            btns = tk.Frame(box, bg=PAL["surface"]); btns.pack(fill="x")
+            ttk.Button(btns, text="📥 " + t("prog.put_last"), command=lambda s=s: self.save_last_scan(s)).pack(side="left")
+            ttk.Button(btns, text="✖", width=3, command=lambda s=s: self.clear_slot(s)).pack(side="left", padx=6)
+            self.slot_cards[s] = (box, head, body)
+        ttk.Label(f, text=t("prog.all_builds"), style="Section.TLabel").pack(anchor="w", padx=12, pady=(10, 2))
+        self.allp = ttk.Treeview(f, columns=("b", "n", "m"), show="headings", height=7)
+        for c, hd, w in (("b", t("panel.col_build"), 320), ("n", t("prog.col_have"), 90), ("m", t("prog.col_missing"), 640)):
+            self.allp.heading(c, text=hd); self.allp.column(c, width=w, anchor="center" if c == "n" else "w")
+        self.allp.pack(fill="both", expand=True, padx=12, pady=(0, 10))
+        self.allp.bind("<<TreeviewSelect>>", self._pick_allp)
         self.refresh_prog()
 
+    def _pick_allp(self, _=None):
+        s = self.allp.selection()
+        if s and s[0] in self.pb["values"]:
+            self.pb.set(s[0]); self.refresh_prog()
+
     def refresh_prog(self):
-        self.tp.delete(*self.tp.get_children())
         name = self.pb.get()
-        if not name: return
-        slots = build_slots(self.cfg, name); prog = self.progress.get(name, {}); have = 0
-        for s in slots:
+        b = next((x for x in self.cfg["builds"] if x["name"] == name), None)
+        slots = build_slots(self.cfg, name) if b else engine.ALL_SLOTS
+        prog = self.progress.get(name, {})
+        have = 0
+        for s, (box, head, body) in self.slot_cards.items():
             d = prog.get(s)
-            have += bool(d)
-            self.tp.insert("", "end", iid=s, values=(slot_name(s), t("prog.filled") if d else t("prog.empty"), d["item"] if d else "—", f"{d['score']}%" if d else ""),
-                           tags=("ok" if d else "miss",))
+            active = s in slots
+            if not active:
+                box.config(highlightbackground=PAL["border"]); head.config(fg=PAL["muted"])
+                body.config(text=t("prog.not_in_build")); continue
+            if d:
+                have += 1
+                rolls = "  ".join(f"{attr_name(k)} {v:g}" + (f" ({d.get('quality', {}).get(k)}%)" if d.get("quality", {}).get(k) is not None else "")
+                                  for k, v in list(d.get("attrs", {}).items())[:3])
+                tag = " / ".join(x for x in (d.get("gear_set"), d.get("brand")) if x)
+                body.config(text=f"✔ {d['item']}\n" + (f"🏷 {tag}\n" if tag else "") + f"{t('col.score')}: {d['score']}%   ·   {d.get('time', '')[:10]}\n{rolls}",
+                            fg=PAL["fg"])
+                box.config(highlightbackground=PAL["success"]); head.config(fg=PAL["success"])
+            else:
+                if s in ("Weapon", "Sidearm"):                    # silah yuvası: aranan silah türü + silah talent'i
+                    types = engine.weapon_types_of(b) if b else []
+                    if s == "Sidearm": types = [x for x in types if x == "pistol"] or ["pistol"]
+                    need = ", ".join(engine.TYPE_LABEL.get(x, x) for x in types)
+                    wn = {gamedata.nrm(n) for n in GAME.data.get("weapon_talents", [])} if GAME.ok else set()
+                    top = ", ".join(n for n in (b or {}).get("talents", {}) if gamedata.nrm(n).replace("perfect ", "") in wn][:3]
+                else:
+                    need = ", ".join(b.get("sets_or_brands", [])[:3]) if b else ""
+                    top = ", ".join(attr_name(k) for k, _ in sorted((b or {}).get("attributes", {}).items(), key=lambda kv: -kv[1].get("weight", 0))[:3])
+                body.config(text=t("prog.missing_card", need=need or "—", attrs=top or "—"), fg=PAL["muted"])
+                box.config(highlightbackground=PAL["danger"]); head.config(fg=PAL["danger"])
         self.pg_lbl.config(text=t("prog.completed", have=have, total=len(slots)))
         self.pbar["value"] = 100 * have / max(len(slots), 1)
-        lines = []
-        for b in self.cfg["builds"]:
-            sl = build_slots(self.cfg, b["name"]); miss = [s for s in sl if s not in self.progress.get(b["name"], {})]
-            lines.append(f"{b['name']}: " + (", ".join(slot_name(x) for x in miss) if miss else t("prog.done_all")) + f"   ({len(sl) - len(miss)}/{len(sl)})")
-        self.miss_lbl.config(state="normal"); self.miss_lbl.delete("1.0", "end")
-        self.miss_lbl.insert("end", t("prog.all_missing") + "\n".join(lines)); self.miss_lbl.config(state="disabled")
+        self.allp.delete(*self.allp.get_children())
+        for bb in self.cfg["builds"]:
+            sl = build_slots(self.cfg, bb["name"]); miss = [s for s in sl if s not in self.progress.get(bb["name"], {})]
+            self.allp.insert("", "end", iid=bb["name"], values=(bb["name"], f"{len(sl) - len(miss)}/{len(sl)}",
+                                                                 ", ".join(slot_name(x) for x in miss) if miss else t("prog.done_all")))
 
-    def save_last_scan(self):
+    def save_last_scan(self, slot=None):
         if not self.last_scan: return messagebox.showinfo(APP_NAME, t("prog.no_scan_yet"))
         item, res, sig = self.last_scan
         name = self.pb.get()
-        if not item.get("slot"): return messagebox.showinfo(APP_NAME, t("prog.no_slot"))
+        slot = slot or item.get("slot")
+        if not slot: return messagebox.showinfo(APP_NAME, t("prog.no_slot"))
+        if item.get("slot") and item["slot"] != slot and not messagebox.askyesno(APP_NAME, t("prog.slot_mismatch", a=slot_name(item["slot"]), b=slot_name(slot))):
+            return
         sc = next((p for p, n, _ in res if n == name), 0)
-        self.record(name, item["slot"], sc, item, sig); self.refresh_prog()
+        self.record(name, slot, sc, item, sig); self.refresh_prog()
 
-    def clear_slot(self):
-        s = self.tp.selection()
-        if s and self.progress.get(self.pb.get(), {}).pop(s[0], None) is not None:
+    def clear_slot(self, slot=None):
+        if slot and self.progress.get(self.pb.get(), {}).pop(slot, None) is not None:
             save_progress(self.progress); self.refresh_prog()
 
     def reset_build_prog(self):
