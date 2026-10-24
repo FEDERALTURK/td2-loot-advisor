@@ -62,7 +62,7 @@ DEFAULTS = {"scan_mode": "hotkey", "auto_interval_ms": 700, "auto_record": True,
             "ui_theme": "dark", "ui_sounds": True, "bg_interval": 15,
             "meta_sync": True, "meta_feed_url": "", "meta_last_try": 0, "meta_last_sync": "", "meta_version": "",
             "meta_hidden": [], "tasks_sync": True, "auto_reset_times": True,
-            "wiki_sync": True, "wiki_last_try": 0}
+            "wiki_sync": True, "wiki_last_try": 0, "only_game_active": True}
 AUTO_STABLE, AUTO_CHANGE, DEDUP_SECONDS, UPGRADE_MARGIN = 4, 8, 30, 3
 
 if not CFG_PATH.exists() and (BUNDLE / "builds.json").exists():
@@ -168,6 +168,23 @@ def read_item_text(img, lang, card_x=None):
     else:
         crop = img.crop((int(card_x * img.width), 0, img.width, img.height))
     return pytesseract.image_to_string(gamedata.text_image(crop), lang=lang, config="--psm 6"), card_x
+
+def foreground_title():
+    """Öndeki pencerenin başlığı (yalnız Windows; başka sistemde boş)."""
+    if os.name != "nt": return ""
+    try:
+        u = ctypes.windll.user32
+        h = u.GetForegroundWindow(); n = u.GetWindowTextLengthW(h)
+        buf = ctypes.create_unicode_buffer(n + 1); u.GetWindowTextW(h, buf, n + 1)
+        return buf.value
+    except Exception:
+        return ""
+
+def game_active():
+    """Sadece oyun öndeyken tara: program kendi penceresini ya da başka uygulamaları okumasın."""
+    if os.name != "nt": return True
+    title = foreground_title().lower()
+    return "division" in title and "loot advisor" not in title
 
 def grab(region):
     with mss.mss() as sct:
@@ -1050,6 +1067,8 @@ class App:
 
     def trigger(self):  # pynput thread'inden de çağrılır: tk'ya dokunma
         region = self.cfg["settings"].get("region")
+        if region and self.cfg["settings"].get("only_game_active", True) and not game_active():
+            return log.info("Hotkey ignored: game window is not in front")
         if region and not self.lock.locked():
             threading.Thread(target=self.manual_scan, args=(region,), daemon=True).start()
 
@@ -1083,7 +1102,9 @@ class App:
         while not stop.is_set():
             try:
                 region = self.cfg["settings"].get("region")
-                if region:
+                if region and self.cfg["settings"].get("only_game_active", True) and not game_active():
+                    prev = None; stable = 0                     # oyun önde değil: okuma yapma
+                elif region:
                     img = grab(region); h = thumb(img)
                     stable = stable + 1 if prev is not None and dist(h, prev) < AUTO_STABLE else 0
                     prev = h

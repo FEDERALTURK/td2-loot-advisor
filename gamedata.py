@@ -167,9 +167,10 @@ class GameData:
         is_weapon = any(w in low for w in self.weapon_types) or bool(re.search(r"\b(rpm|mag)\b", low))
         slot = None
         if not is_weapon:
-            head = nrm(" ".join(lines[:8]))
-            for w, s in self.slots.items():
-                if re.search(r"\b" + re.escape(w) + r"\b", head): slot = s; break
+            for scope in (nrm(" ".join(lines[:8])), low):       # önce kartın üstü, bulamazsa tüm kart
+                for w, s in self.slots.items():
+                    if re.search(r"\b" + re.escape(w) + r"\b", scope): slot = s; break
+                if slot: break
         else:
             slot = "Sidearm" if re.search(r"\b(pistol|sidearm)\b", low) else "Weapon"
         attrs, quality = self.parse_attrs(lines, "PROTOTYPE" in rarity)
