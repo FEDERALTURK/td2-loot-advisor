@@ -216,13 +216,14 @@ def text_image(img):
     r, g, b = img.convert("RGB").split()
     mx = ImageChops.lighter(ImageChops.lighter(r, g), b)            # beyaz/turuncu yazı parlak kalır
     # 1440p'de kart yazıları ~20 px: 1,5× büyütmek Tesseract için en iyi sonucu verdi (gerçek oyun kartıyla ölçüldü)
-    scale = 2.0 if mx.height < 700 else 1.5 if mx.height < 2000 else 1.0
+    scale = SCALE or (2.0 if mx.height < 700 else 1.5 if mx.height < 2000 else 1.0)
     if scale != 1: mx = mx.resize((int(mx.width * scale), int(mx.height * scale)), Image.LANCZOS)
     thr = THRESHOLD
     return mx.point(lambda v: 0 if v >= thr else 255)                 # yazı siyah, yarı saydam zemin beyaz
 
 
 THRESHOLD = 170          # 0-255; oyun parlaklığı/HDR'a göre ayarlardan değiştirilebilir
+SCALE = None             # None = otomatik (kart yüksekliğine göre); ayarlardan sabitlenebilir
 
 CARD_ANCHORS = {"core", "attributes", "attribute", "talents", "talent", "mods", "modifications", "stats", "brand", "gear"}
 

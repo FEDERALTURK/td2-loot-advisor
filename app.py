@@ -32,6 +32,8 @@ import meta_sync
 import wiki_sync
 import gamedata
 import engine
+import display
+import view3d
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
@@ -61,6 +63,8 @@ DEFAULTS = {"scan_mode": "hotkey", "auto_interval_ms": 700, "auto_record": True,
             "chatgpt_window_title": "ChatGPT", "chatgpt_hotkey": "<f10>", "chatgpt_wait_seconds": 15,
             "language": "", "log_level": "INFO", "log_max_kb": 1024, "log_backups": 3,
             "ui_theme": "dark", "ui_sounds": True, "bg_interval": 15,
+            "res_profile": "auto", "ocr_threshold": 170, "ocr_scale": "auto", "ocr_psm": 6, "ocr_passes": 3,
+            "overlay_mode": "card", "overlay_alpha": 0.94, "overlay_size": 1.0, "ui_depth": True,
             "meta_sync": True, "meta_feed_url": "", "meta_last_try": 0, "meta_last_sync": "", "meta_version": "",
             "meta_hidden": [], "tasks_sync": True, "auto_reset_times": True,
             "wiki_sync": True, "wiki_last_try": 0, "only_game_active": True, "scan_source": "screen"}
@@ -162,10 +166,72 @@ SLOT_ICONS = {"Mask": "🎭", "Chest": "🦺", "Backpack": "🎒", "Gloves": "�
 
 def attr_name(k):
     """Attribute anahtarının okunur adı (oyundaki İngilizce ad)."""
+    if k == "weapon_type_damage": return "Weapon Type Damage"
     if GAME.ok:
         al = GAME.data.get("attributes", {}).get(k, {}).get("aliases")
         if al: return al[0].title()
     return k.replace("_", " ").title()
+
+def elevated(parent, row, column, depth=True):
+    """Gölgeli, üzerine gelince kalkan kart (grid ile). Dönüş: iç çerçeve."""
+    outer = tk.Frame(parent, bg=PAL["bg"])
+    outer.grid(row=row, column=column, sticky="nsew", padx=6, pady=6)
+    if depth:
+        sh = tk.Frame(outer, bg="#b9bdc6" if PAL.get("mode") == "light" else "#06070a")
+        sh.place(x=5, y=6, relwidth=1, relheight=1, width=-5, height=-6)
+    box = tk.Frame(outer, bg=PAL["surface"], highlightthickness=2, highlightbackground=PAL["border"], padx=12, pady=10)
+    box.pack(fill="both", expand=True, padx=(0, 5 if depth else 0), pady=(0, 6 if depth else 0))
+    box._base_border = PAL["border"]
+    if depth:
+        def lift(_=None): box.pack_configure(padx=(0, 5), pady=(0, 6)); box.config(bg=PAL["surface2"]); _tint(box, PAL["surface2"])
+        def drop(_=None):
+            x, y = outer.winfo_pointerxy(); wdg = outer.winfo_containing(x, y)
+            while wdg is not None and wdg is not outer: wdg = wdg.master
+            if wdg is outer: return
+            box.config(bg=PAL["surface"]); _tint(box, PAL["surface"])
+        outer.bind("<Enter>", lift); outer.bind("<Leave>", drop); box.bind("<Leave>", drop)
+    return box
+
+
+def _tint(w, bg):
+    for c in w.winfo_children():
+        if isinstance(c, (tk.Label, tk.Frame)):
+            try: c.config(bg=bg)
+            except tk.TclError: pass
+            _tint(c, bg)
+
+
+def active_profile(st):
+    """(anahtar, profil) — 'auto' ise ana monitörden tespit edilir."""
+    key = st.get("res_profile", "auto")
+    if key not in display.PROFILES:
+        key = display.detect_profile(*display.monitor_size())
+    return key, display.PROFILES[key]
+
+
+def apply_ocr_settings(st):
+    """Eşik / ölçek ayarlarını OCR ön işlemine uygular (profil + kullanıcı ince ayarı)."""
+    _, prof = active_profile(st)
+    try: gamedata.THRESHOLD = int(float(st.get("ocr_threshold") or prof["threshold"]))
+    except (TypeError, ValueError): gamedata.THRESHOLD = prof["threshold"]
+    sc = st.get("ocr_scale", "auto")
+    try: gamedata.SCALE = None if sc in ("auto", "", None) else float(sc)
+    except (TypeError, ValueError): gamedata.SCALE = None
+
+
+def ocr_config(st):
+    try: psm = int(st.get("ocr_psm", 6))
+    except (TypeError, ValueError): psm = 6
+    return f"--psm {psm if psm in (3, 4, 6, 11) else 6}"
+
+
+def ocr_quality(text):
+    """Kalibrasyon puanı: tanınan ad/set/attribute/talent sayısı + güven."""
+    if not GAME.ok: return len(text.strip()) / 100
+    r = GAME.recognize(text)
+    return (r.get("confidence", 0) * 10 + len(r.get("attrs", {})) * 2 + len(r.get("talents", [])) * 1.5 +
+            (2 if r.get("known") else 0) + (1 if r.get("brand") or r.get("gear_set") else 0))
+
 
 def ocr_data(img):
     return pytesseract.image_to_data(img, config="--psm 11", output_type=pytesseract.Output.DICT)
@@ -842,6 +908,8 @@ class App:
             stg["language"] = active; save_cfg(self.cfg)
         log.info("Language: %s (%s)", active, i18n.language_name(active))
         self.progress, self.tasks = load_progress(), load_tasks()
+        apply_ocr_settings(stg)
+        log.info("Display profile: %s, OCR threshold %s, scale %s", active_profile(stg)[0], gamedata.THRESHOLD, gamedata.SCALE or "auto")
         self.tess = find_tesseract(self.cfg)
         self.listener, self.auto_stop, self.running = None, None, False
         self.lock, self.results = threading.Lock(), queue.Queue()
@@ -851,6 +919,7 @@ class App:
         self.last_sig, self.last_time, self.last_err = None, 0, ""
         self.speaker, self.rec, self.voice_busy, self.chat_hist = Speaker(), Recorder(), False, []
 
+        display.set_dpi_aware()                         # %125/%150 Windows ölçeğinde koordinatlar kaymasın
         self.root = tk.Tk()
         self.root.title(f"{APP_NAME} v{APP_VERSION}"); self.root.minsize(880, 700)
         sw, sh = self.root.winfo_screenwidth(), self.root.winfo_screenheight()
@@ -1165,14 +1234,34 @@ class App:
         if box is None:
             box = engine.find_card(img, ocr_data); tried_fresh = True
         card = img.crop(box) if box else img
-        text = pytesseract.image_to_string(gamedata.text_image(card), lang=s["ocr_lang"], config="--psm 6")
+        text = pytesseract.image_to_string(gamedata.text_image(card), lang=s["ocr_lang"], config=ocr_config(s))
         item, verdict, res = evaluate(text, self.cfg)
         if not valid_item(item) and not tried_fresh:                  # kart yer değiştirmiş: yeniden bul
             box = engine.find_card(img, ocr_data)
             card = img.crop(box) if box else img
-            text = pytesseract.image_to_string(gamedata.text_image(card), lang=s["ocr_lang"], config="--psm 6")
+            text = pytesseract.image_to_string(gamedata.text_image(card), lang=s["ocr_lang"], config=ocr_config(s))
             item, verdict, res = evaluate(text, self.cfg)
         self.card_box = box if valid_item(item) else None
+        try: passes = max(1, min(3, int(s.get("ocr_passes", 3))))
+        except (TypeError, ValueError): passes = 3
+        fresh = not (auto and signature(item) == self.last_sig and time.time() - self.last_time < DEDUP_SECONDS)
+        if passes > 1 and valid_item(item) and fresh:
+            # çoklu geçiş: aynı kart farklı eşiklerle okunur, en çok bilgi tanınan metin seçilir
+            # (gerçek 3440×1440 kartta tek eşik bazen bir satırı kaçırıyor; 2-3 geçiş bunu kapatıyor)
+            best_q, best_t = ocr_quality(text), text
+            base = gamedata.THRESHOLD
+            try:
+                for th in (base + 10, base - 40)[:passes - 1]:
+                    gamedata.THRESHOLD = max(90, min(235, th))
+                    tx = pytesseract.image_to_string(gamedata.text_image(card), lang=s["ocr_lang"], config=ocr_config(s))
+                    q = ocr_quality(tx)
+                    if q > best_q: best_q, best_t = q, tx
+            finally:
+                gamedata.THRESHOLD = base
+            if best_t is not text:
+                text = best_t
+                item, verdict, res = evaluate(text, self.cfg)
+            log.debug("OCR multi-pass: %d passes, quality %.1f", passes, best_q)
         try:
             card.save(BASE / "last_card.png")
             (APPLOG_DIR / "last_ocr.txt").write_text(text, encoding="utf-8")
@@ -1183,6 +1272,12 @@ class App:
             if not valid_item(item): return
             if sig == self.last_sig and time.time() - self.last_time < DEDUP_SECONDS: return
         self.last_card_img = card
+        try:                                              # kartın ekrandaki yeri: bindirme yanına konur
+            a = self.scan_area()
+            bx = box or (0, 0, img.width, img.height)
+            self.last_card_screen = (a["left"] + bx[0], a["top"] + bx[1], a["left"] + bx[2], a["top"] + bx[3])
+        except Exception:
+            self.last_card_screen = None
         self.last_sig, self.last_time = sig, time.time()
         self.results.put(("ok", text, item, verdict, res, sig))
 
@@ -1288,19 +1383,42 @@ class App:
 
     # ---------- overlay ----------
     def popup(self, verdict, item, res, note):
+        """Oyun üstü bilgi kartı: kartın hemen yanında (ya da seçilen köşede), rulo çubukları ve en iyi build ile."""
         if self.overlay: self.overlay.destroy()
+        st = self.cfg["settings"]
         w = self.overlay = tk.Toplevel(self.root)
-        w.overrideredirect(True); w.attributes("-topmost", True, "-alpha", 0.94)
+        try: alpha = max(0.4, min(1.0, float(st.get("overlay_alpha", 0.94))))
+        except (TypeError, ValueError): alpha = 0.94
+        w.overrideredirect(True); w.attributes("-topmost", True, "-alpha", alpha)
+        _, prof = active_profile(st)
+        try: k = prof.get("ui", 1.0) * float(st.get("overlay_size", 1.0))
+        except (TypeError, ValueError): k = prof.get("ui", 1.0)
+        fz = lambda n: max(7, int(round(n * k)))
         col = COLORS[verdict]
-        dark, fg, mu = "#14161b", "#eceef2", "#9aa1ae"   # oyun üstünde hep koyu kart
-        w.configure(bg=dark)
-        tk.Frame(w, bg=col, width=7).pack(side="left", fill="y")              # renkli şerit
-        body = tk.Frame(w, bg=dark, padx=16, pady=12); body.pack(side="left", fill="both")
+        dark, dark2, fg, mu = "#14161b", "#1e2129", "#eceef2", "#9aa1ae"   # oyun üstünde hep koyu kart
+        w.configure(bg="#000000")
+        shell = tk.Frame(w, bg=dark, highlightthickness=1, highlightbackground="#2c313d"); shell.pack(fill="both", expand=True)
+        tk.Frame(shell, bg=col, width=max(5, int(7 * k))).pack(side="left", fill="y")      # renkli şerit
+        body = tk.Frame(shell, bg=dark, padx=int(16 * k), pady=int(12 * k)); body.pack(side="left", fill="both")
         tk.Label(body, text=verdict_label(verdict), fg=ui_theme.PALETTES["dark"]["verdict_fg"].get(verdict, fg),
-                 bg=dark, font=(ui_theme.FONT_SEMI, 18)).pack(anchor="w")
-        tk.Label(body, text=item["name"][:42], fg=fg, bg=dark, font=(ui_theme.FONT_SEMI, 11)).pack(anchor="w")
+                 bg=dark, font=(ui_theme.FONT_SEMI, fz(18))).pack(anchor="w")
+        sub = item["name"][:42] + ("  ·  " + ", ".join(item["rarity"]) if item.get("rarity") else "")
+        tk.Label(body, text=sub, fg=fg, bg=dark, font=(ui_theme.FONT_SEMI, fz(11))).pack(anchor="w")
+        tag = " / ".join(x for x in (item.get("gear_set"), item.get("brand")) if x)
+        if tag: tk.Label(body, text="🏷 " + tag, fg=mu, bg=dark, font=(ui_theme.FONT, fz(10))).pack(anchor="w")
+        # rulo kalitesi çubukları (oyundaki en yüksek değere göre)
+        q = item.get("quality", {})
+        if q:
+            bars = tk.Canvas(body, bg=dark, highlightthickness=0, width=int(340 * k), height=int(20 * k) * min(4, len(q)) + 4)
+            bars.pack(anchor="w", pady=(int(8 * k), 0))
+            for r, (a, v) in enumerate(list(q.items())[:4]):
+                y = r * int(20 * k) + 2; bw = int(120 * k); x0 = int(170 * k)
+                bars.create_text(0, y + int(8 * k), text=f"{attr_name(a)[:20]}", fill=mu, anchor="w", font=(ui_theme.FONT, fz(9)))
+                bars.create_rectangle(x0, y + 3, x0 + bw, y + int(14 * k), fill=dark2, outline="")
+                c = "#22c55e" if v >= 85 else "#eab308" if v >= 60 else "#ef4444"
+                bars.create_rectangle(x0, y + 3, x0 + bw * min(100, v) / 100, y + int(14 * k), fill=c, outline="")
+                bars.create_text(x0 + bw + 6, y + int(8 * k), text=f"{v}%", fill=fg, anchor="w", font=(ui_theme.FONT, fz(9)))
         L = []
-        if item["rarity"]: L.append("[" + ", ".join(item["rarity"]) + "]")
         if item.get("_note"): L.append("» " + item["_note"])
         if note: L.append("» " + note)
         if verdict == "REVIEW": L.append(t("panel.rare_warning"))
@@ -1309,20 +1427,30 @@ class App:
         if res and res[0][2]: L.append("  " + ", ".join(res[0][2][:4]))
         if verdict == "DISMANTLE": L.append(t("panel.no_build_match"))
         if L:
-            tk.Label(body, text="\n".join(L), justify="left", fg=mu, bg=dark, font=(ui_theme.FONT, 10)).pack(anchor="w", pady=(6, 0))
+            tk.Label(body, text="\n".join(L), justify="left", fg=mu, bg=dark, font=(ui_theme.FONT, fz(10)),
+                     wraplength=int(420 * k)).pack(anchor="w", pady=(6, 0))
         w.update_idletasks()
         sw, sh = self.root.winfo_screenwidth(), self.root.winfo_screenheight()
         ww, wh = w.winfo_width(), w.winfo_height()
-        pos = lambda c: (sw - ww - 30 if "right" in c else 30, 60 if "top" in c else sh - wh - 80)
-        want = self.cfg["settings"]["overlay_corner"]
-        corners = [want] + [c for c in ("top_left", "bottom_left", "bottom_right", "top_right") if c != want]
-        reg = self.region_rect()
-        c = next((c for c in corners if not self.rects_overlap((*pos(c), pos(c)[0] + ww, pos(c)[1] + wh), reg)), want)
-        x, y = pos(c)                                         # kart, okunan bölgenin üstüne düşmesin
-        w.geometry(f"+{x}+{y}")
+        x = y = None
+        card = getattr(self, "last_card_screen", None)
+        if st.get("overlay_mode", "card") == "card" and card:
+            gap = int(14 * k)
+            if card[2] + gap + ww <= sw: x = card[2] + gap                       # kartın sağı
+            elif card[0] - gap - ww >= 0: x = card[0] - gap - ww                 # yer yoksa solu
+            if x is not None:
+                y = max(10, min(sh - wh - 10, card[1] + int(40 * k)))
+        if x is None:
+            pos = lambda c: (sw - ww - 30 if "right" in c else 30, 60 if "top" in c else sh - wh - 80)
+            want = st["overlay_corner"]
+            corners = [want] + [c for c in ("top_left", "bottom_left", "bottom_right", "top_right") if c != want]
+            reg = card or self.region_rect()
+            c = next((c for c in corners if not self.rects_overlap((*pos(c), pos(c)[0] + ww, pos(c)[1] + wh), reg)), want)
+            x, y = pos(c)                                     # kart, okunan bölgenin üstüne düşmesin
+        w.geometry(f"+{int(x)}+{int(y)}")
         click_through(w)
         if self.overlay_job: self.root.after_cancel(self.overlay_job)
-        self.overlay_job = self.root.after(int(float(self.cfg["settings"]["overlay_seconds"]) * 1000), w.destroy)
+        self.overlay_job = self.root.after(int(float(st["overlay_seconds"]) * 1000), w.destroy)
 
     # ---------- kalibrasyon / test ----------
     def calibrate(self):
@@ -1667,30 +1795,56 @@ class App:
         ttk.Button(bar, text=ui_theme.with_icon(t("prog.reset_build"), "↺"), command=self.reset_build_prog).pack(side="right")
         self.pg_lbl = ttk.Label(f, style="Section.TLabel"); self.pg_lbl.pack(anchor="w", padx=12)
         self.pbar = ttk.Progressbar(f, maximum=100); self.pbar.pack(fill="x", padx=12, pady=6)
-        self.slot_grid = ttk.Frame(f); self.slot_grid.pack(fill="x", padx=8, pady=4)
+        mid = ttk.Frame(f); mid.pack(fill="x", padx=8, pady=4)
+        av_box = tk.Frame(mid, bg=PAL["surface"], highlightthickness=1, highlightbackground=PAL["border"])
+        av_box.pack(side="left", fill="y", padx=(4, 8), pady=6)
+        tk.Label(av_box, text="🧍 " + t("v3d.agent"), bg=PAL["surface"], fg=PAL["fg"], font=(ui_theme.FONT_SEMI, 11)).pack(anchor="w", padx=10, pady=(8, 0))
+        self.agent3d = view3d.AgentView(av_box, bg=PAL["surface"], width=300, height=380)
+        self.agent3d.pack(padx=6, pady=4)
+        self.agent3d.on_pick = self._pick_slot3d
+        tk.Label(av_box, text=t("v3d.agent_hint"), bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 9),
+                 wraplength=290, justify="left").pack(anchor="w", padx=10, pady=(0, 8))
+        self.agent3d.spin()
+        self.sel_slot = None
+        self.slot_grid = ttk.Frame(mid); self.slot_grid.pack(side="left", fill="both", expand=True)
         cols = 4
         for c in range(cols): self.slot_grid.columnconfigure(c, weight=1, uniform="slot")
         self.slot_cards = {}
         for i, s in enumerate(engine.ALL_SLOTS):
-            box = tk.Frame(self.slot_grid, bg=PAL["surface"], highlightthickness=2, highlightbackground=PAL["border"], padx=12, pady=10)
-            box.grid(row=i // cols, column=i % cols, sticky="nsew", padx=6, pady=6)
+            box = elevated(self.slot_grid, row=i // cols, column=i % cols, depth=self.cfg["settings"].get("ui_depth", True))
             head = tk.Label(box, text=SLOT_ICONS.get(s, "•") + "  " + slot_name(s), bg=PAL["surface"], fg=PAL["fg"],
                             font=(ui_theme.FONT_SEMI, 12), anchor="w")
             head.pack(fill="x")
             body = tk.Label(box, text="", bg=PAL["surface"], fg=PAL["muted"], justify="left", anchor="w",
                             font=(ui_theme.FONT, 10), wraplength=360)
             body.pack(fill="x", pady=(4, 6))
+            box.bind("<Configure>", lambda e, b=body: b.config(wraplength=max(120, e.width - 30)))
             btns = tk.Frame(box, bg=PAL["surface"]); btns.pack(fill="x")
             ttk.Button(btns, text="📥 " + t("prog.put_last"), command=lambda s=s: self.save_last_scan(s)).pack(side="left")
             ttk.Button(btns, text="✖", width=3, command=lambda s=s: self.clear_slot(s)).pack(side="left", padx=6)
             self.slot_cards[s] = (box, head, body)
         ttk.Label(f, text=t("prog.all_builds"), style="Section.TLabel").pack(anchor="w", padx=12, pady=(10, 2))
-        self.allp = ttk.Treeview(f, columns=("b", "n", "m"), show="headings", height=7)
-        for c, hd, w in (("b", t("panel.col_build"), 320), ("n", t("prog.col_have"), 90), ("m", t("prog.col_missing"), 640)):
+        low = ttk.Frame(f); low.pack(fill="both", expand=True, padx=12, pady=(0, 10))
+        self.allp = ttk.Treeview(low, columns=("b", "n", "m"), show="headings", height=7)
+        for c, hd, w in (("b", t("panel.col_build"), 300), ("n", t("prog.col_have"), 80), ("m", t("prog.col_missing"), 420)):
             self.allp.heading(c, text=hd); self.allp.column(c, width=w, anchor="center" if c == "n" else "w")
-        self.allp.pack(fill="both", expand=True, padx=12, pady=(0, 10))
+        self.allp.pack(side="left", fill="both", expand=True)
+        bx = tk.Frame(low, bg=PAL["surface"], highlightthickness=1, highlightbackground=PAL["border"]); bx.pack(side="left", fill="both", padx=(10, 0))
+        tk.Label(bx, text="📊 " + t("v3d.bars"), bg=PAL["surface"], fg=PAL["fg"], font=(ui_theme.FONT_SEMI, 11)).pack(anchor="w", padx=10, pady=(8, 0))
+        self.bars3d = view3d.Bars3D(bx, bg=PAL["surface"], width=520, height=260)
+        self.bars3d.pack(padx=6, pady=4)
+        self.bars3d.on_pick = lambda tag: self.bars_info.config(text=tag)
+        self.bars_info = tk.Label(bx, text=t("v3d.bars_hint"), bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 9))
+        self.bars_info.pack(anchor="w", padx=10, pady=(0, 8))
         self.allp.bind("<<TreeviewSelect>>", self._pick_allp)
         self.refresh_prog()
+
+    def _pick_slot3d(self, slot):
+        """3D ajanda tıklanan yuva: ilgili kart vurgulanır."""
+        self.sel_slot = None if self.sel_slot == slot else slot
+        for s2, (box, head, body) in self.slot_cards.items():
+            box.config(highlightbackground=PAL["accent"] if s2 == self.sel_slot else box._base_border)
+        self.agent3d.set_status(self.agent3d.status, self.sel_slot)
 
     def _pick_allp(self, _=None):
         s = self.allp.selection()
@@ -1703,9 +1857,12 @@ class App:
         slots = build_slots(self.cfg, name) if b else engine.ALL_SLOTS
         prog = self.progress.get(name, {})
         have = 0
+        status3d = {}
         for s, (box, head, body) in self.slot_cards.items():
             d = prog.get(s)
             active = s in slots
+            status3d[s] = "off" if not active else "ok" if d else "miss"
+            box._base_border = {"off": PAL["border"], "ok": PAL["success"], "miss": PAL["danger"]}[status3d[s]]
             if not active:
                 box.config(highlightbackground=PAL["border"]); head.config(fg=PAL["muted"])
                 body.config(text=t("prog.not_in_build")); continue
@@ -1729,6 +1886,13 @@ class App:
                     top = ", ".join(attr_name(k) for k, _ in sorted((b or {}).get("attributes", {}).items(), key=lambda kv: -kv[1].get("weight", 0))[:3])
                 body.config(text=t("prog.missing_card", need=need or "—", attrs=top or "—"), fg=PAL["muted"])
                 box.config(highlightbackground=PAL["danger"]); head.config(fg=PAL["danger"])
+        self.agent3d.set_status(status3d, self.sel_slot)
+        rows, vals = [], []
+        for bb in self.cfg["builds"][:10]:
+            sl, pr = build_slots(self.cfg, bb["name"]), self.progress.get(bb["name"], {})
+            rows.append(bb["name"][:28])
+            vals.append([(pr[x]["score"] if x in pr else 0) if x in sl else None for x in engine.ALL_SLOTS])
+        self.bars3d.set_data(rows, [slot_name(x) for x in engine.ALL_SLOTS], vals)
         self.pg_lbl.config(text=t("prog.completed", have=have, total=len(slots)))
         self.pbar["value"] = 100 * have / max(len(slots), 1)
         self.allp.delete(*self.allp.get_children())
@@ -2628,6 +2792,9 @@ class App:
         ttk.Label(mb, text=t("meta.note"), foreground=PAL["muted"], wraplength=820,
                   justify="left").pack(anchor="w", padx=8, pady=(0, 6))
 
+        # ---- Ekran ve oyun / display & game ----
+        self.build_display_box(f, st)
+
         # ---- Görünüm / appearance ----
         ap = ttk.LabelFrame(f, text=t("set.appearance_box")); ap.pack(fill="x", padx=10, pady=6)
         ra = ttk.Frame(ap); ra.pack(fill="x", padx=8, pady=6)
@@ -2642,6 +2809,8 @@ class App:
         self.sv["bg_interval"] = tk.StringVar(value=str(st.get("bg_interval", 15)))
         ttk.Entry(rb, textvariable=self.sv["bg_interval"], width=6).pack(side="left", padx=6)
         ttk.Button(rb, text=ui_theme.with_icon(t("set.open_art"), "📂"), command=self.open_art_folder).pack(side="left", padx=(12, 0))
+        self.bv["ui_depth"] = tk.BooleanVar(value=bool(st.get("ui_depth", True)))
+        ttk.Checkbutton(rb, text=t("v3d.depth"), variable=self.bv["ui_depth"]).pack(side="left", padx=(18, 0))
         ttk.Label(ap, text=t("set.theme_note") + "\n" + t("set.art_note"), foreground=PAL["muted"], wraplength=820,
                   justify="left").pack(anchor="w", padx=8, pady=(0, 6))
 
@@ -2680,6 +2849,203 @@ class App:
 
         ttk.Button(f, text=t("set.save"), command=self.save_settings, style="Accent.TButton").pack(anchor="w", padx=12, pady=12)
 
+    # ---------- Ekran ve oyun ----------
+    def build_display_box(self, f, st):
+        db = ttk.LabelFrame(f, text=t("disp.box")); db.pack(fill="x", padx=10, pady=6)
+        mw, mh = display.monitor_size()
+        det = display.detect_profile(mw, mh)
+        r1 = ttk.Frame(db); r1.pack(fill="x", padx=8, pady=(6, 2))
+        ttk.Label(r1, text=t("disp.monitor", res=f"{mw}×{mh}", prof=display.PROFILES[det]["label"])).pack(side="left")
+        r2 = ttk.Frame(db); r2.pack(fill="x", padx=8, pady=4)
+        ttk.Label(r2, text=t("disp.profile")).pack(side="left")
+        self._prof_keys = ["auto"] + list(display.PROFILES)
+        labels = [t("disp.auto", prof=display.PROFILES[det]["label"])] + [display.PROFILES[k]["label"] for k in display.PROFILES]
+        cur = st.get("res_profile", "auto")
+        self.prof_var = tk.StringVar(value=labels[self._prof_keys.index(cur)] if cur in self._prof_keys else labels[0])
+        pcb = ttk.Combobox(r2, textvariable=self.prof_var, values=labels, width=34, state="readonly"); pcb.pack(side="left", padx=6)
+        self._prof_labels = labels
+        pcb.bind("<<ComboboxSelected>>", lambda e: self._apply_profile_defaults())
+
+        # oyun ayar dosyası (yalnız okuma)
+        gx = ttk.Frame(db); gx.pack(fill="x", padx=8, pady=(8, 2))
+        ttk.Label(gx, text="🎮 " + t("disp.game_settings"), style="Section.TLabel").pack(side="left")
+        ttk.Button(gx, text=ui_theme.with_icon(t("disp.reread"), "↻"), command=self.refresh_game_settings).pack(side="left", padx=10)
+        self.gfx_lbl = ttk.Label(db, text="", justify="left", wraplength=900); self.gfx_lbl.pack(anchor="w", padx=12)
+        self.gfx_tips = ttk.Label(db, text="", justify="left", wraplength=900, foreground=PAL["muted"]); self.gfx_tips.pack(anchor="w", padx=12, pady=(2, 6))
+        self.refresh_game_settings()
+
+        # OCR ince ayar
+        oc = ttk.Frame(db); oc.pack(fill="x", padx=8, pady=(8, 2))
+        ttk.Label(oc, text="🔍 " + t("ocr.box"), style="Section.TLabel").pack(side="left")
+        o2 = ttk.Frame(db); o2.pack(fill="x", padx=8, pady=4)
+        ttk.Label(o2, text=t("ocr.threshold")).pack(side="left")
+        self.ocr_thr = tk.IntVar(value=int(st.get("ocr_threshold", 170)))
+        thr_lbl = ttk.Label(o2, text=str(self.ocr_thr.get()), width=4)
+        ttk.Scale(o2, from_=100, to=230, variable=self.ocr_thr, length=220,
+                  command=lambda v: (self.ocr_thr.set(int(float(v))), thr_lbl.config(text=str(int(float(v)))))).pack(side="left", padx=6)
+        thr_lbl.pack(side="left")
+        ttk.Label(o2, text=t("ocr.scale")).pack(side="left", padx=(16, 2))
+        self.ocr_scale_var = tk.StringVar(value=t("ocr.auto") if st.get("ocr_scale", "auto") == "auto" else str(st.get("ocr_scale")))
+        ttk.Combobox(o2, textvariable=self.ocr_scale_var, values=[t("ocr.auto"), "1.0", "1.25", "1.5", "1.75", "2.0", "2.5"],
+                     width=8).pack(side="left")
+        ttk.Label(o2, text="PSM").pack(side="left", padx=(16, 2))
+        self.ocr_psm_var = tk.StringVar(value=str(st.get("ocr_psm", 6)))
+        ttk.Combobox(o2, textvariable=self.ocr_psm_var, values=["6", "4", "3", "11"], width=4, state="readonly").pack(side="left")
+        ttk.Label(o2, text=t("ocr.passes")).pack(side="left", padx=(16, 2))
+        self.ocr_pass_var = tk.StringVar(value=str(st.get("ocr_passes", 3)))
+        ttk.Combobox(o2, textvariable=self.ocr_pass_var, values=["1", "2", "3"], width=4, state="readonly").pack(side="left")
+        o3 = ttk.Frame(db); o3.pack(fill="x", padx=8, pady=4)
+        ttk.Button(o3, text=ui_theme.with_icon(t("ocr.calibrate"), "🎯"), command=self.auto_calibrate_ocr).pack(side="left")
+        ttk.Button(o3, text=ui_theme.with_icon(t("ocr.preview"), "👁"), command=self.ocr_preview).pack(side="left", padx=8)
+        self.ocr_msg = ttk.Label(o3, text="", foreground=PAL["muted"]); self.ocr_msg.pack(side="left", padx=8)
+        ttk.Label(db, text=t("ocr.note"), foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=12, pady=(0, 4))
+
+        # bindirme
+        ov = ttk.Frame(db); ov.pack(fill="x", padx=8, pady=(8, 2))
+        ttk.Label(ov, text="🪟 " + t("overlay.box"), style="Section.TLabel").pack(side="left")
+        o4 = ttk.Frame(db); o4.pack(fill="x", padx=8, pady=(4, 8))
+        ttk.Label(o4, text=t("overlay.mode")).pack(side="left")
+        self.ov_mode = tk.StringVar(value=t("overlay.mode_card") if st.get("overlay_mode", "card") == "card" else t("overlay.mode_corner"))
+        ttk.Combobox(o4, textvariable=self.ov_mode, values=[t("overlay.mode_card"), t("overlay.mode_corner")], width=24,
+                     state="readonly").pack(side="left", padx=6)
+        ttk.Label(o4, text=t("overlay.alpha")).pack(side="left", padx=(16, 2))
+        self.ov_alpha = tk.DoubleVar(value=float(st.get("overlay_alpha", 0.94)))
+        ttk.Scale(o4, from_=0.4, to=1.0, variable=self.ov_alpha, length=120).pack(side="left")
+        ttk.Label(o4, text=t("overlay.size")).pack(side="left", padx=(16, 2))
+        self.ov_size = tk.DoubleVar(value=float(st.get("overlay_size", 1.0)))
+        ttk.Scale(o4, from_=0.7, to=1.6, variable=self.ov_size, length=120).pack(side="left")
+        ttk.Button(o4, text=ui_theme.with_icon(t("overlay.test"), "▶"), command=self.overlay_test).pack(side="left", padx=12)
+
+    def _profile_key(self):
+        try: return self._prof_keys[self._prof_labels.index(self.prof_var.get())]
+        except (ValueError, AttributeError): return "auto"
+
+    def _apply_profile_defaults(self):
+        key = self._profile_key()
+        k2 = key if key in display.PROFILES else display.detect_profile(*display.monitor_size())
+        pr = display.PROFILES[k2]
+        self.ocr_thr.set(pr["threshold"]); self.ocr_scale_var.set(str(pr["ocr_scale"]))
+        self.ocr_msg.config(text=t("disp.profile_applied", prof=pr["label"]))
+
+    def refresh_game_settings(self):
+        """Oyunun kendi GFXSettings dosyasını OKUR (yazmaz) ve öneriler gösterir."""
+        mw, mh = display.monitor_size()
+        try: g = display.read_game_settings()
+        except Exception as e:
+            log.warning("Game settings read failed: %s", e); g = {"error": str(e)}
+        self.game_settings = g
+        if g and not g.get("error"):
+            parts = [t("disp.file", f=Path(g["file"]).name)]
+            if g.get("width"): parts.append(t("disp.game_res", res=f"{g['width']}×{g['height']}" + (f" @{g['refresh']}Hz" if g.get("refresh") else "")))
+            if g.get("display_mode"): parts.append(t("disp.mode", m=g["display_mode"]))
+            if g.get("hdr") is not None: parts.append("HDR: " + (t("disp.on") if g["hdr"] else t("disp.off")))
+            self.gfx_lbl.config(text="   ·   ".join(parts))
+            log.info("Game settings: %s", {k: g.get(k) for k in ("file", "width", "height", "display_mode", "hdr")})
+        else:
+            self.gfx_lbl.config(text=t("disp.not_found"))
+        tips = [x for x in display.recommendations(g, mw, mh) if x[0] != "disp.no_game_file"]
+        icon = {"disp.all_good": "✔ "}
+        self.gfx_tips.config(text="".join(icon.get(k, "⚠ ") + t(k, **kw) + "\n" for k, kw in tips) + t("disp.requirements"))
+
+    def _calib_image(self):
+        img = getattr(self, "last_card_img", None)
+        if img is None and (BASE / "last_card.png").exists():
+            img = Image.open(BASE / "last_card.png").convert("RGB")
+        return img
+
+    def auto_calibrate_ocr(self):
+        """Son okunan kart üzerinde eşik × ölçek denenir, en çok bilgiyi tanıyan ayar seçilir."""
+        img = self._calib_image()
+        if img is None: return messagebox.showinfo(APP_NAME, t("ocr.need_card"))
+        if not self.tess: return messagebox.showwarning(APP_NAME, t("msg.no_tesseract"))
+        self.ocr_msg.config(text=t("ocr.calibrating")); self.root.update_idletasks()
+        lang, cfgs = self.cfg["settings"]["ocr_lang"], ocr_config(self.cfg["settings"])
+
+        def work():
+            old_t, old_s = gamedata.THRESHOLD, gamedata.SCALE
+            best = (-1, 170, None)
+            try:
+                for sc in (1.25, 1.5, 2.0):
+                    for th in range(130, 215, 20):
+                        gamedata.THRESHOLD, gamedata.SCALE = th, sc
+                        txt = pytesseract.image_to_string(gamedata.text_image(img), lang=lang, config=cfgs)
+                        q = ocr_quality(txt)
+                        log.debug("calib thr=%s scale=%s quality=%.2f", th, sc, q)
+                        if q > best[0]: best = (q, th, sc)
+            finally:
+                gamedata.THRESHOLD, gamedata.SCALE = old_t, old_s
+            self.root.after(0, lambda: self._calib_done(best))
+        threading.Thread(target=work, daemon=True).start()
+
+    def _calib_done(self, best):
+        q, th, sc = best
+        self.ocr_thr.set(th); self.ocr_scale_var.set(str(sc))
+        self.ocr_msg.config(text=t("ocr.calib_done", thr=th, scale=sc, q=round(q, 1)))
+        log.info("OCR auto-calibration: threshold=%s scale=%s quality=%.2f", th, sc, q)
+
+    def ocr_preview(self):
+        """Orijinal kart ↔ işlenmiş (siyah-beyaz) görüntü + OCR metni + tanınanlar; eşik kaydırıcısıyla canlı."""
+        img = self._calib_image()
+        if img is None: return messagebox.showinfo(APP_NAME, t("ocr.need_card"))
+        w = tk.Toplevel(self.root); w.title(t("ocr.preview")); w.configure(bg=PAL["bg"])
+        top = ttk.Frame(w); top.pack(fill="both", expand=True, padx=10, pady=10)
+        h = min(640, int(self.root.winfo_screenheight() * 0.55))
+        k = h / img.height
+        orig = ImageTk.PhotoImage(img.resize((max(1, int(img.width * k)), h)))
+        l1 = tk.Label(top, image=orig, bg=PAL["bg"]); l1.image = orig; l1.pack(side="left", padx=4)
+        l2 = tk.Label(top, bg=PAL["bg"]); l2.pack(side="left", padx=4)
+        txt = tk.Text(top, width=48, height=30, bg=PAL["surface"], fg=PAL["fg"], font=("Consolas", 10), relief="flat")
+        txt.pack(side="left", fill="both", expand=True, padx=4)
+        bar = ttk.Frame(w); bar.pack(fill="x", padx=10, pady=(0, 10))
+        thr = tk.IntVar(value=self.ocr_thr.get())
+        ttk.Label(bar, text=t("ocr.threshold")).pack(side="left")
+        vl = ttk.Label(bar, text=str(thr.get()), width=4)
+
+        def run(_=None):
+            th = int(thr.get()); vl.config(text=str(th))
+            old_t, old_s = gamedata.THRESHOLD, gamedata.SCALE
+            gamedata.THRESHOLD = th
+            sc = self.ocr_scale_var.get().strip()
+            try: gamedata.SCALE = None if sc in ("", "auto", t("ocr.auto")) else float(sc)
+            except ValueError: gamedata.SCALE = None
+            try:
+                pre = gamedata.text_image(img)
+                kk = h / pre.height
+                ph = ImageTk.PhotoImage(pre.resize((max(1, int(pre.width * kk)), h)))
+                l2.config(image=ph); l2.image = ph
+                out = pytesseract.image_to_string(pre, lang=self.cfg["settings"]["ocr_lang"], config=ocr_config(self.cfg["settings"])) if self.tess else ""
+            finally:
+                gamedata.THRESHOLD, gamedata.SCALE = old_t, old_s
+            txt.delete("1.0", "end"); txt.insert("end", out)
+            if GAME.ok and out:
+                r = GAME.recognize(out)
+                txt.insert("end", "\n────────────\n" + f"{r.get('name')}  [{r.get('known') or '?'}]  {t('panel.quality')}: {round(r.get('confidence', 0) * 100)}%\n")
+                for a, v in r.get("attrs", {}).items():
+                    txt.insert("end", f"  {attr_name(a)}: {v:g}  ({r.get('quality', {}).get(a, '?')}%)\n")
+                if r.get("talents"): txt.insert("end", "  ★ " + ", ".join(r["talents"]) + "\n")
+                txt.insert("end", t("ocr.score", q=round(ocr_quality(out), 1)))
+        ttk.Scale(bar, from_=100, to=230, variable=thr, length=300, command=lambda v: thr.set(int(float(v)))).pack(side="left", padx=6)
+        vl.pack(side="left")
+        ttk.Button(bar, text=ui_theme.with_icon(t("ocr.rerun"), "↻"), command=run).pack(side="left", padx=8)
+        ttk.Button(bar, text=ui_theme.with_icon(t("ocr.use_this"), "✔"),
+                   command=lambda: (self.ocr_thr.set(int(thr.get())), w.destroy())).pack(side="left")
+        run()
+
+    def overlay_test(self):
+        """Bindirmeyi örnek bir sonuçla gösterir (son kart ya da örnek)."""
+        st = self.cfg["settings"]
+        backup = {k: st.get(k) for k in ("overlay_alpha", "overlay_size", "overlay_mode")}
+        st["overlay_alpha"], st["overlay_size"] = float(self.ov_alpha.get()), float(self.ov_size.get())
+        st["overlay_mode"] = "card" if self.ov_mode.get() == t("overlay.mode_card") else "corner"
+        item = {"name": "Stoner LAMG", "rarity": ["HIGH-END"], "brand": None, "gear_set": None,
+                "quality": {"weapon_type_damage": 74, "crit_chance": 85, "headshot_damage": 52}, "_note": ""}
+        res = [(82, "Striker LMG", ["✔ Light Machine Gun", "talent Optimist"]), (55, "Heartbreaker", [])]
+        if not getattr(self, "last_card_screen", None):
+            sw, sh = self.root.winfo_screenwidth(), self.root.winfo_screenheight()
+            self.last_card_screen = (int(sw * 0.55), int(sh * 0.18), int(sw * 0.72), int(sh * 0.8))
+        try: self.popup("KEEP", item, res, None)
+        finally: st.update(backup)
+
     def _selected_lang_code(self):
         names = [n for _, n in i18n.available_languages()]
         try: return self.lang_codes[names.index(self.lang_var.get())]
@@ -2715,10 +3081,20 @@ class App:
             st["log_max_kb"] = max(16, int(float(self.sv["log_max_kb"].get())))
             st["log_backups"] = max(0, int(float(self.sv["log_backups"].get())))
             st["bg_interval"] = max(0, int(float(self.sv["bg_interval"].get() or 0)))
+            st["ocr_threshold"] = int(self.ocr_thr.get())
+            sc = self.ocr_scale_var.get().strip()
+            st["ocr_scale"] = "auto" if sc in ("", "auto", t("ocr.auto")) else float(sc)
+            st["ocr_psm"] = int(self.ocr_psm_var.get())
+            st["ocr_passes"] = int(self.ocr_pass_var.get())
+            st["overlay_alpha"] = round(float(self.ov_alpha.get()), 2)
+            st["overlay_size"] = round(float(self.ov_size.get()), 2)
         except Exception as e:
             return messagebox.showerror(APP_NAME, t("err.bad_setting", e=e))
         for k in ("hotkey", "overlay_corner", "ocr_lang", "tesseract_cmd", "log_level", "meta_feed_url"): st[k] = self.sv[k].get().strip()
         for k, v in self.bv.items(): st[k] = v.get()
+        st["res_profile"] = self._profile_key()
+        st["overlay_mode"] = "card" if self.ov_mode.get() == t("overlay.mode_card") else "corner"
+        apply_ocr_settings(st); self.card_box = None
         old_theme = st.get("ui_theme", "dark")
         st["ui_theme"] = next((m for m in ui_theme.THEME_MODES if t("theme." + m) == self.theme_var.get()), old_theme)
         self.sounds.enabled = bool(st.get("ui_sounds", True))

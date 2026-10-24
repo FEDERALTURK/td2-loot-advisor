@@ -41,6 +41,17 @@ Wiki content is CC BY-SA; every task links back to its wiki section.
 
 How the feeds are researched and scored: [`meta/UPDATER.md`](meta/UPDATER.md).
 
+## Display, game settings & 3D / Ekran, oyun ayarları ve 3D
+
+- **Resolution profiles** (1080p → 4K, 21:9 and 32:9): OCR scale, threshold and overlay size per resolution; detected automatically, DPI-aware (125 % / 150 % Windows scaling).
+- **Game settings check (read only):** reads `Documents\My Games\Tom Clancy's The Division 2\GFXSettings*.xml` and warns about HDR on, exclusive fullscreen or a resolution mismatch. The game's memory and files are never written.
+- **OCR fine tuning:** threshold slider, scale, PSM, multi-pass reading (the card is read with 2–3 thresholds, the best reading wins), *Auto calibrate* on the last card and a live *Preview* (original ↔ processed image + recognized stats).
+- **Overlay next to the item card:** verdict, roll-quality bars and best build appear beside the tooltip (or in a fixed corner); opacity and size adjustable.
+- **3D views:** a rotatable 3D agent in *Missing pieces* (green = owned, red = missing, click a piece to highlight its slot) and 3D build × slot score bars. Pure Tk canvas, no extra libraries.
+- Ideas borrowed from d4lf, Diablo4Companion and RatScanner (resolution presets, in-game requirement checks, overlay tooltip).
+
+**Recommended game settings:** English game language, HDR off, borderless window, game resolution = monitor resolution.
+
 ## License
 
 MIT — see [`LICENSE`](LICENSE).
