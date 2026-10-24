@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "version": "2026-10-24.1",
-  "updated": "2026-10-24T00:00:00Z",
+  "version": "2026-10-24.2",
+  "updated": "2026-10-24T01:36:28Z",
   "season": "Year 8 Season 3 – Red Horizon",
   "generator": "seed (manual research)",
   "popularity_method": "0-100; seed = how many independent sources feature the build, weighted by recency. Daily updater adds engagement signals (views/upvotes) where public.",
@@ -246,11 +246,15 @@
         {
           "title": "Overgear – Division 2 builds (Red Horizon)",
           "url": "https://overgear.com/guides/division-2/best-builds-for-any-activities/"
+        },
+        {
+          "title": "Item Level Gaming – Red Moon Unleashed builds (Oct 17, 2026)",
+          "url": "https://itemlevel.net/best-build-for-red-moon-unleashed-in-the-division-2/"
         }
       ],
       "summary": {
-        "tr": "Hotshot seti + Iron Will göğüs (Resolved); keskin nişancı, kafa vuruşu hasarı modları.",
-        "en": "Hotshot set + Iron Will chest (Resolved); sniper with headshot damage mods."
+        "tr": "Hotshot seti (varsa Aces & Eights) + Iron Will göğüs (Resolved); keskin nişancı, kafa vuruşu hasarı modları. Y8S3.2'de MMR'lerin kafa vuruşu bonusu arttı.",
+        "en": "Hotshot set (or Aces & Eights if owned) + Iron Will chest (Resolved); sniper with headshot damage mods. Y8S3.2 raised marksman rifle headshot bonus."
       }
     },
     {
@@ -463,7 +467,7 @@
         "Catharsis": 3,
         "Perfect Vanguard": 2
       },
-      "popularity": 75,
+      "popularity": 60,
       "sources": [
         {
           "title": "The Division Dispatch – build guides",
@@ -558,6 +562,50 @@
       "summary": {
         "tr": "Fafnir pompalı + Ember Engine; yanma şansı %40 (göğüsle %60), Firestarter + Incinerator Turret.",
         "en": "Fafnir shotgun + Ember Engine; burn chance 40% (60% with chest), Firestarter + Incinerator Turret."
+      }
+    },
+    {
+      "id": "aces-eights-palisade-rifle",
+      "name": "Aces & Eights Palisade Rifle (Red Moon solo)",
+      "mode": "PvE / Solo event",
+      "role": "dps",
+      "sets_or_brands": [
+        "Aces & Eights",
+        "Palisade Steelworks"
+      ],
+      "set_bonus": 15,
+      "attributes": {
+        "headshot_damage": {
+          "weight": 3,
+          "good_at": 9
+        },
+        "weapon_damage": {
+          "weight": 2.5,
+          "good_at": 10
+        },
+        "crit_damage": {
+          "weight": 2,
+          "good_at": 9
+        },
+        "armor": {
+          "weight": 1,
+          "good_at": 5
+        }
+      },
+      "talents": {
+        "Vigilance": 4,
+        "Boomerang": 3
+      },
+      "popularity": 45,
+      "sources": [
+        {
+          "title": "allthings.how – Red Moon Unleashed rewards, bounties and best build",
+          "url": "https://allthings.how/red-moon-unleashed-in-the-division-2-event-rewards-bounties-and-best-build/"
+        }
+      ],
+      "summary": {
+        "en": "4x Aces & Eights + 2x Palisade (backpack with Vigilance), rifle like UIC15 MOD2 with Boomerang; stack Protection from Elites mods. Benefits from the Y8S3.2 rifle buff.",
+        "tr": "4 Aces & Eights + 2 Palisade (sırt çantası Vigilance), Boomerang'lı tüfek (ör. UIC15 MOD2); modlarda Protection from Elites topla. Y8S3.2 tüfek güçlendirmesinden faydalanır."
       }
     }
   ]
