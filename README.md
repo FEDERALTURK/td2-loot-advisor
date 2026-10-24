@@ -52,6 +52,12 @@ How the feeds are researched and scored: [`meta/UPDATER.md`](meta/UPDATER.md).
 
 **Recommended game settings:** English game language, HDR off, borderless window, game resolution = monitor resolution.
 
+## Tasks / Görevler
+
+- Tasks are shown **only in the interface language**, grouped (Journey · Mission 3, Manhunt · Scout 2, Classified Assignments, daily/weekly projects) with a short line each; duplicates from different sources are merged.
+- **Double-click** a task for a detail window: header art, the full task, step-by-step how-to, source link, done toggle and pictures from The Division Wiki (cached).
+- **Fetch with Claude** replaces the old ChatGPT screen macro: Claude Code (your Claude subscription, as in the Assistant tab) searches the web for the current season's Journey, Manhunt and project tasks and adds them in your language with a how-to.
+
 ## Build sheet, active build & effects / Build ayrıntısı, aktif build ve efektler
 
 - **Build sheet (Builds → 📋):** every slot shows what to farm — gear-set piece / brand / named or exotic item, core attribute, attributes, chest/backpack talent, weapon type and talent — next to the piece you already have with ✔/✖ per requirement.

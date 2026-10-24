@@ -243,3 +243,32 @@ def run(start_page, app_version="", now=None):
         parse_project_events(season, text, now)
     return {"version": datetime.now(timezone.utc).strftime("%Y-%m-%d"), "season": season,
             "season_url": page_url(season), "tasks": tasks, "guides": [], "resets": None}
+
+
+# ---------------------------------------------------------------- görev görselleri
+def images_for(title=None, search=None, n=3, size=640, app_version=""):
+    """Wiki sayfası (ya da aramayla bulunan sayfalar) için küçük resim adresleri: [(url, sayfa başlığı)]."""
+    titles = []
+    if title: titles.append(title)
+    if search:
+        try:
+            r = _get({"action": "query", "list": "search", "srsearch": search, "srlimit": 4, "srnamespace": 0}, app_version)
+            titles += [x["title"] for x in r.get("query", {}).get("search", [])
+                       if x["title"] not in titles and not re.search(r"Resurgence|Heartland|\(The Division\)|Tom Clancy's The Division$", x["title"])]
+        except Exception:
+            pass
+    if not titles: return []
+    r = _get({"action": "query", "prop": "pageimages", "piprop": "thumbnail", "pithumbsize": size,
+              "titles": "|".join(titles[:6]), "redirects": 1}, app_version)
+    pages = r.get("query", {}).get("pages", [])
+    order = {t: i for i, t in enumerate(titles)}
+    pages.sort(key=lambda p: order.get(p.get("title"), 99))
+    out = [(p["thumbnail"]["source"], p["title"]) for p in pages if p.get("thumbnail")]
+    return out[:n]
+
+
+def fetch_bytes(url, app_version="", limit=6_000_000):
+    req = urllib.request.Request(url, headers={
+        "User-Agent": f"TD2-Loot-Advisor/{app_version} (https://github.com/FEDERALTURK/td2-loot-advisor)"})
+    with urllib.request.urlopen(req, timeout=TIMEOUT_S, context=ssl.create_default_context()) as r:
+        return r.read(limit)

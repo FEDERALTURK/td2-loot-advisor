@@ -12,8 +12,8 @@ respect to Ubisoft's stance on overlay/automation tools.
 
 See README.md for setup and usage.
 """
-import csv, ctypes, json, logging, logging.handlers, os, queue, re, shutil, subprocess, sys, threading, time
-import urllib.error, urllib.request
+import csv, ctypes, json, math, logging, logging.handlers, os, queue, re, shutil, subprocess, sys, threading, time
+import urllib.error, urllib.parse, urllib.request
 import tkinter as tk
 from collections import Counter
 from datetime import datetime, timedelta
@@ -23,7 +23,7 @@ from tkinter import ttk, filedialog, messagebox
 
 import mss
 import pytesseract
-from PIL import Image, ImageOps, ImageTk
+from PIL import Image, ImageDraw, ImageOps, ImageTk
 
 import i18n
 import ui_theme
@@ -801,7 +801,7 @@ def _history_as_prompt(history):
     return ("Conversation so far:\n" + "\n".join(lines) +
             "\n\nReply only to this latest user message:\n" + history[-1]["content"])
 
-def ask_claude_code(model, system, history, timeout=CLAUDE_CODE_TIMEOUT):
+def ask_claude_code(model, system, history, timeout=CLAUDE_CODE_TIMEOUT, tools="", max_turns=1):
     import subprocess
     exe = find_claude_cli()
     if not exe:
@@ -813,11 +813,13 @@ def ask_claude_code(model, system, history, timeout=CLAUDE_CODE_TIMEOUT):
     sys_file.write_text(system, encoding="utf-8")
     args = [exe, "-p", "--output-format", "json",
             "--system-prompt-file", str(sys_file),
-            "--tools", "",                  # dosya/komut aracı yok: sadece cevap yazar
+            "--tools", tools,               # varsayılan: hiç araç yok (yalnızca cevap). Görev getirme: WebSearch,WebFetch
             "--disallowedTools", "mcp__*",
             "--strict-mcp-config",
             "--no-session-persistence",
-            "--max-turns", "1"]
+            "--max-turns", str(max_turns)]
+    if tools:
+        args += ["--allowedTools", tools.replace(",", " ")]
     if model:
         args += ["--model", model]
     flags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
@@ -928,6 +930,134 @@ def builtin_task_translate(text):
     for en, tr in sorted(pairs, key=lambda x: -len(x[0])):
         out = re.sub(re.escape(en), tr, out, flags=re.IGNORECASE)
     return out
+
+def task_text(task, lang=None):
+    """Görevin yalnızca seçili dildeki metni: (metin, çevrili mi)."""
+    lang = lang or i18n.current_language()
+    tx = task.get("texts") or {}
+    if tx.get(lang): return tx[lang].replace("**", "").strip(), True
+    if lang == "tr" and task.get("tr"): return task["tr"], True
+    if lang == "en": return task.get("en") or tx.get("en", ""), True
+    return task.get("en") or tx.get("en") or task.get("tr", ""), False
+
+
+def split_title(text):
+    """'Red Horizon Yolculuğu – Görev 3: 10 düşmanı yak' → ('Görev 3', '10 düşmanı yak')."""
+    text = (text or "").strip()
+    m = re.match(r"^(.{3,70}?):\s+(.+)$", text)
+    if not m: return "", text
+    group, rest = m.group(1).strip(), m.group(2).strip()
+    if " – " in group: group = group.split(" – ")[-1].strip()
+    elif " - " in group: group = group.split(" - ")[-1].strip()
+    return group, rest[:1].upper() + rest[1:]
+
+
+def task_group(task, cat):
+    """Grup anahtarı ve arayüz dilinde grup adı (İngilizce metinden; çeviriler farklı olsa da aynı grup)."""
+    en = task.get("en") or (task.get("texts") or {}).get("en", "")
+    g_en, _ = split_title(en)
+    low = g_en.lower()
+    m = re.search(r"(?:mission|görev|scout|sector)\s*(\d+)", low)
+    if "classified" in low:
+        return "classified", t("grp.classified")
+    if "scout" in low and m:
+        return f"scout{m.group(1)}", t("grp.scout", n=m.group(1))
+    if ("journey" in low or "mission" in low) and m:
+        return f"mission{m.group(1)}", t("grp.mission", n=m.group(1))
+    loc, _ = split_title(task_text(task)[0])
+    return (low or "other"), (loc or g_en or t("tasks.other_group"))
+
+
+def task_dedupe_key(task):
+    """Aynı görevin farklı kaynaklardan gelen kopyaları (ör. ortak liste + wiki) için anahtar."""
+    en = task.get("en") or (task.get("texts") or {}).get("en", "")
+    g, rest = split_title(en)
+    head = re.split(r"\s+[–-]\s+|\s*\(", rest)[0]
+    return gamedata.nrm(g.split(" – ")[-1] + "|" + head)[:60]
+
+
+TASK_KEYWORDS = ["Control Point", "Public Execution", "Stronghold", "Bounty", "Dark Zone", "Countdown", "Summit", "Descent",
+                 "Incursion", "Raid", "Manhunt", "Supply Drop", "Convoy", "Hostage", "Propaganda Broadcast", "Resource Transport",
+                 "Territory Control", "Global Event", "Legendary", "Heroic", "Expedition", "Kenly College", "Conflict",
+                 "Fiery Aura", "Hunter", "Rogue", "Landmark", "Side Mission", "Main Mission", "Classified Assignment",
+                 "Settlement", "Castle", "Theater", "Campus", "Brooklyn", "Coney Island", "Battleship"]
+
+
+def task_image_query(task):
+    """Görsel için (wiki sayfası, arama terimi)."""
+    title = None
+    url = task.get("url") or ""
+    if "/wiki/" in url:
+        title = urllib.parse.unquote(url.split("/wiki/", 1)[1].split("#")[0]).replace("_", " ")
+    en = task.get("en") or (task.get("texts") or {}).get("en", "")
+    kw = next((k for k in TASK_KEYWORDS if k.lower() in en.lower()), None)
+    return title, kw or (split_title(en)[1][:60] if en else None)
+
+
+TASK_IMG_DIR = BASE / "cache" / "task_images"
+
+
+def load_task_images(task, n=3):
+    """Wiki'den görevle ilgili görseller (diskte önbellekli). [(PIL.Image, başlık)]."""
+    import hashlib, io
+    title, search = task_image_query(task)
+    key = hashlib.sha1(f"{title}|{search}".encode("utf-8")).hexdigest()[:16]
+    TASK_IMG_DIR.mkdir(parents=True, exist_ok=True)
+    idx = TASK_IMG_DIR / f"{key}.json"
+    out = []
+    try:
+        meta = json.loads(idx.read_text(encoding="utf-8")) if idx.exists() else None
+        if meta is None:
+            meta = []
+            for k, (url, page) in enumerate(wiki_sync.images_for(title, search, n=n, app_version=APP_VERSION)):
+                f = TASK_IMG_DIR / f"{key}_{k}.img"
+                f.write_bytes(wiki_sync.fetch_bytes(url, APP_VERSION))
+                meta.append({"file": f.name, "page": page})
+            idx.write_text(json.dumps(meta), encoding="utf-8")
+        for m in meta:
+            try: out.append((Image.open(TASK_IMG_DIR / m["file"]).convert("RGB"), m["page"]))
+            except Exception: pass
+    except Exception as e:
+        log.info("Task images unavailable (%s)", e)
+    return out
+
+
+def claude_tasks_prompt():
+    lang = i18n.english_name()
+    return ("You are a research assistant for the game Tom Clancy's The Division 2. Use web search to find what is CURRENT "
+            f"today ({datetime.now().strftime('%Y-%m-%d')}): the running season's Journey missions, Manhunt scout tasks, "
+            "and active daily/weekly projects or global events. Prefer official Ubisoft news, patch notes and The Division Wiki. "
+            "Do not invent anything; skip what you cannot confirm. Reply with ONLY one JSON object, no prose, in this shape: "
+            '{"season": "...", "tasks": [{"cat": "projects|journey|manhunt", "kind": "daily|weekly|seasonal|settlement (projects only, else empty)", '
+            '"en": "short English task, e.g. Journey 3: burn 10 enemies with one Fiery Aura (5x)", '
+            f'"text": "the same task in {lang}", "how_en": "1-2 sentence English how-to", "how": "the same how-to in {lang}", '
+            '"url": "https source"}]}. At most 30 tasks. Keep each task under 120 characters.')
+
+
+def parse_claude_tasks(raw):
+    """Claude'un JSON yanıtını görev kayıtlarına çevirir: {kategori: [görev]}."""
+    m = re.search(r"\{.*\}", raw or "", re.S)
+    if not m: return {}, ""
+    data = json.loads(m.group(0))
+    lang = i18n.current_language()
+    out = {}
+    for x in data.get("tasks", [])[:40]:
+        cat, kind = split_cat(str(x.get("cat", "")).lower())
+        if cat not in TASK_CATS: continue
+        en = str(x.get("en", "")).strip()[:200]
+        if not en: continue
+        kind = (str(x.get("kind", "")).lower() if cat == "projects" else "") or kind
+        task = {"en": en, "texts": {"en": en}, "src": "Claude", "done": False, "time": datetime.now().isoformat(timespec="seconds")}
+        if x.get("text"): task["texts"][lang] = str(x["text"]).strip()[:200]
+        how = {}
+        if x.get("how_en"): how["en"] = str(x["how_en"]).strip()[:500]
+        if x.get("how"): how[lang] = str(x["how"]).strip()[:500]
+        if how: task["how"] = how
+        if str(x.get("url", "")).startswith("https://"): task["url"] = str(x["url"])[:300]
+        if cat == "projects" and kind in PROJECT_KINDS: task["kind"] = kind
+        out.setdefault(cat, []).append(task)
+    return out, str(data.get("season", ""))[:60]
+
 
 def task_system_prompt():
     """Çeviri istemi, seçili dile göre kurulur."""
@@ -1435,7 +1565,7 @@ class App:
             vh = self.cfg["settings"].get("voice_hotkey")
             if vh and vh not in hk: hk[vh] = self.toggle_voice
             gh = self.cfg["settings"].get("chatgpt_hotkey")
-            if gh and gh not in hk: hk[gh] = self.run_gpt_fetch
+            if gh and gh not in hk: hk[gh] = self.run_claude_fetch
             self.listener = keyboard.GlobalHotKeys(hk)
             self.listener.start()
         except Exception as e:
@@ -1622,10 +1752,12 @@ class App:
                         if kind and not it.get("kind"): it["kind"] = kind
                     self.tasks["items"].setdefault(cat, []).extend(r[2]); save_tasks(self.tasks)
                     self.task_in.delete("1.0", "end"); self.tr_status.config(text=t("task.added_src", n=len(r[2]), src=r[2][0]["src"]))
-                    if self.selected_list_cat() == cat: self.refresh_tasks()
+                    self.refresh_tasks()
                     continue
                 if r[0] == "gpt_status":
                     self.gpt_status.config(text=r[1]); continue
+                if r[0] == "claude_tasks":
+                    self.apply_claude_tasks(r[1], r[2]); continue
                 if r[0] == "gpt_raw":
                     self.gpt_raw.config(state="normal"); self.gpt_raw.delete("1.0", "end"); self.gpt_raw.insert("end", r[1]); self.gpt_raw.config(state="disabled")
                     continue
@@ -2567,9 +2699,111 @@ class App:
 
     # ---------- Görevler (Günlük/Haftalık/Journey/Global Event/Manhunt) ----------
     def build_gorevler(self):
-        f, st = ui_theme.scrollable(self.tabs["tasks"], PAL["bg"]), self.cfg["settings"]
-        top = ttk.LabelFrame(f, text=t("task.reset_box")); top.pack(fill="x", padx=10, pady=10)
-        self.reset_lbl = ttk.Label(top, style="Section.TLabel"); self.reset_lbl.pack(anchor="w", padx=8, pady=4)
+        """Görevler v3: yalnızca arayüz dilinde, gruplu ve öz liste; çift tıkla → görselli ayrıntı penceresi.
+        Alt sekmeler: Görevler · Ekle/Ekrandan oku · Claude ile getir · Sıfırlama ve senkron."""
+        st = self.cfg["settings"]
+        self.task_nb = ttk.Notebook(self.tabs["tasks"]); self.task_nb.pack(fill="both", expand=True, padx=8, pady=8)
+        pg = {}
+        for key, icon in (("list", "🗂"), ("add", "➕"), ("claude", "🤖"), ("sync", "⏱")):
+            fr = ttk.Frame(self.task_nb); self.task_nb.add(fr, text=f" {icon} {t('tpage.' + key)} ")
+            pg[key] = fr
+
+        # ---- liste
+        L = pg["list"]
+        head = ttk.Frame(L); head.pack(fill="x", padx=6, pady=(8, 4))
+        self.task_cat = tk.StringVar(value=TASK_CATS[0])
+        self.cat_btns = {}
+        icons = {"projects": "📋", "journey": "🧭", "manhunt": "🎯"}
+        for c in TASK_CATS:
+            b = ttk.Radiobutton(head, text="", value=c, variable=self.task_cat, style="Toolbutton",
+                                command=self.refresh_tasks)
+            b.pack(side="left", padx=(0, 6)); self.cat_btns[c] = (b, icons.get(c, "•"))
+        self.task_q = tk.StringVar()
+        ttk.Label(head, text="🔎").pack(side="left", padx=(14, 2))
+        qe = ttk.Entry(head, textvariable=self.task_q, width=24); qe.pack(side="left")
+        qe.bind("<KeyRelease>", lambda e: self.refresh_tasks())
+        self.hide_done = tk.BooleanVar(value=bool(st.get("tasks_hide_done", False)))
+        ttk.Checkbutton(head, text=t("tasks.hide_done"), variable=self.hide_done,
+                        command=lambda: (st.__setitem__("tasks_hide_done", self.hide_done.get()), save_cfg(self.cfg), self.refresh_tasks())).pack(side="left", padx=12)
+        self.reset_lbl = ttk.Label(head, foreground=PAL["muted"]); self.reset_lbl.pack(side="right")
+
+        body = ttk.Panedwindow(L, orient="horizontal"); body.pack(fill="both", expand=True, padx=6, pady=4)
+        lf, rf = ttk.Frame(body), ttk.Frame(body)
+        body.add(lf, weight=3); body.add(rf, weight=2)
+        self.task_tv = ttk.Treeview(lf, columns=("st", "src"), show="tree headings", selectmode="browse")
+        self.task_tv.heading("#0", text=t("tasks.col_task")); self.task_tv.column("#0", width=560, anchor="w")
+        self.task_tv.heading("st", text="✔"); self.task_tv.column("st", width=44, anchor="center", stretch=False)
+        self.task_tv.heading("src", text=t("col.source")); self.task_tv.column("src", width=90, anchor="center", stretch=False)
+        self.task_tv.tag_configure("group", font=(ui_theme.FONT_SEMI, 10), foreground=PAL["accent"])
+        self.task_tv.tag_configure("done", foreground=PAL["muted"])
+        sb = ttk.Scrollbar(lf, orient="vertical", command=self.task_tv.yview); self.task_tv.configure(yscrollcommand=sb.set)
+        self.task_tv.pack(side="left", fill="both", expand=True); sb.pack(side="left", fill="y")
+        self.task_tv.bind("<Double-1>", self.on_task_double)
+        self.task_tv.bind("<Return>", self.on_task_double)
+        self.task_tv.bind("<<TreeviewSelect>>", self.show_task_how)
+        self.task_tv.bind("<space>", lambda e: self.toggle_task_done())
+        # sağ: önizleme kartı
+        card = tk.Frame(rf, bg=PAL["surface"], highlightthickness=1, highlightbackground=PAL["border"])
+        card.pack(fill="both", expand=True, padx=(8, 0))
+        self.prev_title = tk.Label(card, text=t("tasks.how_pick"), bg=PAL["surface"], fg=PAL["fg"], font=(ui_theme.FONT_SEMI, 13),
+                                   wraplength=420, justify="left", anchor="w")
+        self.prev_title.pack(fill="x", padx=14, pady=(14, 4))
+        self.prev_meta = tk.Label(card, text="", bg=PAL["surface"], fg=PAL["accent"], font=(ui_theme.FONT, 9), anchor="w")
+        self.prev_meta.pack(fill="x", padx=14)
+        self.how_lbl = tk.Label(card, text="", bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 10), wraplength=420,
+                                justify="left", anchor="nw")
+        self.how_lbl.pack(fill="both", expand=True, padx=14, pady=8)
+        card.bind("<Configure>", lambda e: [w.config(wraplength=max(160, e.width - 30)) for w in (self.prev_title, self.how_lbl)])
+        pb = tk.Frame(card, bg=PAL["surface"]); pb.pack(fill="x", padx=12, pady=(0, 12))
+        ttk.Button(pb, text=ui_theme.with_icon(t("tasks.details"), "🔍"), style="Accent.TButton", command=self.on_task_double).pack(side="left")
+        self.how_btn = ttk.Button(pb, text=ui_theme.with_icon(t("tasks.open_source"), "🔗"), command=self.open_how_source, state="disabled")
+        self.how_btn.pack(side="left", padx=6)
+        tb = ttk.Frame(L); tb.pack(fill="x", padx=6, pady=(2, 8))
+        ttk.Button(tb, text=ui_theme.with_icon(t("task.toggle_done"), "✔"), command=self.toggle_task_done).pack(side="left")
+        ttk.Button(tb, text=ui_theme.with_icon(t("btn.delete"), "🗑"), command=self.delete_task).pack(side="left", padx=6)
+        ttk.Button(tb, text=ui_theme.with_icon(t("task.clear_done"), "🧹"), command=self.clear_done_tasks).pack(side="left")
+        ttk.Button(tb, text=ui_theme.with_icon(t("task.clear_cat"), "🗑"), command=self.clear_all_tasks).pack(side="left", padx=6)
+        ttk.Label(tb, text=t("tasks.dbl_hint"), foreground=PAL["muted"]).pack(side="right")
+
+        # ---- ekle / ekrandan oku
+        A = ui_theme.scrollable(pg["add"], PAL["bg"])
+        add = ttk.LabelFrame(A, text=t("task.add_box")); add.pack(fill="x", padx=10, pady=10)
+        row = ttk.Frame(add); row.pack(fill="x", padx=8, pady=6)
+        ttk.Label(row, text=t("label.category")).pack(side="left")
+        self.cat_var = tk.StringVar(value=add_choice_name(*ADD_CHOICES[0]))
+        ttk.Combobox(row, textvariable=self.cat_var, values=[add_choice_name(*c) for c in ADD_CHOICES],
+                     width=24, state="readonly").pack(side="left", padx=4)
+        ttk.Button(row, text=t("task.read_screen"), command=self.capture_task_region).pack(side="left", padx=8)
+        ttk.Button(row, text=ui_theme.with_icon(t("tasks.read_projects"), "📋"), style="Accent.TButton",
+                   command=self.read_projects_screen).pack(side="left")
+        ttk.Button(row, text=t("tasks.reset_region"), command=lambda: self.read_projects_screen(reselect=True)).pack(side="left", padx=6)
+        ttk.Label(add, text=t("tasks.projects_note"), foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=8)
+        self.task_in = tk.Text(add, height=6, wrap="word"); self.task_in.pack(fill="x", padx=8, pady=(4, 4))
+        row2 = ttk.Frame(add); row2.pack(fill="x", padx=8, pady=(0, 8))
+        ttk.Button(row2, text=t("task.translate_add"), command=self.translate_and_add, style="Accent.TButton").pack(side="left")
+        self.tr_status = ttk.Label(row2, text=""); self.tr_status.pack(side="left", padx=10)
+
+        # ---- Claude ile getir (eski ChatGPT ekran makrosu yerine)
+        C = ui_theme.scrollable(pg["claude"], PAL["bg"])
+        cb = ttk.LabelFrame(C, text="🤖 " + t("cl.box")); cb.pack(fill="x", padx=10, pady=10)
+        ttk.Label(cb, text=t("cl.note"), wraplength=900, justify="left").pack(anchor="w", padx=8, pady=(6, 4))
+        cr = ttk.Frame(cb); cr.pack(fill="x", padx=8, pady=6)
+        ttk.Button(cr, text=ui_theme.with_icon(t("cl.run"), "🌐"), style="Accent.TButton", command=self.run_claude_fetch).pack(side="left")
+        self.cl_replace = tk.BooleanVar(value=bool(st.get("claude_tasks_replace", True)))
+        ttk.Checkbutton(cr, text=t("cl.replace"), variable=self.cl_replace).pack(side="left", padx=12)
+        ttk.Label(cr, text=t("cl.hotkey")).pack(side="left", padx=(12, 2))
+        self.gv = {"chatgpt_hotkey": tk.StringVar(value=str(st.get("chatgpt_hotkey", "<f10>")))}
+        ttk.Entry(cr, textvariable=self.gv["chatgpt_hotkey"], width=8).pack(side="left")
+        ttk.Button(cr, text=t("btn.save_short"), command=self.save_gpt_settings).pack(side="left", padx=6)
+        self.gpt_status = ttk.Label(cb, text=self.claude_cli_state(), foreground=PAL["muted"], wraplength=900, justify="left")
+        self.gpt_status.pack(anchor="w", padx=8)
+        ttk.Label(cb, text=t("cl.raw"), foreground=PAL["muted"]).pack(anchor="w", padx=8, pady=(8, 0))
+        self.gpt_raw = tk.Text(cb, height=10, state="disabled", wrap="word", font=("Consolas", 9)); self.gpt_raw.pack(fill="x", padx=8, pady=(0, 8))
+
+        # ---- sıfırlama ve senkron
+        S = ui_theme.scrollable(pg["sync"], PAL["bg"])
+        top = ttk.LabelFrame(S, text=t("task.reset_box")); top.pack(fill="x", padx=10, pady=10)
+        self.reset_lbl2 = ttk.Label(top, style="Section.TLabel"); self.reset_lbl2.pack(anchor="w", padx=8, pady=4)
         rr = ttk.Frame(top); rr.pack(fill="x", padx=8, pady=(0, 6))
         self.rv = {"daily_reset_hour": tk.StringVar(value=str(st["daily_reset_hour"])),
                    "weekly_reset_day": tk.StringVar(value=weekday_names()[st["weekly_reset_day"]]),
@@ -2581,195 +2815,86 @@ class App:
         ttk.Label(rr, text=t("task.hour")).pack(side="left")
         ttk.Entry(rr, textvariable=self.rv["weekly_reset_hour"], width=4).pack(side="left", padx=2)
         ttk.Button(rr, text=ui_theme.with_icon(t("btn.save_short"), "💾"), command=self.save_reset_settings, style="Accent.TButton").pack(side="left", padx=8)
-        ttk.Label(top, text=t("task.reset_note"),
-                 foreground=PAL["muted"]).pack(anchor="w", padx=8, pady=(0, 4))
-
-        fb = ttk.LabelFrame(f, text=t("tasks.feed_box")); fb.pack(fill="x", padx=10, pady=(0, 8))
+        ttk.Label(top, text=t("task.reset_note"), foreground=PAL["muted"]).pack(anchor="w", padx=8, pady=(0, 4))
+        fb = ttk.LabelFrame(S, text=t("tasks.feed_box")); fb.pack(fill="x", padx=10, pady=(0, 8))
         fr = ttk.Frame(fb); fr.pack(fill="x", padx=8, pady=6)
         ttk.Button(fr, text=ui_theme.with_icon(t("tasks.sync_now"), "🌐"), style="Accent.TButton",
                    command=lambda: self.meta_sync_start(force=True, what=("tasks",))).pack(side="left")
         self.bv_tasks = {k: tk.BooleanVar(value=bool(st.get(k, True))) for k in ("tasks_sync", "auto_reset_times")}
-        ttk.Checkbutton(fr, text=t("tasks.enable"), variable=self.bv_tasks["tasks_sync"],
-                        command=self.save_task_feed_flags).pack(side="left", padx=(14, 0))
-        ttk.Checkbutton(fr, text=t("tasks.auto_resets"), variable=self.bv_tasks["auto_reset_times"],
-                        command=self.save_task_feed_flags).pack(side="left", padx=(14, 0))
-        self.tasks_info = ttk.Label(fb, text=self.tasks_status_text(), foreground=PAL["muted"], wraplength=820, justify="left")
+        ttk.Checkbutton(fr, text=t("tasks.enable"), variable=self.bv_tasks["tasks_sync"], command=self.save_task_feed_flags).pack(side="left", padx=(14, 0))
+        ttk.Checkbutton(fr, text=t("tasks.auto_resets"), variable=self.bv_tasks["auto_reset_times"], command=self.save_task_feed_flags).pack(side="left", padx=(14, 0))
+        self.tasks_info = ttk.Label(fb, text=self.tasks_status_text(), foreground=PAL["muted"], wraplength=900, justify="left")
         self.tasks_info.pack(anchor="w", padx=8)
         wr = ttk.Frame(fb); wr.pack(fill="x", padx=8, pady=(6, 2))
         ttk.Button(wr, text=ui_theme.with_icon(t("wiki.sync_now"), "📚"), style="Accent.TButton",
                    command=lambda: self.meta_sync_start(force=True, what=("wiki",))).pack(side="left")
         self.bv_tasks["wiki_sync"] = tk.BooleanVar(value=bool(st.get("wiki_sync", True)))
-        ttk.Checkbutton(wr, text=t("wiki.enable"), variable=self.bv_tasks["wiki_sync"],
-                        command=self.save_task_feed_flags).pack(side="left", padx=(14, 0))
+        ttk.Checkbutton(wr, text=t("wiki.enable"), variable=self.bv_tasks["wiki_sync"], command=self.save_task_feed_flags).pack(side="left", padx=(14, 0))
         ttk.Button(wr, text=ui_theme.with_icon(t("wiki.open"), "🔗"), command=self.open_wiki_page).pack(side="left", padx=(14, 0))
-        self.wiki_lbl = ttk.Label(fb, text=self.wiki_status_text(), foreground=PAL["muted"], wraplength=820, justify="left")
+        self.wiki_lbl = ttk.Label(fb, text=self.wiki_status_text(), foreground=PAL["muted"], wraplength=900, justify="left")
         self.wiki_lbl.pack(anchor="w", padx=8)
-        ttk.Label(fb, text=t("wiki.note"), foreground=PAL["muted"], wraplength=820, justify="left").pack(anchor="w", padx=8)
-        ttk.Label(fb, text=t("tasks.feed_note"), foreground=PAL["muted"], wraplength=820,
-                  justify="left").pack(anchor="w", padx=8, pady=(0, 6))
-
-        add = ttk.LabelFrame(f, text=t("task.add_box"))
-        add.pack(fill="x", padx=10, pady=(0, 8))
-        row = ttk.Frame(add); row.pack(fill="x", padx=8, pady=4)
-        ttk.Label(row, text=t("label.category")).pack(side="left")
-        self.cat_var = tk.StringVar(value=add_choice_name(*ADD_CHOICES[0]))
-        ttk.Combobox(row, textvariable=self.cat_var, values=[add_choice_name(*c) for c in ADD_CHOICES],
-                     width=22, state="readonly").pack(side="left", padx=4)
-        ttk.Button(row, text=t("task.read_screen"), command=self.capture_task_region).pack(side="left", padx=8)
-        ttk.Button(row, text=ui_theme.with_icon(t("tasks.read_projects"), "📋"), style="Accent.TButton",
-                   command=self.read_projects_screen).pack(side="left")
-        ttk.Button(row, text=t("tasks.reset_region"), command=lambda: self.read_projects_screen(reselect=True)).pack(side="left", padx=6)
-        ttk.Label(add, text=t("tasks.projects_note"), foreground=PAL["muted"], wraplength=820,
-                  justify="left").pack(anchor="w", padx=8)
-        self.task_in = tk.Text(add, height=4, wrap="word"); self.task_in.pack(fill="x", padx=8, pady=(0, 4))
-        row2 = ttk.Frame(add); row2.pack(fill="x", padx=8, pady=(0, 6))
-        ttk.Button(row2, text=t("task.translate_add"), command=self.translate_and_add, style="Accent.TButton").pack(side="left")
-        self.tr_status = ttk.Label(row2, text=""); self.tr_status.pack(side="left", padx=10)
-
-        lst = ttk.Frame(f); lst.pack(fill="both", expand=True, padx=10, pady=(0, 10))
-        left = ttk.Frame(lst); left.pack(side="left", fill="y")
-        ttk.Label(left, text=t("label.categories")).pack(anchor="w")
-        self.cat_lb = tk.Listbox(left, width=16, exportselection=False)
-        for c in TASK_CATS: self.cat_lb.insert("end", cat_name(c))
-        self.cat_lb.selection_set(0); self.cat_lb.pack(fill="y", expand=True)
-        self.cat_lb.bind("<<ListboxSelect>>", lambda e: self.refresh_tasks())
-        right = ttk.Frame(lst); right.pack(side="left", fill="both", expand=True, padx=(10, 0))
-        self.task_tv = ttk.Treeview(right, columns=("done", "tr", "en", "src"), show="headings", height=10)
-        for c, hd, w in (("done", "✔", 40), ("tr", t("col.translated"), 320), ("en", t("col.original"), 320), ("src", t("col.source"), 70)):
-            self.task_tv.heading(c, text=hd); self.task_tv.column(c, width=w, anchor="center" if c in ("done", "src") else "w")
-        self.task_tv.pack(fill="both", expand=True)
-        self.task_tv.bind("<Double-1>", lambda e: self.toggle_task_done())
-        self.task_tv.bind("<<TreeviewSelect>>", self.show_task_how)
-        hw = ttk.LabelFrame(right, text=t("tasks.how_title")); hw.pack(fill="x", pady=(6, 0))
-        self.how_lbl = ttk.Label(hw, text=t("tasks.how_pick"), wraplength=700, justify="left"); self.how_lbl.pack(anchor="w", padx=8, pady=4)
-        self.how_btn = ttk.Button(hw, text=ui_theme.with_icon(t("tasks.open_source"), "🔗"), command=self.open_how_source, state="disabled")
-        self.how_btn.pack(anchor="w", padx=8, pady=(0, 6))
-        tb = ttk.Frame(right); tb.pack(fill="x", pady=6)
-        ttk.Button(tb, text=t("task.toggle_done"), command=self.toggle_task_done).pack(side="left")
-        ttk.Button(tb, text=ui_theme.with_icon(t("btn.delete"), "🗑"), command=self.delete_task).pack(side="left", padx=6)
-        ttk.Button(tb, text=ui_theme.with_icon(t("task.clear_done"), "✔"), command=self.clear_done_tasks).pack(side="left")
-        ttk.Button(tb, text=ui_theme.with_icon(t("task.clear_cat"), "🧹"), command=self.clear_all_tasks).pack(side="left", padx=6)
+        ttk.Label(fb, text=t("wiki.note") + "\n" + t("tasks.feed_note"), foreground=PAL["muted"], wraplength=900,
+                  justify="left").pack(anchor="w", padx=8, pady=(4, 8))
         self.refresh_tasks(); self.update_reset_label()
+        self.root.after(1500, self.translate_wiki_tasks)
 
-        gpt = ttk.LabelFrame(f, text=t("gpt.box"))
-        gpt.pack(fill="x", padx=10, pady=(0, 10))
-        ttk.Label(gpt, text=t("gpt.warning"), foreground=PAL["warning"], wraplength=760, justify="left").pack(anchor="w", padx=8, pady=4)
-        gr = ttk.Frame(gpt); gr.pack(fill="x", padx=8, pady=2)
-        self.gv = {k: tk.StringVar(value=str(self.cfg["settings"].get(k, ""))) for k in
-                   ("chatgpt_window_title", "chatgpt_hotkey", "chatgpt_wait_seconds")}
-        ttk.Label(gr, text=t("gpt.window_title")).pack(side="left")
-        ttk.Entry(gr, textvariable=self.gv["chatgpt_window_title"], width=14).pack(side="left", padx=4)
-        ttk.Label(gr, text=t("gpt.hotkey")).pack(side="left")
-        ttk.Entry(gr, textvariable=self.gv["chatgpt_hotkey"], width=8).pack(side="left", padx=4)
-        ttk.Label(gr, text=t("gpt.wait")).pack(side="left")
-        ttk.Entry(gr, textvariable=self.gv["chatgpt_wait_seconds"], width=5).pack(side="left", padx=4)
-        ttk.Button(gr, text=t("btn.save"), command=self.save_gpt_settings, style="Accent.TButton").pack(side="left", padx=8)
-        gr2 = ttk.Frame(gpt); gr2.pack(fill="x", padx=8, pady=4)
-        ttk.Button(gr2, text=ui_theme.with_icon(t("gpt.pick_region"), "⛶"), command=self.capture_gpt_region).pack(side="left")
-        ttk.Button(gr2, text=t("gpt.run"), command=self.run_gpt_fetch, style="Accent.TButton").pack(side="left", padx=6)
-        ttk.Button(gr2, text=t("gpt.read_only"), command=self.read_gpt_region_only).pack(side="left")
-        self.gpt_status = ttk.Label(gpt, text=""); self.gpt_status.pack(anchor="w", padx=8)
-        ttk.Label(gpt, text=t("gpt.prompt_label")).pack(anchor="w", padx=8, pady=(6, 0))
-        self.gpt_prompt = tk.Text(gpt, height=4, wrap="word"); self.gpt_prompt.pack(fill="x", padx=8, pady=(0, 4))
-        self.gpt_prompt.insert("end", self.cfg["settings"].get("chatgpt_prompt") or default_gpt_prompt())
-        ttk.Button(gpt, text=t("gpt.save_prompt"), command=self.save_gpt_prompt).pack(anchor="w", padx=8, pady=(0, 4))
-        ttk.Label(gpt, text=t("gpt.raw_label")).pack(anchor="w", padx=8)
-        self.gpt_raw = tk.Text(gpt, height=5, state="disabled", wrap="word", font=("Consolas", 9)); self.gpt_raw.pack(fill="x", padx=8, pady=(0, 8))
+    def claude_cli_state(self):
+        return t("cl.ready") if find_claude_cli() else t("ai.cc_missing")
 
     def save_gpt_settings(self):
         st = self.cfg["settings"]
         try:
-            ws = float(self.gv["chatgpt_wait_seconds"].get())
             from pynput import keyboard
             keyboard.HotKey.parse(self.gv["chatgpt_hotkey"].get())
         except Exception as e:
             return messagebox.showerror(APP_NAME, t("err.bad_setting", e=e))
-        st["chatgpt_window_title"] = self.gv["chatgpt_window_title"].get().strip() or "ChatGPT"
         st["chatgpt_hotkey"] = self.gv["chatgpt_hotkey"].get().strip()
-        st["chatgpt_wait_seconds"] = ws
+        st["claude_tasks_replace"] = bool(self.cl_replace.get())
         save_cfg(self.cfg)
         if self.running: self.stop(); self.start()
-        messagebox.showinfo(APP_NAME, t("msg.settings_saved"))
+        self.toast(t("msg.settings_saved"))
 
-    def save_gpt_prompt(self):
-        self.cfg["settings"]["chatgpt_prompt"] = self.gpt_prompt.get("1.0", "end").strip()
-        save_cfg(self.cfg); messagebox.showinfo(APP_NAME, t("gpt.prompt_saved"))
+    def run_claude_fetch(self):  # pynput thread'inden de çağrılır: tk'ya dokunma
+        if getattr(self, "_cl_busy", False): return
+        self._cl_busy = True
+        threading.Thread(target=self._claude_fetch_work, daemon=True).start()
 
-    def capture_gpt_region(self):
-        if not messagebox.askokcancel(APP_NAME, t("calib.ask_gpt")):
-            return
-        self.root.withdraw(); self.root.after(5000, self._gpt_region_capture)
-
-    def _gpt_region_capture(self):
-        with mss.mss() as sct:
-            mon = sct.monitors[1]; s = sct.grab(mon); img = Image.frombytes("RGB", s.size, s.rgb)
-        self.root.deiconify()
-        w = tk.Toplevel(self.root); w.attributes("-fullscreen", True, "-topmost", True)
-        cv = tk.Canvas(w, highlightthickness=0, cursor="crosshair"); cv.pack(fill="both", expand=True)
-        w.update_idletasks()
-        sw, sh = w.winfo_width(), w.winfo_height()
-        scale = min(sw / img.width, sh / img.height)
-        w._photo = ImageTk.PhotoImage(img.resize((int(img.width * scale), int(img.height * scale))))
-        cv.create_image(0, 0, image=w._photo, anchor="nw")
-        cv.create_text(sw // 2, 30, fill="yellow", font=("Segoe UI", 18, "bold"), text=t("gpt.calib_hint"))
-        st = {}
-        def down(e): st.update(x0=e.x, y0=e.y, r=cv.create_rectangle(e.x, e.y, e.x, e.y, outline="lime", width=3))
-        def move(e): cv.coords(st["r"], st["x0"], st["y0"], e.x, e.y)
-        def up(e):
-            x1, x2 = sorted((st["x0"], e.x)); y1, y2 = sorted((st["y0"], e.y))
-            if x2 - x1 < 30 or y2 - y1 < 30: return
-            self.cfg["settings"]["chatgpt_region"] = {"left": mon["left"] + int(x1 / scale), "top": mon["top"] + int(y1 / scale),
-                                                       "width": int((x2 - x1) / scale), "height": int((y2 - y1) / scale)}
-            save_cfg(self.cfg); w.destroy()
-        cv.bind("<ButtonPress-1>", down); cv.bind("<B1-Motion>", move); cv.bind("<ButtonRelease-1>", up)
-        w.bind("<Escape>", lambda e: w.destroy()); w.focus_force()
-
-    def run_gpt_fetch(self):  # pynput thread'inden de çağrılır: tk'ya dokunma
-        st = self.cfg["settings"]
-        if not st.get("chatgpt_region"):
-            return self.results.put(("gpt_status", t("gpt.need_region")))
-        threading.Thread(target=self._gpt_fetch_work, daemon=True).start()
-
-    def _gpt_fetch_work(self):
+    def _claude_fetch_work(self):
         st = self.cfg["settings"]
         try:
-            self.results.put(("gpt_status", t("gpt.finding_window")))
-            find_and_focus_window(st.get("chatgpt_window_title", "ChatGPT"))
-            raw = st.get("chatgpt_prompt") or default_gpt_prompt()
-            try:
-                prompt = raw.format(date=datetime.now().strftime("%Y-%m-%d"))
-            except (KeyError, IndexError, ValueError):
-                prompt = raw   # kullanıcı kendi metninde başka bir yer tutucu kullanmışsa bozma
-            type_and_send(prompt)
-            wait = float(st.get("chatgpt_wait_seconds", 15))
-            for left in range(int(wait), 0, -1):
-                self.results.put(("gpt_status", t("gpt.waiting", left=left)))
-                time.sleep(1)
-            self._gpt_read_and_add()
+            if not find_claude_cli():
+                return self.results.put(("gpt_status", t("ai.cc_missing")))
+            self.results.put(("gpt_status", t("cl.working")))
+            raw = ask_claude_code(st.get("claude_code_model", ""), claude_tasks_prompt(),
+                                  [{"role": "user", "content": "List the current Division 2 Journey, Manhunt and project tasks as JSON."}],
+                                  timeout=420, tools="WebSearch,WebFetch", max_turns=12)
+            self.results.put(("gpt_raw", raw))
+            parsed, season = parse_claude_tasks(raw)
+            total = sum(len(v) for v in parsed.values())
+            if not total:
+                return self.results.put(("gpt_status", t("cl.nothing")))
+            self.results.put(("claude_tasks", parsed, season))
         except Exception as e:
-            log.exception("ChatGPT automation failed")
+            log.exception("Claude task fetch failed")
             self.results.put(("gpt_status", t("err.generic", e=e)))
+        finally:
+            self._cl_busy = False
 
-    def read_gpt_region_only(self):
-        if not self.cfg["settings"].get("chatgpt_region"):
-            return messagebox.showinfo(APP_NAME, t("gpt.need_region_short"))
-        threading.Thread(target=self._gpt_read_and_add, daemon=True).start()
-
-    def _gpt_read_and_add(self):
-        try:
-            text = ocr(grab(self.cfg["settings"]["chatgpt_region"]), "eng+tur" if "+tur" in (pytesseract.pytesseract.tesseract_cmd or "") else self.cfg["settings"]["ocr_lang"])
-            parsed = parse_gpt_answer(text)
-            self.results.put(("gpt_raw", text))
-            total = 0
-            for cat, items in parsed.items():
-                if not items: continue
-                add = [{"en": "", "tr": it, "src": "ChatGPT", "done": False, "time": datetime.now().isoformat(timespec="seconds")} for it in items]
-                self.results.put(("tasks_added", cat, add)); total += len(add)
-            self.results.put(("gpt_status", t("task.added", n=total) if total else t("gpt.no_parse")))
-        except Exception as e:
-            log.exception("Reading ChatGPT answer failed")
-            self.results.put(("gpt_status", t("err.read", e=e)))
-
+    def apply_claude_tasks(self, parsed, season):
+        replace = bool(getattr(self, "cl_replace", None) and self.cl_replace.get())
+        added = 0
+        for cat, items in parsed.items():
+            cur = self.tasks["items"].setdefault(cat, [])
+            if replace:
+                cur[:] = [x for x in cur if x.get("src") != "Claude"]
+            have = {gamedata.nrm(x.get("en") or task_text(x, "en")[0]) for x in cur}
+            for x in items:
+                if gamedata.nrm(x["en"]) in have: continue
+                cur.append(x); have.add(gamedata.nrm(x["en"])); added += 1
+        save_tasks(self.tasks); self.refresh_tasks()
+        self.gpt_status.config(text=t("cl.added", n=added, season=season or "—"))
+        log.info("Claude tasks: %d added (season %s)", added, season)
+        self.translate_wiki_tasks()
 
     def save_task_feed_flags(self):
         st = self.cfg["settings"]
@@ -2792,10 +2917,11 @@ class App:
     def update_reset_label(self):
         st, now = self.cfg["settings"], datetime.now()
         nd = next_daily_reset(now, st["daily_reset_hour"]); nw = next_weekly_reset(now, st["weekly_reset_day"], st["weekly_reset_hour"])
-        self.reset_lbl.config(text=t("task.reset_line",
-                                     daily=fmt_remaining(nd, now),
-                                     day=weekday_names()[st["weekly_reset_day"]],
-                                     weekly=fmt_remaining(nw, now)))
+        txt = t("task.reset_line", daily=fmt_remaining(nd, now), day=weekday_names()[st["weekly_reset_day"]],
+                weekly=fmt_remaining(nw, now))
+        for w in (getattr(self, "reset_lbl", None), getattr(self, "reset_lbl2", None)):
+            try: w and w.config(text=("⏱ " + txt))
+            except tk.TclError: pass
 
     # ---------- Meta build senkronu ----------
     def meta_sync_start(self, force=False, quiet=False, what=("builds", "tasks", "wiki")):
@@ -2925,7 +3051,7 @@ class App:
         if lang == "en" or self.cfg["settings"].get("ai_provider", "builtin") == "builtin" or getattr(self, "_wiki_tr_busy", False):
             return
         todo = [x for c in self.tasks["items"].values() for x in c
-                if str(x.get("feed_id", "")).startswith("wiki-") and lang not in x.get("texts", {})][:30]
+                if x.get("en") and lang not in x.get("texts", {}) and not (lang == "tr" and x.get("tr"))][:30]
         if not todo: return
         self._wiki_tr_busy = True
 
@@ -2937,7 +3063,7 @@ class App:
                     if src != t("src.ai"): break                       # yapay zekâ yanıt vermiyor: sözlükle karıştırma
                     how_en = (x.get("how") or {}).get("en", "")
                     how_tr = translate_task_text(self, how_en)[0] if how_en else ""
-                    done[x["feed_id"]] = (tr.strip(), how_tr.strip())
+                    done[id(x)] = (tr.strip(), how_tr.strip())
                 except Exception as e:
                     log.debug("Wiki translation failed: %s", e); break
             self.root.after(0, lambda: self._apply_wiki_translations(lang, done))
@@ -2947,8 +3073,8 @@ class App:
         self._wiki_tr_busy = False
         for c in self.tasks["items"].values():
             for x in c:
-                if x.get("feed_id") in done:
-                    tr, how = done[x["feed_id"]]
+                if id(x) in done:
+                    tr, how = done[id(x)]
                     x.setdefault("texts", {})[lang] = tr
                     if how: x.setdefault("how", {})[lang] = how
         if done:
@@ -3017,23 +3143,59 @@ class App:
         self.root.after(60000, self.check_resets)
 
     def selected_list_cat(self):
-        """Soldaki kategori listesinde seçili olanın kimliği."""
-        s = self.cat_lb.curselection()
-        return TASK_CATS[s[0]] if s else TASK_CATS[0]
+        """Üstteki kategori düğmelerinde seçili olanın kimliği."""
+        v = self.task_cat.get() if hasattr(self, "task_cat") else TASK_CATS[0]
+        return v if v in TASK_CATS else TASK_CATS[0]
+
+    def selected_task(self):
+        """(kategori, sıra) ya da (None, None) — grup satırı seçiliyse None."""
+        sel = self.task_tv.selection() if hasattr(self, "task_tv") else ()
+        if not sel or not sel[0].startswith("t:"): return None, None
+        _, cat, i = sel[0].split(":", 2)
+        return cat, int(i)
 
     def refresh_tasks(self):
-        self.task_tv.delete(*self.task_tv.get_children())
-        cat = self.selected_list_cat()
+        if not hasattr(self, "task_tv"): return
         lang = i18n.current_language()
-        for i, task in enumerate(self.tasks["items"].get(cat, [])):
-            shown = task.get("texts", {}).get(lang) or task.get("tr") or task["en"]
-            if cat == "projects" and task.get("kind") in PROJECT_KINDS: shown = f"[{cat_name(task['kind'])}] {shown}"
-            src = task.get("src", "") + (" 💡" if self.task_how(task)[0] else "")
-            self.task_tv.insert("", "end", iid=str(i), values=("✔" if task["done"] else "—", shown, task["en"], src))
-        if hasattr(self, "how_lbl"): self.show_task_how()
+        cat = self.selected_list_cat()
+        q = gamedata.nrm(self.task_q.get()) if hasattr(self, "task_q") else ""
+        for c, (b, icon) in self.cat_btns.items():
+            lst = self.tasks["items"].get(c, [])
+            open_n = sum(1 for x in lst if not x.get("done"))
+            b.config(text=f"{icon} {cat_name(c)}  {open_n}/{len(lst)}")
+        keep = self.task_tv.selection()
+        self.task_tv.delete(*self.task_tv.get_children())
+        groups = {}
+        lst = self.tasks["items"].get(cat, [])
+        best = {}                                              # kopyalar: çevrili ve ortak listeden geleni göster
+        for i, task in enumerate(lst):
+            k = task_dedupe_key(task)
+            score = (task_text(task, lang)[1], task.get("src", "").lower() != "wiki", bool(task.get("how")))
+            if k not in best or score > best[k][0]: best[k] = (score, i)
+        show_idx = {v[1] for v in best.values()}
+        for i, task in enumerate(lst):
+            if i not in show_idx: continue
+            if self.hide_done.get() and task.get("done"): continue
+            text, ok = task_text(task, lang)
+            if q and q not in gamedata.nrm(text): continue
+            gkey, group = task_group(task, cat)
+            _, short = split_title(text)
+            if cat == "projects" and task.get("kind") in PROJECT_KINDS:
+                gkey, group = "k:" + task["kind"] + gkey, cat_name(task["kind"]) + (f" · {group}" if group != t("tasks.other_group") else "")
+            if gkey not in groups:
+                groups[gkey] = self.task_tv.insert("", "end", iid=f"g:{len(groups)}", text=f"  {group}", open=True, tags=("group",))
+            group = gkey
+            src = task.get("src", "")
+            src = {"wiki": "📚 Wiki"}.get(src.lower(), src) + (" 💡" if self.task_how(task)[0] else "")
+            label = ("" if ok else "🌐 ") + (short if len(short) <= 110 else short[:107] + "…")
+            self.task_tv.insert(groups[group], "end", iid=f"t:{cat}:{i}", text=label,
+                                values=("✔" if task.get("done") else "○", src), tags=("done",) if task.get("done") else ())
+        for k in keep:
+            if self.task_tv.exists(k): self.task_tv.selection_set(k); self.task_tv.see(k)
+        self.show_task_how()
 
     def task_how(self, task):
-        """(ipucu metni, kaynak adresi) — önce görevin kendi ipucu, yoksa türüne uyan genel ipucu."""
+        """(ipucu metni, kaynak adresi) — yalnızca arayüz dilinde (yoksa İngilizce)."""
         lang = i18n.current_language()
         how = task.get("how") or {}
         if how:
@@ -3044,14 +3206,143 @@ class App:
         return "", task.get("url", "")
 
     def show_task_how(self, _=None):
-        sel = self.task_tv.selection()
-        items = self.tasks["items"].get(self.selected_list_cat(), [])
-        if not sel or int(sel[0]) >= len(items):
-            self.how_lbl.config(text=t("tasks.how_pick")); self.how_url = ""; return
-        tip, url = self.task_how(items[int(sel[0])])
-        self.how_lbl.config(text=tip or t("tasks.how_none")); self.how_url = url
+        if not hasattr(self, "how_lbl"): return
+        cat, i = self.selected_task()
+        items = self.tasks["items"].get(cat, []) if cat else []
+        if cat is None or i >= len(items):
+            self.prev_title.config(text=t("tasks.how_pick")); self.prev_meta.config(text="")
+            self.how_lbl.config(text=t("tasks.dbl_hint")); self.how_url = ""
+            try: self.how_btn.config(state="disabled")
+            except Exception: pass
+            return
+        task = items[i]
+        text, ok = task_text(task)
+        group, short = split_title(text)
+        tip, url = self.task_how(task)
+        self.prev_title.config(text=short)
+        meta = [cat_name(cat)] + ([cat_name(task["kind"])] if task.get("kind") in PROJECT_KINDS else []) + ([group] if group else [])
+        if task.get("done"): meta.append("✔ " + t("tasks.done"))
+        if not ok: meta.append("🌐 " + t("tasks.not_translated"))
+        self.prev_meta.config(text="  ·  ".join(meta))
+        self.how_lbl.config(text=(tip or t("tasks.how_none")) + "\n\n" + t("tasks.dbl_hint")); self.how_url = url
         try: self.how_btn.config(state="normal" if url else "disabled")
         except Exception: pass
+
+    def on_task_double(self, _=None):
+        cat, i = self.selected_task()
+        if cat is None:
+            sel = self.task_tv.selection()                    # grup satırı: aç/kapa
+            if sel: self.task_tv.item(sel[0], open=not self.task_tv.item(sel[0], "open"))
+            return "break"
+        self.open_task_detail(cat, i)
+        return "break"
+
+    def open_task_detail(self, cat, i):
+        """Ayrı pencere: başlık bandı, açıklama, adım adım nasıl yapılır, wiki görselleri, kaynak, tamamlandı."""
+        items = self.tasks["items"].get(cat, [])
+        if i >= len(items): return
+        task = items[i]
+        text, ok = task_text(task)
+        group, short = split_title(text)
+        tip, url = self.task_how(task)
+        f = getattr(self, "ui_factor", 1.0)
+        w = tk.Toplevel(self.root); w.title(f"{cat_name(cat)} — {short[:60]}"); w.configure(bg=PAL["bg"])
+        ww, wh = int(980 * max(0.6, f)), int(700 * max(0.6, f))
+        w.geometry(f"{ww}x{wh}+{self.root.winfo_rootx() + 60}+{self.root.winfo_rooty() + 60}")
+        w.transient(self.root)
+        # başlık bandı
+        hb = tk.Canvas(w, height=int(118 * max(0.6, f)), highlightthickness=0, bg="#0d0f13"); hb.pack(fill="x")
+        accent = {"projects": "#ff6d10", "journey": "#38bdf8", "manhunt": "#ef4444"}.get(cat, PAL["accent"])
+
+        def draw_head(_=None):
+            hb.delete("all")
+            W, H = max(200, hb.winfo_width()), int(hb["height"])
+            for k in range(24):                                  # koyu degrade + altıgen deseni
+                c = int(13 + 10 * (1 - k / 24))
+                hb.create_rectangle(0, H * k / 24, W, H * (k + 1) / 24 + 1, fill=f"#{c:02x}{c + 2:02x}{c + 6:02x}", outline="")
+            r = 18
+            for row in range(-1, H // 26 + 2):
+                for col in range(W // 31 + 2):
+                    x, y = col * 31 + (15 if row % 2 else 0), row * 26
+                    hb.create_polygon([(x + r * math.cos(math.radians(60 * a + 30)), y + r * math.sin(math.radians(60 * a + 30))) for a in range(6)],
+                                      outline="#1b2029", fill="")
+            hb.create_rectangle(0, H - 4, W, H, fill=accent, outline="")
+            hb.create_text(24, 26, anchor="w", text=(cat_name(cat) + ("  ·  " + cat_name(task["kind"]) if task.get("kind") in PROJECT_KINDS else "")).upper(),
+                           fill=accent, font=(ui_theme.FONT_SEMI, 10))
+            hb.create_text(24, 56, anchor="w", text=group or cat_name(cat), fill="#ffffff", font=(ui_theme.FONT_SEMI, 20))
+            st_txt = "✔ " + t("tasks.done") if task.get("done") else "○ " + t("tasks.open")
+            hb.create_text(W - 24, 26, anchor="e", text=st_txt, fill="#4ade80" if task.get("done") else "#c9ced8",
+                           font=(ui_theme.FONT_SEMI, 11))
+        hb.bind("<Configure>", draw_head)
+        body = ttk.Panedwindow(w, orient="horizontal"); body.pack(fill="both", expand=True, padx=12, pady=10)
+        left, right = ttk.Frame(body), ttk.Frame(body)
+        body.add(left, weight=3); body.add(right, weight=2)
+        tk.Label(left, text=short, bg=PAL["bg"], fg=PAL["fg"], font=(ui_theme.FONT_SEMI, 14), wraplength=520,
+                 justify="left", anchor="w").pack(fill="x", pady=(0, 6))
+        if not ok:
+            tk.Label(left, text="🌐 " + t("tasks.not_translated"), bg=PAL["bg"], fg=PAL["warning"], font=(ui_theme.FONT, 9),
+                     anchor="w").pack(fill="x")
+        ttk.Label(left, text=t("tasks.how_title"), style="Section.TLabel").pack(anchor="w", pady=(10, 2))
+        steps = [x.strip() for x in re.split(r"(?<=[.!?])\s+", tip or "") if x.strip()]
+        sf = tk.Frame(left, bg=PAL["bg"]); sf.pack(fill="x")
+        if steps:
+            for n, stp in enumerate(steps, 1):
+                r_ = tk.Frame(sf, bg=PAL["bg"]); r_.pack(fill="x", pady=3)
+                tk.Label(r_, text=str(n), bg=accent, fg="white", font=(ui_theme.FONT_SEMI, 9), width=3).pack(side="left", anchor="n")
+                tk.Label(r_, text=stp, bg=PAL["bg"], fg=PAL["fg"], font=(ui_theme.FONT, 10), wraplength=480, justify="left",
+                         anchor="w").pack(side="left", fill="x", padx=8)
+        else:
+            tk.Label(sf, text=t("tasks.how_none"), bg=PAL["bg"], fg=PAL["muted"], font=(ui_theme.FONT, 10), anchor="w").pack(fill="x")
+        meta = []
+        if task.get("src"): meta.append(t("tasks.src_line", src=task["src"]))
+        if task.get("expires"): meta.append(t("tasks.expires", d=str(task["expires"])[:16]))
+        if task.get("time"): meta.append(t("tasks.added_at", d=str(task["time"])[:16].replace("T", " ")))
+        if meta:
+            tk.Label(left, text="   ·   ".join(meta), bg=PAL["bg"], fg=PAL["muted"], font=(ui_theme.FONT, 9), anchor="w").pack(fill="x", pady=(12, 0))
+        bb = ttk.Frame(left); bb.pack(fill="x", pady=12)
+
+        def toggle():
+            task["done"] = not task.get("done"); save_tasks(self.tasks); self.refresh_tasks(); draw_head()
+            done_btn.config(text=ui_theme.with_icon(t("tasks.mark_open") if task.get("done") else t("tasks.mark_done"), "✔"))
+        done_btn = ttk.Button(bb, text=ui_theme.with_icon(t("tasks.mark_open") if task.get("done") else t("tasks.mark_done"), "✔"),
+                              style="Accent.TButton", command=toggle)
+        done_btn.pack(side="left")
+        if url:
+            ttk.Button(bb, text=ui_theme.with_icon(t("tasks.open_source"), "🔗"), command=lambda: __import__("webbrowser").open(url)).pack(side="left", padx=6)
+        ttk.Button(bb, text=t("btn.close"), command=w.destroy).pack(side="right")
+        # görseller (wiki) — arka planda yüklenir
+        ttk.Label(right, text="🖼 " + t("tasks.images"), style="Section.TLabel").pack(anchor="w")
+        galh = ttk.Frame(right); galh.pack(fill="both", expand=True, pady=(4, 0))
+        gal = ui_theme.scrollable(galh, PAL["surface"])
+        loading = tk.Label(gal, text=t("tasks.images_loading"), bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 10))
+        loading.pack(pady=30)
+        w._photos = []
+
+        def show(imgs):
+            if not w.winfo_exists(): return
+            loading.destroy()
+            if not imgs:
+                art = Image.new("RGB", (420, 240), (18, 21, 28))
+                d = ImageDraw.Draw(art)
+                for k in range(0, 420, 28): d.line((k, 0, k - 120, 240), fill=(26, 30, 38), width=2)
+                d.rectangle((0, 232, 420, 240), fill=tuple(int(accent[j:j + 2], 16) for j in (1, 3, 5)))
+                imgs = [(art, "")]
+                tk.Label(gal, text=t("tasks.no_images"), bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 9)).pack(anchor="w", padx=8)
+            maxw = max(240, right.winfo_width() - 20)
+            for img, page in imgs:
+                k = min(1.0, maxw / img.width, 260 / img.height)
+                ph = ImageTk.PhotoImage(img.resize((max(1, int(img.width * k)), max(1, int(img.height * k))), Image.LANCZOS))
+                w._photos.append(ph)
+                lb = tk.Label(gal, image=ph, bg=PAL["surface"], cursor="hand2" if page else "")
+                lb.pack(padx=8, pady=(8, 0), anchor="w")
+                if page:
+                    tk.Label(gal, text="📚 " + page + " — The Division Wiki", bg=PAL["surface"], fg=PAL["muted"],
+                             font=(ui_theme.FONT, 8)).pack(anchor="w", padx=8)
+                    lb.bind("<Button-1>", lambda e, pg_=page: __import__("webbrowser").open(wiki_sync.page_url(pg_)))
+        threading.Thread(target=lambda: (lambda imgs: self.root.after(0, lambda: show(imgs)))(load_task_images(task)), daemon=True).start()
+        w.bind("<Escape>", lambda e: w.destroy())
+        w.bind("<space>", lambda e: toggle())
+        w.focus_set()
 
     def open_how_source(self):
         if getattr(self, "how_url", ""):
@@ -3133,7 +3424,7 @@ class App:
             added = []
             for line in lines:
                 tr, src = translate_task_text(self, line)
-                added.append({"en": line, "tr": tr.strip(), "src": src, "done": False,
+                added.append({"en": line, "texts": {"en": line, i18n.current_language(): tr.strip()}, "src": src, "done": False,
                              "time": datetime.now().isoformat(timespec="seconds")})
             self.results.put(("tasks_added", cat, added))
         threading.Thread(target=work, daemon=True).start()
@@ -3144,29 +3435,23 @@ class App:
         return next((c for c in ADD_CHOICES if add_choice_name(*c) == label), ADD_CHOICES[0])
 
     def toggle_task_done(self):
-        s, idx = self.cat_lb.curselection(), self.task_tv.selection()
-        if not s or not idx: return
-        cat, i = TASK_CATS[s[0]], int(idx[0])
-        self.tasks["items"][cat][i]["done"] = not self.tasks["items"][cat][i]["done"]
+        cat, i = self.selected_task()
+        if cat is None: return
+        self.tasks["items"][cat][i]["done"] = not self.tasks["items"][cat][i].get("done")
         save_tasks(self.tasks); self.refresh_tasks()
 
     def delete_task(self):
-        s, idx = self.cat_lb.curselection(), self.task_tv.selection()
-        if not s or not idx: return
-        cat, i = TASK_CATS[s[0]], int(idx[0])
+        cat, i = self.selected_task()
+        if cat is None: return
         del self.tasks["items"][cat][i]; save_tasks(self.tasks); self.refresh_tasks()
 
     def clear_done_tasks(self):
-        s = self.cat_lb.curselection()
-        if not s: return
-        cat = TASK_CATS[s[0]]
-        self.tasks["items"][cat] = [x for x in self.tasks["items"][cat] if not x["done"]]
+        cat = self.selected_list_cat()
+        self.tasks["items"][cat] = [x for x in self.tasks["items"].get(cat, []) if not x.get("done")]
         save_tasks(self.tasks); self.refresh_tasks()
 
     def clear_all_tasks(self):
-        s = self.cat_lb.curselection()
-        if not s: return
-        cat = TASK_CATS[s[0]]
+        cat = self.selected_list_cat()
         if messagebox.askyesno(APP_NAME, t("task.clear_cat_confirm", cat=cat_name(cat))):
             self.tasks["items"][cat] = []; save_tasks(self.tasks); self.refresh_tasks()
 
