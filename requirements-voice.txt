@@ -5,3 +5,5 @@ pyttsx3
 sounddevice
 numpy
 faster-whisper
+# Arka plan videosu / background video (optional)
+av

@@ -464,6 +464,8 @@ class Banner:
         self.chips, self.toast_text = [], ""
         self._jobs = {}
         self._size = (0, 0)
+        self._grad_cache = {}
+        self._vframe, self.video_on = None, False
         self.alive = True
         self.cv.bind("<Configure>", self._on_resize)
         self._ready = False
@@ -529,8 +531,11 @@ class Banner:
         w, h = base.size
         img = base.convert("RGBA")
         # okunabilirlik için soldan koyu geçiş
-        grad = Image.linear_gradient("L").rotate(-90).resize((w, h))  # solda 255 (koyu), sağda 0
-        grad = grad.point(lambda v: int(v * 0.85) if v > 90 else int(v * 0.5))
+        grad = self._grad_cache.get((w, h))
+        if grad is None:
+            grad = Image.linear_gradient("L").rotate(-90).resize((w, h))  # solda 255 (koyu), sağda 0
+            grad = grad.point(lambda v: int(v * 0.85) if v > 90 else int(v * 0.5))
+            self._grad_cache = {(w, h): grad}
         img = Image.composite(Image.new("RGBA", (w, h), (8, 9, 12, 255)), img, grad)
         if self.flash_state:
             rgba, _t, _s, col = self.flash_state
@@ -574,9 +579,13 @@ class Banner:
     def _draw_overlay(self):
         cv, w, h = self.cv, self._wh()[0], self.h
         fs = self.pal
-        cv.create_text(22, 40, anchor="w", text=self.title, fill=fs.get("accent", "#ff6d10"),
-                       font=("Segoe UI Semibold", 21))
-        cv.create_text(24, 72, anchor="w", text=self.subtitle, fill="#c9ced8", font=("Segoe UI", 10))
+        if h >= 90:
+            cv.create_text(22, 40, anchor="w", text=self.title, fill=fs.get("accent", "#ff6d10"),
+                           font=("Segoe UI Semibold", 21))
+            cv.create_text(24, 72, anchor="w", text=self.subtitle, fill="#c9ced8", font=("Segoe UI", 10))
+        else:                                                   # kompakt (küçük ekran): tek satır
+            cv.create_text(14, h / 2, anchor="w", text=f"{self.title}  {self.subtitle}", fill=fs.get("accent", "#ff6d10"),
+                           font=("Segoe UI Semibold", max(9, int(h / 3.2))))
         if self.flash_state:
             _rgba, t1, t2, col = self.flash_state
             x = int(w * 0.47) + int(min(h - 18, w * 0.32) * 0.75) + 18
@@ -614,6 +623,30 @@ class Banner:
         self.frame = None
         self._render()
 
+    # --- arka plan videosu (fx.VideoFX kareleri gönderir) ---
+    def push_video(self, img):
+        """Video iş parçacığından çağrılır: yalnızca son kare saklanır."""
+        self._vframe = img
+
+    def video_size(self):
+        return self._wh()
+
+    def start_video(self):
+        self.video_on = True
+        self._video_tick()
+
+    def stop_video(self):
+        self.video_on = False
+        self._vframe = None
+        if self.alive: self._resized()
+
+    def _video_tick(self):
+        if not self.alive or not self.video_on: return
+        f, self._vframe = self._vframe, None
+        if f is not None and f.size == self._wh() and self.flash_state is None:
+            self._show(self._compose(f), keep=False)
+        self._after("video", 40, self._video_tick)
+
     # --- dönüş ---
     def set_interval(self, seconds):
         self.interval = max(0, int(seconds or 0))
@@ -628,7 +661,7 @@ class Banner:
             self._after("rotate", self.interval * 1000, self.next)
 
     def next(self):
-        if self.flash_state is None and self.paths:
+        if self.flash_state is None and self.paths and not self.video_on:
             self.idx = (self.idx + 1) % len(self.paths)
             self.base = self._fitted(self._current_path())
             self._render(fade=True)

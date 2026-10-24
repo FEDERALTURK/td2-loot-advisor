@@ -307,3 +307,116 @@ def decide(item, res, cfg):
     if best >= st["consider_threshold"]:
         return "CONSIDER", None, {}
     return "DISMANTLE", None, {}
+
+
+# ---------------------------------------------------------------- build planı (yuva yuva ayrıntı)
+SET_SLOT_ORDER = ["Mask", "Gloves", "Holster", "Kneepads", "Backpack", "Chest"]
+
+
+def _talent_slot(game, name):
+    core = re.sub(r"^perfect(ly)? ", "", gamedata.nrm(name))
+    for t_name, d in game.data.get("gear_talent_slots", {}).items():
+        if gamedata.nrm(t_name) in (core, gamedata.nrm(name)):
+            return d.get("slot"), d.get("kind")
+    return None, None
+
+
+def build_plan(build, game):
+    """Build'in her yuvası için ne aranmalı: {slot: {"kind", "source", "core", "attrs", "talent", "item"}}.
+    - Build'de adı geçen named/egzotik eşyalar kendi yuvasına,
+    - gear set varsa 4 parça set (göğüs/sırt çantası set talent'i istenirse onlar da set),
+    - kalan yuvalar 'serbest' (build'in markaları ya da herhangi bir marka, doğru çekirdek + attribute),
+    - göğüs/sırt çantasına uygun talent, silah yuvalarına tür + silah talent'i."""
+    game_ok = bool(game and game.ok)
+    attrs = build.get("attributes", {})
+    srt = sorted(attrs.items(), key=lambda kv: -float(kv[1].get("weight", 1)))
+    cores = [k for k, _ in srt if k in CORE_ATTRS]
+    minors = [k for k, _ in srt if k not in CORE_ATTRS]
+    core = cores[0] if cores else None
+    gs_names = {gamedata.nrm(x) for x in (game.data.get("gear_sets", []) if game_ok else [])}
+    br_names = {gamedata.nrm(x) for x in (game.data.get("brands", []) if game_ok else [])}
+    sets = [s for s in build.get("sets_or_brands", []) if gamedata.nrm(s) in gs_names]
+    brands = [s for s in build.get("sets_or_brands", []) if gamedata.nrm(s) in br_names]
+    if not sets and not brands:                         # kütüphane yoksa ya da ad kısaltılmışsa: ilk ad set sayılır
+        sets = build.get("sets_or_brands", [])[:1]
+    slots = build.get("slots") or ALL_SLOTS
+    plan = {s: {"kind": "off"} for s in ALL_SLOTS}
+    for s in slots: plan[s] = {"kind": "any", "source": brands[:3], "core": core, "attrs": minors[:2], "talent": None, "item": None}
+    # 1) adı geçen eşyalar (items listesi + build adı ve açıklamasında geçen named/egzotik adlar)
+    witems = []
+    named_list = list(build.get("items", []))
+    if game_ok:
+        summ = (build.get("meta", {}).get("summary") or build.get("summary") or {})
+        hay = gamedata.nrm(build.get("name", "") + " " + str(summ.get("en", "") if isinstance(summ, dict) else summ))
+        for n, canon, kind in game.names:
+            if kind in ("exotic", "named") and len(n) >= 5 and re.search(r"(?<![a-z])" + re.escape(n) + r"(?![a-z])", hay) \
+                    and canon not in named_list:
+                named_list.append(canon)
+    for it in named_list:
+        info = game.items.get(gamedata.nrm(it)) if game_ok else None
+        winfo = game.weapon_index.get(gamedata.nrm(it)) if game_ok else None
+        if info and info.get("slot") in plan and plan[info["slot"]]["kind"] == "any":
+            p = plan[info["slot"]]
+            p.update(kind="item", item=it, source=[it], talent=info.get("talent"))
+        elif winfo:
+            witems.append((it, winfo))
+    # 2) talent'ler: göğüs / sırt çantası
+    tals = sorted(build.get("talents", {}).items(), key=lambda kv: -kv[1])
+    set_talent_slots = []
+    for name, _w in tals:
+        slot, kind = _talent_slot(game, name) if game_ok else (None, None)
+        if slot in ("Chest", "Backpack") and slot in plan and plan[slot]["kind"] in ("any", "item") and not plan[slot].get("talent"):
+            plan[slot]["talent"] = name
+            if kind == "gear_set": set_talent_slots.append(slot)
+    # 3) gear set: 4 parça
+    if sets:
+        need, order = 4, set_talent_slots + [s for s in SET_SLOT_ORDER if s not in set_talent_slots]
+        for s in order:
+            if need and s in slots and plan[s]["kind"] == "any":
+                plan[s].update(kind="set", source=sets[:1], attrs=minors[:1]); need -= 1
+    # 4) silahlar
+    wtal = [n for n, _ in tals if game_ok and gamedata.nrm(re.sub(r"(?i)^perfect(ly)? ", "", n)) in
+            {gamedata.nrm(x) for x in game.data.get("weapon_talents", [])}]
+    types = weapon_types_of(build)
+    if "Weapon" in plan and plan["Weapon"]["kind"] != "off":
+        w = next(((n, i) for n, i in witems if i.get("type", "").lower() != "pistol"), None)
+        plan["Weapon"].update(kind="item" if w else "weapon", item=w[0] if w else None, source=[w[0]] if w else [],
+                              types=[TYPE_LABEL.get(x, x) for x in types if x != "pistol"] or ([w[1]["type"]] if w else []),
+                              core=None, attrs=[k for k in minors if k in ("crit_chance", "crit_damage", "headshot_damage")][:2],
+                              talent=wtal[0] if wtal else None)
+    if "Sidearm" in plan and plan["Sidearm"]["kind"] != "off":
+        p = next(((n, i) for n, i in witems if i.get("type", "").lower() == "pistol"), None)
+        plan["Sidearm"].update(kind="item" if p else "weapon", item=p[0] if p else None, source=[p[0]] if p else [],
+                               types=["Pistol"], core=None, attrs=[], talent=None)
+    return plan
+
+
+def check_slot(item, req, game=None):
+    """Eşya bu yuvanın şartlarını karşılıyor mu? [(etiket, durum, ayrıntı)] — durum: True / False / None (bilinmiyor)."""
+    out = []
+    if not req or req.get("kind") == "off":
+        return out
+    have = [gamedata.nrm(x) for x in (item.get("brand"), item.get("gear_set"), item.get("name") if isinstance(item.get("name"), str) else item.get("item")) if x]
+    if req.get("source"):
+        ok = any(gamedata.nrm(s) == h or (len(gamedata.nrm(s)) > 4 and gamedata.nrm(s) in h) for s in req["source"] for h in have)
+        out.append(("source", ok if have else None, " / ".join(req["source"])))
+    if req.get("types"):
+        wt = (item.get("weapon_type") or "").lower()
+        out.append(("type", (wt in [x.lower() for x in req["types"]]) if wt else None, " / ".join(req["types"])))
+    a = item.get("attrs", {}); q = item.get("quality", {})
+    if req.get("core"):
+        out.append(("core", req["core"] in a, req["core"] + (f" {a[req['core']]:g}" if req["core"] in a else "")))
+    for k in req.get("attrs", []):
+        out.append(("attr", (q.get(k, 100) >= 80) if k in a else False,
+                    k + (f" {a[k]:g} ({q.get(k, '?')}%)" if k in a else "")))
+    if req.get("talent"):
+        tn = gamedata.nrm(re.sub(r"(?i)^perfect(ly)? ", "", req["talent"]))
+        ht = [gamedata.nrm(re.sub(r"(?i)^perfect(ly)? ", "", x)) for x in item.get("talents", [])]
+        out.append(("talent", tn in ht if ht or item.get("talents") is not None else None, req["talent"]))
+    return out
+
+
+def slot_done(checks):
+    """Tüm şartlar tamam mı (bilinmeyenler sayılmaz)?"""
+    known = [c for c in checks if c[1] is not None]
+    return bool(known) and all(c[1] for c in known)

@@ -52,6 +52,13 @@ How the feeds are researched and scored: [`meta/UPDATER.md`](meta/UPDATER.md).
 
 **Recommended game settings:** English game language, HDR off, borderless window, game resolution = monitor resolution.
 
+## Build sheet, active build & effects / Build ayrıntısı, aktif build ve efektler
+
+- **Build sheet (Builds → 📋):** every slot shows what to farm — gear-set piece / brand / named or exotic item, core attribute, attributes, chest/backpack talent, weapon type and talent — next to the piece you already have with ✔/✖ per requirement.
+- **Active build:** chosen in Panel, Builds or Missing pieces (shared). Every scan is checked against the active build's slot requirements; fitting drops are recorded automatically and the app tells you when the build is complete.
+- **Effects (Settings → ✨, all optional):** custom mouse cursor (generic sights and weapon silhouettes or your own image), mouse trail, animated menu transitions, and a silent background video behind the header made from **your own** clips (`art/videos`, needs the optional `av` package).
+- **Any screen size:** resolution profiles from 240p to 4K resize the window and scale the text; changing the profile reopens the app in ~2 seconds.
+
 ## Game library / Oyun kütüphanesi
 
 `meta/game_data.json` lists every gear set, brand, named and exotic item (with slot), weapon (with type), weapon and gear talents, gear mods and weapon mods, skills, specialization weapons and attribute max values. The app uses it to tell gear from weapons, mods, cosmetics and specialization weapons, to ignore expertise bonuses, and to merge scrolled (long) item cards.

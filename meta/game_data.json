@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "version": "2026-10-24.5",
+ "version": "2026-10-24.6",
  "source": "The Division Wiki (fandom) + mx-division-builds data (CC BY-NC-SA 4.0, mxswat) + manual",
  "prototype_multiplier": 1.5,
  "gear_sets": [
@@ -3430,5 +3430,488 @@
   "mark as junk",
   "favorite",
   "equipped"
- ]
+ ],
+ "gear_talent_slots": {
+  "Bloodsucker": {
+   "slot": "Backpack",
+   "kind": "normal"
+  },
+  "Calculated": {
+   "slot": "Backpack",
+   "kind": "normal"
+  },
+  "Clutch": {
+   "slot": "Backpack",
+   "kind": "normal"
+  },
+  "Combined Arms": {
+   "slot": "Backpack",
+   "kind": "normal"
+  },
+  "Companion": {
+   "slot": "Backpack",
+   "kind": "normal"
+  },
+  "Composure": {
+   "slot": "Backpack",
+   "kind": "normal"
+  },
+  "Concussion": {
+   "slot": "Backpack",
+   "kind": "normal"
+  },
+  "Creeping Death": {
+   "slot": "Backpack",
+   "kind": "normal"
+  },
+  "Energize": {
+   "slot": "Backpack",
+   "kind": "normal"
+  },
+  "Galvanize": {
+   "slot": "Backpack",
+   "kind": "normal"
+  },
+  "Leadership": {
+   "slot": "Backpack",
+   "kind": "normal"
+  },
+  "Opportunistic": {
+   "slot": "Backpack",
+   "kind": "normal"
+  },
+  "Overclock": {
+   "slot": "Backpack",
+   "kind": "normal"
+  },
+  "Protector": {
+   "slot": "Backpack",
+   "kind": "normal"
+  },
+  "Reassigned": {
+   "slot": "Backpack",
+   "kind": "normal"
+  },
+  "Safeguard": {
+   "slot": "Backpack",
+   "kind": "normal"
+  },
+  "Shock and Awe": {
+   "slot": "Backpack",
+   "kind": "normal"
+  },
+  "Tech Support": {
+   "slot": "Backpack",
+   "kind": "normal"
+  },
+  "Unstoppable Force": {
+   "slot": "Backpack",
+   "kind": "normal"
+  },
+  "Versatile": {
+   "slot": "Backpack",
+   "kind": "normal"
+  },
+  "Vigilance": {
+   "slot": "Backpack",
+   "kind": "normal"
+  },
+  "Wicked": {
+   "slot": "Backpack",
+   "kind": "normal"
+  },
+  "Empathic Resolve": {
+   "slot": "Chest",
+   "kind": "normal"
+  },
+  "Mad Bomber": {
+   "slot": "Chest",
+   "kind": "normal"
+  },
+  "Overwatch": {
+   "slot": "Chest",
+   "kind": "normal"
+  },
+  "Perfect Overwatch": {
+   "slot": "Chest",
+   "kind": "perfect"
+  },
+  "Trauma": {
+   "slot": "Chest",
+   "kind": "normal"
+  },
+  "Explosive Delivery": {
+   "slot": "Chest",
+   "kind": "normal"
+  },
+  "Kinetic Momentum": {
+   "slot": "Chest",
+   "kind": "normal"
+  },
+  "Skilled": {
+   "slot": "Chest",
+   "kind": "normal"
+  },
+  "Spotter": {
+   "slot": "Chest",
+   "kind": "normal"
+  },
+  "Tag Team": {
+   "slot": "Chest",
+   "kind": "normal"
+  },
+  "Tamper Proof": {
+   "slot": "Chest",
+   "kind": "normal"
+  },
+  "Efficient": {
+   "slot": "Chest",
+   "kind": "normal"
+  },
+  "Entrench": {
+   "slot": "Chest",
+   "kind": "normal"
+  },
+  "Intimidate": {
+   "slot": "Chest",
+   "kind": "normal"
+  },
+  "Protected Reload": {
+   "slot": "Chest",
+   "kind": "normal"
+  },
+  "Unbreakable": {
+   "slot": "Chest",
+   "kind": "normal"
+  },
+  "Vanguard": {
+   "slot": "Chest",
+   "kind": "normal"
+  },
+  "Braced": {
+   "slot": "Chest",
+   "kind": "normal"
+  },
+  "Focus": {
+   "slot": "Chest",
+   "kind": "normal"
+  },
+  "Glass Cannon": {
+   "slot": "Chest",
+   "kind": "normal"
+  },
+  "Gunslinger": {
+   "slot": "Chest",
+   "kind": "normal"
+  },
+  "Obliterate": {
+   "slot": "Chest",
+   "kind": "normal"
+  },
+  "Spark": {
+   "slot": "Chest",
+   "kind": "normal"
+  },
+  "Pack Instincts": {
+   "slot": "Exotic",
+   "kind": "exotic"
+  },
+  "Grace Under Fire": {
+   "slot": "Exotic",
+   "kind": "exotic"
+  },
+  "Parkour!": {
+   "slot": "Exotic",
+   "kind": "exotic"
+  },
+  "Dragon's Glare": {
+   "slot": "Exotic",
+   "kind": "exotic"
+  },
+  "Quick Draw": {
+   "slot": "Exotic",
+   "kind": "exotic"
+  },
+  "Transference Overclock": {
+   "slot": "Exotic",
+   "kind": "exotic"
+  },
+  "Ablative Nano-Plating": {
+   "slot": "Exotic",
+   "kind": "exotic"
+  },
+  "One in Hand...": {
+   "slot": "Exotic",
+   "kind": "exotic"
+  },
+  "Perfect Clutch": {
+   "slot": "Backpack",
+   "kind": "perfect"
+  },
+  "Perfect Combined Arms": {
+   "slot": "Backpack",
+   "kind": "perfect"
+  },
+  "Perfect Shock and Awe": {
+   "slot": "Backpack",
+   "kind": "perfect"
+  },
+  "Perfect Tech Support": {
+   "slot": "Backpack",
+   "kind": "perfect"
+  },
+  "Perfect Vigilance": {
+   "slot": "Backpack",
+   "kind": "perfect"
+  },
+  "Perfectly Wicked": {
+   "slot": "Backpack",
+   "kind": "perfect"
+  },
+  "Perfect Intimidate": {
+   "slot": "Chest",
+   "kind": "perfect"
+  },
+  "Perfectly Unbreakable": {
+   "slot": "Chest",
+   "kind": "perfect"
+  },
+  "Perfect Vanguard": {
+   "slot": "Chest",
+   "kind": "perfect"
+  },
+  "Perfect Braced": {
+   "slot": "Chest",
+   "kind": "perfect"
+  },
+  "Perfect Focus": {
+   "slot": "Chest",
+   "kind": "perfect"
+  },
+  "Perfect Glass Cannon": {
+   "slot": "Chest",
+   "kind": "perfect"
+  },
+  "Perfect Spark": {
+   "slot": "Chest",
+   "kind": "perfect"
+  },
+  "Short Circuit": {
+   "slot": "Backpack",
+   "kind": "gear_set"
+  },
+  "Positive Reinforcement": {
+   "slot": "Chest",
+   "kind": "gear_set"
+  },
+  "Emergency Requisition": {
+   "slot": "Backpack",
+   "kind": "gear_set"
+  },
+  "Parabellum Rounds": {
+   "slot": "Chest",
+   "kind": "gear_set"
+  },
+  "Patriotic Boost": {
+   "slot": "Backpack",
+   "kind": "gear_set"
+  },
+  "Waving the Flag": {
+   "slot": "Chest",
+   "kind": "gear_set"
+  },
+  "Poker Face": {
+   "slot": "Backpack",
+   "kind": "gear_set"
+  },
+  "No Limit": {
+   "slot": "Chest",
+   "kind": "gear_set"
+  },
+  "Critical Measures": {
+   "slot": "Backpack",
+   "kind": "gear_set"
+  },
+  "Target Rich Environment": {
+   "slot": "Chest",
+   "kind": "gear_set"
+  },
+  "Process Refinery": {
+   "slot": "Backpack",
+   "kind": "gear_set"
+  },
+  "Improved Materials": {
+   "slot": "Chest",
+   "kind": "gear_set"
+  },
+  "Strategic Combat Support": {
+   "slot": "Backpack",
+   "kind": "gear_set"
+  },
+  "Risk Management": {
+   "slot": "Backpack",
+   "kind": "gear_set"
+  },
+  "Press the Advantage": {
+   "slot": "Chest",
+   "kind": "gear_set"
+  },
+  "Multithreaded Execution": {
+   "slot": "Backpack",
+   "kind": "gear_set"
+  },
+  "Compiler Optimization": {
+   "slot": "Chest",
+   "kind": "gear_set"
+  },
+  "Headhunter": {
+   "slot": "Chest",
+   "kind": "normal"
+  }
+ },
+ "brand_bonuses": {
+  "5.11 Tactical": [
+   "10% Health",
+   "15% Incoming Repairs",
+   "10% Hazard Protection"
+  ],
+  "Airaldi Holdings": [
+   "10% Marksman Rifle Damage",
+   "10% Headshot Damage",
+   "5% Damage to Armor"
+  ],
+  "Alps Summit Armaments": [
+   "15% Repair Skills",
+   "20% Skill Duration",
+   "10% Cooldown Reduction"
+  ],
+  "Badger Tuff": [
+   "10% Shotgun Damage",
+   "5% % Armor",
+   "10% Armor on Kill"
+  ],
+  "Ceska Vyroba s.r.o.": [
+   "10% Critical Hit Chance",
+   "10% Hazard Protection",
+   "10% Health"
+  ],
+  "China Light Industries Corporation": [
+   "15% Explosive Damage",
+   "10% Cooldown Reduction",
+   "10% Status Effects"
+  ],
+  "Douglas & Harding": [
+   "20% Pistol Damage",
+   "10% Stability",
+   "10% Accuracy"
+  ],
+  "Fenris Group AB": [
+   "10% Assault Rifle Damage",
+   "10% Reload Speed %",
+   "10% Stability"
+  ],
+  "Gila Guard": [
+   "5% % Armor",
+   "10% Health",
+   "1% Armor Regeneration %"
+  ],
+  "Golan Gear Ltd": [
+   "10% Status Effects",
+   "1% Armor Regeneration %",
+   "5% % Armor"
+  ],
+  "Grupo Sombra S.A.": [
+   "15% Critical Hit Damage",
+   "15% Explosive Damage",
+   "10% Headshot Damage"
+  ],
+  "Hana-U Corporation": [
+   "10% Cooldown Reduction",
+   "10% Skill Damage",
+   "5% Weapon Damage"
+  ],
+  "Murakami Industries": [
+   "20% Skill Duration",
+   "15% Repair Skills",
+   "10% Skill Damage"
+  ],
+  "Overlord Armaments": [
+   "10% Rifle Damage",
+   "10% Accuracy",
+   "10% Weapon Handling"
+  ],
+  "Petrov Defense Group": [
+   "10% LMG Damage",
+   "10% Weapon Handling",
+   "20% Ammo Capacity"
+  ],
+  "Providence Defense": [
+   "10% Headshot Damage",
+   "10% Critical Hit Chance",
+   "15% Critical Hit Damage"
+  ],
+  "Richter & Kaiser GmbH": [
+   "15% Incoming Repairs",
+   "10% Explosive Resistance",
+   "15% Skill Repair"
+  ],
+  "Sokolov Concern": [
+   "10% SMG Damage",
+   "15% Critical Hit Damage",
+   "10% Critical Hit Chance"
+  ],
+  "Wyvern Wear": [
+   "10% Skill Damage",
+   "10% Status Effects",
+   "20% Skill Duration"
+  ],
+  "Yaahl Gear": [
+   "10% Hazard Protection",
+   "5% Weapon Damage",
+   "40% Pulse Resistance"
+  ],
+  "Hard Wired": [
+   "15% Skill Haste",
+   "15% Skill Damage",
+   "15% Repair Skills"
+  ],
+  "Ongoing Directive": [
+   "15% Status Effects",
+   "20% Reload Speed %"
+  ],
+  "True Patriot": [
+   "30% Ammo Capacity",
+   "30% Magazine Size %"
+  ],
+  "Aces and Eights": [
+   "15% Marksman Rifle Damage",
+   "20% Headshot Damage"
+  ],
+  "Negotiator's Dilemma": [
+   "15% Critical Hit Chance",
+   "20% Critical Hit Damage"
+  ],
+  "Tip of the Spear": [
+   "10% Signature Weapon Damage",
+   "10% Weapon Damage"
+  ],
+  "Foundry Bullwark": [
+   "10% % Armor",
+   "3% Armor Regeneration %"
+  ],
+  "Future Initiative": [
+   "15% Skill Repair",
+   "15% Skill Duration",
+   "15% Cooldown Reduction"
+  ],
+  "Striker's Battlegear": [
+   "15% Weapon Handling",
+   "15% Rate of Fire %"
+  ],
+  "System Corruption": [
+   "15% Armor on Kill",
+   "40% Disrupt Resistance",
+   "40% Pulse Resistance"
+  ]
+ }
 }

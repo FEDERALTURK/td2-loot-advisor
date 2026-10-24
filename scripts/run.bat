@@ -27,6 +27,8 @@ call :opt pyttsx3 pyttsx3
 call :opt sounddevice sounddevice
 call :opt numpy numpy
 call :opt faster-whisper faster_whisper
+REM Arka plan videosu (istege bagli) / background video (optional)
+call :opt av av
 
 REM 3) Uygulamayi ac / start the app
 %PY% app.py

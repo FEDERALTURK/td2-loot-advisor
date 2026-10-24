@@ -34,6 +34,7 @@ import gamedata
 import engine
 import display
 import view3d
+import fx
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
@@ -63,6 +64,9 @@ DEFAULTS = {"scan_mode": "hotkey", "auto_interval_ms": 700, "auto_record": True,
             "chatgpt_window_title": "ChatGPT", "chatgpt_hotkey": "<f10>", "chatgpt_wait_seconds": 15,
             "language": "", "log_level": "INFO", "log_max_kb": 1024, "log_backups": 3,
             "ui_theme": "dark", "ui_sounds": True, "bg_interval": 15,
+            "fx_cursor": True, "fx_cursor_style": "crosshair", "fx_cursor_color": "#ff6d10", "fx_cursor_custom": "",
+            "fx_trail": True, "fx_trail_color": "#ff6d10", "fx_trail_len": 18, "fx_transitions": True,
+            "fx_video": True, "fx_video_dim": 0.45,
             "res_profile": "auto", "ocr_threshold": 170, "ocr_scale": "auto", "ocr_psm": 6, "ocr_passes": 3,
             "overlay_mode": "card", "overlay_alpha": 0.94, "overlay_size": 1.0, "ui_depth": True,
             "meta_sync": True, "meta_feed_url": "", "meta_last_try": 0, "meta_last_sync": "", "meta_version": "",
@@ -400,6 +404,52 @@ def evaluate_legacy(text, cfg):
         verdict = "DISMANTLE"
     return item, verdict, res
 
+def build_by_name(cfg, name):
+    return next((b for b in cfg["builds"] if b["name"] == name), None)
+
+
+def active_build(cfg):
+    """Aktif build (Panel, Build'ler ve Eksik Parça bunu ortak kullanır)."""
+    b = build_by_name(cfg, cfg["settings"].get("active_build", ""))
+    return b or (cfg["builds"][0] if cfg["builds"] else None)
+
+
+def plan_of(build):
+    try:
+        return engine.build_plan(build, GAME) if build else {}
+    except Exception:
+        log.exception("build plan failed")
+        return {}
+
+
+def req_lines(req):
+    """Bir yuvanın şartlarını okunur satırlara çevirir."""
+    if not req or req.get("kind") == "off": return [t("plan.off")]
+    L = []
+    k = req.get("kind")
+    if k == "item": L.append("★ " + t("plan.item", item=req.get("item")))
+    elif k == "set": L.append("🧩 " + t("plan.set", s=", ".join(req.get("source", []))))
+    elif k == "weapon": L.append("🔫 " + t("plan.weapon", types=", ".join(req.get("types", [])) or "—"))
+    else: L.append("🏷 " + (t("plan.brand", s=", ".join(req["source"])) if req.get("source") else t("plan.any")))
+    if req.get("core"): L.append(t("plan.core", a=attr_name(req["core"])))
+    if req.get("attrs"): L.append(t("plan.attrs", a=", ".join(attr_name(x) for x in req["attrs"])))
+    if req.get("talent"): L.append(t("plan.talent", t=req["talent"]))
+    return L
+
+
+def check_lines(checks):
+    sym = {True: "✔", False: "✖", None: "?"}
+    lab = {"source": t("plan.c_source"), "type": t("plan.c_type"), "core": t("plan.c_core"), "attr": t("plan.c_attr"), "talent": t("plan.c_talent")}
+    out = []
+    for kind, ok, detail in checks:
+        d = detail
+        if kind in ("core", "attr"):
+            parts = detail.split(" ", 1)
+            d = attr_name(parts[0]) + (" " + parts[1] if len(parts) > 1 else "")
+        out.append(f"{sym[ok]} {lab.get(kind, kind)}: {d}")
+    return out
+
+
 def build_slots(cfg, name):
     for b in cfg["builds"]:
         if b["name"] == name:
@@ -421,22 +471,38 @@ def roll_diff(old_attrs, new_attrs):
     return lines
 
 def apply_progress(cfg, progress, item, verdict, res):
-    """Eksik parça / yükseltme / rulo karşılaştırması. (verdict, not, aksiyon, rulo_farki) döner."""
-    if verdict not in ("KEEP", "CONSIDER") or not item["slot"] or not res:
+    """Eksik parça / yükseltme / rulo karşılaştırması — önce AKTİF build'e göre.
+    (verdict, not, aksiyon, rulo_farki) döner; not içinde yuvanın şartları (✔/✖) da yazılır."""
+    if not item.get("slot") or not res or item.get("kind") not in ("gear", "weapon"):
         return verdict, None, None, None
-    score, bname = res[0][0], res[0][1]
+    st = cfg["settings"]
+    act_b = active_build(cfg)
+    scores = {n: p for p, n, _ in res}
+    if act_b and scores.get(act_b["name"], 0) >= st["consider_threshold"]:
+        bname, score = act_b["name"], scores[act_b["name"]]
+    elif verdict in ("KEEP", "CONSIDER"):
+        score, bname = res[0][0], res[0][1]
+    else:
+        return verdict, None, None, None
     slot = item["slot"]
     if slot not in build_slots(cfg, bname):
         return verdict, None, None, None
+    b = build_by_name(cfg, bname)
+    checks = engine.check_slot(item, plan_of(b).get(slot), GAME)
+    done = engine.slot_done(checks)
+    tail = ("  ·  " + "  ".join(check_lines(checks))) if checks else ""
     cur = progress.get(bname, {}).get(slot)
     act = (bname, slot, score)
+    if verdict == "DISMANTLE" and bname == (act_b or {}).get("name"):
+        verdict = "CONSIDER"
     if not cur:
-        return verdict, t("note.fills_gap", build=bname, slot=slot_name(slot)), act, None
+        key = "note.fills_gap_done" if done else "note.fills_gap"
+        return verdict, t(key, build=bname, slot=slot_name(slot)) + tail, act, None
     if signature(item) == cur.get("sig"):
         return verdict, t("note.already", build=bname, slot=slot_name(slot)), None, None
     diff = roll_diff(cur.get("attrs"), item["attrs"])
     if score > cur["score"] + UPGRADE_MARGIN:
-        return verdict, t("note.upgrade", build=bname, slot=slot_name(slot), old=cur["score"], new=score), act, diff
+        return verdict, t("note.upgrade", build=bname, slot=slot_name(slot), old=cur["score"], new=score) + tail, act, diff
     return ("CONSIDER" if verdict == "KEEP" else verdict), t("note.yours_better", build=bname, slot=slot_name(slot), pct=cur["score"]), None, diff
 
 
@@ -998,9 +1064,9 @@ class App:
 
         display.set_dpi_aware()                         # %125/%150 Windows ölçeğinde koordinatlar kaymasın
         self.root = tk.Tk()
-        self.root.title(f"{APP_NAME} v{APP_VERSION}"); self.root.minsize(880, 700)
-        sw, sh = self.root.winfo_screenwidth(), self.root.winfo_screenheight()
-        self.root.geometry("1700x1080" if sw >= 3000 and sh >= 1300 else "1360x900" if sw >= 1900 else "1040x840")
+        self.root.title(f"{APP_NAME} v{APP_VERSION}")
+        self._base_scaling = float(self.root.tk.call("tk", "scaling"))
+        self.apply_window_profile(initial=True)
         self.sounds = ui_theme.Sounds(BASE / "sounds", enabled=bool(stg.get("ui_sounds", True)))
         ui_theme.bind_click_sounds(self.root, self.sounds)
         self.build_ui()
@@ -1011,6 +1077,73 @@ class App:
         log.info("UI ready — language=%s, tesseract=%s", i18n.current_language(), self.tess or "NOT FOUND")
         if not self.tess:
             messagebox.showwarning(APP_NAME, t("msg.no_tesseract"))
+
+    def restart_app(self, tab=None, page=None):
+        """Programı aynı ayarlarla yeniden açar (pencere/yazı ölçeği değişince)."""
+        st = self.cfg["settings"]
+        st["_start_tab"], st["_start_page"] = tab or "", page or ""
+        save_cfg(self.cfg)
+        if getattr(sys, "frozen", False):
+            args = [sys.executable] + sys.argv[1:]
+        else:
+            args = [sys.executable, str(Path(__file__).resolve())] + sys.argv[1:]
+        log.info("Restarting: %s", args)
+        try:
+            subprocess.Popen(args, cwd=str(BASE), creationflags=getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0))
+        except Exception as e:
+            log.warning("Restart failed: %s", e); return
+        self.on_close()
+
+    def apply_window_profile(self, initial=False):
+        """Pencereyi seçilen çözünürlük profiline göre boyutlandırır: 240p'den 4K'ya kadar her ekranda sığar.
+        Küçük ekranlarda yazılar/boşluklar küçülür (tk scaling), başlık bandı incelir (kompakt mod)."""
+        st = self.cfg["settings"]
+        key, prof = active_profile(st)
+        try: pw, ph = map(int, key.split("x"))
+        except ValueError: pw, ph = self.root.winfo_screenwidth(), self.root.winfo_screenheight()
+        sw, sh = self.root.winfo_screenwidth(), self.root.winfo_screenheight()
+        tw, th = min(pw, sw), min(ph, sh)                 # profil ekrandan büyükse ekran sınırı
+        # yazı ölçeği: 1080p = 1.0 → 720p ≈ 0.8, 480p ≈ 0.62, 240p ≈ 0.5, 1440p ≈ 1.1, 4K ≈ 1.3
+        f = max(0.5, min(1.35, (th / 1080) ** 0.55))
+        self.ui_factor = f
+        self.compact = th < 800
+        try: self.root.tk.call("tk", "scaling", self._base_scaling * f)
+        except tk.TclError: pass
+        ww, wh = (int(tw * 0.98), int(th * 0.92)) if self.compact else \
+                 ((1700, 1080) if tw >= 3000 and th >= 1300 else (1360, 900) if tw >= 1900 else (min(1240, tw - 40), min(860, th - 60)))
+        self.root.minsize(min(880, max(320, ww - 20)), min(640, max(200, wh - 20)))
+        x = max(0, (sw - ww) // 2); y = max(0, (sh - wh) // 3)
+        self.root.geometry(f"{ww}x{wh}+{x}+{y}")
+        log.info("Window profile %s: %dx%d, ui scale %.2f, compact=%s", key, ww, wh, f, self.compact)
+
+    def apply_fx(self):
+        """İmleç, fare izi ve arka plan videosunu ayarlara göre aç/kapat."""
+        st = self.cfg["settings"]
+        if not hasattr(self, "cursor_fx"): self.cursor_fx = fx.CursorFX(self.root, ART_DIR / "cursors")
+        ok = self.cursor_fx.apply(st.get("fx_cursor", True), st.get("fx_cursor_style", "crosshair"),
+                                  st.get("fx_cursor_color", "#ff6d10"), st.get("fx_cursor_custom", ""), getattr(self, "ui_factor", 1.0))
+        if not ok: log.warning("Custom cursor could not be applied")
+        tr = getattr(self, "trail_fx", None)
+        if st.get("fx_trail", True):
+            if tr and (tr.color != st.get("fx_trail_color") or tr.length != int(st.get("fx_trail_len", 18))):
+                tr.stop(); tr = None
+            if not tr or not tr.alive:
+                self.trail_fx = fx.TrailFX(self.root, st.get("fx_trail_color", "#ff6d10"), st.get("fx_trail_len", 18), click_through)
+                self.trail_fx.start()
+        elif tr:
+            tr.stop(); self.trail_fx = None
+        v = getattr(self, "video", None)
+        if v: v.stop(); self.video = None
+        if hasattr(self, "banner"):
+            self.banner.stop_video() if self.banner.video_on else None
+            if st.get("fx_video", True):
+                (ART_DIR / "videos").mkdir(parents=True, exist_ok=True)
+                self.video = fx.VideoFX(ART_DIR / "videos", self.banner.push_video, self.banner.video_size,
+                                        dim=float(st.get("fx_video_dim", 0.45)))
+                if self.video.start():
+                    self.banner.start_video(); log.info("Background video on (%s)", fx.video_backend())
+                else:
+                    log.info("Background video off: %s", self.video.error); self.video = None
 
     def normalize_builds(self):
         """Build'lerdeki talent/eşya karışıklığını oyun kütüphanesine göre düzeltir (Equalizer → items)."""
@@ -1026,6 +1159,7 @@ class App:
         """Tema + başlık bandı + tüm sekmeler. Tema/dil değişince rebuild_ui() ile yeniden kurulur."""
         set_palette(ui_theme.apply(self.root, self.cfg["settings"].get("ui_theme", "dark")))
         self.build_header()
+        self.fxbar = fx.Transition(self.root, self.root, color=PAL["accent"], bg=PAL["bg"])
         nb = self.nb = ttk.Notebook(self.root); nb.pack(fill="both", expand=True, padx=10, pady=(6, 10))
         # Sekmeler sabit kimliklerle tutulur, başlıkları t() ile çevrilir.
         self.tab_keys = ("dash", "builds", "progress", "stats", "tasks", "assistant", "settings", "history", "log", "help")
@@ -1034,6 +1168,13 @@ class App:
         self.build_dash(); self.build_builds(); self.build_prog(); self.build_stats(); self.build_gorevler(); self.build_asistan()
         self.build_settings(); self.build_hist(); self.build_logtab(); self.build_help()
         nb.bind("<<NotebookTabChanged>>", self.on_tab)
+        self.root.after(300, self.apply_fx)
+        st = self.cfg["settings"]
+        if st.get("_start_tab") in self.tab_keys:                       # yeniden açılıştan sonra kaldığı yere dön
+            self.nb.select(self.tab_keys.index(st["_start_tab"]))
+            if st.get("_start_page") in getattr(self, "_set_keys", []):
+                self.set_nb.select(self._set_keys.index(st["_start_page"]))
+            st["_start_tab"] = st["_start_page"] = ""; save_cfg(self.cfg)
 
     def rebuild_ui(self, tab=None):
         """Yeniden başlatmadan arayüzü yeni tema/dille kurar.
@@ -1049,7 +1190,10 @@ class App:
             try: self.overlay.destroy()
             except Exception: pass
             self.overlay = None
+        if getattr(self, "video", None): self.video.stop(); self.video = None
         try: self.banner.destroy()
+        except Exception: pass
+        try: self.fxbar.destroy()
         except Exception: pass
         self.nb.destroy()
         # Yok edilen eski widget referanslarını temizle (hasattr kontrolleri yeni widget'ı beklesin)
@@ -1073,7 +1217,8 @@ class App:
         """Üst bant: dönen arka planlar, marka ve durum rozetleri (ui_art.Banner)."""
         st = self.cfg["settings"]
         self.banner = ui_art.Banner(self.root, PAL, ART_DIR / "backgrounds", interval_s=st.get("bg_interval", 15),
-                                    title="◆ TD2 LOOT ADVISOR", subtitle=f"v{APP_VERSION}")
+                                    title="◆ TD2 LOOT ADVISOR", subtitle=f"v{APP_VERSION}",
+                                    height=max(44, int(118 * getattr(self, "ui_factor", 1.0) * (0.6 if getattr(self, "compact", False) else 1.0))))
         self.refresh_header()
 
     def toast(self, text):
@@ -1109,6 +1254,7 @@ class App:
 
     def on_tab(self, _=None):
         if hasattr(self, "sounds"): self.sounds.play("tab")
+        if self.cfg["settings"].get("fx_transitions", True) and hasattr(self, "fxbar"): self.fxbar.play()
         k = self.current_tab()
         if k == "history": self.load_history()
         elif k == "stats": self.root.after(50, self.refresh_stats_tab)
@@ -1140,6 +1286,14 @@ class App:
         self.mode_var = tk.StringVar(value=st["scan_mode"])
         for txt, val in ((t("mode.hotkey"), "hotkey"), (t("mode.auto"), "auto")):
             ttk.Radiobutton(mode, text=txt, value=val, variable=self.mode_var, command=self.change_mode).pack(side="left", padx=6)
+        ab = ttk.Frame(left); ab.pack(fill="x", pady=(4, 0))
+        ttk.Label(ab, text="⭐ " + t("plan.active"), foreground=PAL["accent"]).pack(side="left")
+        self.act_cb = ttk.Combobox(ab, state="readonly", width=44, values=[b["name"] for b in self.cfg["builds"]])
+        a0 = active_build(self.cfg)
+        if a0: self.act_cb.set(a0["name"])
+        self.act_cb.pack(side="left", padx=6)
+        self.act_cb.bind("<<ComboboxSelected>>", lambda e: self.set_active_build(self.act_cb.get()))
+        self.act_prog = ttk.Label(ab, text="", foreground=PAL["muted"]); self.act_prog.pack(side="left", padx=6)
         self.status = ttk.Label(left, foreground=PAL["muted"], wraplength=560, justify="left"); self.status.pack(anchor="w", pady=(4, 2))
 
         card = ttk.Frame(left, style="Card.TFrame", padding=(0, 0, 0, 12)); card.pack(fill="x", pady=(6, 8))
@@ -1148,6 +1302,8 @@ class App:
         self.verdict_lbl.pack(fill="x")
         self.item_lbl = ttk.Label(card, text="—", style="Item.TLabel", wraplength=560); self.item_lbl.pack(anchor="w", padx=16, pady=(10, 0))
         self.note_lbl = ttk.Label(card, text="", style="Note.TLabel", wraplength=560, justify="left"); self.note_lbl.pack(anchor="w", padx=16)
+        self.fit_lbl = tk.Label(card, text="", wraplength=560, justify="left", bg=PAL["surface"], fg=PAL["muted"],
+                                font=(ui_theme.FONT, 10)); self.fit_lbl.pack(anchor="w", padx=16, pady=(4, 0))
         chips = ttk.Frame(left); chips.pack(fill="x", pady=(0, 6))
         self.count_chips = {}
         for v in ("KEEP", "CONSIDER", "DISMANTLE", "REVIEW"):
@@ -1176,6 +1332,24 @@ class App:
         self.last_shown = None
         self.refresh_counts(); self.refresh_status()
 
+    def show_fit(self, item):
+        """Panel: bu eşya aktif build'in ilgili yuvasının şartlarını karşılıyor mu?"""
+        if not hasattr(self, "fit_lbl"): return
+        b = active_build(self.cfg)
+        stt = self.build_status(b) if b else {}
+        have = sum(1 for v in stt.values() if v[0] in ("done", "partial")); tot = sum(1 for v in stt.values() if v[0] != "off")
+        if hasattr(self, "act_prog"): self.act_prog.config(text=t("prog.completed", have=have, total=tot) if tot else "")
+        slot = item.get("slot")
+        if not b or not slot or item.get("kind") not in ("gear", "weapon"):
+            self.fit_lbl.config(text=""); return
+        req = plan_of(b).get(slot)
+        checks = engine.check_slot(item, req, GAME)
+        if not checks:
+            self.fit_lbl.config(text=t("plan.not_in_build", slot=slot_name(slot)), fg=PAL["muted"]); return
+        ok = engine.slot_done(checks)
+        head = t("plan.fit_ok" if ok else "plan.fit_no", build=b["name"], slot=slot_name(slot))
+        self.fit_lbl.config(text=head + "\n" + "\n".join(check_lines(checks)), fg=PAL["success"] if ok else PAL["warning"])
+
     def change_source(self):
         self.cfg["settings"]["scan_source"] = self.src_var.get(); save_cfg(self.cfg)
         self.card_box = None; self.refresh_status()
@@ -1186,8 +1360,10 @@ class App:
         kind = t("kind." + item["kind"]) if item.get("kind") else ""
         self.item_lbl.config(text=item["name"] + ("  [" + ", ".join(item["rarity"]) + "]" if item["rarity"] else "") +
                              (f"  ·  {slot_name(item['slot'])}" if item.get("slot") else "") + (f"  ·  {kind}" if kind else ""))
-        notes = [n for n in (item.get("_note"), note) if n]
+        notes = [n for n in (item.get("_note"), note) if n and "  ·  " not in n]
+        notes += [n.split("  ·  ")[0] for n in (note,) if n and "  ·  " in n]
         self.note_lbl.config(text="\n".join("» " + n for n in notes))
+        self.show_fit(item)
         self.item_tv.delete(*self.item_tv.get_children())
         proto = "PROTOTYPE" in item.get("rarity", [])
         for k, v in item.get("attrs", {}).items():
@@ -1478,7 +1654,47 @@ class App:
                                                      "rarity": item.get("rarity", []),
                                                      "time": datetime.now().isoformat(timespec="seconds")}
         save_progress(self.progress)
+        self.check_build_complete(bname)
         if self.current_tab() == "progress": self.refresh_prog()
+        if self.current_tab() == "builds" and getattr(self, "cur", None) and self.cur.get("name") == bname: self.draw_sheet()
+
+    def build_status(self, b):
+        """{slot: ("done"|"partial"|"missing"|"off", kayıt, şartlar)} — Build'ler, Eksik Parça ve Panel ortak kullanır."""
+        plan = plan_of(b)
+        prog = self.progress.get(b["name"], {})
+        out = {}
+        for slot in engine.ALL_SLOTS:
+            req = plan.get(slot, {"kind": "off"})
+            if req.get("kind") == "off":
+                out[slot] = ("off", None, []); continue
+            rec = prog.get(slot)
+            if not rec:
+                out[slot] = ("missing", None, []); continue
+            checks = engine.check_slot(dict(rec, name=rec.get("item")), req, GAME)
+            out[slot] = ("done" if engine.slot_done(checks) else "partial", rec, checks)
+        return out
+
+    def check_build_complete(self, bname):
+        b = build_by_name(self.cfg, bname)
+        if not b: return
+        stt = self.build_status(b)
+        act = [v for v in stt.values() if v[0] != "off"]
+        if act and all(v[0] in ("done", "partial") for v in act):
+            full = all(v[0] == "done" for v in act)
+            self.toast(t("build.complete_full" if full else "build.complete", build=bname))
+            log.info("Build complete: %s (all requirements: %s)", bname, full)
+            try: self.sounds.play("KEEP", force=True)
+            except Exception: pass
+
+    def set_active_build(self, name, refresh=True):
+        if not build_by_name(self.cfg, name): return
+        self.cfg["settings"]["active_build"] = name; save_cfg(self.cfg)
+        log.info("Active build: %s", name)
+        if not refresh: return
+        if hasattr(self, "act_cb"): self.act_cb.set(name)
+        if hasattr(self, "pb") and self.pb.get() != name:
+            self.pb.set(name); self.refresh_prog()
+        if hasattr(self, "sheet_box"): self.draw_sheet()
 
     def log(self, item, verdict, res):
         ensure_log()
@@ -1624,7 +1840,11 @@ class App:
         self.meta_info = ttk.Label(left, text=self.meta_status_text(), foreground=PAL["muted"], wraplength=300, justify="left")
         self.meta_info.pack(fill="x", pady=(4, 0))
 
-        holder = ttk.Frame(paned); paned.add(holder, weight=3)
+        right = ttk.Frame(paned); paned.add(right, weight=3)
+        self.b_nb = ttk.Notebook(right); self.b_nb.pack(fill="both", expand=True)
+        sh = ttk.Frame(self.b_nb); self.b_nb.add(sh, text=" 📋 " + t("plan.tab_sheet") + " ")
+        holder = ttk.Frame(self.b_nb); self.b_nb.add(holder, text=" ✏ " + t("plan.tab_edit") + " ")
+        self.sheet_box = ui_theme.scrollable(sh, PAL["bg"])
         r = ui_theme.scrollable(holder, PAL["bg"])
         names = (GAME.data.get("gear_sets", []) + GAME.data.get("brands", [])) if GAME.ok else []
 
@@ -1641,6 +1861,15 @@ class App:
         ttk.Button(sb, text="🗑", width=3, command=self.del_set).pack(side="left", padx=4)
         ttk.Label(g, text=t("build.set_bonus")).grid(row=3, column=0, sticky="w", padx=8, pady=4)
         ttk.Spinbox(g, textvariable=self.v_bonus, from_=0, to=50, width=6).grid(row=3, column=1, sticky="w")
+        ttk.Label(g, text=t("plan.items")).grid(row=5, column=0, sticky="nw", padx=8, pady=4)
+        self.items_lb = tk.Listbox(g, height=3, width=34, exportselection=False); self.items_lb.grid(row=5, column=1, sticky="w", pady=4)
+        self.v_itempick = tk.StringVar()
+        ip = ttk.Frame(g); ip.grid(row=5, column=2, sticky="w", padx=6)
+        ttk.Combobox(ip, textvariable=self.v_itempick, width=30,
+                     values=sorted(set(GAME.data.get("exotics", []) + GAME.data.get("named", []))) if GAME.ok else []).pack(side="left")
+        ttk.Button(ip, text="✚", width=3, command=lambda: self.v_itempick.get().strip() and self.v_itempick.get().strip() not in self.items_lb.get(0, "end")
+                   and self.items_lb.insert("end", self.v_itempick.get().strip())).pack(side="left", padx=4)
+        ttk.Button(ip, text="🗑", width=3, command=lambda: [self.items_lb.delete(x) for x in reversed(self.items_lb.curselection())]).pack(side="left")
         ttk.Label(g, text=t("build.slots")).grid(row=4, column=0, sticky="nw", padx=8, pady=4)
         slf = ttk.Frame(g); slf.grid(row=4, column=1, columnspan=3, sticky="w")
         self.v_slots = {}
@@ -1759,6 +1988,8 @@ class App:
         self.v_name.set(self.cur["name"]); self.v_bonus.set(str(self.cur.get("set_bonus", 0)))
         self.sets_lb.delete(0, "end")
         for s in self.cur.get("sets_or_brands", []): self.sets_lb.insert("end", s)
+        self.items_lb.delete(0, "end")
+        for s in self.cur.get("items", []): self.items_lb.insert("end", s)
         slots = self.cur.get("slots") or engine.ALL_SLOTS
         for s, v in self.v_slots.items(): v.set(s in slots)
         types = (self.cur.get("weapons") or {}).get("types", [])
@@ -1768,6 +1999,74 @@ class App:
         self.test_lbl.config(text="")
         self.refresh_trees()
         if hasattr(self, "meta_detail"): self.meta_detail.config(text=self.meta_detail_text(self.cur))
+        self.draw_sheet()
+
+    def draw_sheet(self):
+        """Build ayrıntısı: özet, kaynaklar, set/marka bonusu, 8 yuva (ne aranmalı + elindeki parça + ✔/✖), silahlar."""
+        box = getattr(self, "sheet_box", None)
+        b = getattr(self, "cur", None)
+        if box is None or not b: return
+        for w in box.winfo_children(): w.destroy()
+        is_act = active_build(self.cfg) is b
+        head = ttk.Frame(box); head.pack(fill="x", padx=8, pady=(8, 4))
+        ttk.Label(head, text=b["name"], font=(ui_theme.FONT_SEMI, 16)).pack(side="left")
+        if is_act:
+            tk.Label(head, text="⭐ " + t("plan.is_active"), bg=PAL["accent"], fg="white", font=(ui_theme.FONT_SEMI, 9), padx=8, pady=2).pack(side="left", padx=10)
+        else:
+            ttk.Button(head, text="⭐ " + t("plan.make_active"), style="Accent.TButton",
+                       command=lambda: (self.set_active_build(b["name"]), self.refresh_builds(keep=True))).pack(side="left", padx=10)
+        ttk.Button(head, text="🧍 " + t("plan.open_progress"), command=lambda: (self.pb.set(b["name"]), self.refresh_prog(),
+                                                                              self.nb.select(self.tab_keys.index("progress")))).pack(side="right")
+        stt = self.build_status(b)
+        have = sum(1 for v in stt.values() if v[0] in ("done", "partial")); full = sum(1 for v in stt.values() if v[0] == "done")
+        tot = sum(1 for v in stt.values() if v[0] != "off")
+        pb = ttk.Progressbar(box, maximum=max(tot, 1), value=have); pb.pack(fill="x", padx=10, pady=(2, 0))
+        ttk.Label(box, text=t("plan.progress", have=have, full=full, total=tot), foreground=PAL["muted"]).pack(anchor="w", padx=10)
+        m = b.get("meta", {})
+        summ = m.get("summary", {}) if isinstance(m.get("summary"), dict) else {}
+        line = summ.get(i18n.current_language()) or summ.get("en") or ""
+        info = []
+        if m.get("mode") or m.get("role"): info.append(" · ".join(x for x in (m.get("mode"), m.get("role"), f"🔥 {m.get('popularity')}" if m.get("popularity") else "") if x))
+        if line: info.append(line)
+        sets = b.get("sets_or_brands", [])
+        if sets: info.append(t("plan.sets_line", s=", ".join(sets)))
+        for br in sets:
+            bon = GAME.data.get("brand_bonuses", {}).get(br) if GAME.ok else None
+            if bon:
+                start = 2 if GAME.ok and br in GAME.data.get("gear_sets", []) else 1
+                info.append(f"   {br}: " + " · ".join(f"{i + start}pc {x}" for i, x in enumerate(bon)))
+        if b.get("items"): info.append(t("plan.items_line", s=", ".join(b["items"])))
+        if b.get("talents"): info.append(t("plan.talents_line", s=", ".join(f"{n} ({w:g})" for n, w in sorted(b["talents"].items(), key=lambda kv: -kv[1]))))
+        if b.get("attributes"):
+            info.append(t("plan.attrs_line", s=", ".join(f"{attr_name(k)} ≥{r.get('good_at') or '—'}" for k, r in
+                                                           sorted(b["attributes"].items(), key=lambda kv: -float(kv[1].get("weight", 1))))))
+        if info:
+            ttk.Label(box, text="\n".join(info), wraplength=1100, justify="left").pack(anchor="w", padx=10, pady=(6, 4))
+        for src in m.get("sources", [])[:4]:
+            lk = ttk.Label(box, text="🔗 " + (src.get("title") or src.get("url")), foreground=PAL["accent"], cursor="hand2")
+            lk.pack(anchor="w", padx=14); lk.bind("<Button-1>", lambda e, u=src.get("url"): __import__("webbrowser").open(u))
+        grid = ttk.Frame(box); grid.pack(fill="x", padx=4, pady=8)
+        for c in range(4): grid.columnconfigure(c, weight=1, uniform="sheet")
+        plan = plan_of(b)
+        colors = {"done": PAL["success"], "partial": PAL["warning"], "missing": PAL["danger"], "off": PAL["border"]}
+        for i, slot in enumerate(engine.ALL_SLOTS):
+            state, rec, checks = stt[slot]
+            card = elevated(grid, row=i // 4, column=i % 4, depth=self.cfg["settings"].get("ui_depth", True))
+            card.config(highlightbackground=colors[state])
+            tk.Label(card, text=f"{SLOT_ICONS.get(slot, '•')}  {slot_name(slot)}   " + t("plan.st_" + state), bg=PAL["surface"],
+                     fg=colors[state] if state != "off" else PAL["muted"], font=(ui_theme.FONT_SEMI, 11), anchor="w").pack(fill="x")
+            tk.Label(card, text="\n".join(req_lines(plan.get(slot))), bg=PAL["surface"], fg=PAL["fg"], justify="left", anchor="w",
+                     font=(ui_theme.FONT, 9), wraplength=300).pack(fill="x", pady=(4, 2))
+            if rec:
+                tk.Label(card, text="🎒 " + t("plan.have", item=rec.get("item"), score=rec.get("score")), bg=PAL["surface"], fg=PAL["accent"],
+                         justify="left", anchor="w", font=(ui_theme.FONT_SEMI, 9), wraplength=300).pack(fill="x")
+                tk.Label(card, text="\n".join(check_lines(checks)), bg=PAL["surface"], fg=PAL["muted"], justify="left", anchor="w",
+                         font=(ui_theme.FONT, 9), wraplength=300).pack(fill="x")
+            elif state == "missing":
+                tk.Label(card, text=t("plan.missing_hint"), bg=PAL["surface"], fg=PAL["muted"], justify="left", anchor="w",
+                         font=(ui_theme.FONT, 9), wraplength=300).pack(fill="x")
+            card.bind("<Configure>", lambda e, c=card: [w.config(wraplength=max(120, e.width - 26))
+                                                       for w in c.winfo_children() if isinstance(w, tk.Label)])
 
     def meta_detail_text(self, b):
         if not b.get("meta_id"): return ""
@@ -1877,6 +2176,7 @@ class App:
         types = [k for k, v in self.v_wtypes.items() if v.get()]
         if types: self.cur.setdefault("weapons", {})["types"] = types
         elif "weapons" in self.cur: self.cur["weapons"].pop("types", None)
+        self.cur["items"] = list(self.items_lb.get(0, "end"))
         if self.cur.get("meta_id"): self.cur["meta_locked"] = True   # artık senkron bu build'i değiştirmez
         if old != new and old in self.progress:
             self.progress[new] = self.progress.pop(old); save_progress(self.progress)
@@ -1899,8 +2199,9 @@ class App:
         bar = ttk.Frame(f); bar.pack(fill="x", padx=10, pady=10)
         ttk.Label(bar, text=t("label.build")).pack(side="left")
         self.pb = ttk.Combobox(bar, state="readonly", width=48, values=[b["name"] for b in self.cfg["builds"]])
-        self.pb.pack(side="left", padx=6); self.pb.bind("<<ComboboxSelected>>", lambda e: self.refresh_prog())
-        if self.cfg["builds"]: self.pb.current(0)
+        self.pb.pack(side="left", padx=6); self.pb.bind("<<ComboboxSelected>>", lambda e: (self.set_active_build(self.pb.get()), self.refresh_prog()))
+        a0 = active_build(self.cfg)
+        if a0: self.pb.set(a0["name"])
         ttk.Button(bar, text=ui_theme.with_icon(t("prog.reset_build"), "↺"), command=self.reset_build_prog).pack(side="right")
         self.pg_lbl = ttk.Label(f, style="Section.TLabel"); self.pg_lbl.pack(anchor="w", padx=12)
         self.pbar = ttk.Progressbar(f, maximum=100); self.pbar.pack(fill="x", padx=12, pady=6)
@@ -1968,34 +2269,24 @@ class App:
         prog = self.progress.get(name, {})
         have = 0
         status3d = {}
+        stt = self.build_status(b) if b else {x: ("missing", None, []) for x in engine.ALL_SLOTS}
+        plan = plan_of(b) if b else {}
+        colors = {"done": PAL["success"], "partial": PAL["warning"], "missing": PAL["danger"], "off": PAL["border"]}
         for s, (box, head, body) in self.slot_cards.items():
-            d = prog.get(s)
-            active = s in slots
-            status3d[s] = "off" if not active else "ok" if d else "miss"
-            box._base_border = {"off": PAL["border"], "ok": PAL["success"], "miss": PAL["danger"]}[status3d[s]]
-            if not active:
-                box.config(highlightbackground=PAL["border"]); head.config(fg=PAL["muted"])
-                body.config(text=t("prog.not_in_build")); continue
+            state, d, checks = stt.get(s, ("missing", None, []))
+            if s not in slots: state = "off"
+            status3d[s] = {"done": "ok", "partial": "ok", "missing": "miss", "off": "off"}[state]
+            box._base_border = colors[state]
+            box.config(highlightbackground=colors[state]); head.config(fg=colors[state] if state != "off" else PAL["muted"])
+            if state == "off":
+                body.config(text=t("prog.not_in_build"), fg=PAL["muted"]); continue
+            need = "\n".join(req_lines(plan.get(s)))
             if d:
                 have += 1
-                rolls = "  ".join(f"{attr_name(k)} {v:g}" + (f" ({d.get('quality', {}).get(k)}%)" if d.get("quality", {}).get(k) is not None else "")
-                                  for k, v in list(d.get("attrs", {}).items())[:3])
-                tag = " / ".join(x for x in (d.get("gear_set"), d.get("brand")) if x)
-                body.config(text=f"✔ {d['item']}\n" + (f"🏷 {tag}\n" if tag else "") + f"{t('col.score')}: {d['score']}%   ·   {d.get('time', '')[:10]}\n{rolls}",
-                            fg=PAL["fg"])
-                box.config(highlightbackground=PAL["success"]); head.config(fg=PAL["success"])
+                body.config(text=f"✔ {d['item']}  ·  {t('col.score')}: {d['score']}%  ·  {d.get('time', '')[:10]}\n"
+                                 + "\n".join(check_lines(checks)) + "\n— " + t("plan.wanted") + " —\n" + need, fg=PAL["fg"])
             else:
-                if s in ("Weapon", "Sidearm"):                    # silah yuvası: aranan silah türü + silah talent'i
-                    types = engine.weapon_types_of(b) if b else []
-                    if s == "Sidearm": types = [x for x in types if x == "pistol"] or ["pistol"]
-                    need = ", ".join(engine.TYPE_LABEL.get(x, x) for x in types)
-                    wn = {gamedata.nrm(n) for n in GAME.data.get("weapon_talents", [])} if GAME.ok else set()
-                    top = ", ".join([n for n in (b or {}).get("talents", {}) if gamedata.nrm(n).replace("perfect ", "") in wn][:3])
-                else:
-                    need = ", ".join(b.get("sets_or_brands", [])[:3]) if b else ""
-                    top = ", ".join(attr_name(k) for k, _ in sorted((b or {}).get("attributes", {}).items(), key=lambda kv: -kv[1].get("weight", 0))[:3])
-                body.config(text=t("prog.missing_card", need=need or "—", attrs=top or "—"), fg=PAL["muted"])
-                box.config(highlightbackground=PAL["danger"]); head.config(fg=PAL["danger"])
+                body.config(text=t("plan.missing_title") + "\n" + need, fg=PAL["muted"])
         self.agent3d.set_status(status3d, self.sel_slot)
         rows, vals = [], []
         for bb in self.cfg["builds"][:10]:
@@ -2885,10 +3176,14 @@ class App:
         ttk.Label(bar, text=t("set.save_hint"), foreground=PAL["muted"]).pack(side="left", padx=12)
         self.set_nb = ttk.Notebook(outer); self.set_nb.pack(fill="both", expand=True, padx=8, pady=(8, 0))
         P = {}
-        for key, icon in (("general", "⚙"), ("scan", "🎯"), ("display", "🖥"), ("ocr", "🔍"), ("overlay", "🪟"),
+        for key, icon in (("general", "⚙"), ("fx", "✨"), ("scan", "🎯"), ("display", "🖥"), ("ocr", "🔍"), ("overlay", "🪟"),
                           ("sync", "⭐"), ("logs", "📝")):
             holder = ttk.Frame(self.set_nb); self.set_nb.add(holder, text=f" {icon} {t('setpage.' + key)} ")
             P[key] = ui_theme.scrollable(holder, PAL["bg"])
+        self._set_keys = ["general", "fx", "scan", "display", "ocr", "overlay", "sync", "logs"]
+        self.build_fx_box(P["fx"], st)
+        if getattr(self, "_set_page", None) in self._set_keys:
+            self.set_nb.select(self._set_keys.index(self._set_page))
         f = P["general"]
         keys = ("hotkey", "keep_threshold", "consider_threshold", "overlay_seconds", "auto_interval_ms",
                 "ocr_lang", "tesseract_cmd", "log_max_kb", "log_backups")
@@ -2982,6 +3277,99 @@ class App:
         ttk.Entry(r1, textvariable=self.sv["log_backups"], width=5).pack(side="left")
 
 
+    # ---------- Efektler ----------
+    def build_fx_box(self, f, st):
+        self.fxv = {
+            "fx_cursor": tk.BooleanVar(value=bool(st.get("fx_cursor", True))),
+            "fx_trail": tk.BooleanVar(value=bool(st.get("fx_trail", True))),
+            "fx_transitions": tk.BooleanVar(value=bool(st.get("fx_transitions", True))),
+            "fx_video": tk.BooleanVar(value=bool(st.get("fx_video", True))),
+        }
+        styles = [t("fx.cur_" + x) for x in fx.CURSOR_STYLES]
+        self.fx_style = tk.StringVar(value=t("fx.cur_" + st.get("fx_cursor_style", "crosshair")))
+        self.fx_ccol = tk.StringVar(value=st.get("fx_cursor_color", "#ff6d10"))
+        self.fx_custom = tk.StringVar(value=st.get("fx_cursor_custom", ""))
+        self.fx_tcol = tk.StringVar(value=st.get("fx_trail_color", "#ff6d10"))
+        self.fx_tlen = tk.IntVar(value=int(st.get("fx_trail_len", 18)))
+        self.fx_dim = tk.DoubleVar(value=float(st.get("fx_video_dim", 0.45)))
+        colors = ["#ff6d10", "#ffffff", "#22c55e", "#38bdf8", "#ef4444", "#eab308", "#a855f7"]
+
+        c = ttk.LabelFrame(f, text="🖱 " + t("fx.cursor_box")); c.pack(fill="x", padx=10, pady=(10, 6))
+        r1 = ttk.Frame(c); r1.pack(fill="x", padx=8, pady=6)
+        ttk.Checkbutton(r1, text=t("fx.enable"), variable=self.fxv["fx_cursor"]).pack(side="left")
+        ttk.Label(r1, text=t("fx.style")).pack(side="left", padx=(16, 4))
+        ttk.Combobox(r1, textvariable=self.fx_style, values=styles, state="readonly", width=20).pack(side="left")
+        ttk.Label(r1, text=t("fx.color")).pack(side="left", padx=(16, 4))
+        ttk.Combobox(r1, textvariable=self.fx_ccol, values=colors, width=10).pack(side="left")
+        r2 = ttk.Frame(c); r2.pack(fill="x", padx=8, pady=(0, 6))
+        ttk.Label(r2, text=t("fx.custom")).pack(side="left")
+        ttk.Entry(r2, textvariable=self.fx_custom, width=50).pack(side="left", padx=6)
+        ttk.Button(r2, text=t("btn.browse"), command=lambda: self.fx_custom.set(filedialog.askopenfilename(
+            filetypes=[(t("fx.images"), "*.png *.cur *.ani *.ico *.webp")]) or self.fx_custom.get())).pack(side="left")
+        prev = ttk.Frame(c); prev.pack(fill="x", padx=8, pady=(0, 8))
+        self._cur_prev = []
+        for stl in fx.CURSOR_STYLES[1:-1]:
+            img, _ = fx.draw_cursor(stl, self.fx_ccol.get(), 40)
+            bg = Image.new("RGBA", img.size, (23, 26, 33, 255)); bg.alpha_composite(img)
+            ph = ImageTk.PhotoImage(bg); self._cur_prev.append(ph)
+            b = tk.Label(prev, image=ph, bg=PAL["surface"], cursor="hand2", padx=6, pady=6)
+            b.pack(side="left", padx=4)
+            b.bind("<Button-1>", lambda e, x=stl: self.fx_style.set(t("fx.cur_" + x)))
+        ttk.Label(c, text=t("fx.cursor_note"), foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=12, pady=(0, 8))
+
+        tr = ttk.LabelFrame(f, text="☄ " + t("fx.trail_box")); tr.pack(fill="x", padx=10, pady=6)
+        r3 = ttk.Frame(tr); r3.pack(fill="x", padx=8, pady=8)
+        ttk.Checkbutton(r3, text=t("fx.enable"), variable=self.fxv["fx_trail"]).pack(side="left")
+        ttk.Label(r3, text=t("fx.color")).pack(side="left", padx=(16, 4))
+        ttk.Combobox(r3, textvariable=self.fx_tcol, values=colors, width=10).pack(side="left")
+        ttk.Label(r3, text=t("fx.length")).pack(side="left", padx=(16, 4))
+        ttk.Scale(r3, from_=6, to=40, variable=self.fx_tlen, length=160).pack(side="left")
+
+        an = ttk.LabelFrame(f, text="🎞 " + t("fx.anim_box")); an.pack(fill="x", padx=10, pady=6)
+        ttk.Checkbutton(an, text=t("fx.transitions"), variable=self.fxv["fx_transitions"]).pack(anchor="w", padx=8, pady=8)
+
+        vd = ttk.LabelFrame(f, text="🎬 " + t("fx.video_box")); vd.pack(fill="x", padx=10, pady=6)
+        r4 = ttk.Frame(vd); r4.pack(fill="x", padx=8, pady=6)
+        ttk.Checkbutton(r4, text=t("fx.enable"), variable=self.fxv["fx_video"]).pack(side="left")
+        ttk.Label(r4, text=t("fx.dim")).pack(side="left", padx=(16, 4))
+        ttk.Scale(r4, from_=0.0, to=0.85, variable=self.fx_dim, length=160).pack(side="left")
+        ttk.Button(r4, text=ui_theme.with_icon(t("fx.add_video"), "➕"), command=self.add_video).pack(side="left", padx=(16, 4))
+        ttk.Button(r4, text=ui_theme.with_icon(t("fx.open_videos"), "📂"), command=lambda: self.open_folder(ART_DIR / "videos")).pack(side="left")
+        n = len(fx.list_videos(ART_DIR / "videos"))
+        be = fx.video_backend()
+        state = t("fx.video_state", n=n, be=be or "—") + ("" if be else "  ·  " + t("fx.no_backend"))
+        ttk.Label(vd, text=state, foreground=PAL["warning"] if not be or not n else PAL["muted"]).pack(anchor="w", padx=12)
+        ttk.Label(vd, text=t("fx.video_note"), foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=12, pady=(2, 8))
+        ttk.Button(f, text=ui_theme.with_icon(t("fx.apply"), "✨"), command=self.save_fx, style="Accent.TButton").pack(anchor="w", padx=12, pady=8)
+
+    def _fx_from_ui(self):
+        st = self.cfg["settings"]
+        for k, v in self.fxv.items(): st[k] = bool(v.get())
+        st["fx_cursor_style"] = next((x for x in fx.CURSOR_STYLES if t("fx.cur_" + x) == self.fx_style.get()), "crosshair")
+        st["fx_cursor_color"] = self.fx_ccol.get().strip() or "#ff6d10"
+        st["fx_cursor_custom"] = self.fx_custom.get().strip()
+        st["fx_trail_color"] = self.fx_tcol.get().strip() or "#ff6d10"
+        st["fx_trail_len"] = int(self.fx_tlen.get())
+        st["fx_video_dim"] = round(float(self.fx_dim.get()), 2)
+
+    def save_fx(self):
+        self._fx_from_ui(); save_cfg(self.cfg); self.apply_fx(); self.toast(t("msg.settings_saved"))
+
+    def add_video(self):
+        paths = filedialog.askopenfilenames(initialdir=str(Path.home() / "Videos"),
+                                            filetypes=[(t("fx.videos"), " ".join("*" + e for e in fx.VIDEO_EXT))])
+        if not paths: return
+        dst = ART_DIR / "videos"; dst.mkdir(parents=True, exist_ok=True)
+        for p in paths:
+            try: shutil.copy2(p, dst / Path(p).name)
+            except Exception as e: log.warning("Video copy failed: %s", e)
+        self.save_fx(); self._set_page = "fx"; self.rebuild_ui(tab="settings")
+
+    def open_folder(self, path):
+        Path(path).mkdir(parents=True, exist_ok=True)
+        try: os.startfile(str(path))
+        except Exception: pass
+
     # ---------- Ekran ve oyun ----------
     def build_display_box(self, P, st):
         db = ttk.LabelFrame(P["display"], text=t("disp.box")); db.pack(fill="x", padx=10, pady=6)
@@ -3054,7 +3442,10 @@ class App:
     def _profile_warn(self):
         key = self._profile_key()
         w = display.profile_warning(key, *display.monitor_size()) if key != "auto" else None
-        self.prof_warn.config(text=("⚠ " + t(w[0], **w[1])) if w else "")
+        if w and w[0] == "disp.low_res":
+            self.prof_warn.config(text="ℹ " + t(w[0], **w[1]), foreground=PAL["muted"])
+        else:
+            self.prof_warn.config(text=("⚠ " + t(w[0], **w[1])) if w else "", foreground=PAL["warning"])
 
     def _profile_key(self):
         try: return self._prof_keys[self._prof_labels.index(self.prof_var.get())]
@@ -3065,7 +3456,13 @@ class App:
         k2 = key if key in display.PROFILES else display.detect_profile(*display.monitor_size())
         pr = display.PROFILES[k2]
         self.ocr_thr.set(pr["threshold"]); self.ocr_scale_var.set(str(pr["ocr_scale"]))
-        self.ocr_msg.config(text=t("disp.profile_applied", prof=pr["label"]))
+        st = self.cfg["settings"]
+        st["res_profile"], st["ocr_threshold"], st["ocr_scale"] = key, pr["threshold"], ("auto" if key == "auto" else pr["ocr_scale"])
+        save_cfg(self.cfg); apply_ocr_settings(st); self.card_box = None
+        # pencere ve arayüz yeni ekran boyutuna göre hemen yeniden kurulur (yeniden başlatma yok)
+        # Yazı tipleri Tk'da önbelleğe alındığı için ölçek değişimi en temiz yeniden açılışla uygulanır (~2 sn)
+        self.toast(t("disp.restarting", prof=pr["label"]))
+        self.root.after(600, lambda: self.restart_app(tab="settings", page="display"))
 
     def refresh_game_settings(self):
         """Oyunun kendi GFXSettings dosyasını OKUR (yazmaz) ve öneriler gösterir."""
@@ -3236,6 +3633,7 @@ class App:
             return messagebox.showerror(APP_NAME, t("err.bad_setting", e=e))
         for k in ("hotkey", "overlay_corner", "ocr_lang", "tesseract_cmd", "log_level", "meta_feed_url"): st[k] = self.sv[k].get().strip()
         for k, v in self.bv.items(): st[k] = v.get()
+        if hasattr(self, "fxv"): self._fx_from_ui()
         st["res_profile"] = self._profile_key()
         st["overlay_mode"] = "card" if self.ov_mode.get() == t("overlay.mode_card") else "corner"
         apply_ocr_settings(st); self.card_box = None
@@ -3251,6 +3649,7 @@ class App:
         else:
             self.banner.set_interval(st["bg_interval"])
             self.refresh_status()
+            self.apply_fx()
         self.toast(t("msg.settings_saved"))
 
     def meta_restore_hidden(self):
