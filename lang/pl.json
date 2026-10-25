@@ -1013,5 +1013,6 @@
   "v3d.o_desert": "Pustynia",
   "v3d.o_winter": "Zima",
   "v3d.o_urban": "Miasto",
-  "v3d.o_crimson": "Karmazyn"
+  "v3d.o_crimson": "Karmazyn",
+  "v3d.agent_hint_sprite": "◀ ▶ zmienia agenta. Przeciągnij = obróć, kółko = powiększ, kliknij część = podświetl slot. Zielony = masz, czerwony = brak."
 }

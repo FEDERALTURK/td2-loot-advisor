@@ -3202,7 +3202,7 @@ class App:
         self._build_agent_look(look)
         self.agent3d.on_pick = self._pick_slot3d
         self.agent3d.set_labels({x: slot_name(x) for x in engine.ALL_SLOTS})
-        tk.Label(av_box, text=t("v3d.agent_hint"), bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 9),
+        tk.Label(av_box, text=t("v3d.agent_hint_sprite" if getattr(self.agent3d, "sprite", False) else "v3d.agent_hint"), bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 9),
                  wraplength=350, justify="left").pack(anchor="w", padx=10, pady=(0, 8))
         self.agent3d.spin()
         self.sel_slot = None

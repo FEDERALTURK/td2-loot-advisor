@@ -1013,5 +1013,6 @@
   "v3d.o_desert": "Woestijn",
   "v3d.o_winter": "Winter",
   "v3d.o_urban": "Stad",
-  "v3d.o_crimson": "Karmozijn"
+  "v3d.o_crimson": "Karmozijn",
+  "v3d.agent_hint_sprite": "◀ ▶ wisselt van agent. Slepen = draaien, scrollwiel = zoomen, klik op een onderdeel = slot markeren. Groen = in bezit, rood = ontbreekt."
 }

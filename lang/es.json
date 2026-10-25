@@ -1013,5 +1013,6 @@
   "v3d.o_desert": "Desierto",
   "v3d.o_winter": "Invierno",
   "v3d.o_urban": "Urbano",
-  "v3d.o_crimson": "Carmesí"
+  "v3d.o_crimson": "Carmesí",
+  "v3d.agent_hint_sprite": "◀ ▶ cambia de agente. Arrastra = girar, rueda = zoom, clic en una pieza = resaltar su ranura. Verde = tienes, rojo = falta."
 }

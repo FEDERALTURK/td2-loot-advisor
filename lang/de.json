@@ -1017,5 +1017,6 @@
   "v3d.o_desert": "Wüste",
   "v3d.o_winter": "Winter",
   "v3d.o_urban": "Stadt",
-  "v3d.o_crimson": "Karmesin"
+  "v3d.o_crimson": "Karmesin",
+  "v3d.agent_hint_sprite": "◀ ▶ wechselt den Agenten. Ziehen = drehen, Mausrad = zoomen, Teil anklicken = Slot hervorheben. Grün = vorhanden, Rot = fehlt."
 }

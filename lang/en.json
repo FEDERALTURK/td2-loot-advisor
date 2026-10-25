@@ -858,5 +858,6 @@
   "v3d.o_desert": "Desert",
   "v3d.o_winter": "Winter",
   "v3d.o_urban": "Urban",
-  "v3d.o_crimson": "Crimson"
+  "v3d.o_crimson": "Crimson",
+  "v3d.agent_hint_sprite": "◀ ▶ switches the agent. Drag to rotate, wheel to zoom, click a piece to highlight its slot. Green = owned, red = missing."
 }

@@ -1013,5 +1013,6 @@
   "v3d.o_desert": "Désert",
   "v3d.o_winter": "Hiver",
   "v3d.o_urban": "Urbain",
-  "v3d.o_crimson": "Pourpre"
+  "v3d.o_crimson": "Pourpre",
+  "v3d.agent_hint_sprite": "◀ ▶ change d'agent. Glisser = tourner, molette = zoom, cliquer une pièce = surligner l'emplacement. Vert = possédé, rouge = manquant."
 }

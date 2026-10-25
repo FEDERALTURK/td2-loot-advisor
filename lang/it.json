@@ -1013,5 +1013,6 @@
   "v3d.o_desert": "Deserto",
   "v3d.o_winter": "Inverno",
   "v3d.o_urban": "Urbano",
-  "v3d.o_crimson": "Cremisi"
+  "v3d.o_crimson": "Cremisi",
+  "v3d.agent_hint_sprite": "◀ ▶ cambia agente. Trascina = ruota, rotellina = zoom, clic su un pezzo = evidenzia lo slot. Verde = posseduto, rosso = mancante."
 }

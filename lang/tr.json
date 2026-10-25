@@ -1160,5 +1160,6 @@
   "v3d.o_desert": "Çöl",
   "v3d.o_winter": "Kış",
   "v3d.o_urban": "Şehir",
-  "v3d.o_crimson": "Kızıl"
+  "v3d.o_crimson": "Kızıl",
+  "v3d.agent_hint_sprite": "◀ ▶ ile ajan değiştir. Sürükle → döndür, tekerlek → yakınlaştır, parçaya tıkla → yuvası vurgulanır. Yeşil = var, kırmızı = eksik."
 }
