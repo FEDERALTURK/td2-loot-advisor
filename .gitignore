@@ -35,3 +35,9 @@ learned_library.json
 learned_library.json.tmp
 tests/.click_result.json
 tests/.tab_result.json
+
+# Panel ayarları (token, config)
+td2_admin_panel.json
+~/.td2_admin_panel.json
+reports_sent.json
+reports_queue.json
