@@ -76,6 +76,14 @@ def test_vendor_record():
     assert it["slot"] == "Weapon" and it["weapon_type"] == "Submachine Gun" and it["attrs"]["crit_chance"] == 13.5
     assert it["talents"] == ["Future Perfect"]
 
+def test_skill_build_not_weapon_type():
+    import engine
+    b = {"name": "Refactor Drone & Turret (Skill)", "sets_or_brands": ["Refactor"],
+         "meta": {"summary": {"en": "Striker Drone and Assault Turret."}}}
+    assert engine.weapon_types_of(b) == [], engine.weapon_types_of(b)
+    assert engine.weapon_types_of({"name": "Striker AR/SMG"}) == ["assault rifle", "submachine gun"]
+
+
 if __name__ == "__main__":
     fails = 0
     for n, f in list(globals().items()):

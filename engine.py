@@ -13,7 +13,7 @@ import re
 import gamedata
 
 WEAPON_WORDS = {  # build adındaki kısaltmalardan silah türü tahmini
-    "assault rifle": ["ar", "assault", "st elmo", "st. elmo", "police m4", "famas", "carbine"],
+    "assault rifle": ["ar", "assault rifle", "st elmo", "st. elmo", "police m4", "famas", "carbine"],
     "submachine gun": ["smg", "vector", "ouroboros", "submachine"],
     "light machine gun": ["lmg", "pestilence", "alejandro", "iron lung", "bluescreen", "machine gun"],
     "shotgun": ["shotgun", "fafnir", "acs-12", "close range", "scorpio", "sweet dreams"],
