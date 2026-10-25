@@ -15,9 +15,9 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.13"
 
@@ -27,8 +27,31 @@ jobs:
           CI: "1"
         run: scripts\build_installer.bat
 
+      - name: Test - install silently and start the app
+        shell: pwsh
+        run: |
+          $setup = Get-ChildItem installer\TD2LootAdvisor_Setup_*.exe | Select-Object -First 1
+          if (-not $setup) { throw "no installer" }
+          $dir = "$env:RUNNER_TEMP\td2app"
+          Start-Process $setup.FullName -ArgumentList "/VERYSILENT","/SUPPRESSMSGBOXES","/NORESTART","/DIR=$dir" -Wait
+          $exe = Join-Path $dir "TD2LootAdvisor.exe"
+          if (-not (Test-Path $exe)) { throw "exe not installed" }
+          $p = Start-Process $exe -PassThru
+          $ok = $false
+          for ($i = 0; $i -lt 60; $i++) {
+            Start-Sleep -Seconds 2
+            $log = Join-Path $dir "logs\app.log"
+            if ((Test-Path $log) -and (Select-String -Path $log -Pattern "UI ready" -Quiet)) { $ok = $true; break }
+            if ($p.HasExited) { break }
+          }
+          if (Test-Path (Join-Path $dir "logs\app.log")) { Get-Content (Join-Path $dir "logs\app.log") -Tail 25 }
+          if (-not $p.HasExited) { Stop-Process -Id $p.Id -Force }
+          if (-not $ok) { throw "app did not reach 'UI ready'" }
+          if (Select-String -Path (Join-Path $dir "logs\app.log") -Pattern "Traceback" -Quiet) { throw "traceback in app.log" }
+          Write-Host "App started fine."
+
       - name: Upload installer
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: TD2LootAdvisor-installer
           path: installer/*
