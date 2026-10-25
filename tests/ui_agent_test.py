@@ -64,11 +64,11 @@ def models(i):
     if i == 0:
         ok(hasattr(a, "_agent_look"), "model/kıyafet seçici var")
         shot("0_tab")
-    models = av.models if SPRITE else view3d.MODELS
-    if i == 0: ok(not SPRITE or len(models) == 5, f"gerçekçi ajanlar yüklendi: {models}")
-    if i < len(models):
+    mlist = av.models if SPRITE else view3d.MODELS
+    if i == 0: ok(not SPRITE or len(mlist) == 5, f"gerçekçi ajanlar yüklendi: {mlist}")
+    if i < len(mlist):
         if i: a._agent_look["cycle"](1)
-        ok(av.model == models[i], f"model: {av.model}")
+        ok(av.model == mlist[i], f"model: {av.model}")
         if SPRITE:
             seen = set()
             for f in range(0, av.n, 6): seen |= set(av.info["anchors"][f])
