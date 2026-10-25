@@ -244,3 +244,80 @@ def rarity_color(img, lines):
     box = (0, max(0, int(y0 - h)), max(2, int(x0)), min(rgb.height, int(y1 + 2 * h)))
     if box[2] - box[0] < 2: return None
     return RARITY_COLOR.get(_hue_class(list(rgb.crop(box).getdata())))
+
+
+# ---------------------------------------------------------------- Windows OCR (ikinci motor)
+WIN_PKGS = ("winrt.windows.media.ocr", "winrt.windows.globalization", "winrt.windows.graphics.imaging",
+            "winrt.windows.storage.streams")
+_win = {"engine": None, "lang": None, "error": None, "tried": False}
+_win_lock = threading.Lock()
+
+
+def winocr_available():
+    """Windows'un yerleşik OCR'ı kullanılabilir mi (paket kurulu + bir OCR dili var)? Yüklemeden önce yalnız paket denetimi."""
+    import importlib.util, sys
+    if sys.platform != "win32": return False
+    try:
+        return all(importlib.util.find_spec(m) is not None for m in WIN_PKGS)
+    except Exception:
+        return False
+
+
+def _win_engine():
+    with _win_lock:
+        if _win["tried"]: return _win["engine"]
+        _win["tried"] = True
+        try:
+            from winrt.windows.media.ocr import OcrEngine
+            from winrt.windows.globalization import Language
+            eng = None
+            for tag in ("en-US", "en-GB", "en"):            # oyun metni İngilizce: önce İngilizce OCR dili
+                try:
+                    if OcrEngine.is_language_supported(Language(tag)):
+                        eng = OcrEngine.try_create_from_language(Language(tag)); _win["lang"] = tag
+                        if eng: break
+                except Exception:
+                    continue
+            if eng is None:                                  # İngilizce paket yoksa kullanıcının dili (ör. tr-TR; Latin harfler okunur)
+                eng = OcrEngine.try_create_from_user_profile_languages()
+                if eng: _win["lang"] = str(eng.recognizer_language.language_tag)
+            _win["engine"] = eng
+            if eng is None: _win["error"] = "no OCR language installed"
+        except Exception as e:
+            _win["error"] = f"{type(e).__name__}: {e}"
+        if _win["error"]: log.info("Windows OCR not available: %s", _win["error"])
+        else: log.info("Windows OCR available (%s)", _win["lang"])
+        return _win["engine"]
+
+
+def winocr_info():
+    return {"available": _win["engine"] is not None, "lang": _win["lang"], "error": _win["error"], "tried": _win["tried"]}
+
+
+def winocr_lines(img, scale=None):
+    """Windows OCR ile satırlar: [(metin, (x0, y0, x1, y1), güven)] — RapidOCR satırlarıyla aynı biçim.
+    Güven Windows'ta yok (0.0). Kutular verilen görüntünün ölçeğinde."""
+    eng = _win_engine()
+    if eng is None: return []
+    import asyncio
+    from PIL import Image
+    from winrt.windows.storage.streams import DataWriter
+    from winrt.windows.graphics.imaging import SoftwareBitmap, BitmapPixelFormat
+    k = scale or Engine.auto_scale(img)
+    try: mx = int(eng.max_image_dimension) or 4096
+    except Exception: mx = 4096
+    k = min(k, mx / max(img.width, img.height))
+    im = img.convert("RGBA")
+    if abs(k - 1.0) > 0.05: im = im.resize((max(1, int(im.width * k)), max(1, int(im.height * k))), Image.LANCZOS)
+    w = DataWriter(); w.write_bytes(im.tobytes())
+    sb = SoftwareBitmap.create_copy_from_buffer(w.detach_buffer(), BitmapPixelFormat.RGBA8, im.width, im.height)
+
+    async def run():
+        return await eng.recognize_async(sb)
+    res = asyncio.run(run())
+    items = []                                   # kelimeler → RapidOCR ile aynı satır gruplaması ve kutu biçimi (x0, y0, x1, y1)
+    for line in res.lines:
+        for wd in line.words:
+            r = wd.bounding_rect
+            items.append((str(wd.text), (int(r.x / k), int(r.y / k), int((r.x + r.width) / k), int((r.y + r.height) / k)), 0.0))
+    return [(_fix(t), b, c) for t, b, c in group_lines(items)]

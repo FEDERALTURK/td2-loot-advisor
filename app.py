@@ -376,7 +376,7 @@ def first_pass_confident(item, lines):
     """İlk okuma güvenilir mi? Eşya tam güvenle tanındı, kesik değil ve rakamlı satırlar net okundu → ek geçiş gereksiz.
     (Kaydırılmış/eksik kartlarda güven düşer ve eskisi gibi çoklu okuma yapılır.)"""
     if OCR is None or OCR.name != "rapidocr" or not isinstance(item, dict): return False
-    if not item.get("known") or item.get("partial") or float(item.get("confidence") or 0) < 0.95: return False
+    if not item.get("known") or item.get("partial") or item.get("suspect") or float(item.get("confidence") or 0) < 0.95: return False
     if not item.get("attrs"): return False
     dig = [c for l, _, c in (lines or []) if re.search(r"\d", l)]
     return bool(dig) and min(dig) >= 0.9

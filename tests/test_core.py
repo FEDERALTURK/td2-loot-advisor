@@ -56,6 +56,18 @@ def test_weapon_limits():
     assert G.parse_attr_line("+13.5% Critical Hit Chance") is None                                # gear: impossible
     assert G.parse_attr_line("+20.0% Headshot Damage", named=True) == ("headshot_damage", 20.0)   # named "perfect"
 
+def test_decimal_repair():
+    """OCR ondalık noktayı kaçırınca ('60%' → 6.0) değer atılmaz, onarılır ve şüpheli işaretlenir."""
+    G = _game()
+    for line, kw, want in (("+60% Critical Hit Chance", {}, ("crit_chance", 6.0)), ("+125% Critical Hit Damage", {}, ("crit_damage", 12.5)),
+                           ("+411.1% Critical Hit Damage", {}, ("crit_damage", 11.1))):
+        sus = []
+        assert G.parse_attr_line(line, suspects=sus, **kw) == want and sus == [want[0]], (line, sus)
+    sus = []
+    assert G.parse_attr_line("+6.0% Critical Hit Chance", suspects=sus) == ("crit_chance", 6.0) and sus == []
+    assert G.parse_attr_line("170,370 Armor", suspects=sus) == ("armor", 170370.0) and sus == []
+    assert G.parse_attr_line("+13.5% Critical Hit Chance", suspects=sus) is None                  # ondalıklı ve imkânsız: yine reddedilir
+
 def test_share_roundtrip():
     import share
     b = {"name": "Striker", "sets_or_brands": ["Striker's Battlegear"], "attributes": {"crit_chance": {"weight": 2}},

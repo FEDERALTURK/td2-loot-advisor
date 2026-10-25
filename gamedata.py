@@ -305,8 +305,8 @@ class GameData:
                     found.append((name, best[2]))
         return found
 
-    def parse_attr_line(self, line, prototype=False, weapon=False, named=False):
-        """Tek satırdan (anahtar, değer) ya da None."""
+    def parse_attr_line(self, line, prototype=False, weapon=False, named=False, suspects=None):
+        """Tek satırdan (anahtar, değer) ya da None. Onarılan (şüpheli) değerlerin anahtarı suspects'e eklenir."""
         # attribute satırı sayıyla başlar ("+5.9% Critical Hit Chance", "170,370 Armor");
         # talent açıklamaları ve marka bonusları ("1 piece: …") sayılmaz
         if not re.match(r"^[^A-Za-z]{0,8}?[+-]?\d", line) or re.search(r"(?i)\bpieces?\b|\bfor \d+s\b|\bseconds?\b|\bstacks?\b|\btimes\b", line):
@@ -335,18 +335,24 @@ class GameData:
         mx0 = self.limit_of(key, prototype, weapon, named)
         if mx0 and val > mx0 * 1.05:
             raw2 = m.group(1).lstrip("+-")
+            unit = (m.group(2) or "").strip() or self.data.get("attributes", {}).get(key, {}).get("unit", "")
+            fixed = None
             if raw2[:1] == "4" and len(raw2) > 1:      # "+" çoğu zaman "4" okunur: "411.1%" → "11.1%"
                 try:
                     v2 = float(raw2[1:].replace(",", "."))
+                    if v2 <= mx0 * 1.05: fixed = v2
                 except ValueError:
-                    return None
-                if v2 <= mx0 * 1.05: val = v2
-                else: return None
-            else:
+                    pass
+            if fixed is None and unit == "%" and re.fullmatch(r"\d{2,3}", raw2):
+                v2 = float(raw2) / 10                 # ondalık nokta kaçmış: "60%" → 6.0, "125%" → 12.5
+                if v2 <= mx0 * 1.05: fixed = v2
+            if fixed is None:
                 return None                           # imkânsız değer (OCR hatası)
+            val = fixed
+            if suspects is not None: suspects.append(key)
         return key, val
 
-    def parse_attrs(self, lines, prototype=False, sections=None, weapon=False, named=False):
+    def parse_attrs(self, lines, prototype=False, sections=None, weapon=False, named=False, suspects=None):
         """(attrs, quality, mod_attrs). sections verilirse yalnızca core/attributes/mods bölümleri okunur."""
         attrs, quality, mods = {}, {}, {}
         rows = sections if sections is not None else [(None, l) for l in lines]
@@ -356,7 +362,7 @@ class GameData:
                 continue
             if not use_sections and re.search(r"(?i)expertise|proficien", line):
                 continue
-            kv = self.parse_attr_line(line, prototype, weapon, named)
+            kv = self.parse_attr_line(line, prototype, weapon, named, suspects)
             if not kv: continue
             key, val = kv
             target = mods if sec == "mods" else attrs
@@ -457,8 +463,10 @@ class GameData:
                     m = re.search(r"\b" + re.escape(w) + r"\b", scope)
                     if m: hits.append((m.start(), s))
                 if hits: slot = min(hits)[1]; break
+        suspect = []
         attrs, quality, mod_attrs = self.parse_attrs(lines, "PROTOTYPE" in rarity, secs if has_sections else None,
-                                                     weapon=bool(is_weapon), named=bool({"NAMED", "EXOTIC"} & set(rarity)))
+                                                     weapon=bool(is_weapon), named=bool({"NAMED", "EXOTIC"} & set(rarity)),
+                                                     suspects=suspect)
         talents = self.match_talents(lines)
         if not name:                                      # bilinen ad yoksa: marka/set + yuva ("Grupo Sombra Mask")
             base = sets.get("gear_set") or sets.get("brand")
@@ -479,7 +487,7 @@ class GameData:
                 "brand": sets.get("brand") or info.get("brand") or (name if kind == "brand" else None),
                 "gear_set": sets.get("gear_set") or info.get("gear_set") or (name if kind == "gear_set" else None),
                 "rarity": rarity, "slot": slot if item_kind in ("weapon", "gear") else None,
-                "weapon_type": wtype, "spec": spec, "partial": partial, "sections": has_sections,
+                "weapon_type": wtype, "spec": spec, "partial": partial, "sections": has_sections, "suspect": sorted(set(suspect)),
                 "attrs": attrs, "quality": quality, "mod_attrs": mod_attrs,
                 "talents": [t for t, _ in talents], "confidence": confidence,
                 "_learn": {"set_name": set_name, "set_kind": set_kind, "bonuses": bonuses, "title": title}}
