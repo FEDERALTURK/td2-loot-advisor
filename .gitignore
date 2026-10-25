@@ -34,3 +34,4 @@ installer/
 learned_library.json
 learned_library.json.tmp
 tests/.click_result.json
+tests/.tab_result.json

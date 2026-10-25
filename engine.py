@@ -57,6 +57,11 @@ def find_card(img, ocr_data_fn, preprocess=True):
     col = [a for a in anchors if abs(a[1] - best[1]) < tol]
     x0 = min(a[1] for a in col)
     top = min(a[2] for a in col)
+    # kartın başlığı: sağ üstte "RANK" yazar. Bölüm başlıkları (Core/Attributes) çok aşağıdaysa (uzun set
+    # açıklaması) başlık kırpılıyordu → aynı kartın RANK'ı varsa üst sınır oradan
+    ranks = [w for w in words if w[0] == "rank" and x0 - 0.01 * W <= w[1] <= x0 + 0.32 * W and w[2] < top]
+    if ranks:
+        top = min(top, min(r[2] for r in ranks))
     # kartın genişliği: başlık sütunundan sağa doğru, aynı satırlardaki kelimelerin en sağı
     # tam ekranda kart ekranın ~%17'si: sağdaki başka paneller karışmasın diye 0.30W ile sınırla.
     # Kırpılmış kart / küçük bölge verildiyse (W < 1600 px) kart görüntünün büyük kısmıdır: sınır yok.
@@ -70,6 +75,59 @@ def find_card(img, ocr_data_fn, preprocess=True):
     if box[2] - box[0] < 0.08 * W or box[3] - box[1] < 0.15 * H:
         return None
     return box
+
+
+def find_selected_row(img, card_box=None):
+    """Envanter listesinde seçili (turuncu vurgulu) satırın kutusu ya da None.
+    Kart aşağı kaydırılınca eşyanın adı ve seti kartta görünmez; listede seçili satırda yazar
+    ("Striker's Pack / Striker's Battlegear / Weapon Damage +15%"). Satır kartın SOLUNDA aranır."""
+    from PIL import Image
+    W, H = img.size
+    x1 = card_box[0] if card_box else int(W * 0.6)
+    if x1 < W * 0.08: return None
+    k = max(1, -(-W // 1400))
+    small = img.crop((0, 0, x1, H)).resize((max(1, x1 // k), max(1, H // k)), Image.BILINEAR)
+    sw, sh = small.size
+    px = small.load()
+    def orange(c):
+        r, g, b = c[:3]
+        return r >= 200 and 80 <= g <= 175 and b <= 90 and r - g >= 60
+    rows = []
+    for y in range(sh):
+        n = 0; first = None
+        for x in range(0, sw, 2):
+            if orange(px[x, y]):
+                n += 1
+                if first is None: first = x
+        rows.append((n * 2 / sw, first))
+    best, cur = None, None
+    for y, (f, first) in enumerate(rows + [(0, None)]):
+        if f >= 0.18:
+            cur = (cur[0], y, min(cur[2], first)) if cur else (y, y, first)
+        elif cur:
+            h = cur[1] - cur[0] + 1
+            if h * k >= H * 0.025 and (best is None or h > best[1] - best[0] + 1):
+                best = cur
+            cur = None
+    if not best: return None
+    y0, y1, xs = best
+    pad = int(H * 0.004)
+    # satırın tamamı: turuncu bölgenin solundaki resim alanı dahil değil (yazı turuncu zeminde)
+    return (max(0, xs * k - pad), max(0, y0 * k - pad), x1, min(H, (y1 + 1) * k + pad))
+
+
+def selected_row_header(lines):
+    """Seçili satırın OCR satırlarından eşya adı ve set/marka satırı. Satırın ilk iki yazısı hep ad ve set/markadır;
+    sağdaki "LEVEL 40" ve alttaki çekirdek attribute ("Weapon Damage +15%") atılır."""
+    out = []
+    for l in lines:
+        t = re.sub(r"\s*\b(level|lvl)\b.*$", "", l.strip(), flags=re.I)
+        t = re.sub(r"\s+\d{1,3}$", "", t).strip(" .,:;|")
+        if not t or re.fullmatch(r"[\d\s.,+%]+", t) or re.search(r"[+%]", t): continue
+        if out and gamedata.nrm(t) in ("weapon damage", "veapon damage", "armor", "skill tier", "health"): break   # exotic: set satırı yok
+        out.append(t)
+        if len(out) == 2: break
+    return out
 
 
 # ---------------------------------------------------------------- yardımcılar

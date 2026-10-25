@@ -235,44 +235,74 @@ class TrailFX:
 
 # ---------------------------------------------------------------- sekme geçişi
 class Transition:
-    """Sekme geçişi: sekme satırının altında, eski sekmeden yeni sekmeye kayan parlak bir ışık çizgisi; yeni sekmenin
-    altına varınca genişleyip söner. Pencerenin saydamlığına (-alpha) DOKUNMAZ: eskiden tüm pencere karartılıp
-    açılıyordu → arka plan saati şeffaflığıyla çakışıp titriyor ve kasıyordu. Yalnız 3 px'lik bir çizgi çizilir.
-    play(notebook, eski_sekme, yeni_sekme)  ·  duration_ms ile hız ayarlanır."""
+    """Sekme göstergesi: seçili sekmenin altında kalıcı turuncu bir çizgi; sekme değişince eski sekmeden yenisine
+    akıcı biçimde kayar ve yeni sekmenin genişliğine oturur. Şekiller her karede yeniden yaratılmaz (yalnız konumları
+    güncellenir), pencerenin saydamlığına dokunulmaz. play(notebook, eski, yeni) · duration (ms) ile hız."""
 
-    def __init__(self, root, bar_parent=None, color="#ff6d10", bg="#0f1116", duration_ms=650):
+    def __init__(self, root, bar_parent=None, color="#ff6d10", bg="#0f1116", duration_ms=260):
         self.root, self.color, self.bg = root, color, bg
-        self.duration = max(150, int(duration_ms))
+        self.duration = max(120, min(450, int(duration_ms)))
         self.bar = None
         self._gen = 0
         self._spans = {}
+        self._pos = None                                 # (sol, sağ) şu anki çizgi
         self.frames = 0                                  # test: çizilen kare sayısı
+        self.debug = {}
 
     def _tab_spans(self, nb):
         """Sekmelerin x aralıkları ve sekme satırının alt kenarı (Tk'dan; ekran ölçeğinden bağımsız)."""
         w = nb.winfo_width()
-        key = (w, nb.index("end"))
+        key = (w, nb.index("end"), tuple(nb.tab(i, "text") for i in range(nb.index("end"))))
         if self._spans.get("key") == key: return self._spans["v"]
         ymid = None
-        for y in range(2, 80, 2):
+        for y in range(2, 90, 2):
             try:
                 nb.index(f"@20,{y}"); ymid = y; break
             except tk.TclError:
                 continue
         spans, bottom = {}, 0
         if ymid is not None:
-            for x in range(0, w, 3):
+            x = 0
+            while x < w:                                  # kaba tarama, sınırlarda inceltme
                 try:
                     i = nb.index(f"@{x},{ymid}")
+                    a, b = spans.get(i, (x, x)); spans[i] = (min(a, x), max(b, x))
                 except tk.TclError:
-                    continue
-                a, b = spans.get(i, (x, x)); spans[i] = (min(a, x), max(b, x))
+                    pass
+                x += 4
             for y in range(ymid, ymid + 120):
                 try: nb.index(f"@20,{y}"); bottom = y
                 except tk.TclError: break
         v = (spans, bottom + 1)
         self._spans = {"key": key, "v": v}
         return v
+
+    def _ensure_bar(self, nb, bottom):
+        if self.bar is None or not self.bar.winfo_exists() or self.bar.master is not nb:
+            self.bar = tk.Canvas(nb, height=3, bg=self.bg, highlightthickness=0, bd=0)
+            self.glow = self.bar.create_rectangle(0, 0, 0, 3, fill=self._dim(0.35), outline="")
+            self.line = self.bar.create_rectangle(0, 0, 0, 3, fill=self.color, outline="")
+            nb.bind("<Configure>", lambda e: self.snap(nb), add="+")
+        self.bar.place(x=0, y=bottom, relwidth=1, height=3)
+        self.bar.tk.call("raise", self.bar._w)
+
+    def _draw(self, l, r, glow=0.0):
+        pad = 4
+        self.bar.coords(self.line, l + pad, 0, r - pad, 3)
+        g = 10 * glow
+        self.bar.coords(self.glow, l + pad - g, 0, r - pad + g, 3)
+        self._pos = (l, r)
+
+    def snap(self, nb):
+        """Çizgiyi animasyonsuz seçili sekmenin altına koy (açılış, pencere boyutu değişince)."""
+        try:
+            spans, bottom = self._tab_spans(nb)
+            cur = nb.index(nb.select())
+            if cur not in spans: return
+            self._ensure_bar(nb, bottom)
+            self._draw(*spans[cur])
+        except Exception:
+            pass
 
     def play(self, nb=None, old=None, new=None):
         self._gen += 1
@@ -283,12 +313,10 @@ class Transition:
             spans, bottom = self._tab_spans(nb)
             self.debug.update(spans={str(k): v for k, v in spans.items()}, bottom=bottom)
             if new not in spans: self.debug["why"] = "tab not found"; return
-            if self.bar is None or not self.bar.winfo_exists() or self.bar.master is not nb:
-                self.bar = tk.Canvas(nb, height=3, bg=self.bg, highlightthickness=0, bd=0)
-            self.bar.place(x=0, y=bottom, relwidth=1, height=3)
-            self.bar.tk.call("raise", self.bar._w)           # Canvas.lift şekilleri öne alır; burada pencerenin kendisi
-            a0 = spans.get(old, spans[new]); a1 = spans[new]
-            self._tick(g, time.time(), a0, a1)
+            self._ensure_bar(nb, bottom)
+            a0 = self._pos or spans.get(old, spans[new]); a1 = spans[new]
+            self.debug["from"], self.debug["to"] = a0, a1
+            self._tick(g, time.perf_counter(), a0, a1)
         except Exception as e:
             self.debug["why"] = repr(e)
 
@@ -297,34 +325,21 @@ class Transition:
         return 1 - (1 - k) ** 3
 
     def _tick(self, g, t0, a0, a1):
-        if g != self._gen: return                         # yeni geçiş başladı
+        if g != self._gen: return                         # yeni geçiş başladı: o devralır
         try:
             if not self.bar.winfo_exists(): return
         except tk.TclError:
             return
-        k = min(1.0, (time.time() - t0) * 1000 / self.duration)
-        cv = self.bar
-        cv.delete("all")
-        W = max(100, cv.winfo_width())
-        move = min(1.0, k / 0.55)                          # %55: kayma, sonra genişleyip sönme
-        e = self._ease(move)
-        c0, c1 = (a0[0] + a0[1]) / 2, (a1[0] + a1[1]) / 2
-        cx = c0 + (c1 - c0) * e
-        half = ((a0[1] - a0[0]) + ((a1[1] - a1[0]) - (a0[1] - a0[0])) * e) / 2
-        if k > 0.55:                                       # varınca: çizgi tüm genişliğe yayılıp söner
-            f = self._ease((k - 0.55) / 0.45)
-            half += (W / 2) * f * 0.5
-            alpha = 1.0 - f
-        else:
-            alpha = 1.0
-        for j, (spread, a) in enumerate(((2.2, 0.18), (1.5, 0.4), (1.0, 1.0))):     # parıltı katmanları
-            hw = half * spread
-            cv.create_rectangle(cx - hw, 0, cx + hw, 3, fill=self._dim(a * alpha), outline="")
+        k = min(1.0, (time.perf_counter() - t0) * 1000 / self.duration)
+        e = self._ease(k)
+        l = a0[0] + (a1[0] - a0[0]) * e
+        r = a0[1] + (a1[1] - a0[1]) * e
+        self._draw(l, r, glow=(1 - k) * 1.0)
         self.frames += 1
         if k < 1.0:
-            self.root.after(16, lambda: self._tick(g, t0, a0, a1))
+            self.root.after(12, lambda: self._tick(g, t0, a0, a1))
         else:
-            cv.delete("all"); cv.place_forget()
+            self.debug["end"] = self._pos
 
     def _dim(self, a):
         r, g, b = _hex(self.color); br, bg_, bb = _hex(self.bg)

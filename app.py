@@ -50,7 +50,7 @@ import updates
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "5.0.5"
+APP_VERSION = "5.0.6"
 FROZEN = getattr(sys, "frozen", False)
 BASE = Path(sys.executable).parent if FROZEN else Path(__file__).resolve().parent
 TASKS_CACHE = BASE / "tasks_cache.json"  # son indirilen görev listesi
@@ -83,7 +83,7 @@ DEFAULTS = {"scan_mode": "hotkey", "auto_interval_ms": 700, "auto_record": True,
             "ui_theme": "dark", "ui_sounds": True, "bg_interval": 15,
             "fx_cursor": True, "fx_cursor_style": "crosshair", "fx_cursor_color": "#ff6d10", "fx_cursor_custom": "",
             "fx_trail": True, "fx_trail_color": "#ff6d10", "fx_trail_len": 18, "fx_transitions": True,
-            "fx_video": True, "fx_video_dim": 0.35, "fx_transition_ms": 650, "fx_bgwatch": True, "fx_bgwatch_dim": 0.0,
+            "fx_video": True, "fx_video_dim": 0.35, "fx_transition_ms": 260, "fx_bgwatch": True, "fx_bgwatch_dim": 0.0,
             "res_profile": "auto", "ocr_engine": "auto", "license_key": "", "update_check": True, "update_last": 0, "update_skip": "", "stash_record": True, "vendor_mode": False, "vendor_auto": True, "drop_share": False, "drop_asked": False, "drop_activity": "none", "drop_server": "", "drop_client": "", "vision_ok": False, "vendor_notified": "", "companion_port": 8765, "ocr_threshold": 170, "ocr_scale": "auto", "ocr_psm": 6, "ocr_passes": 3,
             "overlay_mode": "card", "overlay_alpha": 0.94, "overlay_size": 1.0, "ui_depth": True,
             "meta_sync": True, "meta_feed_url": "", "meta_last_try": 0, "meta_last_sync": "", "meta_version": "",
@@ -461,7 +461,8 @@ def valid_item(item):
     if "confidence" in item:                      # oyun verisiyle tanındıysa: güven eşiği
         # kart yapısı da gerekli (attribute / talent / kart bölümleri): harita, projeler gibi ekranlardaki
         # bir marka adı ("Palisade Steelworks") eşya sanılmasın
-        card_like = bool(item.get("attrs") or item.get("talents") or item.get("sections") or item.get("kind") not in ("gear", "weapon"))
+        card_like = bool(item.get("attrs") or item.get("talents") or (item.get("sections") and item.get("rarity"))
+                         or item.get("kind") not in ("gear", "weapon"))
         return item["confidence"] >= 0.5 and item["name"] != "?" and card_like
     letters = sum(c.isalpha() for c in item["name"])
     return letters >= 4 and (len(item["attrs"]) >= 1 or item["rarity"])
@@ -1428,7 +1429,7 @@ class App:
         set_palette(ui_theme.apply(self.root, self.cfg["settings"].get("ui_theme", "dark")))
         self.build_header()
         self.fxbar = fx.Transition(self.root, self.root, color=PAL["accent"], bg=PAL["bg"],
-                                   duration_ms=int(self.cfg["settings"].get("fx_transition_ms", 650)))
+                                   duration_ms=int(self.cfg["settings"].get("fx_transition_ms", 260)))
         nb = self.nb = ttk.Notebook(self.root); nb.pack(fill="both", expand=True, padx=10, pady=(6, 10))
         # Sekmeler sabit kimliklerle tutulur, başlıkları t() ile çevrilir.
         self.tab_keys = ("dash", "builds", "progress", "stash", "stats", "tasks", "assistant", "settings", "history", "log", "help")
@@ -1438,6 +1439,7 @@ class App:
         self.build_settings(); self.build_hist(); self.build_logtab(); self.build_help()
         nb.bind("<<NotebookTabChanged>>", self.on_tab)
         self.root.after(300, self.apply_fx)
+        self.root.after(400, lambda: self.cfg["settings"].get("fx_transitions", True) and self.fxbar.snap(self.nb))
         st = self.cfg["settings"]
         if st.get("_start_tab") in self.tab_keys:                       # yeniden açılıştan sonra kaldığı yere dön
             self.nb.select(self.tab_keys.index(st["_start_tab"]))
@@ -1526,14 +1528,19 @@ class App:
         if hasattr(self, "sounds"): self.sounds.play("tab")
         cur = self.nb.index(self.nb.select()) if hasattr(self, "nb") else None
         prev, self._tab_prev = getattr(self, "_tab_prev", cur), cur
-        if self.cfg["settings"].get("fx_transitions", True) and hasattr(self, "fxbar"):
-            self.root.after_idle(lambda p=prev, c=cur: self.fxbar.play(self.nb, p, c))   # içerik çizildikten sonra
+        anim = self.cfg["settings"].get("fx_transitions", True) and hasattr(self, "fxbar")
+        if anim:
+            self.fxbar.play(self.nb, prev, cur)
         k = self.current_tab()
-        if k == "history": self.load_history()
-        elif k == "stats": self.root.after(50, self.refresh_stats_tab)
-        elif k == "progress": self.refresh_prog()
-        elif k == "stash": self.refresh_stash()
-        elif k == "log": self.refresh_logtab()
+        # sekmenin verisini yenilemek zaman alabilir: kayma animasyonu donmasın diye bittikten sonra
+        def refresh(k=k):
+            if self.current_tab() != k: return
+            if k == "history": self.load_history()
+            elif k == "stats": self.refresh_stats_tab()
+            elif k == "progress": self.refresh_prog()
+            elif k == "stash": self.refresh_stash()
+            elif k == "log": self.refresh_logtab()
+        self.root.after((self.fxbar.duration + 30) if anim else 20, refresh)
 
     # ---------- Panel ----------
     def build_dash(self):
@@ -1823,6 +1830,23 @@ class App:
                 text = best_t
                 item, verdict, res = evaluate(text, self.cfg)
             log.debug("OCR multi-pass: %d passes, quality %.1f", passes, best_q)
+        # kart kaydırılmış (adı / seti / yuvası görünmüyor): envanter listesinde seçili satırdan oku
+        if item.get("kind") in ("gear", "weapon") and (item.get("partial") or item.get("name") in ("?", "") or
+                                                       (item.get("kind") == "gear" and not item.get("slot"))):
+            try:
+                row = engine.find_selected_row(img, box)
+                if row:
+                    rtext, _ = read_card(img.crop(row))
+                    hdr = engine.selected_row_header(rtext.splitlines())
+                    if hdr:
+                        t2 = "\n".join(hdr) + "\n" + text
+                        it2, v2, r2 = evaluate(t2, self.cfg)
+                        if it2.get("name") not in ("?", "") and not it2.get("partial"):
+                            log.info("Name from inventory list row: %s -> %r slot=%s", hdr, it2["name"], it2.get("slot"))
+                            text, item, verdict, res = t2, it2, v2, r2
+                            item["_from_list"] = True
+            except Exception:
+                log.debug("list row read failed", exc_info=True)
         try:
             card.save(BASE / "last_card.png")
             (APPLOG_DIR / "last_ocr.txt").write_text(text, encoding="utf-8")
@@ -4364,13 +4388,13 @@ class App:
         ar = ttk.Frame(an); ar.pack(fill="x", padx=8, pady=8)
         ttk.Checkbutton(ar, text=t("fx.transitions"), variable=self.fxv["fx_transitions"]).pack(side="left")
         ttk.Label(ar, text=t("fx.speed")).pack(side="left", padx=(18, 4))
-        self.fx_tms = tk.IntVar(value=int(st.get("fx_transition_ms", 650)))
+        self.fx_tms = tk.IntVar(value=max(120, min(450, int(st.get("fx_transition_ms", 260)))))
         tl = ttk.Label(ar, text=f"{self.fx_tms.get()} ms", width=8)
-        ttk.Scale(ar, from_=250, to=1500, variable=self.fx_tms, length=200,
+        ttk.Scale(ar, from_=120, to=450, variable=self.fx_tms, length=200,
                   command=lambda v: (self.fx_tms.set(int(float(v))), tl.config(text=f"{int(float(v))} ms"))).pack(side="left")
         tl.pack(side="left", padx=4)
         ttk.Button(ar, text=ui_theme.with_icon(t("fx.preview"), "▶"),
-                   command=lambda: (setattr(self.fxbar, "duration", int(self.fx_tms.get())),
+                   command=lambda: (setattr(self.fxbar, "duration", max(120, min(450, int(self.fx_tms.get())))),
                                     self.fxbar.play(self.nb, 0, self.nb.index(self.nb.select())))).pack(side="left", padx=8)
 
         self.fxv["fx_bgwatch"] = tk.BooleanVar(value=bool(st.get("fx_bgwatch", True)))
@@ -4409,7 +4433,7 @@ class App:
         st["fx_video_dim"] = round(float(self.fx_dim.get()), 2)
         st["fx_transition_ms"] = int(self.fx_tms.get())
         st["fx_bgwatch_dim"] = round(float(self.fx_wdim.get()), 2)
-        if hasattr(self, "fxbar"): self.fxbar.duration = st["fx_transition_ms"]
+        if hasattr(self, "fxbar"): self.fxbar.duration = max(120, min(450, int(st["fx_transition_ms"])))
 
     def save_fx(self):
         self._fx_from_ui(); save_cfg(self.cfg); self.apply_fx(); self.toast(t("msg.settings_saved"))

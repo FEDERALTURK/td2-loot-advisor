@@ -8,6 +8,11 @@
 
 Windows "kişisel bilgisayarınızı korudu" derse: **Ek bilgi → Yine de çalıştır** (dosya henüz kod imzalı değil).
 
+**5.0.6 — menü geçişi ve kaydırılmış kartlar**
+- Menü geçiş efekti yenilendi: eskiden tüm pencere karartılıp açılıyordu (arka plan saatiyle çakışıp titriyor ve kasıyordu). Artık sekme satırının altında eski sekmeden yeni sekmeye kayan bir ışık çizgisi; pencerenin saydamlığına dokunulmuyor.
+- Kart aşağı kaydırılınca eşyanın adı görünmüyordu: ad ve set/marka artık envanter listesindeki seçili (vurgulu) satırdan okunuyor (ör. "Striker's Pack · Striker's Battlegear"). Kaydırılan kart başka bir eşyayla birleştirilmiyor.
+- Harita, projeler gibi eşya kartı olmayan ekranlardaki yazılar artık eşya sanılmıyor.
+
 **5.0.5 — akıcılık ve fare düzeltmeleri**
 - Menülere ve düğmelere tıklamak bazen algılanmıyordu (arka plandaki ajan saati görünsün diye şeffaf yapılan zemine düşen tıklamalar arka plana gidiyordu): artık bu tıklamalar programa iletiliyor; kaydırma ve sağ tıklama da.
 - Pencere boşluklarında imleç Windows'un beyaz okuna dönüyordu: artık her yerde programın imleci.
