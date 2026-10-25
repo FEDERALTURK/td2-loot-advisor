@@ -277,18 +277,20 @@ class Transition:
     def play(self, nb=None, old=None, new=None):
         self._gen += 1
         g = self._gen
+        self.debug = {"old": old, "new": new}
         try:
-            if nb is None: return
+            if nb is None: self.debug["why"] = "no notebook"; return
             spans, bottom = self._tab_spans(nb)
-            if new not in spans: return
+            self.debug.update(spans={str(k): v for k, v in spans.items()}, bottom=bottom)
+            if new not in spans: self.debug["why"] = "tab not found"; return
             if self.bar is None or not self.bar.winfo_exists() or self.bar.master is not nb:
                 self.bar = tk.Canvas(nb, height=3, bg=self.bg, highlightthickness=0, bd=0)
             self.bar.place(x=0, y=bottom, relwidth=1, height=3)
             self.bar.lift()
             a0 = spans.get(old, spans[new]); a1 = spans[new]
             self._tick(g, time.time(), a0, a1)
-        except Exception:
-            pass
+        except Exception as e:
+            self.debug["why"] = repr(e)
 
     @staticmethod
     def _ease(k):

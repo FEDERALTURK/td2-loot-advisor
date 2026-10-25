@@ -104,6 +104,7 @@ def step_transition(i=[0], alphas=[]):
     if i[0] >= 4:
         res["fx_frames"] = a.fxbar.frames - res["fx_frames_before"]
         res["alpha_values"] = sorted(set(alphas))
+        res["fx_debug"] = getattr(a.fxbar, "debug", None)
         OUT.write_text(json.dumps(res, indent=1), encoding="utf-8")
         print("RESULT", json.dumps(res), flush=True)
         a.root.after(500, a.root.destroy); return
