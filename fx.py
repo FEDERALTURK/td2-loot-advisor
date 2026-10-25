@@ -630,8 +630,8 @@ class WatchBackground:
         """Arka plana düşen fare olayını, ana pencerede o noktadaki bileşene gönder."""
         try:
             if seq == "<ButtonPress-1>": self.root.focus_force()
-            tgt = self.root.winfo_containing(e.x_root, e.y_root)
-            if tgt is None or tgt.winfo_toplevel() is self.win: return
+            tgt = self._widget_at(e.x_root, e.y_root)
+            if tgt is None: return
             kw = {"x": e.x_root - tgt.winfo_rootx(), "y": e.y_root - tgt.winfo_rooty(), "rootx": e.x_root, "rooty": e.y_root}
             if seq == "<MouseWheel>":
                 tgt.event_generate("<MouseWheel>", delta=e.delta, **kw)
@@ -639,6 +639,25 @@ class WatchBackground:
                 tgt.event_generate(seq, **kw)
         except Exception:
             pass
+
+    def _widget_at(self, X, Y):
+        """Ana pencerede ekran noktasındaki en içteki bileşen. winfo_containing kullanılamaz: Windows şeffaf
+        pikselde arka plan penceresini döndürür. Bileşen ağacı ve konumları Tk'dan okunur."""
+        w = self.root
+        if not (w.winfo_rootx() <= X < w.winfo_rootx() + w.winfo_width() and w.winfo_rooty() <= Y < w.winfo_rooty() + w.winfo_height()):
+            return None
+        while True:
+            nxt = None
+            for c in reversed(w.winfo_children()):             # sonra eklenen üstte
+                try:
+                    if isinstance(c, tk.Toplevel) or not c.winfo_ismapped(): continue
+                    x, y = c.winfo_rootx(), c.winfo_rooty()
+                    if x <= X < x + c.winfo_width() and y <= Y < y + c.winfo_height():
+                        nxt = c; break
+                except tk.TclError:
+                    continue
+            if nxt is None: return w
+            w = nxt
 
     def set_cursor(self, spec):
         """Arka plan penceresinde de programın imleci (boşluklarda Windows'un beyaz oku görünmesin)."""
