@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "version": "2026-10-25.4",
+ "version": "2026-10-25.5",
  "source": "The Division Wiki (fandom) + mx-division-builds data (CC BY-NC-SA 4.0, mxswat) + manual + wiki library builder (brand/gear set pieces) + TD2_Kutuphane.xlsx (Ubisoft sezon notları Y8)",
  "prototype_multiplier": 1.5,
  "gear_sets": [
