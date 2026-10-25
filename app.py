@@ -1510,7 +1510,8 @@ class App:
         if not hasattr(self, "banner"): return
         st = self.cfg["settings"]
         prov = st.get("ai_provider", "builtin")
-        self.banner.set_chips([(("● " + t("state.running")) if self.running else ("○ " + t("state.stopped")),
+        self.banner.set_chips([("🔄 " + t("sync.btn_short"), "btn", self.run_sync),
+                               (("● " + t("state.running")) if self.running else ("○ " + t("state.stopped")),
                                 "on" if self.running else "off"),
                                ("🤖 " + provider_label(prov if prov in PROVIDER_KEYS else "builtin"), "off")])
 
@@ -1538,7 +1539,6 @@ class App:
         ttk.Button(top, text="🔍 " + t("btn.scan_now"), command=self.trigger, style="Accent.TButton").pack(side="left", padx=6)
         ttk.Button(top, text=ui_theme.with_icon(t("btn.pick_region"), "⛶"), command=self.calibrate).pack(side="left")
         ttk.Button(top, text=ui_theme.with_icon(t("btn.test_image"), "🖼"), command=self.test_image).pack(side="left", padx=6)
-        ttk.Button(top, text="🔄 " + t("sync.btn_short"), command=self.run_sync).pack(side="left")
 
         src = ttk.Frame(left); src.pack(fill="x", pady=(8, 0))
         ttk.Label(src, text=t("panel.source"), foreground=PAL["muted"]).pack(side="left")

@@ -38,7 +38,8 @@ jobs:
           $g = Start-Process python -ArgumentList "fake_game.py" -PassThru
           Start-Sleep 3
           $p = Start-Process python -ArgumentList "tests/ui_sync_shot.py" -PassThru
-          Start-Sleep 25; Shot "sync_01"
+          Start-Sleep 6;  Shot "sync_00_header"
+          Start-Sleep 19; Shot "sync_01"
           Start-Sleep 12; Shot "sync_02"
           Start-Sleep 10; Shot "sync_03_after_apply"
           if (Test-Path logs\app.log) { Get-Content logs\app.log | Select-String -Pattern "Sync|Capture|profile|Traceback|Error" }
@@ -47,6 +48,7 @@ jobs:
           if (-not $g.HasExited) { Stop-Process -Id $g.Id -Force }
           if (Select-String -Path logs\app.log -Pattern "Traceback" -Quiet) { throw "traceback in app.log" }
           if (-not (Test-Path logs\sync_report.txt)) { throw "no sync report" }
+          if (-not (Select-String -Path logs\app.log -Pattern "Sync applied" -Quiet)) { throw "apply did not run" }
       - uses: actions/upload-artifact@v5
         if: always()
         with:

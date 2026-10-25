@@ -6,7 +6,7 @@ sys.path.insert(0, str(ROOT))
 import app
 app.messagebox.askyesno = lambda *a, **k: False          # açılıştaki "yeni PC" sorusu testi bekletmesin
 a = app.App()
-a.root.after(3000, a.run_sync)
+a.root.after(3000, lambda: a.banner.chips[0][2]())          # üst banttaki "PC senkron" rozeti
 def press_apply():
     b = getattr(a, "_sync_apply_btn", None)
     if b and str(b["state"]) == "normal":

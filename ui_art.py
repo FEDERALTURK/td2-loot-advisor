@@ -602,14 +602,21 @@ class Banner:
             cv.create_text(x, h / 2 + 16, anchor="w", text=t2, fill=col, font=("Segoe UI Semibold", 10))
         # rozetler (sağ üst)
         x = w - 16
-        for text, kind in reversed(self.chips):
-            bg = {"on": fs.get("success", "#22c55e")}.get(kind, "#1d2129")
-            fg = "#ffffff" if kind == "on" else "#c9ced8"
-            tid = cv.create_text(0, 0, text=text, font=("Segoe UI Semibold", 9), fill=fg, anchor="e")
+        for i, chip in reversed(list(enumerate(self.chips))):
+            text, kind = chip[0], chip[1]
+            cb = chip[2] if len(chip) > 2 else None             # tıklanabilir rozet (ör. "PC senkron")
+            bg = {"on": fs.get("success", "#22c55e"), "btn": fs.get("accent", "#ff6d10")}.get(kind, "#1d2129")
+            fg = "#ffffff" if kind in ("on", "btn") else "#c9ced8"
+            tag = f"chip{i}"
+            tid = cv.create_text(0, 0, text=text, font=("Segoe UI Semibold", 9), fill=fg, anchor="e", tags=(tag,))
             bx = cv.bbox(tid); tw = bx[2] - bx[0]
             cv.coords(tid, x - 10, 26)
-            cv.create_rectangle(x - tw - 20, 14, x, 38, fill=bg, outline="")
+            cv.create_rectangle(x - tw - 20, 14, x, 38, fill=bg, outline="", tags=(tag,))
             cv.tag_raise(tid)
+            if cb:
+                cv.tag_bind(tag, "<Button-1>", lambda e, cb=cb: cb())
+                cv.tag_bind(tag, "<Enter>", lambda e: cv.config(cursor="hand2"))
+                cv.tag_bind(tag, "<Leave>", lambda e: cv.config(cursor=""))
             x -= tw + 28
         if self.toast_text:
             tid = cv.create_text(w - 26, h - 26, text=self.toast_text, anchor="e", fill="#ffffff",
