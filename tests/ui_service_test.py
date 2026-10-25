@@ -120,17 +120,7 @@ def s3():
     a.root.after(300, check)
 
 def s3b():
-    # OBS sayfasını Edge ile görüntüle (varsa)
-    edge = next((p for p in (r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe", r"C:\Program Files\Microsoft\Edge\Application\msedge.exe") if os.path.exists(p)), None)
-    if edge:
-        def ov():
-            time.sleep(1.5)
-            a.api.broadcast({"type": "scan", "verdict": "KEEP", "verdict_label": "KEEP", "item": {"name": "Stoner LAMG", "slot": "Weapon"}, "best": "LMG 92%"})
-        threading.Thread(target=ov, daemon=True).start()
-        threading.Thread(target=lambda: subprocess.run([edge, "--headless=new", "--disable-gpu", f"--screenshot={SHOTS / 'svc_03_obs_overlay.png'}",
-                         "--window-size=520,200", "--virtual-time-budget=4000", "--default-background-color=00000000",
-                         f"http://127.0.0.1:8799/overlay?t={st['api_token']}&hide=0"], timeout=40, capture_output=True), daemon=True).start()
-    a.root.after(8000, s4)
+    a.root.after(3000, s4)
 
 def s4():
     game.terminate()

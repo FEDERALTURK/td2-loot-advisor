@@ -1784,7 +1784,7 @@ class App:
             lic = a.data.get("license") or {}
             if lic:
                 exp = lic.get("expires")
-                when = t("prem.never") if not exp else t("prem.exp", date=time.strftime("%Y-%m-%d", time.localtime(exp)))
+                when = (t("prem.never") if not exp else t("prem.exp", date=time.strftime("%Y-%m-%d", time.localtime(exp)))).strip(" ·")
                 P(t("acc.license_line", src=t("acc.src_" + lic.get("source", "admin")), hint=lic.get("hint", ""), exp=when)).pack(fill="x")
             if a.data.get("device_limit"):
                 P("⚠ " + t("acc.device_limit"), fg=PAL["warning"]).pack(fill="x", pady=(6, 0))
