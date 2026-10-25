@@ -1347,6 +1347,14 @@ class App:
             return True
         return False
 
+    def gpu_status_text(self):
+        pr = self.cfg["settings"].get("ocr_gpu_probe") or {}
+        if ocr_backend.USE_DML:
+            return t("ocr.gpu_st_on", cpu=pr.get("cpu_ms", "?"), gpu=pr.get("dml_ms", "?"))
+        if not pr: return t("ocr.gpu_st_pending")
+        if pr.get("reason") == "not faster": return t("ocr.gpu_st_slow", cpu=pr.get("cpu_ms", "?"), gpu=pr.get("dml_ms", "?"))
+        return t("ocr.gpu_st_none", why=pr.get("reason", "?"))
+
     def gpu_check(self):
         """İlk açılışta (her sürümde bir kez) DirectML'i ayrı süreçte dene; aynı sonuç + daha hızlıysa aç."""
         st = self.cfg["settings"]; mode = st.get("ocr_gpu", "auto")
@@ -4791,6 +4799,12 @@ class App:
         eng_txt = t("ocr.active", name="RapidOCR" if OCR.name == "rapidocr" else "Tesseract")
         if not ocr_backend.rapid_available(): eng_txt += "  —  " + t("ocr.rapid_missing")
         ttk.Label(o1, text=eng_txt, foreground=PAL["muted"], wraplength=640, justify="left").pack(side="left", padx=10)
+        og = ttk.Frame(ob); og.pack(fill="x", padx=8, pady=(2, 4))
+        ttk.Label(og, text=t("ocr.gpu")).pack(side="left")
+        self._gpu_modes = {"auto": t("ocr.gpu_auto"), "on": t("ocr.gpu_on"), "off": t("ocr.gpu_off")}
+        self.ocr_gpu_var = tk.StringVar(value=self._gpu_modes.get(st.get("ocr_gpu", "auto"), self._gpu_modes["auto"]))
+        ttk.Combobox(og, textvariable=self.ocr_gpu_var, values=list(self._gpu_modes.values()), width=14, state="readonly").pack(side="left", padx=6)
+        ttk.Label(og, text=self.gpu_status_text(), foreground=PAL["muted"], wraplength=640, justify="left").pack(side="left", padx=10)
         o2 = ttk.Frame(ob); o2.pack(fill="x", padx=8, pady=4)
         ttk.Label(o2, text=t("ocr.threshold")).pack(side="left")
         self.ocr_thr = tk.IntVar(value=int(st.get("ocr_threshold", 170)))
@@ -5036,6 +5050,13 @@ class App:
             st["ocr_passes_auto"] = pv == t("ocr.auto")       # otomatik: bilgisayarın okuma hızına göre 1-3
             if not st["ocr_passes_auto"]: st["ocr_passes"] = int(pv)
             st["ocr_engine"] = next((k for k, v in self._ocr_engines.items() if v == self.ocr_engine_var.get()), "auto")
+            gm = next((k for k, v in self._gpu_modes.items() if v == self.ocr_gpu_var.get()), "auto")
+            if gm != st.get("ocr_gpu", "auto"):
+                st["ocr_gpu"] = gm
+                if gm == "off" and ocr_backend.USE_DML:
+                    ocr_backend.USE_DML = False; ocr_backend.reset_rapid()
+                elif gm != "off":
+                    if not self.gpu_apply_cached(): threading.Thread(target=self.gpu_check, daemon=True).start()
             st["overlay_alpha"] = round(float(self.ov_alpha.get()), 2)
             st["overlay_size"] = round(float(self.ov_size.get()), 2)
         except Exception as e:

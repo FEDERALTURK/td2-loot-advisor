@@ -1014,5 +1014,13 @@
   "v3d.o_winter": "Invierno",
   "v3d.o_urban": "Urbano",
   "v3d.o_crimson": "Carmesí",
-  "v3d.agent_hint_sprite": "◀ ▶ cambia de agente. Arrastra = girar, rueda = zoom, clic en una pieza = resaltar su ranura. Verde = tienes, rojo = falta."
+  "v3d.agent_hint_sprite": "◀ ▶ cambia de agente. Arrastra = girar, rueda = zoom, clic en una pieza = resaltar su ranura. Verde = tienes, rojo = falta.",
+  "ocr.gpu": "Aceleración por GPU (DirectML):",
+  "ocr.gpu_auto": "Automática",
+  "ocr.gpu_on": "Activada",
+  "ocr.gpu_off": "Desactivada",
+  "ocr.gpu_st_on": "Activada — lectura: CPU {cpu} ms → GPU {gpu} ms",
+  "ocr.gpu_st_pending": "Se probará en el primer inicio",
+  "ocr.gpu_st_slow": "Desactivada — la GPU no es más rápida en este PC (CPU {cpu} ms, GPU {gpu} ms)",
+  "ocr.gpu_st_none": "Desactivada — no disponible ({why})"
 }

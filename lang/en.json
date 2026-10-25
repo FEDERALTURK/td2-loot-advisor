@@ -859,5 +859,13 @@
   "v3d.o_winter": "Winter",
   "v3d.o_urban": "Urban",
   "v3d.o_crimson": "Crimson",
-  "v3d.agent_hint_sprite": "◀ ▶ switches the agent. Drag to rotate, wheel to zoom, click a piece to highlight its slot. Green = owned, red = missing."
+  "v3d.agent_hint_sprite": "◀ ▶ switches the agent. Drag to rotate, wheel to zoom, click a piece to highlight its slot. Green = owned, red = missing.",
+  "ocr.gpu": "GPU acceleration (DirectML):",
+  "ocr.gpu_auto": "Automatic",
+  "ocr.gpu_on": "On",
+  "ocr.gpu_off": "Off",
+  "ocr.gpu_st_on": "On — card read: CPU {cpu} ms → GPU {gpu} ms",
+  "ocr.gpu_st_pending": "Will be tested on first start",
+  "ocr.gpu_st_slow": "Off — the GPU is not faster on this PC (CPU {cpu} ms, GPU {gpu} ms)",
+  "ocr.gpu_st_none": "Off — not available ({why})"
 }

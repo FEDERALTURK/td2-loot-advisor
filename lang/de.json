@@ -1018,5 +1018,13 @@
   "v3d.o_winter": "Winter",
   "v3d.o_urban": "Stadt",
   "v3d.o_crimson": "Karmesin",
-  "v3d.agent_hint_sprite": "◀ ▶ wechselt den Agenten. Ziehen = drehen, Mausrad = zoomen, Teil anklicken = Slot hervorheben. Grün = vorhanden, Rot = fehlt."
+  "v3d.agent_hint_sprite": "◀ ▶ wechselt den Agenten. Ziehen = drehen, Mausrad = zoomen, Teil anklicken = Slot hervorheben. Grün = vorhanden, Rot = fehlt.",
+  "ocr.gpu": "GPU-Beschleunigung (DirectML):",
+  "ocr.gpu_auto": "Automatisch",
+  "ocr.gpu_on": "An",
+  "ocr.gpu_off": "Aus",
+  "ocr.gpu_st_on": "An — Kartenlesen: CPU {cpu} ms → GPU {gpu} ms",
+  "ocr.gpu_st_pending": "Wird beim ersten Start getestet",
+  "ocr.gpu_st_slow": "Aus — die GPU ist auf diesem PC nicht schneller (CPU {cpu} ms, GPU {gpu} ms)",
+  "ocr.gpu_st_none": "Aus — nicht verfügbar ({why})"
 }

@@ -1161,5 +1161,13 @@
   "v3d.o_winter": "Kış",
   "v3d.o_urban": "Şehir",
   "v3d.o_crimson": "Kızıl",
-  "v3d.agent_hint_sprite": "◀ ▶ ile ajan değiştir. Sürükle → döndür, tekerlek → yakınlaştır, parçaya tıkla → yuvası vurgulanır. Yeşil = var, kırmızı = eksik."
+  "v3d.agent_hint_sprite": "◀ ▶ ile ajan değiştir. Sürükle → döndür, tekerlek → yakınlaştır, parçaya tıkla → yuvası vurgulanır. Yeşil = var, kırmızı = eksik.",
+  "ocr.gpu": "Ekran kartıyla hızlandır (DirectML):",
+  "ocr.gpu_auto": "Otomatik",
+  "ocr.gpu_on": "Açık",
+  "ocr.gpu_off": "Kapalı",
+  "ocr.gpu_st_on": "Açık — kart okuma: işlemci {cpu} ms → ekran kartı {gpu} ms",
+  "ocr.gpu_st_pending": "İlk açılışta denenecek",
+  "ocr.gpu_st_slow": "Kapalı — bu bilgisayarda ekran kartı hızlandırmıyor (işlemci {cpu} ms, ekran kartı {gpu} ms)",
+  "ocr.gpu_st_none": "Kapalı — kullanılamıyor ({why})"
 }

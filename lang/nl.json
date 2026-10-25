@@ -1014,5 +1014,13 @@
   "v3d.o_winter": "Winter",
   "v3d.o_urban": "Stad",
   "v3d.o_crimson": "Karmozijn",
-  "v3d.agent_hint_sprite": "◀ ▶ wisselt van agent. Slepen = draaien, scrollwiel = zoomen, klik op een onderdeel = slot markeren. Groen = in bezit, rood = ontbreekt."
+  "v3d.agent_hint_sprite": "◀ ▶ wisselt van agent. Slepen = draaien, scrollwiel = zoomen, klik op een onderdeel = slot markeren. Groen = in bezit, rood = ontbreekt.",
+  "ocr.gpu": "GPU-versnelling (DirectML):",
+  "ocr.gpu_auto": "Automatisch",
+  "ocr.gpu_on": "Aan",
+  "ocr.gpu_off": "Uit",
+  "ocr.gpu_st_on": "Aan — kaart lezen: CPU {cpu} ms → GPU {gpu} ms",
+  "ocr.gpu_st_pending": "Wordt bij de eerste start getest",
+  "ocr.gpu_st_slow": "Uit — de GPU is op deze pc niet sneller (CPU {cpu} ms, GPU {gpu} ms)",
+  "ocr.gpu_st_none": "Uit — niet beschikbaar ({why})"
 }

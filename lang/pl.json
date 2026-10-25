@@ -1014,5 +1014,13 @@
   "v3d.o_winter": "Zima",
   "v3d.o_urban": "Miasto",
   "v3d.o_crimson": "Karmazyn",
-  "v3d.agent_hint_sprite": "◀ ▶ zmienia agenta. Przeciągnij = obróć, kółko = powiększ, kliknij część = podświetl slot. Zielony = masz, czerwony = brak."
+  "v3d.agent_hint_sprite": "◀ ▶ zmienia agenta. Przeciągnij = obróć, kółko = powiększ, kliknij część = podświetl slot. Zielony = masz, czerwony = brak.",
+  "ocr.gpu": "Przyspieszenie GPU (DirectML):",
+  "ocr.gpu_auto": "Automatycznie",
+  "ocr.gpu_on": "Wł.",
+  "ocr.gpu_off": "Wył.",
+  "ocr.gpu_st_on": "Wł. — odczyt: CPU {cpu} ms → GPU {gpu} ms",
+  "ocr.gpu_st_pending": "Zostanie przetestowane przy pierwszym uruchomieniu",
+  "ocr.gpu_st_slow": "Wył. — GPU nie jest szybsze na tym PC (CPU {cpu} ms, GPU {gpu} ms)",
+  "ocr.gpu_st_none": "Wył. — niedostępne ({why})"
 }
