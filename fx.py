@@ -286,7 +286,7 @@ class Transition:
             if self.bar is None or not self.bar.winfo_exists() or self.bar.master is not nb:
                 self.bar = tk.Canvas(nb, height=3, bg=self.bg, highlightthickness=0, bd=0)
             self.bar.place(x=0, y=bottom, relwidth=1, height=3)
-            self.bar.lift()
+            self.bar.tk.call("raise", self.bar._w)           # Canvas.lift şekilleri öne alır; burada pencerenin kendisi
             a0 = spans.get(old, spans[new]); a1 = spans[new]
             self._tick(g, time.time(), a0, a1)
         except Exception as e:
