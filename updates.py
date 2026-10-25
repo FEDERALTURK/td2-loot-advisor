@@ -48,3 +48,20 @@ def diff_summary(diff, limit=8):
     names = diff["exotics"] + diff["named"] + diff["gear_sets"] + diff["brands"] + diff["weapons"] + diff["items"]
     more = max(0, len(names) - limit)
     return names[:limit], more
+
+
+def release_highlights(notes, version="", limit=420):
+    """Sürüm notlarından o sürümün "neler yeni" maddeleri (indirme tablosu değil).
+    Notlarda '**5.0.4 — başlık**' biçimli bölümler aranır; yoksa madde işaretli satırlar kullanılır."""
+    text = notes or ""
+    secs = list(re.finditer(r"\*\*\s*v?(\d+(?:\.\d+)+)\s*[—–-]\s*([^*]+)\*\*", text))
+    pick = next((m for m in secs if version and m.group(1) == str(version).lstrip("vV")), secs[0] if secs else None)
+    if pick:
+        end = next((m.start() for m in secs if m.start() > pick.start()), len(text))
+        body = text[pick.end():end]
+        head = pick.group(2).strip()
+    else:
+        body, head = text, ""
+    items = [re.sub(r"\s+", " ", re.sub(r"[*`#>|]+", "", l)).strip(" -•") for l in body.splitlines() if l.strip().startswith(("-", "•", "*"))]
+    out = (head + ": " if head else "") + " · ".join(i for i in items if i)
+    return (out[:limit - 1] + "…") if len(out) > limit else out

@@ -1956,7 +1956,7 @@ class App:
             info = res["prog"]
             box = ttk.LabelFrame(body, text="⬆ " + t("uc.prog_box")); box.pack(fill="x", pady=4)
             ttk.Checkbutton(box, variable=v_prog, text=t("uc.prog", old=APP_VERSION, new=info["version"])).pack(anchor="w", padx=8, pady=(6, 2))
-            notes = re.sub(r"[#*`|>]+", " ", info.get("notes", "")); notes = re.sub(r"\s+", " ", notes).strip()[:360]
+            notes = updates.release_highlights(info.get("notes", ""), info.get("version"))
             if notes:
                 ttk.Label(box, text=notes, foreground=PAL["muted"], wraplength=wrap, justify="left").pack(anchor="w", padx=28, pady=(0, 6))
             if FROZEN and not info.get("setup"): v_prog.set(False)

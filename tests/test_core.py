@@ -210,6 +210,9 @@ def test_update_center_logic():
     assert gameinfo.changed(a, {"version": "1.0.0.2", "mtime": 1, "size": 5}) and not gameinfo.changed(a, dict(a))
     assert gameinfo.changed({"version": "", "mtime": 1, "size": 5}, {"version": "", "mtime": 2, "size": 5})
     assert not gameinfo.changed(None, a) and gameinfo.label({"version": "1.2"}) == "1.2"
+    notes = "## TD2\n| Dosya | Ne |\n**5.0.4 — senkron**\n- Birinci\n- İkinci\n\n**5.0.3 — kütüphane**\n- Eski\n"
+    h = updates.release_highlights(notes, "5.0.4"); assert h == "senkron: Birinci · İkinci", h
+    assert updates.release_highlights(notes, "5.0.3") == "kütüphane: Eski"
 
 
 if __name__ == "__main__":
