@@ -8,8 +8,10 @@ from PIL import Image
 import engine, gamedata, ocr_backend
 
 CASES = [  # dosya, beklenen ad, yuva, set/marka, kart tek başına adı göstermiyor mu
-    ("inv_striker_pack_scrolled.jpg", "Striker's Pack", "Backpack", "Striker's Battlegear", True),
+    ("inv_striker_pack_scrolled.jpg", "Striker's Pack", "Backpack", "Striker's Battlegear", False),  # başlık en üstte: RANK ile kartta da okunur
     ("inv_unmatched_backpack.jpg", "Unmatched Backpack", "Backpack", "Unit Alloys", False),
+    ("list_scrolled_a.jpg", "Striker's Pack", "Backpack", "Striker's Battlegear", False),   # başlık çok yukarıda (RANK)
+    ("list_scrolled_b.jpg", "Striker's Pack", "Backpack", "Striker's Battlegear", True),
 ]
 
 
@@ -28,8 +30,8 @@ def main():
         got = (it["name"], it["slot"], it.get("gear_set") or it.get("brand"))
         good = got == (name, slot, base) and (not scrolled or alone["name"] in ("?", "") or alone.get("partial") or alone["name"] != name)
         ok &= good
-        print("✔" if good else "✖", f, "| card alone:", alone["name"], alone["slot"], "| list:", hint and (hint["name"], hint["sub"]), "->", got)
-    print("RESULT:", "PASS" if ok else "FAIL")
+        print("OK  " if good else "FAIL", f, "| card alone:", alone["name"], alone["slot"], "| list:", hint and (hint["name"], hint["sub"]), "->", got)
+    print("RESULT:", "PASS" if ok else "FAIL", flush=True)
     return 0 if ok else 1
 
 

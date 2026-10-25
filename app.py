@@ -1830,28 +1830,6 @@ class App:
                 text = best_t
                 item, verdict, res = evaluate(text, self.cfg)
             log.debug("OCR multi-pass: %d passes, quality %.1f", passes, best_q)
-        # kart kaydırılmış (adı / seti / yuvası görünmüyor): envanter listesinde seçili satırdan oku
-        if item.get("kind") in ("gear", "weapon") and (item.get("partial") or item.get("name") in ("?", "") or
-                                                       (item.get("kind") == "gear" and not item.get("slot"))):
-            try:
-                row = engine.find_selected_row(img, box)
-                if row:
-                    rtext, _ = read_card(img.crop(row))
-                    hdr = engine.selected_row_header(rtext.splitlines())
-                    if hdr:
-                        t2 = "\n".join(hdr) + "\n" + text
-                        it2, v2, r2 = evaluate(t2, self.cfg)
-                        if it2.get("name") not in ("?", "") and not it2.get("partial"):
-                            log.info("Name from inventory list row: %s -> %r slot=%s", hdr, it2["name"], it2.get("slot"))
-                            text, item, verdict, res = t2, it2, v2, r2
-                            item["_from_list"] = True
-            except Exception:
-                log.debug("list row read failed", exc_info=True)
-        try:
-            card.save(BASE / "last_card.png")
-            (APPLOG_DIR / "last_ocr.txt").write_text(text, encoding="utf-8")
-        except Exception:
-            pass
         # Kart aşağı kaydırıldıysa adı görünmez: ad ve marka/set, envanter listesindeki seçili satırdan okunur
         if box and (item["name"] in ("?", "") or item.get("partial") or not (item.get("_learn") or {}).get("title")):
             try:
@@ -1865,6 +1843,11 @@ class App:
                     log.info("Name from inventory list: %r / %r -> %r slot=%s", hint["name"], hint["sub"], item2["name"], item2.get("slot"))
                     text, item, verdict, res = text2, item2, verdict2, res2
                     item["_from_list"] = True
+        try:
+            card.save(BASE / "last_card.png")
+            (APPLOG_DIR / "last_ocr.txt").write_text(text, encoding="utf-8")
+        except Exception:
+            pass
         text, item, verdict, res = self.merge_scrolled(text, item, verdict, res)
         try:
             learned = GAME.learn(item) if GAME.ok else []
