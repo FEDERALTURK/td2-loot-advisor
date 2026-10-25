@@ -93,6 +93,13 @@ Recommended game settings: English game language, borderless window, HDR off, ga
   full-window **agent-watch background** whose orange light follows the mouse (Windows, dark themes),
   original procedural header videos (`bgvideo.py`; animated WebP when `av` is not installed).
 
+**Account & service (new)**
+- Optional account: sign in with Discord (no password; the session is stored encrypted with Windows DPAPI). Redeem a
+  license key (`TD2K-…`), invite / gift code (`TD2I-…`) or purchase key; one license = one computer, 7 days offline.
+- Settings → Service: starts/stops scanning with the game and logs sessions, tray icon, start with Windows,
+  smart scanning (learns menu / field / loading screens from your own screen), optional Discord Rich Presence.
+  Premium: local API (OBS overlay, Stream Deck, WebSocket) and phone notifications (ntfy or Discord webhook).
+
 **Assistant**
 - Chat and voice commands (F9) via Ollama, Claude Code, Claude API or OpenAI; voice diagnostics; Windows speech fallback.
 
@@ -101,7 +108,8 @@ Recommended game settings: English game language, borderless window, HDR off, ga
 Scanning, builds, tasks, stash and the active-build optimizer are free. Premium features are listed in
 Settings → Premium and in `features.py`. A license key is a small Ed25519-signed token checked on the computer
 (no internet). Keys are issued with `scripts/license_tool.py` by the publisher; the private key is kept in `private/`,
-which never goes to git. Because the app is open source, server-side features (community drop statistics,
+which never goes to git. Account premium uses a server-signed, device-bound entitlement (setup: `server/README.md`).
+Because the app is open source, server-side features (community drop statistics,
 cloud sync, vendor alerts) are where premium is really enforced.
 
 ## Game library

@@ -8,6 +8,16 @@
 
 Windows "kişisel bilgisayarınızı korudu" derse: **Ek bilgi → Yine de çalıştır** (dosya henüz kod imzalı değil).
 
+**5.2.0 — hesap, oyunla entegre hizmet**
+- **Yeni: isteğe bağlı hesap — Discord ile giriş.** Program girişsiz de tamamen ücretsiz çalışır. Hesap; premium anahtarını, davet / hediye kodunu ya da satın alımı bilgisayarına bağlar. Şifre yok: kim olduğunu Discord doğrular, oturum bilgisayarında Windows'un kendi şifrelemesiyle (DPAPI) saklanır. İlk açılışta karşılama penceresi çıkar ("Girişsiz devam et" ile geçilebilir); üst banttaki **👤 Giriş yap** her zaman orada.
+- **Kod kullan:** `TD2K-…` lisans anahtarı, `TD2I-…` davet kodu ya da satın alma anahtarı tek kutuya yazılır. Bir lisans bir bilgisayarda çalışır; premium 7 gün internetsiz geçerlidir ve kendiliğinden yenilenir. Eski `TD2P-` anahtarlar çalışmaya devam eder.
+- **Yeni: 🛰 Hizmet (Ayarlar).** Oyun açılınca tarama kendiliğinden başlar, kapanınca durur; oturum özeti (okunan, saklanan, kırılan, egzotik) kaydedilir. Sistem tepsisi simgesi, "pencereyi kapatınca tepside kalsın", **Windows ile başlat**.
+- **Akıllı tarama:** program menü / sahada / yükleme ekranlarını tanır; sahadayken ve yükleme ekranında boşuna okuma yapmaz. Sabit metin aramaz — bir kart her başarıyla okunduğunda o ekranı kendisi öğrenir, her dilde ve çözünürlükte çalışır. Üst bantta oyunun durumu görünür (🎮 Menüde).
+- **Discord durumu:** isteğe bağlı olarak Discord'da "TD2 Loot Advisor — Envanteri düzenliyor · 23 eşya · 2 egzotik" gösterir (bilgisayardaki Discord uygulamasıyla; sunucumuza bir şey gitmez).
+- **Premium — yerel API:** OBS için şeffaf canlı karar kartı (Tarayıcı Kaynağı), Stream Deck düğmeleri (başlat / durdur / tara) ve WebSocket. Varsayılan yalnız bu bilgisayar; her adres gizli bir anahtar içerir.
+- **Premium — telefon bildirimleri:** egzotik / adlı "SAKLA", build yükseltmesi, satıcı eşleşmesi ve oturum özeti telefona gelir — ücretsiz **ntfy** uygulaması (QR ile abone ol) ya da kendi Discord sunucuna webhook.
+- Hiçbiri oyunun belleğine, dosyalarına ya da ağ trafiğine dokunmaz; oyun yalnız pencere adından tanınır, durum yalnız ekrandan okunur.
+
 **5.1.0 — ekran kartıyla okuma**
 - **Yeni: ekran kartıyla OCR (DirectML).** Kart okuma artık ekran kartında çalışabiliyor (DirectX 12 destekleyen her ekran kartı: NVIDIA, AMD, Intel). İlk açılışta program bunu ayrı bir süreçte güvenle dener: sonuç işlemciyle aynıysa ve daha hızlıysa açar, değilse işlemcide kalır. Sürücü sorunu olsa bile program etkilenmez.
 - Ayarlar → OCR'da yeni satır: **Ekran kartıyla hızlandır** (Otomatik / Açık / Kapalı) ve bu bilgisayardaki ölçüm ("işlemci 1350 ms → ekran kartı 400 ms" gibi).

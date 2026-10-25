@@ -95,6 +95,15 @@ tüm build'ler için **3D puan çubukları**. Uyan eşyalar otomatik kaydedilir;
 - **Claude ile oku**: OCR başarısız olursa kart resmi Claude Code ile okunur (isteğe bağlı; gerçek kartla denendi: 5 sn, tüm değerler doğru).
 - **Yanlış okundu**: kartı kaydeder ve hazır doldurulmuş bir GitHub hata bildirimi açar; kart test setine eklenebilir.
 
+### Hesap ve hizmet (yeni)
+- **Hesap (isteğe bağlı):** 👤 Giriş yap → Discord ile giriş. Şifre yok; oturum bilgisayarda Windows şifrelemesiyle
+  durur. Lisans anahtarı (`TD2K-…`), davet / hediye kodu (`TD2I-…`) ya da satın alma anahtarı tek kutudan kullanılır.
+  Bir lisans bir bilgisayarda çalışır; premium 7 gün internetsiz geçerlidir.
+- **🛰 Hizmet (Ayarlar):** oyun açılınca tarama kendiliğinden başlar, kapanınca durur ve oturum özeti kaydedilir;
+  tepsi simgesi, Windows ile başlat. **Akıllı tarama** menü / saha / yükleme ekranlarını kendi öğrenir ve sahada
+  boşuna okumaz. **Discord durumu** isteğe bağlı. Premium: **yerel API** (OBS kaplaması, Stream Deck, WebSocket) ve
+  **telefon bildirimleri** (ntfy uygulaması ya da Discord webhook).
+
 ### Görevler
 - Yalnızca **arayüz dilinde**, gruplu ve kısa: Journey görevleri, Manhunt scout'ları, Gizli Görevler,
   günlük/haftalık projeler. Farklı kaynaklardan gelen aynı görev tek satır görünür.
@@ -128,7 +137,8 @@ Genel · **Efektler** · Tarama · **Ekran ve oyun** · **OCR** · Bindirme · S
 Okuma, build'ler, görevler, sandık ve aktif build optimize edicisi ücretsiz. Premium özellikler Ayarlar → **Premium**
 sayfasında ve `features.py`'de listeli. Lisans anahtarı Ed25519 ile imzalı küçük bir belirteçtir, bilgisayarda doğrulanır
 (internet gerekmez). Anahtarları yayıncı `scripts/license_tool.py` ile üretir; gizli anahtar `private/` klasöründe durur ve
-asla git'e girmez. Program açık kaynak olduğu için premium asıl olarak sunucu tarafı özelliklerde (topluluk düşüş
+asla git'e girmez. Hesapla gelen premium, sunucunun imzaladığı ve bilgisayara bağlı bir yetki belgesiyle açılır
+(kurulum: `server/README.md` → Hesap sistemi). Program açık kaynak olduğu için premium asıl olarak sunucu tarafı özelliklerde (topluluk düşüş
 istatistikleri, bulut eşitleme, satıcı bildirimleri) korunur.
 
 ## Oyun kütüphanesi
