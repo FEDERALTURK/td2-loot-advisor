@@ -85,7 +85,7 @@ DEFAULTS = {"scan_mode": "hotkey", "auto_interval_ms": 700, "auto_record": True,
             "fx_cursor": True, "fx_cursor_style": "crosshair", "fx_cursor_color": "#ff6d10", "fx_cursor_custom": "",
             "fx_trail": True, "fx_trail_color": "#ff6d10", "fx_trail_len": 18, "fx_transitions": True,
             "fx_video": True, "fx_video_dim": 0.35, "fx_transition_ms": 260, "fx_bgwatch": True, "fx_bgwatch_dim": 0.0,
-            "res_profile": "auto", "ocr_engine": "auto", "license_key": "", "update_check": True, "update_last": 0, "update_skip": "", "stash_record": True, "vendor_mode": False, "vendor_auto": True, "drop_share": False, "drop_asked": False, "drop_activity": "none", "drop_server": "", "drop_client": "", "vision_ok": False, "vendor_notified": "", "companion_port": 8765, "ocr_threshold": 170, "ocr_scale": "auto", "ocr_psm": 6, "ocr_passes": 3,
+            "res_profile": "auto", "ocr_engine": "auto", "license_key": "", "update_check": True, "update_last": 0, "update_skip": "", "stash_record": True, "vendor_mode": False, "vendor_auto": True, "drop_share": False, "drop_asked": False, "drop_activity": "none", "drop_server": "", "drop_client": "", "vision_ok": False, "vendor_notified": "", "companion_port": 8765, "agent_model": "operator", "agent_outfit": "night", "agent_skin": 1, "ocr_threshold": 170, "ocr_scale": "auto", "ocr_psm": 6, "ocr_passes": 3,
             "overlay_mode": "card", "overlay_alpha": 0.94, "overlay_size": 1.0, "ui_depth": True,
             "meta_sync": True, "meta_feed_url": "", "meta_last_try": 0, "meta_last_sync": "", "meta_version": "",
             "meta_hidden": [], "tasks_sync": True, "auto_reset_times": True,
@@ -3132,6 +3132,41 @@ class App:
             pct, why = engine.score_gear(item, self.cur, gamedata.nrm(text), GAME)
         self.test_lbl.config(text=t("build.test_result", item=item["name"], pct=pct) + "\n" + (", ".join(why) or "—"))
 
+    # ---------- 3D ajan görünümü: model, kıyafet, ten ----------
+    def _build_agent_look(self, bar):
+        st, av = self.cfg["settings"], self.agent3d
+        names = {m: t("v3d.m_" + m) for m in view3d.MODELS}
+        outfits = {o: t("v3d.o_" + o) for o in view3d.THEMES}
+        btn = dict(bg=PAL["surface2"] if "surface2" in PAL else PAL["bg"], fg=PAL["fg"], bd=0, relief="flat", cursor="hand2",
+                   activebackground=PAL["accent"], activeforeground="#111", font=(ui_theme.FONT_SEMI, 11), width=2)
+        lbl = tk.Label(bar, text=names[av.model], bg=PAL["surface"], fg=PAL["accent"], font=(ui_theme.FONT_SEMI, 11), width=12)
+
+        def save():
+            st["agent_model"], st["agent_outfit"], st["agent_skin"] = av.model, av.outfit, av.skin
+            save_cfg(self.cfg)
+
+        def cycle(step):
+            av.cycle(step); lbl.config(text=names[av.model]); save()
+        tk.Button(bar, text="◀", command=lambda: cycle(-1), **btn).pack(side="left")
+        lbl.pack(side="left", padx=2)
+        tk.Button(bar, text="▶", command=lambda: cycle(1), **btn).pack(side="left")
+        skins = tk.Frame(bar, bg=PAL["surface"]); skins.pack(side="right")
+        for i, col in enumerate(view3d.SKINS):
+            b = tk.Label(skins, bg=col, width=2, cursor="hand2", relief="flat", bd=0,
+                         highlightthickness=2, highlightbackground=PAL["accent"] if i == av.skin else PAL["surface"])
+            b.pack(side="left", padx=1)
+            b.bind("<Button-1>", lambda e, i=i: (av.set_look(skin=i), save(),
+                                                 [w.config(highlightbackground=PAL["accent"] if j == i else PAL["surface"])
+                                                  for j, w in enumerate(skins.winfo_children())]))
+        cb = ttk.Combobox(bar, state="readonly", width=10, values=list(outfits.values()))
+        cb.set(outfits[av.outfit]); cb.pack(side="right", padx=6)
+
+        def pick_outfit(_=None):
+            key = next(k for k, v in outfits.items() if v == cb.get())
+            av.set_look(outfit=key); save()
+        cb.bind("<<ComboboxSelected>>", pick_outfit)
+        self._agent_look = {"cycle": cycle, "outfit": cb, "pick_outfit": pick_outfit, "label": lbl}
+
     # ---------- Eksik parça (v2) ----------
     def build_prog(self):
         """Eksik Parça v2: seçili build'in 8 yuvası kart olarak; her kartta parça, set/marka, puan ve rulolar."""
@@ -3149,8 +3184,12 @@ class App:
         av_box = tk.Frame(mid, bg=PAL["surface"], highlightthickness=1, highlightbackground=PAL["border"])
         av_box.pack(side="left", fill="y", padx=(4, 8), pady=6)
         tk.Label(av_box, text="🧍 " + t("v3d.agent"), bg=PAL["surface"], fg=PAL["fg"], font=(ui_theme.FONT_SEMI, 11)).pack(anchor="w", padx=10, pady=(8, 0))
-        self.agent3d = view3d.AgentView(av_box, bg=PAL["surface"], width=360, height=420)
+        stg_ = self.cfg["settings"]
+        look = tk.Frame(av_box, bg=PAL["surface"]); look.pack(fill="x", padx=8, pady=(6, 0))
+        self.agent3d = view3d.AgentView(av_box, model=stg_.get("agent_model", "operator"), outfit=stg_.get("agent_outfit", "night"),
+                                        skin=int(stg_.get("agent_skin", 1) or 0), bg=PAL["surface"], width=360, height=420)
         self.agent3d.pack(padx=6, pady=4)
+        self._build_agent_look(look)
         self.agent3d.on_pick = self._pick_slot3d
         self.agent3d.set_labels({x: slot_name(x) for x in engine.ALL_SLOTS})
         tk.Label(av_box, text=t("v3d.agent_hint"), bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 9),

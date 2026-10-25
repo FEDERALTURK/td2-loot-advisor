@@ -646,7 +646,7 @@
   "prog.not_in_build": "Bu build'de kullanılmıyor",
   "prog.slot_mismatch": "Son eşya {a} olarak okundu; yine de {b} yuvasına koyulsun mu?",
   "v3d.agent": "3D ajan",
-  "v3d.agent_hint": "Sürükle → döndür, tekerlek → yakınlaştır, parçaya tıkla → yuvası vurgulanır. Yeşil = var, kırmızı = eksik, gri = bu build'de yok.",
+  "v3d.agent_hint": "◀ ▶ ile model değiştir, kıyafet ve ten rengini sağdan seç. Sürükle → döndür, tekerlek → yakınlaştır, parçaya tıkla → yuvası vurgulanır. Yeşil = var, kırmızı = eksik, gri = bu build'de yok.",
   "v3d.bars": "3D build × yuva puanları",
   "v3d.bars_hint": "Sürükle → döndür · ayrıntı için çubuğa tıkla",
   "v3d.depth": "Derinlik efekti (gölgeli kartlar)",
@@ -1149,5 +1149,16 @@
   "fb.st_duplicate": "Mükerrer",
   "fb.st_closed": "Kapatıldı",
   "fb.wrong_title": "Eşya yanlış okundu: {name}",
-  "fb.wrong_body": "Program bu eşyayı yanlış okudu. Doğru değerler (lütfen yaz):"
+  "fb.wrong_body": "Program bu eşyayı yanlış okudu. Doğru değerler (lütfen yaz):",
+  "v3d.m_operator": "Operatör",
+  "v3d.m_scout": "Keşifçi",
+  "v3d.m_heavy": "Ağır Zırh",
+  "v3d.m_urban": "Şehir",
+  "v3d.m_arctic": "Kutup",
+  "v3d.o_night": "Gece",
+  "v3d.o_woodland": "Orman",
+  "v3d.o_desert": "Çöl",
+  "v3d.o_winter": "Kış",
+  "v3d.o_urban": "Şehir",
+  "v3d.o_crimson": "Kızıl"
 }

@@ -1002,5 +1002,16 @@
   "fb.st_in-progress": "Bezig",
   "fb.st_done": "Klaar",
   "fb.st_closed": "Gesloten",
-  "fb.title": "Feedback"
+  "fb.title": "Feedback",
+  "v3d.m_operator": "Operator",
+  "v3d.m_scout": "Verkenner",
+  "v3d.m_heavy": "Zwaar",
+  "v3d.m_urban": "Stedelijk",
+  "v3d.m_arctic": "Arctisch",
+  "v3d.o_night": "Nacht",
+  "v3d.o_woodland": "Bos",
+  "v3d.o_desert": "Woestijn",
+  "v3d.o_winter": "Winter",
+  "v3d.o_urban": "Stad",
+  "v3d.o_crimson": "Karmozijn"
 }

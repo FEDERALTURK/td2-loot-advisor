@@ -344,7 +344,7 @@
   "prog.not_in_build": "Not used in this build",
   "prog.slot_mismatch": "The last item was read as {a}; put it in the {b} slot anyway?",
   "v3d.agent": "3D agent",
-  "v3d.agent_hint": "Drag to rotate, wheel to zoom, click a piece to highlight its slot. Green = owned, red = missing, grey = not used by this build.",
+  "v3d.agent_hint": "◀ ▶ switches the model; pick outfit and skin tone on the right. Drag to rotate, wheel to zoom, click a piece to highlight its slot. Green = owned, red = missing, grey = not used by this build.",
   "v3d.bars": "3D build × slot scores",
   "v3d.bars_hint": "Drag to rotate · click a bar for details",
   "v3d.depth": "Depth effect (shadowed cards)",
@@ -847,5 +847,16 @@
   "fb.st_duplicate": "Duplicate",
   "fb.st_closed": "Closed",
   "fb.wrong_title": "Item read wrong: {name}",
-  "fb.wrong_body": "The program read this item wrong. Correct values (please write them):"
+  "fb.wrong_body": "The program read this item wrong. Correct values (please write them):",
+  "v3d.m_operator": "Operator",
+  "v3d.m_scout": "Scout",
+  "v3d.m_heavy": "Heavy",
+  "v3d.m_urban": "Urban",
+  "v3d.m_arctic": "Arctic",
+  "v3d.o_night": "Night",
+  "v3d.o_woodland": "Woodland",
+  "v3d.o_desert": "Desert",
+  "v3d.o_winter": "Winter",
+  "v3d.o_urban": "Urban",
+  "v3d.o_crimson": "Crimson"
 }

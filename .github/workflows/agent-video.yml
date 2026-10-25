@@ -1,0 +1,53 @@
+# 3D ajan: modeller, kıyafetler, ten, döndürme — Windows'ta test + ekran videosu
+name: Agent 3D video (Windows)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  agent:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Install
+        shell: cmd
+        run: |
+          python -m pip install -r requirements.txt
+          python -m pip install onnxruntime rapidocr pillow
+          choco install ffmpeg -y --no-progress
+      - name: Screen resolution
+        shell: pwsh
+        continue-on-error: true
+        run: Set-DisplayResolution -Width 1920 -Height 1080 -Force
+      - name: Agent test (recorded)
+        shell: pwsh
+        timeout-minutes: 8
+        env:
+          PYTHONIOENCODING: utf-8
+        run: |
+          New-Item -ItemType Directory -Force shots | Out-Null
+          $ff = (Get-Command ffmpeg -ErrorAction SilentlyContinue).Source
+          if (-not $ff) { $ff = "C:\ProgramData\chocolatey\bin\ffmpeg.exe" }
+          $psi = New-Object System.Diagnostics.ProcessStartInfo $ff
+          $psi.Arguments = "-y -f gdigrab -framerate 20 -draw_mouse 1 -i desktop -c:v libx264 -preset veryfast -pix_fmt yuv420p shots\agent_3d.mp4"
+          $psi.UseShellExecute = $false; $psi.RedirectStandardInput = $true; $psi.CreateNoWindow = $true
+          $rec = [System.Diagnostics.Process]::Start($psi)
+          Start-Sleep 3
+          python tests\ui_agent_test.py
+          $code = $LASTEXITCODE
+          Start-Sleep 1
+          $rec.StandardInput.Write("q"); $rec.StandardInput.Flush()
+          if (-not $rec.WaitForExit(20000)) { $rec.Kill() }
+          if (Test-Path logs\app.log) { Get-Content logs\app.log | Select-String -Pattern "Traceback|Error" }
+          exit $code
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: agent-video
+          path: |
+            shots/agent_*.png
+            shots/agent_3d.mp4

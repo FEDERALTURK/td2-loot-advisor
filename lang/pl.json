@@ -1002,5 +1002,16 @@
   "fb.st_in-progress": "W toku",
   "fb.st_done": "Gotowe",
   "fb.st_closed": "Zamknięte",
-  "fb.title": "Opinie"
+  "fb.title": "Opinie",
+  "v3d.m_operator": "Operator",
+  "v3d.m_scout": "Zwiadowca",
+  "v3d.m_heavy": "Ciężki",
+  "v3d.m_urban": "Miejski",
+  "v3d.m_arctic": "Arktyczny",
+  "v3d.o_night": "Noc",
+  "v3d.o_woodland": "Las",
+  "v3d.o_desert": "Pustynia",
+  "v3d.o_winter": "Zima",
+  "v3d.o_urban": "Miasto",
+  "v3d.o_crimson": "Karmazyn"
 }

@@ -1002,5 +1002,16 @@
   "fb.st_in-progress": "En curso",
   "fb.st_done": "Hecho",
   "fb.st_closed": "Cerrado",
-  "fb.title": "Comentarios"
+  "fb.title": "Comentarios",
+  "v3d.m_operator": "Operador",
+  "v3d.m_scout": "Explorador",
+  "v3d.m_heavy": "Pesado",
+  "v3d.m_urban": "Urbano",
+  "v3d.m_arctic": "Ártico",
+  "v3d.o_night": "Noche",
+  "v3d.o_woodland": "Bosque",
+  "v3d.o_desert": "Desierto",
+  "v3d.o_winter": "Invierno",
+  "v3d.o_urban": "Urbano",
+  "v3d.o_crimson": "Carmesí"
 }

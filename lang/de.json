@@ -1006,5 +1006,16 @@
   "fb.st_in-progress": "In Arbeit",
   "fb.st_done": "Erledigt",
   "fb.st_closed": "Geschlossen",
-  "fb.title": "Feedback"
+  "fb.title": "Feedback",
+  "v3d.m_operator": "Operator",
+  "v3d.m_scout": "Späher",
+  "v3d.m_heavy": "Schwer",
+  "v3d.m_urban": "Stadt",
+  "v3d.m_arctic": "Arktis",
+  "v3d.o_night": "Nacht",
+  "v3d.o_woodland": "Wald",
+  "v3d.o_desert": "Wüste",
+  "v3d.o_winter": "Winter",
+  "v3d.o_urban": "Stadt",
+  "v3d.o_crimson": "Karmesin"
 }

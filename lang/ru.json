@@ -1002,5 +1002,16 @@
   "fb.st_in-progress": "В работе",
   "fb.st_done": "Готово",
   "fb.st_closed": "Закрыт",
-  "fb.title": "Отзыв"
+  "fb.title": "Отзыв",
+  "v3d.m_operator": "Оператор",
+  "v3d.m_scout": "Разведчик",
+  "v3d.m_heavy": "Тяжёлый",
+  "v3d.m_urban": "Город",
+  "v3d.m_arctic": "Арктика",
+  "v3d.o_night": "Ночь",
+  "v3d.o_woodland": "Лес",
+  "v3d.o_desert": "Пустыня",
+  "v3d.o_winter": "Зима",
+  "v3d.o_urban": "Город",
+  "v3d.o_crimson": "Багровый"
 }
