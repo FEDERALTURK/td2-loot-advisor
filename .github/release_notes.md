@@ -8,6 +8,13 @@
 
 Windows "kişisel bilgisayarınızı korudu" derse: **Ek bilgi → Yine de çalıştır** (dosya henüz kod imzalı değil).
 
+**5.0.9 — hız**
+- **Eşya tanıma 2–15 kat hızlı:** okunan yazıyı eşya kütüphanesiyle eşleştirme, ilk okumada yaklaşık 2 kat, aynı taramadaki tekrarlarda 13–15 kat hızlandı (Windows ölçümü: kart başına 360–630 ms → 27–47 ms). Sonuçlar eskisiyle birebir aynı (200.000 karşılaştırmada fark yok).
+- **Gereksiz okumalar kaldırıldı:** hızlı bilgisayarlarda her kart 3 kez okunuyordu. İlk okuma eşyayı tam güvenle tanıdıysa ve rakamlar net okunduysa ek okuma yapılmıyor; kart başına 1,5–4,5 sn tasarruf. Kaydırılmış/eksik kartlarda eskisi gibi çoklu okuma yapılır.
+- **Otomatik taramada daha az işlemci:** "ekran değişti mi?" denetimi tam görüntü üretmeden ham piksellerden yapılıyor ve yakalayıcı her seferinde yeniden açılmıyor (3440×1440'ta tur başına 64 ms → 8 ms; 1024×768'de 32 → 16 ms).
+- Son okunan kartın görüntüsü diske arka planda yazılıyor (tarama beklemiyor).
+- Açılış: yedek OCR motoru (Tesseract) yalnız kuruluysa yükleniyor, RapidOCR'ın varlığı yüklenmeden denetleniyor — özellikle bilgisayar yeni açıldığında daha hızlı başlangıç.
+
 **5.0.8 — gerçekçi 3D ajanlar**
 - **Eksik Parçalar sekmesindeki 3D ajan yenilendi:** beş özgün, gerçekçi ajan — Operatör, Keşifçi, Ağır Zırh, Şehir, Kutup. Her biri stüdyo ışığında render edilmiş 360° görüntülerden oluşuyor; fareyle sürükleyince döner, ◀ ▶ ile ajan değişir, seçimin kaydedilir.
 - Eksik parçalar ajanın üzerinde kırmızı nabız gibi parlar, sahip olunanlar yeşil görünür; bir parçaya tıklayınca o yuva seçilir. Yuva adları ajanın iki yanında hizalı durur.
