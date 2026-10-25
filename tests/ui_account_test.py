@@ -36,7 +36,7 @@ def step(name, ok, **kw):
 def shot(name, w=None):
     w = w or a.root
     try:
-        w.lift(); w.attributes("-topmost", True); w.update(); w.after(300); w.update() x, y = w.winfo_rootx(), w.winfo_rooty()
+        w.lift(); w.attributes("-topmost", True); w.update(); w.after(300); w.update(); x, y = w.winfo_rootx(), w.winfo_rooty()
         ImageGrab.grab(bbox=(x, y, x + w.winfo_width(), y + w.winfo_height()), all_screens=True).save(SHOTS / f"{name}.png")
         w.attributes("-topmost", False)
     except Exception as e:
