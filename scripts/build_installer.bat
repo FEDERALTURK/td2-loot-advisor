@@ -36,7 +36,9 @@ if errorlevel 1 (
   goto :fail
 )
 REM Istege bagli: yeni OCR motoru, QR, ses (kurulamazsa paket onlarsiz derlenir)
-for %%P in (onnxruntime rapidocr qrcode pyttsx3 sounddevice numpy) do (
+REM onnxruntime-directml: ekran kartiyla OCR (DirectML); ekran karti yoksa islemcide calisir. Kurulamazsa normal onnxruntime.
+%PY% -m pip install onnxruntime-directml >nul 2>&1 || %PY% -m pip install onnxruntime >nul 2>&1 || echo     [UYARI] onnxruntime kurulamadi
+for %%P in (rapidocr qrcode pyttsx3 sounddevice numpy) do (
   %PY% -m pip install %%P >nul 2>&1 || echo     [UYARI] %%P kurulamadi, onsuz devam / skipped
 )
 

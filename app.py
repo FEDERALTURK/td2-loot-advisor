@@ -21,6 +21,14 @@ from difflib import SequenceMatcher, get_close_matches
 from pathlib import Path
 from tkinter import ttk, filedialog, messagebox
 
+if "--dml-probe" in sys.argv:          # ekran kartı (DirectML) denemesi: ayrı süreçte, programın geri kalanı yüklenmeden
+    import ocr_backend as _ob
+    _i = sys.argv.index("--dml-probe")
+    try: _res = _ob.dml_probe(sys.argv[_i + 1])
+    except Exception as _e: _res = {"ok": False, "reason": f"{type(_e).__name__}: {_e}"}
+    print("DMLPROBE " + json.dumps(_res), flush=True)
+    sys.exit(0)
+
 import mss
 import capture
 from PIL import Image, ImageDraw, ImageOps, ImageTk
@@ -85,7 +93,7 @@ DEFAULTS = {"scan_mode": "hotkey", "auto_interval_ms": 700, "auto_record": True,
             "fx_cursor": True, "fx_cursor_style": "crosshair", "fx_cursor_color": "#ff6d10", "fx_cursor_custom": "",
             "fx_trail": True, "fx_trail_color": "#ff6d10", "fx_trail_len": 18, "fx_transitions": True,
             "fx_video": True, "fx_video_dim": 0.35, "fx_transition_ms": 260, "fx_bgwatch": True, "fx_bgwatch_dim": 0.0,
-            "res_profile": "auto", "ocr_engine": "auto", "license_key": "", "update_check": True, "update_last": 0, "update_skip": "", "stash_record": True, "vendor_mode": False, "vendor_auto": True, "drop_share": False, "drop_asked": False, "drop_activity": "none", "drop_server": "", "drop_client": "", "vision_ok": False, "vendor_notified": "", "companion_port": 8765, "agent_model": "operator", "agent_outfit": "night", "agent_skin": 1, "ocr_threshold": 170, "ocr_scale": "auto", "ocr_psm": 6, "ocr_passes": 3,
+            "res_profile": "auto", "ocr_engine": "auto", "ocr_gpu": "auto", "license_key": "", "update_check": True, "update_last": 0, "update_skip": "", "stash_record": True, "vendor_mode": False, "vendor_auto": True, "drop_share": False, "drop_asked": False, "drop_activity": "none", "drop_server": "", "drop_client": "", "vision_ok": False, "vendor_notified": "", "companion_port": 8765, "agent_model": "operator", "agent_outfit": "night", "agent_skin": 1, "ocr_threshold": 170, "ocr_scale": "auto", "ocr_psm": 6, "ocr_passes": 3,
             "overlay_mode": "card", "overlay_alpha": 0.94, "overlay_size": 1.0, "ui_depth": True,
             "meta_sync": True, "meta_feed_url": "", "meta_last_try": 0, "meta_last_sync": "", "meta_version": "",
             "meta_hidden": [], "tasks_sync": True, "auto_reset_times": True,
@@ -1319,9 +1327,52 @@ class App:
         self.root.after(6000, lambda: self.update_center(reason="startup"))   # her açılışta: program + kütüphane + oyun
         self.root.after(20000, self._drops_tick)
         log.info("UI ready — language=%s, OCR=%s, tesseract=%s", i18n.current_language(), OCR.name, self.tess or "NOT FOUND")
-        OCR.warm_up()
+        if not self.gpu_apply_cached(): OCR.warm_up()
+        self.root.after(8000, lambda: threading.Thread(target=self.gpu_check, daemon=True).start())
         if OCR.name == "tesseract" and not self.tess:
             messagebox.showwarning(APP_NAME, t("msg.no_tesseract"))
+
+    # ---------- Ekran kartıyla OCR (DirectML) ----------
+    def _gpu_key(self):
+        return f"{APP_VERSION}|{sys.version_info.major}.{sys.version_info.minor}"
+
+    def gpu_apply_cached(self):
+        """Bu sürümde daha önce yapılmış denemenin sonucunu uygula (yeniden deneme yok). Uygulandıysa True."""
+        st = self.cfg["settings"]; mode = st.get("ocr_gpu", "auto")
+        pr = st.get("ocr_gpu_probe") or {}
+        if mode == "off" or OCR is None or OCR.name != "rapidocr" or sys.platform != "win32": return False
+        if pr.get("key") == self._gpu_key() and (pr.get("ok") or mode == "on"):
+            ocr_backend.USE_DML = True; ocr_backend.reset_rapid(); OCR.warm_up()
+            log.info("OCR: DirectML (GPU) on — cached probe cpu %s ms -> gpu %s ms", pr.get("cpu_ms"), pr.get("dml_ms"))
+            return True
+        return False
+
+    def gpu_check(self):
+        """İlk açılışta (her sürümde bir kez) DirectML'i ayrı süreçte dene; aynı sonuç + daha hızlıysa aç."""
+        st = self.cfg["settings"]; mode = st.get("ocr_gpu", "auto")
+        if mode == "off" or OCR is None or OCR.name != "rapidocr" or sys.platform != "win32": return
+        if (st.get("ocr_gpu_probe") or {}).get("key") == self._gpu_key(): return
+        sample = next((p for p in (BUNDLE / "meta" / "bench_card.jpg", BASE / "meta" / "bench_card.jpg") if p.exists()), None)
+        if not sample: return
+        cmd = [sys.executable] + ([] if FROZEN else [str(Path(__file__).resolve())]) + ["--dml-probe", str(sample)]
+        res = {"ok": False}
+        try:
+            r = subprocess.run(cmd, capture_output=True, text=True, timeout=120, cwd=str(BASE),
+                               creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+            line = next((l for l in (r.stdout or "").splitlines() if l.startswith("DMLPROBE ")), "")
+            res = json.loads(line[9:]) if line else {"ok": False, "reason": f"probe exit {r.returncode}"}
+        except subprocess.TimeoutExpired:
+            res = {"ok": False, "reason": "probe timeout"}
+        except Exception as e:
+            res = {"ok": False, "reason": f"{type(e).__name__}: {e}"}
+        res["key"] = self._gpu_key()
+        st["ocr_gpu_probe"] = res; save_cfg(self.cfg)
+        log.info("OCR GPU probe: %s", res)
+        if res.get("ok") or (mode == "on" and "DmlExecutionProvider" in (res.get("providers") or [])):
+            with self.lock:
+                ocr_backend.USE_DML = True; ocr_backend.reset_rapid()
+            OCR.warm_up()
+            log.info("OCR: DirectML (GPU) on — cpu %s ms -> gpu %s ms", res.get("cpu_ms"), res.get("dml_ms"))
 
     def set_app_icon(self):
         """Pencere ve görev çubuğu simgesi (icon/td2.ico, td2.png). Windows'ta görev çubuğunda Python simgesi yerine

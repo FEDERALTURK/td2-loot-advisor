@@ -19,7 +19,7 @@ REM Ses paketleri opsiyonel; kurulamazsa .exe sessiz surumle derlenir.
 REM Voice packages are optional; if they fail, the .exe is built without voice.
 %PY% -m pip install -r requirements-voice.txt
 REM Yeni OCR motoru (onerilen) / new OCR engine (recommended)
-%PY% -m pip install onnxruntime rapidocr qrcode
+%PY% -m pip install onnxruntime-directml rapidocr qrcode
 %PY% -c "import ocr_backend; ocr_backend.Engine('rapidocr').text(__import__('PIL.Image').Image.new('RGB',(64,32)))"
 
 REM Kisisel builds.json pakete GIRMEZ: temiz varsayilan ayarlar kullanilir
