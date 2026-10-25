@@ -52,3 +52,28 @@ Kayıt biçimi ve doğrulama: `worker.js` (`cleanDrop`). Attribute değerleri al
 
 Workers ücretsiz katmanı günde 100.000 istek, D1 ücretsiz katmanı 5 GB depolama ve günde 5 milyon satır okuma verir.
 Uygulama düşüşleri 10 dakikada bir toplu gönderir; binlerce oyuncu için bile ücretsiz katman yeterlidir.
+
+## Hesap sistemi (Discord ile giriş, anahtar / davet / satış, 1 bilgisayar)
+
+Giriş isteğe bağlıdır; program hesapsız da ücretsiz çalışır. Kurulum (bir kez, kendi bilgisayarında):
+
+1. https://discord.com/developers/applications → **New Application** → ad: `TD2 Loot Advisor`.
+   OAuth2 sayfası → **Redirects**: `https://td2-stats.td2loot.workers.dev/v1/auth/callback` → Save.
+   Client ID ve **Reset Secret** ile Client Secret'ı al. (Rich Presence → Art Assets: `logo` adında bir görsel yüklersen
+   Discord durumunda simge görünür.)
+2. `cd server` → `node account_setup.mjs` — imza anahtarını ve yönetici belirtecini burada üretir, gizlileri doğrudan
+   Cloudflare'e yollar, tabloları ekler ve yayınlar. Hiçbir gizli bilgi depoya ya da ekrana yazılmaz.
+3. `private\ent_public_key.txt` içindeki açık anahtar programın `features.py` → `ENT_PUBLIC_KEY_HEX` değerine yazılır
+   (gizli değildir). `private\admin_token.txt` → Rapor Paneli → Ayarlar → *Yönetici belirteci*.
+
+| Yol | Ne | Erişim |
+|---|---|---|
+| `POST /v1/auth/start` · `GET /v1/auth/callback` · `POST /v1/auth/token` | Discord girişi (PKCE + 127.0.0.1 dönüşü) | herkese açık, oran sınırlı |
+| `GET /v1/me` | hesap, lisans, 7 günlük imzalı yetki belgesi (TD2E) | `Authorization: Bearer <oturum>` |
+| `POST /v1/license/redeem` | `TD2K-…` anahtar, `TD2I-…` davet, Gumroad anahtarı | oturum; saatte 10 deneme |
+| `POST /v1/auth/logout` | oturumu kapat | oturum |
+| `/v1/admin/*` | hesaplar, lisanslar, davetler, denetim, istatistik | `Authorization: Admin <ADMIN_TOKEN>` |
+
+Güvenlik: oturum belirteçleri, anahtarlar ve davet kodları veritabanında yalnız SHA-256 özetleriyle durur; düz anahtar
+yalnız üretildiği an panelde görünür. Bir lisans tek bilgisayara bağlanır (panelden "Cihazı sıfırla"). Yetki belgesi
+bilgisayara bağlıdır ve 7 gün internetsiz geçerlidir. Testler: `node test_accounts.mjs`, `python ../tests/test_account.py`.
