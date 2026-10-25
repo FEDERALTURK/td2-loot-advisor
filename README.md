@@ -14,6 +14,12 @@ Türkçe tam kılavuz: [`README.tr.md`](README.tr.md).
 **[Latest release → Releases](https://github.com/FEDERALTURK/td2-loot-advisor/releases/latest)**:
 `TD2LootAdvisor_Setup_<version>.exe` (installer, recommended) or `TD2LootAdvisor_<version>_portable.zip`.
 
+## Updating
+
+The app checks GitHub for the latest release at start (every 12 h) and asks; Settings → General → **Updates** checks on demand.
+Installed copies download the new installer, verify SHA-256, install silently and restart; source copies replace only program
+files (old ones go to `backup/`). Settings, builds, stash and `private/` are never touched.
+
 ## Install from source (Windows)
 
 1. Install **Python 3.13** (3.12 works). The OCR engine (RapidOCR) is installed automatically by `run.bat`.

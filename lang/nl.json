@@ -935,5 +935,22 @@
   "act.season": "Seizoen / evenement",
   "act.caches": "Kisten",
   "act.crafting": "Maken",
-  "ai.vision_prompt": "Read the image file {path} with the Read tool and transcribe the item card text line by line."
+  "ai.vision_prompt": "Read the image file {path} with the Read tool and transcribe the item card text line by line.",
+  "upd.box": "Updates",
+  "upd.current": "Versie {v} ({mode})",
+  "upd.mode_exe": "geïnstalleerd",
+  "upd.mode_src": "vanuit broncode",
+  "upd.check": "Controleren op updates",
+  "upd.now": "Nu bijwerken",
+  "upd.auto": "Automatisch controleren",
+  "upd.checking": "GitHub controleren…",
+  "upd.failed": "Bijwerken mislukt: {e}",
+  "upd.latest_ok": "Je hebt de nieuwste versie ({v}).",
+  "upd.available": "Nieuwe versie {v} beschikbaar op GitHub.",
+  "upd.ask": "Versie {new} is beschikbaar (je hebt {old}). Nu bijwerken?\n\nJe instellingen, builds en opslag blijven bewaard.",
+  "upd.downloading": "Versie {v} downloaden…",
+  "upd.progress": "Downloaden… {p}%",
+  "upd.installing": "Installeren — het programma start vanzelf opnieuw",
+  "upd.no_changes": "Er hoefden geen bestanden te veranderen.",
+  "upd.source_done": "Bijgewerkt naar {v}: {n} bestanden vervangen (oude in {bak}). Nu opnieuw starten?"
 }

@@ -935,5 +935,22 @@
   "act.season": "Temporada / evento",
   "act.caches": "Baús",
   "act.crafting": "Criação",
-  "ai.vision_prompt": "Read the image file {path} with the Read tool and transcribe the item card text line by line."
+  "ai.vision_prompt": "Read the image file {path} with the Read tool and transcribe the item card text line by line.",
+  "upd.box": "Atualizações",
+  "upd.current": "Versão {v} ({mode})",
+  "upd.mode_exe": "instalada",
+  "upd.mode_src": "pelo código-fonte",
+  "upd.check": "Procurar atualizações",
+  "upd.now": "Atualizar agora",
+  "upd.auto": "Verificar automaticamente",
+  "upd.checking": "Verificando o GitHub…",
+  "upd.failed": "Falha na atualização: {e}",
+  "upd.latest_ok": "Você tem a versão mais recente ({v}).",
+  "upd.available": "Nova versão {v} disponível no GitHub.",
+  "upd.ask": "A versão {new} está disponível (você tem a {old}). Atualizar agora?\n\nSuas configurações, builds e baú são mantidos.",
+  "upd.downloading": "Baixando a versão {v}…",
+  "upd.progress": "Baixando… {p}%",
+  "upd.installing": "Instalando — o programa reinicia sozinho",
+  "upd.no_changes": "Nenhum arquivo precisava mudar.",
+  "upd.source_done": "Atualizado para {v}: {n} arquivos substituídos (antigos em {bak}). Reiniciar agora?"
 }

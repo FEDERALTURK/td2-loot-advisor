@@ -10,6 +10,12 @@ senin dilinde gösterir. 10 dil; herkes kendi dilini ekleyebilir.
 **[En son sürüm → Releases](https://github.com/FEDERALTURK/td2-loot-advisor/releases/latest)**:
 `TD2LootAdvisor_Setup_<sürüm>.exe` (kurulum, önerilen) ya da `TD2LootAdvisor_<sürüm>_portable.zip` (kurulumsuz).
 
+## Güncelleme
+
+Program açılışta (12 saatte bir) GitHub'daki en son sürümü denetler ve sorar. Ayarlar → Genel → **Güncellemeler**'den elle de
+denetlenir. Kurulu sürüm yeni kurulum dosyasını indirip SHA-256 ile doğrular, sessiz kurar ve kendini yeniden açar; kaynaktan çalışan
+sürüm yalnız program dosyalarını yeniler (eskileri `backup/` altına). Ayarlar, build'ler, sandık ve `private/` hiçbir zaman değişmez.
+
 ## Ne yapar, ne yapmaz
 
 - ✅ Yalnızca **ekranı** okur (OCR) ve oyunun kendi **ayar dosyasını** (`state.cfg`) okur.

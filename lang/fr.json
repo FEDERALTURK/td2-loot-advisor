@@ -935,5 +935,22 @@
   "act.season": "Saison / événement",
   "act.caches": "Caches",
   "act.crafting": "Fabrication",
-  "ai.vision_prompt": "Read the image file {path} with the Read tool and transcribe the item card text line by line."
+  "ai.vision_prompt": "Read the image file {path} with the Read tool and transcribe the item card text line by line.",
+  "upd.box": "Mises à jour",
+  "upd.current": "Version {v} ({mode})",
+  "upd.mode_exe": "installée",
+  "upd.mode_src": "depuis les sources",
+  "upd.check": "Rechercher des mises à jour",
+  "upd.now": "Mettre à jour",
+  "upd.auto": "Vérifier automatiquement",
+  "upd.checking": "Vérification sur GitHub…",
+  "upd.failed": "Échec de la mise à jour : {e}",
+  "upd.latest_ok": "Vous avez la dernière version ({v}).",
+  "upd.available": "Nouvelle version {v} disponible sur GitHub.",
+  "upd.ask": "La version {new} est disponible (vous avez {old}). Mettre à jour ?\n\nVos réglages, builds et coffre sont conservés.",
+  "upd.downloading": "Téléchargement de la version {v}…",
+  "upd.progress": "Téléchargement… {p} %",
+  "upd.installing": "Installation — l'application redémarre seule",
+  "upd.no_changes": "Aucun fichier à modifier.",
+  "upd.source_done": "Mis à jour en {v} : {n} fichiers remplacés (anciens dans {bak}). Redémarrer maintenant ?"
 }

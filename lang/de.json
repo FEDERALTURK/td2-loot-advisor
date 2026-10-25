@@ -939,5 +939,22 @@
   "act.season": "Saison / Event",
   "act.caches": "Kisten",
   "act.crafting": "Herstellung",
-  "ai.vision_prompt": "Read the image file {path} with the Read tool and transcribe the item card text line by line."
+  "ai.vision_prompt": "Read the image file {path} with the Read tool and transcribe the item card text line by line.",
+  "upd.box": "Updates",
+  "upd.current": "Version {v} ({mode})",
+  "upd.mode_exe": "installiert",
+  "upd.mode_src": "aus dem Quellcode",
+  "upd.check": "Nach Updates suchen",
+  "upd.now": "Jetzt aktualisieren",
+  "upd.auto": "Automatisch prüfen",
+  "upd.checking": "GitHub wird geprüft…",
+  "upd.failed": "Update fehlgeschlagen: {e}",
+  "upd.latest_ok": "Du hast die neueste Version ({v}).",
+  "upd.available": "Neue Version {v} auf GitHub verfügbar.",
+  "upd.ask": "Version {new} ist verfügbar (du hast {old}). Jetzt aktualisieren?\n\nEinstellungen, Builds und Lager bleiben erhalten.",
+  "upd.downloading": "Version {v} wird heruntergeladen…",
+  "upd.progress": "Lade herunter… {p}%",
+  "upd.installing": "Wird installiert — das Programm startet von selbst neu",
+  "upd.no_changes": "Keine Dateien mussten geändert werden.",
+  "upd.source_done": "Auf {v} aktualisiert: {n} Dateien ersetzt (alte in {bak}). Jetzt neu starten?"
 }

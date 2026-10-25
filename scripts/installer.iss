@@ -57,3 +57,5 @@ Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#AppExe}"; Tasks: desktopico
 
 [Run]
 Filename: "{app}\{#AppExe}"; Description: "{cm:LaunchProgram,{#AppName}}"; Flags: nowait postinstall skipifsilent
+; Uygulama içi güncelleme sessiz kurulum yapar: bitince program kendiliğinden yeniden açılır
+Filename: "{app}\{#AppExe}"; Flags: nowait; Check: WizardSilent

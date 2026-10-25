@@ -935,5 +935,22 @@
   "act.season": "Temporada / evento",
   "act.caches": "Alijos",
   "act.crafting": "Fabricación",
-  "ai.vision_prompt": "Read the image file {path} with the Read tool and transcribe the item card text line by line."
+  "ai.vision_prompt": "Read the image file {path} with the Read tool and transcribe the item card text line by line.",
+  "upd.box": "Actualizaciones",
+  "upd.current": "Versión {v} ({mode})",
+  "upd.mode_exe": "instalada",
+  "upd.mode_src": "desde el código",
+  "upd.check": "Buscar actualizaciones",
+  "upd.now": "Actualizar ahora",
+  "upd.auto": "Comprobar automáticamente",
+  "upd.checking": "Comprobando GitHub…",
+  "upd.failed": "Error al actualizar: {e}",
+  "upd.latest_ok": "Tienes la última versión ({v}).",
+  "upd.available": "Nueva versión {v} disponible en GitHub.",
+  "upd.ask": "La versión {new} está disponible (tienes {old}). ¿Actualizar ahora?\n\nTus ajustes, builds y alijo se conservan.",
+  "upd.downloading": "Descargando la versión {v}…",
+  "upd.progress": "Descargando… {p} %",
+  "upd.installing": "Instalando — el programa se reinicia solo",
+  "upd.no_changes": "No hacía falta cambiar ningún archivo.",
+  "upd.source_done": "Actualizado a {v}: {n} archivos reemplazados (copias antiguas en {bak}). ¿Reiniciar ahora?"
 }

@@ -713,5 +713,22 @@
   "act.season": "Season / event",
   "act.caches": "Caches",
   "act.crafting": "Crafting",
-  "ai.vision_prompt": "Read the image file {path} with the Read tool and transcribe the item card text line by line."
+  "ai.vision_prompt": "Read the image file {path} with the Read tool and transcribe the item card text line by line.",
+  "upd.box": "Updates",
+  "upd.current": "Version {v} ({mode})",
+  "upd.mode_exe": "installed",
+  "upd.mode_src": "from source",
+  "upd.check": "Check for updates",
+  "upd.now": "Update now",
+  "upd.auto": "Check automatically",
+  "upd.checking": "Checking GitHub…",
+  "upd.failed": "Update failed: {e}",
+  "upd.latest_ok": "You have the latest version ({v}).",
+  "upd.available": "New version {v} is available on GitHub.",
+  "upd.ask": "Version {new} is available (you have {old}). Update now?\n\nYour settings, builds and stash are kept.",
+  "upd.downloading": "Downloading version {v}…",
+  "upd.progress": "Downloading… {p}%",
+  "upd.installing": "Installing — the app restarts by itself",
+  "upd.no_changes": "No files needed changing.",
+  "upd.source_done": "Updated to {v}: {n} files replaced (old copies in {bak}). Restart now?"
 }

@@ -43,6 +43,7 @@ import vendor
 import companion
 import share
 import dropstats
+import updater
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
@@ -80,7 +81,7 @@ DEFAULTS = {"scan_mode": "hotkey", "auto_interval_ms": 700, "auto_record": True,
             "fx_cursor": True, "fx_cursor_style": "crosshair", "fx_cursor_color": "#ff6d10", "fx_cursor_custom": "",
             "fx_trail": True, "fx_trail_color": "#ff6d10", "fx_trail_len": 18, "fx_transitions": True,
             "fx_video": True, "fx_video_dim": 0.35, "fx_transition_ms": 650, "fx_bgwatch": True, "fx_bgwatch_dim": 0.0,
-            "res_profile": "auto", "ocr_engine": "auto", "license_key": "", "stash_record": True, "vendor_mode": False, "vendor_auto": True, "drop_share": False, "drop_asked": False, "drop_activity": "none", "drop_server": "", "drop_client": "", "vision_ok": False, "vendor_notified": "", "companion_port": 8765, "ocr_threshold": 170, "ocr_scale": "auto", "ocr_psm": 6, "ocr_passes": 3,
+            "res_profile": "auto", "ocr_engine": "auto", "license_key": "", "update_check": True, "update_last": 0, "update_skip": "", "stash_record": True, "vendor_mode": False, "vendor_auto": True, "drop_share": False, "drop_asked": False, "drop_activity": "none", "drop_server": "", "drop_client": "", "vision_ok": False, "vendor_notified": "", "companion_port": 8765, "ocr_threshold": 170, "ocr_scale": "auto", "ocr_psm": 6, "ocr_passes": 3,
             "overlay_mode": "card", "overlay_alpha": 0.94, "overlay_size": 1.0, "ui_depth": True,
             "meta_sync": True, "meta_feed_url": "", "meta_last_try": 0, "meta_last_sync": "", "meta_version": "",
             "meta_hidden": [], "tasks_sync": True, "auto_reset_times": True,
@@ -1234,6 +1235,7 @@ class App:
         self.root.after(2500, self.meta_sync_start)     # açılışı bekletmeden, günde bir
         self.root.after(6000, lambda: self.vendor_refresh(auto=True))
         self.root.after(4000, self.ask_drop_consent)
+        self.root.after(9000, lambda: self.check_update(auto=True))
         self.root.after(20000, self._drops_tick)
         log.info("UI ready — language=%s, OCR=%s, tesseract=%s", i18n.current_language(), OCR.name, self.tess or "NOT FOUND")
         OCR.warm_up()
@@ -3788,6 +3790,20 @@ class App:
         ttk.Label(lb, text=t("set.language_note"), foreground=PAL["muted"], wraplength=820,
                   justify="left").pack(anchor="w", padx=8, pady=(0, 6))
 
+        # ---- Güncellemeler ----
+        ub = ttk.LabelFrame(f, text="⬆ " + t("upd.box")); ub.pack(fill="x", padx=10, pady=6)
+        ur = ttk.Frame(ub); ur.pack(fill="x", padx=8, pady=6)
+        ttk.Label(ur, text=t("upd.current", v=APP_VERSION, mode=t("upd.mode_exe") if FROZEN else t("upd.mode_src"))).pack(side="left")
+        ttk.Button(ur, text="🔎 " + t("upd.check"), command=lambda: self.check_update(auto=False)).pack(side="left", padx=10)
+        self.upd_now_btn = ttk.Button(ur, text="⬆ " + t("upd.now"), command=self.do_update, style="Accent.TButton")
+        self.upd_auto = tk.BooleanVar(value=bool(st.get("update_check", True)))
+        ttk.Checkbutton(ur, text=t("upd.auto"), variable=self.upd_auto,
+                        command=lambda: (st.__setitem__("update_check", bool(self.upd_auto.get())), save_cfg(self.cfg))).pack(side="right")
+        self.upd_lbl = ttk.Label(ub, text="", foreground=PAL["muted"], wraplength=900, justify="left")
+        self.upd_lbl.pack(anchor="w", padx=12, pady=(0, 6))
+        if getattr(self, "upd_info", None) and updater.newer(self.upd_info["version"], APP_VERSION):
+            self._upd_show(self.upd_info)
+
         # ---- Telefon arkadaşı ----
         cb_ = ttk.LabelFrame(P["sync"], text="📱 " + t("comp.box")); cb_.pack(fill="x", padx=10, pady=(10, 6))
         if self.premium_gate(cb_, "companion"):
@@ -4430,6 +4446,88 @@ class App:
         self.refresh_logtab()
 
     # ---------- Yardım / help ----------
+    # ---------- Güncelleme ----------
+    def check_update(self, auto=False):
+        st = self.cfg["settings"]
+        if auto and (not st.get("update_check", True) or time.time() - float(st.get("update_last", 0) or 0) < 12 * 3600):
+            return
+        if getattr(self, "upd_busy", False): return
+        self.upd_busy = True
+        if not auto and hasattr(self, "upd_lbl"): self.upd_lbl.config(text=t("upd.checking"))
+
+        def work():
+            try: info, err = updater.latest(), None
+            except Exception as e: info, err = None, e
+            self.root.after(0, lambda: self._upd_checked(info, err, auto))
+        threading.Thread(target=work, daemon=True).start()
+
+    def _upd_checked(self, info, err, auto):
+        self.upd_busy = False
+        st = self.cfg["settings"]
+        st["update_last"] = time.time(); save_cfg(self.cfg)
+        if err:
+            log.info("Update check failed: %s", err)
+            if not auto:
+                if hasattr(self, "upd_lbl"): self.upd_lbl.config(text=t("upd.failed", e=err))
+            return
+        self.upd_info = info
+        if not updater.newer(info["version"], APP_VERSION):
+            log.info("Update check: up to date (%s, latest %s)", APP_VERSION, info["version"])
+            if hasattr(self, "upd_lbl"): self.upd_lbl.config(text=t("upd.latest_ok", v=APP_VERSION))
+            return
+        log.info("Update available: %s -> %s", APP_VERSION, info["version"])
+        self._upd_show(info)
+        if auto and st.get("update_skip") == info["version"]:
+            return
+        notes = re.sub(r"[#*`|>\-]+", " ", info.get("notes", "")).strip()
+        notes = re.sub(r"\s+", " ", notes)[:500]
+        if messagebox.askyesno(APP_NAME, t("upd.ask", new=info["version"], old=APP_VERSION) + ("\n\n" + notes if notes else "")):
+            self.do_update()
+        elif auto:
+            st["update_skip"] = info["version"]; save_cfg(self.cfg)
+
+    def _upd_show(self, info):
+        if hasattr(self, "upd_lbl"):
+            self.upd_lbl.config(text=t("upd.available", v=info["version"]))
+            try: self.upd_now_btn.pack(side="left")
+            except Exception: pass
+
+    def do_update(self):
+        info = getattr(self, "upd_info", None)
+        if not info: return self.check_update(auto=False)
+        if FROZEN and not info.get("setup"):
+            return messagebox.showwarning(APP_NAME, t("upd.failed", e="no installer in release"))
+        self.toast(t("upd.downloading", v=info["version"]))
+
+        def prog(f):
+            self.root.after(0, lambda: hasattr(self, "upd_lbl") and self.upd_lbl.config(text=t("upd.progress", p=int(f * 100))))
+
+        def work():
+            try:
+                if FROZEN:
+                    updater.install_frozen(info, prog)
+                    self.root.after(0, self._upd_quit_for_installer)
+                else:
+                    n, bak = updater.update_source(info, BASE, prog)
+                    self.root.after(0, lambda: self._upd_source_done(info, n, bak))
+            except Exception as e:
+                log.exception("Update failed")
+                err = e
+                self.root.after(0, lambda: messagebox.showerror(APP_NAME, t("upd.failed", e=err)))
+        threading.Thread(target=work, daemon=True).start()
+
+    def _upd_quit_for_installer(self):
+        """Kurulum dosyası çalıştı: dosyaları değiştirebilsin diye program kapanır; kurulum bitince kendisi açar."""
+        self.toast(t("upd.installing"))
+        self.root.after(800, self.on_close)
+
+    def _upd_source_done(self, info, n, bak):
+        if not n:
+            return messagebox.showinfo(APP_NAME, t("upd.no_changes"))
+        if messagebox.askyesno(APP_NAME, t("upd.source_done", v=info["version"], n=n, bak=bak)):
+            updater.restart_source()
+            self.on_close()
+
     # ---------- Premium ----------
     def premium_gate(self, parent, feature):
         """Özellik açıksa True. Değilse yerine kilit kartı koyar ve False döner."""

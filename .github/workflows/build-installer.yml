@@ -50,7 +50,7 @@ jobs:
             if ($p.HasExited) { break }
           }
           if (Test-Path (Join-Path $dir "logs\app.log")) { Get-Content (Join-Path $dir "logs\app.log") -Tail 25 }
-          if (-not $p.HasExited) { Stop-Process -Id $p.Id -Force }
+          Get-Process TD2LootAdvisor -ErrorAction SilentlyContinue | Stop-Process -Force
           if (-not $ok) { throw "app did not reach 'UI ready'" }
           if (Select-String -Path (Join-Path $dir "logs\app.log") -Pattern "Traceback" -Quiet) { throw "traceback in app.log" }
           Write-Host "App started fine."
@@ -60,6 +60,11 @@ jobs:
         run: |
           $ver = (python scripts/version.py).Trim()
           Compress-Archive -Path dist\TD2LootAdvisor\* -DestinationPath "installer\TD2LootAdvisor_${ver}_portable.zip" -Force
+          # uygulama içi güncelleyici indirdiği dosyayı bununla doğrular
+          Get-ChildItem installer -File | Where-Object { $_.Extension -in ".exe", ".zip" } | ForEach-Object {
+            "{0}  {1}" -f (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower(), $_.Name
+          } | Set-Content -Encoding ascii "installer\SHA256SUMS.sha256"
+          Get-Content installer\SHA256SUMS.sha256
           Get-ChildItem installer | Format-Table Name, Length
 
       - name: Upload installer

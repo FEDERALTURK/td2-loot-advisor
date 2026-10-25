@@ -935,5 +935,22 @@
   "act.season": "Sezon / wydarzenie",
   "act.caches": "Skrzynie",
   "act.crafting": "Wytwarzanie",
-  "ai.vision_prompt": "Read the image file {path} with the Read tool and transcribe the item card text line by line."
+  "ai.vision_prompt": "Read the image file {path} with the Read tool and transcribe the item card text line by line.",
+  "upd.box": "Aktualizacje",
+  "upd.current": "Wersja {v} ({mode})",
+  "upd.mode_exe": "zainstalowana",
+  "upd.mode_src": "ze źródeł",
+  "upd.check": "Sprawdź aktualizacje",
+  "upd.now": "Aktualizuj teraz",
+  "upd.auto": "Sprawdzaj automatycznie",
+  "upd.checking": "Sprawdzanie GitHub…",
+  "upd.failed": "Aktualizacja nie powiodła się: {e}",
+  "upd.latest_ok": "Masz najnowszą wersję ({v}).",
+  "upd.available": "Nowa wersja {v} jest dostępna na GitHub.",
+  "upd.ask": "Dostępna jest wersja {new} (masz {old}). Zaktualizować teraz?\n\nUstawienia, buildy i schowek zostaną zachowane.",
+  "upd.downloading": "Pobieranie wersji {v}…",
+  "upd.progress": "Pobieranie… {p}%",
+  "upd.installing": "Instalowanie — program sam się uruchomi ponownie",
+  "upd.no_changes": "Żadne pliki nie wymagały zmiany.",
+  "upd.source_done": "Zaktualizowano do {v}: zastąpiono {n} plików (stare w {bak}). Uruchomić ponownie teraz?"
 }

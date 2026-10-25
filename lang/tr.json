@@ -1015,5 +1015,22 @@
   "act.season": "Sezon / etkinlik",
   "act.caches": "Sandıklar",
   "act.crafting": "Üretim",
-  "ai.vision_prompt": "Read the image file {path} with the Read tool and transcribe the item card text line by line."
+  "ai.vision_prompt": "Read the image file {path} with the Read tool and transcribe the item card text line by line.",
+  "upd.box": "Güncellemeler",
+  "upd.current": "Sürüm {v} ({mode})",
+  "upd.mode_exe": "kurulu",
+  "upd.mode_src": "kaynaktan",
+  "upd.check": "Güncellemeleri denetle",
+  "upd.now": "Şimdi güncelle",
+  "upd.auto": "Otomatik denetle",
+  "upd.checking": "GitHub denetleniyor…",
+  "upd.failed": "Güncelleme başarısız: {e}",
+  "upd.latest_ok": "En son sürüm sende ({v}).",
+  "upd.available": "GitHub'da yeni sürüm var: {v}.",
+  "upd.ask": "{new} sürümü yayında (sendeki {old}). Şimdi güncellensin mi?\n\nAyarların, build'lerin ve sandığın korunur.",
+  "upd.downloading": "{v} sürümü indiriliyor…",
+  "upd.progress": "İndiriliyor… %{p}",
+  "upd.installing": "Kuruluyor — program kendiliğinden yeniden açılacak",
+  "upd.no_changes": "Değişmesi gereken dosya yok.",
+  "upd.source_done": "{v} sürümüne güncellendi: {n} dosya yenilendi (eskileri {bak} klasöründe). Şimdi yeniden başlatılsın mı?"
 }

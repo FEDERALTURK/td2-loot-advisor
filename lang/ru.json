@@ -935,5 +935,22 @@
   "act.season": "Сезон / событие",
   "act.caches": "Тайники",
   "act.crafting": "Создание",
-  "ai.vision_prompt": "Read the image file {path} with the Read tool and transcribe the item card text line by line."
+  "ai.vision_prompt": "Read the image file {path} with the Read tool and transcribe the item card text line by line.",
+  "upd.box": "Обновления",
+  "upd.current": "Версия {v} ({mode})",
+  "upd.mode_exe": "установлена",
+  "upd.mode_src": "из исходников",
+  "upd.check": "Проверить обновления",
+  "upd.now": "Обновить сейчас",
+  "upd.auto": "Проверять автоматически",
+  "upd.checking": "Проверка GitHub…",
+  "upd.failed": "Не удалось обновить: {e}",
+  "upd.latest_ok": "У вас последняя версия ({v}).",
+  "upd.available": "На GitHub доступна новая версия {v}.",
+  "upd.ask": "Доступна версия {new} (у вас {old}). Обновить сейчас?\n\nНастройки, билды и хранилище сохранятся.",
+  "upd.downloading": "Загрузка версии {v}…",
+  "upd.progress": "Загрузка… {p}%",
+  "upd.installing": "Установка — программа перезапустится сама",
+  "upd.no_changes": "Менять файлы не потребовалось.",
+  "upd.source_done": "Обновлено до {v}: заменено файлов: {n} (старые в {bak}). Перезапустить сейчас?"
 }
