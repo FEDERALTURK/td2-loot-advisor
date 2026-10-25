@@ -1373,12 +1373,18 @@ class App:
 
     def _acc_changed(self):
         """Hesap / yetki değişti: başlığı güncelle, premium değiştiyse arayüzü yeniden kur."""
+        win = getattr(self, "_acc_win", None)
+        was_open = bool(win and win.winfo_exists())
         if self._acc_apply():
             log.info("Account tier -> %s", self.ent.tier)
+            msg = getattr(self, "_acc_msg", None)
+            if was_open: win.destroy()                       # yeniden kurulumda eski pencere referansları silinir
             self.rebuild_ui()
+            if was_open:
+                self.open_account(); self._acc_msg = msg; self._acc_fill()
         else:
             self.refresh_header()
-        if getattr(self, "_acc_win", None) and self._acc_win.winfo_exists(): self._acc_fill()
+            if was_open: self._acc_fill()
 
     def account_startup(self):
         st = self.cfg["settings"]

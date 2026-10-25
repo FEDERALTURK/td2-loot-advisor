@@ -22,7 +22,7 @@ for f in ("account.dat",): (ROOT / f).unlink(missing_ok=True)
 
 import app  # noqa: E402
 from PIL import ImageGrab  # noqa: E402
-app.messagebox.askyesno = lambda *a, **k: True
+app.messagebox.askyesno = lambda *a, **k: False      # açılıştaki 'yeni PC' sorusu pencereyi örtmesin
 app.messagebox.showinfo = app.messagebox.showwarning = lambda *a, **k: None
 a = app.App()
 a.cfg["settings"]["acc_asked"] = False
@@ -36,8 +36,9 @@ def step(name, ok, **kw):
 def shot(name, w=None):
     w = w or a.root
     try:
-        w.update(); x, y = w.winfo_rootx(), w.winfo_rooty()
+        w.lift(); w.attributes("-topmost", True); w.update(); w.after(300); w.update() x, y = w.winfo_rootx(), w.winfo_rooty()
         ImageGrab.grab(bbox=(x, y, x + w.winfo_width(), y + w.winfo_height()), all_screens=True).save(SHOTS / f"{name}.png")
+        w.attributes("-topmost", False)
     except Exception as e:
         print("shot failed", name, e)
 
@@ -71,7 +72,8 @@ def s3():
          tier=a.ent.tier, src=a.ent.source, why=a.ent.ent_reason)
     step("premium özellik açık", a.ent.has("recal_advisor"))
     step("rozet kullanıcı adı + yıldız", "Soner" in a._acc_chip_text() and "⭐" in a._acc_chip_text(), chip=a._acc_chip_text())
-    if not a._acc_win.winfo_exists(): a.open_account()
+    step("hesap penceresi premium sonrası yeniden açık", getattr(a, "_acc_win", None) is not None and a._acc_win.winfo_exists())
+    if not (getattr(a, "_acc_win", None) and a._acc_win.winfo_exists()): a.open_account()
     shot("acc_03_premium", a._acc_win)
     a._acc_win.lift(); a.root.after(800, s4)
 
@@ -113,6 +115,26 @@ def finish():
     res["ok"] = all(s["ok"] for s in res["steps"])
     (ROOT / "tests" / ".account_result.json").write_text(json.dumps(res, ensure_ascii=False, indent=1), encoding="utf-8")
     a.root.destroy()
+
+
+def guard(fn):
+    def run():
+        try: fn()
+        except Exception as e:
+            import traceback; traceback.print_exc()
+            step(fn.__name__ + " hata", False, e=repr(e)); finish()
+    return run
+
+
+for _n in ("s1", "s2", "s3", "s4", "s5", "s6", "s7"):
+    globals()[_n] = guard(globals()[_n])
+_done = []
+_finish = finish
+def finish():
+    if _done: return
+    _done.append(1)
+    if len(res["steps"]) < 10: step("tüm adımlar çalıştı", False, n=len(res["steps"]))
+    _finish()
 
 
 a.root.after(4500, s1)
