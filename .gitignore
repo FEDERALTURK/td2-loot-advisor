@@ -33,3 +33,4 @@ server/node_modules/
 installer/
 learned_library.json
 learned_library.json.tmp
+tests/.click_result.json

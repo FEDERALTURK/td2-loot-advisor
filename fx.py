@@ -208,13 +208,17 @@ class TrailFX:
             x, y, w, h = r.winfo_rootx(), r.winfo_rooty(), r.winfo_width(), r.winfo_height()
             geo = f"{w}x{h}+{x}+{y}"
             if self.win.geometry() != geo: self.win.geometry(geo)
-            self.win.lift(r)
+            self._n = getattr(self, "_n", 0) + 1
+            if self._n % 15 == 0: self.win.lift(r)               # her karede değil (pencere sırası savaşı = kasma)
             px, py = r.winfo_pointerxy()
             inside = x <= px < x + w and y <= py < y + h
             if inside and (not self.pts or (px - x, py - y) != self.pts[-1][:2]):
                 self.pts.append((px - x, py - y, time.time()))
             now = time.time()
             self.pts = [p for p in self.pts if now - p[2] < 0.35][-self.length:]
+            if not self.pts and getattr(self, "_empty", False):
+                self.root.after(60, self._tick); return          # iz yok: çizme
+            self._empty = not self.pts
             self.cv.delete("all")
             n = len(self.pts)
             for i in range(1, n):
@@ -226,7 +230,7 @@ class TrailFX:
                 self.cv.create_oval(hx - 3, hy - 3, hx + 3, hy + 3, fill=self.color, outline="")
         except Exception:
             pass
-        self.root.after(16, self._tick)
+        self.root.after(33, self._tick)
 
 
 # ---------------------------------------------------------------- sekme geçişi
@@ -394,6 +398,37 @@ class VideoFX:
 
 
 # ---------------------------------------------------------------- tüm pencere arka planı: ajan saati
+class _ItemPool:
+    """Canvas şekillerini her karede silip yeniden yaratmak yerine yeniden kullanır (Tk'da asıl yük budur).
+    Her kare aynı sırayla çizildiği için üst üste binme sırası değişmez."""
+
+    def __init__(self, cv):
+        self.cv, self.items, self.idx = cv, {}, {}
+
+    def reset(self):
+        self.items, self.idx = {}, {}
+
+    def begin(self):
+        self.idx = {k: 0 for k in self.items}
+
+    def put(self, kind, *coords, **opts):
+        opts.pop("tags", None)
+        lst = self.items.setdefault(kind, [])
+        i = self.idx.get(kind, 0); self.idx[kind] = i + 1
+        if i < len(lst):
+            it = lst[i]
+            self.cv.coords(it, *coords)
+            self.cv.itemconfigure(it, state="normal", **opts)
+        else:
+            lst.append(getattr(self.cv, "create_" + kind)(*coords, tags="dyn", **opts))
+
+    def end(self):
+        for kind, lst in self.items.items():
+            for it in lst[self.idx.get(kind, 0):]:
+                self.cv.itemconfigure(it, state="hidden")
+        self.cv.tag_raise("dyn")
+
+
 class AgentWatch:
     """Canvas üzerinde çizilen, fareyi takip eden turuncu ajan saati (özgün tasarım, oyun logosu yok).
     Halkalar, saniye çizgileri, dönen kesikli yaylar, saat/dakika/saniye yayları, ortada saat;
@@ -405,6 +440,7 @@ class AgentWatch:
         self.angle = -90.0                  # ışığın açısı (derece, Tk: 0 = doğu, saat yönünün tersi pozitif)
         self.alive, self._size, self._img = True, (0, 0), None
         self.t0 = time.time()
+        self._pool = _ItemPool(canvas)
 
     def _col(self, k):
         """k: 0 = arka plan, 1 = tam turuncu."""
@@ -451,8 +487,8 @@ class AgentWatch:
         return w * 0.5, h * 0.54
 
     def _arc(self, cx, cy, r, start, extent, color, width, tag="dyn"):
-        self.cv.create_arc(cx - r, cy - r, cx + r, cy + r, start=start, extent=extent, style="arc",
-                           outline=color, width=width, tags=tag)
+        self._pool.put("arc", cx - r, cy - r, cx + r, cy + r, start=start, extent=extent, style="arc",
+                       outline=color, width=width)
 
     def render(self):
         if not self.alive: return
@@ -463,9 +499,9 @@ class AgentWatch:
         cv = self.cv
         if (w, h) != self._size:
             self._size = (w, h)
-            cv.delete("all")
+            cv.delete("all"); self._pool.reset()
             cv.create_image(0, 0, anchor="nw", image=self._backdrop(w, h), tags="bgimg")
-        cv.delete("dyn")
+        P = self._pool; P.begin()
         cx, cy = self.center(w, h)
         R = min(w, h) * 0.40
         now = time.time(); tt = now - self.t0
@@ -480,7 +516,7 @@ class AgentWatch:
         self.angle += diff * 0.18
         # dış çerçeve
         for k, wd in ((1.12, 1), (1.06, 2)):
-            cv.create_oval(cx - R * k, cy - R * k, cx + R * k, cy + R * k, outline=self._grey(0.22), width=wd, tags="dyn")
+            P.put("oval", cx - R * k, cy - R * k, cx + R * k, cy + R * k, outline=self._grey(0.22), width=wd, tags="dyn")
         # saniye çizgileri (60), saniyeye gelen turuncu
         sec = lt.tm_sec + (now % 1)
         for i in range(60):
@@ -489,7 +525,7 @@ class AgentWatch:
             r0, r1 = R * (0.93 if long_ else 0.96), R * 1.0
             near = max(0.0, 1 - ((sec - i) % 60) / 8)
             col = self._col(0.35 + 0.65 * near) if near > 0 else self._grey(0.45 if long_ else 0.25)
-            cv.create_line(cx + r0 * math.cos(a), cy - r0 * math.sin(a), cx + r1 * math.cos(a), cy - r1 * math.sin(a),
+            P.put("line", cx + r0 * math.cos(a), cy - r0 * math.sin(a), cx + r1 * math.cos(a), cy - r1 * math.sin(a),
                            fill=col, width=3 if long_ else 1, tags="dyn")
         # dönen kesikli yaylar
         for k, (rr, spd, n, ext) in enumerate(((0.86, 12, 12, 18), (0.78, -7, 6, 34), (0.62, 20, 24, 6))):
@@ -504,7 +540,7 @@ class AgentWatch:
         # genişleyen nabız halkası
         p = (tt % 4) / 4
         rr = R * (0.4 + 0.75 * p)
-        cv.create_oval(cx - rr, cy - rr, cx + rr, cy + rr, outline=self._col(0.5 * (1 - p)), width=2, tags="dyn")
+        P.put("oval", cx - rr, cy - rr, cx + rr, cy + rr, outline=self._col(0.5 * (1 - p)), width=2, tags="dyn")
         # fareyi takip eden turuncu ışık + kuyruk + parıltı katmanları
         A = self.angle
         for k in range(6, 0, -1):                                   # kuyruk (ters yönde, solarak)
@@ -513,20 +549,20 @@ class AgentWatch:
             self._arc(cx, cy, R * 1.06, A - 18, 36, self._col(k), wd)
         ax, ay = cx + R * 1.06 * math.cos(math.radians(A)), cy - R * 1.06 * math.sin(math.radians(A))
         for rad, k in ((12, 0.25), (7, 0.6), (4, 1.0)):
-            cv.create_oval(ax - rad, ay - rad, ax + rad, ay + rad, fill=self._col(k), outline="", tags="dyn")
+            P.put("oval", ax - rad, ay - rad, ax + rad, ay + rad, fill=self._col(k), outline="", tags="dyn")
         ix, iy = cx + R * 0.55 * math.cos(math.radians(A)), cy - R * 0.55 * math.sin(math.radians(A))
-        cv.create_line(ix, iy, cx + R * 0.97 * math.cos(math.radians(A)), cy - R * 0.97 * math.sin(math.radians(A)),
+        P.put("line", ix, iy, cx + R * 0.97 * math.cos(math.radians(A)), cy - R * 0.97 * math.sin(math.radians(A)),
                        fill=self._col(0.45), width=1, dash=(4, 4), tags="dyn")
         # merkez: saat
         fs = max(14, int(R * 0.22))
-        cv.create_text(cx, cy - R * 0.06, text=time.strftime("%H:%M", lt), fill=self._col(1.0),
+        P.put("text", cx, cy - R * 0.06, text=time.strftime("%H:%M", lt), fill=self._col(1.0),
                        font=("Segoe UI Semibold", fs), tags="dyn")
-        cv.create_text(cx + R * 0.34, cy - R * 0.02, text=time.strftime("%S", lt), fill=self._col(0.7),
+        P.put("text", cx + R * 0.34, cy - R * 0.02, text=time.strftime("%S", lt), fill=self._col(0.7),
                        font=("Segoe UI Semibold", max(9, fs // 3)), tags="dyn", anchor="w")
-        cv.create_text(cx, cy + R * 0.16, text=time.strftime("%d.%m.%Y", lt), fill=self._grey(0.8),
+        P.put("text", cx, cy + R * 0.16, text=time.strftime("%d.%m.%Y", lt), fill=self._grey(0.8),
                        font=("Segoe UI", max(8, fs // 4)), tags="dyn")
-        cv.create_text(cx, cy - R * 0.33, text="◆ AGENT", fill=self._col(0.6), font=("Segoe UI Semibold", max(8, fs // 4)), tags="dyn")
-        cv.tag_raise("dyn")
+        P.put("text", cx, cy - R * 0.33, text="◆ AGENT", fill=self._col(0.6), font=("Segoe UI Semibold", max(8, fs // 4)), tags="dyn")
+        P.end()
 
 
 class WatchBackground:
@@ -534,7 +570,7 @@ class WatchBackground:
     zemin rengi (-transparentcolor) şeffaf yapılır → kartlar ve listeler okunur kalır, boşluklarda saat görünür.
     Diğer sistemlerde (şeffaflık yok) kapalı kalır."""
 
-    def __init__(self, root, bg="#0f1116", color="#ff6d10", dim=0.0, fps=30):
+    def __init__(self, root, bg="#0f1116", color="#ff6d10", dim=0.0, fps=20):
         self.root, self.bgc, self.color, self.dim, self.fps = root, bg, color, dim, fps
         self.win = self.cv = self.watch = None
         self.alive = False
@@ -549,7 +585,12 @@ class WatchBackground:
             self.cv = tk.Canvas(w, bg=self.bgc, highlightthickness=0, bd=0)
             self.cv.pack(fill="both", expand=True)
             self.watch = AgentWatch(self.cv, self._pointer, self.color, self.bgc, self.dim)
-            w.bind("<Button>", lambda e: self.root.focus_force())
+            # Şeffaf zemin piksellerine yapılan tıklamaları Windows bu pencereye verir: programdaki karşılığına ilet
+            # (menü sekmesi, düğme, liste) — yoksa harflerin arası / kenarlar tıklanmıyormuş gibi olur.
+            for seq in ("<ButtonPress-1>", "<ButtonRelease-1>", "<Double-Button-1>", "<ButtonPress-3>", "<ButtonRelease-3>",
+                        "<B1-Motion>", "<MouseWheel>"):
+                self.cv.bind(seq, lambda e, seq=seq: self._forward(e, seq))
+            self._last_ptr, self._last_move, self._last_z = None, time.time(), 0.0
             w.withdraw()                                 # doğru yere konana kadar görünmesin (sol üstte belirmesin)
             w.update_idletasks()
             self._style(w)
@@ -584,6 +625,41 @@ class WatchBackground:
     def _pointer(self):
         x, y = self.root.winfo_pointerxy()
         return x - self.root.winfo_rootx(), y - self.root.winfo_rooty()
+
+    def _forward(self, e, seq):
+        """Arka plana düşen fare olayını, ana pencerede o noktadaki bileşene gönder."""
+        try:
+            if seq == "<ButtonPress-1>": self.root.focus_force()
+            tgt = self.root.winfo_containing(e.x_root, e.y_root)
+            if tgt is None or tgt.winfo_toplevel() is self.win: return
+            kw = {"x": e.x_root - tgt.winfo_rootx(), "y": e.y_root - tgt.winfo_rooty(), "rootx": e.x_root, "rooty": e.y_root}
+            if seq == "<MouseWheel>":
+                tgt.event_generate("<MouseWheel>", delta=e.delta, **kw)
+            else:
+                tgt.event_generate(seq, **kw)
+        except Exception:
+            pass
+
+    def set_cursor(self, spec):
+        """Arka plan penceresinde de programın imleci (boşluklarda Windows'un beyaz oku görünmesin)."""
+        try:
+            if self.win: self.win.configure(cursor=spec)
+            if self.cv: self.cv.configure(cursor=spec)
+        except Exception:
+            pass
+
+    def _active(self):
+        """Program öndeyken ve fare yakın zamanda oynadıysa akıcı; değilse yavaş çiz (kasma olmasın)."""
+        try:
+            p = self.root.winfo_pointerxy()
+            if p != self._last_ptr: self._last_ptr, self._last_move = p, time.time()
+            import ctypes
+            from ctypes import wintypes
+            fg = ctypes.windll.user32.GetForegroundWindow()
+            pid = wintypes.DWORD(); ctypes.windll.user32.GetWindowThreadProcessId(fg, ctypes.byref(pid))
+            return pid.value == os.getpid() and time.time() - self._last_move < 3.0
+        except Exception:
+            return True
 
     def stop(self):
         self.alive = False
@@ -635,7 +711,9 @@ class WatchBackground:
                 self._geo = None
                 self.root.after(250, self._tick); return
             self._n += 1
-            if self._n % max(1, self.fps) == 0: self._geo = None      # saniyede bir zorla eşitle
+            active = self._active()
+            fps = self.fps if active else 5
+            if self._n % max(1, fps) == 0: self._geo = None           # saniyede bir zorla eşitle
             geo = self._client_rect()
             if self.win.state() == "withdrawn":
                 self.win.deiconify(); self._geo = None
@@ -644,9 +722,9 @@ class WatchBackground:
                 self._place(geo)
                 if not self._keyed:                        # artık saat arkada: boşluklarda masaüstü değil saat görünür
                     self.root.attributes("-transparentcolor", self.bgc); self._keyed = True
-            else:
-                self._below_root()
+            elif time.time() - self._last_z > 1.0:          # pencere sırası her karede değil, saniyede bir
+                self._below_root(); self._last_z = time.time()
             self.watch.render()
         except Exception:
-            pass
-        self.root.after(int(1000 / self.fps), self._tick)
+            fps = 5
+        self.root.after(int(1000 / max(1, fps)), self._tick)

@@ -72,6 +72,16 @@ jobs:
           if (-not (Select-String -Path logs\app.log -Pattern "Library updated" -Quiet)) { throw "library not updated" }
           if (-not (Select-String -Path logs\app.log -Pattern "DO_UPDATE CALLED" -Quiet)) { throw "program update not started" }
           if (-not (Test-Path game_data_cache.json)) { throw "no library cache written" }
+      - name: Click-through, cursor and smoothness (agent watch background on)
+        shell: pwsh
+        run: |
+          python tests/ui_click_test.py
+          $r = Get-Content tests\.click_result.json | ConvertFrom-Json
+          $r | Format-List
+          if (-not $r.watch) { throw "watch background not running" }
+          if ($r.gap -and -not $r.click_ok) { throw "click on transparent tab area was lost" }
+          if ($r.watch_cursor -ne $r.root_cursor) { throw "background cursor differs" }
+          if ($r.lag_ms_p95 -gt 60) { throw "UI lag too high: p95 $($r.lag_ms_p95) ms" }
       - uses: actions/upload-artifact@v5
         if: always()
         with:

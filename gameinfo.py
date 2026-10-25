@@ -131,16 +131,21 @@ def current():
     return None
 
 
+GENERIC = {"", "1.0.0.0", "0.0.0.0"}     # oyunun exe'si her yamada aynı genel sürümü taşıyabiliyor
+
+
 def label(info):
     if not info: return "?"
-    if info.get("version"): return info["version"]
     import time
-    return time.strftime("%Y-%m-%d", time.localtime(info.get("mtime", 0)))
+    day = time.strftime("%Y-%m-%d", time.localtime(info.get("mtime", 0)))
+    v = info.get("version") or ""
+    return day if v in GENERIC else f"{v} ({day})"
 
 
 def changed(old, new):
-    """Oyun güncellendi mi? Sürüm numarası varsa ona, yoksa exe'nin tarih/boyutuna göre."""
+    """Oyun güncellendi mi? Anlamlı bir sürüm numarası değiştiyse ya da exe'nin tarihi/boyutu değiştiyse."""
     if not old or not new: return False
-    if old.get("version") and new.get("version"):
-        return old["version"] != new["version"]
+    ov, nv = old.get("version") or "", new.get("version") or ""
+    if ov not in GENERIC and nv not in GENERIC and ov != nv:
+        return True
     return (old.get("mtime"), old.get("size")) != (new.get("mtime"), new.get("size"))

@@ -209,7 +209,10 @@ def test_update_center_logic():
     a = {"version": "1.0.0.1", "mtime": 1, "size": 5}
     assert gameinfo.changed(a, {"version": "1.0.0.2", "mtime": 1, "size": 5}) and not gameinfo.changed(a, dict(a))
     assert gameinfo.changed({"version": "", "mtime": 1, "size": 5}, {"version": "", "mtime": 2, "size": 5})
-    assert not gameinfo.changed(None, a) and gameinfo.label({"version": "1.2"}) == "1.2"
+    assert not gameinfo.changed(None, a) and gameinfo.label({"version": "1.2", "mtime": 0}).startswith("1.2 (")
+    g = {"version": "1.0.0.0", "mtime": 100, "size": 7}                       # genel sürüm: tarih/boyut belirler
+    assert gameinfo.changed(g, dict(g, mtime=200)) and not gameinfo.changed(g, dict(g))
+    assert "1.0.0.0" not in gameinfo.label(g)
     notes = "## TD2\n| Dosya | Ne |\n**5.0.4 — senkron**\n- Birinci\n- İkinci\n\n**5.0.3 — kütüphane**\n- Eski\n"
     h = updates.release_highlights(notes, "5.0.4"); assert h == "senkron: Birinci · İkinci", h
     assert updates.release_highlights(notes, "5.0.3") == "kütüphane: Eski"

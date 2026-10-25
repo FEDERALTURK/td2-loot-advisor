@@ -1391,6 +1391,8 @@ class App:
             if not self.watch_bg.start():
                 log.info("Agent watch background unavailable"); self.watch_bg = None
         watch_on = bool(getattr(self, "watch_bg", None))
+        if watch_on:                                            # boşluklarda da programın imleci
+            self.watch_bg.set_cursor(self.root.cget("cursor"))
         if hasattr(self, "banner"): self.banner.set_transparent(watch_on)
         v = getattr(self, "video", None)
         if v: v.stop(); self.video = None
