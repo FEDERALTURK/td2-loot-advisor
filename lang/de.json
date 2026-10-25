@@ -956,5 +956,22 @@
   "upd.progress": "Lade herunter… {p}%",
   "upd.installing": "Wird installiert — das Programm startet von selbst neu",
   "upd.no_changes": "Keine Dateien mussten geändert werden.",
-  "upd.source_done": "Auf {v} aktualisiert: {n} Dateien ersetzt (alte in {bak}). Jetzt neu starten?"
+  "upd.source_done": "Auf {v} aktualisiert: {n} Dateien ersetzt (alte in {bak}). Jetzt neu starten?",
+  "sync.title": "PC- & Spiel-Synchronisierung",
+  "sync.btn": "Mit diesem PC synchronisieren",
+  "sync.btn_short": "PC-Sync",
+  "sync.apply": "Übernehmen",
+  "sync.copy": "Bericht kopieren",
+  "sync.close": "Schließen",
+  "sync.applied": "Mit diesem PC synchronisiert ✔",
+  "sync.scanning": "PC und Spiel werden gescannt…",
+  "sync.bench_running": "Lesegeschwindigkeit wird gemessen…",
+  "sync.findings": "Ergebnisse",
+  "sync.changes": "Anzuwendende Einstellungen",
+  "sync.no_changes": "Das Programm ist bereits für diesen PC eingerichtet.",
+  "sync.new_pc_ask": "Neuer PC, neue Monitoranordnung oder Spielauflösung erkannt.\n\nPC und Spiel jetzt scannen und das Programm dafür einrichten? (~10 s)",
+  "sync.last": "Letzte Synchronisierung: {t}",
+  "sync.never": "Dieser PC wurde noch nicht synchronisiert.",
+  "sync.box_hint": "Scannt diesen Computer (Monitore, Windows-Skalierung, CPU, Speicher, Grafikkarte) und die Spieleinstellungen, misst die Lesegeschwindigkeit und richtet das Programm für diesen PC ein. Spieldateien und Speicher werden nie verändert.",
+  "sync.box": "PC- & Spiel-Synchronisierung"
 }

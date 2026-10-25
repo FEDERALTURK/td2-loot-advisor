@@ -44,6 +44,7 @@ import companion
 import share
 import dropstats
 import updater
+import syncer
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
@@ -1298,6 +1299,7 @@ class App:
         self.root.after(2500, self.meta_sync_start)     # açılışı bekletmeden, günde bir
         self.root.after(6000, lambda: self.vendor_refresh(auto=True))
         self.root.after(4000, self.ask_drop_consent)
+        self.root.after(3000, self.check_new_pc)
         self.root.after(9000, lambda: self.check_update(auto=True))
         self.root.after(20000, self._drops_tick)
         log.info("UI ready — language=%s, OCR=%s, tesseract=%s", i18n.current_language(), OCR.name, self.tess or "NOT FOUND")
@@ -1536,6 +1538,7 @@ class App:
         ttk.Button(top, text="🔍 " + t("btn.scan_now"), command=self.trigger, style="Accent.TButton").pack(side="left", padx=6)
         ttk.Button(top, text=ui_theme.with_icon(t("btn.pick_region"), "⛶"), command=self.calibrate).pack(side="left")
         ttk.Button(top, text=ui_theme.with_icon(t("btn.test_image"), "🖼"), command=self.test_image).pack(side="left", padx=6)
+        ttk.Button(top, text="🔄 " + t("sync.btn_short"), command=self.run_sync).pack(side="left")
 
         src = ttk.Frame(left); src.pack(fill="x", pady=(8, 0))
         ttk.Label(src, text=t("panel.source"), foreground=PAL["muted"]).pack(side="left")
@@ -1857,6 +1860,108 @@ class App:
             for f in files[:-200]: f.unlink()
         except Exception:
             log.debug("ocr history save failed", exc_info=True)
+
+    # ---------- PC ve oyun senkronizasyonu ----------
+    def check_new_pc(self):
+        """Açılışta: bu bilgisayar / monitör düzeni / oyun çözünürlüğü son senkrondan farklıysa senkron öner."""
+        st = self.cfg["settings"]
+        def work():
+            try: need = syncer.needs_sync(st)
+            except Exception: need = False
+            if need: self.root.after(0, ask)
+        def ask():
+            log.info("Sync: new PC / monitor layout / game resolution detected (fingerprint %s)", st.get("sync_fp") or "none")
+            if messagebox.askyesno(APP_NAME, t("sync.new_pc_ask")):
+                self.run_sync()
+            else:                                         # bir daha bu düzen için sorma
+                try:
+                    st["sync_fp"] = syncer.fingerprint(syncer.scan_pc(), {"settings": display.read_game_settings() or {}})
+                    save_cfg(self.cfg)
+                except Exception:
+                    pass
+        threading.Thread(target=work, daemon=True).start()
+
+    def run_sync(self):
+        """PC'yi ve oyun ayarlarını tara, kart okuma hızını ölç, programın ayarlarını bu PC'ye göre öner ve uygula."""
+        if getattr(self, "_sync_win", None) and self._sync_win.winfo_exists():
+            self._sync_win.lift(); return
+        w = self._sync_win = tk.Toplevel(self.root)
+        w.title(t("sync.title")); w.configure(bg=PAL["bg"])
+        try: w.geometry(f"{int(860 * self.ui_factor)}x{int(640 * self.ui_factor)}")
+        except Exception: w.geometry("860x640")
+        w.transient(self.root)
+        ttk.Label(w, text="🔄 " + t("sync.title"), font=(ui_theme.FONT_SEMI, 15)).pack(anchor="w", padx=14, pady=(12, 2))
+        status = ttk.Label(w, text=t("sync.scanning"), foreground=PAL["muted"]); status.pack(anchor="w", padx=14)
+        pb = ttk.Progressbar(w, mode="indeterminate"); pb.pack(fill="x", padx=14, pady=6); pb.start(12)
+        txt = tk.Text(w, bg=PAL["surface"], fg=PAL["fg"], relief="flat", wrap="word", font=(ui_theme.FONT, 10),
+                      padx=10, pady=8, height=20)
+        txt.pack(fill="both", expand=True, padx=14, pady=6)
+        for tag, col in (("ok", PAL["success"]), ("info", PAL["muted"]), ("warn", PAL["warning"]),
+                         ("bad", PAL["danger"]), ("h", PAL["accent"])):
+            txt.tag_configure(tag, foreground=col)
+        txt.tag_configure("h", font=(ui_theme.FONT_SEMI, 12))
+        bar = ttk.Frame(w); bar.pack(fill="x", padx=14, pady=(0, 12))
+        apply_btn = ttk.Button(bar, text="✔ " + t("sync.apply"), style="Accent.TButton", state="disabled")
+        apply_btn.pack(side="left")
+        copy_btn = ttk.Button(bar, text="📋 " + t("sync.copy"), state="disabled"); copy_btn.pack(side="left", padx=8)
+        ttk.Button(bar, text=t("sync.close"), command=w.destroy).pack(side="right")
+        st = self.cfg["settings"]
+
+        def work():
+            res = {}
+            try:
+                res["pc"] = syncer.scan_pc()
+                res["game"] = syncer.scan_game()
+                self.root.after(0, lambda: status.winfo_exists() and status.config(text=t("sync.bench_running")))
+                gw = res["game"].get("window") or {}
+                gh = gw.get("height") or (res["game"].get("settings") or {}).get("height")
+                res["bench"] = syncer.benchmark(read_card, GAME.recognize, BUNDLE / "meta" / "bench_card.jpg", game_height=gh)
+                res["findings"], res["changes"] = syncer.make_plan(res["pc"], res["game"], res["bench"], st)
+            except Exception as e:
+                log.exception("Sync scan failed"); res["error"] = e
+            self.root.after(0, lambda: show(res))
+
+        def show(res):
+            if not w.winfo_exists(): return
+            pb.stop(); pb.pack_forget()
+            if res.get("error"):
+                status.config(text=t("sync.bench_fail", e=res["error"])); return
+            F, C = res["findings"], res["changes"]
+            diff = {k: v for k, v in C.items() if st.get(k) != v}
+            status.config(text=time.strftime("%H:%M:%S"))
+            icon = {"ok": "✔", "info": "•", "warn": "⚠", "bad": "✖"}
+            txt.insert("end", t("sync.findings") + "\n", "h")
+            for lvl, key, kw in F:
+                txt.insert("end", f"{icon.get(lvl, '•')} {t(key, **kw)}\n", lvl)
+            txt.insert("end", "\n" + t("sync.changes") + "\n", "h")
+            if not diff:
+                txt.insert("end", t("sync.no_changes") + "\n", "ok")
+            for k, v in diff.items():
+                txt.insert("end", f"  {t('syncset.' + k)}: {st.get(k)!s} → {v!s}\n")
+            txt.config(state="disabled")
+            report = syncer.report_text(res["pc"], res["game"], res["bench"], F, t)
+            try: (APPLOG_DIR / "sync_report.txt").write_text(report, encoding="utf-8")
+            except Exception: pass
+            log.info("Sync scan: %s", "; ".join(f"{lvl}:{key}" for lvl, key, _ in F))
+            log.info("Sync proposed changes: %s", diff or "none")
+            copy_btn.config(state="normal", command=lambda: (self.root.clipboard_clear(), self.root.clipboard_append(report), self.toast("📋")))
+            apply_btn.config(state="normal", command=lambda: do_apply(res, diff))
+
+        def do_apply(res, diff):
+            old_prof = st.get("res_profile")
+            syncer.apply_plan(st, res["changes"], res["pc"], res["game"])
+            save_cfg(self.cfg)
+            apply_ocr_settings(st); self.card_box = None
+            self._area_sig = self._area_size = None
+            log.info("Sync applied: %s (fingerprint %s)", diff or "no changes", st.get("sync_fp"))
+            self.toast(t("sync.applied"))
+            w.destroy()
+            if old_prof not in (None, "auto") and st.get("res_profile") == "auto":
+                self.restart_app(tab="settings", page="display")       # arayüz ölçeği yeni profile göre
+            elif hasattr(self, "src_var"):
+                self.src_var.set(st.get("scan_source", "screen")); self.refresh_status()
+
+        threading.Thread(target=work, daemon=True).start()
 
     # ---------- bilgisayar hızına uyum ----------
     def _note_ocr_time(self, dt):
@@ -4189,6 +4294,12 @@ class App:
 
     # ---------- Ekran ve oyun ----------
     def build_display_box(self, P, st):
+        sb = ttk.LabelFrame(P["display"], text="🔄 " + t("sync.box")); sb.pack(fill="x", padx=10, pady=6)
+        ttk.Label(sb, text=t("sync.box_hint"), foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=8, pady=(6, 4))
+        sr = ttk.Frame(sb); sr.pack(fill="x", padx=8, pady=(0, 8))
+        ttk.Button(sr, text="🔄 " + t("sync.btn"), command=self.run_sync, style="Accent.TButton").pack(side="left")
+        ttk.Label(sr, text=t("sync.last", t=st["sync_time"]) if st.get("sync_time") else t("sync.never"),
+                  foreground=PAL["muted"]).pack(side="left", padx=12)
         db = ttk.LabelFrame(P["display"], text=t("disp.box")); db.pack(fill="x", padx=10, pady=6)
         mw, mh, src = game_size(st)
         det_label = display.profile_for(mw, mh)[1]["label"]

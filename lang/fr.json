@@ -952,5 +952,22 @@
   "upd.progress": "Téléchargement… {p} %",
   "upd.installing": "Installation — l'application redémarre seule",
   "upd.no_changes": "Aucun fichier à modifier.",
-  "upd.source_done": "Mis à jour en {v} : {n} fichiers remplacés (anciens dans {bak}). Redémarrer maintenant ?"
+  "upd.source_done": "Mis à jour en {v} : {n} fichiers remplacés (anciens dans {bak}). Redémarrer maintenant ?",
+  "sync.title": "Synchronisation PC & jeu",
+  "sync.btn": "Synchroniser avec ce PC",
+  "sync.btn_short": "Sync PC",
+  "sync.apply": "Appliquer",
+  "sync.copy": "Copier le rapport",
+  "sync.close": "Fermer",
+  "sync.applied": "Synchronisé avec ce PC ✔",
+  "sync.scanning": "Analyse du PC et du jeu…",
+  "sync.bench_running": "Mesure de la vitesse de lecture…",
+  "sync.findings": "Constats",
+  "sync.changes": "Réglages à appliquer",
+  "sync.no_changes": "Le programme est déjà configuré pour ce PC.",
+  "sync.new_pc_ask": "Nouveau PC, disposition d'écrans ou résolution du jeu détecté.\n\nAnalyser ce PC et le jeu maintenant et configurer le programme ? (~10 s)",
+  "sync.last": "Dernière synchro : {t}",
+  "sync.never": "Ce PC n'a pas encore été synchronisé.",
+  "sync.box_hint": "Analyse cet ordinateur (écrans, mise à l'échelle Windows, processeur, mémoire, carte graphique) et les réglages du jeu, mesure la vitesse de lecture et configure le programme pour ce PC. Les fichiers et la mémoire du jeu ne sont jamais modifiés.",
+  "sync.box": "Synchronisation PC & jeu"
 }

@@ -164,6 +164,32 @@ def test_display_sync_helpers():
     assert display.game_window() is None or os.name == "nt"
 
 
+def test_sync_plan():
+    """PC + oyun taramasından ayar planı: oyun penceresi, eski profil/eşik, başka PC'den kalan bölge, HDR, hız."""
+    import syncer
+    pc = {"cpu": "Test CPU", "cores": 8, "ram_gb": 16, "gpus": ["GPU"],
+          "monitors": [{"left": 0, "top": 0, "width": 2560, "height": 1440, "scale": 125},
+                       {"left": 2560, "top": 0, "width": 1920, "height": 1080, "scale": 100}]}
+    game = {"settings": {"width": 1920, "height": 1080, "display_mode": "Borderless", "hdr": True, "language": 0},
+            "window": {"left": 2560, "top": 0, "width": 1920, "height": 1080,
+                       "monitor": {"left": 2560, "top": 0, "width": 1920, "height": 1080}}, "running": True}
+    st = {"res_profile": "3440x1440", "ocr_threshold": 170, "ocr_tuned": True, "scan_source": "region",
+          "region": {"left": 100, "top": 100, "width": 800, "height": 1000}, "game_lang": "de"}
+    F, C = syncer.make_plan(pc, game, {"seconds": 1.1, "ok": True, "name": "Stoner LAMG", "attrs": 3}, st)
+    keys = [k for _, k, _ in F]
+    assert {"sync.game_window", "sync.multi_monitor", "sync.dpi", "sync.hdr", "sync.region_reset", "sync.read_ok"} <= set(keys), keys
+    assert C["res_profile"] == "auto" and C["ocr_tuned"] is False and C["ocr_threshold"] == 165
+    assert C["scan_source"] == "screen" and C["game_lang"] == "en" and C["ocr_passes"] == 2
+    F2, C2 = syncer.make_plan(pc, game, {"seconds": 3.0, "ok": False, "name": "?", "attrs": 0}, st)
+    assert C2["ocr_passes"] == 1 and C2["auto_interval_ms"] == 1600 and ("bad", "sync.read_bad") in [(l, k) for l, k, _ in F2]
+    st2 = dict(st); old = syncer.apply_plan(st2, C, pc, game)
+    assert st2["res_profile"] == "auto" and old["res_profile"] == "3440x1440" and st2["sync_fp"] == syncer.fingerprint(pc, game)
+    pc2 = dict(pc, monitors=pc["monitors"][:1])                    # monitör çıkarıldı → yeniden senkron önerilir
+    assert syncer.fingerprint(pc2, game) != st2["sync_fp"]
+    nogame = syncer.make_plan(pc, {"settings": None, "window": None}, None, {})
+    assert "sync.no_game" in [k for _, k, _ in nogame[0]] and nogame[1]["res_profile"] == "auto"
+
+
 if __name__ == "__main__":
     fails = 0
     for n, f in list(globals().items()):

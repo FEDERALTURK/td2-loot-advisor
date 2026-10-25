@@ -87,6 +87,21 @@ def main():
         print("read:", item["name"], item["kind"], item["slot"], list(item["attrs"])[:4])
         ok &= item["kind"] == "weapon" and len(item["attrs"]) >= 2
 
+        # 3b) senkron aracı: PC + oyun tarama, hız ölçümü, plan
+        import syncer
+        pc = syncer.scan_pc(); gm = syncer.scan_game()
+        print("sync pc:", {k: pc[k] for k in ("os", "cpu", "cores", "ram_gb", "gpus")}, pc["monitors"])
+        print("sync game window:", gm["window"])
+        bench = syncer.benchmark(app.read_card, app.GAME.recognize, ROOT / "meta" / "bench_card.jpg", game_height=gm["window"]["height"])
+        print("sync bench:", bench)
+        stx = {"res_profile": "3840x2160", "ocr_tuned": True, "ocr_threshold": 170, "scan_source": "region",
+               "region": {"left": 5000, "top": 5000, "width": 300, "height": 300}}
+        F, C = syncer.make_plan(pc, gm, bench, stx)
+        for lvl, key, kw in F: print("  ", lvl, app.t(key, **kw))
+        print("sync changes:", C)
+        ok &= gm["window"] is not None and bench.get("ok") is True and C["res_profile"] == "auto" and C["scan_source"] == "screen"
+        ok &= "sync.game_window" in [k for _, k, _ in F]
+
         # 4) pencere yeniden boyutlandı / taşındı → yeni alan bulunmalı
         p.terminate(); p.wait(5)
         W2 = min(820, scr["width"] - 200); H2 = min(600, scr["height"] - 170)

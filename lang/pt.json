@@ -952,5 +952,22 @@
   "upd.progress": "Baixando… {p}%",
   "upd.installing": "Instalando — o programa reinicia sozinho",
   "upd.no_changes": "Nenhum arquivo precisava mudar.",
-  "upd.source_done": "Atualizado para {v}: {n} arquivos substituídos (antigos em {bak}). Reiniciar agora?"
+  "upd.source_done": "Atualizado para {v}: {n} arquivos substituídos (antigos em {bak}). Reiniciar agora?",
+  "sync.title": "Sincronização de PC e jogo",
+  "sync.btn": "Sincronizar com este PC",
+  "sync.btn_short": "Sync PC",
+  "sync.apply": "Aplicar",
+  "sync.copy": "Copiar relatório",
+  "sync.close": "Fechar",
+  "sync.applied": "Sincronizado com este PC ✔",
+  "sync.scanning": "Analisando o PC e o jogo…",
+  "sync.bench_running": "Medindo a velocidade de leitura…",
+  "sync.findings": "Resultados",
+  "sync.changes": "Configurações a aplicar",
+  "sync.no_changes": "O programa já está configurado para este PC.",
+  "sync.new_pc_ask": "Novo PC, disposição de monitores ou resolução do jogo detectado.\n\nAnalisar este PC e o jogo agora e configurar o programa? (~10 s)",
+  "sync.last": "Última sincronização: {t}",
+  "sync.never": "Este PC ainda não foi sincronizado.",
+  "sync.box_hint": "Analisa este computador (monitores, escala do Windows, CPU, memória, placa de vídeo) e as configurações do jogo, mede a velocidade de leitura e configura o programa para este PC. Os arquivos e a memória do jogo nunca são alterados.",
+  "sync.box": "Sincronização de PC e jogo"
 }

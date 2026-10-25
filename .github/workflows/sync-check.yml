@@ -21,3 +21,33 @@ jobs:
       - name: Window / DPI / profile sync test
         shell: cmd
         run: python tests/test_windows_sync.py
+      - name: Sync tool UI (fake game + screenshots)
+        shell: pwsh
+        run: |
+          Add-Type -AssemblyName System.Windows.Forms, System.Drawing
+          function Shot($name) {
+            $b = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+            $bmp = New-Object System.Drawing.Bitmap $b.Width, $b.Height
+            $g = [System.Drawing.Graphics]::FromImage($bmp)
+            $g.CopyFromScreen($b.Location, [System.Drawing.Point]::Empty, $b.Size)
+            $bmp.Save("shots\$name.png"); $g.Dispose(); $bmp.Dispose()
+          }
+          New-Item -ItemType Directory shots | Out-Null
+          $code = "import sys,tkinter as tk`nfrom PIL import Image,ImageTk`nr=tk.Tk();r.title(""Tom Clancy's The Division 2"");r.geometry('900x640+20+20')`ns=Image.open('meta/bench_card.jpg');k=640/s.height`np=Image.new('RGB',(900,640),(12,14,18));p.paste(s.resize((int(s.width*k),640)),(60,0))`nph=ImageTk.PhotoImage(p);tk.Label(r,image=ph).pack();r.after(80000,r.destroy);r.mainloop()"
+          Set-Content -Path fake_game.py -Value $code
+          $g = Start-Process python -ArgumentList "fake_game.py" -PassThru
+          Start-Sleep 3
+          $p = Start-Process python -ArgumentList "tests/ui_sync_shot.py" -PassThru
+          Start-Sleep 25; Shot "sync_01"
+          Start-Sleep 12; Shot "sync_02"
+          if (Test-Path logs\app.log) { Get-Content logs\app.log | Select-String -Pattern "Sync|Capture|profile|Traceback|Error" }
+          if (Test-Path logs\sync_report.txt) { Get-Content logs\sync_report.txt }
+          if (-not $p.HasExited) { Stop-Process -Id $p.Id -Force }
+          if (-not $g.HasExited) { Stop-Process -Id $g.Id -Force }
+          if (Select-String -Path logs\app.log -Pattern "Traceback" -Quiet) { throw "traceback in app.log" }
+          if (-not (Test-Path logs\sync_report.txt)) { throw "no sync report" }
+      - uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: sync-shots
+          path: shots/*

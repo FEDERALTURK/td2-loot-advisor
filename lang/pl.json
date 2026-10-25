@@ -952,5 +952,22 @@
   "upd.progress": "Pobieranie… {p}%",
   "upd.installing": "Instalowanie — program sam się uruchomi ponownie",
   "upd.no_changes": "Żadne pliki nie wymagały zmiany.",
-  "upd.source_done": "Zaktualizowano do {v}: zastąpiono {n} plików (stare w {bak}). Uruchomić ponownie teraz?"
+  "upd.source_done": "Zaktualizowano do {v}: zastąpiono {n} plików (stare w {bak}). Uruchomić ponownie teraz?",
+  "sync.title": "Synchronizacja PC i gry",
+  "sync.btn": "Synchronizuj z tym PC",
+  "sync.btn_short": "Sync PC",
+  "sync.apply": "Zastosuj",
+  "sync.copy": "Kopiuj raport",
+  "sync.close": "Zamknij",
+  "sync.applied": "Zsynchronizowano z tym PC ✔",
+  "sync.scanning": "Skanowanie PC i gry…",
+  "sync.bench_running": "Pomiar szybkości odczytu…",
+  "sync.findings": "Wyniki",
+  "sync.changes": "Ustawienia do zastosowania",
+  "sync.no_changes": "Program jest już ustawiony dla tego PC.",
+  "sync.new_pc_ask": "Wykryto nowy PC, układ monitorów lub rozdzielczość gry.\n\nZeskanować teraz PC i grę i ustawić program? (~10 s)",
+  "sync.last": "Ostatnia synchronizacja: {t}",
+  "sync.never": "Ten PC nie był jeszcze synchronizowany.",
+  "sync.box_hint": "Skanuje ten komputer (monitory, skalowanie Windows, procesor, pamięć, karta graficzna) i ustawienia gry, mierzy szybkość odczytu i ustawia program dla tego PC. Pliki i pamięć gry nigdy nie są zmieniane.",
+  "sync.box": "Synchronizacja PC i gry"
 }

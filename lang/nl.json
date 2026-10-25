@@ -952,5 +952,22 @@
   "upd.progress": "Downloaden… {p}%",
   "upd.installing": "Installeren — het programma start vanzelf opnieuw",
   "upd.no_changes": "Er hoefden geen bestanden te veranderen.",
-  "upd.source_done": "Bijgewerkt naar {v}: {n} bestanden vervangen (oude in {bak}). Nu opnieuw starten?"
+  "upd.source_done": "Bijgewerkt naar {v}: {n} bestanden vervangen (oude in {bak}). Nu opnieuw starten?",
+  "sync.title": "PC- en gamesynchronisatie",
+  "sync.btn": "Synchroniseren met deze pc",
+  "sync.btn_short": "PC-sync",
+  "sync.apply": "Toepassen",
+  "sync.copy": "Rapport kopiëren",
+  "sync.close": "Sluiten",
+  "sync.applied": "Gesynchroniseerd met deze pc ✔",
+  "sync.scanning": "PC en game worden gescand…",
+  "sync.bench_running": "Leessnelheid wordt gemeten…",
+  "sync.findings": "Bevindingen",
+  "sync.changes": "Toe te passen instellingen",
+  "sync.no_changes": "Het programma is al ingesteld voor deze pc.",
+  "sync.new_pc_ask": "Nieuwe pc, monitorindeling of gameresolutie gedetecteerd.\n\nDeze pc en de game nu scannen en het programma instellen? (~10 s)",
+  "sync.last": "Laatste synchronisatie: {t}",
+  "sync.never": "Deze pc is nog niet gesynchroniseerd.",
+  "sync.box_hint": "Scant deze computer (monitoren, Windows-schaal, processor, geheugen, videokaart) en de game-instellingen, meet de leessnelheid en stelt het programma in voor deze pc. Gamebestanden en geheugen worden nooit gewijzigd.",
+  "sync.box": "PC- en gamesynchronisatie"
 }
