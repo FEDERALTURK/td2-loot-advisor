@@ -15,6 +15,12 @@ LICENSE_PUBKEY = "d70b17497241261ca45bcd05bbaedcd0fdeb3d866de4993d23db3c25274f63
 MAX_BATCH = "50"
 MAX_PER_HOUR = "600"
 
+# Hata rapor sistemi (worker.js /v1/reports endpoints)
+# Secrets: npx wrangler secret put GITHUB_TOKEN (ayrı olarak)
+# Variables: Cloudflare dashboard'da set et veya npx wrangler secret put ile
+REPORTS_REPO = "FEDERALTURK/td2-loot-advisor-reports"
+ADMIN_LOGIN = "FEDERALTURK"
+
 # Saatlik temizlik: eski oran kayıtları silinir
 [triggers]
 crons = ["17 * * * *"]
