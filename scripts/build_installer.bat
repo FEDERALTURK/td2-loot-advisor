@@ -88,7 +88,7 @@ echo [6/7] Kurulum araci araniyor / looking for Inno Setup...
 call :find_iscc
 if not defined ISCC (
   echo     Inno Setup yok, kuruluyor / installing Inno Setup ^(winget^)...
-  winget install --id JRSoftware.InnoSetup -e --silent --accept-package-agreements --accept-source-agreements >nul 2>&1
+  if defined CI (choco install innosetup -y --no-progress >nul 2>&1) else (winget install --id JRSoftware.InnoSetup -e --silent --accept-package-agreements --accept-source-agreements >nul 2>&1)
   call :find_iscc
 )
 
@@ -112,8 +112,10 @@ echo  BITTI / DONE:  !OUT!
 echo  Bu dosyayi baskalarina verebilirsin. Kurulum yonetici izni istemez.
 echo  Kisisel ayarlarin, lisansin ve private klasorun pakette YOK.
 echo ==========================================================================
-explorer /select,"%CD%\!OUT!"
-pause
+if not defined CI (
+  explorer /select,"%CD%\!OUT!"
+  pause
+)
 exit /b 0
 
 :find_iscc
@@ -129,5 +131,5 @@ exit /b 0
 :fail
 echo.
 echo [HATA] Islem tamamlanamadi. Yukaridaki mesajlara bakin. / Build failed, see messages above.
-pause
+if not defined CI pause
 exit /b 1
