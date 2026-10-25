@@ -172,13 +172,9 @@
   "Golden Rhino",
   "The House",
   "Thompson M1928",
-  "Barrett's Bulletproof Vest",
-  "Colonel Bliss's Holster",
-  "Ferro's Oxygen Mask",
   "Pristine Example",
   "Ravenous",
   "Sharpshooter",
-  "Shortbow Championship Pads",
   "Grudge",
   "Rock n' Roll"
  ],
@@ -342,12 +338,8 @@
   "Chatterbox",
   "Burnout",
   "Sleipner",
-  "Skulls MC Gloves",
   "Damascus",
   "Defiler",
-  "Eir",
-  "Free Republic",
-  "Hildr",
   "Historian",
   "Hungry Hog",
   "Instigator",
@@ -366,6 +358,7 @@
   "Warlord",
   "Whiplash",
   "Liquid Engineer",
+  "Benefactor",
   "Battery Pack",
   "Emperors Guard",
   "TDI \"Kard\" Custom"
@@ -1937,18 +1930,13 @@
    "quality": "high-end",
    "brand": "Edelweiss GPz"
   },
-  "Benefactor": {
-   "slot": "Chest",
-   "quality": "high-end",
-   "brand": "Edelweiss GPz"
-  },
   "Field Medic Mask": {
    "slot": "Mask",
    "quality": "high-end",
    "brand": "Edelweiss GPz"
   },
   "Sterile Gloves": {
-   "slot": "Mask",
+   "slot": "Gloves",
    "quality": "high-end",
    "brand": "Edelweiss GPz"
   },
@@ -1960,6 +1948,11 @@
   "Corpsman Holster": {
    "slot": "Holster",
    "quality": "high-end",
+   "brand": "Edelweiss GPz"
+  },
+  "Benefactor": {
+   "slot": "Chest",
+   "quality": "named",
    "brand": "Edelweiss GPz"
   },
   "Electrique Back": {
@@ -2552,6 +2545,11 @@
    "quality": "high-end",
    "brand": "Royal Works"
   },
+  "Robin": {
+   "slot": "Chest",
+   "quality": "named",
+   "brand": "Royal Works"
+  },
   "Artificer's Toolbox": {
    "slot": "Backpack",
    "quality": "high-end",
@@ -2831,6 +2829,36 @@
    "slot": "Holster",
    "quality": "high-end",
    "brand": "Česká Výroba s.r.o."
+  },
+  "Lowlands Carrier": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Zwiadowka Sp. z.o.o."
+  },
+  "\"Zofia\" Armor System": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "Zwiadowka Sp. z.o.o."
+  },
+  "Burza Breather": {
+   "slot": "Mask",
+   "quality": "high-end",
+   "brand": "Zwiadowka Sp. z.o.o."
+  },
+  "Lucznik Gloves": {
+   "slot": "Gloves",
+   "quality": "high-end",
+   "brand": "Zwiadowka Sp. z.o.o."
+  },
+  "Bizon Guards": {
+   "slot": "Kneepads",
+   "quality": "high-end",
+   "brand": "Zwiadowka Sp. z.o.o."
+  },
+  "White-Tailed Holster": {
+   "slot": "Holster",
+   "quality": "high-end",
+   "brand": "Zwiadowka Sp. z.o.o."
   },
   "Police SW Backpack": {
    "slot": "Backpack",
@@ -3128,7 +3156,7 @@
    "gear_set": "Ember Engine"
   },
   "Tank Carrier": {
-   "slot": "Chest",
+   "slot": "Backpack",
    "quality": "gear set",
    "gear_set": "Ember Engine"
   },
@@ -3443,7 +3471,7 @@
    "gear_set": "Ortiz: Reficere"
   },
   "Nanite Carrier": {
-   "slot": "Chest",
+   "slot": "Backpack",
    "quality": "gear set",
    "gear_set": "Ortiz: Reficere"
   },
@@ -3467,32 +3495,32 @@
    "quality": "gear set",
    "gear_set": "Ortiz: Reficere"
   },
-  "Reshuffled Gloves (Armor)": {
-   "slot": "Chest",
+  "Reshuffled Gloves": {
+   "slot": "Gloves",
    "quality": "gear set",
    "gear_set": "Refactor"
   },
-  "Revised Holster (Skill Tier)": {
+  "Revised Holster": {
    "slot": "Holster",
    "quality": "gear set",
    "gear_set": "Refactor"
   },
-  "Remodeled Kneepads (Armor)": {
-   "slot": "Chest",
+  "Remodeled Kneepads": {
+   "slot": "Kneepads",
    "quality": "gear set",
    "gear_set": "Refactor"
   },
-  "Reformed Mask (Skill Tier)": {
+  "Reformed Mask": {
    "slot": "Mask",
    "quality": "gear set",
    "gear_set": "Refactor"
   },
-  "Reorganized Backpack (Armor)": {
-   "slot": "Chest",
+  "Reorganized Backpack": {
+   "slot": "Backpack",
    "quality": "gear set",
    "gear_set": "Refactor"
   },
-  "Reformed Vest (Skill Tier)": {
+  "Reformed Vest": {
    "slot": "Chest",
    "quality": "gear set",
    "gear_set": "Refactor"
@@ -3557,32 +3585,27 @@
    "quality": "gear set",
    "gear_set": "Striker's Battlegear"
   },
-  "Haptic Bypass Gloves (Weapon Damage)": {
+  "Haptic Bypass Gloves": {
    "slot": "Gloves",
    "quality": "gear set",
    "gear_set": "System Corruption"
   },
-  "Frame Injection Holster (Weapon Damage)": {
+  "Frame Injection Holster": {
    "slot": "Holster",
    "quality": "gear set",
    "gear_set": "System Corruption"
   },
-  "Zero Day Kneepads (Armor)": {
-   "slot": "Chest",
+  "Zero Day Kneepads": {
+   "slot": "Kneepads",
    "quality": "gear set",
    "gear_set": "System Corruption"
   },
-  "Mask (Weapon Damage)": {
-   "slot": "Mask",
+  "Stack Overflow Container": {
+   "slot": "Backpack",
    "quality": "gear set",
    "gear_set": "System Corruption"
   },
-  "Stack Overflow Container (Armor)": {
-   "slot": "Chest",
-   "quality": "gear set",
-   "gear_set": "System Corruption"
-  },
-  "Blended Threat Armor (Armor)": {
+  "Blended Threat Armor": {
    "slot": "Chest",
    "quality": "gear set",
    "gear_set": "System Corruption"
@@ -3704,6 +3727,11 @@
   },
   "Medley Backpack": {
    "slot": "Backpack",
+   "quality": "gear set",
+   "gear_set": "Virtuoso"
+  },
+  "Bravura Guard": {
+   "slot": "Chest",
    "quality": "gear set",
    "gear_set": "Virtuoso"
   }
@@ -5192,6 +5220,10 @@
   "X-45 Tactical Replica": {
    "type": "Pistol",
    "quality": "high-end"
+  },
+  "TDI \"Kard\" Custom": {
+   "type": "Pistol",
+   "quality": "named"
   }
  },
  "specialization_weapons": {
@@ -6152,6 +6184,11 @@
    "8% Critical Hit Chance",
    "24% Shotgun Damage",
    "30% Hazard Protection"
+  ],
+  "Zwiadowka Sp. z.o.o.": [
+   "15% Magazine Size",
+   "24% Rifle Damage",
+   "30% Weapon Handling"
   ]
  },
  "named_multiplier": 2.0,

@@ -29,9 +29,9 @@ D2 = re.compile(r"Tom Clancy's The Division 2|\(The Division 2\)|\bTD2\b|Warlord
 
 # yuva anahtar sözcükleri (parça adından yuva çıkarmak için; yalnız bu betikte, OCR'de değil)
 SLOT_WORDS = [
-    ("Mask", r"mask|helmet|balaclava|respirator|goggles|face|hood|visor|cap|muzzle|snout|headgear|shades"),
-    ("Backpack", r"backpack|pack|bag|rucksack|go-bag|kit|satchel|frame|loadout frame|quiver pack|back"),
-    ("Chest", r"vest|chest(plate)?|body armou?r|plate carrier|harness|armou?r|jacket|parka|carrier|plate|cage|cuirass|breastplate"),
+    ("Mask", r"mask|helmet|balaclava|respirator|goggles|face|hood|visor|cap|muzzle|snout|headgear|shades|breather"),
+    ("Backpack", r"backpack|pack|bag|rucksack|go-bag|kit|satchel|frame|loadout frame|quiver pack|back|carrier|container|knapsack"),
+    ("Chest", r"vest|chest(plate)?|body armou?r|plate carrier|harness|armou?r|jacket|parka|plate|cage|cuirass|breastplate"),
     ("Gloves", r"gloves?|gauntlets?|grips?|hands|claws|fist guards?|knuckles|mitts|hand protectors?"),
     ("Holster", r"holster|rig|sling|belt|sidearm mount|mount|quiver|sheath|holster system|holder|pouch"),
     ("Kneepads", r"knee ?pads?|knee guards?|knees|kneepads|pads|leggings|pants|trousers|stride|poleyn|greaves|kneelers|collision guards"),
@@ -62,9 +62,19 @@ def members(cat):
         cont = {"cmcontinue": d["continue"]["cmcontinue"]}
 
 
-def wikitext(title):
+def wikitext(title, search=False):
     d = api(action="parse", page=title, prop="wikitext", redirects=1)
-    return (d.get("parse") or {}).get("wikitext", {}).get("*", "")
+    t = (d.get("parse") or {}).get("wikitext", {}).get("*", "")
+    if not t and search:                                  # farklı yazım: "Zwiadowka Sp. z.o.o." ↔ "Zwiadowka SP. z o.o."
+        first = gamedata.nrm(title).split()[0]
+        for r in api(action="query", list="search", srsearch=title.split()[0], srlimit=5)["query"]["search"]:
+            if gamedata.nrm(r["title"]).split()[:1] == [first]:
+                return wikitext(r["title"])
+    return t
+
+# TD1 (ilk oyun) eşyaları: wiki'de TD2 sayfalarıyla karışıyor, TD2 kütüphanesinde olmamalı
+TD1_ONLY = {"Barrett's Bulletproof Vest", "Colonel Bliss's Holster", "Ferro's Oxygen Mask", "Shortbow Championship Pads",
+            "Skulls MC Gloves", "Eir", "Hildr", "Free Republic", "Devil", "Valkyria", "Strawberry Milkshake"}
 
 
 def _tpl(body):
@@ -85,11 +95,14 @@ def plain(s):
 
 def slot_of(name):
     n = name.lower()
-    # en sondaki yuva sözcüğü kazanır ("Harness Pack" → Backpack, "Plate Carrier" → Chest)
+    # en sonda BİTEN yuva sözcüğü kazanır, eşitlikte uzun olan ("Harness Pack" → Backpack,
+    # "Plate Carrier" → Chest, "Tank Carrier" → Backpack). Parantezli notlar ("(Armor)") sayılmaz.
+    n = re.sub(r"\(.*?\)", " ", n)
     best = None
     for slot, pat in SLOT_WORDS:
         for m in re.finditer(r"\b(?:" + pat + r")\b", n):
-            if best is None or m.start() > best[0]: best = (m.start(), slot)
+            key = (m.end(), m.end() - m.start())
+            if best is None or key > best[0]: best = (key, slot)
     return best[1] if best else None
 
 
@@ -114,14 +127,30 @@ def parse_set_page(title, text, kind):
         if not line.strip().startswith("*"): continue
         depth = len(line) - len(line.lstrip("*"))
         raw = line.lstrip("* ").strip()
-        txt = plain(raw)
+        txt = re.sub(r"\s*\(.*?\)\s*$", "", plain(raw)).strip()     # "Reshuffled Gloves (Armor)" → ad
         if not txt or len(txt) > 60: continue
         is_exotic = bool(re.search(r"\{\{\s*exotic", raw, re.I))
-        is_named = is_exotic or bool(re.search(r"'''\s*\[\[", raw)) or bool(re.search(r"\{\{\s*named", raw, re.I))
+        # parça adları düz yazıdır; kendi sayfası olan (bağlantılı) eşya named/exotic'tir ("[[Momma Badger]]")
+        is_named = is_exotic or "[[" in raw or bool(re.search(r"\{\{\s*named", raw, re.I))
         if kind == "brand" and depth == 1:
             cur_slot = slot_of(txt.replace(title, "")) or slot_of(txt)       # "Unit Alloys Vest" → Chest
             continue
-        slot = (cur_slot if kind == "brand" else None) or slot_of(txt)
+        # markada yuva başlığı esastır ("Guardrail VI Face Rig" maskedir, rig ≠ holster); parçanın adında AÇIK bir
+        # yuva adı varsa ve başlıkla çelişiyorsa ad kazanır (wiki yazım hatası: Mask başlığı altında "Sterile Gloves")
+        own = slot_of(txt)
+        strong = re.search(r"\b(mask|backpack|gloves|holster|knee ?pads|vest|chest)\b", txt.lower())
+        if kind == "brand" and cur_slot:
+            st = slot_of(strong.group(1)) if strong else None
+            slot = st if (st and st != cur_slot) else cur_slot   # "Crew-Adapted Chest Rig": chest = başlık → Chest
+        else:
+            slot = own
+        if not slot and is_named:                # named eşya: yuvası kendi sayfasında ("Robin is a Chest")
+            pg = wikitext(txt) or wikitext(txt + " (The Division 2)")
+            m = re.search(r"is an?\s+(?:named\s+)?(?:'+|\[\[|\{\{)*\s*(chest|vest|mask|backpack|gloves|holster|knee ?pads)", plain(pg), re.I)
+            if m:
+                w = m.group(1).lower()
+                slot = {"vest": "Chest"}.get(w, "Kneepads" if "knee" in w else w.title())
+        if txt.lower() in ("mask", "backpack", "chest", "vest", "gloves", "holster", "kneepads", "tbd"): continue  # yer tutucu
         if not slot or txt.upper() == "TBD":
             if txt.upper() != "TBD": UNSLOTTED.append(f"{title}: {txt}")
             continue
@@ -129,6 +158,12 @@ def parse_set_page(title, text, kind):
             named[txt] = (slot, "exotic" if is_exotic else "named")          # main() kütüphaneye göre düzeltir
         else:
             pieces[txt] = slot
+    # gear set'te tek parçanın yuvası bulunamadıysa ve tam bir yuva boşsa: o parça o yuvadır ("Bravura Guard" → Chest)
+    if kind == "gear_set":
+        left = [n for n in UNSLOTTED if n.startswith(title + ": ")]
+        free = [s for s, _ in SLOT_WORDS if s not in set(pieces.values())]
+        if len(left) == 1 and len(free) == 1 and len(pieces) == 5:
+            pieces[left[0].split(": ", 1)[1]] = free[0]; UNSLOTTED.remove(left[0])
     return {"name": title, "bonuses": bonuses_of(section(text, r"Set completion bonus(es)?") or text),
             "pieces": pieces, "named": named}
 
@@ -170,7 +205,7 @@ def main(dry=False):
     for b in list(data["brands"]):
         if gamedata.nrm(b) not in have: brand_titles.append(b); have.add(gamedata.nrm(b))
     for title in brand_titles:
-        text = wikitext(title)
+        text = wikitext(title, search=True)
         if not D2.search(text[:1500]): report["skipped"].append(title); continue
         res = parse_set_page(title, text, "brand")
         name = canon_brand(title); res["name"] = name
@@ -231,6 +266,13 @@ def main(dry=False):
         data["named"].append(name); report["named"].append(name)
         time.sleep(0.3)
 
+    for key in ("exotics", "named"):
+        gone = [n for n in data.get(key, []) if n in TD1_ONLY]
+        if gone: data[key] = [n for n in data[key] if n not in TD1_ONLY]; report.setdefault("removed_td1", []).extend(gone)
+    for n in list(items):
+        if n in TD1_ONLY: items.pop(n)
+    # TDI "Kard" Custom: named tabanca (KARD-45)
+    data.setdefault("weapon_index", {}).setdefault('TDI "Kard" Custom', {"type": "Pistol", "quality": "named"})
     slots = data.setdefault("slots", {})
     for w, s in (("chestplate", "Chest"), ("harness", "Chest"), ("plate carrier", "Chest")):
         slots.setdefault(w, s)
@@ -247,6 +289,7 @@ def main(dry=False):
     print("named:", report["named"][:60]); print("exotic:", report["exotic"][:60])
     print(f"skipped (not TD2): {len(report['skipped'])}")
     print("no slot found:", UNSLOTTED)
+    print("removed TD1-only:", report.get("removed_td1"))
     print(f"totals: brands {len(data['brands'])}, gear sets {len(data['gear_sets'])}, items {len(items)}, "
           f"named {len(data['named'])}, exotics {len(data['exotics'])}")
     if not dry:
