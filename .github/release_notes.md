@@ -9,8 +9,9 @@
 Windows "kişisel bilgisayarınızı korudu" derse: **Ek bilgi → Yine de çalıştır** (dosya henüz kod imzalı değil).
 
 **5.0.6 — menü geçişi ve kaydırılmış kartlar**
-- Menü geçiş efekti yenilendi: eskiden tüm pencere karartılıp açılıyordu (arka plan saatiyle çakışıp titriyor ve kasıyordu). Artık sekme satırının altında eski sekmeden yeni sekmeye kayan bir ışık çizgisi; pencerenin saydamlığına dokunulmuyor.
+- Menü geçiş efekti yenilendi: seçili sekmenin altında kalıcı turuncu bir gösterge; sekme değişince eski sekmeden yenisine ~0,25 sn'de akıcı biçimde kayar. Sekmenin verisi animasyon bittikten sonra yenilendiği için geçiş takılmaz (eskiden pencere karartılıp açılıyor, arka plan saatiyle çakışıp titriyordu).
 - Kart aşağı kaydırılınca eşyanın adı görünmüyordu: ad ve set/marka artık envanter listesindeki seçili (vurgulu) satırdan okunuyor (ör. "Striker's Pack · Striker's Battlegear"). Kaydırılan kart başka bir eşyayla birleştirilmiyor.
+- Kartın başlığı ekranın en üstündeyse (uzun set açıklamasında) artık kırpılmıyor.
 - Harita, projeler gibi eşya kartı olmayan ekranlardaki yazılar artık eşya sanılmıyor.
 
 **5.0.5 — akıcılık ve fare düzeltmeleri**
