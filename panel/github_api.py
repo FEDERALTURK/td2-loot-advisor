@@ -27,7 +27,7 @@ class GitHub:
     
     def issues(self, labels="report", per_page=50, page=1, state="open"):
         """Etiketli issue'ları listele (sayfalı)."""
-        q = f"label:{labels} state:{state} repo:{self.repo}"
+        q = f"label:{labels} repo:{self.repo} is:issue" + ("" if state == "all" else f" state:{state}")
         url = f"/search/issues?q={quote(q)}&per_page={per_page}&page={page}"
         ok, res = self._req("GET", url)
         if ok:

@@ -165,6 +165,7 @@ class Panel:
     
     def _show_detail(self):
         issue = self.selected_issue
+        self.t_detail.config(state="normal")
         self.t_detail.delete("1.0", "end")
         
         body = f"#{issue['number']} — {issue['title']}\n"
