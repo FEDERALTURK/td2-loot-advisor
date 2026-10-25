@@ -8,6 +8,11 @@
 
 Windows "kişisel bilgisayarınızı korudu" derse: **Ek bilgi → Yine de çalıştır** (dosya henüz kod imzalı değil).
 
+**5.1.0 — ekran kartıyla okuma**
+- **Yeni: ekran kartıyla OCR (DirectML).** Kart okuma artık ekran kartında çalışabiliyor (DirectX 12 destekleyen her ekran kartı: NVIDIA, AMD, Intel). İlk açılışta program bunu ayrı bir süreçte güvenle dener: sonuç işlemciyle aynıysa ve daha hızlıysa açar, değilse işlemcide kalır. Sürücü sorunu olsa bile program etkilenmez.
+- Ayarlar → OCR'da yeni satır: **Ekran kartıyla hızlandır** (Otomatik / Açık / Kapalı) ve bu bilgisayardaki ölçüm ("işlemci 1350 ms → ekran kartı 400 ms" gibi).
+- **Ondalık onarımı:** OCR noktayı kaçırdığında ("+60%" Kritik Şans) değer atılmıyor, oyunun sınırlarına göre onarılıyor (6.0%). Onarılan değerler "şüpheli" sayılır ve kart bir kez daha okunur.
+
 **5.0.9 — hız**
 - **Eşya tanıma 2–15 kat hızlı:** okunan yazıyı eşya kütüphanesiyle eşleştirme, ilk okumada yaklaşık 2 kat, aynı taramadaki tekrarlarda 13–15 kat hızlandı (Windows ölçümü: kart başına 360–630 ms → 27–47 ms). Sonuçlar eskisiyle birebir aynı (200.000 karşılaştırmada fark yok).
 - **Gereksiz okumalar kaldırıldı:** hızlı bilgisayarlarda her kart 3 kez okunuyordu. İlk okuma eşyayı tam güvenle tanıdıysa ve rakamlar net okunduysa ek okuma yapılmıyor; kart başına 1,5–4,5 sn tasarruf. Kaydırılmış/eksik kartlarda eskisi gibi çoklu okuma yapılır.
