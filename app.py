@@ -60,6 +60,11 @@ import gameinfo
 import updates
 import reports
 import account
+import service
+import screenstate
+import localapi
+import presence
+import notify
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
@@ -75,6 +80,9 @@ STASH_PATH = BASE / "stash.json"
 VENDOR_CACHE = BASE / "vendor_cache.json"
 DROPQ_PATH = BASE / "drop_queue.json"
 ACCOUNT_PATH = BASE / "account.dat"
+SESSIONS_PATH = BASE / "sessions.json"
+SCREEN_PATH = BASE / "screen_states.json"
+START_IN_TRAY = "--tray" in sys.argv
 ACC_ERRORS = {"offline", "timeout", "invalid", "used", "expired", "payment", "rate", "disabled", "forbidden", "noserver"}
 
 
@@ -112,7 +120,7 @@ DEFAULTS = {"scan_mode": "hotkey", "auto_interval_ms": 700, "auto_record": True,
             "fx_cursor": True, "fx_cursor_style": "crosshair", "fx_cursor_color": "#ff6d10", "fx_cursor_custom": "",
             "fx_trail": True, "fx_trail_color": "#ff6d10", "fx_trail_len": 18, "fx_transitions": True,
             "fx_video": True, "fx_video_dim": 0.35, "fx_transition_ms": 260, "fx_bgwatch": True, "fx_bgwatch_dim": 0.0,
-            "res_profile": "auto", "ocr_engine": "auto", "ocr_gpu": "auto", "license_key": "", "update_check": True, "update_last": 0, "update_skip": "", "stash_record": True, "vendor_mode": False, "vendor_auto": True, "drop_share": False, "drop_asked": False, "drop_activity": "none", "drop_server": "", "drop_client": "", "vision_ok": False, "vendor_notified": "", "companion_port": 8765, "agent_model": "operator", "agent_outfit": "night", "agent_skin": 1, "ocr_threshold": 170, "ocr_scale": "auto", "ocr_psm": 6, "ocr_passes": 3,
+            "res_profile": "auto", "ocr_engine": "auto", "ocr_gpu": "auto", "license_key": "", "update_check": True, "update_last": 0, "update_skip": "", "stash_record": True, "vendor_mode": False, "vendor_auto": True, "drop_share": False, "drop_asked": False, "drop_activity": "none", "drop_server": "", "drop_client": "", "vision_ok": False, "vendor_notified": "", "companion_port": 8765, "svc_tray": True, "svc_close_to_tray": False, "svc_auto_run": True, "smart_scan": True, "api_on": False, "api_port": 8766, "api_lan": False, "api_control": True, "api_token": "", "rpc_on": False, "rpc_client_id": "", "push_on": False, "push_topic": "", "push_webhook": "", "push_drop": True, "push_build": True, "push_vendor": True, "push_session": True, "agent_model": "operator", "agent_outfit": "night", "agent_skin": 1, "ocr_threshold": 170, "ocr_scale": "auto", "ocr_psm": 6, "ocr_passes": 3,
             "overlay_mode": "card", "overlay_alpha": 0.94, "overlay_size": 1.0, "ui_depth": True,
             "meta_sync": True, "meta_feed_url": "", "meta_last_try": 0, "meta_last_sync": "", "meta_version": "",
             "meta_hidden": [], "tasks_sync": True, "auto_reset_times": True,
@@ -1302,6 +1310,10 @@ class App:
         self.account = account.Account(ACCOUNT_PATH, self._acc_url())
         self._acc_apply()
         log.info("Tier: %s (key=%s, account=%s)", self.ent.tier, self.ent.reason, self.ent.ent_reason)
+        self.sessions = service.SessionLog(SESSIONS_PATH)
+        self.screen = screenstate.Detector(SCREEN_PATH)
+        self.game_state, self.game_on, self._auto_started = "unknown", False, False
+        self.notifier, self.presence, self.api, self.tray, self.watcher = notify.Notifier(), None, None, None, None
         self.stash = stash.Stash(STASH_PATH)
         self.vendor_week = vendor.load_cache(VENDOR_CACHE)
         self.vendor_scans, self.vendor_hits, self.vendor_busy = [], [], False
@@ -1351,8 +1363,319 @@ class App:
         if not self.gpu_apply_cached(): OCR.warm_up()
         self.root.after(8000, lambda: threading.Thread(target=self.gpu_check, daemon=True).start())
         self.root.after(1500, self.account_startup)
+        self.root.after(1000, self.service_start)
         if OCR.name == "tesseract" and not self.tess:
             messagebox.showwarning(APP_NAME, t("msg.no_tesseract"))
+
+    # ---------- Hizmet: oyun algılama, akıllı tarama, yerel API, Discord durumu, bildirimler, tepsi ----------
+    def service_start(self):
+        st = self.cfg["settings"]
+        if not st.get("api_token"): st["api_token"] = __import__("secrets").token_urlsafe(16); save_cfg(self.cfg)
+        self.watcher = service.GameWatcher(lambda k, v: self.root.after(0, lambda: self._game_event(k, v)))
+        self.watcher.start()
+        self._push_configure()
+        self.api_apply(quiet=True)
+        if st.get("rpc_on"): self.rpc_apply()
+        if st.get("svc_tray", True) or START_IN_TRAY: self.tray_start()
+        if START_IN_TRAY and self.tray and self.tray.available: self.root.withdraw()
+        self.root.after(5000, self._service_tick)
+
+    def service_stop(self):
+        try:
+            if self.watcher: self.watcher.stop()
+            if self.game_on and self.sessions.current: self.sessions.end()
+            if self.api: self.api.stop(); self.api = None
+            if self.presence: self.presence.close(); self.presence = None
+            if self.tray: self.tray.stop(); self.tray = None
+        except Exception:
+            log.debug("service stop", exc_info=True)
+
+    def _game_event(self, kind, value):
+        st = self.cfg["settings"]
+        if kind == "game" and value == "started":
+            self.game_on = True; self.sessions.begin()
+            log.info("Game started — session begins")
+            if st.get("svc_auto_run", True) and not self.running:
+                self._auto_started = True; self.start(quiet=True); self.toast(t("svc.auto_started"))
+        elif kind == "game" and value == "stopped":
+            self.game_on = False; self.game_state = "unknown"
+            c = self.sessions.end()
+            log.info("Game stopped — session %s", c and {k: c[k] for k in ("scanned", "keep", "dismantle", "exotic")})
+            if self._auto_started and self.running: self.stop(quiet=True)
+            self._auto_started = False
+            if c and c["scanned"]:
+                mins = max(1, (c["end"] - c["start"]) // 60)
+                body = t("push.session_body", mins=mins, n=c["scanned"], keep=c["keep"], dis=c["dismantle"], ex=c["exotic"], named=c["named"])
+                if c["highlights"]: body += "\n" + " · ".join(c["highlights"][-6:])
+                self._push("session", "🎮 " + t("push.session_title"), body)
+        self._service_publish(kind="game")
+        self.refresh_header()
+
+    def _screen_observe(self, small):
+        """Tarama döngüsünden (arka plan) — ekran durumu; değişince arayüze bildirir."""
+        self._last_small = small
+        before = self.screen.state
+        stt = self.screen.observe(small)
+        if stt != before:
+            if before == "menu": self.sessions.add_menu_time(time.time() - self.screen.since)
+            self.root.after(0, self._screen_changed)
+        return stt
+
+    def _screen_changed(self):
+        self.game_state = self.screen.state
+        log.debug("Screen state -> %s (%.2f)", self.game_state, self.screen.score)
+        self._service_publish(kind="game")
+        self.refresh_header()
+
+    def _service_scan(self, item, verdict, res, note, act):
+        st = self.cfg["settings"]
+        try:
+            if verdict != "ERROR" and valid_item(item):
+                self.sessions.add_scan(verdict, item)
+                sm = getattr(self, "_last_small", None)
+                if sm is not None and st.get("smart_scan", True) and self.screen.learn(sm):
+                    log.info("Screen state: learned menu signature #%d", self.screen.learned(sm))
+            if act:
+                self.sessions.add_upgrade(item.get("name"))
+                self._push("build", "⬆ " + t("push.build_title"),
+                           t("push.build_body", build=act[0], slot=slot_name(act[1]), item=item.get("name"), q=act[2]))
+            rar = " ".join(item.get("rarity") or []).upper()
+            if verdict == "KEEP" and ("EXOTIC" in rar or "NAMED" in rar):
+                kind = t("push.exotic") if "EXOTIC" in rar else t("push.named")
+                self._push("drop", "⭐ " + t("push.drop_title", kind=kind),
+                           f"{item.get('name')} — {verdict_label(verdict)}" + (f"\n{res[0][1]} {res[0][0]}%" if res else ""))
+            ev = {"type": "scan", **{k: v for k, v in self.comp_state.items() if k in ("verdict", "verdict_label", "best", "item", "note")}}
+            self._service_publish(extra=ev)
+        except Exception:
+            log.debug("service scan hook failed", exc_info=True)
+
+    def _service_tick(self):
+        try:
+            if self.presence: self._rpc_update(); self.presence.flush()
+            if self.api and self.api.clients: self.api.broadcast({"type": "session", "session": self._session_brief()})
+            if self.tray and self.tray.available: self.tray.set_title(self._tray_title())
+        except Exception:
+            log.debug("service tick", exc_info=True)
+        self.root.after(5000, self._service_tick)
+
+    def _session_brief(self):
+        s = self.sessions.stats()
+        s["label"] = t("svc.session"); return s
+
+    def api_state(self):
+        st = dict(self.comp_state)
+        return {"app": APP_NAME, "version": APP_VERSION, "running": self.running,
+                "game": {"running": self.game_on, "state": self.game_state, "learned": self.screen.learned()},
+                "last": {k: st.get(k) for k in ("verdict", "verdict_label", "best", "item", "note", "time")} if st.get("verdict") else None,
+                "build": st.get("build"), "session": self._session_brief(), "tier": self.ent.tier}
+
+    def _service_publish(self, kind=None, extra=None):
+        if self.api and self.api.clients:
+            ev = extra or {"type": kind or "state"}
+            if kind == "game": ev["game"] = {"running": self.game_on, "state": self.game_state}
+            ev["session"] = self._session_brief()
+            self.api.broadcast(ev)
+        if self.presence: self._rpc_update()
+
+    def api_command(self, cmd, args):
+        """Yerel API'den (arka plan iş parçacığı) — işi arayüz iş parçacığında yapıp sonucu bekler."""
+        done, out = threading.Event(), {}
+        def run():
+            try:
+                if cmd == "start" and not self.running: self.start(quiet=True)
+                elif cmd == "stop" and self.running: self.stop(quiet=True)
+                elif cmd == "toggle": (self.stop if self.running else self.start)(quiet=True)
+                elif cmd == "scan": self.trigger()
+                out["running"] = self.running
+            finally:
+                done.set()
+        self.root.after(0, run)
+        done.wait(5)
+        return out
+
+    def api_apply(self, quiet=False):
+        st = self.cfg["settings"]
+        if self.api: self.api.stop(); self.api = None
+        if not st.get("api_on") or not self.ent.has("local_api"): return
+        try:
+            port = max(1024, min(65535, int(st.get("api_port", 8766))))
+            self.api = localapi.LocalAPI(self.api_state, self.api_command, port=port, token=st["api_token"],
+                                         lan=bool(st.get("api_lan")), allow_control=bool(st.get("api_control", True)))
+            self.api.start()
+        except OSError as e:
+            self.api = None
+            log.warning("Local API failed: %s", e)
+            if not quiet: messagebox.showerror(APP_NAME, t("comp.port_busy", port=st.get("api_port"), e=e))
+
+    # --- Discord durumu
+    def rpc_apply(self):
+        st = self.cfg["settings"]
+        if self.presence: self.presence.close(); self.presence = None
+        if not st.get("rpc_on") or not self.ent.has("discord_presence"): return
+        cid = st.get("rpc_client_id") or ""
+        if not cid.isdigit():
+            def fetch():                                     # Discord uygulama kimliği sunucudan (herkese açık bilgi)
+                try:
+                    with urllib.request.urlopen(self._acc_url().rstrip("/") + "/v1/health", timeout=8) as r:
+                        got = str(json.loads(r.read()).get("discord_app") or "")
+                except Exception:
+                    got = ""
+                if got.isdigit():
+                    st["rpc_client_id"] = got; save_cfg(self.cfg); self.root.after(0, self.rpc_apply)
+                else:
+                    log.info("Discord presence: no application id yet")
+            threading.Thread(target=fetch, daemon=True).start(); return
+        self.presence = presence.Presence(cid, buttons=[("TD2 Loot Advisor", "https://github.com/FEDERALTURK/td2-loot-advisor")])
+        threading.Thread(target=self._rpc_update, daemon=True).start()
+
+    def _rpc_update(self):
+        p = self.presence
+        if not p: return
+        if not self.game_on:
+            if p.current: threading.Thread(target=p.clear, daemon=True).start()
+            return
+        s = self.sessions.stats()
+        det = t("rpc.st_" + (self.game_state if self.game_state in ("menu", "world", "loading") else "playing"))
+        state = t("rpc.counts", n=s["scanned"], keep=s["keep"], ex=s["exotic"]) if s["scanned"] else None
+        threading.Thread(target=p.update, args=(det, state, s.get("start")), daemon=True).start()
+
+    # --- bildirimler
+    def _push_configure(self):
+        st = self.cfg["settings"]
+        on = st.get("push_on") and self.ent.has("push_notify")
+        self.notifier.configure(st.get("push_topic", "") if on else "", st.get("push_webhook", "") if on else "")
+
+    def _push(self, kind, title, body):
+        st = self.cfg["settings"]
+        if self.notifier.enabled and st.get("push_" + kind, True):
+            self.notifier.send(title, body, kind=kind)
+
+    # --- tepsi
+    def _tray_title(self):
+        s = self.sessions.stats()
+        return f"{APP_NAME} — " + (t("svc.st_" + self.game_state) if self.game_on else t("svc.no_game")) + \
+               (f" · {s['scanned']}" if s["scanned"] else "")
+
+    def tray_start(self):
+        if self.tray: return
+        img = None
+        for folder in (BASE / "icon", BUNDLE / "icon"):
+            if (folder / "td2.png").exists():
+                img = Image.open(folder / "td2.png").convert("RGBA").resize((64, 64)); break
+        img = img or Image.new("RGBA", (64, 64), (255, 109, 16, 255))
+        ui = lambda f: (lambda: self.root.after(0, f))
+        self.tray = service.Tray(APP_NAME, img, [(t("svc.tray_open"), ui(self.tray_show)),
+                                                 (t("svc.tray_toggle"), ui(lambda: (self.stop if self.running else self.start)())),
+                                                 None, (t("svc.tray_quit"), ui(lambda: self.on_close(force=True)))])
+        if self.tray.available: self.tray.start()
+        else: log.info("Tray: pystray not installed")
+
+    def tray_show(self):
+        self.root.deiconify(); self.root.lift(); self.root.focus_force()
+
+    def autostart_toggle(self, var):
+        try:
+            ok_ = service.autostart_set(bool(var.get()))
+            if not ok_: raise OSError("registry")
+        except OSError as e:
+            var.set(service.autostart_get()); messagebox.showerror(APP_NAME, str(e))
+
+    # --- ayarlar sayfası
+    def build_service_page(self, f, st):
+        P = lambda parent, txt: ttk.Label(parent, text=txt, foreground=PAL["muted"], wraplength=900, justify="left")
+        def chk(parent, key, label, cmd=None, feature=None):
+            v = tk.BooleanVar(value=bool(st.get(key)))
+            def ch():
+                st[key] = bool(v.get()); save_cfg(self.cfg)
+                if cmd: cmd()
+            cb = ttk.Checkbutton(parent, text=label + ("" if not feature or self.ent.has(feature) else "  ⭐"), variable=v, command=ch)
+            if feature and not self.ent.has(feature): cb.state(["disabled"])
+            cb.pack(anchor="w", padx=10, pady=1); return v
+        # 1) arka plan
+        g = ttk.LabelFrame(f, text="🎮 " + t("svc.box_game")); g.pack(fill="x", padx=10, pady=(10, 6))
+        chk(g, "svc_auto_run", t("svc.auto_run"))
+        chk(g, "svc_tray", t("svc.tray"), cmd=lambda: (self.tray_start() if st.get("svc_tray") else (self.tray and self.tray.stop(), setattr(self, "tray", None))))
+        chk(g, "svc_close_to_tray", t("svc.close_to_tray"))
+        av = tk.BooleanVar(value=service.autostart_get())
+        cb = ttk.Checkbutton(g, text=t("svc.autostart"), variable=av, command=lambda: self.autostart_toggle(av))
+        cb.pack(anchor="w", padx=10, pady=1)
+        if os.name != "nt": cb.state(["disabled"])
+        tot = self.sessions.totals(7)
+        P(g, t("svc.week", n=tot["sessions"], h=round(tot["seconds"] / 3600, 1), scanned=tot["scanned"], keep=tot["keep"],
+               ex=tot["exotic"])).pack(anchor="w", padx=12, pady=(4, 8))
+        # 2) akıllı tarama
+        sm = ttk.LabelFrame(f, text="🧠 " + t("svc.box_smart")); sm.pack(fill="x", padx=10, pady=6)
+        chk(sm, "smart_scan", t("svc.smart"))
+        n = self.screen.learned()
+        P(sm, t("svc.smart_hint") + "  " + (t("svc.smart_learned", n=n) if n else t("svc.smart_none"))).pack(anchor="w", padx=12)
+        rr = ttk.Frame(sm); rr.pack(anchor="w", padx=10, pady=(4, 8))
+        ttk.Button(rr, text=t("svc.smart_reset"), command=lambda: (self.screen.reset(), self.toast(t("svc.smart_reset_done")))).pack(side="left")
+        # 3) yerel API
+        ap = ttk.LabelFrame(f, text="🔌 " + t("svc.box_api") + ("" if self.ent.has("local_api") else "  ⭐")); ap.pack(fill="x", padx=10, pady=6)
+        chk(ap, "api_on", t("svc.api_on"), cmd=lambda: (self.api_apply(), self.rebuild_ui(tab="settings")), feature="local_api")
+        chk(ap, "api_control", t("svc.api_control"), cmd=self.api_apply, feature="local_api")
+        chk(ap, "api_lan", t("svc.api_lan"), cmd=lambda: (self.api_apply(), self.rebuild_ui(tab="settings")), feature="local_api")
+        if self.api and self.api.running:
+            for label, val in ((t("svc.api_obs"), self.api.url("/overlay")), ("WebSocket", self.api.ws_url),
+                               (t("svc.api_deck"), self.api.url("/deck/toggle"))):
+                r = ttk.Frame(ap); r.pack(fill="x", padx=10, pady=1)
+                ttk.Label(r, text=label, width=16).pack(side="left")
+                e = ttk.Entry(r); e.insert(0, val); e.config(state="readonly"); e.pack(side="left", fill="x", expand=True)
+                ttk.Button(r, text="📋", width=3, command=lambda v=val: (self.root.clipboard_clear(), self.root.clipboard_append(v),
+                                                                       self.toast(t("svc.copied")))).pack(side="left", padx=4)
+            P(ap, t("svc.api_hint")).pack(anchor="w", padx=12, pady=(2, 8))
+        else:
+            P(ap, t("svc.api_off_hint")).pack(anchor="w", padx=12, pady=(2, 8))
+        # 4) Discord + bildirimler
+        dc = ttk.LabelFrame(f, text="💬 " + t("svc.box_discord")); dc.pack(fill="x", padx=10, pady=6)
+        chk(dc, "rpc_on", t("svc.rpc_on"), cmd=self.rpc_apply, feature="discord_presence")
+        P(dc, t("svc.rpc_hint")).pack(anchor="w", padx=12, pady=(0, 8))
+        pn = ttk.LabelFrame(f, text="📱 " + t("svc.box_push") + ("" if self.ent.has("push_notify") else "  ⭐")); pn.pack(fill="x", padx=10, pady=6)
+        chk(pn, "push_on", t("svc.push_on"), cmd=self._push_configure, feature="push_notify")
+        r1 = ttk.Frame(pn); r1.pack(fill="x", padx=10, pady=2)
+        ttk.Label(r1, text=t("svc.push_topic"), width=16).pack(side="left")
+        tv = tk.StringVar(value=st.get("push_topic", ""))
+        ttk.Entry(r1, textvariable=tv).pack(side="left", fill="x", expand=True)
+        ttk.Button(r1, text=t("svc.push_new"), command=lambda: tv.set(notify.new_topic())).pack(side="left", padx=4)
+        r2 = ttk.Frame(pn); r2.pack(fill="x", padx=10, pady=2)
+        ttk.Label(r2, text=t("svc.push_webhook"), width=16).pack(side="left")
+        wv = tk.StringVar(value=st.get("push_webhook", ""))
+        ttk.Entry(r2, textvariable=wv, show="•").pack(side="left", fill="x", expand=True)
+        ev_row = ttk.Frame(pn); ev_row.pack(anchor="w", padx=6, pady=2)
+        for k in ("drop", "build", "vendor", "session"):
+            v = tk.BooleanVar(value=st.get("push_" + k, True))
+            ttk.Checkbutton(ev_row, text=t("svc.push_" + k), variable=v,
+                            command=lambda k=k, v=v: (st.__setitem__("push_" + k, bool(v.get())), save_cfg(self.cfg))).pack(side="left", padx=4)
+        qr_lbl = tk.Label(pn, bg=PAL["bg"]); res_lbl = ttk.Label(pn, text="", foreground=PAL["muted"])
+
+        def save_push(test=False):
+            tp, wh = tv.get().strip(), wv.get().strip()
+            if tp and not notify.valid_topic(tp): return res_lbl.config(text=t("svc.push_bad_topic"), foreground=PAL["danger"])
+            if wh and not notify.valid_webhook(wh): return res_lbl.config(text=t("svc.push_bad_hook"), foreground=PAL["danger"])
+            st["push_topic"], st["push_webhook"] = tp, wh; save_cfg(self.cfg); self._push_configure()
+            img = companion.qr_image(self.notifier.subscribe_url, 4) if self.notifier.topic else None
+            if img is not None:
+                qr_lbl._img = ImageTk.PhotoImage(img); qr_lbl.config(image=qr_lbl._img); qr_lbl.pack(anchor="w", padx=12, pady=4)
+            if not test: return res_lbl.config(text=t("svc.saved"), foreground=PAL["success"])
+            if not self.notifier.enabled: return res_lbl.config(text=t("svc.push_need"), foreground=PAL["warning"])
+            res_lbl.config(text=t("acc.working"), foreground=PAL["muted"])
+            def go():
+                r = self.notifier.send_now("✅ " + t("push.test_title"), t("push.test_body"))
+                txt = " · ".join(f"{n}: {'✔' if v else '✖'}" for n, v in zip(("ntfy", "Discord"), r) if v is not None)
+                self.root.after(0, lambda: res_lbl.config(text=txt + (f"  ({self.notifier.last_error})" if self.notifier.last_error else ""),
+                                                         foreground=PAL["success"] if all(v is not False for v in r) else PAL["danger"]))
+            threading.Thread(target=go, daemon=True).start()
+        br = ttk.Frame(pn); br.pack(anchor="w", padx=10, pady=4)
+        ttk.Button(br, text="💾 " + t("svc.save"), command=save_push).pack(side="left")
+        ttk.Button(br, text="🔔 " + t("svc.push_test"), command=lambda: save_push(True), style="Accent.TButton").pack(side="left", padx=6)
+        res_lbl.pack(anchor="w", padx=12)
+        P(pn, t("svc.push_hint")).pack(anchor="w", padx=12, pady=(2, 8))
+        if self.notifier.topic: save_push()
+        if not self.ent.has("push_notify"):
+            for w in (r1, r2, br):
+                for c in w.winfo_children():
+                    try: c.state(["disabled"])
+                    except Exception: pass
 
     # ---------- Hesap (isteğe bağlı: Discord ile giriş, anahtar / davet / satın alma) ----------
     def _acc_url(self):
@@ -1786,6 +2109,7 @@ class App:
         self.banner.set_chips([(self._acc_chip_text(), "btn" if not self.account.signed_in else "on", self.open_account),
                                ("🐞 " + t("fb.btn_short"), "off", self.open_feedback),
                                ("🔄 " + t("sync.btn_short"), "btn", self.run_sync),
+                               *([("🎮 " + t("svc.st_" + self.game_state), "on")] if getattr(self, "game_on", False) else []),
                                (("● " + t("state.running")) if self.running else ("○ " + t("state.stopped")),
                                 "on" if self.running else "off"),
                                ("🤖 " + provider_label(prov if prov in PROVIDER_KEYS else "builtin"), "off")])
@@ -2633,18 +2957,25 @@ class App:
             capture.default().release()
 
     def _auto_loop(self, stop):
-        prev = last_done = None; stable = 0
+        prev = last_done = None; stable = 0; last_t = 0.0
         while not stop.is_set():
             try:
                 region = self.scan_area()
                 if region and self.cfg["settings"].get("only_game_active", True) and not game_active():
                     prev = None; stable = 0                     # oyun önde değil: okuma yapma
                 elif region:
-                    h = capture.default().thumb(region)      # ham piksellerden hızlı özet (tam görüntü üretmeden)
+                    smart = self.cfg["settings"].get("smart_scan", True)
+                    h, small = capture.default().sample(region, screenstate.W if smart else None)   # tek yakalama
                     stable = stable + 1 if prev is not None and dist(h, prev) < AUTO_STABLE else 0
                     prev = h
-                    if stable == 1 and (last_done is None or dist(h, last_done) >= AUTO_CHANGE):
-                        last_done = h
+                    gs = self._screen_observe(small) if small is not None else "unknown"
+                    changed = last_done is None or dist(h, last_done) >= AUTO_CHANGE
+                    if gs == "loading": go = False                        # yükleme ekranı: okuma yok
+                    elif gs == "world":                                   # dünyada: seyrek (tamamen kapatma — yeni
+                        go = changed and stable >= 3 and time.time() - last_t > 4.0   # menü türleri öğrenilebilsin)
+                    else: go = changed and stable == 1                    # menü / bilinmiyor: eski davranış
+                    if go:
+                        last_done, last_t = h, time.time()
                         img = grab(region)
                         with self.lock:
                             self.scan_image(img, auto=True)
@@ -2706,6 +3037,7 @@ class App:
         elif s.get("sound"): self.sounds.play(verdict, force=True)
         if s.get("log_csv"): self.log(item, verdict, res)
         self._companion_update(item, verdict, res, note)
+        self._service_scan(item, verdict, res, note, act)
         if s.get("vendor_mode") and valid_item(item) and item.get("kind") in ("gear", "weapon"):
             it = dict(item, vendor=t("vend.ingame"), id="s:" + str(len(self.vendor_scans)))
             self.vendor_scans.append(it)
@@ -4672,11 +5004,12 @@ class App:
         self.set_nb = ttk.Notebook(outer); self.set_nb.pack(fill="both", expand=True, padx=8, pady=(8, 0))
         P = {}
         for key, icon in (("general", "⚙"), ("fx", "✨"), ("scan", "🎯"), ("display", "🖥"), ("ocr", "🔍"), ("overlay", "🪟"),
-                          ("sync", "🔄"), ("premium", "⭐"), ("logs", "📝")):
+                          ("sync", "🔄"), ("service", "🛰"), ("premium", "⭐"), ("logs", "📝")):
             holder = ttk.Frame(self.set_nb); self.set_nb.add(holder, text=f" {icon} {t('setpage.' + key)} ")
             P[key] = ui_theme.scrollable(holder, PAL["bg"])
-        self._set_keys = ["general", "fx", "scan", "display", "ocr", "overlay", "sync", "premium", "logs"]
+        self._set_keys = ["general", "fx", "scan", "display", "ocr", "overlay", "sync", "service", "premium", "logs"]
         self.build_fx_box(P["fx"], st)
+        self.build_service_page(P["service"], st)
         self.build_premium_box(P["premium"], st)
         if getattr(self, "_set_page", None) in self._set_keys:
             self.set_nb.select(self._set_keys.index(self._set_page))
@@ -5617,6 +5950,9 @@ class App:
         if notify and mine and st.get("vendor_notified") != wk:
             st["vendor_notified"] = wk; save_cfg(self.cfg)
             self.toast(t("vend.notify", n=len(mine), build=act))
+            self._push("vendor", "🛒 " + t("push.vendor_title"),
+                       t("vend.notify", n=len(mine), build=act) + "\n" + "\n".join(
+                           f"• {slot_name(h['slot'])}: {h['item'].get('name')} ({h.get('vendor') or ''}, {h['fit']}%)" for h in mine[:6]))
         self._companion_refresh_build()
 
     def _refresh_vendor(self):
@@ -5959,7 +6295,11 @@ class App:
             box.insert("end", line, ("h",) if plain and plain == plain.upper() and any(c.isalpha() for c in plain) else ())
         box.config(state="disabled")
 
-    def on_close(self):
+    def on_close(self, force=False):
+        st0 = self.cfg["settings"]
+        if not force and st0.get("svc_close_to_tray") and self.tray and self.tray.available:
+            self.root.withdraw(); self.tray.notify(t("svc.in_tray")); return
+        self.service_stop()
         self.stop(); self.speaker.close()
         if self.companion: self.companion.stop()
         st_ = self.cfg["settings"]

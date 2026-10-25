@@ -2,3 +2,4 @@ mss
 pillow
 pytesseract
 pynput
+pystray

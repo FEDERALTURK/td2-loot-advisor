@@ -29,6 +29,11 @@ FEATURES = {
     "drop_stats_view": "premium",  # topluluk düşüş istatistikleri (hangi aktivitede ne düşüyor)
     "vendor_watch":    "premium",  # haftalık satıcı / hedefli loot bildirimleri
     "companion":       "premium",  # telefon arkadaşı (yerel web + QR)
+    "game_service":    "free",     # oyunla birlikte başlat/durdur, tepsi, oturum günlüğü
+    "smart_scan":      "free",     # ekran durumu (menü / dünya / yükleme) ile akıllı tarama
+    "discord_presence": "free",    # Discord'da "TD2 Loot Advisor — envanter düzenliyor"
+    "local_api":       "premium",  # yerel WebSocket API: OBS kaplaması, Stream Deck, telefon
+    "push_notify":     "premium",  # telefon bildirimleri (ntfy / Discord webhook)
     "cloud_sync":      "premium",  # build / sandık bulut eşitleme
 }
 TIERS = ("free", "premium")

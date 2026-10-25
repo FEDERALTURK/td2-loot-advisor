@@ -309,7 +309,7 @@ export default {
     try {
       if (req.method === "OPTIONS") return json({}, 204, { "access-control-allow-methods": "GET, POST",
                                                            "access-control-allow-headers": "content-type, authorization" });
-      if (u.pathname === "/v1/health") return json({ ok: true, login: !!env.DISCORD_CLIENT_ID });
+      if (u.pathname === "/v1/health") return json({ ok: true, login: !!env.DISCORD_CLIENT_ID, discord_app: env.DISCORD_CLIENT_ID || null });
       const acc = await accountRoute(req, env, u.pathname);
       if (acc) return acc;
       if (u.pathname === "/v1/drops" && req.method === "POST") return await postDrops(req, env);

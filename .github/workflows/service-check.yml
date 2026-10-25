@@ -1,0 +1,55 @@
+# Hizmet: oyun algılama, akıllı tarama, yerel API, Discord durumu, bildirimler, tepsi — birim + Windows uçtan uca.
+name: Service check
+
+on:
+  workflow_dispatch:
+  push:
+    paths: ["service.py", "screenstate.py", "localapi.py", "presence.py", "notify.py", "capture.py", "tests/test_service.py",
+            "tests/test_localapi.py", "tests/test_screenstate.py", "tests/ui_service_test.py"]
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with: { node-version: "22" }
+      - uses: actions/setup-python@v6
+        with: { python-version: "3.13" }
+      - run: python -m pip install numpy pillow
+      - run: python tests/test_screenstate.py
+      - run: python tests/test_localapi.py
+      - run: python tests/test_service.py
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    env:
+      TD2_NO_WELCOME: "1"
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with: { python-version: "3.13" }
+      - name: Install
+        shell: cmd
+        run: |
+          python -m pip install -r requirements.txt
+          python -m pip install onnxruntime rapidocr qrcode
+      - name: Unit (Windows)
+        shell: cmd
+        run: |
+          set PYTHONIOENCODING=utf-8
+          python tests/test_screenstate.py || exit /b 1
+          python tests/test_localapi.py || exit /b 1
+          python tests/test_service.py || exit /b 1
+      - name: Service end-to-end (fake game window)
+        shell: cmd
+        run: set PYTHONIOENCODING=utf-8&& python tests/ui_service_test.py
+      - name: Result
+        if: always()
+        shell: pwsh
+        run: if (Test-Path tests\.service_result.json) { Get-Content tests\.service_result.json }; if (Test-Path logs\app.log) { Get-Content logs\app.log -Tail 60 }
+      - uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: service-shots
+          path: shots/*

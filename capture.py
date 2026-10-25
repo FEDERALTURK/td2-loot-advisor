@@ -50,9 +50,23 @@ class Grabber:
         s = self._raw(region)
         return Image.frombytes("RGB", s.size, s.bgra, "raw", "BGRX")
 
+    def sample(self, region, small_width=None):
+        """Tek yakalamadan hem 24×24 özet hem (istenirse) ekran durumu için küçük gri kare."""
+        s = self._raw(region)
+        small = None
+        if small_width:
+            try:
+                import screenstate
+                small = screenstate.small_gray(s.bgra, s.size[0], s.size[1], small_width)
+            except ImportError:
+                pass
+        return self._thumb_of(s), small
+
     def thumb(self, region):
         """24×24 gri özet; eski ImageOps.grayscale(img).resize((24, 24)) ile aynı değer aralığı (0-255)."""
-        s = self._raw(region)
+        return self._thumb_of(self._raw(region))
+
+    def _thumb_of(self, s):
         w, h = s.size
         try:
             import numpy as np
