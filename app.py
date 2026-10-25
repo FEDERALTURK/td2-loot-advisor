@@ -256,18 +256,47 @@ def _tint(w, bg):
             _tint(c, bg)
 
 
+_PROFILE_NOTE = {}
+
+
+def game_size(st=None):
+    """Oyunun gerçek boyutu: açık oyun penceresi, yoksa oyunun ayar dosyası (state.cfg), yoksa oyunun monitörü."""
+    g = display.game_window()
+    if g: return g["width"], g["height"], "window"
+    gs = getattr(display, "_last_game_settings", None)
+    if gs is None:
+        try: gs = display.read_game_settings() if hasattr(display, "read_game_settings") else None
+        except Exception: gs = None
+        display._last_game_settings = gs or {}
+    if gs and gs.get("width") and gs.get("height") and gs.get("display_mode", "").lower() != "windowed":
+        return int(gs["width"]), int(gs["height"]), "state.cfg"
+    w, h = display.monitor_size()
+    return w, h, "monitor"
+
+
 def active_profile(st):
-    """(anahtar, profil) — 'auto' ise ana monitörden tespit edilir."""
+    """(anahtar, profil). 'auto': oyunun gerçek boyutundan (pencere / ayar dosyası) — her çözünürlükte hesaplanır.
+    Elle seçilmiş profil oyunun boyutuna uymuyorsa (başka bilgisayar, monitör değişti) otomatiğe dönülür."""
+    w, h, src = game_size(st)
     key = st.get("res_profile", "auto")
-    if key not in display.PROFILES:
-        key = display.detect_profile(*display.monitor_size())
-    return key, display.PROFILES[key]
+    if key in display.PROFILES and not st.get("res_profile_lock"):
+        pw, ph = map(int, key.split("x"))
+        if abs(ph - h) > 100 or abs(pw / ph - w / max(1, h)) > 0.25:
+            note = (key, w, h)
+            if _PROFILE_NOTE.get("last") != note:
+                _PROFILE_NOTE["last"] = note
+                log.warning("Profile %s does not match the game (%dx%d from %s): using automatic profile", key, w, h, src)
+            key = "auto"
+    if key in display.PROFILES:
+        return key, display.PROFILES[key]
+    return display.profile_for(w, h)
 
 
 def apply_ocr_settings(st):
     """Eşik / ölçek ayarlarını OCR ön işlemine uygular (profil + kullanıcı ince ayarı)."""
     _, prof = active_profile(st)
-    try: gamedata.THRESHOLD = int(float(st.get("ocr_threshold") or prof["threshold"]))
+    # elle ince ayar yapılmadıysa eşik profilden gelir (eski sürümlerde kayıtlı sabit 170 her bilgisayarda kalıyordu)
+    try: gamedata.THRESHOLD = int(float(st.get("ocr_threshold"))) if st.get("ocr_tuned") else prof["threshold"]
     except (TypeError, ValueError): gamedata.THRESHOLD = prof["threshold"]
     sc = st.get("ocr_scale", "auto")
     try: gamedata.SCALE = None if sc in ("auto", "", None) else float(sc)
@@ -1243,7 +1272,8 @@ class App:
             except Exception:
                 log.exception("Stash import failed")
         apply_ocr_settings(stg)
-        log.info("Display profile: %s, OCR threshold %s, scale %s", active_profile(stg)[0], gamedata.THRESHOLD, gamedata.SCALE or "auto")
+        self._prof_key = active_profile(stg)[0]
+        log.info("Display profile: %s, OCR threshold %s, scale %s", self._prof_key, gamedata.THRESHOLD, gamedata.SCALE or "auto")
         self.tess = find_tesseract(self.cfg)
         self.listener, self.auto_stop, self.running = None, None, False
         self.lock, self.results = threading.Lock(), queue.Queue()
@@ -1740,7 +1770,9 @@ class App:
         if box is None:
             box = find_card(img); tried_fresh = True
         card = img.crop(box) if box else img
+        t_ocr = time.perf_counter()
         text, lines = read_card(card)
+        self._note_ocr_time(time.perf_counter() - t_ocr)
         item, verdict, res = evaluate(text, self.cfg)
         if not valid_item(item) and not tried_fresh:                  # kart yer değiştirmiş: yeniden bul
             box = find_card(img)
@@ -1748,8 +1780,11 @@ class App:
             text, lines = read_card(card)
             item, verdict, res = evaluate(text, self.cfg)
         self.card_box = box if valid_item(item) else None
-        try: passes = max(1, min(3, int(s.get("ocr_passes", 3))))
-        except (TypeError, ValueError): passes = 3
+        if s.get("ocr_passes_auto", True):
+            passes = self.auto_passes()                      # bilgisayarın hızına göre 1-3 okuma
+        else:
+            try: passes = max(1, min(3, int(s.get("ocr_passes", 3))))
+            except (TypeError, ValueError): passes = 3
         fresh = not (auto and signature(item) == self.last_sig and time.time() - self.last_time < DEDUP_SECONDS)
         if passes > 1 and valid_item(item) and fresh:
             # çoklu geçiş: aynı kart farklı eşik (Tesseract) ya da ölçekle (RapidOCR) yeniden okunur,
@@ -1823,6 +1858,23 @@ class App:
         except Exception:
             log.debug("ocr history save failed", exc_info=True)
 
+    # ---------- bilgisayar hızına uyum ----------
+    def _note_ocr_time(self, dt):
+        """Tek kart okumasının süresi (sn): kayan ortalama. Zayıf işlemcide okuma sayısı azaltılır."""
+        ema = getattr(self, "ocr_ema", None)
+        self.ocr_ema = dt if ema is None else ema * 0.7 + dt * 0.3
+
+    def auto_passes(self):
+        ema = getattr(self, "ocr_ema", None)
+        if ema is None: n = 2
+        elif ema <= 0.7: n = 3
+        elif ema <= 1.5: n = 2
+        else: n = 1
+        if n != getattr(self, "_passes_logged", None):
+            self._passes_logged = n
+            log.info("OCR speed: %s per read -> %d pass(es)", f"{ema:.2f}s" if ema is not None else "unknown", n)
+        return n
+
     def merge_scrolled(self, text, item, verdict, res):
         """Uzun kartlar ekrana sığmaz; oyuncu kartı kaydırır. Aynı eşyanın ardışık okumaları birleştirilir:
         önce üst kısım (ad, set, çekirdek), sonra alt kısım (attribute, mod, talent) okunur → tek eşya."""
@@ -1850,13 +1902,40 @@ class App:
         return text, item, verdict, res
 
     def scan_area(self):
-        """Taranacak alan: tüm ekran (oyunun olduğu ana monitör) ya da seçilen bölge."""
+        """Taranacak alan: oyun penceresinin kendisi (hangi monitörde / modda olursa olsun), seçilmiş bölge,
+        ya da oyun bulunamazsa ana monitör. Oyunun boyutu değişince okuma ayarları yeniden uygulanır."""
         st = self.cfg["settings"]
         if st.get("scan_source", "screen") == "region" and st.get("region"):
             return st["region"]
+        g = display.game_window()
         with mss.mss() as sct:
-            m = sct.monitors[1]
-        return {"left": m["left"], "top": m["top"], "width": m["width"], "height": m["height"]}
+            mons = sct.monitors
+            area = display.clamp_to_screen(g, mons) if g else None
+            if not area:
+                m = mons[1]
+                area = {"left": m["left"], "top": m["top"], "width": m["width"], "height": m["height"]}
+        sig = (area["left"], area["top"], area["width"], area["height"], bool(g))
+        if sig != getattr(self, "_area_sig", None):
+            self._area_sig = sig
+            src = "game window" if g else "primary monitor (game not found)"
+            log.info("Capture area: %s %dx%d at (%d,%d)", src, area["width"], area["height"], area["left"], area["top"])
+            size = (area["width"], area["height"]) if g else None
+            if g and size != getattr(self, "_area_size", None):    # yalnız boyut değişince (taşımak yetmez)
+                first = getattr(self, "_area_size", None) is None
+                self._area_size = size
+                k0 = getattr(self, "_prof_key", None)
+                k1 = active_profile(st)[0]
+                self._prof_key = k1
+                if k0 != k1 or not first:
+                    apply_ocr_settings(st)
+                log.info("Display profile: %s, OCR threshold %s, scale %s", k1, gamedata.THRESHOLD, gamedata.SCALE or "auto")
+        return area
+
+    def screen_monitor(self):
+        """Tam ekran seçimleri (kalibrasyon, görev bölgesi) için oyunun bulunduğu monitör."""
+        with mss.mss() as sct:
+            g = display.game_window()
+            return dict(display.monitor_of(g, sct.monitors) if g else sct.monitors[1])
 
     def auto_loop(self, stop):
         prev = last_done = None; stable = 0
@@ -2202,8 +2281,9 @@ class App:
         self.root.withdraw(); self.root.after(5000, self._calib_capture)
 
     def _calib_capture(self):
+        mon = self.screen_monitor()
         with mss.mss() as sct:
-            mon = sct.monitors[1]; s = sct.grab(mon); img = Image.frombytes("RGB", s.size, s.rgb)
+            s = sct.grab(mon); img = Image.frombytes("RGB", s.size, s.rgb)
         self.root.deiconify()
         w = tk.Toplevel(self.root); w.attributes("-fullscreen", True, "-topmost", True)
         cv = tk.Canvas(w, highlightthickness=0, cursor="crosshair"); cv.pack(fill="both", expand=True)
@@ -3744,8 +3824,9 @@ class App:
         self.root.withdraw(); self.root.after(5000, self._task_region_capture)
 
     def _task_region_capture(self):
+        mon = self.screen_monitor()
         with mss.mss() as sct:
-            mon = sct.monitors[1]; s = sct.grab(mon); img = Image.frombytes("RGB", s.size, s.rgb)
+            s = sct.grab(mon); img = Image.frombytes("RGB", s.size, s.rgb)
         self.root.deiconify()
         w = tk.Toplevel(self.root); w.attributes("-fullscreen", True, "-topmost", True)
         cv = tk.Canvas(w, highlightthickness=0, cursor="crosshair"); cv.pack(fill="both", expand=True)
@@ -4109,14 +4190,15 @@ class App:
     # ---------- Ekran ve oyun ----------
     def build_display_box(self, P, st):
         db = ttk.LabelFrame(P["display"], text=t("disp.box")); db.pack(fill="x", padx=10, pady=6)
-        mw, mh = display.monitor_size()
-        det = display.detect_profile(mw, mh)
+        mw, mh, src = game_size(st)
+        det_label = display.profile_for(mw, mh)[1]["label"]
         r1 = ttk.Frame(db); r1.pack(fill="x", padx=8, pady=(6, 2))
-        ttk.Label(r1, text=t("disp.monitor", res=f"{mw}×{mh}", prof=display.PROFILES[det]["label"])).pack(side="left")
+        ttk.Label(r1, text=t("disp.monitor", res=f"{mw}×{mh}", prof=det_label) +
+                  {"window": "  ·  🎮 oyun penceresi / game window", "state.cfg": "  ·  oyun ayarı / game settings"}.get(src, "")).pack(side="left")
         r2 = ttk.Frame(db); r2.pack(fill="x", padx=8, pady=4)
         ttk.Label(r2, text=t("disp.profile")).pack(side="left")
         self._prof_keys = ["auto"] + list(display.PROFILES)
-        labels = [t("disp.auto", prof=display.PROFILES[det]["label"])] + [display.PROFILES[k]["label"] for k in display.PROFILES]
+        labels = [t("disp.auto", prof=det_label)] + [display.PROFILES[k]["label"] for k in display.PROFILES]
         cur = st.get("res_profile", "auto")
         self.prof_var = tk.StringVar(value=labels[self._prof_keys.index(cur)] if cur in self._prof_keys else labels[0])
         pcb = ttk.Combobox(r2, textvariable=self.prof_var, values=labels, width=34, state="readonly"); pcb.pack(side="left", padx=6)
@@ -4160,8 +4242,8 @@ class App:
         self.ocr_psm_var = tk.StringVar(value=str(st.get("ocr_psm", 6)))
         ttk.Combobox(o2, textvariable=self.ocr_psm_var, values=["6", "4", "3", "11"], width=4, state="readonly").pack(side="left")
         ttk.Label(o2, text=t("ocr.passes")).pack(side="left", padx=(16, 2))
-        self.ocr_pass_var = tk.StringVar(value=str(st.get("ocr_passes", 3)))
-        ttk.Combobox(o2, textvariable=self.ocr_pass_var, values=["1", "2", "3"], width=4, state="readonly").pack(side="left")
+        self.ocr_pass_var = tk.StringVar(value=t("ocr.auto") if st.get("ocr_passes_auto", True) else str(st.get("ocr_passes", 3)))
+        ttk.Combobox(o2, textvariable=self.ocr_pass_var, values=[t("ocr.auto"), "1", "2", "3"], width=9, state="readonly").pack(side="left")
         o3 = ttk.Frame(ob); o3.pack(fill="x", padx=8, pady=4)
         ttk.Button(o3, text=ui_theme.with_icon(t("ocr.calibrate"), "🎯"), command=self.auto_calibrate_ocr).pack(side="left")
         ttk.Button(o3, text=ui_theme.with_icon(t("ocr.preview"), "👁"), command=self.ocr_preview).pack(side="left", padx=8)
@@ -4199,11 +4281,15 @@ class App:
 
     def _apply_profile_defaults(self):
         key = self._profile_key()
-        k2 = key if key in display.PROFILES else display.detect_profile(*display.monitor_size())
-        pr = display.PROFILES[k2]
+        if key in display.PROFILES:
+            pr = display.PROFILES[key]
+        else:
+            gw, gh, _ = game_size()
+            pr = display.profile_for(gw, gh)[1]
         self.ocr_thr.set(pr["threshold"]); self.ocr_scale_var.set(str(pr["ocr_scale"]))
         st = self.cfg["settings"]
         st["res_profile"], st["ocr_threshold"], st["ocr_scale"] = key, pr["threshold"], ("auto" if key == "auto" else pr["ocr_scale"])
+        st["ocr_tuned"] = False
         save_cfg(self.cfg); apply_ocr_settings(st); self.card_box = None
         # pencere ve arayüz yeni ekran boyutuna göre hemen yeniden kurulur (yeniden başlatma yok)
         # Yazı tipleri Tk'da önbelleğe alındığı için ölçek değişimi en temiz yeniden açılışla uygulanır (~2 sn)
@@ -4378,10 +4464,13 @@ class App:
             st["log_backups"] = max(0, int(float(self.sv["log_backups"].get())))
             st["bg_interval"] = max(0, int(float(self.sv["bg_interval"].get() or 0)))
             st["ocr_threshold"] = int(self.ocr_thr.get())
+            st["ocr_tuned"] = st["ocr_threshold"] != active_profile({**st, "res_profile": self._profile_key()})[1]["threshold"]
             sc = self.ocr_scale_var.get().strip()
             st["ocr_scale"] = "auto" if sc in ("", "auto", t("ocr.auto")) else float(sc)
             st["ocr_psm"] = int(self.ocr_psm_var.get())
-            st["ocr_passes"] = int(self.ocr_pass_var.get())
+            pv = self.ocr_pass_var.get()
+            st["ocr_passes_auto"] = pv == t("ocr.auto")       # otomatik: bilgisayarın okuma hızına göre 1-3
+            if not st["ocr_passes_auto"]: st["ocr_passes"] = int(pv)
             st["ocr_engine"] = next((k for k, v in self._ocr_engines.items() if v == self.ocr_engine_var.get()), "auto")
             st["overlay_alpha"] = round(float(self.ov_alpha.get()), 2)
             st["overlay_size"] = round(float(self.ov_size.get()), 2)

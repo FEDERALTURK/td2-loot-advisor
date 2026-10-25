@@ -1,5 +1,5 @@
 """Lisans (Ed25519) ve sandık optimize edici testleri.   python tests/test_core.py"""
-import sys, time
+import os, sys, time
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -144,6 +144,24 @@ def test_excel_library_in_sync():
     for n in ("Fafnir", "Iron Will", "Loaded for Bear", "Trick Shot", "Melon Baller", "Insult to Injury", "Unmatched Backpack"):
         assert n in d["items"] or n in d["weapon_index"], n
     assert "Cassidy" not in d["weapon_index"] and d["weapon_index"]["Fafnir"]["type"] == "Shotgun"
+
+
+def test_display_sync_helpers():
+    """Oyunun gerçek boyutundan profil; ekran dışına taşan pencere; hangi monitörde."""
+    import display
+    for (w, h) in ((1920, 1080), (3440, 1440), (3840, 2160)):
+        k, p = display.profile_for(w, h); assert k in display.PROFILES and not p.get("dynamic")
+    for (w, h) in ((1680, 1050), (2880, 1800), (1280, 800), (1024, 768), (2560, 1600)):
+        k, p = display.profile_for(w, h)
+        assert p["dynamic"] and 1.0 <= p["ocr_scale"] <= 6 and 0.10 <= p["card_w"] <= 0.34 and 150 <= p["threshold"] <= 175, (k, p)
+    d = display.dynamic_profile(3440, 1440); assert abs(d["card_w"] - 0.16) < 0.01 and d["ocr_scale"] == 1.5
+    mons = [{"left": -1920, "top": 0, "width": 5360, "height": 1440},
+            {"left": 0, "top": 0, "width": 3440, "height": 1440}, {"left": -1920, "top": 200, "width": 1920, "height": 1080}]
+    g = {"left": -1800, "top": 300, "width": 1600, "height": 900}
+    assert display.monitor_of(g, mons) is mons[2]
+    c = display.clamp_to_screen({"left": 3000, "top": -50, "width": 1000, "height": 800}, mons)
+    assert c == {"left": 3000, "top": 0, "width": 440, "height": 750}, c
+    assert display.game_window() is None or os.name == "nt"
 
 
 if __name__ == "__main__":

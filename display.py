@@ -68,6 +68,9 @@ def detect_profile(width, height):
 
 
 def monitor_size():
+    """Oyunun çalıştığı ekranın (yoksa ana monitörün) boyutu."""
+    g = game_window()
+    if g: return g["width"], g["height"]
     try:
         import mss
         with mss.mss() as s:
@@ -75,6 +78,130 @@ def monitor_size():
             return m["width"], m["height"]
     except Exception:
         return 1920, 1080
+
+
+# ---------------------------------------------------------------- oyun penceresi (yalnız konumu; belleğe dokunulmaz)
+GAME_EXES = ("thedivision2.exe", "thedivision2_vulkan.exe", "thedivision2dx12.exe")
+_GW_CACHE = {"t": 0.0, "v": None}
+
+
+def _exe_of(hwnd):
+    try:
+        from ctypes import wintypes
+        u, k = ctypes.windll.user32, ctypes.windll.kernel32
+        pid = wintypes.DWORD(); u.GetWindowThreadProcessId(hwnd, ctypes.byref(pid))
+        h = k.OpenProcess(0x1000, False, pid.value)              # PROCESS_QUERY_LIMITED_INFORMATION
+        if not h: return ""
+        try:
+            buf = ctypes.create_unicode_buffer(520); n = wintypes.DWORD(520)
+            ok = k.QueryFullProcessImageNameW(h, 0, buf, ctypes.byref(n))
+            return os.path.basename(buf.value).lower() if ok else ""
+        finally:
+            k.CloseHandle(h)
+    except Exception:
+        return ""
+
+
+def find_game_hwnd():
+    """The Division 2 penceresi: önce oyunun exe adına, sonra başlığa göre. Simge durumundaki pencere sayılmaz."""
+    if os.name != "nt": return None
+    try:
+        from ctypes import wintypes
+        u = ctypes.windll.user32
+        found = []
+        CB = ctypes.WINFUNCTYPE(wintypes.BOOL, wintypes.HWND, wintypes.LPARAM)
+
+        def cb(h, _):
+            if not u.IsWindowVisible(h) or u.IsIconic(h): return True
+            n = u.GetWindowTextLengthW(h)
+            buf = ctypes.create_unicode_buffer(n + 1); u.GetWindowTextW(h, buf, n + 1)
+            title = buf.value.lower()
+            if "loot advisor" in title: return True
+            exe = _exe_of(h)
+            score = 2 if exe in GAME_EXES else (1 if ("division 2" in title or "division2" in title) else 0)
+            if score: found.append((score, h))
+            return True
+        u.EnumWindows(CB(cb), 0)
+        return max(found)[1] if found else None
+    except Exception:
+        return None
+
+
+def window_client_rect(hwnd):
+    """İstemci alanı ekran koordinatlarında (fiziksel piksel; süreç DPI-aware olmalı)."""
+    try:
+        from ctypes import wintypes
+        u = ctypes.windll.user32
+        rc = wintypes.RECT()
+        if not u.GetClientRect(hwnd, ctypes.byref(rc)): return None
+        pt = wintypes.POINT(0, 0)
+        u.ClientToScreen(hwnd, ctypes.byref(pt))
+        w, h = rc.right - rc.left, rc.bottom - rc.top
+        if w < 320 or h < 200: return None
+        return {"left": pt.x, "top": pt.y, "width": w, "height": h}
+    except Exception:
+        return None
+
+
+def game_window(max_age=2.0):
+    """Oyun penceresinin istemci alanı {"left","top","width","height","hwnd"} ya da None (oyun kapalı / simge).
+    Hangi monitörde, hangi modda (tam ekran / kenarlıksız / pencere) olursa olsun oyunun gerçek alanı."""
+    import time
+    now = time.time()
+    if now - _GW_CACHE["t"] < max_age: return _GW_CACHE["v"]
+    v = None
+    h = find_game_hwnd()
+    if h:
+        r = window_client_rect(h)
+        if r: v = {**r, "hwnd": h}
+    _GW_CACHE.update(t=now, v=v)
+    return v
+
+
+def clamp_to_screen(r, monitors):
+    """Bölgeyi sanal ekranla kesiştir (pencere ekran dışına taşmışsa yakalama hata vermesin)."""
+    allm = monitors[0]
+    L, T = max(r["left"], allm["left"]), max(r["top"], allm["top"])
+    R = min(r["left"] + r["width"], allm["left"] + allm["width"])
+    B = min(r["top"] + r["height"], allm["top"] + allm["height"])
+    if R - L < 100 or B - T < 100: return None
+    return {"left": L, "top": T, "width": R - L, "height": B - T}
+
+
+def monitor_of(r, monitors):
+    """Bölgenin merkezinin bulunduğu monitör (mss monitör sözlüğü)."""
+    cx, cy = r["left"] + r["width"] // 2, r["top"] + r["height"] // 2
+    for m in monitors[1:]:
+        if m["left"] <= cx < m["left"] + m["width"] and m["top"] <= cy < m["top"] + m["height"]:
+            return m
+    return monitors[1] if len(monitors) > 1 else monitors[0]
+
+
+# ---------------------------------------------------------------- dinamik profil
+# Hazır listede olmayan her çözünürlük için değerler oyunun gerçek boyutundan hesaplanır
+# (tablodaki ölçümlerden türetildi: kart genişliği ≈ yüksekliğin %38-48'i, OCR ölçeği ≈ 2160 / yükseklik).
+def dynamic_profile(width, height):
+    h, w = max(1, int(height)), max(1, int(width))
+    def lerp(x, pts):
+        pts = sorted(pts)
+        if x <= pts[0][0]: return pts[0][1]
+        for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
+            if x <= x1: return y0 + (y1 - y0) * (x - x0) / (x1 - x0)
+        return pts[-1][1]
+    card_h = lerp(h, [(480, 0.50), (1080, 0.48), (1440, 0.38), (2160, 0.37)])
+    return {"label": f"{w}×{h} (otomatik / auto)",
+            "ocr_scale": round(max(1.0, min(6.0, 2160 / h)), 2),
+            "threshold": int(round(lerp(h, [(240, 150), (480, 155), (720, 160), (1080, 165), (1440, 170), (2160, 175)]))),
+            "card_w": round(max(0.10, min(0.34, card_h * h / w)), 3),
+            "ui": round(max(0.5, min(1.6, lerp(h, [(240, 0.5), (480, 0.6), (720, 0.75), (1080, 1.0), (1440, 1.2), (2160, 1.6)]))), 2),
+            "low": h < 600, "dynamic": True}
+
+
+def profile_for(width, height):
+    """(anahtar, profil): tam eşleşen hazır profil, yoksa oyunun boyutundan hesaplanan profil."""
+    key = f"{width}x{height}"
+    if key in PROFILES: return key, PROFILES[key]
+    return key, dynamic_profile(width, height)
 
 
 # ---------------------------------------------------------------- oyun ayar dosyası (yalnız okuma)
