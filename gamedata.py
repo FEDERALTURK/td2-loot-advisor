@@ -13,6 +13,8 @@ Veri `meta/game_data.json` dosyasından gelir; ortak liste (GitHub) yenisini get
 Oyunun belleğine dokunulmaz, yalnızca ekrandaki yazı okunur.
 """
 import json
+import time
+import os
 import re
 from difflib import SequenceMatcher
 from pathlib import Path
@@ -84,6 +86,66 @@ class GameData:
     @property
     def ok(self):
         return bool(self.data)
+
+    # ------------------------------------------------------------ öğrenilen kütüphane
+    # Oyuncunun okuttuğu kartlardan öğrenilen markalar, gear set'ler ve parça adları ("Unmatched Backpack" →
+    # Backpack, Unit Alloys). Yerel dosyada tutulur (learned_library.json), güncellemede silinmez; yeni sezonda
+    # gelen ve kütüphanede henüz olmayan eşyalar bir kez okununca hep tanınır.
+    def attach_learned(self, path):
+        self.learned_path = Path(path)
+        try:
+            self.learned = json.loads(self.learned_path.read_text(encoding="utf-8"))
+        except Exception:
+            self.learned = {}
+        for k in ("brands", "gear_sets", "items"):
+            self.learned.setdefault(k, {})
+        self._apply_learned()
+        return self
+
+    def _apply_learned(self):
+        L = getattr(self, "learned", None) or {}
+        known = {x[0] for x in self.names}
+        for key, kind in (("brands", "brand"), ("gear_sets", "gear_set")):
+            for n, v in L.get(key, {}).items():
+                if nrm(n) not in known:
+                    self.names.append((nrm(n), n, kind)); known.add(nrm(n))
+                if kind == "brand" and v.get("bonuses") and n not in self.data.get("brand_bonuses", {}):
+                    self.data.setdefault("brand_bonuses", {})[n] = v["bonuses"]
+        for n, v in L.get("items", {}).items():
+            if nrm(n) not in self.items:
+                self.items[nrm(n)] = v
+            if nrm(n) not in known:
+                self.names.append((nrm(n), n, "piece")); known.add(nrm(n))
+
+    def learn(self, item):
+        """Okunan karttan yeni bilgi varsa kütüphaneye ekle. Dönüş: öğrenilenlerin listesi (boşsa yeni bir şey yok)."""
+        if not getattr(self, "learned_path", None): return []
+        info = item.get("_learn") or {}
+        new = []
+        sname, skind = info.get("set_name"), info.get("set_kind")
+        known = {x[0]: x[2] for x in self.names}
+        if sname and len(nrm(sname)) >= 4 and nrm(sname) not in known:
+            key = "brands" if skind == "brand" else "gear_sets"
+            rec = {"seen": time.strftime("%Y-%m-%d")}
+            if skind == "brand" and info.get("bonuses"): rec["bonuses"] = info["bonuses"]
+            self.learned[key][sname] = rec; new.append(f"{'brand' if skind == 'brand' else 'gear set'}: {sname}")
+        title, slot = info.get("title"), item.get("slot")
+        base = item.get("brand") or item.get("gear_set") or sname
+        if (title and slot and base and item.get("kind") == "gear" and nrm(title) not in self.items
+                and nrm(title) != nrm(base) and 2 <= len(title.split()) <= 5 and not re.search(r"\d", title)):
+            rec = {"slot": slot, "quality": "gear set" if (item.get("gear_set") or skind == "gear_set") else "high-end",
+                   "seen": time.strftime("%Y-%m-%d")}
+            rec["gear_set" if rec["quality"] == "gear set" else "brand"] = base
+            self.learned["items"][title] = rec; new.append(f"{title} → {slot}")
+        if new:
+            self._apply_learned()
+            try:
+                tmp = self.learned_path.with_name(self.learned_path.name + ".tmp")
+                tmp.write_text(json.dumps(self.learned, ensure_ascii=False, indent=1, sort_keys=True), encoding="utf-8")
+                os.replace(tmp, self.learned_path)
+            except Exception:
+                pass
+        return new
 
     def max_of(self, key, prototype=False, weapon=False):
         """Rulo kalitesi için en yüksek değer. Silahta yan attribute'un en yüksek rulosu (weapon_max)."""
@@ -272,9 +334,41 @@ class GameData:
         secs, has_sections = self.split_sections(lines)
         head_lines = [l for s, l in secs if s == "head"][:10]
         head = nrm(" ".join(head_lines))
+        # "Brand Set / Unit Alloys (0/3)" ya da "Gear Set / Striker's Battlegear (4/6)": kütüphanede olmasa da
+        # marka/set adı buradan kesin okunur. Bu bölümden sonrası (set bonusları) eşyanın başlığı değildir.
+        set_name = set_kind = None; bonuses = []; set_idx = None
+        for i, line in enumerate(lines[:16]):
+            l = nrm(line)
+            if l in ("brand set", "gear set", "brandset", "gearset") and i + 1 < len(lines):
+                m = re.match(r"^\s*(.+?)\s*[\(\[]\s*\d\s*/\s*\d\s*[\)\]]", lines[i + 1])
+                if m:
+                    set_name, set_kind, set_idx = m.group(1).strip(" .,:;'\"|"), ("brand" if l.startswith("brand") else "gear_set"), i
+                    for b in lines[i + 2:i + 9]:
+                        if re.match(r"^\s*core attributes?\b", nrm(b)): break
+                        mb = re.match(r"^\s*\+?\s*(\d+(?:[.,]\d+)?)\s*%\s*(.+)$", b)
+                        if mb: bonuses.append(f"{mb.group(1).replace(',', '.').rstrip('0').rstrip('.')}% {mb.group(2).strip()}")
+                        elif bonuses and re.fullmatch(r"[A-Za-z ]{3,20}", b.strip()): bonuses[-1] += " " + b.strip()
+                break
+        if set_idx is not None:
+            head_lines = [l for l in head_lines if l in lines[:set_idx]]
+            head = nrm(" ".join(head_lines))
+        armor_line = any(re.match(r"^\s*\d+(?:[.,]\d+)?\s*k?\s+armor\b", nrm(l)) for l in lines[:6])
         name, kind, conf = self.match_name(head_lines if has_sections and head_lines else lines)
         sets = self.match_brand_or_set(head_lines if has_sections and head_lines else lines[:14])
+        if set_name and not sets:
+            m2 = self.match_brand_or_set([set_name])
+            sets = m2 or {set_kind: set_name}
+        # başlık satırı (eşyanın adı): kartın ilk anlamlı satırı, "RANK" vb. temizlenmiş
+        title = None
+        for l in lines[:3]:
+            tl = re.sub(r"\b(rank|level)\b.*$", "", l, flags=re.I).strip(" .,:;-|")
+            if len(tl) >= 6 and not re.search(r"\d", tl) and not self._ui_line(nrm(tl)) and \
+                    nrm(tl) not in ("high end", "gear set", "exotic", "named", "brand set"):
+                title = tl; break
         info = (self.items.get(nrm(name)) if name else None) or {}
+        if info and not sets:                              # öğrenilen parça: marka/set bilgisi kütüphanede
+            if info.get("brand"): sets = {"brand": info["brand"]}
+            elif info.get("gear_set"): sets = {"gear_set": info["gear_set"]}
         winfo = (self.weapon_index.get(nrm(name)) if name else None) or {}
         rarity = []
         if kind == "exotic" or re.search(r"\bexotic\b", head) or info.get("quality") == "exotic" or winfo.get("quality") == "exotic":
@@ -282,11 +376,11 @@ class GameData:
         if kind == "named" or re.search(r"\bnamed\b", head) or info.get("quality") == "named" or winfo.get("quality") == "named":
             rarity.append("NAMED")
         if "prototype" in head: rarity.append("PROTOTYPE")
-        if kind == "gear_set" or "gear set" in head or sets.get("gear_set"): rarity.append("GEAR SET")
-        if kind == "brand" or "high end" in head or sets.get("brand"): rarity.append("HIGH-END")
+        if kind == "gear_set" or "gear set" in head or sets.get("gear_set") or info.get("quality") == "gear set": rarity.append("GEAR SET")
+        if kind == "brand" or "high end" in head or sets.get("brand") or info.get("quality") == "high-end": rarity.append("HIGH-END")
         special = self.item_kind(head, low, kind)
         # silah mı? Güçlü kanıt gerekir: bilinen silah adı, ya da kartın üstünde silah türü, ya da RPM + MAG birlikte.
-        gearish = kind in ("gear_set", "brand") or bool(info) or bool(sets)
+        gearish = kind in ("gear_set", "brand", "piece") or bool(info) or bool(sets) or armor_line or bool(set_name)
         wtype = winfo.get("type")
         if not wtype:
             for w in self.weapon_types:
@@ -313,7 +407,10 @@ class GameData:
         talents = self.match_talents(lines)
         if not name:                                      # bilinen ad yoksa: marka/set + yuva ("Grupo Sombra Mask")
             base = sets.get("gear_set") or sets.get("brand")
-            name = f"{base} {slot or ''}".strip() if base else ""
+            if base and title and slot and any(re.search(r"\b" + re.escape(w) + r"\b", nrm(title)) for w, sl in self.slots.items() if sl == slot):
+                name = title                              # parçanın kendi adı ("Unmatched Backpack")
+            else:
+                name = f"{base} {slot or ''}".strip() if base else ""
         spec = (self.spec_sidearms.get(nrm(name)) if name else None) or \
                next((n for n in self.spec_signature if n in low), None)
         item_kind = special or ("weapon" if is_weapon else "gear")
@@ -325,11 +422,12 @@ class GameData:
                                (0.15 if slot else 0)), 2)
         return {"name": name or "?", "kind": item_kind, "known": kind, "match": round(conf, 2),
                 "brand": sets.get("brand") or info.get("brand") or (name if kind == "brand" else None),
-                "gear_set": sets.get("gear_set") or (name if kind == "gear_set" else None),
+                "gear_set": sets.get("gear_set") or info.get("gear_set") or (name if kind == "gear_set" else None),
                 "rarity": rarity, "slot": slot if item_kind in ("weapon", "gear") else None,
                 "weapon_type": wtype, "spec": spec, "partial": partial, "sections": has_sections,
                 "attrs": attrs, "quality": quality, "mod_attrs": mod_attrs,
-                "talents": [t for t, _ in talents], "confidence": confidence}
+                "talents": [t for t, _ in talents], "confidence": confidence,
+                "_learn": {"set_name": set_name, "set_kind": set_kind, "bonuses": bonuses, "title": title}}
 
 
 # ---------------------------------------------------------------- ekran görüntüsü yardımcıları

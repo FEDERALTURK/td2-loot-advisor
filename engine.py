@@ -81,8 +81,11 @@ def weapon_types_of(build):
     text = (build.get("name", "") + " " + " ".join(build.get("sets_or_brands", [])) + " " +
             str(build.get("meta", {}).get("summary", {}).get("en", ""))).lower()
     found = []
+    # "rifle" tek başına: "marksman rifle" / "assault rifle" içindeki rifle sayılmaz (Hotshot sniper build'i ≠ M16A2)
+    text_r = re.sub(r"\b(marksman|assault)\s+rifles?\b", r"\1_rifle", text)
     for typ, keys in WEAPON_WORDS.items():
-        if any(re.search(r"(?<![a-z])" + re.escape(k) + r"(?![a-z])", text) for k in keys):
+        src = text_r if typ == "rifle" else text
+        if any(re.search(r"(?<![a-z_])" + re.escape(k) + r"(?![a-z_])", src) for k in keys):
             found.append(typ)
     return found
 

@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "version": "2026-10-24.7",
+ "version": "2026-10-25.1",
  "source": "The Division Wiki (fandom) + mx-division-builds data (CC BY-NC-SA 4.0, mxswat) + manual",
  "prototype_multiplier": 1.5,
  "gear_sets": [
@@ -72,7 +72,8 @@
   "Zwiadowka Sp. z.o.o.",
   "Providence Defense",
   "Ceska Vyroba",
-  "Golan Gear"
+  "Golan Gear",
+  "Unit Alloys"
  ],
  "exotics": [
   "NinjaBike Messenger Bag",
@@ -3944,6 +3945,11 @@
    "15% Armor on Kill",
    "40% Disrupt Resistance",
    "40% Pulse Resistance"
+  ],
+  "Unit Alloys": [
+   "5% Rate of Fire",
+   "24% Assault Rifle Damage",
+   "50% Magazine Size"
   ]
  },
  "named_multiplier": 2.0

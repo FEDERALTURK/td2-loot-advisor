@@ -31,3 +31,5 @@ reports/
 server/.wrangler/
 server/node_modules/
 installer/
+learned_library.json
+learned_library.json.tmp

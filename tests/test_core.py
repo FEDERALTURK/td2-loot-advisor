@@ -84,6 +84,26 @@ def test_skill_build_not_weapon_type():
     assert engine.weapon_types_of({"name": "Striker AR/SMG"}) == ["assault rifle", "submachine gun"]
 
 
+def test_real_cards_and_learning():
+    """Oyuncunun gerçek okumaları (tests/samples/cards): yuva, tür, marka; öğrenilen kütüphane."""
+    import gamedata, tempfile, os
+    from pathlib import Path
+    base = Path(__file__).parent / "samples" / "cards"
+    lib = Path(tempfile.mkdtemp()) / "learned.json"
+    G = gamedata.GameData(str(Path(__file__).parent.parent / "meta" / "game_data.json")).attach_learned(lib)
+    rd = lambda n: G.recognize((base / n).read_text(encoding="utf-8"))
+    it = rd("m16a2.txt"); assert (it["name"], it["kind"], it["slot"]) == ("M16A2", "weapon", "Weapon"), it
+    it = rd("striker_kneepads.txt"); assert (it["kind"], it["slot"], it["gear_set"]) == ("gear", "Kneepads", "Striker's Battlegear"), it
+    it = rd("unit_alloys_topcut.txt"); assert it["kind"] == "gear" and it["brand"] == "Unit Alloys", it   # zırh ≠ silah
+    it = rd("unmatched_backpack.txt")
+    assert (it["name"], it["slot"], it["brand"]) == ("Unmatched Backpack", "Backpack", "Unit Alloys"), it
+    assert any("Backpack" in x for x in G.learn(it)) and lib.exists()
+    G2 = gamedata.GameData(str(Path(__file__).parent.parent / "meta" / "game_data.json")).attach_learned(lib)
+    it = G2.recognize("Unmatched Backpack\n131k Armor\nCore Attribute\n+11.2% Weapon Damage")
+    assert (it["slot"], it["brand"]) == ("Backpack", "Unit Alloys"), it                       # öğrenilen bilgi kalıcı
+    assert G2.learn(it) == []
+
+
 if __name__ == "__main__":
     fails = 0
     for n, f in list(globals().items()):

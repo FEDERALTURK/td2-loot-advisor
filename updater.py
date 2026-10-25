@@ -33,7 +33,7 @@ SOURCE_ALLOW = [r"[^/]+\.py", r"lang/[^/]+\.json", r"meta/(game_data|meta_builds
                 r"scripts/[^/]+", r"icon/[^/]+", r"server/[^/]+", r"tests/[^/]+(/[^/]+)?",
                 r"requirements[^/]*\.txt", r"README[^/]*\.md", r"LICENSE"]
 # Hiçbir koşulda yazılmaz (beyaz listeye uysa bile)
-NEVER = {"builds.json", "stash.json", "progress.json", "tasks.json", "loot_log.csv", "drop_queue.json"}
+NEVER = {"builds.json", "stash.json", "progress.json", "tasks.json", "loot_log.csv", "drop_queue.json", "learned_library.json"}
 
 
 def parse_version(v):

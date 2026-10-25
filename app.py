@@ -47,7 +47,7 @@ import updater
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "5.0.2"
+APP_VERSION = "5.0.3"
 FROZEN = getattr(sys, "frozen", False)
 BASE = Path(sys.executable).parent if FROZEN else Path(__file__).resolve().parent
 TASKS_CACHE = BASE / "tasks_cache.json"  # son indirilen görev listesi
@@ -213,7 +213,8 @@ def norm(s):
     return re.sub(r"[^a-z0-9&' ]+", " ", s.lower()).strip()
 
 GAME_DATA_CACHE = BASE / "game_data_cache.json"
-GAME = gamedata.GameData(GAME_DATA_CACHE, BASE / "meta" / "game_data.json", BUNDLE / "meta" / "game_data.json")
+LEARNED_LIB = BASE / "learned_library.json"      # kartlardan öğrenilen markalar / setler / parça adları
+GAME = gamedata.GameData(GAME_DATA_CACHE, BASE / "meta" / "game_data.json", BUNDLE / "meta" / "game_data.json").attach_learned(LEARNED_LIB)
 
 SLOT_ICONS = {"Mask": "🎭", "Chest": "🦺", "Backpack": "🎒", "Gloves": "🧤", "Holster": "🔫", "Kneepads": "🦵",
               "Weapon": "🔫", "Sidearm": "🔫"}
@@ -356,7 +357,14 @@ def game_active():
 def grab(region):
     with mss.mss() as sct:
         s = sct.grab(region)
-        return Image.frombytes("RGB", s.size, s.rgb)
+        img = Image.frombytes("RGB", s.size, s.rgb)
+    if CAPTURE_MASK:
+        from PIL import ImageDraw
+        dr = ImageDraw.Draw(img); L, T = region["left"], region["top"]
+        for x0, y0, x1, y1 in list(CAPTURE_MASK.values()):
+            if x1 > L and y1 > T and x0 < L + region["width"] and y0 < T + region["height"]:
+                dr.rectangle((x0 - L, y0 - T, x1 - L, y1 - T), fill=(0, 0, 0))
+    return img
 
 def ocr(img, lang=None):
     return OCR.text(img)
@@ -622,6 +630,31 @@ def click_through(win):
         ctypes.windll.user32.SetWindowLongW(hwnd, -20, st | 0x80000 | 0x20)
     except Exception:
         pass
+
+# Programın kendi pencereleri (bindirme kartı) ekran okumasına girmesin: önceki kararın yazıları
+# yeni kartın başlığını kapatıp "Iron Will Hotshot …" gibi kendi metnini okutuyordu.
+CAPTURE_MASK = {}          # pencere adı -> (x0, y0, x1, y1) ekran; yalnız Windows dışlama çalışmadıysa boyanır
+
+def exclude_from_capture(win, key="overlay"):
+    """Windows 10 2004+: WDA_EXCLUDEFROMCAPTURE — oyuncu pencereyi görür, ekran görüntüsünde altındaki oyun görünür.
+    Desteklenmezse pencerenin yeri kaydedilir ve okunan görüntüde siyaha boyanır."""
+    ok = False
+    if os.name == "nt":
+        try:
+            hwnd = ctypes.windll.user32.GetParent(win.winfo_id()) or win.winfo_id()
+            ok = bool(ctypes.windll.user32.SetWindowDisplayAffinity(hwnd, 0x11))
+        except Exception:
+            ok = False
+    if ok:
+        CAPTURE_MASK.pop(key, None)
+    else:
+        try:
+            win.update_idletasks()
+            CAPTURE_MASK[key] = (win.winfo_rootx(), win.winfo_rooty(),
+                                 win.winfo_rootx() + win.winfo_width(), win.winfo_rooty() + win.winfo_height())
+        except Exception:
+            pass
+    return ok
 
 def draw_bars(cv, title, data, empty=None):
     empty = empty or t("word.no_data")
@@ -1748,6 +1781,14 @@ class App:
         except Exception:
             pass
         text, item, verdict, res = self.merge_scrolled(text, item, verdict, res)
+        try:
+            learned = GAME.learn(item) if GAME.ok else []
+            if learned:
+                log.info("Library learned: %s", "; ".join(learned))
+                item, verdict, res = evaluate(text, self.cfg)      # yeni bilgiyle yeniden değerlendir
+                self.root.after(0, lambda m="; ".join(learned): self.toast("📚 " + m))
+        except Exception:
+            log.debug("library learn failed", exc_info=True)
         verdict = color_hints(card, lines, item, verdict)
         self.save_ocr_history(text, item, verdict)
         sig = signature(item)
@@ -2148,6 +2189,9 @@ class App:
             x, y = pos(c)                                     # kart, okunan bölgenin üstüne düşmesin
         w.geometry(f"+{int(x)}+{int(y)}")
         click_through(w)
+        if not exclude_from_capture(w):
+            log.debug("Overlay capture exclusion unavailable: masking %s", CAPTURE_MASK.get("overlay"))
+        w.bind("<Destroy>", lambda e, w=w: CAPTURE_MASK.pop("overlay", None) if e.widget is w else None)
         if self.overlay_job: self.root.after_cancel(self.overlay_job)
         self.overlay_job = self.root.after(int(float(st["overlay_seconds"]) * 1000), w.destroy)
 
@@ -2991,6 +3035,9 @@ class App:
                 self.results.put(("vstatus", t("ai.transcribing")))
                 text = transcribe(audio, self.cfg)
                 self.results.put(("voice", text) if text else ("vstatus", t("ai.not_understood")))
+            except RuntimeError as e:                  # konuşma tanıyıcı kurulu değil: beklenen durum, iz kaydı gerekmez
+                log.warning("Voice command unavailable: %s", e)
+                self.results.put(("vstatus", t("err.stt", e=e)))
             except Exception as e:
                 log.exception("Voice command failed")
                 self.results.put(("vstatus", t("err.stt", e=e)))
@@ -3301,7 +3348,7 @@ class App:
             if m: msgs.append(m)
         if "game" in out:
             global GAME
-            GAME = gamedata.GameData(GAME_DATA_CACHE, BASE / "meta" / "game_data.json", BUNDLE / "meta" / "game_data.json")
+            GAME = gamedata.GameData(GAME_DATA_CACHE, BASE / "meta" / "game_data.json", BUNDLE / "meta" / "game_data.json").attach_learned(LEARNED_LIB)
             log.info("Game data loaded: version %s", GAME.data.get("version"))
         if msgs: self.toast("  ·  ".join(msgs))
 

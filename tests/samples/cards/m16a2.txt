@@ -1,0 +1,20 @@
+M16A2 RANK
+High-End 10
+Rifle
+Core Stats
+Total DMG RPM MAG
+250.31k 460 33
++132.36k -518 -37
+Headshot DMG Optimal Range
+88.0% 50
++25.0% +19
+Expertise
+Proficient
+No Upgrades Active
+Core Attributes
++12.6% Rifle Damage
++16.0% Critical Hit Damage
+Attributes
++12.5% Magazine Size
+All Switch Weapon
+X Options Esc Back
