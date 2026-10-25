@@ -93,9 +93,32 @@ def step_lag(n=[0], t=[0.0]):
         res["lag_ms_avg"] = round(sum(lags) / len(lags), 1)
         res["lag_ms_p95"] = round(lags[int(len(lags) * 0.95)], 1)
         res["lag_ms_max"] = round(lags[-1], 1)
+        a.root.after(200, step_transition)
+
+
+def step_transition(i=[0], alphas=[]):
+    """Sekme geçiş efekti: pencere saydamlığı değişmemeli, ışık çizgisi çizilmeli; ortasından ekran görüntüsü."""
+    import mss
+    from PIL import Image
+    if i[0] == 0: res["fx_frames_before"] = a.fxbar.frames
+    if i[0] >= 4:
+        res["fx_frames"] = a.fxbar.frames - res["fx_frames_before"]
+        res["alpha_values"] = sorted(set(alphas))
         OUT.write_text(json.dumps(res, indent=1), encoding="utf-8")
         print("RESULT", json.dumps(res), flush=True)
-        a.root.after(500, a.root.destroy)
+        a.root.after(500, a.root.destroy); return
+    tabs = ["builds", "stash", "settings", "dash"]
+    a.nb.select(a.tab_keys.index(tabs[i[0]]))
+    shots = (ROOT / "shots"); shots.mkdir(exist_ok=True)
+    def grab(tag):
+        nb = a.nb
+        with mss.mss() as s:
+            g = s.grab({"left": nb.winfo_rootx(), "top": nb.winfo_rooty(), "width": nb.winfo_width(), "height": 70})
+        Image.frombytes("RGB", g.size, g.rgb).save(shots / f"fx_{i[0]}_{tag}.png")
+        alphas.append(round(float(a.root.attributes("-alpha")), 2))
+    a.root.after(120, lambda: grab("a")); a.root.after(330, lambda: grab("b"))
+    i[0] += 1
+    a.root.after(900, step_transition)
 
 
 a.root.after(9000, step_click)

@@ -235,57 +235,105 @@ class TrailFX:
 
 # ---------------------------------------------------------------- sekme geçişi
 class Transition:
-    """Sekme geçişi: pencere kısa bir an kararıp yumuşakça açılır + başlığın altında kayan ışık.
-    duration_ms ile hız ayarlanır (varsayılan 650 ms)."""
+    """Sekme geçişi: sekme satırının altında, eski sekmeden yeni sekmeye kayan parlak bir ışık çizgisi; yeni sekmenin
+    altına varınca genişleyip söner. Pencerenin saydamlığına (-alpha) DOKUNMAZ: eskiden tüm pencere karartılıp
+    açılıyordu → arka plan saati şeffaflığıyla çakışıp titriyor ve kasıyordu. Yalnız 3 px'lik bir çizgi çizilir.
+    play(notebook, eski_sekme, yeni_sekme)  ·  duration_ms ile hız ayarlanır."""
 
-    def __init__(self, root, bar_parent, color="#ff6d10", bg="#0f1116", duration_ms=650):
-        self.root, self.color, self.duration = root, color, max(150, int(duration_ms))
-        self.bar = tk.Canvas(bar_parent, height=4, bg=bg, highlightthickness=0, bd=0)
-        self.bar.pack(fill="x")
+    def __init__(self, root, bar_parent=None, color="#ff6d10", bg="#0f1116", duration_ms=650):
+        self.root, self.color, self.bg = root, color, bg
+        self.duration = max(150, int(duration_ms))
+        self.bar = None
         self._gen = 0
+        self._spans = {}
+        self.frames = 0                                  # test: çizilen kare sayısı
 
-    def play(self):
+    def _tab_spans(self, nb):
+        """Sekmelerin x aralıkları ve sekme satırının alt kenarı (Tk'dan; ekran ölçeğinden bağımsız)."""
+        w = nb.winfo_width()
+        key = (w, nb.index("end"))
+        if self._spans.get("key") == key: return self._spans["v"]
+        ymid = None
+        for y in range(2, 80, 2):
+            try:
+                nb.index(f"@20,{y}"); ymid = y; break
+            except tk.TclError:
+                continue
+        spans, bottom = {}, 0
+        if ymid is not None:
+            for x in range(0, w, 3):
+                try:
+                    i = nb.index(f"@{x},{ymid}")
+                except tk.TclError:
+                    continue
+                a, b = spans.get(i, (x, x)); spans[i] = (min(a, x), max(b, x))
+            for y in range(ymid, ymid + 120):
+                try: nb.index(f"@20,{y}"); bottom = y
+                except tk.TclError: break
+        v = (spans, bottom + 1)
+        self._spans = {"key": key, "v": v}
+        return v
+
+    def play(self, nb=None, old=None, new=None):
         self._gen += 1
         g = self._gen
-        t0 = time.time()
         try:
-            self._tick(g, t0)
+            if nb is None: return
+            spans, bottom = self._tab_spans(nb)
+            if new not in spans: return
+            if self.bar is None or not self.bar.winfo_exists() or self.bar.master is not nb:
+                self.bar = tk.Canvas(nb, height=3, bg=self.bg, highlightthickness=0, bd=0)
+            self.bar.place(x=0, y=bottom, relwidth=1, height=3)
+            self.bar.lift()
+            a0 = spans.get(old, spans[new]); a1 = spans[new]
+            self._tick(g, time.time(), a0, a1)
         except Exception:
             pass
 
-    def _ease(self, k):
+    @staticmethod
+    def _ease(k):
         return 1 - (1 - k) ** 3
 
-    def _tick(self, g, t0):
-        if g != self._gen: return                       # yeni geçiş başladı
-        k = min(1.0, (time.time() - t0) * 1000 / self.duration)
-        if os.name == "nt":                             # karar → açıl (0.55 → 1.0)
-            try: self.root.attributes("-alpha", 0.55 + 0.45 * self._ease(min(1.0, k * 1.15)))
-            except Exception: pass
+    def _tick(self, g, t0, a0, a1):
+        if g != self._gen: return                         # yeni geçiş başladı
         try:
-            if self.bar.winfo_exists():
-                w = max(100, self.bar.winfo_width())
-                self.bar.delete("all")
-                if k < 1.0:
-                    x = -w * 0.35 + (w * 1.4) * self._ease(k)
-                    for j, alpha in enumerate((0.2, 0.45, 1.0)):
-                        seg = w * (0.22 - j * 0.06)
-                        self.bar.create_rectangle(x - seg, 0, x, 4, fill=self.color if alpha == 1.0 else self._dim(alpha), outline="")
+            if not self.bar.winfo_exists(): return
         except tk.TclError:
             return
+        k = min(1.0, (time.time() - t0) * 1000 / self.duration)
+        cv = self.bar
+        cv.delete("all")
+        W = max(100, cv.winfo_width())
+        move = min(1.0, k / 0.55)                          # %55: kayma, sonra genişleyip sönme
+        e = self._ease(move)
+        c0, c1 = (a0[0] + a0[1]) / 2, (a1[0] + a1[1]) / 2
+        cx = c0 + (c1 - c0) * e
+        half = ((a0[1] - a0[0]) + ((a1[1] - a1[0]) - (a0[1] - a0[0])) * e) / 2
+        if k > 0.55:                                       # varınca: çizgi tüm genişliğe yayılıp söner
+            f = self._ease((k - 0.55) / 0.45)
+            half += (W / 2) * f * 0.5
+            alpha = 1.0 - f
+        else:
+            alpha = 1.0
+        for j, (spread, a) in enumerate(((2.2, 0.18), (1.5, 0.4), (1.0, 1.0))):     # parıltı katmanları
+            hw = half * spread
+            cv.create_rectangle(cx - hw, 0, cx + hw, 3, fill=self._dim(a * alpha), outline="")
+        self.frames += 1
         if k < 1.0:
-            self.root.after(15, lambda: self._tick(g, t0))
-        elif os.name == "nt":
-            try: self.root.attributes("-alpha", 1.0)
-            except Exception: pass
+            self.root.after(16, lambda: self._tick(g, t0, a0, a1))
+        else:
+            cv.delete("all"); cv.place_forget()
 
     def _dim(self, a):
-        r, g, b = _hex(self.color)
-        return "#%02x%02x%02x" % (int(15 + (r - 15) * a), int(17 + (g - 17) * a), int(22 + (b - 22) * a))
+        r, g, b = _hex(self.color); br, bg_, bb = _hex(self.bg)
+        a = max(0.0, min(1.0, a))
+        return "#%02x%02x%02x" % (int(br + (r - br) * a), int(bg_ + (g - bg_) * a), int(bb + (b - bb) * a))
 
     def destroy(self):
-        try: self.bar.destroy()
-        except Exception: pass
+        try:
+            if self.bar: self.bar.destroy()
+        except Exception:
+            pass
 
 
 # ---------------------------------------------------------------- arka plan videosu

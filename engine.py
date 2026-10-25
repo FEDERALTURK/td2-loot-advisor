@@ -427,3 +427,69 @@ def slot_done(checks):
     """Tüm şartlar tamam mı (bilinmeyenler sayılmaz)?"""
     known = [c for c in checks if c[1] is not None]
     return bool(known) and all(c[1] for c in known)
+
+
+# ---------------------------------------------------------------- envanter listesinde seçili satır
+def _is_select(px):
+    """Oyunun seçili satır vurgusu: turuncu (sağ taraf) ya da sarı-yeşil degrade (sol taraf)."""
+    r, g, b = px[:3]
+    return (r > 200 and 80 < g < 200 and b < 90) or (r > 150 and g > 160 and b < 90 and abs(r - g) < 70)
+
+
+def find_selected_row(img, card_box):
+    """Kartın solundaki envanter listesinde seçili (vurgulu) satırın kutusu ya da None.
+    Kart aşağı kaydırılınca eşyanın adı kartta görünmez; listedeki seçili satırda ad + marka/set her zaman yazar."""
+    if not card_box: return None
+    W, H = img.size
+    x0, y0, x1, y1 = card_box
+    cw = max(1, x1 - x0)
+    sx0, sx1 = max(0, int(x0 - 1.25 * cw)), max(0, int(x0 - 0.01 * W))
+    if sx1 - sx0 < 0.25 * cw: return None
+    sy0, sy1 = 0, H                                       # liste kartın çok üstünde/altında da olabilir (kaydırılmış kart)
+    strip = img.crop((sx0, sy0, sx1, sy1)).convert("RGB")
+    k = max(1, strip.width // 200)                        # hız: her k. piksel
+    sw, sh = strip.size
+    px = strip.load()
+    cover = []
+    for y in range(sh):
+        n = sum(1 for x in range(0, sw, k) if _is_select(px[x, y]))
+        cover.append(n / max(1, (sw + k - 1) // k))
+    best, cur = None, None
+    for y, c in enumerate(cover + [0]):
+        if c >= 0.35:
+            cur = (cur[0], y) if cur else (y, y)
+        elif cur:
+            if best is None or cur[1] - cur[0] > best[1] - best[0]: best = cur
+            cur = None
+    if not best: return None
+    h = best[1] - best[0]
+    if h < 0.025 * H or h > 0.2 * H: return None
+    # satırın yatay sınırı: vurgunun bulunduğu sütunlar
+    cols = [x for x in range(0, sw, k) if sum(1 for y in range(best[0], best[1], max(1, h // 12)) if _is_select(px[x, y])) >= 3]
+    if not cols: return None
+    return (sx0 + cols[0], sy0 + best[0], sx0 + cols[-1] + k, sy0 + best[1] + 1)
+
+
+def parse_row_text(lines):
+    """Seçili satırın OCR satırlarından (ad, marka/set). 'LEVEL 40', yüzdeler ve attribute satırları atılır."""
+    out = []
+    for l in lines:
+        t = re.sub(r"\s+", " ", (l or "")).strip(" .,:;|")
+        t = re.sub(r"(?i)\s*\b(level|rank)\b.*$", "", t)              # "Striker's Pack LEVEL" → ad
+        t = re.sub(r"\s+\d{1,3}$", "", t).strip(" .,:;|")             # "Striker's Battlegear 40" → set
+        if len(t) < 3 or re.search(r"[%+]|^\d", t) or sum(ch.isalpha() for ch in t) < 3: continue
+        out.append(t)
+    return (out[0] if out else None), (out[1] if len(out) > 1 else None)
+
+
+def list_hint(img, card_box, lines_fn):
+    """Kart başlığı görünmüyorsa: listedeki seçili satırdan (ad, marka/set, satır kutusu). lines_fn(img) -> [(metin, kutu, güven)]."""
+    row = find_selected_row(img, card_box)
+    if not row: return None
+    try:
+        lines = [l for l, _, _ in lines_fn(img.crop(row))]
+    except Exception:
+        return None
+    name, sub = parse_row_text(lines)
+    if not name: return None
+    return {"name": name, "sub": sub, "box": row, "lines": lines}

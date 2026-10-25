@@ -82,6 +82,8 @@ jobs:
           if ($r.gap -and -not $r.click_ok) { throw "click on transparent tab area was lost" }
           if ($r.watch_cursor -ne $r.root_cursor) { throw "background cursor differs" }
           if ($r.lag_ms_p95 -gt 60) { throw "UI lag too high: p95 $($r.lag_ms_p95) ms" }
+          if ($r.fx_frames -lt 20) { throw "tab transition effect did not animate ($($r.fx_frames) frames)" }
+          if (($r.alpha_values | Where-Object { $_ -ne 1.0 }).Count -gt 0) { throw "window alpha changed during transition" }
       - uses: actions/upload-artifact@v5
         if: always()
         with:

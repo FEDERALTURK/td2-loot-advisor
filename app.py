@@ -459,7 +459,10 @@ def signature(item):
 
 def valid_item(item):
     if "confidence" in item:                      # oyun verisiyle tanındıysa: güven eşiği
-        return item["confidence"] >= 0.5 and item["name"] != "?"
+        # kart yapısı da gerekli (attribute / talent / kart bölümleri): harita, projeler gibi ekranlardaki
+        # bir marka adı ("Palisade Steelworks") eşya sanılmasın
+        card_like = bool(item.get("attrs") or item.get("talents") or item.get("sections") or item.get("kind") not in ("gear", "weapon"))
+        return item["confidence"] >= 0.5 and item["name"] != "?" and card_like
     letters = sum(c.isalpha() for c in item["name"])
     return letters >= 4 and (len(item["attrs"]) >= 1 or item["rarity"])
 
@@ -1521,7 +1524,10 @@ class App:
 
     def on_tab(self, _=None):
         if hasattr(self, "sounds"): self.sounds.play("tab")
-        if self.cfg["settings"].get("fx_transitions", True) and hasattr(self, "fxbar"): self.fxbar.play()
+        cur = self.nb.index(self.nb.select()) if hasattr(self, "nb") else None
+        prev, self._tab_prev = getattr(self, "_tab_prev", cur), cur
+        if self.cfg["settings"].get("fx_transitions", True) and hasattr(self, "fxbar"):
+            self.root.after_idle(lambda p=prev, c=cur: self.fxbar.play(self.nb, p, c))   # içerik çizildikten sonra
         k = self.current_tab()
         if k == "history": self.load_history()
         elif k == "stats": self.root.after(50, self.refresh_stats_tab)
@@ -1822,6 +1828,19 @@ class App:
             (APPLOG_DIR / "last_ocr.txt").write_text(text, encoding="utf-8")
         except Exception:
             pass
+        # Kart aşağı kaydırıldıysa adı görünmez: ad ve marka/set, envanter listesindeki seçili satırdan okunur
+        if box and (item["name"] in ("?", "") or item.get("partial") or not (item.get("_learn") or {}).get("title")):
+            try:
+                hint = engine.list_hint(img, box, lambda im: OCR.lines(im, ocr_scale()))
+            except Exception:
+                hint = None
+            if hint:
+                text2 = hint["name"] + "\n" + (hint["sub"] or "") + "\n" + text
+                item2, verdict2, res2 = evaluate(text2, self.cfg)
+                if item2["name"] not in ("?", "") and item2.get("kind") in ("gear", "weapon"):
+                    log.info("Name from inventory list: %r / %r -> %r slot=%s", hint["name"], hint["sub"], item2["name"], item2.get("slot"))
+                    text, item, verdict, res = text2, item2, verdict2, res2
+                    item["_from_list"] = True
         text, item, verdict, res = self.merge_scrolled(text, item, verdict, res)
         try:
             learned = GAME.learn(item) if GAME.ok else []
@@ -4351,7 +4370,8 @@ class App:
                   command=lambda v: (self.fx_tms.set(int(float(v))), tl.config(text=f"{int(float(v))} ms"))).pack(side="left")
         tl.pack(side="left", padx=4)
         ttk.Button(ar, text=ui_theme.with_icon(t("fx.preview"), "▶"),
-                   command=lambda: (setattr(self.fxbar, "duration", int(self.fx_tms.get())), self.fxbar.play())).pack(side="left", padx=8)
+                   command=lambda: (setattr(self.fxbar, "duration", int(self.fx_tms.get())),
+                                    self.fxbar.play(self.nb, 0, self.nb.index(self.nb.select())))).pack(side="left", padx=8)
 
         self.fxv["fx_bgwatch"] = tk.BooleanVar(value=bool(st.get("fx_bgwatch", True)))
         self.fx_wdim = tk.DoubleVar(value=float(st.get("fx_bgwatch_dim", 0.0)))
