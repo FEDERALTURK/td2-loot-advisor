@@ -60,8 +60,10 @@ class Panel:
     def __init__(self, root):
         self.root = root
         root.title(f"{APP_NAME} {VERSION}")
-        root.geometry("1440x860")
-        root.minsize(1100, 640)
+        sw, sh = root.winfo_screenwidth(), root.winfo_screenheight()
+        w, h = min(1440, sw - 60), min(860, sh - 90)
+        root.geometry(f"{w}x{h}+{max(0, (sw - w) // 2)}+{max(0, (sh - h) // 3)}")
+        root.minsize(min(1000, w), min(600, h))
         root.configure(bg=C["bg"])
         try: root.iconbitmap(str(resource("icon/td2.ico")))
         except Exception: pass
@@ -407,6 +409,8 @@ def main():
     except Exception:
         pass
     Panel(root)
+    if "--selfcheck" in sys.argv:          # CI: arayüz kurulabildi mi? 3 sn sonra 0 koduyla çık
+        root.after(3000, root.destroy)
     root.mainloop()
 
 

@@ -30,6 +30,9 @@ jobs:
         run: |
           $env:TD2_PANEL_CONFIG = "$env:RUNNER_TEMP\panel_cfg.json"
           '{"repo":"x/y","token":"t","api":"http://127.0.0.1:9"}' | Out-File -Encoding utf8 $env:TD2_PANEL_CONFIG
+          $c = Start-Process dist\panel\TD2RaporPaneli.exe -ArgumentList "--selfcheck" -PassThru
+          if (-not $c.WaitForExit(40000)) { Stop-Process -Id $c.Id -Force; throw "selfcheck hung (error dialog?)" }
+          if ($c.ExitCode -ne 0) { throw "selfcheck exit code $($c.ExitCode)" }
           $p = Start-Process dist\panel\TD2RaporPaneli.exe -PassThru
           Start-Sleep -Seconds 8
           if ($p.HasExited) { throw "panel exe exited (code $($p.ExitCode))" }
