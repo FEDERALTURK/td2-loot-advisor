@@ -22,7 +22,10 @@ from PIL import Image, ImageTk
 w, h, x, y, img = int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]), sys.argv[5]
 root = tk.Tk(); root.title("Tom Clancy's The Division 2")
 root.geometry(f"{w}x{h}+{x}+{y}"); root.configure(bg="black")
-pic = Image.open(img).convert("RGB").resize((w, h))
+src = Image.open(img).convert("RGB")
+k = min(w * 0.6 / src.width, h / src.height)                 # kart oranı korunur (oyun ekranındaki gibi)
+pic = Image.new("RGB", (w, h), (12, 14, 18))
+pic.paste(src.resize((int(src.width * k), int(src.height * k))), (int(w * 0.08), 0))
 ph = ImageTk.PhotoImage(pic)
 tk.Label(root, image=ph, bd=0, highlightthickness=0).place(x=0, y=0, relwidth=1, relheight=1)
 root.attributes("-topmost", True)
@@ -58,7 +61,7 @@ def main():
     ok &= g0 is None
 
     # 2) sahte oyun penceresi (ekranın sağ altına, ana monitörün tamamı değil)
-    W = min(1000, scr["width"] - 80); H = int(W * 1440 / 3440)
+    W = min(1000, scr["width"] - 80); H = min(700, scr["height"] - 90)
     p = spawn(W, H, scr["left"] + 60, scr["top"] + 50, sample)
     try:
         g = display.game_window(max_age=0)
@@ -86,7 +89,7 @@ def main():
 
         # 4) pencere yeniden boyutlandı / taşındı → yeni alan bulunmalı
         p.terminate(); p.wait(5)
-        W2 = min(820, scr["width"] - 200); H2 = int(W2 * 1440 / 3440)
+        W2 = min(820, scr["width"] - 200); H2 = min(600, scr["height"] - 170)
         p = spawn(W2, H2, scr["left"] + 150, scr["top"] + 120, sample)
         g2 = display.game_window(max_age=0)
         print("moved/resized:", g2)
