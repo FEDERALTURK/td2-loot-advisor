@@ -50,6 +50,13 @@ jobs:
           if (Select-String -Path (Join-Path $dir "logs\app.log") -Pattern "Traceback" -Quiet) { throw "traceback in app.log" }
           Write-Host "App started fine."
 
+      - name: Portable zip
+        shell: pwsh
+        run: |
+          $ver = (python scripts/version.py).Trim()
+          Compress-Archive -Path dist\TD2LootAdvisor\* -DestinationPath "installer\TD2LootAdvisor_${ver}_portable.zip" -Force
+          Get-ChildItem installer | Format-Table Name, Length
+
       - name: Upload installer
         uses: actions/upload-artifact@v5
         with:
@@ -61,5 +68,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
+          name: TD2 Loot Advisor ${{ github.ref_name }}
           files: installer/*
+          body_path: .github/release_notes.md
           generate_release_notes: true
