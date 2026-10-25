@@ -12,7 +12,7 @@ import sys
 import threading
 import tkinter as tk
 import webbrowser
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
 
@@ -47,7 +47,7 @@ def resource(name):
 def ago(iso):
     try:
         t = datetime.strptime(iso[:19], "%Y-%m-%dT%H:%M:%S")
-        d = (datetime.utcnow() - t).total_seconds()
+        d = (datetime.now(timezone.utc).replace(tzinfo=None) - t).total_seconds()
     except Exception:
         return iso[:10]
     if d < 3600: return f"{max(1, int(d // 60))} dk önce"
@@ -228,6 +228,22 @@ class Panel:
         self.apply_filter()
         if keep and self.tree.exists(str(keep)): self.tree.selection_set(str(keep))
         self._status(f"{len(data)} rapor yüklendi · {datetime.now():%H:%M:%S}", C["ok"])
+        if os.environ.get("TD2_PANEL_DEMO_REPLY") and not getattr(self, "_demo", False) and self.view:
+            self._demo = True; self.root.after(1500, self._demo_run)
+
+    def _demo_run(self, step=0):
+        """Test/video için: en yeni raporu seç → Çalışılıyor yap → yanıtı yazıp gönder (yalnız TD2_PANEL_DEMO_REPLY ile)."""
+        text = os.environ["TD2_PANEL_DEMO_REPLY"]
+        if step == 0:
+            self.tree.selection_set(self.tree.get_children()[0]); self.tree.focus_set()
+            return self.root.after(2000, lambda: self._demo_run(1))
+        if step == 1:
+            self.set_status("in-progress"); return self.root.after(2000, lambda: self._demo_run(2))
+        if step < 2 + len(text):
+            self.reply.insert("end", text[step - 2]); return self.root.after(35, lambda: self._demo_run(step + 1))
+        self.send_reply()
+        mark = os.environ.get("TD2_PANEL_DEMO_DONE")
+        if mark: self.root.after(2500, lambda: Path(mark).write_text("ok"))
 
     def _auto(self):
         if self.gh: self.refresh()
