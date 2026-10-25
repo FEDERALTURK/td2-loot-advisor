@@ -8,6 +8,12 @@
 
 Windows "kişisel bilgisayarınızı korudu" derse: **Ek bilgi → Yine de çalıştır** (dosya henüz kod imzalı değil).
 
+**5.0.5 — akıcılık ve fare düzeltmeleri**
+- Menülere ve düğmelere tıklamak bazen algılanmıyordu (arka plandaki ajan saati görünsün diye şeffaf yapılan zemine düşen tıklamalar arka plana gidiyordu): artık bu tıklamalar programa iletiliyor; kaydırma ve sağ tıklama da.
+- Pencere boşluklarında imleç Windows'un beyaz okuna dönüyordu: artık her yerde programın imleci.
+- Kasma azaltıldı: arka plan saati şekilleri yeniden kullanıyor, program arka plandayken / fare hareketsizken yavaş çiziliyor, pencere sırası her karede değil saniyede bir eşitleniyor, fare izi hafifletildi.
+- Oyun güncellemesi algılama: oyunun exe'si her yamada aynı sürüm numarasını (1.0.0.0) taşıdığı için yama artık dosyanın tarihi ve boyutundan da algılanıyor.
+
 **5.0.4 — her bilgisayarda oyunla senkron**
 - **Yeni: her açılışta güncelleme denetimi.** Program sürümü, eşya kütüphanesi ve oyunun kendi sürümü her açılışta denetlenir. Yenilik varsa tek pencerede gösterilir (ör. "Kütüphane: 3 yeni eşya — Fafnir, Iron Will …", "The Division 2 güncellendi 1.41 → 1.42"); seçilenler tek tıkla yüklenir, reddedilirse bir sonraki açılışta yine sorulur. Oyun bir yamayla güncellendiğinde program bunu fark edip yeni eşyaların kütüphanesini denetler (oyun yamasının kendisini Ubisoft Connect / Steam yükler).
 - **Yeni: PC ve oyun senkronizasyon aracı** (üst banttaki 🔄 *PC senkron* düğmesi ya da Ayarlar → Ekran ve oyun). Bilgisayarı (monitörler, Windows ölçeklendirmesi, işlemci, bellek, ekran kartı) ve oyunun ayarlarını tarar, bu PC'de bir eşya kartını okuma hızını ve doğruluğunu ölçer, programın ayarlarını bu PC'ye göre kurar ve bir rapor gösterir (HDR açık, özel tam ekran gibi oyun ayarı önerileriyle). Program yeni bir bilgisayarda, monitör düzeni ya da oyun çözünürlüğü değiştiğinde açılırsa senkronizasyonu kendisi önerir. Oyunun dosyalarına ve belleğine dokunulmaz.
