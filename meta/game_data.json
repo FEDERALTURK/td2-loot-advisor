@@ -1,7 +1,7 @@
 {
  "schema": 1,
- "version": "2026-10-25.2",
- "source": "The Division Wiki (fandom) + mx-division-builds data (CC BY-NC-SA 4.0, mxswat) + manual + wiki library builder (brand/gear set pieces)",
+ "version": "2026-10-25.4",
+ "source": "The Division Wiki (fandom) + mx-division-builds data (CC BY-NC-SA 4.0, mxswat) + manual + wiki library builder (brand/gear set pieces) + TD2_Kutuphane.xlsx (Ubisoft sezon notları Y8)",
  "prototype_multiplier": 1.5,
  "gear_sets": [
   "Striker's Battlegear",
@@ -123,7 +123,6 @@
   "Regulus",
   "Backfire",
   "Scorpio",
-  "The Grudge",
   "Capacitor",
   "Ruthless",
   "Bluescreen",
@@ -154,29 +153,9 @@
   "Fafnir",
   "Vertigo",
   "Bullfrog",
-  "Cassidy",
-  "Defiler",
-  "Damascus",
-  "Midas",
-  "Warlord",
-  "Tenebrae",
-  "Historian",
-  "Centurion",
-  "Hungry Hog",
-  "Medved",
   "Showstopper",
-  "Urban MDR",
-  "Pakhan",
   "Caduceus",
-  "Liberator",
-  "Golden Rhino",
-  "The House",
-  "Thompson M1928",
-  "Pristine Example",
-  "Ravenous",
-  "Sharpshooter",
-  "Grudge",
-  "Rock n' Roll"
+  "Loaded for Bear"
  ],
  "named": [
   "The Courier",
@@ -203,7 +182,6 @@
   "Equalizer",
   "Sleight",
   "The Sacrifice",
-  "Pristine Example",
   "Trick Shot",
   "Closer",
   "Rushdown",
@@ -279,7 +257,6 @@
   "Savage Wolverine",
   "Big Show",
   "Stage Left",
-  "Rock n' Roll",
   "Mechanical Animal",
   "The White Death",
   "Brutus",
@@ -338,30 +315,19 @@
   "Chatterbox",
   "Burnout",
   "Sleipner",
-  "Damascus",
-  "Defiler",
-  "Historian",
-  "Hungry Hog",
-  "Instigator",
-  "Liberator",
-  "Medved",
-  "Midas",
-  "Showstopper",
-  "Shroud",
-  "Steel & Sons ACR",
-  "Tempest",
-  "Tenebrae",
   "Thompson M1928",
   "Tommy Gun",
   "Urban MDR",
-  "Vertigo",
-  "Warlord",
-  "Whiplash",
   "Liquid Engineer",
   "Benefactor",
   "Battery Pack",
   "Emperors Guard",
-  "TDI \"Kard\" Custom"
+  "TDI \"Kard\" Custom",
+  "Pristine Example",
+  "Insult to Injury",
+  "Interchange",
+  "Rock n' Roll",
+  "The Grudge"
  ],
  "gear_talents": [
   "Braced",
@@ -452,7 +418,19 @@
   "Adrenaline Rush",
   "Field Medic",
   "Perfectionist",
-  "Resolved"
+  "Resolved",
+  "Afterburn",
+  "Core Exercise",
+  "Flashpoint",
+  "Impervious",
+  "Improved Dampeners",
+  "Inner Core",
+  "Ortiz Rapid Application Nanite Prototype",
+  "Outer Core",
+  "Overcharged Nanites",
+  "Slotted",
+  "Spontaneous Combustion",
+  "White Hot"
  ],
  "weapon_talents": [
   "Accurate",
@@ -590,7 +568,12 @@
   "Perfectly Steady Handed",
   "Perfectly Unhinged",
   "Head Scratcher",
-  "Immobilize"
+  "Immobilize",
+  "Caduceus",
+  "Dragon's Breath",
+  "Faster Than Reloading",
+  "Gangland Hit",
+  "Perturb"
  ],
  "attributes": {
   "weapon_damage": {
@@ -1175,7 +1158,9 @@
   "Military RPK-74",
   "RPK-74 M",
   "Military M249",
-  "Converted USC .45 ACP"
+  "Converted USC .45 ACP",
+  "Insult to Injury",
+  "Interchange"
  ],
  "license_note": "Item lists and max values compiled from The Division Wiki and mx-division-builds (CC BY-NC-SA 4.0). Non-commercial use with attribution.",
  "items": {
@@ -1229,8 +1214,10 @@
    "quality": "named"
   },
   "Bulldog": {
-   "slot": "Backpack",
-   "quality": "named"
+   "slot": "Holster",
+   "quality": "named",
+   "brand": "Royal Works",
+   "talent": "Perfect Composure"
   },
   "Caesar's Guard": {
    "slot": "Chest",
@@ -1328,7 +1315,8 @@
   },
   "Equalizer": {
    "slot": "Chest",
-   "quality": "named"
+   "quality": "named",
+   "brand": "Unit Alloys"
   },
   "Everyday Carrier": {
    "slot": "Chest",
@@ -1394,15 +1382,19 @@
   },
   "Investor": {
    "slot": "Mask",
-   "quality": "exotic"
+   "quality": "exotic",
+   "talent": "Slotted"
   },
   "Iron Will": {
    "slot": "Chest",
-   "quality": "exotic"
+   "quality": "exotic",
+   "talent": "Resolved"
   },
   "Keeper": {
    "slot": "Backpack",
-   "quality": "named"
+   "quality": "named",
+   "brand": "5.11 Tactical",
+   "talent": "Perfect Protector"
   },
   "Lavoisier": {
    "slot": "Backpack",
@@ -1410,15 +1402,20 @@
   },
   "Melon Baller": {
    "slot": "Backpack",
-   "quality": "named"
+   "quality": "named",
+   "brand": "Airaldi Holdings",
+   "talent": "Perfect Concussion"
   },
   "Memento": {
    "slot": "Backpack",
-   "quality": "exotic"
+   "quality": "exotic",
+   "talent": "Kill Confirmed"
   },
   "Momma Badger": {
    "slot": "Backpack",
-   "quality": "named"
+   "quality": "named",
+   "brand": "Edelweiss GPz",
+   "talent": "Perfect Safeguard"
   },
   "Motherly Love": {
    "slot": "Gloves",
@@ -1445,7 +1442,8 @@
   },
   "Nurse's Kneepads": {
    "slot": "Kneepads",
-   "quality": "exotic"
+   "quality": "exotic",
+   "talent": "Impervious"
   },
   "Overdogs": {
    "slot": "Mask",
@@ -1496,11 +1494,14 @@
   },
   "Rushdown": {
    "slot": "Chest",
-   "quality": "named"
+   "quality": "named",
+   "brand": "Richter & Kaiser GmbH",
+   "talent": "Tag Team"
   },
   "Salvo": {
    "slot": "Holster",
-   "quality": "named"
+   "quality": "named",
+   "brand": "Unit Alloys"
   },
   "Sarru": {
    "slot": "Backpack",
@@ -1565,7 +1566,9 @@
   },
   "Trick Shot": {
    "slot": "Chest",
-   "quality": "named"
+   "quality": "named",
+   "brand": "Imminence Armaments",
+   "talent": "Perfect Reassigned"
   },
   "Vedmedytsya Vest": {
    "slot": "Chest",
@@ -1953,7 +1956,8 @@
   "Benefactor": {
    "slot": "Chest",
    "quality": "named",
-   "brand": "Edelweiss GPz"
+   "brand": "Edelweiss GPz",
+   "talent": "Perfect Empathic Resolve"
   },
   "Electrique Back": {
    "slot": "Backpack",
@@ -2548,7 +2552,8 @@
   "Robin": {
    "slot": "Chest",
    "quality": "named",
-   "brand": "Royal Works"
+   "brand": "Royal Works",
+   "talent": "Perfect Gunslinger"
   },
   "Artificer's Toolbox": {
    "slot": "Backpack",
@@ -3734,6 +3739,11 @@
    "slot": "Chest",
    "quality": "gear set",
    "gear_set": "Virtuoso"
+  },
+  "Loaded for Bear": {
+   "slot": "Gloves",
+   "quality": "exotic",
+   "talent": "Afterburn"
   }
  },
  "weapon_index": {
@@ -3933,14 +3943,6 @@
    "type": "Light Machine Gun",
    "quality": "named"
   },
-  "Cassidy": {
-   "type": "Shotgun",
-   "quality": "exotic"
-  },
-  "Centurion": {
-   "type": "Pistol",
-   "quality": "exotic"
-  },
   "Chameleon": {
    "type": "Assault Rifle",
    "quality": "exotic"
@@ -4041,10 +4043,6 @@
    "type": "Pistol",
    "quality": "high-end"
   },
-  "Damascus": {
-   "type": "Pistol",
-   "quality": "exotic"
-  },
   "Dare": {
    "type": "Light Machine Gun",
    "quality": "named"
@@ -4052,10 +4050,6 @@
   "Dark Winter": {
    "type": "Submachine Gun",
    "quality": "named"
-  },
-  "Defiler": {
-   "type": "Shotgun",
-   "quality": "exotic"
   },
   "Designated Hitter": {
    "type": "Marksman Rifle",
@@ -4159,7 +4153,7 @@
    "quality": "high-end"
   },
   "Fafnir": {
-   "type": "Light Machine Gun",
+   "type": "Shotgun",
    "quality": "exotic"
   },
   "Firestarter": {
@@ -4214,10 +4208,6 @@
    "type": "Assault Rifle",
    "quality": "named"
   },
-  "Golden Rhino": {
-   "type": "Pistol",
-   "quality": "exotic"
-  },
   "Good Times": {
    "type": "Light Machine Gun",
    "quality": "named"
@@ -4234,17 +4224,9 @@
    "type": "Rifle",
    "quality": "named"
   },
-  "Historian": {
-   "type": "Marksman Rifle",
-   "quality": "exotic"
-  },
   "Honey Badger": {
    "type": "Assault Rifle",
    "quality": "high-end"
-  },
-  "Hungry Hog": {
-   "type": "Light Machine Gun",
-   "quality": "exotic"
   },
   "Hunting M44": {
    "type": "Marksman Rifle",
@@ -4321,10 +4303,6 @@
   "Lexington": {
    "type": "Assault Rifle",
    "quality": "named"
-  },
-  "Liberator": {
-   "type": "Assault Rifle",
-   "quality": "exotic"
   },
   "Liberty": {
    "type": "Pistol",
@@ -4495,16 +4473,8 @@
    "type": "Assault Rifle",
    "quality": "named"
   },
-  "Medved": {
-   "type": "Shotgun",
-   "quality": "exotic"
-  },
   "Merciless": {
    "type": "Rifle",
-   "quality": "exotic"
-  },
-  "Midas": {
-   "type": "Submachine Gun",
    "quality": "exotic"
   },
   "Military AK-M": {
@@ -4646,10 +4616,6 @@
   "PP-19": {
    "type": "Submachine Gun",
    "quality": "high-end"
-  },
-  "Pakhan": {
-   "type": "Light Machine Gun",
-   "quality": "exotic"
   },
   "Paratrooper SVD": {
    "type": "Marksman Rifle",
@@ -5037,10 +5003,6 @@
    "type": "Pistol",
    "quality": "exotic"
   },
-  "Tenebrae": {
-   "type": "Marksman Rifle",
-   "quality": "exotic"
-  },
   "Test Subject": {
    "type": "Assault Rifle",
    "quality": "named"
@@ -5075,7 +5037,7 @@
   },
   "The Grudge": {
    "type": "Submachine Gun",
-   "quality": "exotic"
+   "quality": "named"
   },
   "The Harvest": {
    "type": "Pistol",
@@ -5084,10 +5046,6 @@
   "The Headline-grabber": {
    "type": "Light Machine Gun",
    "quality": "named"
-  },
-  "The House": {
-   "type": "Submachine Gun",
-   "quality": "exotic"
   },
   "The Mop": {
    "type": "Shotgun",
@@ -5123,7 +5081,7 @@
   },
   "Thompson M1928": {
    "type": "Submachine Gun",
-   "quality": "exotic"
+   "quality": "high-end"
   },
   "Thorn": {
    "type": "Shotgun",
@@ -5167,7 +5125,7 @@
   },
   "Urban MDR": {
    "type": "Assault Rifle",
-   "quality": "exotic"
+   "quality": "high-end"
   },
   "Urban MDR Replica": {
    "type": "Rifle",
@@ -5197,12 +5155,8 @@
    "type": "Rifle",
    "quality": "exotic"
   },
-  "Warlord": {
-   "type": "Assault Rifle",
-   "quality": "exotic"
-  },
   "Whiplash": {
-   "type": "Shotgun",
+   "type": "Pistol",
    "quality": "exotic"
   },
   "Whisper": {
@@ -5223,6 +5177,14 @@
   },
   "TDI \"Kard\" Custom": {
    "type": "Pistol",
+   "quality": "named"
+  },
+  "Insult to Injury": {
+   "type": "Light Machine Gun",
+   "quality": "named"
+  },
+  "Interchange": {
+   "type": "Assault Rifle",
    "quality": "named"
   }
  },
@@ -5944,6 +5906,10 @@
   "Headhunter": {
    "slot": "Chest",
    "kind": "normal"
+  },
+  "Placeholder": {
+   "slot": "Chest",
+   "kind": "normal"
   }
  },
  "brand_bonuses": {
@@ -6157,8 +6123,8 @@
   ],
   "Royal Works": [
    "5% Weapon Handling",
-   "24% LMG Damage",
-   "50% Accuracy"
+   "32.5% Magazine Size",
+   "15% Critical Hit Damage"
   ],
   "Shiny Monkey Gear": [
    "15% Skill Duration",
@@ -6219,8 +6185,8 @@
    "Talent: Camarederie"
   ],
   "Core Strength": [
-   "10% Weapon Handling",
-   "5% Weapon Damage, 5% Total Armor, 5% Skill Efficiency",
+   "+10% Weapon Handling",
+   "+5% Weapon Damage, +5% Armor, +5% Skill Efficiency",
    "Talent: Core Exercise"
   ],
   "Eclipse Protocol": [
@@ -6230,7 +6196,7 @@
   ],
   "Ember Engine": [
    "+8% Skill Efficiency",
-   "+30% Status Effects",
+   "+30% Status Effect",
    "Talent: Spontaneous Combustion"
   ],
   "Foundry Bulwark": [

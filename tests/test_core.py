@@ -129,6 +129,23 @@ def test_library_self_check():
     assert not wb, wb[:10]
 
 
+def test_excel_library_in_sync():
+    """meta/TD2_Kutuphane.xlsx ile programın kütüphanesi aynı olmalı (Excel → program aktarımı değişiklik üretmez)."""
+    import sys, json
+    from pathlib import Path
+    root = Path(__file__).parent.parent
+    sys.path.insert(0, str(root / "scripts"))
+    import import_library_excel as I
+    before = (root / "meta" / "game_data.json").read_text(encoding="utf-8")
+    ch = I.main(root / "meta" / "TD2_Kutuphane.xlsx", dry=True)
+    assert not any(ch.values()), ch
+    assert (root / "meta" / "game_data.json").read_text(encoding="utf-8") == before
+    d = json.loads(before)
+    for n in ("Fafnir", "Iron Will", "Loaded for Bear", "Trick Shot", "Melon Baller", "Insult to Injury", "Unmatched Backpack"):
+        assert n in d["items"] or n in d["weapon_index"], n
+    assert "Cassidy" not in d["weapon_index"] and d["weapon_index"]["Fafnir"]["type"] == "Shotgun"
+
+
 if __name__ == "__main__":
     fails = 0
     for n, f in list(globals().items()):

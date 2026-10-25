@@ -377,10 +377,15 @@ class GameData:
                     nrm(tl) not in ("high end", "gear set", "exotic", "named", "brand set"):
                 title = tl; break
         info = (self.items.get(nrm(name)) if name else None) or {}
+        winfo = (self.weapon_index.get(nrm(name)) if name else None) or {}
+        if info and winfo:                                # aynı ad hem ekipman hem silah ("Robin"): karttaki kanıta bak
+            if not armor_line and re.search(r"\brpm\b", low) and re.search(r"\b(mag|total dmg|total damage)\b", low):
+                info = {}
+            else:
+                winfo = {}
         if info and not sets:                              # öğrenilen parça: marka/set bilgisi kütüphanede
             if info.get("brand"): sets = {"brand": info["brand"]}
             elif info.get("gear_set"): sets = {"gear_set": info["gear_set"]}
-        winfo = (self.weapon_index.get(nrm(name)) if name else None) or {}
         rarity = []
         if kind == "exotic" or re.search(r"\bexotic\b", head) or info.get("quality") == "exotic" or winfo.get("quality") == "exotic":
             rarity.append("EXOTIC")
