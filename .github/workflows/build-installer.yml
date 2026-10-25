@@ -34,6 +34,7 @@ jobs:
 
       - name: Test - install silently and start the app
         shell: pwsh
+        timeout-minutes: 10
         run: |
           $setup = Get-ChildItem installer\TD2LootAdvisor_Setup_*.exe | Select-Object -First 1
           if (-not $setup) { throw "no installer" }

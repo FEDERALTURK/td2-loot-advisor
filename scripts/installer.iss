@@ -57,5 +57,11 @@ Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#AppExe}"; Tasks: desktopico
 
 [Run]
 Filename: "{app}\{#AppExe}"; Description: "{cm:LaunchProgram,{#AppName}}"; Flags: nowait postinstall skipifsilent
-; Uygulama içi güncelleme sessiz kurulum yapar: bitince program kendiliğinden yeniden açılır
-Filename: "{app}\{#AppExe}"; Flags: nowait; Check: WizardSilent
+; Uygulama içi güncelleme sessiz kurulum yapar (/RELAUNCH=1): bitince program kendiliğinden yeniden açılır
+Filename: "{app}\{#AppExe}"; Flags: nowait; Check: ShouldRelaunch
+
+[Code]
+function ShouldRelaunch: Boolean;
+begin
+  Result := WizardSilent and (ExpandConstant('{param:RELAUNCH|0}') = '1');
+end;

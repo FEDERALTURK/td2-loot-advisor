@@ -98,8 +98,8 @@ def install_frozen(info, progress=None):
     path = Path(tempfile.gettempdir()) / name
     path.write_bytes(data)
     flags = getattr(subprocess, "DETACHED_PROCESS", 0) | getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
-    # /SILENT: ilerleme penceresi görünür ama soru sorulmaz; kurulum bitince program kendini yeniden açar ([Run] WizardSilent)
-    subprocess.Popen([str(path), "/SILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/CLOSEAPPLICATIONS"],
+    # /SILENT: ilerleme penceresi görünür ama soru sorulmaz; kurulum bitince program kendini yeniden açar ([Run] ShouldRelaunch, /RELAUNCH=1)
+    subprocess.Popen([str(path), "/SILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/CLOSEAPPLICATIONS", "/RELAUNCH=1"],
                      creationflags=flags, close_fds=True)
     log.info("Update: started installer %s (sha %s, verified=%s)", name, got[:12], bool(want))
     return path
