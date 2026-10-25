@@ -236,19 +236,36 @@ class Scene3D(tk.Canvas):
             if tag: self._ids[i] = tag
         for txt, x, y, col in self.labels:
             self.create_text(x, y, text=txt, fill=col, font=("Segoe UI", 9), anchor="nw", tags="dyn")
-        for tag, p3, txt in self.anchors:               # yuva etiketleri: parçadan dışarı çizgi + yazı
+        self._draw_anchors(w, h, f)
+
+    def _draw_anchors(self, w, h, f):
+        """Yuva etiketleri pencerenin sol/sağ kenarında sütun halinde; parçaya çizgiyle bağlı. Arkadaki parça: kesikli, soluk."""
+        if not self.anchors: return
+        cols = {-1: [], 1: []}
+        for tag, p3, txt in self.anchors:
             x, y, z, _ = self.project(p3, w, h, f)
-            side = 1 if x >= w / 2 else -1
-            lx = x + side * 34; ly = y - 10
-            col = self.label_color(tag)
-            self.create_line(x, y, lx, ly, lx + side * 8, ly, fill=col, width=1, tags="dyn")
-            self.create_oval(x - 2.5, y - 2.5, x + 2.5, y + 2.5, fill=col, outline="", tags="dyn")
-            i = self.create_text(lx + side * 11, ly, text=txt, fill=col, font=("Segoe UI Semibold", 9),
-                                 anchor="w" if side > 0 else "e", tags="dyn")
-            bb = self.bbox(i)                                # pencere kenarından taşmasın
-            if bb and bb[0] < 3: self.move(i, 3 - bb[0], 0)
-            elif bb and bb[2] > w - 3: self.move(i, w - 3 - bb[2], 0)
-            self._ids[i] = tag
+            cols[1 if x >= w / 2 else -1].append([y, x, z, tag, txt])
+        for side, items in cols.items():
+            items.sort()
+            gap, lo, hi = 17, 12, h - 12
+            for i, it in enumerate(items):                      # dikey çakışmayı aç
+                it.append(max(it[0], items[i - 1][5] + gap) if i else max(lo, it[0]))
+            over = (items[-1][5] - hi) if items else 0
+            if over > 0:
+                for it in items: it[5] -= over
+            for y, x, z, tag, txt, ly in items:
+                col = self.label_color(tag)
+                behind = z > 6.05
+                tx = 6 if side < 0 else w - 6
+                i = self.create_text(tx, ly, text=txt, fill=_shade(col, 0.7) if behind else col,
+                                     font=("Segoe UI Semibold", 9), anchor="w" if side < 0 else "e", tags="dyn")
+                bb = self.bbox(i)
+                ex = (bb[2] + 4) if side < 0 else (bb[0] - 4)
+                lc = _shade(col, 0.6) if behind else col
+                self.create_line(x, y, ex + side * -10, ly, ex, ly, fill=lc, width=1, dash=(2, 3) if behind else None, tags="dyn")
+                r = 1.8 if behind else 2.6
+                self.create_oval(x - r, y - r, x + r, y + r, fill=lc, outline="", tags="dyn")
+                self._ids[i] = tag
 
 
 # ---------------------------------------------------------------- ajan modelleri (özgün tasarımlar)
