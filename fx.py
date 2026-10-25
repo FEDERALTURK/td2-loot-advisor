@@ -550,10 +550,13 @@ class WatchBackground:
             self.cv.pack(fill="both", expand=True)
             self.watch = AgentWatch(self.cv, self._pointer, self.color, self.bgc, self.dim)
             w.bind("<Button>", lambda e: self.root.focus_force())
+            w.withdraw()                                 # doğru yere konana kadar görünmesin (sol üstte belirmesin)
             w.update_idletasks()
             self._style(w)
-            self.root.attributes("-transparentcolor", self.bgc)
             self.alive = True
+            self._n, self._keyed = 0, False                # zemin, saat yerine oturunca şeffaflaşır
+            for ev in ("<Map>", "<Configure>"):            # açılış, büyütme/küçültme, taşıma: konumu yeniden eşitle
+                self.root.bind(ev, self._resync, add="+")
             self._tick()
             return True
         except Exception:
@@ -584,6 +587,7 @@ class WatchBackground:
 
     def stop(self):
         self.alive = False
+        self._keyed = False
         try: self.root.attributes("-transparentcolor", "")
         except Exception: pass
         try:
@@ -592,18 +596,56 @@ class WatchBackground:
             pass
         self.win = self.cv = self.watch = None
 
+    def _resync(self, _e=None):
+        self._geo = None
+
+    def _client_rect(self):
+        """Ana pencerenin iç alanının GERÇEK ekran koordinatları (Windows'tan; Tk'nın açılıştaki eski değerleri değil)."""
+        try:
+            import ctypes
+            from ctypes import wintypes
+            h = self.root.winfo_id()
+            rc = wintypes.RECT(); ctypes.windll.user32.GetClientRect(h, ctypes.byref(rc))
+            pt = wintypes.POINT(0, 0); ctypes.windll.user32.ClientToScreen(h, ctypes.byref(pt))
+            if rc.right > 1 and rc.bottom > 1:
+                return pt.x, pt.y, rc.right, rc.bottom
+        except Exception:
+            pass
+        r = self.root
+        return r.winfo_rootx(), r.winfo_rooty(), r.winfo_width(), r.winfo_height()
+
+    def _place(self, geo):
+        """Konum + boyut + z-sırası tek çağrıda: ana pencerenin hemen arkası."""
+        x, y, w, h = geo
+        try:
+            import ctypes
+            rh = ctypes.windll.user32.GetParent(self.root.winfo_id())
+            if self._hwnd and ctypes.windll.user32.SetWindowPos(self._hwnd, rh, x, y, w, h, 0x0010 | 0x0040):  # NOACTIVATE|SHOWWINDOW
+                return
+        except Exception:
+            pass
+        self.win.geometry(f"{w}x{h}+{x}+{y}")
+
     def _tick(self):
         if not self.alive: return
         try:
             r = self.root
             if r.state() in ("iconic", "withdrawn") or not r.winfo_viewable():
-                self.win.withdraw(); self.root.after(250, self._tick); return
-            if self.win.state() == "withdrawn": self.win.deiconify()
-            geo = (r.winfo_rootx(), r.winfo_rooty(), r.winfo_width(), r.winfo_height())
+                if self.win.state() != "withdrawn": self.win.withdraw()
+                self._geo = None
+                self.root.after(250, self._tick); return
+            self._n += 1
+            if self._n % max(1, self.fps) == 0: self._geo = None      # saniyede bir zorla eşitle
+            geo = self._client_rect()
+            if self.win.state() == "withdrawn":
+                self.win.deiconify(); self._geo = None
             if geo != self._geo:
                 self._geo = geo
-                self.win.geometry(f"{geo[2]}x{geo[3]}+{geo[0]}+{geo[1]}")
-            self._below_root()
+                self._place(geo)
+                if not self._keyed:                        # artık saat arkada: boşluklarda masaüstü değil saat görünür
+                    self.root.attributes("-transparentcolor", self.bgc); self._keyed = True
+            else:
+                self._below_root()
             self.watch.render()
         except Exception:
             pass
