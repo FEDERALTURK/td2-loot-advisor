@@ -51,7 +51,7 @@ import reports
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "5.0.7"
+APP_VERSION = "5.0.8"
 FROZEN = getattr(sys, "frozen", False)
 BASE = Path(sys.executable).parent if FROZEN else Path(__file__).resolve().parent
 TASKS_CACHE = BASE / "tasks_cache.json"  # son indirilen görev listesi
@@ -3135,14 +3135,16 @@ class App:
     # ---------- 3D ajan görünümü: model, kıyafet, ten ----------
     def _build_agent_look(self, bar):
         st, av = self.cfg["settings"], self.agent3d
-        names = {m: t("v3d.m_" + m) for m in view3d.MODELS}
+        sprite = getattr(av, "sprite", False)
+        names = {m: t("v3d.m_" + m) for m in (view3d.SPRITE_MODELS if sprite else view3d.MODELS)}
         outfits = {o: t("v3d.o_" + o) for o in view3d.THEMES}
         btn = dict(bg=PAL["surface2"] if "surface2" in PAL else PAL["bg"], fg=PAL["fg"], bd=0, relief="flat", cursor="hand2",
                    activebackground=PAL["accent"], activeforeground="#111", font=(ui_theme.FONT_SEMI, 11), width=2)
         lbl = tk.Label(bar, text=names[av.model], bg=PAL["surface"], fg=PAL["accent"], font=(ui_theme.FONT_SEMI, 11), width=12)
 
         def save():
-            st["agent_model"], st["agent_outfit"], st["agent_skin"] = av.model, av.outfit, av.skin
+            st["agent_model"] = av.model
+            if not getattr(av, "sprite", False): st["agent_outfit"], st["agent_skin"] = av.outfit, av.skin
             save_cfg(self.cfg)
 
         def cycle(step):
@@ -3150,6 +3152,9 @@ class App:
         tk.Button(bar, text="◀", command=lambda: cycle(-1), **btn).pack(side="left")
         lbl.pack(side="left", padx=2)
         tk.Button(bar, text="▶", command=lambda: cycle(1), **btn).pack(side="left")
+        if sprite:                                       # gerçekçi ajanlarda renk/ten seçimi yok (kıyafet = model)
+            self._agent_look = {"cycle": cycle, "outfit": None, "pick_outfit": lambda *_: None, "label": lbl}
+            return
         skins = tk.Frame(bar, bg=PAL["surface"]); skins.pack(side="right")
         for i, col in enumerate(view3d.SKINS):
             b = tk.Label(skins, bg=col, width=2, cursor="hand2", relief="flat", bd=0,
@@ -3186,8 +3191,13 @@ class App:
         tk.Label(av_box, text="🧍 " + t("v3d.agent"), bg=PAL["surface"], fg=PAL["fg"], font=(ui_theme.FONT_SEMI, 11)).pack(anchor="w", padx=10, pady=(8, 0))
         stg_ = self.cfg["settings"]
         look = tk.Frame(av_box, bg=PAL["surface"]); look.pack(fill="x", padx=8, pady=(6, 0))
-        self.agent3d = view3d.AgentView(av_box, model=stg_.get("agent_model", "operator"), outfit=stg_.get("agent_outfit", "night"),
-                                        skin=int(stg_.get("agent_skin", 1) or 0), bg=PAL["surface"], width=360, height=420)
+        agents_dir = next((d for d in (BUNDLE / "meta" / "agents", BASE / "meta" / "agents") if view3d.sprite_models(d)), None)
+        if agents_dir:                                   # gerçekçi ajanlar (önceden render edilmiş kareler)
+            self.agent3d = view3d.SpriteAgentView(av_box, agents_dir, model=stg_.get("agent_model", "operator"),
+                                                  bg=PAL["surface"], width=360, height=440)
+        else:
+            self.agent3d = view3d.AgentView(av_box, model=stg_.get("agent_model", "operator"), outfit=stg_.get("agent_outfit", "night"),
+                                            skin=int(stg_.get("agent_skin", 1) or 0), bg=PAL["surface"], width=360, height=420)
         self.agent3d.pack(padx=6, pady=4)
         self._build_agent_look(look)
         self.agent3d.on_pick = self._pick_slot3d

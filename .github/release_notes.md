@@ -8,6 +8,12 @@
 
 Windows "kişisel bilgisayarınızı korudu" derse: **Ek bilgi → Yine de çalıştır** (dosya henüz kod imzalı değil).
 
+**5.0.8 — gerçekçi 3D ajanlar**
+- **Eksik Parçalar sekmesindeki 3D ajan yenilendi:** beş özgün, gerçekçi ajan — Operatör, Keşifçi, Ağır Zırh, Şehir, Kutup. Her biri stüdyo ışığında render edilmiş 360° görüntülerden oluşuyor; fareyle sürükleyince döner, ◀ ▶ ile ajan değişir, seçimin kaydedilir.
+- Eksik parçalar ajanın üzerinde kırmızı nabız gibi parlar, sahip olunanlar yeşil görünür; bir parçaya tıklayınca o yuva seçilir. Yuva adları ajanın iki yanında hizalı durur.
+- Tasarımların tamamı özgündür (oyundan hiçbir model ya da doku kullanılmaz); insan bedeni MakeHuman'ın serbest (CC0) temel modelinden.
+- Gerçekçi görüntüler bulunamazsa önceki çizim tabanlı ajan (5 model, kıyafet renkleri, ten seçimi) kullanılır.
+
 **5.0.7 — hata bildirme ve istek menüsü**
 - **Yeni: 🐞 Geri bildirim** (üst bant ve Yardım sekmesi). Hata, istek ya da soru doğrudan geliştiriciye gönderilir; GitHub hesabı gerekmez. İsteğe bağlı olarak sistem bilgisi, program kaydının son satırları ve son okunan eşya kartı eklenebilir; **Önizle** ile tam olarak ne gideceği görülür.
 - Göndermeden önce kişisel bilgiler silinir: dosya yollarındaki Windows kullanıcı adı, lisans anahtarı, e-posta adresleri.

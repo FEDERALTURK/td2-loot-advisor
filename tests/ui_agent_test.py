@@ -47,7 +47,13 @@ def timed_render():
     t = time.perf_counter(); a.agent3d.render(); times.append((time.perf_counter() - t) * 1000)
 
 
+SPRITE = False
+
+
 def start():
+    global SPRITE
+    SPRITE = getattr(a.agent3d, "sprite", False)
+    print("görünüm:", "gerçekçi kareler" if SPRITE else "çokgen", flush=True)
     a.root.deiconify(); a.root.lift()
     a.nb.select(a.tab_keys.index("progress"))
     a.root.after(2500, lambda: models(0))
@@ -58,17 +64,41 @@ def models(i):
     if i == 0:
         ok(hasattr(a, "_agent_look"), "model/kıyafet seçici var")
         shot("0_tab")
-    if i < len(view3d.MODELS):
+    models = av.models if SPRITE else view3d.MODELS
+    if i == 0: ok(not SPRITE or len(models) == 5, f"gerçekçi ajanlar yüklendi: {models}")
+    if i < len(models):
         if i: a._agent_look["cycle"](1)
-        ok(av.model == view3d.MODELS[i], f"model: {av.model}")
-        tags = {f[2] for f in av.faces if f[2]}
-        ok(set(view3d.SLOTS) <= tags, f"{av.model}: 8 yuva parçası")
+        ok(av.model == models[i], f"model: {av.model}")
+        if SPRITE:
+            seen = set()
+            for f in range(0, av.n, 6): seen |= set(av.info["anchors"][f])
+            ok(set(view3d.SLOTS) <= seen, f"{av.model}: 8 yuva maskesi")
+        else:
+            tags = {f[2] for f in av.faces if f[2]}
+            ok(set(view3d.SLOTS) <= tags, f"{av.model}: 8 yuva parçası")
         timed_render()
         a.root.after(1800, lambda: (zoom_shot(f"m{i}_{av.model}"), a.root.after(1700, lambda: models(i + 1))))
         return
     a._agent_look["cycle"](1)                                   # başa dön (operatör)
     ok(av.model == "operator", "◀ ▶ döngüsü başa döndü")
-    a.root.after(800, lambda: outfits(0))
+    a.root.after(800, (lambda: sprite_extra()) if SPRITE else (lambda: outfits(0)))
+
+
+def sprite_extra():
+    av = a.agent3d
+    st = {s: ("ok" if k % 2 else "miss") for k, s in enumerate(view3d.SLOTS)}
+    av.set_status(st, None); timed_render()
+    picked = []; av.on_pick = picked.append
+    w, h, k, ox, oy, dw, dh = av._geom(); ax, ay, _ = av.info["anchors"][av.frame]["Chest"]
+    class E: pass
+    e = E(); e.x, e.y = int(ox + ax * k), int(oy + ay * k)
+    av._press(e); av._release(e)
+    ok(picked == ["Chest"], f"tıklama doğru yuvayı seçti: {picked}")
+    av.on_pick = a._pick_slot3d
+    for _ in range(2): a._agent_look["cycle"](1)                # heavy
+    zoom_shot("tinted")
+    av.auto_spin = False
+    a.root.after(400, lambda: rotate(0))
 
 
 def outfits(i):
@@ -96,8 +126,10 @@ def skins(i):
 
 def rotate(i):                                                 # sürükleyerek döndürme gibi
     if i < 60:
-        a.agent3d.yaw += 0.105; timed_render()
-        return a.root.after(40, lambda: rotate(i + 1))
+        if SPRITE: a.agent3d.frame = (a.agent3d.frame + 1) % a.agent3d.n
+        else: a.agent3d.yaw += 0.105
+        timed_render()
+        return a.root.after(60 if SPRITE else 40, lambda: rotate(i + 1))
     zoom_shot("rotated_back")
     a.agent3d.auto_spin = True
     a.root.after(800, finish)
@@ -105,7 +137,8 @@ def rotate(i):                                                 # sürükleyerek 
 
 def finish():
     st = a.cfg["settings"]
-    ok((st.get("agent_model"), st.get("agent_outfit"), st.get("agent_skin")) == ("heavy", "desert", 2), f"seçim kaydedildi: {st.get('agent_model')}, {st.get('agent_outfit')}, {st.get('agent_skin')}")
+    if SPRITE: ok(st.get("agent_model") == "heavy", f"seçim kaydedildi: {st.get('agent_model')}")
+    else: ok((st.get("agent_model"), st.get("agent_outfit"), st.get("agent_skin")) == ("heavy", "desert", 2), f"seçim kaydedildi: {st.get('agent_model')}, {st.get('agent_outfit')}, {st.get('agent_skin')}")
     avg, worst = sum(times) / len(times), max(times)
     print(f"render ms: ort {avg:.1f}, en kötü {worst:.1f}", flush=True)
     ok(avg < 25, "çizim hızı yeterli (ortalama < 25 ms)")

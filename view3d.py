@@ -554,3 +554,186 @@ class Bars3D(Scene3D):
         self.faces = F
         self.labels = [(f"↕ {r}", 8, 8 + 16 * i, "#9aa1ae") for i, r in enumerate(rows[:12])]
         self.render()
+
+
+# ---------------------------------------------------------------- gerçekçi ajanlar (önceden render edilmiş 360° kareler)
+SPRITE_MODELS = ("operator", "scout", "heavy", "urban", "arctic")
+
+
+def sprite_models(base):
+    """meta/agents altında kareleri olan kıyafetler (sıralı)."""
+    from pathlib import Path
+    b = Path(base)
+    return [m for m in SPRITE_MODELS if (b / m / "info.json").exists() and (b / m / "f00.webp").exists()]
+
+
+class SpriteAgentView(tk.Canvas):
+    """Blender'da render edilmiş özgün ajan: sürükle → döndür (kareler arası), tıkla → yuva, eksik parça renkli parlar.
+    AgentView ile aynı arayüz: set_status, set_labels, set_look, cycle, on_pick, spin, model."""
+    COLORS = {"ok": (34, 197, 94), "miss": (239, 68, 68), "sel": (255, 109, 16)}
+    sprite = True
+
+    def __init__(self, parent, base, model="operator", width=360, height=420, bg="#101217", **kw):
+        super().__init__(parent, width=width, height=height, bg=bg, highlightthickness=0, **kw)
+        from pathlib import Path
+        self.base = Path(base)
+        self.models = sprite_models(self.base)
+        self.status, self.selected, self._names = {}, None, {}
+        self.on_pick, self.auto_spin, self._alive = None, True, True
+        self.outfit, self.skin = None, 0
+        self.zoom, self._pulse, self._drag = 1.0, 0.0, None
+        self._frames, self._cache, self._bg = {}, {}, None
+        self.bg_top, self.bg_bottom = "#1d2230", "#0b0d12"
+        self.bind("<ButtonPress-1>", self._press); self.bind("<B1-Motion>", self._move)
+        self.bind("<ButtonRelease-1>", self._release); self.bind("<MouseWheel>", self._wheel)
+        self.bind("<Configure>", lambda e=None: (self._cache.clear(), setattr(self, "_bg", None), self.render()))
+        self.bind("<Destroy>", lambda e=None: setattr(self, "_alive", False))
+        self.model = None
+        self.set_look(model if model in self.models else (self.models[0] if self.models else None), render=False)
+
+    # --- veri
+    def _load(self, m):
+        import json
+        self.info = json.loads((self.base / m / "info.json").read_text(encoding="utf-8"))
+        self.n = int(self.info["frames"]); self.size = tuple(self.info["size"])
+        self.frame = round(35 / 360 * self.n) % self.n            # 3/4 açıyla başla
+        self._frames.clear(); self._cache.clear()
+
+    def _get(self, i):
+        from PIL import Image
+        if i not in self._frames:
+            d = self.base / self.model
+            img = Image.open(d / f"f{i:02d}.webp").convert("RGBA"); img.load()
+            msk = Image.open(d / f"m{i:02d}.png").convert("L"); msk.load()
+            self._frames[i] = (img, msk)
+        return self._frames[i]
+
+    def _geom(self):
+        w, h = max(50, self.winfo_width()), max(50, self.winfo_height())
+        sw, sh = self.size
+        k = min(w / sw, h / sh) * self.zoom
+        dw, dh = int(sw * k), int(sh * k)
+        return w, h, k, (w - dw) // 2, h - dh - (0 if self.zoom <= 1.0 else int((self.zoom - 1) * dh * 0.35)), dw, dh
+
+    def _background(self, w, h):
+        from PIL import Image
+        if self._bg and self._bg.size == (w, h): return self._bg
+        a, b = _hex(self.bg_top), _hex(self.bg_bottom)
+        col = Image.new("RGB", (1, h))
+        for y in range(h):
+            k = y / max(1, h - 1); col.putpixel((0, y), tuple(int(a[j] + (b[j] - a[j]) * k) for j in range(3)))
+        self._bg = col.resize((w, h)).convert("RGBA")
+        return self._bg
+
+    def _compose(self, i):
+        from PIL import Image, ImageTk
+        pb = 3 if self.auto_spin and not self._drag else int((0.5 + 0.5 * math.sin(self._pulse)) * 4)   # dönerken sabit, dururken nabız
+        key = (i, pb, self.zoom, tuple(sorted(self.status.items())), self.selected, self.winfo_width(), self.winfo_height())
+        if key in self._cache: return self._cache[key]
+        img, msk = self._get(i)
+        r, g, b, a = [0] * 256, [0] * 256, [0] * 256, [0] * 256
+        for k, slot in enumerate(self.info.get("slots", SLOTS), start=1):
+            st = "sel" if slot == self.selected else self.status.get(slot, "off")
+            if st == "off": continue
+            c = self.COLORS.get(st)
+            if not c: continue
+            r[k], g[k], b[k] = c
+            a[k] = {"ok": 92, "sel": 130}.get(st, 70 + pb * 22)
+        ov = Image.merge("RGBA", (msk.point(r), msk.point(g), msk.point(b), msk.point(a)))
+        comp = Image.alpha_composite(img, ov)
+        w, h, k, ox, oy, dw, dh = self._geom()
+        comp = comp.resize((dw, dh), Image.LANCZOS if (dw, dh) != comp.size else Image.NEAREST)
+        canvas = self._background(w, h).copy()
+        canvas.alpha_composite(comp, (max(0, ox), max(0, oy)) if ox >= 0 and oy >= 0 else (0, 0))
+        ph = ImageTk.PhotoImage(canvas)
+        if len(self._cache) > 64: self._cache.pop(next(iter(self._cache)))
+        self._cache[key] = ph
+        return ph
+
+    # --- arayüz
+    def set_look(self, model=None, outfit=None, skin=None, render=True):
+        if model and model in self.models and model != self.model:
+            self.model = model; self._load(model)
+        if render: self.render()
+
+    def cycle(self, step=1):
+        if not self.models: return self.model
+        i = (self.models.index(self.model) + step) % len(self.models)
+        self.set_look(self.models[i]); return self.model
+
+    def set_labels(self, names): self._names = dict(names)
+
+    def set_status(self, status, selected=None):
+        self.status, self.selected = dict(status), selected
+        self.render()
+
+    def label_color(self, tag):
+        if tag == self.selected: return "#ff6d10"
+        return {"ok": "#4ade80", "miss": "#f87171", "off": "#8d95a5"}.get(self.status.get(tag, "off"), "#cfd5df")
+
+    def render(self):
+        if not self._alive or not self.model: return
+        self.delete("dyn")
+        self._ph = self._compose(self.frame)
+        self.create_image(0, 0, image=self._ph, anchor="nw", tags="dyn")
+        self._labels()
+
+    def _labels(self):
+        w, h, k, ox, oy, dw, dh = self._geom()
+        anchors = self.info["anchors"][self.frame] if self.frame < len(self.info["anchors"]) else {}
+        cols = {-1: [], 1: []}
+        for slot in self.info.get("slots", SLOTS):
+            if slot not in anchors: continue
+            x, y, cnt = anchors[slot]
+            X, Y = ox + x * k, oy + y * k
+            cols[1 if X >= w / 2 else -1].append([Y, X, cnt < 160, slot, self._names.get(slot, slot)])
+        for side, items in cols.items():
+            items.sort()
+            for j, it in enumerate(items):
+                it.append(max(it[0], items[j - 1][5] + 17) if j else max(12, it[0]))
+            over = (items[-1][5] - (h - 12)) if items else 0
+            if over > 0:
+                for it in items: it[5] -= over
+            for Y, X, small, slot, txt, ly in items:
+                col = self.label_color(slot)
+                tx = 6 if side < 0 else w - 6
+                i = self.create_text(tx, ly, text=txt, fill=_shade(col, 0.75) if small else col, font=("Segoe UI Semibold", 9),
+                                     anchor="w" if side < 0 else "e", tags="dyn")
+                bb = self.bbox(i); ex = (bb[2] + 4) if side < 0 else (bb[0] - 4)
+                lc = _shade(col, 0.6) if small else col
+                self.create_line(X, Y, ex - side * 10, ly, ex, ly, fill=lc, width=1, dash=(2, 3) if small else None, tags="dyn")
+                self.create_oval(X - 2.6, Y - 2.6, X + 2.6, Y + 2.6, fill=lc, outline="", tags="dyn")
+                self.tag_bind(i, "<Button-1>", lambda e, s=slot: self.on_pick and self.on_pick(s))
+
+    # --- etkileşim
+    def _press(self, e): self._drag = [e.x, e.y, False, 0.0]
+
+    def _move(self, e):
+        if not self._drag or not self.model: return
+        dx = e.x - self._drag[0]; self._drag[0] = e.x
+        self._drag[3] += dx
+        steps = int(self._drag[3] / 7)
+        if steps:
+            self._drag[3] -= steps * 7; self._drag[2] = True
+            self.frame = (self.frame - steps) % self.n; self.render()
+
+    def _release(self, e):
+        if self._drag and not self._drag[2] and self.on_pick and self.model:
+            w, h, k, ox, oy, dw, dh = self._geom()
+            x, y = int((e.x - ox) / k), int((e.y - oy) / k)
+            if 0 <= x < self.size[0] and 0 <= y < self.size[1]:
+                v = self._get(self.frame)[1].getpixel((x, y))
+                slots = self.info.get("slots", SLOTS)
+                if 1 <= v <= len(slots): self.on_pick(slots[v - 1])
+        self._drag = None
+
+    def _wheel(self, e):
+        self.zoom = max(1.0, min(1.8, self.zoom * (1.1 if e.delta > 0 else 0.9))); self._cache.clear(); self.render()
+
+    def spin(self, every=110):
+        if not self._alive: return
+        self._pulse += 0.6
+        if self.winfo_ismapped() and self.model:
+            if self.auto_spin and not self._drag: self.frame = (self.frame + 1) % self.n
+            if self.auto_spin or any(v == "miss" for v in self.status.values()): self.render()
+        self.after(every, lambda: self.spin(every))
