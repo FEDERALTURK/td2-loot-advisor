@@ -1086,5 +1086,20 @@
   "syncset.ocr_passes": "Okuma geçişi",
   "syncset.auto_interval_ms": "Otomatik tarama aralığı (ms)",
   "syncset.ocr_engine": "OCR motoru",
-  "syncset.only_game_active": "Yalnız oyun öndeyken"
+  "syncset.only_game_active": "Yalnız oyun öndeyken",
+  "uc.title": "Güncellemeler",
+  "uc.game_box": "The Division 2 güncellendi",
+  "uc.game_updated": "Oyun güncellendi: {old} → {new}.",
+  "uc.game_lib_new": "Bu güncellemenin yeni eşyaları için eşya kütüphanesi güncellemesi hazır.",
+  "uc.game_lib_ok": "Eşya kütüphanesi güncel. Henüz kütüphanede olmayan yeni eşyaları okuttuğunda program onları kendisi öğrenir.",
+  "uc.lib_box": "Eşya kütüphanesi",
+  "uc.lib": "Eşya kütüphanesini güncelle: {old} → {new} ({n} yeni kayıt)",
+  "uc.lib_new": "Yeni: {names}",
+  "uc.lib_more": "ve {n} tane daha",
+  "uc.prog_box": "Program",
+  "uc.prog": "TD2 Loot Advisor'ı güncelle: {old} → {new}",
+  "uc.install": "Seçilenleri yükle",
+  "uc.later": "Sonra",
+  "uc.lib_done": "Eşya kütüphanesi güncellendi: {v} ({n} yeni kayıt) ✔",
+  "uc.none": "Her şey güncel ✔"
 }

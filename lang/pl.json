@@ -969,5 +969,20 @@
   "sync.last": "Ostatnia synchronizacja: {t}",
   "sync.never": "Ten PC nie był jeszcze synchronizowany.",
   "sync.box_hint": "Skanuje ten komputer (monitory, skalowanie Windows, procesor, pamięć, karta graficzna) i ustawienia gry, mierzy szybkość odczytu i ustawia program dla tego PC. Pliki i pamięć gry nigdy nie są zmieniane.",
-  "sync.box": "Synchronizacja PC i gry"
+  "sync.box": "Synchronizacja PC i gry",
+  "uc.title": "Aktualizacje",
+  "uc.game_box": "The Division 2 został zaktualizowany",
+  "uc.game_updated": "Gra została zaktualizowana: {old} → {new}.",
+  "uc.game_lib_new": "Gotowa jest aktualizacja biblioteki z nowymi przedmiotami z tej łatki.",
+  "uc.game_lib_ok": "Biblioteka przedmiotów jest aktualna. Nowe przedmioty są zapamiętywane automatycznie podczas skanowania.",
+  "uc.lib_box": "Biblioteka przedmiotów",
+  "uc.lib": "Zaktualizuj bibliotekę: {old} → {new} ({n} nowych wpisów)",
+  "uc.lib_new": "Nowe: {names}",
+  "uc.lib_more": "i {n} więcej",
+  "uc.prog_box": "Program",
+  "uc.prog": "Zaktualizuj TD2 Loot Advisor: {old} → {new}",
+  "uc.install": "Zainstaluj wybrane",
+  "uc.later": "Później",
+  "uc.lib_done": "Biblioteka zaktualizowana: {v} ({n} nowych wpisów) ✔",
+  "uc.none": "Wszystko jest aktualne ✔"
 }

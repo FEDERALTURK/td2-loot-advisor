@@ -190,6 +190,28 @@ def test_sync_plan():
     assert "sync.no_game" in [k for _, k, _ in nogame[0]] and nogame[1]["res_profile"] == "auto"
 
 
+def test_update_center_logic():
+    """Kütüphane sürümü (sayısal), "neler yeni" listesi, oyun sürümü değişimi."""
+    import updates, gameinfo, json
+    from pathlib import Path
+    assert updates.lib_newer("2026-10-25.10", "2026-10-25.9") and not updates.lib_newer("2026-10-25.5", "2026-10-25.5")
+    assert updates.lib_newer("2026-10-26.1", "2026-10-25.9") and not updates.lib_newer("", "2026-10-25.1")
+    new = json.loads((Path(__file__).parent.parent / "meta" / "game_data.json").read_text(encoding="utf-8"))
+    old = json.loads(json.dumps(new))
+    old["exotics"] = [x for x in old["exotics"] if x not in ("Fafnir", "Iron Will")]
+    old["items"].pop("Iron Will"); old["items"].pop("Unmatched Backpack"); old["weapon_index"].pop("Fafnir")
+    old["gear_sets"].remove("Ember Engine")
+    d = updates.lib_diff(old, new)
+    assert set(d["exotics"]) == {"Fafnir", "Iron Will"} and d["items"] == ["Unmatched Backpack"] and d["gear_sets"] == ["Ember Engine"]
+    assert "Iron Will" not in d["items"] and "Fafnir" not in d["weapons"] and d["total"] == 4, d
+    names, more = updates.diff_summary(d, limit=2); assert set(names) == {"Fafnir", "Iron Will"} and more == 2
+    assert updates.valid_library(new) and not updates.valid_library({"schema": 1})
+    a = {"version": "1.0.0.1", "mtime": 1, "size": 5}
+    assert gameinfo.changed(a, {"version": "1.0.0.2", "mtime": 1, "size": 5}) and not gameinfo.changed(a, dict(a))
+    assert gameinfo.changed({"version": "", "mtime": 1, "size": 5}, {"version": "", "mtime": 2, "size": 5})
+    assert not gameinfo.changed(None, a) and gameinfo.label({"version": "1.2"}) == "1.2"
+
+
 if __name__ == "__main__":
     fails = 0
     for n, f in list(globals().items()):

@@ -49,6 +49,29 @@ jobs:
           if (Select-String -Path logs\app.log -Pattern "Traceback" -Quiet) { throw "traceback in app.log" }
           if (-not (Test-Path logs\sync_report.txt)) { throw "no sync report" }
           if (-not (Select-String -Path logs\app.log -Pattern "Sync applied" -Quiet)) { throw "apply did not run" }
+      - name: Update center UI (old library + old program + updated game)
+        shell: pwsh
+        run: |
+          Add-Type -AssemblyName System.Windows.Forms, System.Drawing
+          function Shot($name) {
+            $b = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+            $bmp = New-Object System.Drawing.Bitmap $b.Width, $b.Height
+            $g = [System.Drawing.Graphics]::FromImage($bmp)
+            $g.CopyFromScreen($b.Location, [System.Drawing.Point]::Empty, $b.Size)
+            $bmp.Save("shots\$name.png"); $g.Dispose(); $bmp.Dispose()
+          }
+          if (Test-Path logs\app.log) { Remove-Item logs\app.log }
+          if (Test-Path game_data_cache.json) { Remove-Item game_data_cache.json }
+          $p = Start-Process python -ArgumentList "tests/ui_update_shot.py" -PassThru
+          Start-Sleep 20; Shot "update_01_dialog"
+          Start-Sleep 12; Shot "update_02_after_install"
+          Start-Sleep 12
+          Get-Content logs\app.log | Select-String -Pattern "Update center|Library updated|DO_UPDATE|Traceback|Error"
+          if (-not $p.HasExited) { Stop-Process -Id $p.Id -Force }
+          if (Select-String -Path logs\app.log -Pattern "Traceback" -Quiet) { throw "traceback in app.log" }
+          if (-not (Select-String -Path logs\app.log -Pattern "Library updated" -Quiet)) { throw "library not updated" }
+          if (-not (Select-String -Path logs\app.log -Pattern "DO_UPDATE CALLED" -Quiet)) { throw "program update not started" }
+          if (-not (Test-Path game_data_cache.json)) { throw "no library cache written" }
       - uses: actions/upload-artifact@v5
         if: always()
         with:

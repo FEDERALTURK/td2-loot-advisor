@@ -784,5 +784,20 @@
   "syncset.ocr_passes": "Reading passes",
   "syncset.auto_interval_ms": "Auto-scan interval (ms)",
   "syncset.ocr_engine": "OCR engine",
-  "syncset.only_game_active": "Only when the game is in front"
+  "syncset.only_game_active": "Only when the game is in front",
+  "uc.title": "Updates",
+  "uc.game_box": "The Division 2 was updated",
+  "uc.game_updated": "The game was updated: {old} → {new}.",
+  "uc.game_lib_new": "A library update with this patch's new items is ready.",
+  "uc.game_lib_ok": "The item library is up to date. New items not in the library yet are learned automatically when you scan them.",
+  "uc.lib_box": "Item library",
+  "uc.lib": "Update the item library: {old} → {new} ({n} new entries)",
+  "uc.lib_new": "New: {names}",
+  "uc.lib_more": "and {n} more",
+  "uc.prog_box": "Program",
+  "uc.prog": "Update TD2 Loot Advisor: {old} → {new}",
+  "uc.install": "Install selected",
+  "uc.later": "Later",
+  "uc.lib_done": "Item library updated: {v} ({n} new entries) ✔",
+  "uc.none": "Everything is up to date ✔"
 }

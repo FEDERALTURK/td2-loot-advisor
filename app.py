@@ -45,6 +45,8 @@ import share
 import dropstats
 import updater
 import syncer
+import gameinfo
+import updates
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
@@ -1300,7 +1302,7 @@ class App:
         self.root.after(6000, lambda: self.vendor_refresh(auto=True))
         self.root.after(4000, self.ask_drop_consent)
         self.root.after(3000, self.check_new_pc)
-        self.root.after(9000, lambda: self.check_update(auto=True))
+        self.root.after(6000, lambda: self.update_center(reason="startup"))   # her açılışta: program + kütüphane + oyun
         self.root.after(20000, self._drops_tick)
         log.info("UI ready — language=%s, OCR=%s, tesseract=%s", i18n.current_language(), OCR.name, self.tess or "NOT FOUND")
         OCR.warm_up()
@@ -1861,6 +1863,139 @@ class App:
         except Exception:
             log.debug("ocr history save failed", exc_info=True)
 
+    # ---------- Güncelleme merkezi (her açılışta) ----------
+    def _lib_urls(self):
+        st = self.cfg["settings"]
+        return [u.replace("meta_builds.json", "game_data.json") for u in meta_sync.configured_urls(st.get("meta_feed_url", ""))
+                if u.endswith("meta_builds.json")]
+
+    def _game_version_watch(self):
+        """Oyun penceresi ilk görüldüğünde: oyun güncellenmiş mi? (exe'nin dosya sürümü; oyuna dokunulmaz)"""
+        try:
+            gi = gameinfo.current()
+        except Exception:
+            return
+        old = self.cfg["settings"].get("game_install")
+        if gi and old and gameinfo.changed(old, gi) and not getattr(self, "_uc_open", False):
+            self.root.after(0, lambda: self.update_center(reason="game"))
+        elif gi and not old:
+            self.cfg["settings"]["game_install"] = gi; save_cfg(self.cfg)
+
+    def update_center(self, reason="startup"):
+        """Program, eşya kütüphanesi ve oyunun kendi sürümünü denetler; yenilik varsa tek pencerede sorar."""
+        if getattr(self, "_uc_busy", False) or getattr(self, "_uc_open", False): return
+        self._uc_busy = True
+        st = self.cfg["settings"]
+
+        def work():
+            res = {"reason": reason}
+            if st.get("update_check", True):
+                try:
+                    info = updater.latest()
+                    if updater.newer(info["version"], APP_VERSION): res["prog"] = info
+                    res["prog_latest"] = info["version"]
+                except Exception as e:
+                    log.info("Update check failed: %s", e)
+            try:
+                gd, url = meta_sync.fetch(self._lib_urls(), APP_VERSION)
+                cur = GAME.data.get("version", "") if GAME.ok else ""
+                if updates.valid_library(gd) and updates.lib_newer(gd.get("version"), cur):
+                    res["lib"] = (gd, updates.lib_diff(GAME.data if GAME.ok else {}, gd), cur)
+            except Exception as e:
+                log.info("Library check failed: %s", e)
+            try:
+                gi = gameinfo.current()
+                old = st.get("game_install")
+                if gi and old and gameinfo.changed(old, gi): res["game"] = (old, gi)
+                res["game_now"] = gi
+            except Exception as e:
+                log.debug("Game version check failed: %s", e)
+            self.root.after(0, lambda: self._update_center_show(res))
+        threading.Thread(target=work, daemon=True).start()
+
+    def _update_center_show(self, res):
+        self._uc_busy = False
+        st = self.cfg["settings"]
+        gi = res.get("game_now")
+        log.info("Update center (%s): program %s (latest %s), library %s, game %s", res["reason"], APP_VERSION,
+                 res.get("prog_latest", "?"), ("%s -> %s" % (res["lib"][2], res["lib"][0].get("version"))) if res.get("lib") else "up to date",
+                 ("updated %s -> %s" % (gameinfo.label(res["game"][0]), gameinfo.label(res["game"][1]))) if res.get("game")
+                 else (gameinfo.label(gi) if gi else "not found"))
+        if gi and not res.get("game"):
+            if st.get("game_install") != gi: st["game_install"] = gi; save_cfg(self.cfg)
+        if not (res.get("prog") or res.get("lib") or res.get("game")):
+            try:
+                if hasattr(self, "upd_lbl") and self.upd_lbl.winfo_exists(): self.upd_lbl.config(text=t("upd.latest_ok", v=APP_VERSION))
+            except Exception: pass
+            if res["reason"] == "manual": self.toast(t("uc.none"))
+            return
+        if res.get("prog"):
+            self.upd_info = res["prog"]; self._upd_show(res["prog"])
+        self._uc_open = True
+        w = tk.Toplevel(self.root); w.title(t("uc.title")); w.configure(bg=PAL["bg"]); w.transient(self.root)
+        w.protocol("WM_DELETE_WINDOW", lambda: close())
+        ttk.Label(w, text="⬆ " + t("uc.title"), font=(ui_theme.FONT_SEMI, 15)).pack(anchor="w", padx=16, pady=(14, 6))
+        body = ttk.Frame(w); body.pack(fill="both", expand=True, padx=16)
+        wrap = int(640 * getattr(self, "ui_factor", 1.0))
+        v_prog = tk.BooleanVar(value=True); v_lib = tk.BooleanVar(value=True)
+        if res.get("game"):
+            old, new = res["game"]
+            box = ttk.LabelFrame(body, text="🎮 " + t("uc.game_box")); box.pack(fill="x", pady=4)
+            msg = t("uc.game_updated", old=gameinfo.label(old), new=gameinfo.label(new)) + "\n" + \
+                  (t("uc.game_lib_new") if res.get("lib") else t("uc.game_lib_ok"))
+            ttk.Label(box, text=msg, wraplength=wrap, justify="left").pack(anchor="w", padx=8, pady=6)
+        if res.get("lib"):
+            gd, diff, cur = res["lib"]
+            box = ttk.LabelFrame(body, text="📚 " + t("uc.lib_box")); box.pack(fill="x", pady=4)
+            ttk.Checkbutton(box, variable=v_lib, text=t("uc.lib", old=cur or "—", new=gd.get("version"), n=diff["total"])).pack(anchor="w", padx=8, pady=(6, 2))
+            names, more = updates.diff_summary(diff)
+            if names:
+                ttk.Label(box, text=t("uc.lib_new", names=", ".join(names)) + (" " + t("uc.lib_more", n=more) if more else ""),
+                          foreground=PAL["muted"], wraplength=wrap, justify="left").pack(anchor="w", padx=28, pady=(0, 6))
+        if res.get("prog"):
+            info = res["prog"]
+            box = ttk.LabelFrame(body, text="⬆ " + t("uc.prog_box")); box.pack(fill="x", pady=4)
+            ttk.Checkbutton(box, variable=v_prog, text=t("uc.prog", old=APP_VERSION, new=info["version"])).pack(anchor="w", padx=8, pady=(6, 2))
+            notes = re.sub(r"[#*`|>]+", " ", info.get("notes", "")); notes = re.sub(r"\s+", " ", notes).strip()[:360]
+            if notes:
+                ttk.Label(box, text=notes, foreground=PAL["muted"], wraplength=wrap, justify="left").pack(anchor="w", padx=28, pady=(0, 6))
+            if FROZEN and not info.get("setup"): v_prog.set(False)
+        bar = ttk.Frame(w); bar.pack(fill="x", padx=16, pady=12)
+        can_install = bool(res.get("lib") or res.get("prog"))
+        if can_install:
+            ttk.Button(bar, text="✔ " + t("uc.install"), style="Accent.TButton", command=lambda: install()).pack(side="left")
+            ttk.Button(bar, text=t("uc.later"), command=lambda: close()).pack(side="left", padx=8)
+        else:
+            ttk.Button(bar, text="OK", style="Accent.TButton", command=lambda: close()).pack(side="left")
+        self._uc_win = w
+
+        def close(ack_game=True):
+            self._uc_open = False
+            if ack_game and res.get("game"):                 # oyun güncellemesi bildirildi: bir daha aynısı için sorma
+                st["game_install"] = res["game"][1]; save_cfg(self.cfg)
+            try: w.destroy()
+            except Exception: pass
+
+        def install():
+            do_lib, do_prog = res.get("lib") and v_lib.get(), res.get("prog") and v_prog.get()
+            close()
+            if do_lib:
+                global GAME
+                gd = res["lib"][0]
+                try:
+                    tmp = GAME_DATA_CACHE.with_name(GAME_DATA_CACHE.name + ".tmp")
+                    tmp.write_text(json.dumps(gd, ensure_ascii=False), encoding="utf-8"); os.replace(tmp, GAME_DATA_CACHE)
+                    GAME = gamedata.GameData(GAME_DATA_CACHE, BASE / "meta" / "game_data.json", BUNDLE / "meta" / "game_data.json").attach_learned(LEARNED_LIB)
+                    log.info("Library updated: %s -> %s (%d new)", res["lib"][2], GAME.data.get("version"), res["lib"][1]["total"])
+                    self.toast(t("uc.lib_done", v=GAME.data.get("version"), n=res["lib"][1]["total"]))
+                except Exception as e:
+                    log.exception("Library update failed")
+                    messagebox.showerror(APP_NAME, t("upd.failed", e=e))
+            if do_prog:
+                self.upd_info = res["prog"]
+                self.do_update()
+        self._uc_install = install
+
     # ---------- PC ve oyun senkronizasyonu ----------
     def check_new_pc(self):
         """Açılışta: bu bilgisayar / monitör düzeni / oyun çözünürlüğü son senkrondan farklıysa senkron öner."""
@@ -2026,6 +2161,9 @@ class App:
             if not area:
                 m = mons[1]
                 area = {"left": m["left"], "top": m["top"], "width": m["width"], "height": m["height"]}
+        if g and not getattr(self, "_game_ver_checked", False):
+            self._game_ver_checked = True
+            threading.Thread(target=self._game_version_watch, daemon=True).start()
         sig = (area["left"], area["top"], area["width"], area["height"], bool(g))
         if sig != getattr(self, "_area_sig", None):
             self._area_sig = sig
@@ -3507,7 +3645,7 @@ class App:
                 if not on: continue
                 try: out[kind] = (fn(self.cfg, cache, APP_VERSION, force=force), None)
                 except Exception as e: out[kind] = (None, e)
-            if do_b:     # oyun verisi (adlar, talent'ler, en yüksek değerler) — aynı depodan
+            if False and do_b:   # oyun verisi artık açılıştaki güncelleme merkezinden, kullanıcıya sorularak yüklenir
                 try:
                     urls = [u.replace("meta_builds.json", "game_data.json") for u in meta_sync.configured_urls(st.get("meta_feed_url", ""))
                             if u.endswith("meta_builds.json")]
@@ -4058,7 +4196,8 @@ class App:
         ub = ttk.LabelFrame(f, text="⬆ " + t("upd.box")); ub.pack(fill="x", padx=10, pady=6)
         ur = ttk.Frame(ub); ur.pack(fill="x", padx=8, pady=6)
         ttk.Label(ur, text=t("upd.current", v=APP_VERSION, mode=t("upd.mode_exe") if FROZEN else t("upd.mode_src"))).pack(side="left")
-        ttk.Button(ur, text="🔎 " + t("upd.check"), command=lambda: self.check_update(auto=False)).pack(side="left", padx=10)
+        ttk.Button(ur, text="🔎 " + t("upd.check"), command=lambda: (self.upd_lbl.config(text=t("upd.checking")),
+                                                                     self.update_center(reason="manual"))).pack(side="left", padx=10)
         self.upd_now_btn = ttk.Button(ur, text="⬆ " + t("upd.now"), command=self.do_update, style="Accent.TButton")
         self.upd_auto = tk.BooleanVar(value=bool(st.get("update_check", True)))
         ttk.Checkbutton(ur, text=t("upd.auto"), variable=self.upd_auto,

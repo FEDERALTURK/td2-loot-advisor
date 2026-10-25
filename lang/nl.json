@@ -969,5 +969,20 @@
   "sync.last": "Laatste synchronisatie: {t}",
   "sync.never": "Deze pc is nog niet gesynchroniseerd.",
   "sync.box_hint": "Scant deze computer (monitoren, Windows-schaal, processor, geheugen, videokaart) en de game-instellingen, meet de leessnelheid en stelt het programma in voor deze pc. Gamebestanden en geheugen worden nooit gewijzigd.",
-  "sync.box": "PC- en gamesynchronisatie"
+  "sync.box": "PC- en gamesynchronisatie",
+  "uc.title": "Updates",
+  "uc.game_box": "The Division 2 is bijgewerkt",
+  "uc.game_updated": "De game is bijgewerkt: {old} → {new}.",
+  "uc.game_lib_new": "Er is een bibliotheekupdate met de nieuwe items van deze patch.",
+  "uc.game_lib_ok": "De itembibliotheek is actueel. Nieuwe items worden automatisch geleerd als je ze scant.",
+  "uc.lib_box": "Itembibliotheek",
+  "uc.lib": "Itembibliotheek bijwerken: {old} → {new} ({n} nieuwe items)",
+  "uc.lib_new": "Nieuw: {names}",
+  "uc.lib_more": "en nog {n}",
+  "uc.prog_box": "Programma",
+  "uc.prog": "TD2 Loot Advisor bijwerken: {old} → {new}",
+  "uc.install": "Selectie installeren",
+  "uc.later": "Later",
+  "uc.lib_done": "Itembibliotheek bijgewerkt: {v} ({n} nieuwe items) ✔",
+  "uc.none": "Alles is up-to-date ✔"
 }
