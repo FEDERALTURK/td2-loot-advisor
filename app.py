@@ -1351,6 +1351,7 @@ class App:
         ui_theme.bind_click_sounds(self.root, self.sounds)
         self.build_ui()
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)
+        self.root.bind("<Destroy>", lambda e: e.widget is self.root and self.service_stop(), add="+")
         self.meta_busy = False
         self.poll(); self.check_resets()
         self.root.after(2500, self.meta_sync_start)     # açılışı bekletmeden, günde bir

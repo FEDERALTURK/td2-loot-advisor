@@ -195,7 +195,11 @@ class Tray:
         self.icon = pystray.Icon("td2-loot-advisor", image, title, pystray.Menu(*menu))
 
     def start(self):
-        if self.icon: self.icon.run_detached()
+        if not self.icon: return
+        if sys.platform == "win32":                  # kendi (daemon) iş parçacığında: program kapanınca beklemez
+            threading.Thread(target=self.icon.run, daemon=True, name="tray").start()
+        else:
+            self.icon.run_detached()
 
     def notify(self, text, title=None):
         try:
