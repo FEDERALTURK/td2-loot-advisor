@@ -201,7 +201,9 @@ class GameData:
         return out, found
 
     def _ui_line(self, l):
-        return l in self.ui_words or any(l.startswith(w + " ") for w in self.ui_words if len(w) > 6)
+        if l in self.ui_words: return True
+        if re.sub(r"\s+(rank|level)\b.*$", "", l) in self.items: return False   # "Loadout Frame" eşyadır, menü yazısı değil
+        return any(l.startswith(w + " ") for w in self.ui_words if len(w) > 6)
 
     def match_name(self, lines, cutoff=0.82):
         """Satırlarda geçen en iyi bilinen ad: (kanonik, tür, benzerlik) ya da (None, None, 0)."""
