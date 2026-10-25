@@ -47,6 +47,7 @@ import updater
 import syncer
 import gameinfo
 import updates
+import reports
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
@@ -1519,7 +1520,8 @@ class App:
         if not hasattr(self, "banner"): return
         st = self.cfg["settings"]
         prov = st.get("ai_provider", "builtin")
-        self.banner.set_chips([("🔄 " + t("sync.btn_short"), "btn", self.run_sync),
+        self.banner.set_chips([("🐞 " + t("fb.btn_short"), "off", self.open_feedback),
+                               ("🔄 " + t("sync.btn_short"), "btn", self.run_sync),
                                (("● " + t("state.running")) if self.running else ("○ " + t("state.stopped")),
                                 "on" if self.running else "off"),
                                ("🤖 " + provider_label(prov if prov in PROVIDER_KEYS else "builtin"), "off")])
@@ -1890,6 +1892,145 @@ class App:
             for f in files[:-200]: f.unlink()
         except Exception:
             log.debug("ocr history save failed", exc_info=True)
+
+    # ---------- Geri bildirim: hata raporu / istek ----------
+    def _fb_url(self):
+        st = self.cfg["settings"]
+        return os.environ.get("TD2_REPORT_URL") or st.get("report_server") or st.get("drop_server") or dropstats.DEFAULT_URL
+
+    def open_feedback(self, prefill=None):
+        """Kullanıcının hata raporu, istek ya da soru gönderdiği pencere (GitHub hesabı gerekmez)."""
+        if getattr(self, "_fb_win", None) and self._fb_win.winfo_exists():
+            self._fb_win.lift(); return
+        st = self.cfg["settings"]
+        store = self.fb_store = getattr(self, "fb_store", None) or reports.Store(BASE)
+        pre = prefill or {}
+        w = self._fb_win = tk.Toplevel(self.root); w.title(t("fb.title")); w.configure(bg=PAL["bg"]); w.transient(self.root)
+        k = getattr(self, "ui_factor", 1.0)
+        w.geometry(f"{int(760 * k)}x{int(620 * k)}")
+        nb = ttk.Notebook(w); nb.pack(fill="both", expand=True, padx=10, pady=10)
+        f = ttk.Frame(nb, padding=10); nb.add(f, text="📝 " + t("fb.tab_new"))
+        g = ttk.Frame(nb, padding=10); nb.add(g, text="📬 " + t("fb.tab_mine"))
+        # --- yeni rapor
+        r0 = ttk.Frame(f); r0.pack(fill="x")
+        ttk.Label(r0, text=t("fb.type")).pack(side="left")
+        tv = tk.StringVar(value=pre.get("type", "bug"))
+        for key in reports.TYPES:
+            ttk.Radiobutton(r0, text=t("fb.type_" + key), value=key, variable=tv).pack(side="left", padx=8)
+        ttk.Label(f, text=t("fb.f_title")).pack(anchor="w", pady=(10, 2))
+        title = ttk.Entry(f); title.pack(fill="x"); title.insert(0, pre.get("title", ""))
+        ttk.Label(f, text=t("fb.f_body")).pack(anchor="w", pady=(10, 2))
+        body = tk.Text(f, height=9, wrap="word", bg=PAL["entry"], fg=PAL["fg"], insertbackground=PAL["fg"], relief="flat",
+                       font=(ui_theme.FONT, 10), padx=8, pady=6)
+        body.pack(fill="both", expand=True); body.insert("1.0", pre.get("body", ""))
+        rc = ttk.Frame(f); rc.pack(fill="x", pady=(8, 0))
+        ttk.Label(rc, text=t("fb.f_contact")).pack(side="left")
+        contact = ttk.Entry(rc, width=34); contact.pack(side="left", padx=8); contact.insert(0, st.get("fb_contact", ""))
+        ttk.Label(rc, text=t("fb.contact_hint"), foreground=PAL["muted"]).pack(side="left")
+        v_sys = tk.BooleanVar(value=True); v_log = tk.BooleanVar(value=pre.get("type", "bug") == "bug")
+        has_card = bool(getattr(self, "last_text", ""))
+        v_card = tk.BooleanVar(value=bool(pre.get("card")) and has_card)
+        ck = ttk.Frame(f); ck.pack(fill="x", pady=(8, 0))
+        ttk.Checkbutton(ck, text=t("fb.inc_sys"), variable=v_sys).pack(anchor="w")
+        ttk.Checkbutton(ck, text=t("fb.inc_log"), variable=v_log).pack(anchor="w")
+        cb = ttk.Checkbutton(ck, text=t("fb.inc_card"), variable=v_card); cb.pack(anchor="w")
+        if not has_card: cb.state(["disabled"])
+        ttk.Label(f, text=t("fb.privacy"), foreground=PAL["muted"], wraplength=int(700 * k), justify="left").pack(anchor="w", pady=(6, 0))
+        status = ttk.Label(f, text="", foreground=PAL["muted"]); status.pack(anchor="w", pady=(6, 0))
+        bar = ttk.Frame(f); bar.pack(fill="x", pady=(8, 0))
+
+        def payload():
+            gs = getattr(display, "_last_game_settings", None) or {}
+            sysi = reports.system_info(APP_VERSION, {"res": "%sx%s" % game_size(st)[:2], "ocr": OCR.name if OCR else "",
+                                                     "lang": i18n.current_language(), "game_mode": gs.get("display_mode"),
+                                                     "frozen": FROZEN}) if v_sys.get() else {}
+            return reports.build(tv.get(), title.get(), body.get("1.0", "end"), contact.get(), APP_VERSION,
+                                 i18n.current_language(), st.get("drop_client", ""), sysi,
+                                 reports.log_tail(APPLOG_DIR / "app.log") if v_log.get() else "",
+                                 getattr(self, "last_text", "") if v_card.get() else "")
+
+        def preview():
+            try: p = payload()
+            except ValueError as e: return status.config(text=t("fb.err_" + str(e)), foreground=PAL["danger"])
+            pv = tk.Toplevel(w); pv.title(t("fb.preview")); pv.configure(bg=PAL["bg"])
+            tx = tk.Text(pv, wrap="word", bg=PAL["surface"], fg=PAL["fg"], font=("Consolas", 9), width=100, height=34)
+            tx.pack(fill="both", expand=True, padx=8, pady=8)
+            tx.insert("1.0", json.dumps({k: v for k, v in p.items() if k != "client"}, ensure_ascii=False, indent=1)); tx.config(state="disabled")
+
+        def send():
+            try: p = payload()
+            except ValueError as e: return status.config(text=t("fb.err_" + str(e)), foreground=PAL["danger"])
+            st["fb_contact"] = contact.get().strip(); save_cfg(self.cfg)
+            status.config(text=t("fb.sending"), foreground=PAL["muted"]); send_btn.state(["disabled"])
+            def work():
+                res = store.send(self._fb_url(), p)
+                self.root.after(0, lambda: done(res))
+            threading.Thread(target=work, daemon=True).start()
+
+        def done(res):
+            if not w.winfo_exists(): return
+            send_btn.state(["!disabled"])
+            kind, rec = res
+            log.info("Feedback %s: %s %s", kind, p_type_title(), rec or "")
+            if kind == "sent":
+                status.config(text=t("fb.sent", n=rec.get("number") or rec.get("id")), foreground=PAL["success"])
+                title.delete(0, "end"); body.delete("1.0", "end"); fill_mine(); nb.select(1)
+            elif kind == "queued":
+                status.config(text=t("fb.queued"), foreground=PAL["warning"])
+            else:
+                status.config(text=t("fb.failed", e=rec), foreground=PAL["danger"])
+
+        def p_type_title():
+            return f"[{tv.get()}] {title.get()[:60]!r}"
+
+        ttk.Button(bar, text="👁 " + t("fb.preview"), command=preview).pack(side="left")
+        send_btn = ttk.Button(bar, text="📨 " + t("fb.send"), command=send, style="Accent.TButton"); send_btn.pack(side="right")
+        self._fb_send = send; self._fb_fields = (tv, title, body, contact)
+        # --- raporlarım
+        cols = ("no", "type", "title", "time", "status")
+        tree = ttk.Treeview(g, columns=cols, show="headings", height=10)
+        for c, wd in zip(cols, (60, 70, 330, 120, 110)):
+            tree.heading(c, text=t("fb.col_" + c)); tree.column(c, width=int(wd * k), anchor="w")
+        tree.pack(fill="both", expand=True)
+        reply = tk.Text(g, height=6, wrap="word", bg=PAL["surface"], fg=PAL["fg"], relief="flat", font=(ui_theme.FONT, 10), padx=8, pady=6)
+        ttk.Label(g, text=t("fb.reply")).pack(anchor="w", pady=(8, 2)); reply.pack(fill="x")
+        gb = ttk.Frame(g); gb.pack(fill="x", pady=(8, 0))
+        info = ttk.Label(gb, text="", foreground=PAL["muted"]); info.pack(side="left")
+
+        def fill_mine():
+            tree.delete(*tree.get_children())
+            for i, r in enumerate(store.sent):
+                tree.insert("", "end", iid=str(i), values=("#%s" % (r.get("number") or "—"), t("fb.type_" + r.get("type", "bug")),
+                                                           r.get("title", ""), r.get("time", ""), t("fb.st_" + r.get("status", "new"))))
+            q = len(store.queue)
+            info.config(text=t("fb.in_queue", n=q) if q else "")
+
+        def on_sel(_=None):
+            sel = tree.selection()
+            reply.config(state="normal"); reply.delete("1.0", "end")
+            if sel:
+                r = store.sent[int(sel[0])]
+                reply.insert("1.0", r.get("reply") or t("fb.no_reply"))
+            reply.config(state="disabled")
+        tree.bind("<<TreeviewSelect>>", on_sel)
+
+        def refresh():
+            info.config(text=t("fb.refreshing"))
+            def work():
+                url = self._fb_url()
+                try:
+                    n = store.flush(url)
+                    ch = store.refresh(url, st.get("drop_client", ""))
+                    msg = t("fb.refreshed", n=ch + n)
+                except Exception as e:
+                    msg = t("fb.failed", e=e)
+                self.root.after(0, lambda: (w.winfo_exists() and (fill_mine(), info.config(text=msg))))
+            threading.Thread(target=work, daemon=True).start()
+        ttk.Button(gb, text="🔄 " + t("fb.refresh"), command=refresh).pack(side="right")
+        self._fb_refresh = refresh
+        fill_mine()
+        if store.sent or store.queue: w.after(300, refresh)
+        if pre.get("tab") == "mine": nb.select(1)
 
     # ---------- Güncelleme merkezi (her açılışta) ----------
     def _lib_urls(self):
@@ -2354,7 +2495,22 @@ class App:
         threading.Thread(target=go, daemon=True).start()
 
     def report_wrong(self):
-        """Yanlış okunan kartı kaydet (test setine eklensin diye) ve GitHub'da hata bildirimi aç."""
+        """Yanlış okunan kart: programdaki rapor formu, okunan kart metni ve programın yorumu eklenmiş olarak."""
+        img = getattr(self, "last_card_img", None)
+        if img is None: return messagebox.showinfo(APP_NAME, t("ocr.need_card"))
+        it = self._last_item() or {}
+        try:
+            d = REPORTS_DIR / datetime.now().strftime("%Y%m%d_%H%M%S"); d.mkdir(parents=True, exist_ok=True)
+            img.save(d / "card.png")                         # yerel kopya (test setine eklemek için)
+        except Exception:
+            pass
+        read_as = {k: it.get(k) for k in ("name", "kind", "slot", "brand", "gear_set", "rarity", "attrs", "talents")}
+        self.open_feedback(prefill={"type": "bug", "title": t("fb.wrong_title", name=it.get("name") or "?"),
+                                    "body": t("fb.wrong_body") + "\n\n" + json.dumps(read_as, ensure_ascii=False),
+                                    "card": True})
+
+    def report_wrong_github(self):
+        """(eski yol) Yanlış okunan kartı kaydet ve GitHub'da hata bildirimi aç."""
         img = getattr(self, "last_card_img", None)
         if img is None: return messagebox.showinfo(APP_NAME, t("ocr.need_card"))
         it = self._last_item() or {}
@@ -5438,6 +5594,9 @@ class App:
     def build_help(self):
         """Yardım metni dil dosyasındaki help.body anahtarından gelir."""
         f = self.tabs["help"]
+        hb = ttk.Frame(f); hb.pack(side="top", fill="x", padx=10, pady=(10, 0))
+        ttk.Button(hb, text="🐞 " + t("fb.btn"), command=self.open_feedback, style="Accent.TButton").pack(side="left")
+        ttk.Label(hb, text=t("fb.help_hint"), foreground=PAL["muted"]).pack(side="left", padx=10)
         box = tk.Text(f, wrap="word", font=("Segoe UI", 10))
         sb = ttk.Scrollbar(f, orient="vertical", command=box.yview); box.configure(yscrollcommand=sb.set)
         sb.pack(side="right", fill="y", pady=10); box.pack(side="left", fill="both", expand=True, padx=10, pady=10)

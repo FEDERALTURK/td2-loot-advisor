@@ -27,3 +27,14 @@ CREATE TABLE IF NOT EXISTS rate (
   n       INTEGER NOT NULL DEFAULT 0,
   PRIMARY KEY (bucket, hour)
 );
+
+-- Hata raporları / istekler: GitHub'a iletilene kadar kuyruk, sonra issue numarası (durum sorgusu için)
+CREATE TABLE IF NOT EXISTS reports (
+  id       INTEGER PRIMARY KEY AUTOINCREMENT,
+  created  INTEGER NOT NULL,
+  client   TEXT NOT NULL,          -- istemci kimliğinin tuzlu özeti
+  payload  TEXT NOT NULL,          -- GitHub issue gövdesi (temizlenmiş)
+  state    TEXT NOT NULL,          -- queued | sent
+  number   INTEGER                 -- GitHub issue numarası
+);
+CREATE INDEX IF NOT EXISTS idx_reports_state ON reports (state);
