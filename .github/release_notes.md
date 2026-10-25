@@ -12,6 +12,7 @@ Windows "kişisel bilgisayarınızı korudu" derse: **Ek bilgi → Yine de çal�
 - Program artık kendi uyarı penceresini okumuyor (önceki kararın yazıları yeni kartın adını kapatıyordu).
 - Öğrenen kütüphane: kütüphanede olmayan marka / gear set / parça adı bir kez okununca kaydedilir (`learned_library.json`) ve hep tanınır. Örn. "Unmatched Backpack → Sırt çantası, Unit Alloys".
 - "Brand Set / Gear Set" satırından marka ve set her zaman okunur; zırh kartları artık silah sanılmıyor.
+- Tam eşya kütüphanesi: 39 markanın ve 29 gear set'in tüm parça adları (Unmatched Backpack, Umbra Plate Carrier, Burdenless Pack …), Unit Alloys ve eksik named eşyalar eklendi — eşya kaydı 92 → 513. Silah varyantları (Black Market, Classic, Replica …) artık doğru adıyla tanınıyor.
 - Unit Alloys markası eklendi. M16A2 / LVOA-C gibi tüfekler artık sniper build'leriyle eşleşmiyor.
 
 **5.0.2 — kararlılık düzeltmeleri**

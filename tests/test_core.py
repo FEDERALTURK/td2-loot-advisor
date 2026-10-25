@@ -96,12 +96,37 @@ def test_real_cards_and_learning():
     it = rd("striker_kneepads.txt"); assert (it["kind"], it["slot"], it["gear_set"]) == ("gear", "Kneepads", "Striker's Battlegear"), it
     it = rd("unit_alloys_topcut.txt"); assert it["kind"] == "gear" and it["brand"] == "Unit Alloys", it   # zırh ≠ silah
     it = rd("unmatched_backpack.txt")
-    assert (it["name"], it["slot"], it["brand"]) == ("Unmatched Backpack", "Backpack", "Unit Alloys"), it
-    assert any("Backpack" in x for x in G.learn(it)) and lib.exists()
+    assert (it["name"], it["slot"], it["brand"]) == ("Unmatched Backpack", "Backpack", "Unit Alloys"), it   # kütüphanede
+    for txt, want in (("Umbra Plate Carrier\nHigh-End 10\n99k Armor", ("Chest", "Grupo Sombra S.A.")),
+                      ("Sundown Knee Guards RANK\nHigh-End 10\n99k Armor", ("Kneepads", "Grupo Sombra S.A.")),
+                      ("Burdenless Pack\nGear Set 10\n99k Armor", ("Backpack", "Heartbreaker"))):
+        it = G.recognize(txt); assert (it["slot"], it["brand"] or it["gear_set"]) == want, it
+    # kütüphanede olmayan yeni marka / parça: bir kez okununca öğrenilir ve kalıcıdır
+    new_card = "Novel Grip Gloves RANK\nHigh-End 10\n99k Armor\nBrand Set\nNova Testworks (1/3)\n+10% Weapon Handling\nCore Attribute\n+15.0% Weapon Damage"
+    it = G.recognize(new_card); learned = G.learn(it)
+    assert any("Nova Testworks" in x for x in learned) and any("Gloves" in x for x in learned) and lib.exists(), learned
     G2 = gamedata.GameData(str(Path(__file__).parent.parent / "meta" / "game_data.json")).attach_learned(lib)
-    it = G2.recognize("Unmatched Backpack\n131k Armor\nCore Attribute\n+11.2% Weapon Damage")
-    assert (it["slot"], it["brand"]) == ("Backpack", "Unit Alloys"), it                       # öğrenilen bilgi kalıcı
+    it = G2.recognize("Novel Grip Gloves\n99k Armor\nCore Attribute\n+15.0% Weapon Damage")
+    assert (it["slot"], it["brand"]) == ("Gloves", "Nova Testworks"), it
     assert G2.learn(it) == []
+
+
+def test_library_self_check():
+    """Kütüphanedeki her parça / named / exotic / silah adı okununca kendisi olarak tanınmalı."""
+    import gamedata, json
+    from pathlib import Path
+    path = Path(__file__).parent.parent / "meta" / "game_data.json"
+    d = json.loads(path.read_text(encoding="utf-8")); G = gamedata.GameData(str(path))
+    tot = bad = 0
+    for name, v in d["items"].items():
+        if not v.get("slot"): continue
+        q = v.get("quality"); hdr = {"high-end": "High-End", "gear set": "Gear Set"}.get(q, (q or "").title())
+        it = G.recognize(f"{name} RANK\n{hdr} 10\n99k Armor\nCore Attribute\n+15.0% Weapon Damage")
+        tot += 1; bad += it["slot"] != v["slot"]
+    assert tot > 450 and bad <= tot * 0.01, (tot, bad)
+    wb = [n for n, v in d["weapon_index"].items() if gamedata.nrm(G.recognize(
+        f"{n} RANK\nHigh-End 10\n{v.get('type', 'Rifle')}\nCore Stats\nTotal DMG RPM MAG\n231.72k 437 30")["name"]) != gamedata.nrm(n)]
+    assert not wb, wb[:10]
 
 
 if __name__ == "__main__":

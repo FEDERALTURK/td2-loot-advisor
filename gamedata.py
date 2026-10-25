@@ -70,6 +70,10 @@ class GameData:
                 self.attr_alias[nrm(al)] = k
         self.weapon_types = [nrm(w) for w in d.get("weapon_types", [])]
         self.items = {nrm(k): v for k, v in d.get("items", {}).items()}
+        known = {x[0] for x in self.names}
+        for n, v in d.get("items", {}).items():          # marka / set parçaları ("Unmatched Backpack", "Striker's Pack")
+            if v.get("quality") in ("high-end", "gear set") and nrm(n) not in known:
+                self.names.append((nrm(n), n, "piece")); known.add(nrm(n))
         self.weapon_index = {nrm(k): v for k, v in d.get("weapon_index", {}).items()}
         for n, v in d.get("weapon_index", {}).items():           # adlı/egzotik silahlar ad listesinde de olsun
             if not any(x[0] == nrm(n) for x in self.names):
@@ -207,13 +211,18 @@ class GameData:
             if len(l) < 3 or self._ui_line(l): continue
             toks = set(l.split())
             for n, canon, kind in self.names:
-                if len(n) < 3: continue
+                if len(n) < 3 and not (len(n) == 2 and any(ch.isdigit() for ch in n)): continue   # M4, M9 birebir
                 if len(n) <= 5 or " " not in n and any(ch.isdigit() for ch in n):
                     # kısa adlar (M700, KSG, 93R, MP7): yalnızca birebir kelime eşleşmesi ("700 times" ≠ M700)
                     r = 1.0 if n in toks or (" " in n and n in l) else 0.0
                 else:
                     r = best_window(l, n)
+                if kind == "piece" and r < 0.92:
+                    # parça adları "<sözcük> <yuva>" biçiminde: yuva sözcüğü ortak olduğundan benzerlik yanıltır
+                    # ("HG Backpack" ≈ "Unmatched Backpack"); yalnız neredeyse birebir okumalar sayılır
+                    continue
                 r -= 0.01 * i                                  # üstteki satırlar biraz öncelikli
+                r += 0.0005 * min(len(n), 30)                  # eşitlikte daha belirli ad: "Rigger Gear Bag" > "Rigger"
                 if r > best[2]: best = (canon, kind, r)
         return best if best[2] >= cutoff else (None, None, best[2])
 
@@ -378,7 +387,8 @@ class GameData:
         if "prototype" in head: rarity.append("PROTOTYPE")
         if kind == "gear_set" or "gear set" in head or sets.get("gear_set") or info.get("quality") == "gear set": rarity.append("GEAR SET")
         if kind == "brand" or "high end" in head or sets.get("brand") or info.get("quality") == "high-end": rarity.append("HIGH-END")
-        special = self.item_kind(head, low, kind)
+        # bilinen eşya/silah adındaki sözcükler tür sanılmasın: "Special Ammo Holster", "Ammo Dump" ≠ cephane, "Steel & Sons ACR" ≠ malzeme
+        special = None if kind in ("piece", "weapon", "named", "exotic") else self.item_kind(head, low, kind)
         # silah mı? Güçlü kanıt gerekir: bilinen silah adı, ya da kartın üstünde silah türü, ya da RPM + MAG birlikte.
         gearish = kind in ("gear_set", "brand", "piece") or bool(info) or bool(sets) or armor_line or bool(set_name)
         wtype = winfo.get("type")
