@@ -55,6 +55,16 @@ jobs:
           if (-not $ok) { throw "app did not reach 'UI ready'" }
           if (Select-String -Path (Join-Path $dir "logs\app.log") -Pattern "Traceback" -Quiet) { throw "traceback in app.log" }
           Write-Host "App started fine."
+          # ekran kartı (DirectML) denemesi kurulu .exe'den: pencere modunda da sonuç dosyaya yazılmalı
+          $card = Get-ChildItem -Path $dir -Recurse -Filter bench_card.jpg | Select-Object -First 1
+          $pj = Join-Path $env:RUNNER_TEMP "probe.json"
+          $pp = Start-Process $exe -ArgumentList "--dml-probe", "`"$($card.FullName)`"", "`"$pj`"" -PassThru
+          if (-not $pp.WaitForExit(240000)) { Stop-Process -Id $pp.Id -Force; throw "dml probe hung" }
+          if (-not (Test-Path $pj)) { throw "dml probe wrote no result" }
+          $pr = Get-Content $pj -Raw | ConvertFrom-Json
+          Write-Host "DML probe:" (Get-Content $pj -Raw)
+          if (-not ($pr.providers -contains "DmlExecutionProvider")) { throw "DirectML provider missing in package" }
+          if ($pr.similarity -lt 0.97) { throw "DirectML result differs from CPU" }
 
       - name: Portable zip
         shell: pwsh

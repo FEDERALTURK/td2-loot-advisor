@@ -22,11 +22,14 @@ from pathlib import Path
 from tkinter import ttk, filedialog, messagebox
 
 if "--dml-probe" in sys.argv:          # ekran kartı (DirectML) denemesi: ayrı süreçte, programın geri kalanı yüklenmeden
-    import ocr_backend as _ob
+    import ocr_backend as _ob                # sonuç dosyaya yazılır (pencere modundaki .exe'de konsol çıktısı yoktur)
     _i = sys.argv.index("--dml-probe")
     try: _res = _ob.dml_probe(sys.argv[_i + 1])
     except Exception as _e: _res = {"ok": False, "reason": f"{type(_e).__name__}: {_e}"}
-    print("DMLPROBE " + json.dumps(_res), flush=True)
+    if len(sys.argv) > _i + 2:
+        Path(sys.argv[_i + 2]).write_text(json.dumps(_res), encoding="utf-8")
+    else:
+        print("DMLPROBE " + json.dumps(_res), flush=True)
     sys.exit(0)
 
 import mss
@@ -1362,13 +1365,15 @@ class App:
         if (st.get("ocr_gpu_probe") or {}).get("key") == self._gpu_key(): return
         sample = next((p for p in (BUNDLE / "meta" / "bench_card.jpg", BASE / "meta" / "bench_card.jpg") if p.exists()), None)
         if not sample: return
-        cmd = [sys.executable] + ([] if FROZEN else [str(Path(__file__).resolve())]) + ["--dml-probe", str(sample)]
+        out = APPLOG_DIR / "gpu_probe.json"
+        try: out.unlink()
+        except OSError: pass
+        cmd = [sys.executable] + ([] if FROZEN else [str(Path(__file__).resolve())]) + ["--dml-probe", str(sample), str(out)]
         res = {"ok": False}
         try:
-            r = subprocess.run(cmd, capture_output=True, text=True, timeout=120, cwd=str(BASE),
+            r = subprocess.run(cmd, capture_output=True, timeout=180, cwd=str(BASE),
                                creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
-            line = next((l for l in (r.stdout or "").splitlines() if l.startswith("DMLPROBE ")), "")
-            res = json.loads(line[9:]) if line else {"ok": False, "reason": f"probe exit {r.returncode}"}
+            res = json.loads(out.read_text(encoding="utf-8")) if out.exists() else {"ok": False, "reason": f"probe exit {r.returncode}"}
         except subprocess.TimeoutExpired:
             res = {"ok": False, "reason": "probe timeout"}
         except Exception as e:
