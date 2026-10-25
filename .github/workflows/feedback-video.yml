@@ -35,17 +35,16 @@ jobs:
           New-Item -ItemType Directory -Force shots | Out-Null
           $ff = (Get-Command ffmpeg -ErrorAction SilentlyContinue).Source
           if (-not $ff) { $ff = "C:\ProgramData\chocolatey\bin\ffmpeg.exe" }
-          $rec = Start-Process $ff -ArgumentList "-y -f gdigrab -framerate 15 -draw_mouse 1 -i desktop -c:v libx264 -preset veryfast -pix_fmt yuv420p shots\feedback_flow.mp4" -PassThru -RedirectStandardInput "NUL" -NoNewWindow
-          Start-Sleep 2
+          $psi = New-Object System.Diagnostics.ProcessStartInfo $ff
+          $psi.Arguments = "-y -f gdigrab -framerate 15 -draw_mouse 1 -i desktop -c:v libx264 -preset veryfast -pix_fmt yuv420p -vf scale=trunc(iw/2)*2:trunc(ih/2)*2 shots\feedback_flow.mp4"
+          $psi.UseShellExecute = $false; $psi.RedirectStandardInput = $true; $psi.CreateNoWindow = $true
+          $rec = [System.Diagnostics.Process]::Start($psi)
+          Start-Sleep 3
           python tests\ui_feedback_test.py
           $code = $LASTEXITCODE
           Start-Sleep 1
-          # ffmpeg'i nazikçe durdur (q) — yoksa mp4 bozuk kalır
-          Add-Type -Namespace W -Name K -MemberDefinition '[DllImport("kernel32.dll")] public static extern bool GenerateConsoleCtrlEvent(uint e, uint p); [DllImport("kernel32.dll")] public static extern bool AttachConsole(uint p); [DllImport("kernel32.dll")] public static extern bool FreeConsole(); [DllImport("kernel32.dll")] public static extern bool SetConsoleCtrlHandler(System.IntPtr h, bool a);'
-          [W.K]::SetConsoleCtrlHandler([System.IntPtr]::Zero, $true) | Out-Null
-          [W.K]::GenerateConsoleCtrlEvent(0, 0) | Out-Null
-          if (-not $rec.WaitForExit(15000)) { Stop-Process -Id $rec.Id -Force }
-          [W.K]::SetConsoleCtrlHandler([System.IntPtr]::Zero, $false) | Out-Null
+          $rec.StandardInput.Write("q"); $rec.StandardInput.Flush()       # ffmpeg'i düzgün kapat (mp4 tamamlanır)
+          if (-not $rec.WaitForExit(20000)) { $rec.Kill() }
           Get-ChildItem shots | Format-Table Name, Length
           if (Test-Path logs\app.log) { Get-Content logs\app.log | Select-String -Pattern "Feedback|Traceback|Error" }
           exit $code
