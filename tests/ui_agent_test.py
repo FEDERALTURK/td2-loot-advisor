@@ -108,7 +108,7 @@ def finish():
     ok((st.get("agent_model"), st.get("agent_outfit"), st.get("agent_skin")) == ("heavy", "desert", 2), f"seçim kaydedildi: {st.get('agent_model')}, {st.get('agent_outfit')}, {st.get('agent_skin')}")
     avg, worst = sum(times) / len(times), max(times)
     print(f"render ms: ort {avg:.1f}, en kötü {worst:.1f}", flush=True)
-    ok(avg < 40, "çizim hızı yeterli (ortalama < 40 ms)")
+    ok(avg < 25, "çizim hızı yeterli (ortalama < 25 ms)")
     shot("9_final")
     print("RESULT: " + ("PASS" if not fails else f"FAIL ({len(fails)})"), flush=True)
     a.root.after(800, a.root.destroy)

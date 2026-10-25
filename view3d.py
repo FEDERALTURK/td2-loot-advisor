@@ -7,6 +7,7 @@
 Çizim: dönüş + perspektif izdüşüm, arka yüz ayıklama, ressam algoritması (derinliğe göre sıralama), düz gölgeleme.
 """
 import math
+import time
 import tkinter as tk
 
 
@@ -14,10 +15,18 @@ def _hex(c):
     c = c.lstrip("#"); return tuple(int(c[i:i + 2], 16) for i in (0, 2, 4))
 
 
+_SHADE = {}
+
+
 def _shade(color, k):
-    r, g, b = _hex(color)
-    k = max(0.15, min(1.25, k))
-    return "#%02x%02x%02x" % tuple(min(255, int(v * k)) for v in (r, g, b))
+    k = round(max(0.15, min(1.25, k)), 2)
+    key = (color, k)
+    c = _SHADE.get(key)
+    if c is None:
+        r, g, b = _hex(color)
+        c = _SHADE[key] = "#%02x%02x%02x" % tuple(min(255, int(v * k)) for v in (r, g, b))
+        if len(_SHADE) > 20000: _SHADE.clear()
+    return c
 
 
 def _sub(a, b): return (a[0] - b[0], a[1] - b[1], a[2] - b[2])
@@ -65,7 +74,7 @@ def taper(cx, cy, cz, bx, bz, tx, tz, sy, color, tag=None, top_shift=(0.0, 0.0))
     return _orient(polys, (cx + ox / 2, cy, cz + oz / 2), color, tag)
 
 
-def cyl(p0, p1, r0, r1, color, tag=None, n=8, caps=True):
+def cyl(p0, p1, r0, r1, color, tag=None, n=7, caps=True):
     """p0→p1 ekseni boyunca konik silindir (uzuv, namlu, rulo)."""
     ax = _norm(_sub(p1, p0))
     ref = (0.0, 0.0, 1.0) if abs(ax[2]) < 0.9 else (1.0, 0.0, 0.0)
@@ -113,6 +122,7 @@ class Scene3D(tk.Canvas):
         self.bind("<ButtonRelease-1>", self._release); self.bind("<Configure>", lambda e=None: self.render())
         self.bind("<MouseWheel>", self._wheel)
         self.on_pick = None
+        self._spin_delay = 40
         self.auto_spin = True
         self._alive = True
         self.bind("<Destroy>", lambda e=None: setattr(self, "_alive", False))
@@ -140,9 +150,15 @@ class Scene3D(tk.Canvas):
     def spin(self, step=0.012, every=40):
         """Boşta yavaşça döndür (sürüklerken durur)."""
         if not self._alive: return
+        delay = every
         if self.auto_spin and not self._drag and self.winfo_ismapped():
-            self.yaw += step; self.render()
-        self.after(every, lambda: self.spin(step, every))
+            t0 = time.perf_counter()
+            self.yaw += step * max(1.0, self._spin_delay / every); self.render()
+            ms = (time.perf_counter() - t0) * 1000
+            self._spin_ms = 0.8 * getattr(self, "_spin_ms", ms) + 0.2 * ms
+            delay = int(max(every, min(200, self._spin_ms * 3)))          # çizim yavaşsa daha seyrek çiz (arayüz akıcı kalsın)
+        self._spin_delay = delay
+        self.after(delay, lambda: self.spin(step, every))
 
     # --- çizim
     center_y = 0.0
@@ -165,12 +181,14 @@ class Scene3D(tk.Canvas):
 
     def _gradient(self, w, h):
         if not self.bg_top: return
+        if getattr(self, "_grad_size", None) == (w, h) and self.find_withtag("bg"): return
+        self.delete("bg"); self._grad_size = (w, h)
         a, b = _hex(self.bg_top), _hex(self.bg_bottom or self.bg_top)
         steps = 28
         for i in range(steps):
             k = i / (steps - 1)
             c = "#%02x%02x%02x" % tuple(int(a[j] + (b[j] - a[j]) * k) for j in range(3))
-            self.create_rectangle(0, h * i / steps, w, h * (i + 1) / steps + 1, fill=c, outline="")
+            self.create_rectangle(0, h * i / steps, w, h * (i + 1) / steps + 1, fill=c, outline="", tags="bg")
 
     def label_color(self, tag):
         return "#cfd5df"
@@ -180,35 +198,53 @@ class Scene3D(tk.Canvas):
 
     def render(self):
         if not self._alive: return
-        self.delete("all"); self._ids = {}
+        self.delete("dyn"); self._ids = {}
         w, h = max(50, self.winfo_width()), max(50, self.winfo_height())
         self._gradient(w, h)
         f = min(w, h) * 1.15 * self.zoom
         self.draw_under(w, h, f)
         L = _norm(self.key_light)
         polys = []
+        cyw, syw, cp, sp = math.cos(self.yaw), math.sin(self.yaw), math.cos(self.pitch), math.sin(self.pitch)
+        hw, hh, cyo, cache = w / 2, h * 0.5, self.center_y, {}
         for pts, color, tag in self.faces:
-            pr = [self.project(p, w, h, f) for p in pts]
+            pr = []
+            for p in pts:                                            # izdüşüm (paylaşılan köşeler bir kez hesaplanır)
+                q = cache.get(p)
+                if q is None:
+                    x, y, z = p[0], p[1] - cyo, p[2]
+                    x, z = x * cyw - z * syw, x * syw + z * cyw
+                    y, z = y * cp - z * sp, y * sp + z * cp
+                    z += 6.0
+                    k = f / (z if z > 0.5 else 0.5)
+                    q = cache[p] = (hw + x * k, hh - y * k, z, (x, y, z))
+                pr.append(q)
             a, b, c = pr[0][3], pr[1][3], pr[2][3]
             n = _norm(_cross(_sub(b, a), _sub(c, a)))
             fc = (sum(p[3][0] for p in pr) / len(pr), sum(p[3][1] for p in pr) / len(pr), sum(p[3][2] for p in pr) / len(pr))
             if _dot(n, fc) > 0: continue                             # arka yüz: görünmez, çizilmez
+            scr = [(p[0], p[1]) for p in pr]
+            area = 0.0
+            for i in range(len(scr)):
+                x0, y0 = scr[i - 1]; x1, y1 = scr[i]
+                area += x0 * y1 - x1 * y0
+            if abs(area) < 3.0: continue                             # ekranda görünmeyecek kadar küçük
             light = 0.38 + 0.72 * max(0.0, _dot(n, L)) + 0.12 * (1 - abs(n[2]))   # ana ışık + kenar parlaması
-            polys.append((fc[2], [(p[0], p[1]) for p in pr], _shade(self.color_of(color, tag), light), tag))
-        for depth, pts, col, tag in sorted(polys, key=lambda t: -t[0]):
-            i = self.create_polygon(*[c for p in pts for c in p], fill=col, outline=_shade(col, 0.82), width=1)
+            polys.append((fc[2], scr, _shade(self.color_of(color, tag), light), tag, abs(area) > 260))
+        for depth, pts, col, tag, edge in sorted(polys, key=lambda t: -t[0]):
+            i = self.create_polygon(*[c for p in pts for c in p], fill=col, outline=_shade(col, 0.82) if edge else "", tags="dyn")
             if tag: self._ids[i] = tag
         for txt, x, y, col in self.labels:
-            self.create_text(x, y, text=txt, fill=col, font=("Segoe UI", 9), anchor="nw")
+            self.create_text(x, y, text=txt, fill=col, font=("Segoe UI", 9), anchor="nw", tags="dyn")
         for tag, p3, txt in self.anchors:               # yuva etiketleri: parçadan dışarı çizgi + yazı
             x, y, z, _ = self.project(p3, w, h, f)
             side = 1 if x >= w / 2 else -1
             lx = x + side * 34; ly = y - 10
             col = self.label_color(tag)
-            self.create_line(x, y, lx, ly, lx + side * 8, ly, fill=col, width=1)
-            self.create_oval(x - 2.5, y - 2.5, x + 2.5, y + 2.5, fill=col, outline="")
+            self.create_line(x, y, lx, ly, lx + side * 8, ly, fill=col, width=1, tags="dyn")
+            self.create_oval(x - 2.5, y - 2.5, x + 2.5, y + 2.5, fill=col, outline="", tags="dyn")
             i = self.create_text(lx + side * 11, ly, text=txt, fill=col, font=("Segoe UI Semibold", 9),
-                                 anchor="w" if side > 0 else "e")
+                                 anchor="w" if side > 0 else "e", tags="dyn")
             bb = self.bbox(i)                                # pencere kenarından taşmasın
             if bb and bb[0] < 3: self.move(i, 3 - bb[0], 0)
             elif bb and bb[2] > w - 3: self.move(i, w - 3 - bb[2], 0)
@@ -237,18 +273,18 @@ def _body(P, k=1.0):
     F += taper(0, 1.4, 0, 0.6 * k, 0.33 * k, 0.84 * k, 0.42 * k, 0.74, P["cloth"])                     # gövde
     F += box(0, 1.06, 0, 0.65 * k, 0.08, 0.37 * k, P["strap"])                                          # kemer
     F += cyl((0, 1.74, 0), (0, 1.99, 0), 0.1, 0.095, P["skin"], n=6)                                   # boyun
-    F += ell(0, 2.17, -0.01, 0.19, 0.24, 0.21, P["skin"], nu=10, nv=7)                                 # baş
+    F += ell(0, 2.17, -0.01, 0.19, 0.24, 0.21, P["skin"], nu=9, nv=5)                                 # baş
     hands = {1: (0.2, 1.17, -0.5), -1: (-0.33, 1.22, -0.52)}
     for sx in (-1, 1):
         sh, el = (0.5 * k * sx, 1.7, 0.0), (0.6 * k * sx, 1.33, -0.2)
-        F += ell(0.47 * k * sx, 1.72, 0, 0.17 * k, 0.15, 0.18, P["cloth"], nu=8, nv=5)                 # omuz
+        F += ell(0.47 * k * sx, 1.72, 0, 0.17 * k, 0.15, 0.18, P["cloth"], nu=6, nv=3)                 # omuz
         F += cyl(sh, el, 0.11 * k, 0.095 * k, P["cloth"])                                               # üst kol
         F += cyl(el, hands[sx], 0.09 * k, 0.075 * k, P["cloth2"])                                       # ön kol
-        F += ell(*hands[sx], 0.085 * k, 0.095, 0.1, GEAR, "Gloves", nu=7, nv=4)                        # eldiven
+        F += ell(*hands[sx], 0.085 * k, 0.095, 0.1, GEAR, "Gloves", nu=6, nv=3)                        # eldiven
         hip, knee, ank = (0.19 * k * sx, 0.9, 0), (0.21 * k * sx, 0.44, -0.04), (0.22 * k * sx, -0.08, 0.0)
         F += cyl(hip, knee, 0.15 * k, 0.12 * k, P["cloth"])                                             # uyluk
         F += cyl(knee, ank, 0.115 * k, 0.085 * k, P["cloth2"])                                          # baldır
-        F += ell(0.21 * k * sx, 0.45, -0.13, 0.1 * k, 0.11, 0.06, GEAR, "Kneepads", nu=7, nv=4)        # dizlik
+        F += ell(0.21 * k * sx, 0.45, -0.13, 0.1 * k, 0.11, 0.06, GEAR, "Kneepads", nu=6, nv=3)        # dizlik
         F += taper(0.22 * k * sx, -0.19, -0.06, 0.2 * k, 0.38, 0.17 * k, 0.26, 0.16, P["boot"], top_shift=(0, 0.04))
     F += box(0.37 * k, 0.66, -0.02, 0.1, 0.3, 0.2, GEAR, "Holster")                                    # kılıf (sağ uyluk)
     F += box(0.38 * k, 0.86, 0.01, 0.08, 0.15, 0.1, GEAR, "Sidearm")                                   # tabanca kabzası
@@ -313,7 +349,7 @@ def _pack(k, w=0.56, h=0.66, d=0.3, y=1.45):
 def m_operator(P):
     k = 1.0
     F, A = _body(P, k)
-    F += ell(0, 2.24, 0.0, 0.235, 0.21, 0.255, P["cloth2"], nu=10, nv=5, top=0.55)              # kask
+    F += ell(0, 2.24, 0.0, 0.235, 0.21, 0.255, P["cloth2"], nu=9, nv=4, top=0.55)              # kask
     F += box(0, 2.31, -0.25, 0.09, 0.07, 0.05, P["metal"])                                       # gece görüşü yuvası
     for sx in (-1, 1): F += box(0.235 * sx, 2.2, 0, 0.03, 0.06, 0.22, P["metal"])                # raylar
     F += taper(0, 2.05, -0.17, 0.3, 0.12, 0.27, 0.1, 0.17, GEAR, "Mask")                         # yarım yüz maskesi
@@ -327,9 +363,9 @@ def m_operator(P):
 def m_scout(P):
     k = 0.94
     F, A = _body(P, k)
-    F += ell(0, 2.2, 0.03, 0.255, 0.3, 0.275, P["cloth2"], nu=10, nv=6, top=0.6)                 # kapüşon
+    F += ell(0, 2.2, 0.03, 0.255, 0.3, 0.275, P["cloth2"], nu=9, nv=5, top=0.6)                 # kapüşon
     F += taper(0, 1.9, 0.14, 0.34, 0.24, 0.28, 0.2, 0.22, P["cloth2"])                           # kapüşon arkası
-    F += ell(0, 2.03, -0.04, 0.2, 0.12, 0.2, GEAR, "Mask", nu=10, nv=5)                         # yüz örtüsü
+    F += ell(0, 2.03, -0.04, 0.2, 0.12, 0.2, GEAR, "Mask", nu=9, nv=4)                         # yüz örtüsü
     F += cyl((0, 1.83, 0), (0, 1.94, 0), 0.155, 0.14, GEAR, "Mask")                              # boyun atkısı
     T = "Chest"                                                                                  # hafif göğüs teçhizatı
     F += box(0, 1.3, -0.2, 0.52 * k, 0.2, 0.06, GEAR, T)
@@ -348,14 +384,14 @@ def m_scout(P):
 def m_heavy(P):
     k = 1.16
     F, A = _body(P, k)
-    F += ell(0, 2.2, 0.01, 0.255, 0.29, 0.27, P["cloth2"], nu=10, nv=6)                          # tam kask
-    F += ell(0, 2.14, -0.14, 0.2, 0.19, 0.13, GEAR, "Mask", nu=10, nv=6)                         # yüz siperi
+    F += ell(0, 2.2, 0.01, 0.255, 0.29, 0.27, P["cloth2"], nu=9, nv=5)                          # tam kask
+    F += ell(0, 2.14, -0.14, 0.2, 0.19, 0.13, GEAR, "Mask", nu=9, nv=5)                         # yüz siperi
     F += _carrier(k, heavy=True)
     T = "Chest"
     F += cyl((0, 1.78, 0), (0, 1.9, 0), 0.24, 0.2, GEAR, T, n=10)                                # boyun koruması
     F += taper(0, 0.86, -0.2, 0.34, 0.06, 0.3, 0.06, 0.3, GEAR, T)                               # kasık plakası
     for sx in (-1, 1):
-        F += ell(0.52 * k * sx, 1.76, 0, 0.2 * k, 0.14, 0.22, GEAR, T, nu=8, nv=4, top=0.6)      # omuz zırhı
+        F += ell(0.52 * k * sx, 1.76, 0, 0.2 * k, 0.14, 0.22, GEAR, T, nu=7, nv=3, top=0.6)      # omuz zırhı
         F += cyl((0.24 * sx, 0.36, -0.12), (0.25 * sx, 0.02, -0.11), 0.07, 0.06, GEAR, "Kneepads", n=6)  # kaval koruma
     pf, pa = _pack(k, w=0.66, h=0.82, d=0.38, y=1.42); F += pf
     F += box(-0.2, 0.98, 0.3, 0.16, 0.14, 0.2, GEAR, "Backpack")                                 # cephane kutusu
@@ -371,7 +407,7 @@ def m_urban(P):
     F += box(0, 2.3, -0.27, 0.22, 0.025, 0.14, P["accent"])                                      # siper
     F += cyl((0, 1.8, 0), (0, 1.9, 0), 0.17, 0.16, P["cloth"], n=8)                              # ceket yakası
     F += taper(0, 0.9, 0, 0.68 * k, 0.4, 0.64 * k, 0.38, 0.2, P["cloth"])                         # ceket eteği
-    F += ell(0, 2.05, -0.17, 0.15, 0.13, 0.1, GEAR, "Mask", nu=8, nv=5)                          # gaz maskesi
+    F += ell(0, 2.05, -0.17, 0.15, 0.13, 0.1, GEAR, "Mask", nu=6, nv=3)                          # gaz maskesi
     F += cyl((0, 2.0, -0.25), (0, 1.97, -0.34), 0.06, 0.06, GEAR, "Mask")                        # filtre
     for sx in (-1, 1): F += box(0.07 * sx, 2.15, -0.2, 0.08, 0.05, 0.03, GEAR, "Mask")          # camlar
     T = "Chest"
@@ -389,9 +425,9 @@ def m_arctic(P):
     F, A = _body(P, k)
     F += taper(0, 0.86, 0, 0.74 * k, 0.46, 0.68 * k, 0.42, 0.34, P["cloth"])                      # parka eteği
     F += cyl((0, 1.78, 0), (0, 1.92, 0), 0.22, 0.17, "#d8d1c4", n=10)                            # kürk yaka
-    F += ell(0, 2.27, 0.0, 0.205, 0.17, 0.225, P["cloth2"], nu=10, nv=5, top=0.55)              # bere
+    F += ell(0, 2.27, 0.0, 0.205, 0.17, 0.225, P["cloth2"], nu=9, nv=4, top=0.55)              # bere
     F += cyl((0, 2.2, 0), (0, 2.27, 0), 0.215, 0.215, P["accent"], n=10)                         # bere kıvrımı
-    F += ell(0, 2.04, -0.05, 0.2, 0.11, 0.2, GEAR, "Mask", nu=10, nv=5)                         # yüz örtüsü
+    F += ell(0, 2.04, -0.05, 0.2, 0.11, 0.2, GEAR, "Mask", nu=9, nv=4)                         # yüz örtüsü
     F += box(0, 2.17, -0.2, 0.32, 0.08, 0.06, GEAR, "Mask")                                      # kar gözlüğü
     T = "Chest"
     F += box(0, 1.36, -0.24, 0.56, 0.3, 0.07, GEAR, T)
@@ -454,7 +490,7 @@ class AgentView(Scene3D):
             r = 0.82 + 0.03 * math.sin(self._pulse * 0.4)
             x, y, z, _ = self.project((r * math.cos(math.radians(a)), -0.27, r * math.sin(math.radians(a))), w, h, f)
             pts += [x, y]
-        self.create_line(*pts, fill=THEMES[self.outfit]["accent"] if self.outfit != "night" else "#ff6d10", width=2, smooth=True)
+        self.create_line(*pts, fill=THEMES[self.outfit]["accent"] if self.outfit != "night" else "#ff6d10", width=2, smooth=True, tags="dyn")
 
     def color_of(self, color, tag):
         if not tag: return color
