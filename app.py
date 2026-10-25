@@ -47,7 +47,7 @@ import updater
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "5.0.1"
+APP_VERSION = "5.0.2"
 FROZEN = getattr(sys, "frozen", False)
 BASE = Path(sys.executable).parent if FROZEN else Path(__file__).resolve().parent
 TASKS_CACHE = BASE / "tasks_cache.json"  # son indirilen görev listesi
@@ -1749,6 +1749,7 @@ class App:
             pass
         text, item, verdict, res = self.merge_scrolled(text, item, verdict, res)
         verdict = color_hints(card, lines, item, verdict)
+        self.save_ocr_history(text, item, verdict)
         sig = signature(item)
         if auto:
             if not valid_item(item): return
@@ -1763,6 +1764,24 @@ class App:
         self.last_sig, self.last_time = sig, time.time()
         self.results.put(("ok", text, item, verdict, res, sig))
 
+    def save_ocr_history(self, text, item, verdict):
+        """Tanı için son 200 okuma: logs/ocr_history/<zaman>.txt (okunan metin + programın yorumu).
+        Yalnız kart metni; ekran görüntüsü ya da kişisel bilgi yok."""
+        try:
+            d = APPLOG_DIR / "ocr_history"; d.mkdir(parents=True, exist_ok=True)
+            sig = signature(item)
+            if sig == getattr(self, "_hist_sig", None): return
+            self._hist_sig = sig
+            v = verdict[0] if isinstance(verdict, (tuple, list)) else verdict
+            head = (f"name={item.get('name')} kind={item.get('kind')} slot={item.get('slot')} rarity={item.get('rarity')} "
+                    f"partial={item.get('partial')} merged={item.get('_merged', False)} verdict={v}\n"
+                    f"attrs={item.get('attrs')} talents={item.get('talents')}\n----\n")
+            (d / (time.strftime("%Y%m%d_%H%M%S") + f"_{int(time.time()*1000)%1000:03d}.txt")).write_text(head + text, encoding="utf-8")
+            files = sorted(d.glob("*.txt"))
+            for f in files[:-200]: f.unlink()
+        except Exception:
+            log.debug("ocr history save failed", exc_info=True)
+
     def merge_scrolled(self, text, item, verdict, res):
         """Uzun kartlar ekrana sığmaz; oyuncu kartı kaydırır. Aynı eşyanın ardışık okumaları birleştirilir:
         önce üst kısım (ad, set, çekirdek), sonra alt kısım (attribute, mod, talent) okunur → tek eşya."""
@@ -1771,7 +1790,7 @@ class App:
         kind_ok = item.get("kind") in ("gear", "weapon")
         if prev and now - prev["t"] < 60 and kind_ok:
             # aynı set/markanın farklı parçaları aynı adla okunur (ör. Striker eldiveni ve dizliği): yuva farklıysa ayrı eşya
-            slot_ok = not item.get("slot") or not prev["item"].get("slot") or item["slot"] == prev["item"]["slot"]
+            slot_ok = item.get("slot") == prev["item"].get("slot") or (item.get("partial") and not item.get("slot"))
             kind_same = item.get("kind") == prev["item"].get("kind")
             same = item["name"] not in ("?", "") and gamedata.nrm(item["name"]) == gamedata.nrm(prev["item"]["name"])
             # devam parçası: adı görünmeyen alt kısım. Aynı türde olmalı (silah ≠ zırh) ve kendi başlığı

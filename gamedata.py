@@ -300,10 +300,14 @@ class GameData:
         elif is_weapon:
             slot = "Sidearm" if (wtype or "").lower() in ("pistol", "sidearm") or re.search(r"\b(pistol|sidearm)\b", head) else "Weapon"
         else:
-            for scope in (head, nrm(" ".join(lines[:8])), low):    # önce kartın üstü, bulamazsa tüm kart
+            # önce kartın üstü, bulamazsa tüm kart. Birden çok yuva sözcüğü varsa metinde EN ÖNCE geçen kazanır
+            # (sözlük sırası değil: "Striker's Kneepads" kartında açıklamadaki başka bir yuva adı seçilmesin)
+            for scope in (head, nrm(" ".join(lines[:8])), low):
+                hits = []
                 for w, s in self.slots.items():
-                    if re.search(r"\b" + re.escape(w) + r"\b", scope): slot = s; break
-                if slot: break
+                    m = re.search(r"\b" + re.escape(w) + r"\b", scope)
+                    if m: hits.append((m.start(), s))
+                if hits: slot = min(hits)[1]; break
         attrs, quality, mod_attrs = self.parse_attrs(lines, "PROTOTYPE" in rarity, secs if has_sections else None,
                                                      weapon=bool(is_weapon), named=bool({"NAMED", "EXOTIC"} & set(rarity)))
         talents = self.match_talents(lines)
