@@ -7,5 +7,12 @@ import app
 app.messagebox.askyesno = lambda *a, **k: False          # açılıştaki "yeni PC" sorusu testi bekletmesin
 a = app.App()
 a.root.after(3000, a.run_sync)
+def press_apply():
+    b = getattr(a, "_sync_apply_btn", None)
+    if b and str(b["state"]) == "normal":
+        b.invoke(); print("APPLY PRESSED", a.cfg["settings"].get("sync_fp"), a.cfg["settings"].get("sync_time"), flush=True)
+    else:
+        a.root.after(2000, press_apply)
+a.root.after(30000, press_apply)
 a.root.after(45000, a.root.destroy)
 a.root.mainloop()

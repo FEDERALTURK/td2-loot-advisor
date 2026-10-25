@@ -1902,7 +1902,7 @@ class App:
         txt.tag_configure("h", font=(ui_theme.FONT_SEMI, 12))
         bar = ttk.Frame(w); bar.pack(fill="x", padx=14, pady=(0, 12))
         apply_btn = ttk.Button(bar, text="✔ " + t("sync.apply"), style="Accent.TButton", state="disabled")
-        apply_btn.pack(side="left")
+        apply_btn.pack(side="left"); self._sync_apply_btn = apply_btn
         copy_btn = ttk.Button(bar, text="📋 " + t("sync.copy"), state="disabled"); copy_btn.pack(side="left", padx=8)
         ttk.Button(bar, text=t("sync.close"), command=w.destroy).pack(side="right")
         st = self.cfg["settings"]
@@ -1927,7 +1927,9 @@ class App:
             if res.get("error"):
                 status.config(text=t("sync.bench_fail", e=res["error"])); return
             F, C = res["findings"], res["changes"]
-            diff = {k: v for k, v in C.items() if st.get(k) != v}
+            # yalnız gerçekten değişenler: hiç ayarlanmamış (varsayılan) bir anahtarın varsayılanı yazılıyorsa gösterme
+            defaults = {"res_profile_lock": False, "ocr_tuned": False, "ocr_passes_auto": True, "only_game_active": True}
+            diff = {k: v for k, v in C.items() if st.get(k, defaults.get(k)) != v}
             status.config(text=time.strftime("%H:%M:%S"))
             icon = {"ok": "✔", "info": "•", "warn": "⚠", "bad": "✖"}
             txt.insert("end", t("sync.findings") + "\n", "h")
@@ -1936,8 +1938,13 @@ class App:
             txt.insert("end", "\n" + t("sync.changes") + "\n", "h")
             if not diff:
                 txt.insert("end", t("sync.no_changes") + "\n", "ok")
+            def fmt(x):
+                if isinstance(x, bool): return "✔" if x else "✖"
+                if x in (None, ""): return "—"
+                if x == "auto": return t("ocr.auto")
+                return {"screen": t("panel.src_screen"), "region": t("panel.src_region")}.get(x, str(x))
             for k, v in diff.items():
-                txt.insert("end", f"  {t('syncset.' + k)}: {st.get(k)!s} → {v!s}\n")
+                txt.insert("end", f"  {t('syncset.' + k)}:  {fmt(st.get(k))}  →  {fmt(v)}\n")
             txt.config(state="disabled")
             report = syncer.report_text(res["pc"], res["game"], res["bench"], F, t)
             try: (APPLOG_DIR / "sync_report.txt").write_text(report, encoding="utf-8")
