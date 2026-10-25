@@ -33,7 +33,7 @@ copy /Y scripts\default_builds.json build\pkg\builds.json >nul
   --add-data "icon;icon" ^
   --hidden-import PIL._tkinter_finder ^
   --hidden-import pyttsx3.drivers --hidden-import pyttsx3.drivers.sapi5 ^
-  --hidden-import ocr_backend --hidden-import features --hidden-import stash --hidden-import vendor --hidden-import companion --hidden-import share --hidden-import dropstats --hidden-import fx --hidden-import bgvideo --hidden-import view3d --hidden-import display --hidden-import updater --hidden-import syncer --hidden-import gameinfo --hidden-import updates ^
+  --hidden-import ocr_backend --hidden-import features --hidden-import stash --hidden-import vendor --hidden-import companion --hidden-import share --hidden-import dropstats --hidden-import fx --hidden-import bgvideo --hidden-import view3d --hidden-import display --hidden-import updater --hidden-import syncer --hidden-import gameinfo --hidden-import updates --hidden-import reports ^
   --collect-all rapidocr --collect-all onnxruntime --collect-all faster_whisper --collect-all ctranslate2 ^
   app.py
 

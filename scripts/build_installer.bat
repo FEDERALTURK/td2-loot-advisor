@@ -73,7 +73,7 @@ if exist dist\TD2LootAdvisor rmdir /s /q dist\TD2LootAdvisor
   --hidden-import pyttsx3.drivers --hidden-import pyttsx3.drivers.sapi5 ^
   --hidden-import ocr_backend --hidden-import features --hidden-import stash --hidden-import vendor ^
   --hidden-import companion --hidden-import share --hidden-import dropstats --hidden-import updater ^
-  --hidden-import syncer --hidden-import gameinfo --hidden-import updates ^
+  --hidden-import syncer --hidden-import gameinfo --hidden-import updates --hidden-import reports ^
   --hidden-import fx --hidden-import bgvideo --hidden-import view3d --hidden-import display ^
   --exclude-module faster_whisper --exclude-module ctranslate2 --exclude-module torch --exclude-module av ^
   %COLLECT% ^

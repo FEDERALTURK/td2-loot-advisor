@@ -8,6 +8,13 @@
 
 Windows "kişisel bilgisayarınızı korudu" derse: **Ek bilgi → Yine de çalıştır** (dosya henüz kod imzalı değil).
 
+**5.0.7 — hata bildirme ve istek menüsü**
+- **Yeni: 🐞 Geri bildirim** (üst bant ve Yardım sekmesi). Hata, istek ya da soru doğrudan geliştiriciye gönderilir; GitHub hesabı gerekmez. İsteğe bağlı olarak sistem bilgisi, program kaydının son satırları ve son okunan eşya kartı eklenebilir; **Önizle** ile tam olarak ne gideceği görülür.
+- Göndermeden önce kişisel bilgiler silinir: dosya yollarındaki Windows kullanıcı adı, lisans anahtarı, e-posta adresleri.
+- **Raporlarım** sekmesi: gönderdiğin raporların durumu (Yeni, İncelendi, Üzerinde çalışılıyor, Tamamlandı…) ve geliştiricinin yanıtı burada görünür.
+- İnternet yoksa rapor saklanır ve bağlantı gelince kendiliğinden gönderilir.
+- "Yanlış okundu" düğmesi artık bu pencereyi kartın bilgileriyle doldurulmuş olarak açıyor.
+
 **5.0.6 — menü geçişi ve kaydırılmış kartlar**
 - Menü geçiş efekti yenilendi: seçili sekmenin altında kalıcı turuncu bir gösterge; sekme değişince eski sekmeden yenisine ~0,25 sn'de akıcı biçimde kayar. Sekmenin verisi animasyon bittikten sonra yenilendiği için geçiş takılmaz (eskiden pencere karartılıp açılıyor, arka plan saatiyle çakışıp titriyordu).
 - Kart aşağı kaydırılınca eşyanın adı görünmüyordu: ad ve set/marka artık envanter listesindeki seçili (vurgulu) satırdan okunuyor (ör. "Striker's Pack · Striker's Battlegear"). Kaydırılan kart başka bir eşyayla birleştirilmiyor.
