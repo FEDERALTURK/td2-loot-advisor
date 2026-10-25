@@ -45,3 +45,7 @@ reports_queue.json
 # Test ekran görüntüleri / videoları
 shots/
 tests/.bench_card.png
+
+# Hesap oturumu (DPAPI ile şifreli, kişisel)
+account.dat
+account.dat.tmp

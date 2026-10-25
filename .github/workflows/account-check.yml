@@ -1,0 +1,49 @@
+# Hesap / lisans sistemi: sunucu testleri (node + SQLite), istemci uçtan uca, Windows arayüz testi + ekran görüntüleri.
+name: Account check
+
+on:
+  workflow_dispatch:
+  push:
+    paths: ["server/**", "account.py", "features.py", "tests/test_account.py", "tests/ui_account_test.py"]
+
+jobs:
+  server:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with: { node-version: "22" }
+      - uses: actions/setup-python@v6
+        with: { python-version: "3.13" }
+      - run: node server/test_accounts.mjs
+      - run: node server/test_reports.mjs
+      - run: python tests/test_account.py
+  windows-ui:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with: { node-version: "22" }
+      - uses: actions/setup-python@v6
+        with: { python-version: "3.13" }
+      - name: Install
+        shell: cmd
+        run: |
+          python -m pip install -r requirements.txt
+          python -m pip install onnxruntime rapidocr
+      - name: Client end-to-end (DPAPI, MachineGuid)
+        shell: cmd
+        run: set PYTHONIOENCODING=utf-8&& python tests/test_account.py
+      - name: Account UI
+        shell: cmd
+        run: set PYTHONIOENCODING=utf-8&& python tests/ui_account_test.py
+      - name: Result
+        if: always()
+        shell: pwsh
+        run: if (Test-Path tests\.account_result.json) { Get-Content tests\.account_result.json }; if (Test-Path logs\app.log) { Get-Content logs\app.log -Tail 40 }
+      - uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: account-shots
+          path: shots/*

@@ -59,6 +59,7 @@ import syncer
 import gameinfo
 import updates
 import reports
+import account
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
@@ -73,6 +74,21 @@ CFG_PATH, LOG_PATH, DEBUG_PATH, PROG_PATH = (BASE / n for n in ("builds.json", "
 STASH_PATH = BASE / "stash.json"
 VENDOR_CACHE = BASE / "vendor_cache.json"
 DROPQ_PATH = BASE / "drop_queue.json"
+ACCOUNT_PATH = BASE / "account.dat"
+ACC_ERRORS = {"offline", "timeout", "invalid", "used", "expired", "payment", "rate", "disabled", "forbidden", "noserver"}
+
+
+def webbrowser_open(url):
+    import webbrowser
+    webbrowser.open(url)
+
+
+def _test_browser(url):
+    """Yalnız UI testi (TD2_ACCOUNT_TEST_BROWSER): yerel test sunucusunun sahte Discord onayını açar."""
+    st = urllib.parse.parse_qs(urllib.parse.urlparse(url).query).get("state", [""])[0]
+    base = os.environ.get("TD2_ACCOUNT_URL", "").rstrip("/")
+    if not base.startswith("http://127.0.0.1:"): return
+    urllib.request.urlopen(f"{base}/fake/discord?state={st}&user={os.environ['TD2_ACCOUNT_TEST_BROWSER']}", timeout=15).read()
 REPORTS_DIR = BASE / "reports"
 ISSUES_URL = "https://github.com/FEDERALTURK/td2-loot-advisor/issues/new"
 APPLOG_DIR = BASE / "logs"
@@ -1283,7 +1299,9 @@ class App:
         self.progress, self.tasks = load_progress(), load_tasks()
         self.normalize_builds()
         self.ent = features.Entitlements(stg.get("license_key", ""))
-        log.info("Tier: %s (%s)", self.ent.tier, self.ent.reason)
+        self.account = account.Account(ACCOUNT_PATH, self._acc_url())
+        self._acc_apply()
+        log.info("Tier: %s (key=%s, account=%s)", self.ent.tier, self.ent.reason, self.ent.ent_reason)
         self.stash = stash.Stash(STASH_PATH)
         self.vendor_week = vendor.load_cache(VENDOR_CACHE)
         self.vendor_scans, self.vendor_hits, self.vendor_busy = [], [], False
@@ -1332,8 +1350,174 @@ class App:
         log.info("UI ready — language=%s, OCR=%s, tesseract=%s", i18n.current_language(), OCR.name, self.tess or "NOT FOUND")
         if not self.gpu_apply_cached(): OCR.warm_up()
         self.root.after(8000, lambda: threading.Thread(target=self.gpu_check, daemon=True).start())
+        self.root.after(1500, self.account_startup)
         if OCR.name == "tesseract" and not self.tess:
             messagebox.showwarning(APP_NAME, t("msg.no_tesseract"))
+
+    # ---------- Hesap (isteğe bağlı: Discord ile giriş, anahtar / davet / satın alma) ----------
+    def _acc_url(self):
+        st = self.cfg["settings"]
+        return os.environ.get("TD2_ACCOUNT_URL") or st.get("account_server") or st.get("drop_server") or dropstats.DEFAULT_URL
+
+    def _acc_apply(self):
+        """Hesaptaki yetki belgesini doğrula; premium durumu değiştiyse True."""
+        before = self.ent.tier
+        self.ent.set_entitlement(self.account.entitlement, account.device_pub(),
+                                 os.environ.get("TD2_ENT_PUBKEY") or None)
+        return before != self.ent.tier
+
+    def _acc_chip_text(self):
+        a = getattr(self, "account", None)
+        if not a or not a.signed_in: return "👤 " + t("acc.login_short")
+        return "👤 " + a.username[:16] + (" ⭐" if self.ent.source == "account" or self.ent.valid else "")
+
+    def _acc_changed(self):
+        """Hesap / yetki değişti: başlığı güncelle, premium değiştiyse arayüzü yeniden kur."""
+        if self._acc_apply():
+            log.info("Account tier -> %s", self.ent.tier)
+            self.rebuild_ui()
+        else:
+            self.refresh_header()
+        if getattr(self, "_acc_win", None) and self._acc_win.winfo_exists(): self._acc_fill()
+
+    def account_startup(self):
+        st = self.cfg["settings"]
+        if self.account.signed_in:
+            ent_exp = self.ent.ent_payload.get("exp", 0) if self.ent.ent_reason in ("ok", "expired") else 0
+            if self.account.needs_refresh() or (ent_exp and ent_exp - time.time() < 2 * 86400) or self.ent.ent_reason != "ok":
+                self.account_refresh(quiet=True)
+        elif not st.get("acc_asked") and not os.environ.get("TD2_NO_WELCOME"):
+            st["acc_asked"] = True; save_cfg(self.cfg)
+            self.open_account(welcome=True)
+
+    def account_refresh(self, quiet=False):
+        def work():
+            try: self.account.refresh(); err = None
+            except account.AuthError as e: err = e
+            self.root.after(0, lambda: self._acc_after(err, quiet))
+        threading.Thread(target=work, daemon=True).start()
+
+    def _acc_after(self, err, quiet=False, msg=None):
+        if err is not None:
+            log.info("Account: %s (%s)", err.code, err)
+            if err.code == "unauthorized": msg = t("acc.err_session")
+            elif not quiet: msg = t("acc.err_" + err.code) if err.code in ACC_ERRORS else t("acc.err_http", e=str(err))
+        self._acc_msg = (msg, "danger" if err is not None else "success") if msg else None
+        self._acc_changed()
+
+    def open_account(self, welcome=False):
+        if getattr(self, "_acc_win", None) and self._acc_win.winfo_exists():
+            self._acc_win.lift(); return
+        w = self._acc_win = tk.Toplevel(self.root); w.title("👤 " + t("acc.title")); w.configure(bg=PAL["bg"])
+        w.transient(self.root)
+        k = getattr(self, "ui_factor", 1.0)
+        w.geometry(f"{int(560 * k)}x{int(600 * k)}"); w.minsize(int(480 * k), int(460 * k))
+        self._acc_welcome, self._acc_msg = welcome, None
+        self._acc_body = tk.Frame(w, bg=PAL["bg"]); self._acc_body.pack(fill="both", expand=True, padx=18, pady=16)
+        w.bind("<Escape>", lambda e: w.destroy())
+        self._acc_fill()
+
+    def _acc_fill(self):
+        b = self._acc_body
+        for c in b.winfo_children(): c.destroy()
+        a, e = self.account, self.ent
+        H = lambda txt, size=15, fg=None: tk.Label(b, text=txt, bg=PAL["bg"], fg=fg or PAL["fg"], font=(ui_theme.FONT_SEMI, size),
+                                                   anchor="w", justify="left")
+        P = lambda txt, fg=None: tk.Label(b, text=txt, bg=PAL["bg"], fg=fg or PAL["muted"], font=(ui_theme.FONT, 10),
+                                          anchor="w", justify="left", wraplength=int(500 * getattr(self, "ui_factor", 1.0)))
+        if not a.signed_in:
+            H("👤 " + t("acc.welcome_title" if self._acc_welcome else "acc.title")).pack(fill="x")
+            P(t("acc.intro")).pack(fill="x", pady=(6, 12))
+            card = tk.Frame(b, bg=PAL["surface"], highlightthickness=1, highlightbackground=PAL["accent"])
+            card.pack(fill="x", pady=4)
+            for line in ("acc.why_1", "acc.why_2", "acc.why_3"):
+                tk.Label(card, text="⭐  " + t(line), bg=PAL["surface"], fg=PAL["fg"], font=(ui_theme.FONT, 10), anchor="w",
+                         justify="left").pack(fill="x", padx=12, pady=(6, 0))
+            tk.Frame(card, height=8, bg=PAL["surface"]).pack()
+            self._acc_btn = ttk.Button(b, text="🎮  " + t("acc.discord"), style="Accent.TButton", command=self._acc_login)
+            self._acc_btn.pack(fill="x", pady=(16, 4), ipady=6)
+            P(t("acc.register_note")).pack(fill="x")
+            self._acc_status = tk.Label(b, text="", bg=PAL["bg"], fg=PAL["muted"], font=(ui_theme.FONT, 10), anchor="w",
+                                        justify="left", wraplength=int(500 * getattr(self, "ui_factor", 1.0)))
+            self._acc_status.pack(fill="x", pady=(8, 0))
+            sec = tk.Frame(b, bg=PAL["bg"]); sec.pack(fill="x", side="bottom")
+            for line in ("acc.sec_1", "acc.sec_2", "acc.sec_3"):
+                tk.Label(sec, text="🔒 " + t(line), bg=PAL["bg"], fg=PAL["muted"], font=(ui_theme.FONT, 9), anchor="w").pack(fill="x")
+            if self._acc_welcome:
+                ttk.Button(b, text=t("acc.skip"), command=self._acc_win.destroy).pack(anchor="e", pady=(10, 6), side="bottom")
+        else:
+            prem = e.source == "account"
+            H("👤 " + a.username).pack(fill="x")
+            badge = ("⭐ " + t("prem.premium")) if prem else (("⭐ " + t("acc.via_key")) if e.valid else t("prem.free"))
+            tk.Label(b, text=badge, bg=PAL["accent"] if (prem or e.valid) else PAL["surface"],
+                     fg=PAL["bg"] if (prem or e.valid) else PAL["muted"], font=(ui_theme.FONT_SEMI, 10), padx=10, pady=2).pack(anchor="w", pady=(4, 8))
+            lic = a.data.get("license") or {}
+            if lic:
+                exp = lic.get("expires")
+                when = t("prem.never") if not exp else t("prem.exp", date=time.strftime("%Y-%m-%d", time.localtime(exp)))
+                P(t("acc.license_line", src=t("acc.src_" + lic.get("source", "admin")), hint=lic.get("hint", ""), exp=when)).pack(fill="x")
+            if a.data.get("device_limit"):
+                P("⚠ " + t("acc.device_limit"), fg=PAL["warning"]).pack(fill="x", pady=(6, 0))
+            elif prem:
+                left = max(0, int((e.ent_payload.get("exp", 0) - time.time()) / 86400))
+                P(t("acc.offline_days", n=left)).pack(fill="x", pady=(2, 0))
+            elif a.signed_in and e.ent_reason == "nokey" and a.entitlement:
+                P(t("acc.nokey"), fg=PAL["warning"]).pack(fill="x", pady=(6, 0))
+            H(t("acc.redeem_title"), 11).pack(fill="x", pady=(18, 2))
+            P(t("acc.redeem_hint")).pack(fill="x")
+            rr = tk.Frame(b, bg=PAL["bg"]); rr.pack(fill="x", pady=6)
+            self._acc_code = ttk.Entry(rr); self._acc_code.pack(side="left", fill="x", expand=True)
+            self._acc_code.bind("<Return>", lambda ev: self._acc_redeem())
+            self._acc_btn = ttk.Button(rr, text="✔ " + t("acc.redeem"), style="Accent.TButton", command=self._acc_redeem)
+            self._acc_btn.pack(side="left", padx=(6, 0))
+            self._acc_status = tk.Label(b, text="", bg=PAL["bg"], fg=PAL["muted"], font=(ui_theme.FONT, 10), anchor="w",
+                                        justify="left", wraplength=int(500 * getattr(self, "ui_factor", 1.0)))
+            self._acc_status.pack(fill="x")
+            P(t("acc.one_device")).pack(fill="x", pady=(14, 0))
+            bar = tk.Frame(b, bg=PAL["bg"]); bar.pack(fill="x", side="bottom", pady=(10, 0))
+            ttk.Button(bar, text="🔄 " + t("acc.refresh"), command=lambda: (self._acc_set_status(t("acc.working")), self.account_refresh())).pack(side="left")
+            ttk.Button(bar, text="🐞 " + t("acc.support"), command=lambda: self.open_feedback(
+                prefill={"type": "question", "title": t("acc.support_title")})).pack(side="left", padx=6)
+            ttk.Button(bar, text="⎋ " + t("acc.logout"), command=self._acc_logout).pack(side="right")
+        if getattr(self, "_acc_msg", None):
+            self._acc_set_status(*self._acc_msg)
+
+    def _acc_set_status(self, text, kind="muted"):
+        if getattr(self, "_acc_status", None) and self._acc_status.winfo_exists():
+            self._acc_status.config(text=text, fg=PAL.get(kind, PAL["muted"]))
+
+    def _acc_login(self):
+        if getattr(self, "_acc_cancel", None) and not self._acc_cancel.is_set():   # ikinci tık: iptal
+            self._acc_cancel.set(); return
+        cancel = self._acc_cancel = threading.Event()
+        self._acc_btn.config(text="✖ " + t("acc.cancel"))
+        self._acc_set_status(t("acc.waiting"))
+        opener = webbrowser_open
+        if os.environ.get("TD2_ACCOUNT_TEST_BROWSER"):                 # UI testi: tarayıcı yerine sahte onay
+            opener = lambda u: threading.Thread(target=_test_browser, args=(u,), daemon=True).start()
+        def work():
+            try: self.account.login(open_url=opener, cancel=cancel); err = None
+            except account.AuthError as e: err = e
+            except Exception as e: err = account.AuthError("http", str(e))
+            cancel.set()
+            msg = t("acc.welcome", name=self.account.username) if err is None else None
+            self.root.after(0, lambda: self._acc_after(err if not (err and err.code == "cancelled") else None, msg=msg))
+        threading.Thread(target=work, daemon=True).start()
+
+    def _acc_redeem(self):
+        code = self._acc_code.get().strip()
+        if len(code) < 8: return self._acc_set_status(t("acc.err_invalid"), "danger")
+        self._acc_btn.state(["disabled"]); self._acc_set_status(t("acc.working"))
+        def work():
+            try: j = self.account.redeem(code); err = None
+            except account.AuthError as e: err, j = e, {}
+            msg = t("acc.redeemed") if err is None and j.get("tier") == "premium" else (t("acc.device_limit") if j.get("device_limit") else None)
+            self.root.after(0, lambda: self._acc_after(err, msg=msg))
+        threading.Thread(target=work, daemon=True).start()
+
+    def _acc_logout(self):
+        if not messagebox.askyesno(APP_NAME, t("acc.logout_q"), parent=self._acc_win): return
+        threading.Thread(target=lambda: (self.account.logout(), self.root.after(0, self._acc_changed)), daemon=True).start()
 
     # ---------- Ekran kartıyla OCR (DirectML) ----------
     def _gpu_key(self):
@@ -1593,7 +1777,8 @@ class App:
         if not hasattr(self, "banner"): return
         st = self.cfg["settings"]
         prov = st.get("ai_provider", "builtin")
-        self.banner.set_chips([("🐞 " + t("fb.btn_short"), "off", self.open_feedback),
+        self.banner.set_chips([(self._acc_chip_text(), "btn" if not self.account.signed_in else "on", self.open_account),
+                               ("🐞 " + t("fb.btn_short"), "off", self.open_feedback),
                                ("🔄 " + t("sync.btn_short"), "btn", self.run_sync),
                                (("● " + t("state.running")) if self.running else ("○ " + t("state.stopped")),
                                 "on" if self.running else "off"),
@@ -3463,7 +3648,7 @@ class App:
         url = self.cfg["settings"].get("drop_server") or dropstats.DEFAULT_URL
         if not url: return messagebox.showinfo(APP_NAME, t("drops.no_server"))
         act = next((k for k, v in self._acts.items() if v == self.cs_act.get()), None)
-        q, key = self.cs_q.get().strip(), self.cfg["settings"].get("license_key", "")
+        q, key = self.cs_q.get().strip(), self.ent.server_auth()[4:]
         def go():
             try: data, err = dropstats.stats(url, key, act, q), None
             except Exception as e: data, err = None, e
@@ -5296,7 +5481,15 @@ class App:
         if "premium" in getattr(self, "_set_keys", []): self.set_nb.select(self._set_keys.index("premium"))
 
     def build_premium_box(self, f, st):
-        pb = ttk.LabelFrame(f, text=t("prem.box")); pb.pack(fill="x", padx=10, pady=(10, 6))
+        ab = ttk.LabelFrame(f, text="👤 " + t("acc.title")); ab.pack(fill="x", padx=10, pady=(10, 6))
+        ar = ttk.Frame(ab); ar.pack(fill="x", padx=8, pady=8)
+        a = self.account
+        txt = (t("acc.signed_as", name=a.username) + ("  ⭐ " + t("prem.premium") if self.ent.source == "account" else "")) if a.signed_in \
+            else t("acc.not_signed")
+        ttk.Label(ar, text=txt).pack(side="left")
+        ttk.Button(ar, text=t("acc.open") if a.signed_in else "🎮 " + t("acc.discord"), command=self.open_account,
+                   style="Accent.TButton").pack(side="right")
+        pb = ttk.LabelFrame(f, text=t("prem.box")); pb.pack(fill="x", padx=10, pady=(4, 6))
         r = ttk.Frame(pb); r.pack(fill="x", padx=8, pady=8)
         ttk.Label(r, text=t("prem.key")).pack(side="left")
         self.lic_var = tk.StringVar(value=st.get("license_key", ""))
@@ -5322,6 +5515,8 @@ class App:
         if e.valid:
             exp = t("prem.exp", date=e.expires()) if e.expires() else t("prem.never")
             txt = t("prem.status_ok", name=e.payload.get("name", ""), exp=exp)
+        elif e.reason == "empty" and e.source == "account":
+            txt = t("acc.prem_via_account", name=self.account.username)
         elif e.reason == "empty":
             txt = t("prem.status_free")
         elif e.reason == "expired":

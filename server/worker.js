@@ -11,7 +11,11 @@
 // GitHub ulaşılamazsa rapor D1'de bekletilir ve saatlik görevde iletilir. Kişisel veriler (kullanıcı klasörü
 // yolları, lisans anahtarları, e-postalar) temizlenir.
 //
+//   Hesap / lisans (accounts.js): /v1/auth/start|callback|token|logout, /v1/me, /v1/license/redeem, /v1/admin/*
+//
 // Gizlilik: IP saklanmaz; istemci kimliği tuzlu SHA-256 ile özetlenir; attribute DEĞERLERİ değil yalnız türleri alınır.
+
+import { route as accountRoute, verifyEntitlement } from "./accounts.js";
 
 const ACTIVITIES = new Set(["open_world", "mission", "legendary", "countdown", "summit", "incursion", "raid", "dark_zone",
   "conflict", "descent", "manhunt", "control_point", "bounty", "season", "vendor", "caches", "crafting", "unknown"]);
@@ -77,6 +81,11 @@ function b64url(s) {
 }
 
 async function licenseOk(env, header) {
+  const e = /^TD2\s+(TD2E-\S+)$/.exec(header || "");
+  if (e) {                                               // hesap yetki belgesi (Discord girişi + anahtar)
+    const p = await verifyEntitlement(env, e[1]);
+    return p && p.tier === "premium" ? { ok: true, payload: p } : { ok: false, why: "entitlement" };
+  }
   const m = /^TD2\s+(TD2P-[A-Za-z0-9_\-]+\.[A-Za-z0-9_\-]+)$/.exec(header || "");
   if (!m) return { ok: false, why: "missing" };
   const [body, sig] = m[1].slice(5).split(".");
@@ -300,7 +309,9 @@ export default {
     try {
       if (req.method === "OPTIONS") return json({}, 204, { "access-control-allow-methods": "GET, POST",
                                                            "access-control-allow-headers": "content-type, authorization" });
-      if (u.pathname === "/v1/health") return json({ ok: true });
+      if (u.pathname === "/v1/health") return json({ ok: true, login: !!env.DISCORD_CLIENT_ID });
+      const acc = await accountRoute(req, env, u.pathname);
+      if (acc) return acc;
       if (u.pathname === "/v1/drops" && req.method === "POST") return await postDrops(req, env);
       if (u.pathname === "/v1/summary" && req.method === "GET") return await summary(env);
       if (u.pathname === "/v1/stats" && req.method === "GET") return await stats(req, env);
@@ -314,6 +325,9 @@ export default {
   async scheduled(_event, env) {                       // eski oran kayıtlarını sil (48 saatten eski)
     const hour = Math.floor(Date.now() / 3600000) - 48;
     await env.DB.prepare("DELETE FROM rate WHERE hour < ?1").bind(hour).run();
+    const t = Math.floor(Date.now() / 1000);
+    await env.DB.prepare("DELETE FROM auth_pending WHERE created < ?1").bind(t - 900).run();
+    await env.DB.prepare("DELETE FROM sessions WHERE expires < ?1 OR (revoked = 1 AND last_seen < ?2)").bind(t, t - 7 * 86400).run();
     await flushQueue(env);                             // GitHub'a iletilemeyen raporlar
   },
 };

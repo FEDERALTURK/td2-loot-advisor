@@ -4,6 +4,8 @@ name: Sync check (Windows)
 on:
   workflow_dispatch:
 
+env:
+  TD2_NO_WELCOME: "1"      # hesap karşılama penceresi diğer arayüz testlerini örtmesin
 jobs:
   sync:
     runs-on: windows-latest

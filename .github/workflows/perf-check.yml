@@ -8,6 +8,8 @@ on:
         description: "Karşılaştırılacak önceki sürüm etiketi"
         default: "v5.0.8"
 
+env:
+  TD2_NO_WELCOME: "1"      # hesap karşılama penceresi diğer arayüz testlerini örtmesin
 jobs:
   perf:
     runs-on: windows-latest

@@ -38,6 +38,10 @@ COMING = {"cloud_sync"}
 # Yayıncının açık anahtarı (32 bayt, hex). scripts/license_tool.py init ile üretilir.
 PUBLIC_KEY_HEX = "d70b17497241261ca45bcd05bbaedcd0fdeb3d866de4993d23db3c25274f633a"
 KEY_PREFIX = "TD2P-"
+# Hesap sunucusunun yetki belgesi açık anahtarı (Discord girişi + anahtar/davet/satış → TD2E belgesi).
+# scripts/account_keys.mjs ile kullanıcının KENDİ bilgisayarında üretilir; özel yarısı yalnız Cloudflare gizlisinde durur.
+ENT_PUBLIC_KEY_HEX = ""
+ENT_PREFIX = "TD2E-"
 
 # ---------------------------------------------------------------- Ed25519 (RFC 8032, saf Python)
 _p = 2 ** 255 - 19
@@ -166,17 +170,65 @@ def check_key(key, pub_hex=None, now=None):
     return True, payload, "ok"
 
 
+def check_entitlement(token, device_pub, pub_hex=None, now=None):
+    """Hesap yetki belgesi (TD2E) — imza, süre (en çok 7 gün, internetsiz) ve BU bilgisayara bağlılık.
+    Dönüş: (geçerli mi, payload ya da {}, sebep: ok|empty|nokey|format|signature|expired|device)."""
+    token = (token or "").strip()
+    if not token: return False, {}, "empty"
+    pub_hex = pub_hex if pub_hex is not None else ENT_PUBLIC_KEY_HEX
+    if not pub_hex: return False, {}, "nokey"
+    if not token.startswith(ENT_PREFIX) or "." not in token: return False, {}, "format"
+    try:
+        body_s, sig_s = token[len(ENT_PREFIX):].split(".", 1)
+        body, sig = _b64d(body_s), _b64d(sig_s)
+        payload = json.loads(body.decode())
+    except Exception:
+        return False, {}, "format"
+    if not verify(bytes.fromhex(pub_hex), body, sig): return False, {}, "signature"
+    t = now or time.time()
+    if not payload.get("exp") or t > float(payload["exp"]) or t + 300 < float(payload.get("iat", 0)):
+        return False, payload, "expired"
+    if not device_pub or payload.get("dev") != device_pub: return False, payload, "device"
+    return True, payload, "ok"
+
+
 class Entitlements:
-    """Uygulamanın tek soru noktası: ent.has("recal_advisor")."""
+    """Uygulamanın tek soru noktası: ent.has("recal_advisor").
+    Premium iki yoldan gelir: yayıncının imzalı anahtarı (TD2P, eski yol) ya da hesap yetki belgesi (TD2E)."""
 
     def __init__(self, key="", pub_hex=None):
+        self.ent_token, self.ent_payload, self.ent_reason = "", {}, "empty"
         self.set_key(key, pub_hex)
+
+    def _recompute(self):
+        if self.valid: self.tier = self.payload.get("tier", "premium")
+        elif self.ent_reason == "ok": self.tier = self.ent_payload.get("tier", "premium")
+        else: self.tier = "free"
 
     def set_key(self, key, pub_hex=None):
         self.key = key or ""
         self.valid, self.payload, self.reason = check_key(self.key, pub_hex)
-        self.tier = self.payload.get("tier", "premium") if self.valid else "free"
+        self._recompute()
         return self.valid
+
+    def set_entitlement(self, token, device_pub, pub_hex=None, now=None):
+        ok, self.ent_payload, self.ent_reason = check_entitlement(token, device_pub, pub_hex, now)
+        self.ent_token = token if ok else ""
+        self._recompute()
+        return ok
+
+    @property
+    def source(self):
+        """premium nereden geliyor: key | account | None"""
+        if self.valid: return "key"
+        if self.ent_reason == "ok": return "account"
+        return None
+
+    def server_auth(self):
+        """Sunucunun premium uç noktaları için Authorization başlığı (yoksa "")."""
+        if self.valid: return "TD2 " + self.key.strip()
+        if self.ent_token: return "TD2 " + self.ent_token
+        return ""
 
     def has(self, feature):
         need = FEATURES.get(feature, "free")
@@ -186,5 +238,5 @@ class Entitlements:
         return [f for f in FEATURES if not self.has(f)]
 
     def expires(self):
-        exp = self.payload.get("exp")
+        exp = self.payload.get("exp") if self.valid else self.ent_payload.get("lic_exp")
         return time.strftime("%Y-%m-%d", time.localtime(float(exp))) if exp else None
