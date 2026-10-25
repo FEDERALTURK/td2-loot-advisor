@@ -1770,13 +1770,14 @@ class App:
         prev = getattr(self, "card_session", None)
         kind_ok = item.get("kind") in ("gear", "weapon")
         if prev and now - prev["t"] < 60 and kind_ok:
+            # aynı set/markanın farklı parçaları aynı adla okunur (ör. Striker eldiveni ve dizliği): yuva farklıysa ayrı eşya
+            slot_ok = not item.get("slot") or not prev["item"].get("slot") or item["slot"] == prev["item"]["slot"]
+            kind_same = item.get("kind") == prev["item"].get("kind")
             same = item["name"] not in ("?", "") and gamedata.nrm(item["name"]) == gamedata.nrm(prev["item"]["name"])
             # devam parçası: adı görünmeyen alt kısım. Aynı türde olmalı (silah ≠ zırh) ve kendi başlığı
             # (nadirlik satırı: Exotic / High-End …) görünmemeli — başlık varsa bu yeni bir kartın üstüdür.
-            cont = (item.get("partial") and not prev["item"].get("partial")
-                    and item.get("kind") == prev["item"].get("kind") and not item.get("rarity")
-                    and (not item.get("slot") or not prev["item"].get("slot") or item["slot"] == prev["item"]["slot"]))
-            if (same or cont) and prev["text"].strip() != text.strip():
+            cont = item.get("partial") and not prev["item"].get("partial") and not item.get("rarity")
+            if (same or cont) and kind_same and slot_ok and prev["text"].strip() != text.strip():
                 merged_text = prev["text"] + "\n" + text
                 item2, verdict2, res2 = evaluate(merged_text, self.cfg)
                 if item2["name"] not in ("?", ""):
