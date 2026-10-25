@@ -7,6 +7,8 @@ import json
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
 from PIL import Image
 
 SLOTS = ("Mask", "Chest", "Backpack", "Gloves", "Holster", "Kneepads", "Weapon", "Sidearm")
@@ -35,7 +37,8 @@ def main(src, dst, outfit):
                 if sum((c[t] - pal[k][t]) ** 2 for t in range(3)) > 6000: continue
                 po[x, y] = k; a = acc[k]; a[0] += x; a[1] += y; a[2] += 1
         out.save(dst / f"m{i:02d}.png", optimize=True)
-        anchors.append({SLOTS[k - 1]: [round(a[0] / a[2]), round(a[1] / a[2]), a[2]] for k, a in acc.items() if a[2] >= 12})
+        from fix_anchors import anchors_of
+        anchors.append({SLOTS[k - 1]: v for k, v in anchors_of(out).items()})
         print("packed", i, flush=True)
     info = {"outfit": outfit, "frames": len(frames), "size": list(size), "slots": list(SLOTS), "anchors": anchors,
             "credits": "Original design. Body base: MakeHuman (CC0)."}
