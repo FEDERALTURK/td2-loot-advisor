@@ -1222,6 +1222,7 @@ class App:
         display.set_dpi_aware()                         # %125/%150 Windows ölçeğinde koordinatlar kaymasın
         self.root = tk.Tk()
         self.root.title(f"{APP_NAME} v{APP_VERSION}")
+        self.set_app_icon()
         self._base_scaling = float(self.root.tk.call("tk", "scaling"))
         self.apply_window_profile(initial=True)
         self.sounds = ui_theme.Sounds(BASE / "sounds", enabled=bool(stg.get("ui_sounds", True)))
@@ -1238,6 +1239,23 @@ class App:
         OCR.warm_up()
         if OCR.name == "tesseract" and not self.tess:
             messagebox.showwarning(APP_NAME, t("msg.no_tesseract"))
+
+    def set_app_icon(self):
+        """Pencere ve görev çubuğu simgesi (icon/td2.ico, td2.png). Windows'ta görev çubuğunda Python simgesi yerine
+        uygulamanın kendi simgesi görünsün diye ayrı bir AppUserModelID verilir."""
+        if os.name == "nt":
+            try: ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("FEDERALTURK.TD2LootAdvisor")
+            except Exception: pass
+        for folder in (BASE / "icon", BUNDLE / "icon"):
+            try:
+                if os.name == "nt" and (folder / "td2.ico").exists():
+                    self.root.iconbitmap(default=str(folder / "td2.ico"))
+                if (folder / "td2.png").exists():
+                    self._icon_img = ImageTk.PhotoImage(Image.open(folder / "td2.png").resize((64, 64), Image.LANCZOS))
+                    self.root.iconphoto(True, self._icon_img)
+                    return
+            except Exception:
+                log.debug("icon failed", exc_info=True)
 
     def restart_app(self, tab=None, page=None):
         """Programı aynı ayarlarla yeniden açar (pencere/yazı ölçeği değişince)."""

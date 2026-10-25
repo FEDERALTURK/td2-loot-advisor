@@ -54,7 +54,7 @@ echo [4/7] Paket hazirlaniyor / preparing package...
 if exist build\pkg rmdir /s /q build\pkg
 mkdir build\pkg >nul 2>&1
 copy /Y scripts\default_builds.json build\pkg\builds.json >nul
-%PY% scripts\make_icon.py build\td2.ico >nul
+if exist icon\td2.ico (copy /Y icon\td2.ico build\td2.ico >nul) else (%PY% scripts\make_icon.py build\td2.ico >nul)
 for /f "delims=" %%v in ('%PY% scripts\version.py') do set "VER=%%v"
 if not defined VER set "VER=5.0"
 echo     Surum / version: %VER%
@@ -67,6 +67,7 @@ if exist dist\TD2LootAdvisor rmdir /s /q dist\TD2LootAdvisor
   --add-data "build\pkg\builds.json;." ^
   --add-data "lang;lang" ^
   --add-data "meta;meta" ^
+  --add-data "icon;icon" ^
   --hidden-import PIL._tkinter_finder --hidden-import PIL.ImageTk ^
   --hidden-import pynput.keyboard._win32 --hidden-import pynput.mouse._win32 ^
   --hidden-import pyttsx3.drivers --hidden-import pyttsx3.drivers.sapi5 ^
