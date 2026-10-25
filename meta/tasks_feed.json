@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "version": "2026-10-24.4",
-  "updated": "2026-10-24T01:36:28Z",
+  "version": "2026-10-25.1",
+  "updated": "2026-10-25T01:35:38Z",
   "season": "Year 8 Season 3 – Red Horizon",
   "resets": {
     "daily_hour_utc": 8,
@@ -281,6 +281,99 @@
         "ru": "Тот же маршрут, что и для 10 поджогов: в третьей зоне идите влево к группе из четырёх и активируйте Fiery Aura в их центре. Если они разойдутся, засчитается только шаг на 10.",
         "pl": "Ta sama trasa co przy 10 podpaleniach: w trzeciej strefie idź w lewo do grupy czterech i aktywuj Fiery Aura w ich środku. Jeśli się rozproszą, zaliczy się tylko etap 10.",
         "nl": "Zelfde route als de 10-stap: ga in het derde gebied links naar de groep van vier en activeer Fiery Aura midden tussen hen. Verspreiden ze zich, dan telt mogelijk alleen de 10-stap."
+      }
+    },
+    {
+      "id": "y8s3-journey-m4-burning-headshots",
+      "cat": "journey",
+      "source": {
+        "url": "https://grindout.com/division-2/guides/season-journey-missions"
+      },
+      "text": {
+        "en": "Red Horizon Journey – Mission 4: headshot 3 different burning enemies within 3 seconds of each other",
+        "tr": "Red Horizon Yolculuğu – Görev 4: yanan 3 farklı düşmanı birbirinden en fazla 3 saniye arayla kafadan vur",
+        "de": "Red Horizon Reise – Mission 4: 3 verschiedene brennende Gegner innerhalb von 3 Sekunden per Kopfschuss treffen",
+        "fr": "Parcours Red Horizon – Mission 4 : tirer dans la tête de 3 ennemis en feu différents à moins de 3 secondes d'intervalle",
+        "es": "Recorrido Red Horizon – Misión 4: dispara a la cabeza a 3 enemigos ardiendo distintos con menos de 3 segundos entre cada uno",
+        "it": "Percorso Red Horizon – Missione 4: colpisci alla testa 3 nemici in fiamme diversi entro 3 secondi l'uno dall'altro",
+        "pt": "Jornada Red Horizon – Missão 4: acerte na cabeça 3 inimigos diferentes em chamas com até 3 segundos entre cada um",
+        "ru": "Путешествие Red Horizon – Миссия 4: попадите в голову 3 разным горящим врагам с интервалом не более 3 секунд",
+        "pl": "Podróż Red Horizon – Misja 4: traf w głowę 3 różnych płonących wrogów w odstępie maks. 3 sekund",
+        "nl": "Red Horizon-reis – Missie 4: raak 3 verschillende brandende vijanden in het hoofd binnen 3 seconden van elkaar"
+      },
+      "how": {
+        "en": "Set Burn on a group first (Fiery Aura, a firestarter skill or incendiary grenade), then switch to a fast-firing rifle and tap heads quickly. An easy, low difficulty mission makes it simpler. Keep Vicarious Combustion equipped meanwhile to level it to 5.",
+        "tr": "Önce bir gruba Burn uygula (Fiery Aura, firestarter yeteneği ya da yanıcı bomba), sonra hızlı ateş eden bir tüfeğe geçip kafaları peş peşe vur. Kolay zorlukta bir görev işi kolaylaştırır. Bu sırada Vicarious Combustion takılı kalsın ki seviye 5'e çıksın.",
+        "de": "Zuerst eine Gruppe in Brand setzen (Fiery Aura, Firestarter-Skill oder Brandgranate), dann zu einem schnell feuernden Gewehr wechseln und zügig auf Köpfe zielen. Eine leichte Mission auf niedriger Stufe hilft. Vicarious Combustion ausgerüstet lassen, damit es Stufe 5 erreicht.",
+        "fr": "Enflammez d'abord un groupe (Fiery Aura, compétence incendiaire ou grenade incendiaire), puis passez à un fusil rapide et enchaînez les tirs à la tête. Une mission en difficulté basse aide. Gardez Vicarious Combustion équipé pour le monter au niveau 5.",
+        "es": "Primero aplica Burn a un grupo (Fiery Aura, habilidad incendiaria o granada incendiaria), luego cambia a un rifle de cadencia alta y apunta a la cabeza rápido. Una misión en dificultad baja lo facilita. Deja Vicarious Combustion equipado para subirlo a nivel 5.",
+        "it": "Prima incendia un gruppo (Fiery Aura, abilità incendiaria o granata incendiaria), poi passa a un fucile rapido e colpisci le teste in fretta. Una missione a bassa difficoltà aiuta. Tieni equipaggiato Vicarious Combustion per portarlo al livello 5.",
+        "pt": "Primeiro aplique Burn em um grupo (Fiery Aura, habilidade incendiária ou granada incendiária), depois troque para um rifle de tiro rápido e mire na cabeça rapidamente. Uma missão em dificuldade baixa ajuda. Mantenha Vicarious Combustion equipado para chegar ao nível 5.",
+        "ru": "Сначала подожгите группу (Fiery Aura, поджигающий навык или зажигательная граната), затем переключитесь на скорострельную винтовку и быстро стреляйте в голову. Проще на лёгкой сложности. Держите Vicarious Combustion экипированным, чтобы прокачать до 5.",
+        "pl": "Najpierw podpal grupę (Fiery Aura, umiejętność zapalająca lub granat zapalający), potem przełącz się na szybkostrzelny karabin i szybko celuj w głowy. Pomaga misja na niskim poziomie trudności. Trzymaj Vicarious Combustion założone, by wbić poziom 5.",
+        "nl": "Steek eerst een groep in brand (Fiery Aura, firestarter-skill of brandgranaat), wissel dan naar een snel vurend geweer en mik snel op hoofden. Een missie op lage moeilijkheid helpt. Houd Vicarious Combustion uitgerust zodat het niveau 5 haalt."
+      }
+    },
+    {
+      "id": "y8s3-journey-m4-five-burning",
+      "cat": "journey",
+      "source": {
+        "url": "https://grindout.com/division-2/guides/season-journey-missions"
+      },
+      "text": {
+        "en": "Red Horizon Journey – Mission 4: have 5 enemies burning at the same time within 20 m",
+        "tr": "Red Horizon Yolculuğu – Görev 4: 20 m içinde aynı anda 5 düşmanı yanar halde tut",
+        "de": "Red Horizon Reise – Mission 4: 5 Gegner gleichzeitig im Umkreis von 20 m brennen lassen",
+        "fr": "Parcours Red Horizon – Mission 4 : avoir 5 ennemis en feu en même temps à moins de 20 m",
+        "es": "Recorrido Red Horizon – Misión 4: ten 5 enemigos ardiendo a la vez a menos de 20 m",
+        "it": "Percorso Red Horizon – Missione 4: avere 5 nemici in fiamme contemporaneamente entro 20 m",
+        "pt": "Jornada Red Horizon – Missão 4: tenha 5 inimigos em chamas ao mesmo tempo a até 20 m",
+        "ru": "Путешествие Red Horizon – Миссия 4: держите 5 горящих врагов одновременно в радиусе 20 м",
+        "pl": "Podróż Red Horizon – Misja 4: miej 5 płonących wrogów jednocześnie w promieniu 20 m",
+        "nl": "Red Horizon-reis – Missie 4: zorg dat 5 vijanden tegelijk branden binnen 20 m"
+      },
+      "how": {
+        "en": "Bank Headquarters on Hard starts with a group of about 5 enemies close together: open with Fiery Aura or an incendiary grenade/firestarter at short range. Restart the mission if it fails.",
+        "tr": "Bank Headquarters görevi Hard zorlukta, birbirine yakın yaklaşık 5 düşmanla başlar: yakın mesafeden Fiery Aura ya da yanıcı bomba/firestarter ile aç. Olmazsa görevi yeniden başlat.",
+        "de": "Bank Headquarters auf Hard beginnt mit etwa 5 eng beieinander stehenden Gegnern: aus kurzer Distanz mit Fiery Aura oder Brandgranate/Firestarter eröffnen. Bei Fehlschlag Mission neu starten.",
+        "fr": "Bank Headquarters en Difficile commence avec environ 5 ennemis groupés : ouvrez à courte portée avec Fiery Aura ou une grenade incendiaire/firestarter. Relancez la mission en cas d'échec.",
+        "es": "Bank Headquarters en Difícil empieza con unos 5 enemigos juntos: abre a corta distancia con Fiery Aura o una granada incendiaria/firestarter. Reinicia la misión si falla.",
+        "it": "Bank Headquarters a Difficile inizia con circa 5 nemici vicini: apri a breve distanza con Fiery Aura o granata incendiaria/firestarter. Riavvia la missione se non riesce.",
+        "pt": "Bank Headquarters no Difícil começa com cerca de 5 inimigos próximos: abra de perto com Fiery Aura ou granada incendiária/firestarter. Reinicie a missão se falhar.",
+        "ru": "Bank Headquarters на сложности Hard начинается с группы примерно из 5 врагов рядом: начните вблизи с Fiery Aura или зажигательной гранаты/firestarter. При неудаче перезапустите миссию.",
+        "pl": "Bank Headquarters na poziomie Hard zaczyna się od ok. 5 wrogów blisko siebie: otwórz z bliska Fiery Aura lub granatem zapalającym/firestarterem. Jeśli się nie uda, zrestartuj misję.",
+        "nl": "Bank Headquarters op Hard begint met ongeveer 5 vijanden dicht bij elkaar: open op korte afstand met Fiery Aura of een brandgranaat/firestarter. Herstart de missie als het mislukt."
+      }
+    },
+    {
+      "id": "y8s3-journey-m5-sidearm-3",
+      "cat": "journey",
+      "source": {
+        "url": "https://grindout.com/division-2/guides/season-journey-missions"
+      },
+      "text": {
+        "en": "Red Horizon Journey – Mission 5: kill 3 hostiles with a sidearm without reloading",
+        "tr": "Red Horizon Yolculuğu – Görev 5: şarjör değiştirmeden tabancayla 3 düşman öldür",
+        "de": "Red Horizon Reise – Mission 5: 3 Gegner mit der Seitenwaffe ohne Nachladen töten",
+        "fr": "Parcours Red Horizon – Mission 5 : tuer 3 ennemis à l'arme de poing sans recharger",
+        "es": "Recorrido Red Horizon – Misión 5: mata a 3 enemigos con la pistola sin recargar",
+        "it": "Percorso Red Horizon – Missione 5: uccidi 3 nemici con l'arma secondaria senza ricaricare",
+        "pt": "Jornada Red Horizon – Missão 5: elimine 3 inimigos com a arma secundária sem recarregar",
+        "ru": "Путешествие Red Horizon – Миссия 5: убейте 3 врагов из пистолета без перезарядки",
+        "pl": "Podróż Red Horizon – Misja 5: zabij 3 wrogów bronią boczną bez przeładowania",
+        "nl": "Red Horizon-reis – Missie 5: dood 3 vijanden met je zijwapen zonder te herladen"
+      },
+      "how": {
+        "en": "Start a mission on Story difficulty so weak enemies drop in one or two shots, use a pistol with a large magazine and aim for the head. Reload only after the third kill.",
+        "tr": "Düşmanların bir iki atışta düştüğü Story zorluğunda bir görev başlat, büyük şarjörlü bir tabanca kullan ve kafaya nişan al. Şarjörü ancak üçüncü öldürmeden sonra değiştir.",
+        "de": "Eine Mission auf Story starten, damit Gegner nach ein, zwei Treffern fallen; eine Pistole mit großem Magazin nutzen und auf den Kopf zielen. Erst nach dem dritten Kill nachladen.",
+        "fr": "Lancez une mission en difficulté Histoire pour que les ennemis tombent en un ou deux tirs, prenez un pistolet à grand chargeur et visez la tête. Ne rechargez qu'après le troisième kill.",
+        "es": "Empieza una misión en dificultad Historia para que los enemigos caigan en uno o dos disparos, usa una pistola de cargador grande y apunta a la cabeza. Recarga solo tras la tercera baja.",
+        "it": "Avvia una missione a difficoltà Storia così i nemici cadono in uno o due colpi, usa una pistola con caricatore grande e mira alla testa. Ricarica solo dopo la terza uccisione.",
+        "pt": "Inicie uma missão na dificuldade História para os inimigos caírem com um ou dois tiros, use uma pistola de pente grande e mire na cabeça. Recarregue só depois da terceira eliminação.",
+        "ru": "Запустите миссию на сложности Story, чтобы враги падали с одного-двух выстрелов, возьмите пистолет с большим магазином и цельтесь в голову. Перезаряжайтесь только после третьего убийства.",
+        "pl": "Uruchom misję na poziomie Story, by wrogowie padali po jednym-dwóch strzałach, użyj pistoletu z dużym magazynkiem i celuj w głowę. Przeładuj dopiero po trzecim zabójstwie.",
+        "nl": "Start een missie op Story zodat vijanden na één of twee schoten vallen, gebruik een pistool met groot magazijn en mik op het hoofd. Herlaad pas na de derde kill."
       }
     },
     {

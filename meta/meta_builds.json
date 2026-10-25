@@ -1,7 +1,7 @@
 {
  "schema": 1,
- "version": "2026-10-24.5",
- "updated": "2026-10-24T01:36:28Z",
+ "version": "2026-10-25.1",
+ "updated": "2026-10-25T01:35:38Z",
  "season": "Year 8 Season 3 – Red Horizon",
  "generator": "seed (manual research)",
  "popularity_method": "0-100; seed = how many independent sources feature the build, weighted by recency. Daily updater adds engagement signals (views/upvotes) where public.",
@@ -246,7 +246,7 @@
     "Resolved": 4,
     "Determined": 2
    },
-   "popularity": 65,
+   "popularity": 68,
    "sources": [
     {
      "title": "Overgear – Division 2 builds (Red Horizon)",
@@ -255,6 +255,10 @@
     {
      "title": "Item Level Gaming – Red Moon Unleashed builds (Oct 17, 2026)",
      "url": "https://itemlevel.net/best-build-for-red-moon-unleashed-in-the-division-2/"
+    },
+    {
+     "title": "KeenGamer – Y8S3 Red Horizon full update guide",
+     "url": "https://www.keengamer.com/articles/guides/the-division-2-y8s3-red-horizon-full-update-guide/"
     }
    ],
    "summary": {
@@ -554,10 +558,14 @@
     "skill_damage": {
      "weight": 1.5,
      "good_at": 8
+    },
+    "skill_tier": {
+     "weight": 3,
+     "good_at": 1
     }
    },
    "talents": {},
-   "popularity": 55,
+   "popularity": 60,
    "sources": [
     {
      "title": "Overgear – Division 2 builds (Red Horizon)",
@@ -566,14 +574,19 @@
     {
      "title": "LFCarry – Division 2 builds Y8S3",
      "url": "https://lfcarry.com/guides/division-2-builds"
+    },
+    {
+     "title": "KeenGamer – Fire & Status Effect build Y8S3 (Sep 12, 2026)",
+     "url": "https://www.keengamer.com/articles/guides/the-division-2-best-fire-and-status-effect-build-for-y8s3-red-horizon/"
     }
    ],
    "summary": {
-    "tr": "Fafnir pompalı + Ember Engine; yanma şansı %40 (göğüsle %60), Firestarter + Incinerator Turret.",
-    "en": "Fafnir shotgun + Ember Engine; burn chance 40% (60% with chest), Firestarter + Incinerator Turret."
+    "tr": "Fafnir pompalı + 4 parça Ember Engine + Vile egzotik maske; çekirdekler Skill Tier, ikincil özellikler Status Effects. Yanma şansı %40 (göğüsle %60), Firestarter + Incinerator Turret. PvP'de zayıf.",
+    "en": "Fafnir shotgun + 4-piece Ember Engine + Vile exotic mask; Skill Tier cores, Status Effects secondaries. Burn chance 40% (60% with chest), Firestarter + Incinerator Turret. Weaker in PvP."
    },
    "items": [
-    "Fafnir"
+    "Fafnir",
+    "Vile"
    ]
   },
   {
