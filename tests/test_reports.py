@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Rapor sistemi ve panel testleri."""
+"""reports.py testleri: kişisel veri temizleme, rapor oluşturma, gönderme kuyruğu."""
 import json
 import sys
 import tempfile
