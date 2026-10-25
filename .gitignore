@@ -30,3 +30,4 @@ drop_queue.json
 reports/
 server/.wrangler/
 server/node_modules/
+installer/

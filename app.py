@@ -89,8 +89,15 @@ AUTO_STABLE, AUTO_CHANGE, DEDUP_SECONDS, UPGRADE_MARGIN = 4, 8, 30, 3
 
 if not CFG_PATH.exists() and (BUNDLE / "builds.json").exists():
     shutil.copy(BUNDLE / "builds.json", CFG_PATH)
-if not (BASE / "lang").is_dir() and (BUNDLE / "lang").is_dir():
-    shutil.copytree(BUNDLE / "lang", BASE / "lang")  # .exe içinden ilk açılışta dilleri çıkar
+if (BUNDLE / "lang").is_dir() and BUNDLE != BASE:      # .exe: dilleri çıkar; güncellemede paketteki yeni sürümle yenile
+    (BASE / "lang").mkdir(exist_ok=True)              # (kullanıcının eklediği yeni dil dosyalarına dokunulmaz)
+    for _src in (BUNDLE / "lang").glob("*.json"):
+        _dst = BASE / "lang" / _src.name
+        try:
+            if not _dst.exists() or _dst.read_bytes() != _src.read_bytes():
+                shutil.copy(_src, _dst)
+        except OSError:
+            pass
 
 # ───────────── Günlük kayıt / application log ─────────────
 log = logging.getLogger("td2")

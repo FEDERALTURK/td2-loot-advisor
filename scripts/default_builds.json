@@ -1,0 +1,280 @@
+{
+  "settings": {
+    "hotkey": "<f8>",
+    "overlay_seconds": 8,
+    "overlay_corner": "top_right",
+    "ocr_lang": "eng",
+    "tesseract_cmd": "C:\\Program Files\\Tesseract-OCR\\tesseract.exe",
+    "keep_threshold": 70,
+    "consider_threshold": 40,
+    "region": null,
+    "save_debug_crop": true,
+    "log_csv": true
+  },
+  "attributes": {
+    "weapon_damage": [
+      "weapon damage"
+    ],
+    "crit_chance": [
+      "critical hit chance",
+      "crit hit chance"
+    ],
+    "crit_damage": [
+      "critical hit damage",
+      "crit hit damage"
+    ],
+    "headshot_damage": [
+      "headshot damage"
+    ],
+    "rate_of_fire": [
+      "rate of fire"
+    ],
+    "weapon_handling": [
+      "weapon handling"
+    ],
+    "reload_speed": [
+      "reload speed"
+    ],
+    "magazine_size": [
+      "magazine size"
+    ],
+    "optimal_range": [
+      "optimal range"
+    ],
+    "damage_to_armor": [
+      "damage to armor"
+    ],
+    "damage_to_health": [
+      "damage to health"
+    ],
+    "damage_to_elites": [
+      "damage to elites"
+    ],
+    "armor": [
+      "armor"
+    ],
+    "health": [
+      "health"
+    ],
+    "armor_regen": [
+      "armor regeneration"
+    ],
+    "hazard_protection": [
+      "hazard protection"
+    ],
+    "explosive_resist": [
+      "explosive resistance"
+    ],
+    "pulse_resistance": [
+      "pulse resistance"
+    ],
+    "skill_damage": [
+      "skill damage"
+    ],
+    "skill_haste": [
+      "skill haste"
+    ],
+    "skill_duration": [
+      "skill duration"
+    ],
+    "skill_health": [
+      "skill health"
+    ],
+    "repair_skills": [
+      "repair skills"
+    ],
+    "status_effects": [
+      "status effects"
+    ],
+    "skill_tier": [
+      "skill tier"
+    ]
+  },
+  "builds": [
+    {
+      "name": "Striker AR/SMG DPS (PvE)",
+      "sets_or_brands": [
+        "Striker's Battlegear",
+        "Striker"
+      ],
+      "set_bonus": 15,
+      "attributes": {
+        "weapon_damage": {
+          "weight": 3.0,
+          "good_at": 10
+        },
+        "crit_chance": {
+          "weight": 2.5,
+          "good_at": 5
+        },
+        "crit_damage": {
+          "weight": 2.5,
+          "good_at": 9
+        },
+        "headshot_damage": {
+          "weight": 1.5,
+          "good_at": 9
+        },
+        "rate_of_fire": {
+          "weight": 1.5,
+          "good_at": 5
+        },
+        "weapon_handling": {
+          "weight": 1.0,
+          "good_at": 10
+        }
+      },
+      "talents": {
+        "Perfect Optimized": 4,
+        "Perfect Fast Hands": 2,
+        "Perfect Ranger": 2,
+        "Perfect Killer": 2,
+        "Optimized": 2
+      }
+    },
+    {
+      "name": "Heartbreaker AR (Solo / Legendary)",
+      "sets_or_brands": [
+        "Heartbreaker"
+      ],
+      "set_bonus": 15,
+      "attributes": {
+        "weapon_damage": {
+          "weight": 3.0,
+          "good_at": 10
+        },
+        "crit_chance": {
+          "weight": 2.0,
+          "good_at": 5
+        },
+        "crit_damage": {
+          "weight": 2.0,
+          "good_at": 9
+        },
+        "headshot_damage": {
+          "weight": 1.5,
+          "good_at": 9
+        },
+        "armor": {
+          "weight": 1.0,
+          "good_at": 5
+        }
+      },
+      "talents": {
+        "Perfect Optimized": 3,
+        "Perfect Unhinged": 2,
+        "Perfect Ranger": 2,
+        "Optimized": 1.5
+      }
+    },
+    {
+      "name": "Hunter's Fury Close Range",
+      "sets_or_brands": [
+        "Hunter's Fury"
+      ],
+      "set_bonus": 15,
+      "attributes": {
+        "weapon_damage": {
+          "weight": 3.0,
+          "good_at": 10
+        },
+        "crit_damage": {
+          "weight": 2.0,
+          "good_at": 9
+        },
+        "crit_chance": {
+          "weight": 2.0,
+          "good_at": 5
+        },
+        "weapon_handling": {
+          "weight": 1.5,
+          "good_at": 10
+        },
+        "armor": {
+          "weight": 1.0,
+          "good_at": 5
+        }
+      },
+      "talents": {
+        "Perfect Close & Personal": 4,
+        "Perfect Fast Hands": 2,
+        "Close & Personal": 2
+      }
+    },
+    {
+      "name": "Tank / Hybrid (Raid / Heroic)",
+      "sets_or_brands": [
+        "Core Strength"
+      ],
+      "set_bonus": 10,
+      "attributes": {
+        "armor": {
+          "weight": 3.0,
+          "good_at": 5
+        },
+        "health": {
+          "weight": 2.0,
+          "good_at": 5
+        },
+        "armor_regen": {
+          "weight": 2.0,
+          "good_at": 5
+        },
+        "hazard_protection": {
+          "weight": 1.5,
+          "good_at": 5
+        },
+        "explosive_resist": {
+          "weight": 1.0,
+          "good_at": 5
+        },
+        "weapon_damage": {
+          "weight": 1.5,
+          "good_at": 10
+        }
+      },
+      "talents": {
+        "Perfect Glass Cannon": 1,
+        "Spark": 2,
+        "Obliterate": 2
+      }
+    },
+    {
+      "name": "Skill Build",
+      "sets_or_brands": [],
+      "set_bonus": 0,
+      "attributes": {
+        "skill_haste": {
+          "weight": 3.0,
+          "good_at": 8
+        },
+        "skill_damage": {
+          "weight": 2.5,
+          "good_at": 8
+        },
+        "repair_skills": {
+          "weight": 2.0,
+          "good_at": 8
+        },
+        "skill_duration": {
+          "weight": 1.5,
+          "good_at": 8
+        },
+        "skill_health": {
+          "weight": 1.5,
+          "good_at": 8
+        },
+        "status_effects": {
+          "weight": 1.0,
+          "good_at": 8
+        },
+        "skill_tier": {
+          "weight": 3.0,
+          "good_at": 1
+        }
+      },
+      "talents": {}
+    }
+  ],
+  "notes": "Talent/set names and good_at values are EXAMPLES. Edit them to match your game language and the current meta. Matching is case-insensitive and tolerates small OCR errors."
+}

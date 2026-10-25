@@ -16,7 +16,8 @@ Türkçe tam kılavuz: [`README.tr.md`](README.tr.md).
 2. **Code → Download ZIP**, extract.
 3. Start with **`scripts\run.bat`** — it picks the right Python, installs the required packages and tries the optional
    ones (OCR: rapidocr, onnxruntime; voice: pyttsx3, sounddevice, faster-whisper; video: av).
-4. Optional: `scripts\build_exe.bat` builds a single `.exe`; `scripts\install_claude_code.bat` sets up Claude Code for
+4. **Installer:** double-click `scripts\build_installer.bat` → `installer\TD2LootAdvisor_Setup_<version>.exe` (no admin
+   rights needed; your personal settings and license are never packaged). Optional: `scripts\build_exe.bat` builds a single `.exe`; `scripts\install_claude_code.bat` sets up Claude Code for
    the assistant and *Fetch with Claude* (uses a Claude subscription, no API key).
 
 Recommended game settings: English game language, borderless window, HDR off, game resolution = monitor resolution

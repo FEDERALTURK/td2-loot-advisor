@@ -20,7 +20,9 @@ senin dilinde gösterir. 10 dil; herkes kendi dilini ekleyebilir.
    isteğe bağlı paketleri (rapidocr, onnxruntime, pyttsx3, sounddevice, faster-whisper, av) dener. Kurulamayan paket atlanır.
    > Programı her zaman run.bat ile aç: doğru Python sürümünü (3.13) seçer. app.py'ye çift tıklamak
    > bilgisayardaki en yeni Python'u kullanır; orada ses/video paketleri olmayabilir.
-4. İsteğe bağlı: `scripts\build_exe.bat` tek dosyalık `.exe` üretir; `scripts\install_claude_code.bat`
+4. **Kurulum dosyası:** `scripts\build_installer.bat`'a çift tıkla → `installer\TD2LootAdvisor_Setup_<sürüm>.exe`
+   (yönetici izni istemeyen gerçek bir Windows kurulumu; kişisel ayarların ve lisansın pakete girmez).
+   İsteğe bağlı: `scripts\build_exe.bat` tek dosyalık `.exe` üretir; `scripts\install_claude_code.bat`
    asistan ve "Claude ile getir" için Claude Code'u kurar (Claude aboneliğiyle, API anahtarı gerekmez).
 
 ## Oyun ayarları (önerilen)
