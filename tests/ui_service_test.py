@@ -42,8 +42,10 @@ def step(name, ok, **kw):
 def shot(name, w=None):
     w = w or a.root
     try:
+        if w is a.root: a.root.deiconify(); a.root.lift(); a.root.attributes("-topmost", True); a.root.update(); time.sleep(0.6)
         w.update(); x, y = w.winfo_rootx(), w.winfo_rooty()
         ImageGrab.grab(bbox=(x, y, x + w.winfo_width(), y + w.winfo_height()), all_screens=True).save(SHOTS / f"{name}.png")
+        a.root.attributes("-topmost", False)
     except Exception as e: print("shot failed", e)
 
 events = []

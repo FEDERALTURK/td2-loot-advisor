@@ -54,7 +54,7 @@ function show(e){const c=document.getElementById("c");c.className="on "+(e.verdi
  clearTimeout(tm);if(HIDE>0)tm=setTimeout(()=>c.className="",HIDE)}
 function sess(s){if(s)document.getElementById("s").textContent=`${s.label||""} ${s.scanned??0} · ★ ${s.keep??0} · ⚙ ${s.dismantle??0}`}
 function go(){const w=new WebSocket(`ws://${location.host}/ws?t=${encodeURIComponent(P.get("t")||"")}`);
- w.onmessage=m=>{const e=JSON.parse(m.data);if(e.type==="scan")show(e);if(e.session)sess(e.session);if(e.type==="hello"&&e.state?.last)sess(e.state.session)};
+ w.onmessage=m=>{const e=JSON.parse(m.data);if(e.type==="scan")show(e);if(e.session)sess(e.session);if(e.type==="hello"&&e.state){if(e.state.last)show(e.state.last);sess(e.state.session)}};
  w.onclose=()=>setTimeout(go,2000)}
 go();
 </script></body></html>"""
