@@ -103,17 +103,31 @@ def s2():
 
 def s3():
     shot("svc_02_settings")
-    with urllib.request.urlopen(f"http://127.0.0.1:8799/deck/stop?t={st['api_token']}", timeout=8) as r: d = json.loads(r.read())
-    step("Stream Deck komutu: durdur", d.get("ok") and not a.running, d=d)
-    with urllib.request.urlopen(f"http://127.0.0.1:8799/deck/start?t={st['api_token']}", timeout=8) as r: d = json.loads(r.read())
-    step("Stream Deck komutu: başlat", d.get("ok") and a.running)
+    def deck(cmd):
+        with urllib.request.urlopen(f"http://127.0.0.1:8799/deck/{cmd}?t={st['api_token']}", timeout=10) as r: return json.loads(r.read())
+    out = {}
+    def work():                                   # Stream Deck başka bir süreçtir: istekler arayüz iş parçacığından yapılmaz
+        out["stop"] = deck("stop"); out["stop_run"] = a.running
+        out["start"] = deck("start"); out["start_run"] = a.running
+    th = threading.Thread(target=work, daemon=True); th.start()
+    def check():
+        if th.is_alive(): return a.root.after(300, check)
+        step("Stream Deck komutu: durdur", out["stop"].get("ok") and out["stop"].get("running") is False and not out["stop_run"], d=out["stop"])
+        step("Stream Deck komutu: başlat", out["start"].get("ok") and out["start"].get("running") is True and out["start_run"], d=out["start"])
+        s3b()
+    a.root.after(300, check)
+
+def s3b():
     # OBS sayfasını Edge ile görüntüle (varsa)
     edge = next((p for p in (r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe", r"C:\Program Files\Microsoft\Edge\Application\msedge.exe") if os.path.exists(p)), None)
     if edge:
+        def ov():
+            time.sleep(1.5)
+            a.api.broadcast({"type": "scan", "verdict": "KEEP", "verdict_label": "KEEP", "item": {"name": "Stoner LAMG", "slot": "Weapon"}, "best": "LMG 92%"})
+        threading.Thread(target=ov, daemon=True).start()
         threading.Thread(target=lambda: subprocess.run([edge, "--headless=new", "--disable-gpu", f"--screenshot={SHOTS / 'svc_03_obs_overlay.png'}",
                          "--window-size=520,200", "--virtual-time-budget=4000", "--default-background-color=00000000",
                          f"http://127.0.0.1:8799/overlay?t={st['api_token']}&hide=0"], timeout=40, capture_output=True), daemon=True).start()
-    a.api.broadcast({"type": "scan", "verdict": "KEEP", "verdict_label": "KEEP", "item": {"name": "Stoner LAMG", "slot": "Weapon"}, "best": "LMG 92%"})
     a.root.after(8000, s4)
 
 def s4():
@@ -144,7 +158,7 @@ def guard(fn):
         except Exception as e:
             import traceback; traceback.print_exc(); step(fn.__name__ + " hata", False, e=repr(e)); finish()
     return run
-for _n in ("s0", "s1", "s2", "s3", "s4", "s5"): globals()[_n] = guard(globals()[_n])
+for _n in ("s0", "s1", "s2", "s3", "s3b", "s4", "s5"): globals()[_n] = guard(globals()[_n])
 a.root.after(4000, s0)
 a.root.after(150000, finish)
 a.root.mainloop()

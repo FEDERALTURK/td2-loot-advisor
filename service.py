@@ -167,7 +167,7 @@ def autostart_get():
 def autostart_set(on, command=None):
     if os.name != "nt": return False
     import winreg
-    with winreg.OpenKey(winreg.HKEY_CURRENT_USER, RUN_KEY, 0, winreg.KEY_SET_VALUE) as k:
+    with winreg.CreateKeyEx(winreg.HKEY_CURRENT_USER, RUN_KEY, 0, winreg.KEY_SET_VALUE | winreg.KEY_QUERY_VALUE) as k:
         if on: winreg.SetValueEx(k, RUN_NAME, 0, winreg.REG_SZ, command or autostart_command())
         else:
             try: winreg.DeleteValue(k, RUN_NAME)
