@@ -27,10 +27,10 @@ _rapid_error = None
 
 
 def rapid_available():
+    """Kurulu mu? (yüklemeden bakar — rapidocr/onnxruntime/numpy açılışta yüklenmesin; model warm_up'ta yüklenir)."""
+    import importlib.util
     try:
-        import rapidocr  # noqa: F401
-        import onnxruntime  # noqa: F401
-        return True
+        return importlib.util.find_spec("rapidocr") is not None and importlib.util.find_spec("onnxruntime") is not None
     except Exception:
         return False
 

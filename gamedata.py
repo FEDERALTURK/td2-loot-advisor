@@ -18,6 +18,9 @@ import os
 import re
 from difflib import SequenceMatcher
 from pathlib import Path
+import threading
+from collections import Counter
+from functools import lru_cache
 
 NUMBER = re.compile(r"([+-]?\d{1,3}(?:[.,]\d{3})*(?:[.,]\d+)?|\d+(?:[.,]\d+)?)\s*(k|%)?", re.I)
 
@@ -27,22 +30,57 @@ def nrm(s):
     return re.sub(r"\s+", " ", re.sub(r"[^a-z0-9&' ]+", " ", s)).strip()
 
 
+_TLS = threading.local()
+
+
+@lru_cache(maxsize=65536)
+def _chars(s):
+    return Counter(s)
+
+
+def _matcher(b):
+    """b için hazırlanmış SequenceMatcher (b'nin karakter dizini bir kez kurulur; iş parçacığı başına önbellek)."""
+    cache = getattr(_TLS, "sm", None)
+    if cache is None: cache = _TLS.sm = {}
+    sm = cache.get(b)
+    if sm is None:
+        if len(cache) > 4096: cache.clear()
+        sm = cache[b] = SequenceMatcher(None, "", b)
+    return sm
+
+
+@lru_cache(maxsize=131072)
 def ratio(a, b):
-    sm = SequenceMatcher(None, a, b)
-    if sm.real_quick_ratio() < 0.6 or sm.quick_ratio() < 0.6:   # hızlı eleme
-        return 0.0
+    """difflib.SequenceMatcher(None, a, b).ratio() ile birebir aynı sonuç; hızlı elemeler aynı formüllerle,
+    nesne kurmadan yapılır, b'nin dizini yeniden kullanılır ve sonuçlar hatırlanır."""
+    la, lb = len(a), len(b)
+    if not la + lb: return 0.0
+    if 2.0 * min(la, lb) / (la + lb) < 0.6: return 0.0               # real_quick_ratio
+    ca, cb = _chars(a), _chars(b)
+    inter = sum(min(n, cb[ch]) for ch, n in ca.items() if ch in cb)
+    if 2.0 * inter / (la + lb) < 0.6: return 0.0                     # quick_ratio
+    sm = _matcher(b); sm.set_seq1(a)
     return sm.ratio()
+
+
+@lru_cache(maxsize=8192)
+def _windows(line, n):
+    words = line.split()
+    return tuple(" ".join(words[i:i + n]) for i in range(0, max(1, len(words) - n + 1)))
 
 
 def best_window(line, target):
     """Satırın içinde hedefe en çok benzeyen kelime penceresinin benzerliği (0-1)."""
     if not line or not target: return 0.0
     if target in line: return 1.0
-    words, tw = line.split(), len(target.split())
-    best = ratio(line, target) if abs(len(line) - len(target)) <= 4 else 0.0
+    lt, tw = len(target), len(target.split())
+    best = ratio(line, target) if abs(len(line) - lt) <= 4 else 0.0
     for n in {tw, tw + 1, max(1, tw - 1)}:
-        for i in range(0, max(1, len(words) - n + 1)):
-            best = max(best, ratio(" ".join(words[i:i + n]), target))
+        for w in _windows(line, n):                  # pencereler satır başına bir kez kurulur
+            lw = len(w)
+            if 2.0 * min(lw, lt) < 0.6 * (lw + lt): continue      # uzunluk elemesi (ratio zaten 0 döner)
+            r = ratio(w, target)
+            if r > best: best = r
     return best
 
 

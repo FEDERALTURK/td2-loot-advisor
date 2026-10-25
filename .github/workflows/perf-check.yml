@@ -1,0 +1,45 @@
+# Performans karşılaştırması: önceki sürüm (etiket) ile şimdiki kod aynı Windows makinesinde ölçülür.
+name: Perf check (Windows)
+
+on:
+  workflow_dispatch:
+    inputs:
+      base:
+        description: "Karşılaştırılacak önceki sürüm etiketi"
+        default: "v5.0.8"
+
+jobs:
+  perf:
+    runs-on: windows-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v5
+        with: { path: new }
+      - uses: actions/checkout@v5
+        with: { path: old, ref: "${{ github.event.inputs.base }}" }
+      - uses: actions/setup-python@v6
+        with: { python-version: "3.13" }
+      - name: Install
+        shell: cmd
+        run: |
+          python -m pip install -r new\requirements.txt
+          python -m pip install onnxruntime rapidocr numpy
+      - name: Benchmark (new / old)
+        shell: pwsh
+        env: { PYTHONIOENCODING: utf-8 }
+        run: |
+          Copy-Item new\tests\bench_scan.py old\tests\bench_scan.py
+          python new\tests\bench_scan.py --json new_bench.json
+          python old\tests\bench_scan.py --json old_bench.json
+      - name: Startup time (new / old)
+        shell: pwsh
+        env: { PYTHONIOENCODING: utf-8 }
+        run: |
+          python new\tests\startup_time.py old
+          python new\tests\startup_time.py new
+          python new\tests\startup_time.py old
+          python new\tests\startup_time.py new
+      - uses: actions/upload-artifact@v4
+        with:
+          name: perf
+          path: "*_bench.json"

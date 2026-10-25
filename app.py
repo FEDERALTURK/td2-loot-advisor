@@ -22,7 +22,7 @@ from pathlib import Path
 from tkinter import ttk, filedialog, messagebox
 
 import mss
-import pytesseract
+import capture
 from PIL import Image, ImageDraw, ImageOps, ImageTk
 
 import i18n
@@ -203,6 +203,7 @@ def find_tesseract(cfg):
     for c in (cfg["settings"].get("tesseract_cmd", ""), shutil.which("tesseract") or "",
               r"C:\Program Files\Tesseract-OCR\tesseract.exe", r"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe"):
         if c and os.path.exists(c):
+            import pytesseract                       # yedek motor: yalnız kuruluysa yüklenir (açılışı yavaşlatmasın)
             pytesseract.pytesseract.tesseract_cmd = c
             return c
     return None
@@ -370,6 +371,16 @@ def ocr_quality(text):
 def ocr_data(img):
     return OCR.data(img)
 
+
+def first_pass_confident(item, lines):
+    """İlk okuma güvenilir mi? Eşya tam güvenle tanındı, kesik değil ve rakamlı satırlar net okundu → ek geçiş gereksiz.
+    (Kaydırılmış/eksik kartlarda güven düşer ve eskisi gibi çoklu okuma yapılır.)"""
+    if OCR is None or OCR.name != "rapidocr" or not isinstance(item, dict): return False
+    if not item.get("known") or item.get("partial") or float(item.get("confidence") or 0) < 0.95: return False
+    if not item.get("attrs"): return False
+    dig = [c for l, _, c in (lines or []) if re.search(r"\d", l)]
+    return bool(dig) and min(dig) >= 0.9
+
 def foreground_title():
     """Öndeki pencerenin başlığı (yalnız Windows; başka sistemde boş)."""
     if os.name != "nt": return ""
@@ -388,9 +399,7 @@ def game_active():
     return "division" in title and "loot advisor" not in title
 
 def grab(region):
-    with mss.mss() as sct:
-        s = sct.grab(region)
-        img = Image.frombytes("RGB", s.size, s.rgb)
+    img = capture.default().grab(region)            # kalıcı mss (her yakalamada yeniden açılmaz)
     if CAPTURE_MASK:
         from PIL import ImageDraw
         dr = ImageDraw.Draw(img); L, T = region["left"], region["top"]
@@ -1808,7 +1817,10 @@ class App:
             try: passes = max(1, min(3, int(s.get("ocr_passes", 3))))
             except (TypeError, ValueError): passes = 3
         fresh = not (auto and signature(item) == self.last_sig and time.time() - self.last_time < DEDUP_SECONDS)
-        if passes > 1 and valid_item(item) and fresh:
+        skip = passes > 1 and valid_item(item) and fresh and first_pass_confident(item, lines)
+        if skip:
+            log.debug("OCR multi-pass skipped: first read confident (%s)", item.get("name"))
+        if passes > 1 and valid_item(item) and fresh and not skip:
             # çoklu geçiş: aynı kart farklı eşik (Tesseract) ya da ölçekle (RapidOCR) yeniden okunur,
             # en çok bilgi tanınan metin seçilir (gerçek 3440×1440 kartta tek okuma bazen bir satırı kaçırıyor)
             best_q, best_t = ocr_quality(text), text
@@ -1845,11 +1857,13 @@ class App:
                     log.info("Name from inventory list: %r / %r -> %r slot=%s", hint["name"], hint["sub"], item2["name"], item2.get("slot"))
                     text, item, verdict, res = text2, item2, verdict2, res2
                     item["_from_list"] = True
-        try:
-            card.save(BASE / "last_card.png")
-            (APPLOG_DIR / "last_ocr.txt").write_text(text, encoding="utf-8")
-        except Exception:
-            pass
+        def _save_last(c=card.copy(), tx=text):           # diske yazma arka planda (taramayı bekletmesin)
+            try:
+                c.save(BASE / "last_card.png", compress_level=1)
+                (APPLOG_DIR / "last_ocr.txt").write_text(tx, encoding="utf-8")
+            except Exception:
+                pass
+        threading.Thread(target=_save_last, daemon=True).start()
         text, item, verdict, res = self.merge_scrolled(text, item, verdict, res)
         try:
             learned = GAME.learn(item) if GAME.ok else []
@@ -2357,6 +2371,13 @@ class App:
             return dict(display.monitor_of(g, sct.monitors) if g else sct.monitors[1])
 
     def auto_loop(self, stop):
+        capture.default().keep()                         # bu döngü boyunca tek, kalıcı yakalayıcı
+        try:
+            self._auto_loop(stop)
+        finally:
+            capture.default().release()
+
+    def _auto_loop(self, stop):
         prev = last_done = None; stable = 0
         while not stop.is_set():
             try:
@@ -2364,11 +2385,12 @@ class App:
                 if region and self.cfg["settings"].get("only_game_active", True) and not game_active():
                     prev = None; stable = 0                     # oyun önde değil: okuma yapma
                 elif region:
-                    img = grab(region); h = thumb(img)
+                    h = capture.default().thumb(region)      # ham piksellerden hızlı özet (tam görüntü üretmeden)
                     stable = stable + 1 if prev is not None and dist(h, prev) < AUTO_STABLE else 0
                     prev = h
                     if stable == 1 and (last_done is None or dist(h, last_done) >= AUTO_CHANGE):
                         last_done = h
+                        img = grab(region)
                         with self.lock:
                             self.scan_image(img, auto=True)
             except Exception as e:
