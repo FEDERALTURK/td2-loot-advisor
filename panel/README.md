@@ -1,71 +1,22 @@
-# TD2 Raporları — Admin Paneli
+# TD2 Rapor Paneli
 
-Kullanıcıların gönderdikleri hata raporları ve istekleri GitHub issue'ları olarak görmek ve yönetmek için.
+Kullanıcıların programdaki **🐞 Geri bildirim** menüsünden gönderdiği hata raporlarını ve istekleri yönetmek için ayrı bir Windows programı.
+Raporlar özel GitHub deposunda (`FEDERALTURK/td2-loot-advisor-reports`) issue olarak durur; panel onları oradan çeker.
 
-## Kurulum
+## Çalıştırma
+- **Program:** `TD2RaporPaneli.exe` (çift tıkla). Derlemek için: `panel\build_panel.bat` → `dist\panel\TD2RaporPaneli.exe`
+- **Kaynaktan:** `python panel\panel.py`
 
-### GitHub Ayarı
+İlk açılışta Ayarlar penceresi gelir: depo, GitHub token (Issues: okuma-yazma) ve GitHub adın.
+Ayarlar yalnız bu bilgisayarda saklanır: `%APPDATA%\TD2RaporPaneli\settings.json`.
 
-1. **Özel depo oluştur** (td2-loot-advisor-reports):
-   ```bash
-   gh repo create td2-loot-advisor-reports --private
-   ```
+## Neler yapılır
+- Raporları listele; tür / durum / açık-kapalı filtresi, arama (Ctrl+F), sütuna tıklayıp sıralama
+- Özet sayaçları (açık, yeni, hata, istek, çalışılıyor, biten)
+- Detay: açıklama, sistem bilgisi, eşya kartı, program kaydı, yorumlar (senin yanıtların yeşil)
+- Durum düğmeleri: Yeni · İncelendi · Çalışılıyor · Tamamlandı · Yapılmayacak · Mükerrer (`status:*` etiketi)
+- **Yanıtla:** yorum olarak yazılır, kullanıcı programdaki "Raporlarım" bölümünde görür
+- Kapat / yeniden aç, GitHub'da aç (çift tık), CSV'ye aktar, F5 ile yenile (5 dakikada bir kendiliğinden)
 
-2. **Fine-grained token oluştur** (Personal Access Tokens → Fine-grained):
-   - Resource owner: your account
-   - Repository access: Only select repositories → td2-loot-advisor-reports
-   - Permissions:
-     - Issues: Read and write
-   - Token'ı kopyala (git credentials'a kaydet veya panel ayarlarında kullan)
-
-3. **Cloudflare Worker ayarı** (varsa):
-   - Worker environment variables:
-     - `GITHUB_TOKEN`: yukarıdaki token
-     - `REPORTS_REPO`: td2-loot-advisor-reports (owner/repo)
-     - `ADMIN_LOGIN`: senin GitHub login'in (yanıtları göstermek için)
-
-4. **Veritabanı migration** (node.js + D1):
-   ```bash
-   sqlite3 reports.db < server/schema.sql
-   # veya D1'de `wrangler d1 execute reports < server/schema.sql`
-   ```
-
-5. **Worker'ı redeploy et**:
-   ```bash
-   wrangler deploy
-   ```
-
-### Paneli Çalıştır
-
-```bash
-python panel/panel.py
-# veya Windows'ta: panel\panel.bat
-```
-
-Açılan pencerede:
-- **Ayarlar** sekmesine git
-- Repo: `owner/td2-loot-advisor-reports`
-- Token: yukarıda oluşturduğun token
-- API Base: (boş bırak) `https://api.github.com`
-- Admin login: senin GitHub login'in
-- **Raporlar** sekmesine geç, **Yenile** tuşuna bas
-
-## Kullanım
-
-**Raporlar** sekmesinde:
-- Tür, durum ve açıklık filtresi ile raporları listele
-- Raporu seç ve **Detay** sekmesinde oku
-- **Yanıt Ekle**: geliştiricinin cevabını yaz (kullanıcının uygulamada görüneceği)
-- **Etiket Ayarla**: `status:triaged`, `status:in-progress`, `status:done` vb. ekle
-- **Kapat/Aç**: işlemi bitirince kapat
-- **GitHub'da Aç**: tarayıcıda gerçek issue'yu gör
-
-## Demo Modu (test)
-
-Eğer test etmek istersen `tests/fake_github.py` var:
-
-```bash
-python tests/fake_github.py
-```
-
-Bu, gerçek GitHub'a bağlanmadan işleri simüle eder.
+## Test
+`python tests\panel_shot.py` — sahte GitHub sunucusuyla uçtan uca test ve ekran görüntüleri (`shots\panel_*.png`).
