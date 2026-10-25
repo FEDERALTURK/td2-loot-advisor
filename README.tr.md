@@ -5,6 +5,11 @@ program kartı okur, oyunun eşya kütüphanesiyle doğrular, **aktif build'inle
 içinde **SAKLA / DÜŞÜN / KIR / KONTROL ET** der. Build'in eksik parçalarını takip eder, oyun görevlerini
 senin dilinde gösterir. 10 dil; herkes kendi dilini ekleyebilir.
 
+## İndir
+
+**[En son sürüm → Releases](https://github.com/FEDERALTURK/td2-loot-advisor/releases/latest)**:
+`TD2LootAdvisor_Setup_<sürüm>.exe` (kurulum, önerilen) ya da `TD2LootAdvisor_<sürüm>_portable.zip` (kurulumsuz).
+
 ## Ne yapar, ne yapmaz
 
 - ✅ Yalnızca **ekranı** okur (OCR) ve oyunun kendi **ayar dosyasını** (`state.cfg`) okur.

@@ -9,7 +9,12 @@ tasks in your language. It never touches game memory. 10 interface languages; an
 **sakla / düşün / kır** der; eksik parçaları ve görevleri takip eder. Oyunun belleğine dokunmaz.
 Türkçe tam kılavuz: [`README.tr.md`](README.tr.md).
 
-## Install (Windows)
+## Download
+
+**[Latest release → Releases](https://github.com/FEDERALTURK/td2-loot-advisor/releases/latest)**:
+`TD2LootAdvisor_Setup_<version>.exe` (installer, recommended) or `TD2LootAdvisor_<version>_portable.zip`.
+
+## Install from source (Windows)
 
 1. Install **Python 3.13** (3.12 works). The OCR engine (RapidOCR) is installed automatically by `run.bat`.
    **Tesseract OCR** is optional — only a fallback (UB Mannheim build, `C:\Program Files\Tesseract-OCR`).
