@@ -80,6 +80,8 @@ import voicepack
 import livetranslate
 import tasks_live
 import overlay
+import terms
+import trscreen
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
@@ -796,7 +798,7 @@ DEFAULTS.update({
     "ai_provider": "ollama", "ollama_url": "http://localhost:11434", "ollama_model": "gemma3:12b",
     "claude_model": "claude-haiku-5-5", "claude_api_key": "", "claude_code_model": "haiku", "openai_model": "gpt-4o-mini", "openai_api_key": "",
     "stt_model": "small", "stt_device": "cpu",
-    "tts_rate": 185, "tts_voice": "", "voice_hotkey": "<f9>", "speak_verdict": True, "speak_chat": True, "voice_pack": "tactical", "voice_radio": True, "quiz_xp": 0, "quiz_best": 0, "quiz_loading": False, "meta_favs": [], "meta_pop_prev": {}, "news_seen": [], "task_share": None, "task_live": True, "task_client": "", "tr_on": False, "tr_engine": "local", "tr_mode": "subtitle", "tr_region": None, "tr_hotkey": "<f7>", "tr_auto": True, "tr_font": 15, "tr_hide": 10, "tr_alpha": 0.9})
+    "tts_rate": 185, "tts_voice": "", "voice_hotkey": "<f9>", "speak_verdict": True, "speak_chat": True, "voice_pack": "tactical", "voice_radio": True, "quiz_xp": 0, "quiz_best": 0, "quiz_loading": False, "meta_favs": [], "meta_pop_prev": {}, "news_seen": [], "task_share": None, "task_live": True, "task_client": "", "tr_on": False, "tr_engine": "local", "tr_mode": "subtitle", "tr_region": None, "tr_hotkey": "<f7>", "tr_auto": True, "tr_font": 15, "tr_hide": 10, "tr_alpha": 0.9, "tr_screen": False, "tr_screen_port": 8767, "tr_screen_token": "", "tr_speak": "off", "tr_family": "", "tr_outline": False})
 PROVIDER_KEYS = ["ollama", "claude_code", "claude", "openai", "builtin"]
 
 def provider_label(pid):
@@ -1436,6 +1438,7 @@ class App:
         self.root.after(NEWS_POLL_MS, self._news_poll)
         self.root.after(2000, self._info_badge)
         self.root.after(5000, self._task_live_poll)
+        if stg.get("tr_screen"): self.root.after(3000, self.tr_screen_apply)
         if OCR.name == "tesseract" and not self.tess:
             messagebox.showwarning(APP_NAME, t("msg.no_tesseract"))
 
@@ -1515,6 +1518,18 @@ class App:
         try: self.refresh_tasks()
         except Exception: pass
         self._task_ui()
+
+    def _ts_ui(self):
+        lbl = getattr(self, "ts_url", None)
+        if not lbl or not lbl.winfo_exists(): return
+        api = getattr(self, "tr_api", None)
+        if api and api.running:
+            u = api.url("/tr"); lbl.config(text=u)
+            img = companion.qr_image(u, 3)
+            if img is not None:
+                self.ts_qr._img = ImageTk.PhotoImage(img); self.ts_qr.config(image=self.ts_qr._img)
+        else:
+            lbl.config(text=t("ts.off")); self.ts_qr.config(image=""); self.ts_qr._img = None
 
     def _task_live_poll_once(self):
         def work():
@@ -1760,8 +1775,72 @@ class App:
         w.bind("<Destroy>", lambda e, w=w: CAPTURE_MASK.pop("translate", None) if e.widget is w else None)
 
     def _lt_after(self, pairs, ms):
-        """Çeviri sonrası: telefon / ikinci ekran, sesli okuma (yeni özellikler buraya bağlanır)."""
-        pass
+        """Çeviri sonrası: terimler, telefon / ikinci ekran, sesli okuma."""
+        st = self.cfg["settings"]
+        now = int(time.time())
+        items = []
+        for en, tr, _ in pairs:
+            try: tl = self.term_finder().find(en + "\n" + tr)
+            except Exception: tl = []
+            items.append({"en": en, "tr": tr, "terms": tl, "time": now})
+        self.lt_terms = dict(list(getattr(self, "lt_terms", {}).items())[-200:]) | {it["en"]: it["terms"] for it in items}
+        rec = getattr(self, "tr_recent", [])
+        self.tr_recent = (rec + items)[-20:]
+        ev = {"type": "translate", "items": items, "time": now, "theme": self.tr_theme_vars()}
+        for api in (getattr(self, "tr_api", None), getattr(self, "api", None)):
+            try:
+                if api and api.clients: api.broadcast(ev)
+            except Exception:
+                log.debug("translate broadcast", exc_info=True)
+        mode = st.get("tr_speak", "off")
+        if mode == "all" or (mode == "subtitle" and st.get("tr_mode", "subtitle") == "subtitle"):
+            text = " ".join(tr for _, tr, _ in pairs[-3:]).strip()
+            if text and text != getattr(self, "_tr_spoken", None):
+                self._tr_spoken = text
+                try: rate = int(float(st.get("tts_rate", 185)))
+                except ValueError: rate = 185
+                fx = bool(st.get("voice_radio", True)) and st.get("voice_pack", "tactical") != "classic"
+                self.speaker.say(text, rate, "tr-tr", fx=fx)
+
+    def term_finder(self):
+        lang = i18n.current_language()
+        if getattr(self, "_terms", None) is None or self._terms_lang != lang:
+            enc = getattr(self, "_enc", None)
+            if enc is None:
+                try: enc = self._enc = knowledge.Encyclopedia(GAME.data, [BASE / "meta" / "sources", BUNDLE / "meta" / "sources"])
+                except Exception: enc = None
+            loc = lambda e, text: self.desc_i18n().get(e["name"], {}).get(lang) if lang != "en" else text
+            self._terms = terms.TermFinder(enc, [BASE / "meta" / "terms.json", BUNDLE / "meta" / "terms.json"], lang, loc)
+            self._terms_lang = lang
+        return self._terms
+
+    def tr_theme_vars(self):
+        """Telefon sayfasının renkleri: seçili tema paketi."""
+        return {"bg": PAL.get("bg"), "sf": PAL.get("surface"), "sf2": PAL.get("surface2"), "fg": PAL.get("fg"),
+                "mu": PAL.get("muted"), "ac": PAL.get("accent")}
+
+    def tr_state(self):
+        return {"translate": {"recent": getattr(self, "tr_recent", [])[-8:], "theme": self.tr_theme_vars()}, "version": APP_VERSION}
+
+    def tr_screen_apply(self, quiet=True):
+        """Telefon / ikinci ekran sunucusu (yerel ağ). Yalnız yazı gönderir; ücretsiz."""
+        st = self.cfg["settings"]
+        if getattr(self, "tr_api", None): self.tr_api.stop(); self.tr_api = None
+        if not st.get("tr_screen"): return None
+        if not st.get("tr_screen_token"):
+            import secrets as _s
+            st["tr_screen_token"] = _s.token_urlsafe(12); save_cfg(self.cfg)
+        try:
+            port = max(1024, min(65535, int(st.get("tr_screen_port", 8767))))
+            self.tr_api = localapi.LocalAPI(self.tr_state, None, port=port, token=st["tr_screen_token"], lan=True,
+                                            allow_control=False, pages={"/tr": trscreen.PAGE})
+            self.tr_api.start()
+            return self.tr_api.url("/tr")
+        except OSError as e:
+            self.tr_api = None
+            log.warning("Translation screen failed: %s", e)
+            if not quiet: messagebox.showerror(APP_NAME, t("comp.port_busy", port=st.get("tr_screen_port"), e=e))
+            return None
 
     def _lt_hide(self):
         if getattr(self, "_lt_job", None):
@@ -1840,6 +1919,30 @@ class App:
         ttk.Label(cb, text=t("tl.use_hint"), foreground=PAL["muted"], wraplength=880, justify="left").pack(anchor="w", padx=28)
         self.task_stat = ttk.Label(cb, text="", foreground=PAL["muted"]); self.task_stat.pack(anchor="w", padx=8, pady=(4, 8))
         self._task_ui()
+        # telefon / ikinci ekran + sesli okuma
+        pb = ttk.LabelFrame(f, text="📱 " + t("ts.box")); pb.pack(fill="x", padx=10, pady=6)
+        prow = ttk.Frame(pb); prow.pack(fill="x", padx=8, pady=(6, 2))
+        pleft = ttk.Frame(prow); pleft.pack(side="left", fill="x", expand=True)
+        self.ts_var = tk.BooleanVar(value=bool(st.get("tr_screen")))
+        def ts_set():
+            st["tr_screen"] = bool(self.ts_var.get()); save_cfg(self.cfg)
+            self.tr_screen_apply(quiet=False); self._ts_ui()
+        ttk.Checkbutton(pleft, text=t("ts.on"), variable=self.ts_var, command=ts_set).pack(anchor="w")
+        ttk.Label(pleft, text=t("ts.hint"), foreground=PAL["muted"], wraplength=640, justify="left").pack(anchor="w", padx=20)
+        self.ts_url = ttk.Label(pleft, text="", foreground=PAL["info"], cursor="hand2"); self.ts_url.pack(anchor="w", padx=20, pady=(4, 0))
+        self.ts_url.bind("<Button-1>", lambda e: self.tr_api and webbrowser_open(self.tr_api.url("/tr")))
+        br = ttk.Frame(pleft); br.pack(anchor="w", padx=20, pady=4)
+        ttk.Button(br, text="🖥 " + t("ts.open"), command=lambda: self.tr_api and webbrowser_open(self.tr_api.url("/tr"))).pack(side="left")
+        ttk.Button(br, text="📋 " + t("ts.copy"), command=lambda: self.tr_api and (self.root.clipboard_clear(), self.root.clipboard_append(self.tr_api.url("/tr")))).pack(side="left", padx=6)
+        self.ts_qr = ttk.Label(prow); self.ts_qr.pack(side="right", padx=8)
+        sr = ttk.Frame(pb); sr.pack(fill="x", padx=8, pady=(4, 8))
+        ttk.Label(sr, text="🔊 " + t("ts.speak")).pack(side="left")
+        self.ts_speak = tk.StringVar(value=t("ts.sp_" + st.get("tr_speak", "off")))
+        sp = ttk.Combobox(sr, textvariable=self.ts_speak, state="readonly", width=26, values=[t("ts.sp_" + k) for k in ("off", "subtitle", "all")])
+        sp.pack(side="left", padx=8)
+        sp.bind("<<ComboboxSelected>>", lambda e: (st.__setitem__("tr_speak", next(k for k in ("off", "subtitle", "all") if t("ts.sp_" + k) == self.ts_speak.get())), save_cfg(self.cfg)))
+        ttk.Label(sr, text=t("ts.speak_hint"), foreground=PAL["muted"]).pack(side="left", padx=6)
+        self._ts_ui()
         # dene
         tb = ttk.LabelFrame(f, text="✍ " + t("lt.try")); tb.pack(fill="x", padx=10, pady=6)
         self.lt_in = tk.Text(tb, height=3, wrap="word", bg=PAL["entry"], fg=PAL["fg"], insertbackground=PAL["fg"], relief="flat",
@@ -1852,6 +1955,12 @@ class App:
         self.lt_out.pack(fill="x", padx=8, pady=(6, 8))
         # geçmiş
         hb = ttk.LabelFrame(f, text="🕘 " + t("lt.history")); hb.pack(fill="both", expand=True, padx=10, pady=6)
+        hbar = ttk.Frame(hb); hbar.pack(fill="x", padx=6, pady=(6, 0))
+        self.lt_q = tk.StringVar()
+        ttk.Label(hbar, text="🔎").pack(side="left")
+        qe = ttk.Entry(hbar, textvariable=self.lt_q, width=30); qe.pack(side="left", padx=4)
+        self.lt_q.trace_add("write", lambda *a: self._lt_hist_fill())
+        ttk.Button(hbar, text="⬇ CSV", command=self.lt_export).pack(side="right")
         self.lt_hist_txt = tk.Text(hb, height=12, wrap="word", bg=PAL["surface"], fg=PAL["fg"], relief="flat", font=(ui_theme.FONT, 10), padx=10, pady=8)
         self.lt_hist_txt.tag_configure("en", foreground=PAL["muted"]); self.lt_hist_txt.tag_configure("tr", font=(ui_theme.FONT_SEMI, 10))
         self.lt_hist_txt.pack(fill="both", expand=True, padx=6, pady=6)
@@ -1887,10 +1996,80 @@ class App:
         T = getattr(self, "lt_hist_txt", None)
         if not T or not T.winfo_exists(): return
         T.config(state="normal"); T.delete("1.0", "end")
-        for en, tr in reversed(getattr(self, "lt_hist", [])[-40:]):
-            T.insert("end", en + "\n", "en"); T.insert("end", tr + "\n\n", "tr")
+        terms_of = getattr(self, "lt_terms", {})
+        q = (self.lt_q.get().strip().lower() if getattr(self, "lt_q", None) else "")
+        for i, (en, tr) in enumerate(reversed(getattr(self, "lt_hist", [])[-80:])):
+            if q and q not in (en + " " + tr).lower(): continue
+            T.insert("end", en + "\n", "en"); T.insert("end", tr + "\n", "tr")
+            for k, term in enumerate(terms_of.get(en, [])):
+                tag = f"term{i}_{k}"
+                T.tag_configure(tag, foreground=PAL["accent"], underline=True)
+                T.tag_bind(tag, "<Button-1>", lambda e, tm=term: self._term_popup(tm))
+                T.tag_bind(tag, "<Enter>", lambda e: T.config(cursor="hand2")); T.tag_bind(tag, "<Leave>", lambda e: T.config(cursor=""))
+                T.insert("end", ("📖 " if k == 0 else "   ") + term["name"], tag)
+            line = (tr, en)
+            ftag = f"fix{i}"
+            T.tag_configure(ftag, foreground=PAL["muted"], underline=True)
+            T.tag_bind(ftag, "<Button-1>", lambda e, ln=line: self.lt_suggest(ln[1], ln[0]))
+            T.insert("end", ("   " if terms_of.get(en) else "") + "✍ " + t("sg.link"), ftag)
+            T.insert("end", "\n\n")
         if not getattr(self, "lt_hist", None): T.insert("end", t("lt.hist_empty"), "en")
         T.config(state="disabled")
+
+    def lt_export(self):
+        hist = getattr(self, "lt_hist", [])
+        if not hist: return messagebox.showinfo(APP_NAME, t("lt.hist_empty"))
+        p = filedialog.asksaveasfilename(defaultextension=".csv", initialfile="ceviri_gecmisi.csv", filetypes=[("CSV", "*.csv")])
+        if not p: return
+        with open(p, "w", encoding="utf-8-sig", newline="") as fh:
+            w = csv.writer(fh); w.writerow(["English", "Türkçe"])
+            for en, tr in hist: w.writerow([en, tr])
+        self.toast(t("lt.exported", n=len(hist)))
+
+    def lt_suggest(self, en, tr):
+        """Topluluk düzeltme önerisi: oyuncu daha iyi bir Türkçe yazar → sunucu → yönetici onayı → herkesin çeviri hafızası."""
+        st = self.cfg["settings"]
+        w = tk.Toplevel(self.root); w.title(t("sg.title")); w.configure(bg=PAL["surface"]); w.transient(self.root)
+        tk.Frame(w, height=3, bg=PAL["accent"]).pack(fill="x")
+        tk.Label(w, text=en, bg=PAL["surface"], fg=PAL["muted"], wraplength=560, justify="left", font=(ui_theme.FONT, 9)).pack(anchor="w", padx=16, pady=(12, 2))
+        tk.Label(w, text=t("sg.now") + "  " + tr, bg=PAL["surface"], fg=PAL["fg"], wraplength=560, justify="left").pack(anchor="w", padx=16, pady=(0, 6))
+        tk.Label(w, text=t("sg.better"), bg=PAL["surface"], fg=PAL["accent"], font=(ui_theme.FONT_SEMI, 10)).pack(anchor="w", padx=16)
+        tx = tk.Text(w, height=4, width=70, wrap="word", bg=PAL["entry"], fg=PAL["fg"], insertbackground=PAL["fg"], relief="flat", padx=8, pady=6)
+        tx.insert("1.0", tr); tx.pack(fill="x", padx=16, pady=4)
+        msg = tk.Label(w, text=t("sg.hint"), bg=PAL["surface"], fg=PAL["muted"], wraplength=560, justify="left", font=(ui_theme.FONT, 9))
+        msg.pack(anchor="w", padx=16)
+        def send():
+            new = tx.get("1.0", "end").strip()
+            if not new or new == tr: return msg.config(text=t("sg.same"), fg=PAL["warning"])
+            msg.config(text=t("acc.working"), fg=PAL["muted"])
+            def go():
+                ok_ = tasks_live.suggest(self.task_server(), st.get("task_client"), en, tr, new, APP_VERSION)
+                self.root.after(0, lambda: (msg.config(text=t("sg.sent") if ok_ else t("sg.fail"), fg=PAL["success"] if ok_ else PAL["danger"]),
+                                            ok_ and w.after(1500, w.destroy)))
+            threading.Thread(target=go, daemon=True).start()
+        bar = ttk.Frame(w); bar.pack(fill="x", padx=12, pady=12)
+        ttk.Button(bar, text="✉ " + t("sg.send"), style="Accent.TButton", command=send).pack(side="right")
+        ttk.Button(bar, text=t("btn.cancel") if t("btn.cancel") != "btn.cancel" else "✖", command=w.destroy).pack(side="right", padx=6)
+
+    def _term_popup(self, term):
+        w = tk.Toplevel(self.root); w.title(term["name"]); w.configure(bg=PAL["surface"]); w.transient(self.root)
+        tk.Frame(w, height=3, bg=PAL["accent"]).pack(fill="x")
+        tk.Label(w, text=(term.get("label") + " · " if term.get("label") else "") + term["name"], bg=PAL["surface"], fg=PAL["accent"],
+                 font=(ui_theme.FONT_SEMI, 12)).pack(anchor="w", padx=16, pady=(12, 4))
+        tk.Label(w, text=term.get("text") or "—", bg=PAL["surface"], fg=PAL["fg"], wraplength=440, justify="left",
+                 font=(ui_theme.FONT, 10)).pack(anchor="w", padx=16, pady=(0, 10))
+        bar = ttk.Frame(w); bar.pack(fill="x", padx=12, pady=(0, 12))
+        if term.get("cat") != "term":
+            ttk.Button(bar, text="📚 " + t("ts.in_enc"), command=lambda: (w.destroy(), self._open_enc(term["name"]))).pack(side="left")
+        ttk.Button(bar, text="✖", command=w.destroy).pack(side="right")
+
+    def _open_enc(self, name):
+        try:
+            self.nb.select(self.tabs["info"])
+            if hasattr(self, "enc_q"): self.enc_q.set(name)
+            if hasattr(self, "refresh_enc"): self.refresh_enc()
+        except Exception:
+            log.debug("open enc", exc_info=True)
 
     def lt_try(self):
         text = self.lt_in.get("1.0", "end").strip()
@@ -2642,7 +2821,7 @@ class App:
 
     def api_state(self):
         st = dict(self.comp_state)
-        return {"app": APP_NAME, "version": APP_VERSION, "running": self.running,
+        return {"app": APP_NAME, "version": APP_VERSION, "running": self.running, "translate": self.tr_state()["translate"],
                 "game": {"running": self.game_on, "state": self.game_state, "learned": self.screen.learned()},
                 "last": {k: st.get(k) for k in ("verdict", "verdict_label", "best", "item", "note", "time")} if st.get("verdict") else None,
                 "build": st.get("build"), "session": self._session_brief(), "tier": self.ent.tier}
@@ -2677,7 +2856,7 @@ class App:
         if not st.get("api_on") or not self.ent.has("local_api"): return
         try:
             port = max(1024, min(65535, int(st.get("api_port", 8766))))
-            self.api = localapi.LocalAPI(self.api_state, self.api_command, port=port, token=st["api_token"],
+            self.api = localapi.LocalAPI(self.api_state, self.api_command, port=port, token=st["api_token"], pages={"/tr": trscreen.PAGE},
                                          lan=bool(st.get("api_lan")), allow_control=bool(st.get("api_control", True)))
             self.api.start()
         except OSError as e:
@@ -7552,6 +7731,9 @@ class App:
         if not force and st0.get("svc_close_to_tray") and self.tray and self.tray.available:
             self.root.withdraw(); self.tray.notify(t("svc.in_tray")); return
         self.service_stop()
+        try:
+            if getattr(self, "tr_api", None): self.tr_api.stop()
+        except Exception: pass
         try: self.lt_stop(quiet=True); self.lt_cache.save() if getattr(self, "lt_cache", None) else None
         except Exception: pass
         self.stop(); self.speaker.close()

@@ -109,5 +109,34 @@ ok(puts.length === 1 && puts[0][0].includes("/repos/o/r/contents/tasks/") && JSO
 await worker.scheduled({}, env);
 ok(puts.length === 1, "aynı gün ikinci döküm yok");
 
+// --- çeviri önerileri
+const line = "Head to the White House and talk to Manny.";
+for (const [who, ip, txt] of [["sug-aaaa-1111", "5.5.5.1", "White House'a git ve Manny ile konuş."], ["sug-bbbb-2222", "5.5.5.2", "White House'a git ve Manny ile konuş."],
+                               ["sug-cccc-3333", "5.5.5.3", "Beyaz Saray'a git."]]) {
+  [st] = await call("POST", "/v1/suggest", { client: who, en: line, old: "Beyaz Saray'a gidin ve Manny ile konuşun.", new: txt, app: "5.1.9" }, {}, ip);
+  ok(st === 200, "öneri alındı: " + who);
+}
+[st] = await call("POST", "/v1/suggest", { client: "sug-dddd-4444", en: line, old: "x", new: "x" }, {}, "5.5.5.4");
+ok(st === 400, "aynı metin öneri sayılmaz");
+[st] = await call("POST", "/v1/suggest", { client: "sug-eeee-5555", en: "Привет", old: "a", new: "b" }, {}, "5.5.5.5");
+ok(st === 400, "İngilizce olmayan satır reddedildi");
+[st] = await call("GET", "/v1/admin/suggestions");
+ok(st === 403, "öneriler yalnız yönetici");
+[st, j] = await call("GET", "/v1/admin/suggestions", null, { authorization: "Admin " + ADMIN });
+ok(j.suggestions.length === 2 && j.suggestions[0].n === 2 && j.suggestions[0].new.startsWith("White House'a git"), "aynı öneri gruplanıp sayıldı (2 oyuncu)");
+[st, j] = await call("GET", "/v1/tasks/live");
+ok(Array.isArray(j.lines) && j.lines.length === 0, "onaysız öneri herkese gitmez");
+const top = (await call("GET", "/v1/admin/suggestions", null, { authorization: "Admin " + ADMIN }))[1].suggestions[0];
+[st] = await call("POST", "/v1/admin/suggestions/decide", { id: top.id, approve: true }, { authorization: "Admin " + ADMIN });
+[st, j] = await call("GET", "/v1/tasks/live");
+ok(j.lines.length === 1 && j.lines[0].tr === "White House'a git ve Manny ile konuş." && j.lines[0].en === line, "onaylanan öneri herkesin listesinde");
+[st, j] = await call("GET", "/v1/admin/suggestions", null, { authorization: "Admin " + ADMIN });
+ok(j.suggestions.length === 0, "aynı satırın diğer önerileri kapandı");
+[st, j] = await call("GET", "/v1/admin/suggestions?status=rejected", null, { authorization: "Admin " + ADMIN });
+ok(j.suggestions.length === 1 && j.suggestions[0].new === "Beyaz Saray'a git.", "diğer öneri reddedildi olarak duruyor");
+await call("POST", "/v1/admin/suggestions/line", { en_key: top.en_key }, { authorization: "Admin " + ADMIN });
+[st, j] = await call("GET", "/v1/tasks/live");
+ok(j.lines.length === 0, "onaylı satır kaldırılabildi");
+
 console.log("RESULT:", fails ? `FAIL (${fails})` : "PASS");
 process.exit(fails ? 1 : 0);

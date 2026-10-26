@@ -6,6 +6,7 @@
 Uç noktalar (hepsi ?t=<belirteç> ister):
     GET  /api/state            anlık durum (JSON)
     GET  /overlay              OBS tarayıcı kaynağı: şeffaf arka planlı canlı karar kartı
+    GET  /tr                   telefon / ikinci ekran: canlı çeviri akışı (trscreen.py)
     GET  /deck/<komut>         Stream Deck / kısayol: start | stop | toggle | scan  → {"ok": true}
     WS   /ws                   canlı olaylar: hello, scan, game, session, build;  istemci → {"cmd": "..."}
 
@@ -113,8 +114,9 @@ class _Client:
 
 
 class LocalAPI:
-    def __init__(self, state_fn, command_fn=None, port=8766, token=None, lan=False, allow_control=True):
+    def __init__(self, state_fn, command_fn=None, port=8766, token=None, lan=False, allow_control=True, pages=None):
         self.state_fn, self.command_fn = state_fn, command_fn
+        self.pages = dict(pages or {})                     # ek sayfalar: {"/tr": html} (aynı belirteçle)
         self.port, self.lan, self.allow_control = int(port), bool(lan), bool(allow_control)
         self.token = token or secrets.token_urlsafe(16)
         self.httpd = None; self.clients = []; self._lock = threading.Lock()
@@ -194,6 +196,7 @@ class LocalAPI:
                 if u.path == "/ws": return self._ws()
                 if u.path == "/api/state": return self._send(200, json.dumps(api._state(), ensure_ascii=False))
                 if u.path == "/overlay": return self._send(200, OVERLAY, "text/html; charset=utf-8")
+                if u.path in api.pages: return self._send(200, api.pages[u.path], "text/html; charset=utf-8")
                 if u.path.startswith("/deck/"):
                     return self._send(200, json.dumps(api._command(u.path[6:].strip("/"), {"via": "deck"})))
                 return self._send(404, '{"error":"not found"}')

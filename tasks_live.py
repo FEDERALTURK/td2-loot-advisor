@@ -222,7 +222,11 @@ def validate_feed(d):
         if isinstance(x.get("tr"), dict):
             t["tr"] = {k: str(v)[:LIMITS[k] * 2] for k, v in x["tr"].items() if k in LIMITS and isinstance(v, str)}
         out.append(t)
-    return {"version": str(d.get("version", ""))[:20], "generated": d.get("generated"), "tasks": out}
+    lines = []
+    for x in (d.get("lines") or [])[:2000] if isinstance(d.get("lines"), list) else []:
+        if isinstance(x, dict) and isinstance(x.get("en"), str) and isinstance(x.get("tr"), str):
+            lines.append({"en": x["en"][:420], "tr": x["tr"][:840]})
+    return {"version": str(d.get("version", ""))[:24], "generated": d.get("generated"), "tasks": out, "lines": lines}
 
 
 def fetch_live(url, raw_url=None, opener=None, timeout=10):
@@ -274,9 +278,24 @@ class Memory:
             tr = x.get("tr") or {}
             for k in LIMITS:
                 if x.get(k) and tr.get(k): m[norm(x[k])] = tr[k]
+        for ln in feed.get("lines", []):                  # yöneticinin onayladığı topluluk düzeltmeleri (öncelikli)
+            m[norm(ln["en"])] = ln["tr"]
         self.map = m
 
     def __len__(self): return len(self.map)
 
     def get(self, text):
         return self.map.get(norm(text)) if self.map else None
+
+
+def suggest(url, client, en, old, new, app_version=None, opener=None, timeout=10):
+    """Çeviri satırı için daha iyi Türkçe önerisi (yönetici onaylarsa herkesin çeviri hafızasına girer). Dönüş: gönderildi mi."""
+    if not url or not client: return False
+    body = {"client": client, "app": app_version, "en": en, "old": old, "new": new}
+    try:
+        req = urllib.request.Request(url.rstrip("/") + "/v1/suggest", data=json.dumps(body).encode(), method="POST",
+                                     headers={"content-type": "application/json", "user-agent": f"TD2LootAdvisor/{app_version}"})
+        with (opener or urllib.request.urlopen)(req, timeout=timeout) as r: r.read()
+        return True
+    except Exception:
+        return False

@@ -37,12 +37,12 @@ jobs:
           except Exception as e:
               print("::warning::community tasks endpoint unavailable:", e); sys.exit(0)
           feed = tasks_live.validate_feed(raw)
-          out = {"schema": 1, "version": feed["version"], "generated": feed["generated"], "tasks": feed["tasks"]}
+          out = {"schema": 1, "version": feed["version"], "generated": feed["generated"], "tasks": feed["tasks"], "lines": feed["lines"]}
           path = "meta/tasks_live.json"
           old = None
           try: old = json.load(open(path, encoding="utf-8"))
           except Exception: pass
-          strip = lambda d: [{k: v for k, v in t.items() if k != "last_seen"} for t in (d or {}).get("tasks", [])]
+          strip = lambda d: ([{k: v for k, v in t.items() if k != "last_seen"} for t in (d or {}).get("tasks", [])], (d or {}).get("lines", []))
           if old is not None and strip(old) == strip(out):
               print("no change"); sys.exit(0)
           json.dump(out, open(path, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
