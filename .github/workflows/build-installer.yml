@@ -67,6 +67,25 @@ jobs:
           Write-Host "DML probe:" (Get-Content $pj -Raw)
           if (-not ($pr.providers -contains "DmlExecutionProvider")) { throw "DirectML provider missing in package" }
           if ($pr.similarity -lt 0.97) { throw "DirectML result differs from CPU" }
+          # güncelleme, program sistem tepsisindeyken de kurulabilmeli (dosyalar kilitli kalmamalı)
+          $cfg = Join-Path $dir "builds.json"
+          $j = Get-Content $cfg -Raw | ConvertFrom-Json
+          $j.settings | Add-Member -NotePropertyName svc_close_to_tray -NotePropertyValue $true -Force
+          $j | ConvertTo-Json -Depth 50 | Set-Content -Encoding utf8 $cfg
+          $n0 = (Select-String -Path (Join-Path $dir "logs\app.log") -Pattern "UI ready").Count
+          $p = Start-Process $exe -PassThru
+          for ($i = 0; $i -lt 60; $i++) { Start-Sleep 2; if ((Select-String -Path (Join-Path $dir "logs\app.log") -Pattern "UI ready").Count -gt $n0) { break } }
+          Start-Sleep 4
+          $null = $p.CloseMainWindow(); Start-Sleep 4
+          $alive = @(Get-Process TD2LootAdvisor -ErrorAction SilentlyContinue).Count
+          Write-Host "after closing the window (close-to-tray on): processes alive = $alive"
+          if ($alive -lt 1) { throw "close-to-tray test did not keep the app in the tray" }
+          $u = Start-Process $setup.FullName -ArgumentList "/SILENT","/SUPPRESSMSGBOXES","/NORESTART","/CLOSEAPPLICATIONS","/DIR=$dir" -PassThru
+          if (-not $u.WaitForExit(300000)) { Stop-Process -Id $u.Id -Force; throw "update over tray app hung" }
+          Write-Host "update installer exit code:" $u.ExitCode
+          if ($u.ExitCode -ne 0) { throw "update over a tray app failed (exit $($u.ExitCode))" }
+          if (@(Get-Process TD2LootAdvisor -ErrorAction SilentlyContinue).Count -gt 0) { Get-Process TD2LootAdvisor | Stop-Process -Force; throw "old app still running after update" }
+          Write-Host "Update over tray app: OK"
 
       - name: Portable zip
         shell: pwsh

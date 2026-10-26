@@ -68,7 +68,7 @@ import notify
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "5.1.3"
+APP_VERSION = "5.1.4"
 FROZEN = getattr(sys, "frozen", False)
 BASE = Path(sys.executable).parent if FROZEN else Path(__file__).resolve().parent
 TASKS_CACHE = BASE / "tasks_cache.json"  # son indirilen görev listesi
@@ -5805,14 +5805,21 @@ class App:
     def _upd_quit_for_installer(self):
         """Kurulum dosyası çalıştı: dosyaları değiştirebilsin diye program kapanır; kurulum bitince kendisi açar."""
         self.toast(t("upd.installing"))
-        self.root.after(800, self.on_close)
+        self.root.after(800, self._quit_for_update)
+
+    def _quit_for_update(self):
+        """Güncelleme için TAMAMEN kapan: tepsiye küçülme yok; arka plan iş parçacığı kalırsa süreç yine biter."""
+        log.info("Quitting for update")
+        threading.Timer(4.0, lambda: os._exit(0)).start()
+        try: self.on_close(force=True)
+        except Exception: log.exception("close for update"); os._exit(0)
 
     def _upd_source_done(self, info, n, bak):
         if not n:
             return messagebox.showinfo(APP_NAME, t("upd.no_changes"))
         if messagebox.askyesno(APP_NAME, t("upd.source_done", v=info["version"], n=n, bak=bak)):
             updater.restart_source()
-            self.on_close()
+            self._quit_for_update()
 
     # ---------- Premium ----------
     def premium_gate(self, parent, feature):

@@ -8,6 +8,9 @@
 
 Windows "kişisel bilgisayarınızı korudu" derse: **Ek bilgi → Yine de çalıştır** (dosya henüz kod imzalı değil).
 
+**5.1.4 — güncelleme düzeltmesi**
+- Otomatik güncellemede program artık sistem tepsisine küçülmüyor, tamamen kapanıyor; kurulum dosyaları değiştirip programı yeniden açabiliyor. Kurulum da başlamadan önce tepside açık kalmış bir programı kapatıyor (kaldırırken de).
+
 **5.1.3 — düzeltme**
 - Discord ile giriş yapınca (ya da premium açılıp kapanınca) program kendiliğinden yeniden başlıyor ve aynı sekmeye, hesap penceresiyle dönüyor. Önceden girişten sonra menüler ve pencere boyutu bozuk kalabiliyordu; kapatıp açmak gerekmiyor.
 

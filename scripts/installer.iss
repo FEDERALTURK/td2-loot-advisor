@@ -28,7 +28,7 @@ Compression=lzma2/max
 SolidCompression=yes
 WizardStyle=modern
 ArchitecturesInstallIn64BitMode=x64compatible
-CloseApplications=yes
+CloseApplications=force
 
 [Languages]
 Name: "turkish"; MessagesFile: "compiler:Languages\Turkish.isl"
@@ -64,4 +64,23 @@ Filename: "{app}\{#AppExe}"; Flags: nowait; Check: ShouldRelaunch
 function ShouldRelaunch: Boolean;
 begin
   Result := WizardSilent and (ExpandConstant('{param:RELAUNCH|0}') = '1');
+end;
+
+{ Program sistem tepsisinde açık kalmış olsa bile kurulumdan önce tamamen kapatılır (dosyalar kilitli kalmasın). }
+function PrepareToInstall(var NeedsRestart: Boolean): String;
+var
+  Code: Integer;
+begin
+  Exec(ExpandConstant('{sys}\taskkill.exe'), '/F /IM {#AppExe}', '', SW_HIDE, ewWaitUntilTerminated, Code);
+  Sleep(800);
+  Result := '';
+end;
+
+{ Kaldırırken de tepside açık kalan program kapatılır. }
+function InitializeUninstall: Boolean;
+var
+  Code: Integer;
+begin
+  Exec(ExpandConstant('{sys}\taskkill.exe'), '/F /IM {#AppExe}', '', SW_HIDE, ewWaitUntilTerminated, Code);
+  Result := True;
 end;
