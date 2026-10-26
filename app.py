@@ -83,6 +83,8 @@ import overlay
 import terms
 import trscreen
 import speech
+import winocr
+import gamepad
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
@@ -799,7 +801,7 @@ DEFAULTS.update({
     "ai_provider": "ollama", "ollama_url": "http://localhost:11434", "ollama_model": "gemma3:12b",
     "claude_model": "claude-haiku-5-5", "claude_api_key": "", "claude_code_model": "haiku", "openai_model": "gpt-4o-mini", "openai_api_key": "",
     "stt_model": "small", "stt_device": "cpu",
-    "tts_rate": 185, "tts_voice": "", "voice_hotkey": "<f9>", "speak_verdict": True, "speak_chat": True, "voice_pack": "tactical", "voice_radio": True, "quiz_xp": 0, "quiz_best": 0, "quiz_loading": False, "meta_favs": [], "meta_pop_prev": {}, "news_seen": [], "task_share": None, "task_live": True, "task_client": "", "tr_on": False, "tr_engine": "local", "tr_mode": "subtitle", "tr_region": None, "tr_hotkey": "<f7>", "tr_auto": True, "tr_font": 15, "tr_hide": 10, "tr_alpha": 0.9, "tr_screen": False, "tr_screen_port": 8767, "tr_screen_token": "", "tr_speak": "off", "tr_family": "", "tr_outline": False, "sp_on": False, "sp_source": "auto", "sp_hide_captions": True})
+    "tts_rate": 185, "tts_voice": "", "voice_hotkey": "<f9>", "speak_verdict": True, "speak_chat": True, "voice_pack": "tactical", "voice_radio": True, "quiz_xp": 0, "quiz_best": 0, "quiz_loading": False, "meta_favs": [], "meta_pop_prev": {}, "news_seen": [], "task_share": None, "task_live": True, "task_client": "", "tr_on": False, "tr_engine": "local", "tr_mode": "subtitle", "tr_region": None, "tr_hotkey": "<f7>", "tr_auto": True, "tr_font": 15, "tr_hide": 10, "tr_alpha": 0.9, "tr_screen": False, "tr_screen_port": 8767, "tr_screen_token": "", "tr_speak": "off", "tr_family": "", "tr_outline": False, "sp_on": False, "sp_source": "auto", "sp_hide_captions": True, "tr_ocr": "auto", "tr_ocr_pick": "", "tr_ocr_bench_t": 0, "tr_pad": "back+rb"})
 PROVIDER_KEYS = ["ollama", "claude_code", "claude", "openai", "builtin"]
 
 def provider_label(pid):
@@ -1583,6 +1585,61 @@ class App:
         elif st.get("task_share") is False: parts.append(t("tl.share_off"))
         lbl.config(text="  ·  ".join(parts))
 
+    # ---------- Canlı çeviri OCR'ı: RapidOCR ya da Windows OCR (bilgisayara hafif olan)
+    def _winocr(self):
+        if getattr(self, "_wocr", None) is None: self._wocr = winocr.WinOCR()
+        return self._wocr
+
+    def lt_ocr(self, img):
+        st = self.cfg["settings"]; choice = st.get("tr_ocr", "auto")
+        rapid = lambda: OCR.segments(img) if hasattr(OCR, "segments") else OCR.lines(img)
+        if choice == "rapid": return rapid()
+        w = self._winocr()
+        if not w.available: return rapid()
+        if choice == "windows": return w.segments(img)
+        pick = st.get("tr_ocr_pick")
+        if not pick or time.time() - float(st.get("tr_ocr_bench_t", 0) or 0) > 7 * 86400:
+            return self._lt_ocr_bench(img, w)
+        return w.segments(img) if pick == "windows" else rapid()
+
+    def _lt_ocr_bench(self, img, w):
+        """İki OCR'ı aynı görüntüde ölç: Windows OCR, RapidOCR kadar okuyorsa ve daha hızlıysa (ya da ekran kartı oyunda
+        meşgulken işlemcide çalıştığı için) onu seç."""
+        st = self.cfg["settings"]
+        t0 = time.perf_counter(); r = OCR.segments(img) if hasattr(OCR, "segments") else OCR.lines(img); tr_ = time.perf_counter() - t0
+        try:
+            t0 = time.perf_counter(); wv = w.segments(img); tw = time.perf_counter() - t0
+        except Exception as e:
+            log.info("Windows OCR failed: %s", e); wv, tw = [], 99
+        sim = winocr.similar(r, wv)
+        txt = sum(len(x[0]) for x in r)
+        pick = "windows" if (sim >= 0.8 or txt < 8) and tw <= tr_ * 1.3 else "rapid"
+        st["tr_ocr_pick"], st["tr_ocr_bench_t"] = pick, time.time(); save_cfg(self.cfg)
+        log.info("Translate OCR benchmark: rapid %.0f ms, windows %.0f ms, similarity %.2f -> %s", tr_ * 1000, tw * 1000, sim, pick)
+        self.root.after(0, self._lt_ocr_ui)
+        return wv if pick == "windows" else r
+
+    def _lt_ocr_ui(self):
+        lbl = getattr(self, "lt_ocr_lbl", None)
+        if not lbl or not lbl.winfo_exists(): return
+        st = self.cfg["settings"]; w = self._winocr()
+        if not w.available: txt = t("ocr2.win_none")
+        elif st.get("tr_ocr", "auto") == "auto": txt = t("ocr2.auto_pick", e=t("ocr2.e_" + st["tr_ocr_pick"])) if st.get("tr_ocr_pick") else t("ocr2.auto_wait")
+        else: txt = ""
+        lbl.config(text=txt)
+
+    def _lt_pad_start(self):
+        st = self.cfg["settings"]
+        self._lt_pad_stop()
+        combo = st.get("tr_pad", "back+rb")
+        if not combo or combo == "off": return
+        self.lt_pad = gamepad.ComboWatcher(combo, lambda: self.root.after(0, self.lt_once))
+        if not self.lt_pad.start(): self.lt_pad = None
+        else: log.info("Gamepad translate combo: %s", combo)
+
+    def _lt_pad_stop(self):
+        if getattr(self, "lt_pad", None): self.lt_pad.stop(); self.lt_pad = None
+
     # ---------- Konuşma çevirisi (W11 Canlı Altyazı / W10 Whisper)
     def sp_model_dir(self):
         return BASE / "models" / "whisper-base.en"
@@ -1707,10 +1764,12 @@ class App:
                     self.toast(t("scan.minimized")); self.root.after(1200, self.root.iconify)
             except Exception:
                 pass
+        self._lt_pad_start()
         self._lt_status(t("lt.running", key=st.get("tr_hotkey", "<f7>").upper().strip("<>")), "success")
         self._lt_ui(); return True
 
     def lt_stop(self, quiet=False):
+        self._lt_pad_stop()
         if getattr(self, "lt_stop_ev", None): self.lt_stop_ev.set(); self.lt_stop_ev = None
         if getattr(self, "lt_keys", None):
             try: self.lt_keys.stop()
@@ -1763,7 +1822,7 @@ class App:
 
     def _lt_run(self, img, area, force=False):
         try:
-            lines = OCR.segments(img) if hasattr(OCR, "segments") else OCR.lines(img)   # sütun duyarlı (yan yana paneller)
+            lines = self.lt_ocr(img)                                 # sütun duyarlı (yan yana paneller)
             blocks = livetranslate.blocks_from_lines(lines, GAME.data.get("ui_words", []))
             if not blocks:
                 if force: self.root.after(0, lambda: self._lt_status(t("lt.nothing"), "muted"))
@@ -1992,6 +2051,33 @@ class App:
             v = self.lt_vars[k] = tk.StringVar(value=str(st.get(k, default)))
             e = ttk.Entry(g, textvariable=v, width=w); e.grid(row=0, column=i * 2 + 1, sticky="w", padx=(0, 16))
             e.bind("<FocusOut>", lambda ev: self._lt_save_opts())
+        g2 = ttk.Frame(ob); g2.pack(fill="x", padx=8, pady=(0, 8))
+        ttk.Label(g2, text="OCR").pack(side="left")
+        ocr_keys = ("auto", "rapid", "windows")
+        self.lt_ocr_var = tk.StringVar(value=t("ocr2." + st.get("tr_ocr", "auto")))
+        cb1 = ttk.Combobox(g2, textvariable=self.lt_ocr_var, state="readonly", width=22, values=[t("ocr2." + k) for k in ocr_keys])
+        cb1.pack(side="left", padx=(4, 6))
+        cb1.bind("<<ComboboxSelected>>", lambda e: (st.__setitem__("tr_ocr", next(k for k in ocr_keys if t("ocr2." + k) == self.lt_ocr_var.get())),
+                                                     st.__setitem__("tr_ocr_pick", ""), save_cfg(self.cfg), self._lt_ocr_ui()))
+        self.lt_ocr_lbl = ttk.Label(g2, text="", foreground=PAL["muted"]); self.lt_ocr_lbl.pack(side="left", padx=(0, 16))
+        ttk.Label(g2, text="🎮 " + t("pad.label")).pack(side="left")
+        self.lt_pad_var = tk.StringVar(value=t("pad." + st.get("tr_pad", "back+rb")))
+        cb2 = ttk.Combobox(g2, textvariable=self.lt_pad_var, state="readonly", width=16, values=[t("pad." + k) for k in gamepad.COMBOS])
+        cb2.pack(side="left", padx=4)
+        def pad_set(e=None):
+            st["tr_pad"] = next(k for k in gamepad.COMBOS if t("pad." + k) == self.lt_pad_var.get()); save_cfg(self.cfg)
+            if getattr(self, "lt_stop_ev", None) or getattr(self, "lt_keys", None): self._lt_pad_start()
+        cb2.bind("<<ComboboxSelected>>", pad_set)
+        fam = ttk.Frame(ob); fam.pack(fill="x", padx=8, pady=(0, 8))
+        ttk.Label(fam, text=t("lt.family")).pack(side="left")
+        self.lt_fam = tk.StringVar(value=st.get("tr_family") or ui_theme.FONT)
+        fcb = ttk.Combobox(fam, textvariable=self.lt_fam, width=22, values=[ui_theme.FONT, "Bahnschrift", "Consolas", "Verdana", "Arial", "Tahoma", "OpenDyslexic"])
+        fcb.pack(side="left", padx=4)
+        fcb.bind("<<ComboboxSelected>>", lambda e: (st.__setitem__("tr_family", self.lt_fam.get()), save_cfg(self.cfg)))
+        self.lt_outline = tk.BooleanVar(value=bool(st.get("tr_outline", False)))
+        ttk.Checkbutton(fam, text=t("lt.outline"), variable=self.lt_outline,
+                        command=lambda: (st.__setitem__("tr_outline", bool(self.lt_outline.get())), save_cfg(self.cfg))).pack(side="left", padx=12)
+        self._lt_ocr_ui()
         # topluluk görevleri
         cb = ttk.LabelFrame(f, text="👥 " + t("tl.box")); cb.pack(fill="x", padx=10, pady=6)
         self.task_share_var = tk.BooleanVar(value=bool(st.get("task_share")))
