@@ -760,7 +760,7 @@ def exclude_from_capture(win, key="overlay"):
     """Windows 10 2004+: WDA_EXCLUDEFROMCAPTURE — oyuncu pencereyi görür, ekran görüntüsünde altındaki oyun görünür.
     Desteklenmezse pencerenin yeri kaydedilir ve okunan görüntüde siyaha boyanır."""
     ok = False
-    if os.name == "nt":
+    if os.name == "nt" and not os.environ.get("TD2_SHOT_OVERLAY"):        # testler: kaplama ekran görüntüsünde görünsün
         try:
             hwnd = ctypes.windll.user32.GetParent(win.winfo_id()) or win.winfo_id()
             ok = bool(ctypes.windll.user32.SetWindowDisplayAffinity(hwnd, 0x11))
