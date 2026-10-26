@@ -9,19 +9,20 @@ SHOTS = ROOT / "shots"; SHOTS.mkdir(exist_ok=True)
 os.environ["TD2_NO_WELCOME"] = "1"
 from PIL import Image, ImageDraw, ImageFont, ImageGrab  # noqa: E402
 
-W, H = 1280, 720
+W, H = 960, 600
 img = Image.new("RGB", (W, H), (40, 52, 60)); d = ImageDraw.Draw(img)
 for i in range(0, W, 40): d.line((i, 0, i - 200, H), fill=(48, 62, 70), width=12)
-try: font = ImageFont.truetype("segoeui.ttf", 30)
+try: font = ImageFont.truetype("segoeui.ttf", 26)
 except OSError: font = ImageFont.load_default()
 SUB = "Agent, the Black Tusk have taken control of the Capitol Building."
-tw = d.textlength(SUB, font=font); d.text(((W - tw) / 2, 600), SUB, fill=(255, 255, 255), font=font)
-d.text((60, 120), "INTEL: Head to the safe house and talk to the quartermaster.", fill=(230, 230, 230), font=font)
+tw = d.textlength(SUB, font=font); d.text(((W - tw) / 2, 500), SUB, fill=(255, 255, 255), font=font)
+d.rectangle((40, 90, 900, 160), fill=(18, 22, 26))
+d.text((60, 110), "INTEL: Head to the safe house and talk to the quartermaster.", fill=(230, 230, 230), font=font)
 img_path = ROOT / "tests" / ".fake_sub.png"; img.save(img_path)
 FAKE = r'''
 import sys, tkinter as tk
 from PIL import Image, ImageTk
-root = tk.Tk(); root.title("Tom Clancy's The Division 2"); root.geometry("1280x720+30+30")
+root = tk.Tk(); root.title("Tom Clancy's The Division 2"); root.geometry("960x600+30+30")
 ph = ImageTk.PhotoImage(Image.open(sys.argv[1])); tk.Label(root, image=ph, bd=0).place(x=0, y=0)
 root.after(90000, root.destroy); root.mainloop()
 '''
@@ -33,7 +34,7 @@ import app  # noqa: E402
 app.messagebox.askyesno = lambda *a, **k: False
 app.messagebox.showinfo = app.messagebox.showwarning = lambda *a, **k: None
 a = app.App()
-a.cfg["settings"].update(only_game_active=False, tr_engine="local", tr_mode="subtitle", tr_auto=True, ai_provider="builtin")
+a.cfg["settings"].update(only_game_active=False, tr_engine="local", tr_mode="subtitle", tr_auto=True, ai_provider="builtin", tr_hide=40)
 res = {"steps": []}
 def step(name, ok, **kw):
     res["steps"].append({"name": name, "ok": bool(ok), **kw}); print(("OK   " if ok else "FAIL ") + name, kw, flush=True)
@@ -64,7 +65,7 @@ def s3():
     shot("02_overlay", full=True)
     a.lt_stop()
     step("durduruldu", not getattr(a, "lt_stop_ev", None) and a._lt_win is None)
-    a.cfg["settings"].update(tr_mode="region", tr_region={"left": 30 + 40, "top": 30 + 100, "width": 1150, "height": 80})
+    a.cfg["settings"].update(tr_mode="region", tr_region={"left": 30 + 30, "top": 30 + 30 + 80, "width": 880, "height": 90})
     a.lt_hist = []; a.lt_once(); a.root.after(8000, s4)
 def s4():
     hist = getattr(a, "lt_hist", [])
