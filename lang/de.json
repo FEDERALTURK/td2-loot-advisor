@@ -1297,5 +1297,16 @@
   "lt.note": "Tipp: Spiele randlos oder im Fenster, damit die Übersetzung oben erscheint. Das lokale Modell übersetzt Satz für Satz; für lange Storytexte klingt die KI natürlicher.",
   "news.new_toast": "{n} neu: {title}",
   "news.push_title": "The Division 2 News",
-  "svc.push_news": "News & Events"
+  "svc.push_news": "News & Events",
+  "tl.box": "Community-Aufgaben",
+  "tl.share": "Gesehene Aufgaben mit der Community teilen",
+  "tl.share_hint": "Liest die Live-Übersetzung ein Aufgabenfenster (Projekte, Kopfgelder, Aufträge), werden nur der Aufgabentext und seine Übersetzung gesendet. Kein Spielername, kein Screenshot, keine Computerdaten. Eine Aufgabe wird öffentlich, sobald mindestens 2 verschiedene Spieler sie gemeldet haben.",
+  "tl.use": "Community-Aufgaben verwenden",
+  "tl.use_hint": "Von Spielern gesammelte aktuelle Aufgaben erscheinen im Aufgaben-Tab mit 👥; bekannte Aufgabentexte werden in der Live-Übersetzung sofort mit geprüfter Übersetzung angezeigt.",
+  "tl.status": "👥 {n} Community-Aufgaben · {m} fertige Übersetzungszeilen",
+  "tl.status_none": "👥 Community-Aufgabenliste noch nicht empfangen",
+  "tl.shared": "Zuletzt geteilt: {title}",
+  "tl.share_off": "Teilen ist aus",
+  "tl.ask_title": "Community-Aufgaben",
+  "tl.ask": "Wenn die Live-Übersetzung einen Aufgabenbildschirm liest, den Aufgabentext (Titel, Ziel, Belohnungen) und seine Übersetzung an die Community-Liste senden?\n\nSpielername, Screenshots und Computerdaten werden nie gesendet. Eine Aufgabe wird für alle hinzugefügt, sobald mindestens 2 verschiedene Spieler sie gemeldet haben.\n\nDu kannst das jederzeit im Tab Live-Übersetzung ändern."
 }

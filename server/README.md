@@ -45,6 +45,9 @@ python test_local.py TD2P-...                        :: ayrı pencerede; lisans 
 | `GET /v1/summary` | toplam düşüş, katkıcı sayısı | herkese açık |
 | `GET /v1/stats?activity=&q=&weeks=` | aktivite başına en çok düşenler, eşyanın nerede düştüğü | `Authorization: TD2 <lisans>` |
 | `GET /v1/health` | çalışıyor mu | herkese açık |
+| `POST /v1/tasks` | topluluk görevi: `{"client", "app", "task": {title, subtitle, desc, objective, total, rewards, category, period, expires_at}, "tr": {...}}` | herkese açık, saatte 60 / istemci |
+| `GET /v1/tasks/live` | en az 2 oyuncudan gelen güncel görevler (+ Türkçe) | herkese açık, 5 dk önbellek |
+| `GET /v1/admin/tasks`, `POST /v1/admin/tasks/hide`, `POST /v1/admin/tasks/override` | tüm görevler, gizle, Türkçe düzelt | `Authorization: Admin <ADMIN_TOKEN>` |
 
 Kayıt biçimi ve doğrulama: `worker.js` (`cleanDrop`). Attribute değerleri alınmaz, yalnız türleri.
 
@@ -77,3 +80,21 @@ Giriş isteğe bağlıdır; program hesapsız da ücretsiz çalışır. Kurulum 
 Güvenlik: oturum belirteçleri, anahtarlar ve davet kodları veritabanında yalnız SHA-256 özetleriyle durur; düz anahtar
 yalnız üretildiği an panelde görünür. Bir lisans tek bilgisayara bağlanır (panelden "Cihazı sıfırla"). Yetki belgesi
 bilgisayara bağlıdır ve 7 gün internetsiz geçerlidir. Testler: `node test_accounts.mjs`, `python ../tests/test_account.py`.
+
+## Topluluk görevleri (5.1.8)
+
+Oyuncular canlı çeviriyi açıkken bir görev paneline (harita → Projeler, Ödül avları, Görevlendirmeler) bakınca program
+görevi tanır ve oyuncu izin verdiyse yalnız görev yazısını ve Türkçe çevirisini `POST /v1/tasks`'a gönderir (`server/tasks.js`).
+
+- Görev kimliği sunucuda hesaplanır (başlık + hedef). Aynı oyuncu bir görevi bir kez sayılır.
+- **Eşik:** bir görev en az `TASKS_MIN_REPORTERS` (varsayılan 2) farklı oyuncudan gelince `GET /v1/tasks/live`'a girer;
+  Türkçe çeviri de en az 2 oyuncudan aynı geldiyse ya da yönetici düzelttiyse yayınlanır. Süresi dolan (günlük/haftalık
+  sıfırlama) görevler listeden düşer; ham kayıtlar 90 gün sonra silinir.
+- **Yalnız sen görürsün:** Rapor Paneli → 👥 Topluluk görevleri sekmesi (aynı yönetici belirteci): tüm görevler, kaç
+  oyuncudan geldiği, farklı metin/çeviri hâlleri; gizle ve Türkçe düzelt. Sunucu ayrıca her gün özel depoya
+  (`REPORTS_REPO`) `tasks/<gün>.json` dökümü yazar — bunun için `GITHUB_TOKEN`'ın o depoda **Contents: Read and write**
+  izni olmalı (yoksa döküm atlanır, panel yine çalışır).
+- **Herkese açık liste:** `.github/workflows/tasks-live.yml` saatte bir `meta/tasks_live.json`'u günceller; program önce
+  sunucudan, olmazsa bu dosyadan okur.
+- Tablolar ilk istekte kendiliğinden oluşur; güncellemek için yalnız `npx wrangler deploy` yeterli.
+- İsteğe bağlı değişkenler: `TASKS_MIN_REPORTERS` (2), `TASKS_PER_HOUR` (60), `TASKS_KEEP_DAYS` (8).

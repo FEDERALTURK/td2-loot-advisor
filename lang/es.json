@@ -1293,5 +1293,16 @@
   "lt.note": "Consejo: juega en modo ventana o sin bordes para que la traducción aparezca encima. El modelo local traduce frase a frase; para textos largos la IA suena más natural.",
   "news.new_toast": "{n} nueva(s): {title}",
   "news.push_title": "Noticias de The Division 2",
-  "svc.push_news": "Noticias y eventos"
+  "svc.push_news": "Noticias y eventos",
+  "tl.box": "Tareas de la comunidad",
+  "tl.share": "Compartir con la comunidad las tareas que veo",
+  "tl.share_hint": "Cuando la traducción en directo lee un panel de tarea (Proyectos, Recompensas, Asignaciones), solo se envían el texto de la tarea y su traducción. Sin nombre de jugador, capturas ni datos del ordenador. Una tarea se hace pública cuando al menos 2 jugadores distintos la han enviado.",
+  "tl.use": "Usar tareas de la comunidad",
+  "tl.use_hint": "Las tareas actuales recogidas de los jugadores aparecen en la pestaña Tareas con 👥; los textos de tareas conocidos se muestran al instante en la traducción en directo con su traducción verificada.",
+  "tl.status": "👥 {n} tareas de la comunidad · {m} líneas de traducción listas",
+  "tl.status_none": "👥 Aún no se ha recibido la lista de tareas de la comunidad",
+  "tl.shared": "Último compartido: {title}",
+  "tl.share_off": "Compartir desactivado",
+  "tl.ask_title": "Tareas de la comunidad",
+  "tl.ask": "Cuando la traducción en directo lea una pantalla de tarea, ¿enviar el texto de la tarea (título, objetivo, recompensas) y su traducción a la lista de la comunidad?\n\nTu nombre de jugador, capturas y datos del ordenador nunca se envían. Una tarea se añade para todos cuando al menos 2 jugadores distintos la han enviado.\n\nPuedes cambiarlo cuando quieras en la pestaña Traducción en directo."
 }

@@ -310,7 +310,7 @@ async function redeem(req, env) {
 }
 
 // ------------------------------------------------------------ yönetici
-async function isAdmin(req, env) {
+export async function isAdmin(req, env) {
   const m = /^Admin\s+(\S{24,200})$/.exec(req.headers.get("authorization") || "");
   if (!m || !env.ADMIN_TOKEN) return false;
   return safeEqual(await sha256(m[1]), await sha256(env.ADMIN_TOKEN));

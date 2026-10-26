@@ -1138,5 +1138,16 @@
   "lt.note": "Tip: in the game use borderless or windowed mode so the translation can appear on top. The local model translates sentence by sentence; for long story texts the AI engine reads more naturally.",
   "news.new_toast": "{n} new: {title}",
   "news.push_title": "The Division 2 news",
-  "svc.push_news": "News & events"
+  "svc.push_news": "News & events",
+  "tl.box": "Community tasks",
+  "tl.share": "Share the tasks I see with the community",
+  "tl.share_hint": "When live translation reads a task panel (Projects, Bounties, Assignments), only the task text and its translation are sent. No player name, screenshot or computer information. A task becomes public once at least 2 different players have reported it.",
+  "tl.use": "Use community tasks",
+  "tl.use_hint": "Current tasks collected from players appear in the Tasks tab marked 👥; known task texts are shown instantly in live translation with their verified translation.",
+  "tl.status": "👥 {n} community tasks · {m} ready translation lines",
+  "tl.status_none": "👥 Community task list not received yet",
+  "tl.shared": "Last shared: {title}",
+  "tl.share_off": "Sharing is off",
+  "tl.ask_title": "Community tasks",
+  "tl.ask": "When live translation reads a task screen, send the task text (title, objective, rewards) and its translation to the community list?\n\nYour player name, screenshots and computer information are never sent. A task is added to everyone's Tasks tab and translation once at least 2 different players have reported it.\n\nYou can change this any time in the Live translation tab."
 }

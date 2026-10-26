@@ -1,0 +1,59 @@
+# Topluluk görevleri: sunucudaki birleştirilmiş listeyi (en az 2 oyuncudan gelen görevler) saatte bir
+# meta/tasks_live.json olarak depoya yazar. Program önce sunucudan, olmazsa bu dosyadan okur.
+# Ham gönderimler (kim, kaç kez) burada yer almaz; yalnız sunucuda ve özel depodaki günlük dökümde durur.
+name: Community tasks feed
+
+on:
+  schedule:
+    - cron: "41 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: tasks-live
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with: { python-version: "3.13" }
+      - name: Fetch and validate
+        id: fetch
+        run: |
+          python - <<'EOF'
+          import json, os, sys, urllib.request
+          sys.path.insert(0, ".")
+          import tasks_live
+          url = os.environ.get("TASKS_URL", "https://td2-stats.td2loot.workers.dev") + "/v1/tasks/live"
+          try:
+              with urllib.request.urlopen(urllib.request.Request(url, headers={"user-agent": "td2-tasks-feed"}), timeout=20) as r:
+                  raw = json.loads(r.read().decode("utf-8"))
+          except Exception as e:
+              print("::warning::community tasks endpoint unavailable:", e); sys.exit(0)
+          feed = tasks_live.validate_feed(raw)
+          out = {"schema": 1, "version": feed["version"], "generated": feed["generated"], "tasks": feed["tasks"]}
+          path = "meta/tasks_live.json"
+          old = None
+          try: old = json.load(open(path, encoding="utf-8"))
+          except Exception: pass
+          strip = lambda d: [{k: v for k, v in t.items() if k != "last_seen"} for t in (d or {}).get("tasks", [])]
+          if old is not None and strip(old) == strip(out):
+              print("no change"); sys.exit(0)
+          json.dump(out, open(path, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+          open(os.environ["GITHUB_OUTPUT"], "a").write(f"changed=1\ncount={len(out['tasks'])}\n")
+          print("tasks:", len(out["tasks"]))
+          EOF
+      - name: Commit
+        if: steps.fetch.outputs.changed == '1'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add meta/tasks_live.json
+          git commit -m "Topluluk görevleri: ${{ steps.fetch.outputs.count }} görev"
+          for i in 1 2 3; do git pull --rebase -q && git push -q && break; sleep 5; done

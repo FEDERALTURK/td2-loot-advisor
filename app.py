@@ -78,10 +78,11 @@ import notify
 import knowledge
 import voicepack
 import livetranslate
+import tasks_live
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "5.1.7"
+APP_VERSION = "5.1.8"
 FROZEN = getattr(sys, "frozen", False)
 BASE = Path(sys.executable).parent if FROZEN else Path(__file__).resolve().parent
 TASKS_CACHE = BASE / "tasks_cache.json"  # son indirilen görev listesi
@@ -794,7 +795,7 @@ DEFAULTS.update({
     "ai_provider": "ollama", "ollama_url": "http://localhost:11434", "ollama_model": "gemma3:12b",
     "claude_model": "claude-haiku-5-5", "claude_api_key": "", "claude_code_model": "haiku", "openai_model": "gpt-4o-mini", "openai_api_key": "",
     "stt_model": "small", "stt_device": "cpu",
-    "tts_rate": 185, "tts_voice": "", "voice_hotkey": "<f9>", "speak_verdict": True, "speak_chat": True, "voice_pack": "tactical", "voice_radio": True, "quiz_xp": 0, "quiz_best": 0, "quiz_loading": False, "meta_favs": [], "meta_pop_prev": {}, "news_seen": [], "tr_on": False, "tr_engine": "local", "tr_mode": "subtitle", "tr_region": None, "tr_hotkey": "<f7>", "tr_auto": True, "tr_font": 15, "tr_hide": 10, "tr_alpha": 0.9})
+    "tts_rate": 185, "tts_voice": "", "voice_hotkey": "<f9>", "speak_verdict": True, "speak_chat": True, "voice_pack": "tactical", "voice_radio": True, "quiz_xp": 0, "quiz_best": 0, "quiz_loading": False, "meta_favs": [], "meta_pop_prev": {}, "news_seen": [], "task_share": None, "task_live": True, "task_client": "", "tr_on": False, "tr_engine": "local", "tr_mode": "subtitle", "tr_region": None, "tr_hotkey": "<f7>", "tr_auto": True, "tr_font": 15, "tr_hide": 10, "tr_alpha": 0.9})
 PROVIDER_KEYS = ["ollama", "claude_code", "claude", "openai", "builtin"]
 
 def provider_label(pid):
@@ -1378,6 +1379,9 @@ class App:
         self.dropq = dropstats.Queue(DROPQ_PATH)
         if not stg.get("drop_client"):
             stg["drop_client"] = dropstats.new_client_id(); save_cfg(self.cfg)
+        if not stg.get("task_client"):                    # topluluk görevleri için ayrı, rastgele kimlik
+            stg["task_client"] = dropstats.new_client_id(); save_cfg(self.cfg)
+        self.task_mem = tasks_live.Memory(); self.task_feed = None; self.task_sub = None
         self.last_text, self.drops_busy = "", False
         if not self.stash.data.get("imported_progress"):          # eski sürümün kayıtları bir kez aktarılır
             try:
@@ -1430,6 +1434,7 @@ class App:
         if stg.get("tr_on"): self.root.after(2500, lambda: self.lt_start(quiet=True))
         self.root.after(NEWS_POLL_MS, self._news_poll)
         self.root.after(2000, self._info_badge)
+        self.root.after(5000, self._task_live_poll)
         if OCR.name == "tesseract" and not self.tess:
             messagebox.showwarning(APP_NAME, t("msg.no_tesseract"))
 
@@ -1474,7 +1479,91 @@ class App:
             if not getattr(self, "_lt_local", None): self._lt_local = livetranslate.LocalMT(self.lt_model_dir())
             if not self._lt_local.installed(): raise RuntimeError(t("lt.need_model"))
             eng = self._lt_local
-        return livetranslate.Translator(eng, self.lt_glossary(), self.lt_cache)
+        tr = livetranslate.Translator(eng, self.lt_glossary(), self.lt_cache)
+        if st.get("task_live", True): tr.set_memory(getattr(self, "task_mem", None))
+        return tr
+
+    # ---------- Topluluk görevleri (canlı çeviriyle toplanan / dağıtılan görevler)
+    def task_server(self):
+        st = self.cfg["settings"]
+        return os.environ.get("TD2_TASKS_URL") or st.get("drop_server") or dropstats.DEFAULT_URL
+
+    TASKS_RAW_URL = "https://raw.githubusercontent.com/FEDERALTURK/td2-loot-advisor/main/meta/tasks_live.json"
+
+    def _task_live_poll(self):
+        """Açılışta ve 30 dakikada bir: oyunculardan toplanan güncel görev listesi."""
+        st = self.cfg["settings"]
+        if st.get("task_live", True):
+            def work():
+                try: res = tasks_live.fetch_live(self.task_server(), self.TASKS_RAW_URL)
+                except Exception as e:
+                    log.info("Community tasks unavailable: %s", e); res = None
+                self.root.after(0, lambda: self._task_live_arrived(res))
+            threading.Thread(target=work, daemon=True).start()
+        self.root.after(NEWS_POLL_MS, self._task_live_poll)
+
+    def _task_live_arrived(self, res):
+        if not res: return
+        feed, src = res
+        self.task_feed = feed
+        self.task_mem.load(feed)
+        summary = meta_sync.merge_tasks(self.tasks, tasks_live.to_feed_tasks(feed), scope="community")
+        save_tasks(self.tasks)
+        log.info("Community tasks from %s: %d tasks, %d translated lines (added=%d removed=%d)", src, len(feed["tasks"]),
+                 len(self.task_mem), summary["added"], summary["removed"])
+        try: self.refresh_tasks()
+        except Exception: pass
+        self._task_ui()
+
+    def _task_live_poll_once(self):
+        def work():
+            try: res = tasks_live.fetch_live(self.task_server(), self.TASKS_RAW_URL)
+            except Exception as e:
+                log.info("Community tasks unavailable: %s", e); res = None
+            self.root.after(0, lambda: self._task_live_arrived(res))
+        threading.Thread(target=work, daemon=True).start()
+
+    def task_ask_share(self):
+        """Görev paylaşımı izni: canlı çeviri ilk açıldığında bir kez sorulur."""
+        st = self.cfg["settings"]
+        if st.get("task_share") is not None: return
+        st["task_share"] = bool(messagebox.askyesno(t("tl.ask_title"), t("tl.ask")))
+        save_cfg(self.cfg)
+        if hasattr(self, "task_share_var"): self.task_share_var.set(st["task_share"])
+        self._task_ui()
+
+    def _task_seen(self, lines, translator):
+        """Canlı çeviri ekranında görev paneli varsa ayıkla ve (izin verildiyse) topluluğa gönder. Arka plandan çağrılır."""
+        st = self.cfg["settings"]
+        try:
+            task = tasks_live.extract(lines, self._news_resets())
+        except Exception:
+            log.debug("task extract", exc_info=True); return
+        if not task: return
+        self._task_last = task
+        if not st.get("task_share"): return
+        if self.task_sub is None:
+            self.task_sub = tasks_live.Submitter(self.task_server(), st.get("task_client"), BASE / "tasks_sent.json")
+        if not self.task_sub.due(task): return
+        tr = {}
+        try:
+            fields = [k for k in ("title", "subtitle", "desc", "objective") if task.get(k)]
+            for k, v in zip(fields, translator.translate([task[k] for k in fields])): tr[k] = v
+        except Exception:
+            log.debug("task translate", exc_info=True); tr = {}
+        if self.task_sub.submit(task, tr or None, APP_VERSION):
+            log.info("Community task shared: %s / %s", task["title"], task["objective"][:60])
+            self.root.after(0, lambda: self._task_ui(shared=task["title"]))
+
+    def _task_ui(self, shared=None):
+        lbl = getattr(self, "task_stat", None)
+        if not lbl or not lbl.winfo_exists(): return
+        st = self.cfg["settings"]
+        n = len((self.task_feed or {}).get("tasks", []))
+        parts = [t("tl.status", n=n, m=len(self.task_mem))] if self.task_feed else [t("tl.status_none")]
+        if shared: parts.append(t("tl.shared", title=shared))
+        elif st.get("task_share") is False: parts.append(t("tl.share_off"))
+        lbl.config(text="  ·  ".join(parts))
 
     def lt_area(self):
         st = self.cfg["settings"]; mode = st.get("tr_mode", "subtitle")
@@ -1493,6 +1582,7 @@ class App:
             if not quiet: messagebox.showwarning(APP_NAME, str(e))
             self._lt_status(str(e), "warning"); return False
         self.lt_stop(quiet=True)
+        if not quiet: self.task_ask_share()
         st["tr_on"] = True; save_cfg(self.cfg)
         self.lt_stop_ev = threading.Event()
         if st.get("tr_auto", True):
@@ -1570,7 +1660,7 @@ class App:
 
     def _lt_run(self, img, area, force=False):
         try:
-            lines = OCR.lines(img)
+            lines = OCR.segments(img) if hasattr(OCR, "segments") else OCR.lines(img)   # sütun duyarlı (yan yana paneller)
             blocks = livetranslate.blocks_from_lines(lines, GAME.data.get("ui_words", []))
             if not blocks:
                 if force: self.root.after(0, lambda: self._lt_status(t("lt.nothing"), "muted"))
@@ -1579,7 +1669,9 @@ class App:
             if sig == getattr(self, "_lt_last_sig", None) and not force: return
             self._lt_last_sig = sig
             t0 = time.time()
-            out = self.lt_translator().translate([b[0] for b in blocks])
+            translator = self.lt_translator()
+            out = translator.translate([b[0] for b in blocks])
+            self._task_seen(lines, translator)
             ms = int((time.time() - t0) * 1000)
             pairs = [(b[0], tr, b[1]) for b, tr in zip(blocks, out)]
             self.root.after(0, lambda: self._lt_show(pairs, area, ms))
@@ -1700,6 +1792,20 @@ class App:
             v = self.lt_vars[k] = tk.StringVar(value=str(st.get(k, default)))
             e = ttk.Entry(g, textvariable=v, width=w); e.grid(row=0, column=i * 2 + 1, sticky="w", padx=(0, 16))
             e.bind("<FocusOut>", lambda ev: self._lt_save_opts())
+        # topluluk görevleri
+        cb = ttk.LabelFrame(f, text="👥 " + t("tl.box")); cb.pack(fill="x", padx=10, pady=6)
+        self.task_share_var = tk.BooleanVar(value=bool(st.get("task_share")))
+        self.task_live_var = tk.BooleanVar(value=bool(st.get("task_live", True)))
+        def tl_set():
+            st["task_share"] = bool(self.task_share_var.get()); st["task_live"] = bool(self.task_live_var.get()); save_cfg(self.cfg)
+            self._task_ui()
+            if st["task_live"] and not self.task_feed: self._task_live_poll_once()
+        ttk.Checkbutton(cb, text=t("tl.share"), variable=self.task_share_var, command=tl_set).pack(anchor="w", padx=8, pady=(6, 0))
+        ttk.Label(cb, text=t("tl.share_hint"), foreground=PAL["muted"], wraplength=880, justify="left").pack(anchor="w", padx=28)
+        ttk.Checkbutton(cb, text=t("tl.use"), variable=self.task_live_var, command=tl_set).pack(anchor="w", padx=8, pady=(4, 0))
+        ttk.Label(cb, text=t("tl.use_hint"), foreground=PAL["muted"], wraplength=880, justify="left").pack(anchor="w", padx=28)
+        self.task_stat = ttk.Label(cb, text="", foreground=PAL["muted"]); self.task_stat.pack(anchor="w", padx=8, pady=(4, 8))
+        self._task_ui()
         # dene
         tb = ttk.LabelFrame(f, text="✍ " + t("lt.try")); tb.pack(fill="x", padx=10, pady=6)
         self.lt_in = tk.Text(tb, height=3, wrap="word", bg=PAL["entry"], fg=PAL["fg"], insertbackground=PAL["fg"], relief="flat",

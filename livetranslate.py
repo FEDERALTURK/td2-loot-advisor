@@ -122,19 +122,23 @@ def blocks_from_lines(lines, ui_words=()):
     blocks = []
     for s, b, c in rows:
         h = max(1.0, b[3] - b[1])
-        last = blocks[-1] if blocks else None
-        if last:
-            lb, lh, prev = last[1], last[3], last[4]
+        target = None
+        for blk in reversed(blocks[-16:]):             # çok sütunlu ekran: satır kendi sütunundaki bloğa eklenir
+            lb, lh = blk[1], blk[3]
             gap = b[1] - lb[3]
-            overlap_x = min(b[2], lb[2]) - max(b[0], lb[0])
-            same_col = overlap_x > -0.5 * h or abs(b[0] - lb[0]) < 2.5 * h
-            if same_col and -0.4 * h <= gap <= 0.9 * h:
-                last[0] = last[0] + _joiner(prev, s, lh, h) + s
-                last[1] = [min(lb[0], b[0]), min(lb[1], b[1]), max(lb[2], b[2]), max(lb[3], b[3])]
-                last[2] = min(last[2], c); last[3] = h; last[4] = s
-                continue
-        blocks.append([s, b, c, h, s])
-    return [(s, tuple(b), c) for s, b, c, _, _ in blocks if len(s) >= 4]
+            if gap > 0.9 * h or gap < -0.4 * h: continue
+            if blk[5][0] > b[2] or b[0] > blk[5][2]: continue        # son satırla yatayda hiç çakışmıyor
+            if abs(b[0] - blk[5][0]) < 2.5 * h or (min(b[2], blk[5][2]) - max(b[0], blk[5][0])) > 0.3 * (b[2] - b[0]):
+                target = blk; break
+        if target:
+            lb = target[1]
+            target[0] = target[0] + _joiner(target[4], s, target[3], h) + s
+            target[1] = [min(lb[0], b[0]), min(lb[1], b[1]), max(lb[2], b[2]), max(lb[3], b[3])]
+            target[2] = min(target[2], c); target[3] = h; target[4] = s; target[5] = list(b)
+            continue
+        blocks.append([s, list(b), c, h, s, list(b)])
+    blocks.sort(key=lambda bl: (bl[1][1], bl[1][0]))
+    return [(s, tuple(b), c) for s, b, c, _, _, _ in blocks if len(s) >= 4]
 
 
 def _is_label(s):
@@ -289,6 +293,13 @@ class Translator:
     def __init__(self, engine, glossary, cache):
         self.engine, self.glossary, self.cache = engine, glossary, cache
         self.ck = engine.name + "@2"           # önbellek anahtarı: çeviri kuralları değişince eski sonuçlar kullanılmaz
+        self.memory = None                     # topluluk görevleri (tasks_live.Memory): bilinen satırın doğrulanmış Türkçesi
+        self.memory_hits = 0
+
+    def set_memory(self, memory):
+        """Hafıza değişince önbellek anahtarı da değişir (düzeltilmiş çeviri eski önbellekten gelmesin)."""
+        self.memory = memory if memory is not None and len(memory) else None
+        self.ck = self.engine.name + "@2" + (":" + getattr(memory, "version", "") if self.memory else "")
 
     def translate(self, texts):
         out, todo, first = [None] * len(texts), [], {}
@@ -311,6 +322,9 @@ class Translator:
                     counters = COUNTER_RE.findall(body)            # "00/01" ilerleme sayaçları cümleden çıkarılır, sona eklenir
                     if counters: body = " ".join(COUNTER_RE.sub(" ", body).split())
                     fixed = UI_TR.get(body.strip().lower())
+                    if not fixed and self.memory is not None:
+                        fixed = self.memory.get(body)
+                        if fixed: self.memory_hits += 1
                     if fixed or self.glossary.whole(body):
                         lines.setdefault(i, {}).setdefault(ln_no, [bullet, []])[1].append(fixed or body.strip())
                         if counters: lines[i][ln_no][1].append("(" + ", ".join(f"{a}/{b}" for a, b in counters) + ")")

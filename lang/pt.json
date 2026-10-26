@@ -1293,5 +1293,16 @@
   "lt.note": "Dica: jogue em janela ou sem bordas para a tradução aparecer por cima. O modelo local traduz frase a frase; para textos longos a IA soa mais natural.",
   "news.new_toast": "{n} nova(s): {title}",
   "news.push_title": "Notícias de The Division 2",
-  "svc.push_news": "Notícias e eventos"
+  "svc.push_news": "Notícias e eventos",
+  "tl.box": "Tarefas da comunidade",
+  "tl.share": "Partilhar com a comunidade as tarefas que vejo",
+  "tl.share_hint": "Quando a tradução ao vivo lê um painel de tarefa (Projetos, Recompensas, Missões), só são enviados o texto da tarefa e a sua tradução. Sem nome de jogador, capturas de ecrã ou dados do computador. Uma tarefa torna-se pública quando pelo menos 2 jogadores diferentes a enviaram.",
+  "tl.use": "Usar tarefas da comunidade",
+  "tl.use_hint": "As tarefas atuais recolhidas dos jogadores aparecem no separador Tarefas com 👥; textos de tarefas conhecidos aparecem de imediato na tradução ao vivo com a tradução verificada.",
+  "tl.status": "👥 {n} tarefas da comunidade · {m} linhas de tradução prontas",
+  "tl.status_none": "👥 Lista de tarefas da comunidade ainda não recebida",
+  "tl.shared": "Última partilhada: {title}",
+  "tl.share_off": "Partilha desativada",
+  "tl.ask_title": "Tarefas da comunidade",
+  "tl.ask": "Quando a tradução ao vivo ler um ecrã de tarefa, enviar o texto da tarefa (título, objetivo, recompensas) e a sua tradução para a lista da comunidade?\n\nO teu nome de jogador, capturas de ecrã e dados do computador nunca são enviados. Uma tarefa é adicionada para todos quando pelo menos 2 jogadores diferentes a enviaram.\n\nPodes mudar isto a qualquer momento no separador Tradução ao vivo."
 }

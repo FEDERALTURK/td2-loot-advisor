@@ -1293,5 +1293,16 @@
   "lt.note": "Tip: speel in venster- of randloze modus zodat de vertaling erboven verschijnt. Het lokale model vertaalt zin voor zin; voor lange verhaalteksten klinkt de AI natuurlijker.",
   "news.new_toast": "{n} nieuw: {title}",
   "news.push_title": "The Division 2-nieuws",
-  "svc.push_news": "Nieuws & events"
+  "svc.push_news": "Nieuws & events",
+  "tl.box": "Communitytaken",
+  "tl.share": "Taken die ik zie delen met de community",
+  "tl.share_hint": "Als de live vertaling een takenpaneel leest (Projecten, Premies, Opdrachten), worden alleen de taaktekst en de vertaling verstuurd. Geen spelernaam, schermafbeelding of computergegevens. Een taak wordt openbaar zodra minstens 2 verschillende spelers hem hebben gemeld.",
+  "tl.use": "Communitytaken gebruiken",
+  "tl.use_hint": "Actuele taken die van spelers zijn verzameld verschijnen in het tabblad Taken met 👥; bekende taakteksten verschijnen meteen in de live vertaling met gecontroleerde vertaling.",
+  "tl.status": "👥 {n} communitytaken · {m} kant-en-klare vertaalregels",
+  "tl.status_none": "👥 Communitytakenlijst nog niet ontvangen",
+  "tl.shared": "Laatst gedeeld: {title}",
+  "tl.share_off": "Delen staat uit",
+  "tl.ask_title": "Communitytaken",
+  "tl.ask": "Als de live vertaling een takenscherm leest, de taaktekst (titel, doel, beloningen) en de vertaling naar de communitylijst sturen?\n\nJe spelernaam, schermafbeeldingen en computergegevens worden nooit verstuurd. Een taak wordt voor iedereen toegevoegd zodra minstens 2 verschillende spelers hem hebben gemeld.\n\nJe kunt dit altijd wijzigen in het tabblad Live vertaling."
 }

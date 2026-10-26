@@ -1440,5 +1440,16 @@
   "lt.note": "İpucu: çevirinin oyunun üstünde görünmesi için oyunu kenarlıksız ya da pencere modunda oyna. Yerel model cümle cümle çevirir; uzun hikâye metinlerinde yapay zekâ motoru daha doğal okunur.",
   "news.new_toast": "{n} yeni haber: {title}",
   "news.push_title": "The Division 2 haberleri",
-  "svc.push_news": "Haberler ve etkinlikler"
+  "svc.push_news": "Haberler ve etkinlikler",
+  "tl.box": "Topluluk görevleri",
+  "tl.share": "Gördüğüm görevleri toplulukla paylaş",
+  "tl.share_hint": "Canlı çeviri bir görev paneli (Projeler, Ödül avları, Görevlendirmeler) okuduğunda yalnız görev yazısı ve Türkçe çevirisi gönderilir. Oyuncu adı, ekran görüntüsü ya da bilgisayar bilgisi gönderilmez. Bir görev en az 2 farklı oyuncudan gelince herkese açılır.",
+  "tl.use": "Topluluk görevlerini kullan",
+  "tl.use_hint": "Oyunculardan toplanan güncel görevler Görevler sekmesinde 👥 işaretiyle görünür; bilinen görev metinleri canlı çeviride anında ve doğrulanmış Türkçesiyle gösterilir.",
+  "tl.status": "👥 {n} topluluk görevi · {m} hazır çeviri satırı",
+  "tl.status_none": "👥 Topluluk görev listesi henüz alınmadı",
+  "tl.shared": "Son paylaşılan: {title}",
+  "tl.share_off": "Paylaşım kapalı",
+  "tl.ask_title": "Topluluk görevleri",
+  "tl.ask": "Canlı çeviri bir görev ekranı okuduğunda görevin yazısı (başlık, hedef, ödüller) ve Türkçe çevirisi topluluk listesine gönderilsin mi?\n\nOyuncu adın, ekran görüntüsü ya da bilgisayar bilgisi gönderilmez. Bir görev en az 2 farklı oyuncudan gelince herkesin Görevler sekmesine ve çevirisine eklenir.\n\nBu ayarı Canlı çeviri sekmesinden istediğin zaman değiştirebilirsin."
 }

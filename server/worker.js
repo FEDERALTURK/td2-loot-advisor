@@ -11,11 +11,13 @@
 // GitHub ulaşılamazsa rapor D1'de bekletilir ve saatlik görevde iletilir. Kişisel veriler (kullanıcı klasörü
 // yolları, lisans anahtarları, e-postalar) temizlenir.
 //
+//   Topluluk görevleri (tasks.js): POST /v1/tasks, GET /v1/tasks/live, /v1/admin/tasks*
 //   Hesap / lisans (accounts.js): /v1/auth/start|callback|token|logout, /v1/me, /v1/license/redeem, /v1/admin/*
 //
 // Gizlilik: IP saklanmaz; istemci kimliği tuzlu SHA-256 ile özetlenir; attribute DEĞERLERİ değil yalnız türleri alınır.
 
-import { route as accountRoute, verifyEntitlement } from "./accounts.js";
+import { route as accountRoute, verifyEntitlement, isAdmin } from "./accounts.js";
+import { route as tasksRoute, snapshotToRepo, cleanup as tasksCleanup } from "./tasks.js";
 
 const ACTIVITIES = new Set(["open_world", "mission", "legendary", "countdown", "summit", "incursion", "raid", "dark_zone",
   "conflict", "descent", "manhunt", "control_point", "bounty", "season", "vendor", "caches", "crafting", "unknown"]);
@@ -304,12 +306,14 @@ async function flushQueue(env) {
 }
 
 export default {
-  async fetch(req, env) {
+  async fetch(req, env, ctx) {
     const u = new URL(req.url);
     try {
       if (req.method === "OPTIONS") return json({}, 204, { "access-control-allow-methods": "GET, POST",
                                                            "access-control-allow-headers": "content-type, authorization" });
       if (u.pathname === "/v1/health") return json({ ok: true, login: !!env.DISCORD_CLIENT_ID, discord_app: env.DISCORD_CLIENT_ID || null });
+      const tk = await tasksRoute(req, env, u.pathname, isAdmin, ctx);
+      if (tk) return tk;
       const acc = await accountRoute(req, env, u.pathname);
       if (acc) return acc;
       if (u.pathname === "/v1/drops" && req.method === "POST") return await postDrops(req, env);
@@ -329,6 +333,7 @@ export default {
     await env.DB.prepare("DELETE FROM auth_pending WHERE created < ?1").bind(t - 900).run();
     await env.DB.prepare("DELETE FROM sessions WHERE expires < ?1 OR (revoked = 1 AND last_seen < ?2)").bind(t, t - 7 * 86400).run();
     await flushQueue(env);                             // GitHub'a iletilemeyen raporlar
+    try { await tasksCleanup(env); await snapshotToRepo(env, gh); } catch (e) { /* görev dökümü bir sonraki saate */ }
   },
 };
 

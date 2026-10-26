@@ -1293,5 +1293,16 @@
   "lt.note": "Suggerimento: gioca in finestra o senza bordi perché la traduzione compaia sopra. Il modello locale traduce frase per frase; per i testi lunghi l'IA è più naturale.",
   "news.new_toast": "{n} nuova/e: {title}",
   "news.push_title": "Notizie The Division 2",
-  "svc.push_news": "Notizie ed eventi"
+  "svc.push_news": "Notizie ed eventi",
+  "tl.box": "Attività della community",
+  "tl.share": "Condividi con la community le attività che vedo",
+  "tl.share_hint": "Quando la traduzione dal vivo legge un pannello attività (Progetti, Taglie, Incarichi), vengono inviati solo il testo dell'attività e la sua traduzione. Nessun nome giocatore, screenshot o dato del computer. Un'attività diventa pubblica quando almeno 2 giocatori diversi l'hanno segnalata.",
+  "tl.use": "Usa le attività della community",
+  "tl.use_hint": "Le attività attuali raccolte dai giocatori compaiono nella scheda Attività con 👥; i testi noti vengono mostrati subito nella traduzione dal vivo con la traduzione verificata.",
+  "tl.status": "👥 {n} attività della community · {m} righe di traduzione pronte",
+  "tl.status_none": "👥 Elenco attività della community non ancora ricevuto",
+  "tl.shared": "Ultima condivisa: {title}",
+  "tl.share_off": "Condivisione disattivata",
+  "tl.ask_title": "Attività della community",
+  "tl.ask": "Quando la traduzione dal vivo legge una schermata attività, inviare il testo (titolo, obiettivo, ricompense) e la sua traduzione all'elenco della community?\n\nNome giocatore, screenshot e dati del computer non vengono mai inviati. Un'attività viene aggiunta per tutti quando almeno 2 giocatori diversi l'hanno segnalata.\n\nPuoi cambiarlo quando vuoi nella scheda Traduzione dal vivo."
 }
