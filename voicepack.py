@@ -50,6 +50,33 @@ class Lines:
         return " ".join(p for p in parts if p)
 
 
+# ---------------------------------------------------------------- Windows konuşma motoru → WAV
+def sapi_to_wav(text, path, rate_wpm=185, hints=()):
+    """Metni Windows SAPI ile doğrudan WAV dosyasına söyletir (pyttsx3'ün dosyaya yazma hatasından kaçınır).
+    Çağıran iş parçacığında COM başlatılır. Başarılıysa True."""
+    import math
+    import comtypes
+    import comtypes.client
+    comtypes.CoInitialize()
+    try:
+        voice = comtypes.client.CreateObject("SAPI.SpVoice")
+        stream = comtypes.client.CreateObject("SAPI.SpFileStream")
+        toks = voice.GetVoices()
+        for h in [x.lower() for x in hints if x]:
+            pick = next((toks.Item(i) for i in range(toks.Count) if h in (toks.Item(i).GetDescription() + " " + toks.Item(i).Id).lower()), None)
+            if pick is not None:
+                voice.Voice = pick; break
+        voice.Rate = max(-10, min(10, int(round(math.log(max(rate_wpm, 50) / 200.0, 1.1)))))
+        stream.Open(str(path), 3, False)                 # SSFMCreateForWrite
+        voice.AudioOutputStream = stream
+        voice.Speak(text, 0)
+        stream.Close()
+        return Path(path).exists() and Path(path).stat().st_size > 1000
+    finally:
+        try: comtypes.CoUninitialize()
+        except Exception: pass
+
+
 # ---------------------------------------------------------------- telsiz efekti
 def radio_fx(src, dst, seed=None):
     """WAV dosyasına telsiz efekti uygula. numpy yoksa dosyayı olduğu gibi kopyalar. Dönüş: dst yolu."""

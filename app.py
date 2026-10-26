@@ -818,20 +818,19 @@ class Speaker:
                 if pick: eng.setProperty("voice", pick.id)
                 eng.setProperty("rate", rate)
                 if fx and os.name == "nt":
-                    if not self._say_radio(eng, text): eng.say(text); eng.runAndWait()
+                    if not self._say_radio(text, rate, hint): eng.say(text); eng.runAndWait()
                 else:
                     eng.say(text); eng.runAndWait()
             except Exception as e:
                 self.err = f"{type(e).__name__}: {e}"
 
-    def _say_radio(self, eng, text):
-        """Telsiz efektli konuşma: sesi dosyaya üret → efekt → çal. Başarısızsa False (düz konuşmaya düşer)."""
+    def _say_radio(self, text, rate, hint):
+        """Telsiz efektli konuşma: sesi dosyaya üret (SAPI) → efekt → çal. Başarısızsa False (düz konuşmaya düşer)."""
         try:
             import tempfile, winsound
             d = Path(tempfile.gettempdir())
             raw, fxp = d / "td2_voice_raw.wav", d / "td2_voice_fx.wav"
-            eng.save_to_file(text, str(raw)); eng.runAndWait()
-            if not raw.exists() or raw.stat().st_size < 100: return False
+            if not voicepack.sapi_to_wav(text, raw, rate, [hint] + VOICE_HINTS.get(i18n.current_language(), [])): return False
             voicepack.radio_fx(raw, fxp)
             winsound.PlaySound(str(fxp), winsound.SND_FILENAME)
             self.last_fx = str(fxp)

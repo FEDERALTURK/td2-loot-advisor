@@ -1,14 +1,13 @@
-"""Windows: pyttsx3 ile dosyaya konuşma üretimi çalışıyor mu? (telsiz efekti için)"""
+"""Windows: SAPI ile dosyaya konuşma + telsiz efekti çalışıyor mu?"""
 import os, sys, tempfile, threading, time
-import pyttsx3
-out = os.path.join(tempfile.gettempdir(), "diag.wav")
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import voicepack
+d = tempfile.gettempdir()
 def work():
-    e = pyttsx3.init()
-    print("voices:", [v.name for v in e.getProperty("voices")], flush=True)
-    t0 = time.time(); e.save_to_file("Exotic detected. Recommend keeping it.", out); e.runAndWait()
-    print("save_to_file done in %.1fs" % (time.time() - t0), os.path.exists(out) and os.path.getsize(out), flush=True)
-    t0 = time.time(); e.say("test"); e.runAndWait(); print("say done %.1fs" % (time.time() - t0), flush=True)
-    t0 = time.time(); e.save_to_file("Second line.", out); e.runAndWait()
-    print("second save done %.1fs" % (time.time() - t0), os.path.getsize(out), flush=True)
+    for i in range(2):
+        t0 = time.time(); raw = os.path.join(d, f"diag{i}.wav")
+        ok = voicepack.sapi_to_wav("Exotic detected. Recommend keeping it.", raw, 185, ["zira"])
+        fx = voicepack.radio_fx(raw, os.path.join(d, f"diag{i}_fx.wav"))
+        print(f"run {i}: ok={ok} raw={os.path.getsize(raw)} fx={os.path.getsize(fx)} {time.time()-t0:.1f}s", flush=True)
 th = threading.Thread(target=work, daemon=True); th.start(); th.join(60)
 print("alive after 60s:", th.is_alive())
