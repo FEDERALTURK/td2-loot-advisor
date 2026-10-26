@@ -8,6 +8,23 @@
 
 Windows "kişisel bilgisayarınızı korudu" derse: **Ek bilgi → Yine de çalıştır** (dosya henüz kod imzalı değil).
 
+**5.1.7 — ⚡ Performans ve daha iyi çeviri**
+- **Program artık tek kopya çalışır.** Masaüstü kısayoluna ya da Başlat menüsüne ikinci kez tıklamak yeni bir kopya açmıyor; açık olan pencere (tarama sırasında küçültülmüş olsa, oyun tam ekranda olsa bile) öne geliyor. Önceden her tıklama arka planda yeni bir kopya başlatıyordu; kopyaların hepsi ekranı okuyup ekran kartını ve işlemciyi birlikte yoruyordu ve F7 kısayolunu birbirinden kapıyordu.
+- **Oyun sırasında daha az yük:**
+  - Ekranda eşya kartı yokken (sahada, haritada, başka menülerde) ekranın tamamı artık tam çözünürlükte okunmuyor ve diske resim yazılmıyor; kart aramasının küçük ön okuması yeterli. Kartsız ekranlarda okuma başına iş yaklaşık yarıya iniyor.
+  - Sahadayken kart çıkmadıkça okuma aralığı kendiliğinden uzar (4 → 8 → 16 → 30 sn); envanter ya da bir menü açılınca hemen eski hızına döner.
+  - Oyun penceresi ve monitör bilgisi önbellekten okunuyor (önceden saniyede birkaç kez tüm pencereler taranıyordu).
+  - Oyun açıkken programın işlemci önceliği "normalin altı" olur, oyun kare hızı önce gelir; oyun kapanınca normale döner.
+  - Yerel çeviri modeli işlemci çekirdeklerinin en fazla yarısını kullanır.
+- **Canlı çeviri daha doğru:**
+  - Başlıklar ve listeler ayrı satırda: "Objective / Rewards" gibi başlıklar metne yapışmıyor ve **Hedef / Ödüller** olarak gösteriliyor; ödül listesi satır satır.
+  - İlerleme sayaçları (00/01) cümlenin ortasına girmiyor, sona ekleniyor.
+  - Ödül sandıkları oyundaki adlarıyla kalıyor (Exotic Cache, Recalibration Cache…); "önbellek" gibi yanlış çeviriler yok.
+  - "Misyon" yerine oyundaki **görev**, "Legendary zorluğu üzerinde" yerine **Legendary zorlukta**.
+  - Simgelerden okunan tek harfler (ör. "X") ayıklanıyor.
+  - Her çeviri `logs\live_translate.log` dosyasına da yazılıyor (İngilizcesi ve Türkçesiyle), çeviri kutusunu kaçırırsan sonradan bakabilirsin.
+- Yerel API (OBS/Stream Deck) Windows'ta aynı portu iki kez açamaz; çakışma artık görünür bir hata veriyor.
+
 **5.1.6 — 🌐 Canlı oyun çevirisi ve canlı haber akışı**
 - **Yeni sekme: 🌐 Canlı çeviri (İngilizce → Türkçe).** Program ekrandaki İngilizce yazıyı eşya kartı okur gibi okur ve Türkçe çevirisini oyunun üstünde gösterir: altyazılar ve telsiz konuşmaları, istihbarat ve görev metinleri, menüler.
   - **Ne çevrilsin:** Altyazılar (oyun penceresinin alt kısmı), Seçili alan (bir kez seçersin) ya da Tüm oyun penceresi (yan panelde).
