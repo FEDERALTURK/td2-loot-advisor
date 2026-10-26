@@ -22,7 +22,7 @@ from pathlib import Path
 
 MODEL_RELEASE = "https://github.com/FEDERALTURK/td2-loot-advisor/releases/download/mt-models/"
 MODEL_FILE = "en-tr-opus-mt-tc-big-en-tr.zip"
-MODEL_SHA256 = ""          # yayımlanan paketin özeti (sürüm hazırlanırken yazılır)
+MODEL_SHA256 = "15b848670994a47a688dd8bbe3e619c4d19bfd7bcb570b9627bdcd218d1f63fc"   # mt-models sürümündeki paket
 
 # Oyunda sık geçen, çevrilmemesi gereken adlar (kütüphanedeki eşya/yetenek/set/marka adlarına ek)
 EXTRA_TERMS = [
