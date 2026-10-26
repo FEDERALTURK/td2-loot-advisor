@@ -17,6 +17,7 @@ jobs:
         with: { python-version: "3.13" }
       - run: node server/test_accounts.mjs
       - run: node server/test_reports.mjs
+      - run: node server/test_tasks.mjs
       - run: python tests/test_account.py
   windows-ui:
     runs-on: windows-latest
