@@ -16,7 +16,7 @@ import csv, ctypes, json, math, logging, logging.handlers, os, queue, re, shutil
 import urllib.error, urllib.parse, urllib.request
 import tkinter as tk
 from collections import Counter
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from difflib import SequenceMatcher, get_close_matches
 from pathlib import Path
 from tkinter import ttk, filedialog, messagebox
@@ -65,6 +65,8 @@ import screenstate
 import localapi
 import presence
 import notify
+import knowledge
+import voicepack
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
@@ -72,7 +74,8 @@ APP_VERSION = "5.1.4"
 FROZEN = getattr(sys, "frozen", False)
 BASE = Path(sys.executable).parent if FROZEN else Path(__file__).resolve().parent
 TASKS_CACHE = BASE / "tasks_cache.json"  # son indirilen görev listesi
-META_CACHE = BASE / "meta_cache.json"   # son indirilen meta listesi (çevrimdışı kullanım)
+META_CACHE = BASE / "meta_cache.json"
+NEWS_CACHE = BASE / "news_cache.json"   # son indirilen meta listesi (çevrimdışı kullanım)
 ART_DIR = BASE / "art"   # arka planlar / amblemler / bayraklar (kullanıcı kendi görsellerini ekleyebilir)
 BUNDLE = Path(getattr(sys, "_MEIPASS", BASE))
 CFG_PATH, LOG_PATH, DEBUG_PATH, PROG_PATH = (BASE / n for n in ("builds.json", "loot_log.csv", "last_crop.png", "progress.json"))
@@ -761,7 +764,7 @@ DEFAULTS.update({
     "ai_provider": "ollama", "ollama_url": "http://localhost:11434", "ollama_model": "gemma3:12b",
     "claude_model": "claude-haiku-5-5", "claude_api_key": "", "claude_code_model": "haiku", "openai_model": "gpt-4o-mini", "openai_api_key": "",
     "stt_model": "small", "stt_device": "cpu",
-    "tts_rate": 185, "tts_voice": "", "voice_hotkey": "<f9>", "speak_verdict": True, "speak_chat": True})
+    "tts_rate": 185, "tts_voice": "", "voice_hotkey": "<f9>", "speak_verdict": True, "speak_chat": True, "voice_pack": "tactical", "voice_radio": True, "quiz_xp": 0, "quiz_best": 0, "quiz_loading": False, "meta_favs": [], "meta_pop_prev": {}, "news_seen": []})
 PROVIDER_KEYS = ["ollama", "claude_code", "claude", "openai", "builtin"]
 
 def provider_label(pid):
@@ -780,10 +783,16 @@ def system_prompt():
             f"Do not help with reading game memory, cheats or bot software.")
 
 
+VOICE_HINTS = {"tr": ["turk", "tr-tr", "tolga", "emel"], "en": ["en-us", "english", "zira", "david"], "de": ["de-de", "german", "hedda", "katja"],
+               "fr": ["fr-fr", "french", "hortense", "julie"], "es": ["es-es", "spanish", "helena", "laura"], "it": ["it-it", "italian", "elsa"],
+               "pt": ["pt-br", "pt-pt", "portug", "maria"], "pl": ["pl-pl", "polish", "paulina"], "ru": ["ru-ru", "russian", "irina"],
+               "nl": ["nl-nl", "dutch", "frank"]}
+
+
 class Speaker:
     """Çevrimdışı konuşma (Windows SAPI, pyttsx3). Kendi iş parçacığında çalışır."""
     def __init__(self):
-        self.q, self.err = queue.Queue(), None
+        self.q, self.err, self.last_fx = queue.Queue(), None, None
         threading.Thread(target=self.run, daemon=True).start()
 
     def run(self):
@@ -799,26 +808,45 @@ class Speaker:
                 break
             if not eng:
                 continue
-            text, rate, hint = job
+            text, rate, hint, fx = job if len(job) == 4 else (*job, False)
             try:
                 voices = eng.getProperty("voices")
                 pick = None
-                for key in ([hint.lower()] if hint else []) + ["turk", "tr-tr", "tolga", "emel"]:
+                for key in ([hint.lower()] if hint else []) + VOICE_HINTS.get(i18n.current_language(), []):
                     pick = next((v for v in voices if key in (v.name + " " + v.id).lower()), None)
                     if pick: break
                 if pick: eng.setProperty("voice", pick.id)
                 eng.setProperty("rate", rate)
-                eng.say(text); eng.runAndWait()
+                if fx and os.name == "nt":
+                    if not self._say_radio(eng, text): eng.say(text); eng.runAndWait()
+                else:
+                    eng.say(text); eng.runAndWait()
             except Exception as e:
                 self.err = f"{type(e).__name__}: {e}"
 
-    def say(self, text, rate=185, hint="", interrupt=True):
+    def _say_radio(self, eng, text):
+        """Telsiz efektli konuşma: sesi dosyaya üret → efekt → çal. Başarısızsa False (düz konuşmaya düşer)."""
+        try:
+            import tempfile, winsound
+            d = Path(tempfile.gettempdir())
+            raw, fxp = d / "td2_voice_raw.wav", d / "td2_voice_fx.wav"
+            eng.save_to_file(text, str(raw)); eng.runAndWait()
+            if not raw.exists() or raw.stat().st_size < 100: return False
+            voicepack.radio_fx(raw, fxp)
+            winsound.PlaySound(str(fxp), winsound.SND_FILENAME)
+            self.last_fx = str(fxp)
+            return True
+        except Exception as e:
+            self.err = f"radio: {type(e).__name__}: {e}"
+            return False
+
+    def say(self, text, rate=185, hint="", interrupt=True, fx=False):
         if interrupt:
             try:
                 while True: self.q.get_nowait()
             except queue.Empty:
                 pass
-        self.q.put((text, rate, hint))
+        self.q.put((text, rate, hint, fx))
 
     def close(self):
         self.q.put(None)
@@ -1340,6 +1368,11 @@ class App:
         self.root_after_resets = None
         self.last_sig, self.last_time, self.last_err = None, 0, ""
         self.speaker, self.rec, self.voice_busy, self.chat_hist = Speaker(), Recorder(), False, []
+        self.voice_lines = voicepack.Lines(BASE / "meta" / "voice_lines.json", BUNDLE / "meta" / "voice_lines.json")
+        self.news = None
+        for np_ in (NEWS_CACHE, BASE / "meta" / "news_feed.json", BUNDLE / "meta" / "news_feed.json"):
+            try: self.news = knowledge.validate_news(json.loads(np_.read_text(encoding="utf-8"))); break
+            except Exception: continue
 
         display.set_dpi_aware()                         # %125/%150 Windows ölçeğinde koordinatlar kaymasın
         self.root = tk.Tk()
@@ -1367,6 +1400,475 @@ class App:
         self.root.after(1000, self.service_start)
         if OCR.name == "tesseract" and not self.tess:
             messagebox.showwarning(APP_NAME, t("msg.no_tesseract"))
+
+    # ---------- Bilgi: ansiklopedi, meta build vitrini, haberler ve sezon, bilgi yarışması ----------
+    CAT_COLORS = {"exotic": "#ff8a3d", "named": "#e0b03a", "gear_set": "#2fbf71", "brand": "#5b8def", "talent": "#a78bfa"}
+
+    def encyclopedia(self):
+        if getattr(self, "_enc_ver", None) != GAME.data.get("version") or not getattr(self, "_enc", None):
+            self._enc = knowledge.Encyclopedia(GAME.data, [BASE / "meta" / "sources", BUNDLE / "meta" / "sources"])
+            self._enc_ver = GAME.data.get("version")
+        return self._enc
+
+    def build_info(self):
+        p = self.tabs["info"]
+        nb = self.info_nb = ttk.Notebook(p); nb.pack(fill="both", expand=True, padx=8, pady=8)
+        self._info_keys = ["enc", "meta", "news", "quiz"]
+        frames = {}
+        for k, icon in zip(self._info_keys, ("📖", "🏆", "📰", "❓")):
+            fr = ttk.Frame(nb, padding=8); nb.add(fr, text=f" {icon} {t('info.' + k)} "); frames[k] = fr
+        self._build_enc(frames["enc"]); self._build_meta_gallery(frames["meta"])
+        self._build_news(frames["news"]); self._build_quiz(frames["quiz"])
+        nb.bind("<<NotebookTabChanged>>", lambda e: self._info_tab_changed())
+
+    def _info_tab_changed(self):
+        k = self._info_keys[self.info_nb.index(self.info_nb.select())]
+        if k == "news": self._news_mark_seen()
+        if k == "quiz" and not getattr(self, "_quiz_q", None): self.quiz_next()
+
+    # --- ansiklopedi
+    def _build_enc(self, f):
+        enc = self.encyclopedia()
+        top = ttk.Frame(f); top.pack(fill="x")
+        self.enc_q = tk.StringVar()
+        e = ttk.Entry(top, textvariable=self.enc_q, width=34); e.pack(side="left")
+        self.enc_q.trace_add("write", lambda *a: self._enc_fill())
+        cats = [None] + list(knowledge.CATEGORIES)
+        self._enc_cat_labels = [t("enc.all")] + [t("enc.c_" + c) for c in knowledge.CATEGORIES]
+        self.enc_cat = tk.StringVar(value=self._enc_cat_labels[0])
+        cb = ttk.Combobox(top, textvariable=self.enc_cat, values=self._enc_cat_labels, state="readonly", width=16); cb.pack(side="left", padx=6)
+        cb.bind("<<ComboboxSelected>>", lambda e: self._enc_fill())
+        self._enc_slots = [None] + list(knowledge.SLOT_ORDER)
+        self.enc_slot = tk.StringVar(value=t("enc.any_slot"))
+        sb = ttk.Combobox(top, textvariable=self.enc_slot, values=[t("enc.any_slot")] + [slot_name(x) for x in knowledge.SLOT_ORDER],
+                          state="readonly", width=14); sb.pack(side="left")
+        sb.bind("<<ComboboxSelected>>", lambda e: self._enc_fill())
+        c = enc.counts()
+        self.enc_count = ttk.Label(top, text="", foreground=PAL["muted"]); self.enc_count.pack(side="left", padx=10)
+        ttk.Label(top, text=t("enc.totals", ex=c["exotic"], na=c["named"], gs=c["gear_set"], br=c["brand"], ta=c["talent"]),
+                  foreground=PAL["muted"]).pack(side="right")
+        body = ttk.Frame(f); body.pack(fill="both", expand=True, pady=(8, 0))
+        left = ttk.Frame(body); left.pack(side="left", fill="y")
+        self.enc_tv = ttk.Treeview(left, columns=("name", "kind"), show="headings", height=22, selectmode="browse")
+        self.enc_tv.heading("name", text=t("enc.h_name")); self.enc_tv.heading("kind", text=t("enc.h_kind"))
+        self.enc_tv.column("name", width=250); self.enc_tv.column("kind", width=120)
+        for k, col in self.CAT_COLORS.items(): self.enc_tv.tag_configure(k, foreground=col)
+        ys = ttk.Scrollbar(left, orient="vertical", command=self.enc_tv.yview); self.enc_tv.configure(yscrollcommand=ys.set)
+        self.enc_tv.pack(side="left", fill="y"); ys.pack(side="left", fill="y")
+        self.enc_tv.bind("<<TreeviewSelect>>", lambda e: self._enc_show())
+        right = ttk.Frame(body); right.pack(side="left", fill="both", expand=True, padx=(10, 0))
+        self.enc_txt = tk.Text(right, wrap="word", bg=PAL["surface"], fg=PAL["fg"], relief="flat", padx=14, pady=10,
+                               font=(ui_theme.FONT, 10), cursor="arrow")
+        self.enc_txt.pack(fill="both", expand=True)
+        for tag, kw in (("h1", {"font": (ui_theme.FONT_SEMI, 16)}), ("sub", {"foreground": PAL["muted"]}),
+                        ("h2", {"font": (ui_theme.FONT_SEMI, 11), "foreground": PAL["accent"], "spacing1": 10}),
+                        ("link", {"foreground": "#7cb7ff", "underline": True}), ("chip", {"font": (ui_theme.FONT_SEMI, 9)})):
+            self.enc_txt.tag_configure(tag, **kw)
+        for k, col in self.CAT_COLORS.items(): self.enc_txt.tag_configure("c_" + k, foreground=col, font=(ui_theme.FONT_SEMI, 10))
+        self.enc_txt.config(state="disabled")
+        bar = ttk.Frame(right); bar.pack(fill="x", pady=(6, 0))
+        self.enc_add_btn = ttk.Button(bar, text="➕ " + t("enc.add"), command=self.enc_add_to_build, style="Accent.TButton")
+        self.enc_add_btn.pack(side="left")
+        ttk.Button(bar, text="📍 " + t("enc.where") + ("" if self.ent.has("drop_stats_view") else " ⭐"), command=self.enc_where).pack(side="left", padx=6)
+        ttk.Button(bar, text="🌐 " + t("enc.wiki"), command=self.enc_wiki).pack(side="left")
+        self.enc_status = ttk.Label(right, text="", foreground=PAL["muted"]); self.enc_status.pack(anchor="w", pady=(4, 0))
+        self._enc_fill()
+
+    def _enc_fill(self):
+        if not hasattr(self, "enc_tv"): return
+        enc = self.encyclopedia()
+        cat = ([None] + list(knowledge.CATEGORIES))[self._enc_cat_labels.index(self.enc_cat.get())] if self.enc_cat.get() in self._enc_cat_labels else None
+        sl = self.enc_slot.get()
+        slot = next((x for x in knowledge.SLOT_ORDER if slot_name(x) == sl), None)
+        rows = enc.search(self.enc_q.get(), cat, slot)
+        tv = self.enc_tv; tv.delete(*tv.get_children())
+        self._enc_rows = {}
+        for i, e in enumerate(rows):
+            iid = f"e{i}"; self._enc_rows[iid] = e
+            kind = t("enc.c_" + e["cat"]) + (f" · {slot_name(e['slot'])}" if e.get("slot") in knowledge.SLOT_ORDER else "")
+            tv.insert("", "end", iid=iid, values=(e["name"], kind), tags=(e["cat"],))
+        self.enc_count.config(text=t("enc.found", n=len(rows)))
+        if rows and not tv.selection(): tv.selection_set("e0")
+
+    def _enc_show(self, e=None):
+        if e is None:
+            sel = self.enc_tv.selection()
+            if not sel: return
+            e = self._enc_rows.get(sel[0])
+        if not e: return
+        self._enc_cur = e
+        T = self.enc_txt; T.config(state="normal"); T.delete("1.0", "end")
+        T.insert("end", e["name"] + "\n", "h1")
+        meta = [t("enc.c_" + e["cat"])]
+        if e.get("slot"): meta.append(slot_name(e["slot"]) if e["slot"] in knowledge.SLOT_ORDER else e["slot"])
+        if e.get("weapon_type"): meta.append(e["weapon_type"])
+        if e.get("brand"): meta.append(e["brand"])
+        if e.get("gear_set"): meta.append(e["gear_set"])
+        if e.get("kind"): meta.append(t("enc.k_" + e["kind"]))
+        T.insert("end", "  ·  ".join(meta) + "\n", ("c_" + e["cat"],))
+        if e.get("talent") and e["cat"] in ("exotic", "named"):
+            T.insert("end", t("enc.talent") + "\n", "h2"); T.insert("end", e["talent"] + "\n", "chip")
+        if e.get("desc"):
+            T.insert("end", t("enc.desc") + "\n", "h2"); T.insert("end", e["desc"] + "\n")
+        if e.get("bonuses"):
+            T.insert("end", t("enc.bonuses") + "\n", "h2")
+            for i, b in enumerate(e["bonuses"], start=1):
+                T.insert("end", f"{i + (1 if e['cat'] == 'gear_set' else 0)} ▸ ", "sub"); T.insert("end", b + "\n")
+        if e.get("pieces"):
+            T.insert("end", t("enc.pieces") + "\n", "h2")
+            T.insert("end", ", ".join(f"{n} ({slot_name(sl)})" for n, sl in e["pieces"]) + "\n")
+        rel = self.encyclopedia().related(e)
+        if rel:
+            T.insert("end", t("enc.related") + "\n", "h2")
+            for r in rel:
+                tag = f"rel{id(r)}"
+                T.insert("end", "• ", "sub"); T.insert("end", r["name"], ("link", tag)); T.insert("end", f"  ({t('enc.c_' + r['cat'])})\n", "sub")
+                T.tag_bind(tag, "<Button-1>", lambda ev, r=r: self._enc_show(r))
+                T.tag_bind(tag, "<Enter>", lambda ev: T.config(cursor="hand2")); T.tag_bind(tag, "<Leave>", lambda ev: T.config(cursor="arrow"))
+        T.config(state="disabled")
+        can = e["cat"] in ("gear_set", "brand") or e.get("talent") or e["cat"] in ("exotic", "named")
+        self.enc_add_btn.state(["!disabled"] if can else ["disabled"])
+        self.enc_status.config(text="")
+
+    def enc_open(self, name):
+        """Başka bir yerden (yarışma, haber) bir girişi aç."""
+        self.nb.select(self.tab_keys.index("info")); self.info_nb.select(0)
+        e = next((x for x in self.encyclopedia().entries if x["name"] == name), None)
+        if e: self._enc_show(e)
+
+    def enc_add_to_build(self):
+        e = getattr(self, "_enc_cur", None)
+        if not e: return
+        if e["cat"] in ("gear_set", "brand"):
+            b = {"name": t("enc.new_build", name=e["name"]), "sets_or_brands": [e["name"]], "set_bonus": 15 if e["cat"] == "gear_set" else 0,
+                 "attributes": {}, "talents": ({e["talent"]: 3} if e.get("talent") else {})}
+            self.cfg["builds"].append(b); self.normalize_builds(); save_cfg(self.cfg)
+            self.enc_status.config(text=t("enc.added_build", name=b["name"]), foreground=PAL["success"])
+            try: self.refresh_builds(len(self.cfg["builds"]) - 1)
+            except Exception: pass
+            return
+        b = active_build(self.cfg)
+        if not b: return self.enc_status.config(text=t("enc.no_build"), foreground=PAL["warning"])
+        if e["cat"] in ("exotic", "named"):
+            items = b.setdefault("items", [])
+            if e["name"] not in items: items.append(e["name"])
+        elif e["cat"] == "talent":
+            b.setdefault("talents", {}).setdefault(e["name"], 3)
+        b["meta_locked"] = True if b.get("meta_id") else b.get("meta_locked", False)
+        save_cfg(self.cfg)
+        self.enc_status.config(text=t("enc.added", name=e["name"], build=b["name"]), foreground=PAL["success"])
+
+    def enc_where(self):
+        e = getattr(self, "_enc_cur", None)
+        if not e: return
+        if not self.ent.has("drop_stats_view"): return self.open_premium_page()
+        url = self.cfg["settings"].get("drop_server") or dropstats.DEFAULT_URL
+        self.enc_status.config(text=t("acc.working"), foreground=PAL["muted"])
+        key = self.ent.server_auth()[4:]
+        def go():
+            try: d, err = dropstats.stats(url, key, None, e["name"]), None
+            except Exception as ex: d, err = None, ex
+            def show():
+                if err: return self.enc_status.config(text=t("drops.send_failed", e=err), foreground=PAL["danger"])
+                w = (d or {}).get("where") or []
+                if not w: return self.enc_status.config(text=t("enc.where_none"), foreground=PAL["muted"])
+                self.enc_status.config(text=t("enc.where_res") + "  " + "  ·  ".join(
+                    f"{t('act.' + x['activity'])} {x['per1000']}‰" for x in w[:5]), foreground=PAL["success"])
+            self.root.after(0, show)
+        threading.Thread(target=go, daemon=True).start()
+
+    def enc_wiki(self):
+        e = getattr(self, "_enc_cur", None)
+        if e: webbrowser_open("https://thedivision.fandom.com/wiki/" + urllib.parse.quote(e["name"].replace(" ", "_")))
+
+    # --- meta build vitrini
+    def meta_feed_builds(self):
+        known = set(self.cfg.get("attributes", {}).keys())
+        for p_ in (META_CACHE, BASE / "meta" / "meta_builds.json", BUNDLE / "meta" / "meta_builds.json"):
+            try: return meta_sync.validate(json.loads(p_.read_text(encoding="utf-8")), known)
+            except Exception: continue
+        return {"builds": [], "version": "", "season": ""}
+
+    def _meta_trend_base(self, feed):
+        st = self.cfg["settings"]
+        h = st.get("meta_pop_hist") or {}
+        cur = {"v": feed.get("version", ""), "pop": {b["meta_id"]: b["meta"]["popularity"] for b in feed["builds"]}}
+        if h.get("cur", {}).get("v") != cur["v"]:
+            h = {"prev": h.get("cur"), "cur": cur}; st["meta_pop_hist"] = h; save_cfg(self.cfg)
+        return (h.get("prev") or {}).get("pop")
+
+    def _build_meta_gallery(self, f):
+        top = ttk.Frame(f); top.pack(fill="x")
+        self._mg_tags = ["all", "pve", "pvp", "solo", "group", "endgame", "dps", "close", "precision", "skill", "tank", "pulse"]
+        self.mg_tag = tk.StringVar(value=t("mg.t_all"))
+        cb = ttk.Combobox(top, textvariable=self.mg_tag, values=[t("mg.t_" + x) for x in self._mg_tags], state="readonly", width=16)
+        cb.pack(side="left"); cb.bind("<<ComboboxSelected>>", lambda e: self.refresh_meta_gallery())
+        self._mg_sorts = ["pop", "trend", "name"]
+        self.mg_sort = tk.StringVar(value=t("mg.s_pop"))
+        sb = ttk.Combobox(top, textvariable=self.mg_sort, values=[t("mg.s_" + x) for x in self._mg_sorts], state="readonly", width=16)
+        sb.pack(side="left", padx=6); sb.bind("<<ComboboxSelected>>", lambda e: self.refresh_meta_gallery())
+        self.mg_favs = tk.BooleanVar(value=False)
+        ttk.Checkbutton(top, text="★ " + t("mg.only_favs"), variable=self.mg_favs, command=self.refresh_meta_gallery).pack(side="left", padx=6)
+        self.mg_info = ttk.Label(top, text="", foreground=PAL["muted"]); self.mg_info.pack(side="right")
+        holder = ttk.Frame(f); holder.pack(fill="both", expand=True, pady=(8, 0))
+        self.mg_area = ui_theme.scrollable(holder, PAL["bg"])
+        self.refresh_meta_gallery()
+
+    def refresh_meta_gallery(self):
+        if not hasattr(self, "mg_area"): return
+        for c in self.mg_area.winfo_children(): c.destroy()
+        st = self.cfg["settings"]
+        feed = self.meta_feed_builds()
+        prev = self._meta_trend_base(feed)
+        favs, hidden = set(st.get("meta_favs", [])), set(st.get("meta_hidden", []))
+        tag = self._mg_tags[[t("mg.t_" + x) for x in self._mg_tags].index(self.mg_tag.get())]
+        rows = []
+        for b in feed["builds"]:
+            tags = knowledge.build_tags({"mode": b["meta"]["mode"], "role": b["meta"]["role"]})
+            if tag != "all" and tag not in tags: continue
+            if self.mg_favs.get() and b["meta_id"] not in favs: continue
+            pop = b["meta"]["popularity"]
+            tr = knowledge.trend(pop, prev.get(b["meta_id"]) if prev else None) if prev else ""
+            rows.append((b, tags, pop, tr, (prev or {}).get(b["meta_id"])))
+        srt = self._mg_sorts[[t("mg.s_" + x) for x in self._mg_sorts].index(self.mg_sort.get())]
+        if srt == "pop": rows.sort(key=lambda r: -r[2])
+        elif srt == "trend": rows.sort(key=lambda r: -(r[2] - (r[4] if r[4] is not None else r[2])) - (50 if r[3] == "new" else 0))
+        else: rows.sort(key=lambda r: r[0]["name"].lower())
+        self.mg_info.config(text=t("mg.info", n=len(rows), season=feed.get("season") or "?", v=feed.get("version") or "?"))
+        if not rows:
+            ttk.Label(self.mg_area, text=t("mg.empty"), foreground=PAL["muted"]).pack(anchor="w", padx=10, pady=10); return
+        cols = 2
+        grid = tk.Frame(self.mg_area, bg=PAL["bg"]); grid.pack(fill="both", expand=True)
+        for c in range(cols): grid.columnconfigure(c, weight=1, uniform="mg")
+        for i, (b, tags, pop, tr, _) in enumerate(rows):
+            self._meta_card(grid, b, tags, pop, tr, b["meta_id"] in favs, b["meta_id"] in hidden).grid(
+                row=i // cols, column=i % cols, sticky="nsew", padx=6, pady=6)
+
+    def _meta_card(self, parent, b, tags, pop, tr, fav, hidden):
+        m = b["meta"]
+        card = tk.Frame(parent, bg=PAL["surface"], highlightthickness=1, highlightbackground=PAL["accent"] if fav else PAL["surface"])
+        head = tk.Frame(card, bg=PAL["surface"]); head.pack(fill="x", padx=12, pady=(10, 2))
+        tk.Label(head, text=b["name"], bg=PAL["surface"], fg=PAL["fg"], font=(ui_theme.FONT_SEMI, 12), anchor="w").pack(side="left")
+        trc = {"up": ("▲ " + t("mg.up"), PAL["success"]), "down": ("▼ " + t("mg.down"), PAL["danger"]), "new": ("✦ " + t("mg.new"), PAL["accent"])}.get(tr)
+        if trc: tk.Label(head, text=trc[0], bg=PAL["surface"], fg=trc[1], font=(ui_theme.FONT_SEMI, 9)).pack(side="right")
+        tk.Label(card, text=" · ".join(x for x in (m.get("mode"), t("mg.t_" + m["role"]) if m.get("role") in self._mg_tags else m.get("role")) if x),
+                 bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 9), anchor="w").pack(fill="x", padx=12)
+        chips = tk.Frame(card, bg=PAL["surface"]); chips.pack(fill="x", padx=12, pady=(4, 0))
+        for tg in tags[:5]:
+            tk.Label(chips, text=t("mg.t_" + tg) if tg in self._mg_tags else tg, bg=PAL["bg"], fg=PAL["fg"], font=(ui_theme.FONT, 8),
+                     padx=6, pady=1).pack(side="left", padx=(0, 4))
+        bar = tk.Frame(card, bg=PAL["surface"]); bar.pack(fill="x", padx=12, pady=(6, 0))
+        tk.Label(bar, text=t("mg.pop"), bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 9)).pack(side="left")
+        cv = tk.Canvas(bar, height=8, bg=PAL["bg"], highlightthickness=0); cv.pack(side="left", fill="x", expand=True, padx=6)
+        cv.bind("<Configure>", lambda ev, cv=cv, pop=pop: (cv.delete("all"), cv.create_rectangle(0, 0, ev.width * pop / 100, 8, fill=PAL["accent"], width=0)))
+        tk.Label(bar, text=f"{pop}", bg=PAL["surface"], fg=PAL["fg"], font=(ui_theme.FONT_SEMI, 9)).pack(side="left")
+        sets = ", ".join(b.get("sets_or_brands") or [])
+        tal = ", ".join(sorted(b.get("talents") or {}, key=lambda k: -(b["talents"][k]))[:3])
+        tk.Label(card, text=(sets + ("\n" + tal if tal else "")), bg=PAL["surface"], fg=PAL["fg"], font=(ui_theme.FONT, 9),
+                 justify="left", anchor="w", wraplength=380).pack(fill="x", padx=12, pady=(6, 0))
+        src = m.get("sources") or []
+        if src:
+            lk = tk.Label(card, text=f"🔗 {src[0]['title']}" + (f"  (+{len(src) - 1})" if len(src) > 1 else ""), bg=PAL["surface"], fg="#7cb7ff",
+                          cursor="hand2", font=(ui_theme.FONT, 8), anchor="w")
+            lk.pack(fill="x", padx=12, pady=(4, 0)); lk.bind("<Button-1>", lambda e, u=src[0]["url"]: webbrowser_open(u))
+        btns = tk.Frame(card, bg=PAL["surface"]); btns.pack(fill="x", padx=12, pady=(8, 10))
+        ttk.Button(btns, text=("★ " if fav else "☆ ") + t("mg.fav"), command=lambda: self.meta_toggle_fav(b["meta_id"])).pack(side="left")
+        ttk.Button(btns, text=(t("mg.show") if hidden else t("mg.hide")), command=lambda: self.meta_toggle_hidden(b)).pack(side="left", padx=6)
+        return card
+
+    def meta_toggle_fav(self, mid):
+        favs = self.cfg["settings"].setdefault("meta_favs", [])
+        favs.remove(mid) if mid in favs else favs.append(mid)
+        save_cfg(self.cfg); self.refresh_meta_gallery()
+
+    def meta_toggle_hidden(self, b):
+        st = self.cfg["settings"]; hid = st.setdefault("meta_hidden", [])
+        mid = b["meta_id"]
+        if mid in hid:                                         # tekrar göster: build listesine hemen ekle
+            hid.remove(mid)
+            if not any(x.get("meta_id") == mid for x in self.cfg["builds"]):
+                nb_ = dict(b)
+                while any(x["name"] == nb_["name"] for x in self.cfg["builds"]): nb_["name"] += " ★"
+                self.cfg["builds"].append(nb_)
+        else:
+            hid.append(mid)
+            self.cfg["builds"] = [x for x in self.cfg["builds"] if x.get("meta_id") != mid or x.get("meta_locked")]
+        save_cfg(self.cfg)
+        try: self.refresh_builds()
+        except Exception: pass
+        self.refresh_meta_gallery()
+
+    # --- haberler ve sezon
+    def _build_news(self, f):
+        top = tk.Frame(f, bg=PAL["surface"]); top.pack(fill="x")
+        self.news_season = tk.Label(top, text="", bg=PAL["surface"], fg=PAL["fg"], font=(ui_theme.FONT_SEMI, 13), anchor="w")
+        self.news_season.pack(fill="x", padx=14, pady=(10, 2))
+        row = tk.Frame(top, bg=PAL["surface"]); row.pack(fill="x", padx=14, pady=(2, 10))
+        self.news_clock = {}
+        for k in ("daily", "weekly", "tasks"):
+            box = tk.Frame(row, bg=PAL["bg"]); box.pack(side="left", padx=(0, 10), ipadx=10, ipady=4)
+            self.news_clock[k] = tk.Label(box, text="–", bg=PAL["bg"], fg=PAL["accent"], font=(ui_theme.FONT_SEMI, 16))
+            self.news_clock[k].pack(anchor="w", padx=8)
+            tk.Label(box, text=t("news.c_" + k), bg=PAL["bg"], fg=PAL["muted"], font=(ui_theme.FONT, 9)).pack(anchor="w", padx=8)
+        holder = ttk.Frame(f); holder.pack(fill="both", expand=True, pady=(8, 0))
+        self.news_area = ui_theme.scrollable(holder, PAL["bg"])
+        self.refresh_info_news(); self._news_tick()
+
+    def _news_resets(self):
+        try: return json.loads(TASKS_CACHE.read_text(encoding="utf-8")).get("resets")
+        except Exception:
+            try: return json.loads((BUNDLE / "meta" / "tasks_feed.json").read_text(encoding="utf-8")).get("resets")
+            except Exception: return None
+
+    def _news_tick(self):
+        if not hasattr(self, "news_clock") or not self.news_clock["daily"].winfo_exists(): return
+        now = datetime.now(timezone.utc)
+        d, w = knowledge.next_resets(self._news_resets(), now)
+        self.news_clock["daily"].config(text=knowledge.fmt_left(d - now)[0])
+        self.news_clock["weekly"].config(text=knowledge.fmt_left(w - now)[0])
+        try:
+            items = [x for v in self.tasks.get("items", {}).values() for x in v if not x.get("done")]
+            self.news_clock["tasks"].config(text=str(len(items)))
+        except Exception:
+            pass
+        self.root.after(30000, self._news_tick)
+
+    def refresh_info_news(self):
+        if not hasattr(self, "news_area"): return
+        for c in self.news_area.winfo_children(): c.destroy()
+        lang = i18n.current_language()
+        feed = self.news or {"items": [], "season": ""}
+        season = feed.get("season") or self.tasks.get("season") or ""
+        self.news_season.config(text="🗓 " + (season or t("news.no_season")))
+        seen = set(self.cfg["settings"].get("news_seen", []))
+        rows = knowledge.news_sorted(feed["items"])
+        if not rows:
+            ttk.Label(self.news_area, text=t("news.empty"), foreground=PAL["muted"]).pack(anchor="w", padx=10, pady=10); return
+        now = datetime.now(timezone.utc)
+        icons = {"patch": "🛠", "event": "🎉", "season": "🗺", "maintenance": "🔧", "dlc": "🆕", "community": "💬"}
+        colors = {"live": PAL["success"], "upcoming": PAL["accent"], "news": PAL["muted"], "ended": PAL["muted"]}
+        for it, stt in rows:
+            card = tk.Frame(self.news_area, bg=PAL["surface"]); card.pack(fill="x", padx=6, pady=5)
+            head = tk.Frame(card, bg=PAL["surface"]); head.pack(fill="x", padx=12, pady=(8, 0))
+            tk.Label(head, text=t("news.s_" + stt), bg=colors[stt], fg=PAL["bg"], font=(ui_theme.FONT_SEMI, 8), padx=6).pack(side="left")
+            if it["id"] not in seen and stt != "ended":
+                tk.Label(head, text=t("news.new"), bg=PAL["accent"], fg=PAL["bg"], font=(ui_theme.FONT_SEMI, 8), padx=6).pack(side="left", padx=4)
+            tk.Label(head, text=f" {icons.get(it['kind'], '•')} " + knowledge.pick_lang(it["title"], lang), bg=PAL["surface"], fg=PAL["fg"],
+                     font=(ui_theme.FONT_SEMI, 11), anchor="w").pack(side="left")
+            when = ""
+            if stt == "live" and it.get("end"): when = t("news.ends_in", t=knowledge.fmt_left(it["end"] - now)[0])
+            elif stt == "upcoming" and it.get("start"): when = t("news.starts_in", t=knowledge.fmt_left(it["start"] - now)[0])
+            elif it.get("date"): when = it["date"].astimezone().strftime("%Y-%m-%d")
+            tk.Label(head, text=when, bg=PAL["surface"], fg=colors[stt], font=(ui_theme.FONT, 9)).pack(side="right")
+            txt = knowledge.pick_lang(it.get("text"), lang)
+            if txt:
+                tk.Label(card, text=txt, bg=PAL["surface"], fg=PAL["fg"] if stt != "ended" else PAL["muted"], font=(ui_theme.FONT, 10),
+                         justify="left", anchor="w", wraplength=900).pack(fill="x", padx=12, pady=(4, 0))
+            if it.get("url"):
+                lk = tk.Label(card, text="🔗 " + (it.get("source") or t("news.source")), bg=PAL["surface"], fg="#7cb7ff", cursor="hand2",
+                              font=(ui_theme.FONT, 9), anchor="w")
+                lk.pack(fill="x", padx=12, pady=(2, 8)); lk.bind("<Button-1>", lambda e, u=it["url"]: webbrowser_open(u))
+            else:
+                tk.Frame(card, height=6, bg=PAL["surface"]).pack()
+
+    def _news_mark_seen(self):
+        if not self.news: return
+        st = self.cfg["settings"]
+        ids = [x["id"] for x in self.news["items"]]
+        if set(ids) - set(st.get("news_seen", [])):
+            st["news_seen"] = ids[-100:]; save_cfg(self.cfg)
+
+    # --- bilgi yarışması
+    def _build_quiz(self, f):
+        st = self.cfg["settings"]
+        top = tk.Frame(f, bg=PAL["surface"]); top.pack(fill="x")
+        self.quiz_lvl = tk.Label(top, text="", bg=PAL["surface"], fg=PAL["accent"], font=(ui_theme.FONT_SEMI, 13)); self.quiz_lvl.pack(side="left", padx=14, pady=10)
+        self.quiz_bar = tk.Canvas(top, height=10, width=260, bg=PAL["bg"], highlightthickness=0); self.quiz_bar.pack(side="left", padx=6)
+        self.quiz_stat = tk.Label(top, text="", bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 10)); self.quiz_stat.pack(side="left", padx=10)
+        self.quiz_box = tk.Frame(f, bg=PAL["bg"]); self.quiz_box.pack(fill="both", expand=True, pady=10)
+        opt = ttk.Frame(f); opt.pack(fill="x")
+        self.quiz_load_v = tk.BooleanVar(value=bool(st.get("quiz_loading")))
+        ttk.Checkbutton(opt, text=t("quiz.on_loading"), variable=self.quiz_load_v,
+                        command=lambda: (st.__setitem__("quiz_loading", bool(self.quiz_load_v.get())), save_cfg(self.cfg))).pack(anchor="w")
+        ttk.Label(opt, text=t("quiz.hint"), foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w")
+        self._quiz_streak = 0
+        self._quiz_render_level()
+
+    def _quiz_render_level(self):
+        st = self.cfg["settings"]
+        lvl, x, need = knowledge.quiz_level(st.get("quiz_xp", 0))
+        self.quiz_lvl.config(text=t("quiz.level", n=lvl))
+        self.quiz_bar.delete("all"); self.quiz_bar.create_rectangle(0, 0, 260 * x / need, 10, fill=PAL["accent"], width=0)
+        self.quiz_stat.config(text=t("quiz.stat", xp=st.get("quiz_xp", 0), streak=self._quiz_streak, best=st.get("quiz_best", 0)))
+
+    def _quiz_text(self, q):
+        a = q["args"]
+        return t("quiz.q_" + q["kind"], **a)
+
+    def _quiz_opt(self, q, o):
+        if q["kind"] == "exotic_slot": return slot_name(o)
+        return o
+
+    def quiz_next(self, box=None, compact=False):
+        box = box or getattr(self, "quiz_box", None)
+        if box is None: return
+        q = self._quiz_q = knowledge.Quiz(self.encyclopedia()).make()
+        for c in box.winfo_children(): c.destroy()
+        if not q:
+            ttk.Label(box, text=t("quiz.none"), foreground=PAL["muted"]).pack(anchor="w"); return
+        card = tk.Frame(box, bg=PAL["surface"]); card.pack(fill="x", padx=6, pady=6)
+        tk.Label(card, text=self._quiz_text(q), bg=PAL["surface"], fg=PAL["fg"], font=(ui_theme.FONT_SEMI, 11 if compact else 13),
+                 justify="left", anchor="w", wraplength=420 if compact else 900).pack(fill="x", padx=14, pady=(12, 8))
+        btns, fb = [], tk.Label(card, text="", bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 10), anchor="w", justify="left")
+        def answer(o, b):
+            if getattr(card, "_done", False): return
+            card._done = True
+            ok = o == q["right"]
+            st = self.cfg["settings"]
+            if ok:
+                self._quiz_streak += 1
+                st["quiz_xp"] = int(st.get("quiz_xp", 0)) + 10 + min(10, 2 * (self._quiz_streak - 1))
+                st["quiz_best"] = max(int(st.get("quiz_best", 0)), self._quiz_streak)
+            else:
+                self._quiz_streak = 0
+            save_cfg(self.cfg)
+            for bb, oo in btns:
+                bb.config(bg=PAL["success"] if oo == q["right"] else (PAL["danger"] if bb is b else PAL["bg"]),
+                          fg=PAL["bg"] if oo == q["right"] or bb is b else PAL["muted"])
+            fb.config(text=("✔ " + t("quiz.right")) if ok else ("✖ " + t("quiz.wrong", a=self._quiz_opt(q, q["right"]))),
+                      fg=PAL["success"] if ok else PAL["danger"])
+            if hasattr(self, "quiz_lvl") and self.quiz_lvl.winfo_exists(): self._quiz_render_level()
+            if hasattr(self, "sounds"): self.sounds.play("KEEP" if ok else "DISMANTLE", force=False)
+        grid = tk.Frame(card, bg=PAL["surface"]); grid.pack(fill="x", padx=14)
+        for i, o in enumerate(q["options"]):
+            b = tk.Button(grid, text=self._quiz_opt(q, o), bg=PAL["bg"], fg=PAL["fg"], activebackground=PAL["accent"], relief="flat",
+                          font=(ui_theme.FONT, 10), wraplength=200 if compact else 400, justify="left", anchor="w", padx=10, pady=6, cursor="hand2")
+            b.config(command=lambda o=o, b=b: answer(o, b))
+            b.grid(row=i // 2, column=i % 2, sticky="ew", padx=4, pady=4); grid.columnconfigure(i % 2, weight=1)
+            btns.append((b, o))
+        fb.pack(fill="x", padx=14, pady=(6, 0))
+        nav = tk.Frame(card, bg=PAL["surface"]); nav.pack(fill="x", padx=14, pady=(6, 12))
+        ttk.Button(nav, text="➜ " + t("quiz.next"), command=lambda: self.quiz_next(box, compact), style="Accent.TButton").pack(side="left")
+        subj = q["args"].get("name") or (q["right"] if q["kind"] == "talent_desc" else None)
+        if subj and not compact:
+            ttk.Button(nav, text="📖 " + t("quiz.open_enc"), command=lambda: self.enc_open(subj)).pack(side="left", padx=6)
+        self._quiz_card = card
+
+    def quiz_popup(self):
+        """Yükleme ekranında küçük yarışma penceresi (isteğe bağlı). Yükleme bitince kendiliğinden kapanır."""
+        w = getattr(self, "_quiz_pop", None)
+        if w and w.winfo_exists(): return
+        w = self._quiz_pop = tk.Toplevel(self.root); w.overrideredirect(True); w.attributes("-topmost", True)
+        w.configure(bg=PAL["surface"], highlightthickness=1, highlightbackground=PAL["accent"])
+        try: w.attributes("-alpha", 0.95)
+        except tk.TclError: pass
+        head = tk.Frame(w, bg=PAL["surface"]); head.pack(fill="x")
+        tk.Label(head, text="❓ " + t("quiz.pop_title"), bg=PAL["surface"], fg=PAL["accent"], font=(ui_theme.FONT_SEMI, 10)).pack(side="left", padx=10, pady=6)
+        tk.Button(head, text="✕", command=w.destroy, bg=PAL["surface"], fg=PAL["muted"], relief="flat", cursor="hand2").pack(side="right", padx=4)
+        box = tk.Frame(w, bg=PAL["bg"]); box.pack(fill="both", expand=True)
+        self.quiz_next(box, compact=True)
+        w.update_idletasks()
+        sw = w.winfo_screenwidth(); w.geometry(f"+{sw - w.winfo_reqwidth() - 30}+{80}")
 
     # ---------- Hizmet: oyun algılama, akıllı tarama, yerel API, Discord durumu, bildirimler, tepsi ----------
     def service_start(self):
@@ -1424,6 +1926,13 @@ class App:
 
     def _screen_changed(self):
         self.game_state = self.screen.state
+        st_ = self.cfg["settings"]
+        if self.game_state == "loading" and st_.get("quiz_loading") and self.game_on:
+            try: self.quiz_popup()
+            except Exception: log.debug("quiz popup", exc_info=True)
+        elif self.game_state != "loading" and getattr(self, "_quiz_pop", None):
+            pop = self._quiz_pop
+            self.root.after(6000, lambda: pop.winfo_exists() and pop.destroy())
         log.debug("Screen state -> %s (%.2f)", self.game_state, self.screen.score)
         self._service_publish(kind="game")
         self.refresh_header()
@@ -2031,10 +2540,10 @@ class App:
                                    duration_ms=int(self.cfg["settings"].get("fx_transition_ms", 260)))
         nb = self.nb = ttk.Notebook(self.root); nb.pack(fill="both", expand=True, padx=10, pady=(6, 10))
         # Sekmeler sabit kimliklerle tutulur, başlıkları t() ile çevrilir.
-        self.tab_keys = ("dash", "builds", "progress", "stash", "stats", "tasks", "assistant", "settings", "history", "log", "help")
+        self.tab_keys = ("dash", "builds", "progress", "stash", "stats", "info", "tasks", "assistant", "settings", "history", "log", "help")
         self.tabs = {k: ttk.Frame(nb) for k in self.tab_keys}
         for k in self.tab_keys: nb.add(self.tabs[k], text=ui_theme.with_icon(t(f"tab.{k}"), ui_theme.TAB_ICONS.get(k, "")))
-        self.build_dash(); self.build_builds(); self.build_prog(); self.build_stash(); self.build_stats(); self.build_gorevler(); self.build_asistan()
+        self.build_dash(); self.build_builds(); self.build_prog(); self.build_stash(); self.build_stats(); self.build_info(); self.build_gorevler(); self.build_asistan()
         self.build_settings(); self.build_hist(); self.build_logtab(); self.build_help()
         nb.bind("<<NotebookTabChanged>>", self.on_tab)
         self.root.after(300, self.apply_fx)
@@ -4080,6 +4589,19 @@ class App:
         ttk.Checkbutton(box, text=t("ai.speak_chat"), variable=self.abv["speak_chat"]).grid(row=2, column=2, sticky="w", padx=16)
         ttk.Button(box, text=t("ai.test_voice"), command=lambda: self.speak(t("ai.voice_test"))).grid(row=3, column=2, sticky="w", padx=16)
         ttk.Button(box, text=t("btn.save"), command=self.save_ai_settings, style="Accent.TButton").grid(row=4, column=2, sticky="w", padx=16)
+        vp = ttk.Frame(box); vp.grid(row=5, column=2, rowspan=4, sticky="nw", padx=16, pady=(6, 0))
+        ttk.Label(vp, text="🎙 " + t("vp.pack")).pack(anchor="w")
+        packs = list(voicepack.PACKS)
+        self.vp_var = tk.StringVar(value=t("vp.p_" + st.get("voice_pack", "tactical")))
+        cb = ttk.Combobox(vp, textvariable=self.vp_var, values=[t("vp.p_" + p) for p in packs], state="readonly", width=24); cb.pack(anchor="w", pady=2)
+        self.vp_radio = tk.BooleanVar(value=bool(st.get("voice_radio", True)))
+        def vp_save(*_):
+            st["voice_pack"] = packs[[t("vp.p_" + p) for p in packs].index(self.vp_var.get())]
+            st["voice_radio"] = bool(self.vp_radio.get()); save_cfg(self.cfg)
+        cb.bind("<<ComboboxSelected>>", vp_save)
+        ttk.Checkbutton(vp, text=t("vp.radio"), variable=self.vp_radio, command=vp_save).pack(anchor="w")
+        ttk.Button(vp, text="▶ " + t("vp.test"), command=self.voice_demo).pack(anchor="w", pady=(4, 0))
+        ttk.Label(vp, text=t("vp.hint"), foreground=PAL["muted"], wraplength=260, justify="left").pack(anchor="w", pady=(4, 0))
         ttk.Label(box, text=t("ai.key_warning"),
                  foreground=PAL["muted"]).grid(row=len(fields) + 1, column=0, columnspan=2, sticky="w", padx=8, pady=(6, 0))
         self.chat_add("sys", t("ai.examples"))
@@ -4101,14 +4623,32 @@ class App:
         if txt:
             self.chat_in.delete(0, "end"); self.ask(txt)
 
-    def speak(self, text):
+    def speak(self, text, fx=None):
         st = self.cfg["settings"]
         try: rate = int(float(st.get("tts_rate", 185)))
         except ValueError: rate = 185
-        self.speaker.say(text, rate, st.get("tts_voice", ""))
+        if fx is None: fx = bool(st.get("voice_radio", True)) and st.get("voice_pack", "tactical") != "classic"
+        self.speaker.say(text, rate, st.get("tts_voice", ""), fx=fx)
+
+    def voice_demo(self):
+        st = self.cfg["settings"]
+        pack = st.get("voice_pack", "tactical")
+        if pack == "classic": return self.speak(t("ai.voice_test"))
+        self.speak(self.voice_lines.compose(i18n.current_language(), pack, "KEEP", "EXOTIC", "Striker", 92, "upgrade"))
 
     def speak_verdict(self, verdict, item, res, note):
         if verdict == "ERROR": return
+        st = self.cfg["settings"]
+        pack = st.get("voice_pack", "tactical")
+        if pack != "classic" and getattr(self, "voice_lines", None):
+            nk = None
+            if note:
+                head = note.split(":")[0]
+                nk = "fills_gap" if head == t("prog.fills_gap") else "upgrade" if head == t("prog.upgrade") else None
+            txt = self.voice_lines.compose(i18n.current_language(), pack, verdict, " ".join(item.get("rarity") or []),
+                                           res[0][1].split(" (")[0] if res and res[0][0] > 0 else None,
+                                           res[0][0] if res else None, nk)
+            if txt: return self.speak(txt)
         parts = [verdict_label(verdict).capitalize()]
         if verdict == "REVIEW":
             parts.append(t("speak.rare"))
@@ -4495,7 +5035,8 @@ class App:
         def work():
             out = {}
             for kind, fn, cache, on in (("builds", meta_sync.run, META_CACHE, do_b),
-                                        ("tasks", meta_sync.run_tasks, TASKS_CACHE, do_t)):
+                                        ("tasks", meta_sync.run_tasks, TASKS_CACHE, do_t),
+                                        ("news", meta_sync.run_news, NEWS_CACHE, do_t)):
                 if not on: continue
                 try: out[kind] = (fn(self.cfg, cache, APP_VERSION, force=force), None)
                 except Exception as e: out[kind] = (None, e)
@@ -4527,6 +5068,14 @@ class App:
         if "tasks" in out:
             m = self.tasks_sync_done(*out["tasks"], verbose)
             if m: msgs.append(m)
+        if "news" in out:
+            res, err = out["news"]
+            if err is None:
+                self.news = res[0]; log.info("News feed from %s: version=%s items=%d", res[1], res[0].get("version"), len(res[0]["items"]))
+                try: self.refresh_info_news()
+                except Exception: log.debug("news refresh", exc_info=True)
+            else:
+                log.info("News sync failed: %s", err)
         if "wiki" in out:
             m = self.wiki_sync_done(*out["wiki"], verbose)
             if m: msgs.append(m)

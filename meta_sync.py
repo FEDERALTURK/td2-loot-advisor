@@ -359,3 +359,27 @@ def run_tasks(cfg, cache_path, app_version="", force=False):
         if cache_path.exists() and not force:
             return validate_tasks(json.loads(cache_path.read_text(encoding="utf-8"))), "cache"
         raise
+
+
+# ---------------------------------------------------------------- haber / sezon akışı (meta/news_feed.json)
+def news_urls(builds_setting):
+    return [u.replace("meta_builds.json", "news_feed.json") for u in configured_urls(builds_setting)
+            if u.endswith("meta_builds.json")]
+
+
+def run_news(cfg, cache_path, app_version="", force=False):
+    """Haber akışını indir, doğrula, önbelleğe yaz. Ağ yoksa önbellek, o da yoksa programla gelen dosya."""
+    import knowledge
+    urls = news_urls(cfg["settings"].get("meta_feed_url", ""))
+    try:
+        if not urls: raise RuntimeError("news feed not configured")
+        raw, url = fetch(urls, app_version)
+        feed = knowledge.validate_news(raw)
+        try: cache_path.write_text(json.dumps(raw, ensure_ascii=False, indent=1), encoding="utf-8")
+        except Exception: pass
+        return feed, url
+    except Exception as e:
+        log.info("News feed unavailable (%s); trying cache", e)
+        if cache_path.exists():
+            return knowledge.validate_news(json.loads(cache_path.read_text(encoding="utf-8"))), "cache"
+        raise

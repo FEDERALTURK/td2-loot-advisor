@@ -49,3 +49,5 @@ tests/.bench_card.png
 # Hesap oturumu (DPAPI ile şifreli, kişisel)
 account.dat
 account.dat.tmp
+news_cache.json
+quiz_state.json

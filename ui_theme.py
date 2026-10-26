@@ -57,7 +57,7 @@ FONT = "Segoe UI"
 FONT_SEMI = "Segoe UI Semibold"
 
 # Sekme ikonları (sekme kimliğine göre) / tab icons by tab id
-TAB_ICONS = {"dash": "🎯", "builds": "🧩", "progress": "📦", "stash": "🗄", "stats": "📊", "tasks": "📋",
+TAB_ICONS = {"dash": "🎯", "builds": "🧩", "progress": "📦", "stash": "🗄", "stats": "📊", "info": "📚", "tasks": "📋",
              "assistant": "🤖", "settings": "⚙", "history": "🕘", "log": "📜", "help": "❓"}
 
 
