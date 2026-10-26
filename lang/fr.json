@@ -1293,5 +1293,16 @@
   "lt.note": "Astuce : joue en fenêtré ou sans bordure pour que la traduction s'affiche par-dessus. Le modèle local traduit phrase par phrase ; pour les longs textes, l'IA est plus naturelle.",
   "news.new_toast": "{n} nouveau(x) : {title}",
   "news.push_title": "Actus The Division 2",
-  "svc.push_news": "Actus et événements"
+  "svc.push_news": "Actus et événements",
+  "tl.box": "Tâches de la communauté",
+  "tl.share": "Partager avec la communauté les tâches que je vois",
+  "tl.share_hint": "Quand la traduction en direct lit un panneau de tâche (Projets, Primes, Missions), seuls le texte de la tâche et sa traduction sont envoyés. Aucun nom de joueur, capture d'écran ou information sur l'ordinateur. Une tâche devient publique dès qu'au moins 2 joueurs différents l'ont signalée.",
+  "tl.use": "Utiliser les tâches de la communauté",
+  "tl.use_hint": "Les tâches actuelles collectées auprès des joueurs apparaissent dans l'onglet Tâches avec 👥 ; les textes de tâches connus s'affichent instantanément dans la traduction en direct avec leur traduction vérifiée.",
+  "tl.status": "👥 {n} tâches de la communauté · {m} lignes de traduction prêtes",
+  "tl.status_none": "👥 Liste des tâches de la communauté pas encore reçue",
+  "tl.shared": "Dernier partage : {title}",
+  "tl.share_off": "Partage désactivé",
+  "tl.ask_title": "Tâches de la communauté",
+  "tl.ask": "Quand la traduction en direct lit un écran de tâche, envoyer le texte de la tâche (titre, objectif, récompenses) et sa traduction à la liste de la communauté ?\n\nTon nom de joueur, tes captures d'écran et les informations de ton ordinateur ne sont jamais envoyés. Une tâche est ajoutée pour tout le monde dès qu'au moins 2 joueurs différents l'ont signalée.\n\nTu peux changer cela à tout moment dans l'onglet Traduction en direct."
 }

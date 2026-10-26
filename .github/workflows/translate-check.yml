@@ -4,7 +4,7 @@ name: Translate check
 on:
   workflow_dispatch:
   push:
-    paths: ["livetranslate.py", "tests/test_livetranslate.py", "tests/ui_translate_test.py", "meta/descriptions_i18n.json"]
+    paths: ["livetranslate.py", "tests/test_livetranslate.py", "tests/ui_translate_test.py", "meta/descriptions_i18n.json", "tasks_live.py", "tests/test_tasks_live.py", "server/tasks.js", "ocr_backend.py"]
 
 permissions:
   contents: read
@@ -20,6 +20,8 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
         with: { python-version: "3.13" }
+      - uses: actions/setup-node@v5
+        with: { node-version: "22" }
       - name: Install
         shell: cmd
         run: |
@@ -38,6 +40,9 @@ jobs:
       - name: Unit + real model
         shell: cmd
         run: set PYTHONIOENCODING=utf-8&& set MT_MODEL_DIR=models\en-tr&& python tests/test_livetranslate.py
+      - name: Community tasks (unit + local server, two players)
+        shell: cmd
+        run: set PYTHONIOENCODING=utf-8&& python tests/test_tasks_live.py --e2e
       - name: Live translation UI
         shell: cmd
         run: set PYTHONIOENCODING=utf-8&& python tests/ui_translate_test.py

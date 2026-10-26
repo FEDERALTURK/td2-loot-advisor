@@ -293,9 +293,12 @@ def task_expired(item, now=None):
 def merge_tasks(tasks, feed, now=None, scope="feed"):
     """Akış görevlerini kullanıcının görev listesine işler. Kendi eklediği görevlere dokunmaz;
     akış görevlerinin 'yapıldı' işaretini korur; süresi dolanları ve akıştan çıkanları kaldırır.
-    scope: "feed" (ortak liste, 🌐) ya da "wiki" (canlı wiki, 📚, kimlikler "wiki-" ile başlar);
+    scope: "feed" (ortak liste, 🌐), "wiki" (canlı wiki, 📚, kimlikler "wiki-") ya da "community" (oyunculardan
+    toplanan görevler, 👥, kimlikler "cm-");
     her kaynak yalnızca kendi görevlerini ekler/siler."""
-    owned = (lambda f: f.startswith("wiki-")) if scope == "wiki" else (lambda f: not f.startswith("wiki-"))
+    prefixes = {"wiki": "wiki-", "community": "cm-"}
+    if scope in prefixes: owned = lambda f, p=prefixes[scope]: f.startswith(p)
+    else: owned = lambda f: not any(f.startswith(p) for p in prefixes.values())
     now = now or datetime.now(timezone.utc)
     items = tasks.setdefault("items", {})
     done = {x["feed_id"]: x.get("done", False) for c in items.values() for x in c if x.get("feed_id")}
@@ -312,7 +315,7 @@ def merge_tasks(tasks, feed, now=None, scope="feed"):
         have = {x["feed_id"]: x for x in items[c] if x.get("feed_id")}
         for x in feed["tasks"]:
             if x["cat"] != c or x["feed_id"] not in live: continue
-            row = {"feed_id": x["feed_id"], "wiki_id": x.get("wiki_id", ""), "kind": x.get("kind", ""), "texts": x["texts"], "how": x.get("how", {}), "en": x["texts"]["en"], "tr": "", "src": "📚" if scope == "wiki" else "🌐",
+            row = {"feed_id": x["feed_id"], "wiki_id": x.get("wiki_id", ""), "kind": x.get("kind", ""), "texts": x["texts"], "how": x.get("how", {}), "en": x["texts"]["en"], "tr": "", "src": {"wiki": "📚", "community": "👥"}.get(scope, "🌐"),
                    "until": x["until"], "url": x["source"], "done": done.get(x["feed_id"], False),
                    "time": now.isoformat(timespec="seconds")}
             if x["feed_id"] in have:

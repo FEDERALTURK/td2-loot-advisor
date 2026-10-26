@@ -1293,5 +1293,16 @@
   "lt.note": "Wskazówka: graj w oknie lub bez ramki, by tłumaczenie pojawiało się nad grą. Model lokalny tłumaczy zdanie po zdaniu; przy długich tekstach AI brzmi naturalniej.",
   "news.new_toast": "{n} nowe: {title}",
   "news.push_title": "Wiadomości The Division 2",
-  "svc.push_news": "Wiadomości i wydarzenia"
+  "svc.push_news": "Wiadomości i wydarzenia",
+  "tl.box": "Zadania społeczności",
+  "tl.share": "Udostępniaj społeczności zadania, które widzę",
+  "tl.share_hint": "Gdy tłumaczenie na żywo odczyta panel zadania (Projekty, Nagrody, Zlecenia), wysyłany jest tylko tekst zadania i jego tłumaczenie. Bez nazwy gracza, zrzutów ekranu i danych komputera. Zadanie staje się publiczne, gdy zgłosi je co najmniej 2 różnych graczy.",
+  "tl.use": "Używaj zadań społeczności",
+  "tl.use_hint": "Aktualne zadania zebrane od graczy pojawiają się w karcie Zadania z oznaczeniem 👥; znane teksty zadań są od razu wyświetlane w tłumaczeniu na żywo ze sprawdzonym tłumaczeniem.",
+  "tl.status": "👥 {n} zadań społeczności · {m} gotowych linii tłumaczenia",
+  "tl.status_none": "👥 Lista zadań społeczności jeszcze nie pobrana",
+  "tl.shared": "Ostatnio udostępnione: {title}",
+  "tl.share_off": "Udostępnianie wyłączone",
+  "tl.ask_title": "Zadania społeczności",
+  "tl.ask": "Gdy tłumaczenie na żywo odczyta ekran zadania, wysłać tekst zadania (tytuł, cel, nagrody) i jego tłumaczenie do listy społeczności?\n\nNazwa gracza, zrzuty ekranu i dane komputera nigdy nie są wysyłane. Zadanie zostaje dodane dla wszystkich, gdy zgłosi je co najmniej 2 różnych graczy.\n\nMożesz to zmienić w każdej chwili w karcie Tłumaczenie na żywo."
 }

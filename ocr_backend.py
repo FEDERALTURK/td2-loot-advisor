@@ -131,8 +131,10 @@ def _fix(t):
     return re.sub(r"(\d),(\d)", r"\1.\2", t)
 
 
-def group_lines(items):
-    """[(metin, (x0,y0,x1,y1), güven)] kutularını satırlara topla (aynı yükseklikteki kutular tek satır)."""
+def group_lines(items, max_gap=None):
+    """[(metin, (x0,y0,x1,y1), güven)] kutularını satırlara topla (aynı yükseklikteki kutular tek satır).
+    max_gap: aynı satırda iki kutu arası boşluk yazı yüksekliğinin bu katını geçerse ayrı parça (sütun) sayılır —
+    menü/harita gibi çok sütunlu ekranlarda yan yana paneller birleşmesin diye (eşya kartı okuması bunu kullanmaz)."""
     items = sorted(items, key=lambda it: ((it[1][1] + it[1][3]) / 2, it[1][0]))
     rows, cur, cy, ch = [], [], None, 0
     for it in items:
@@ -142,6 +144,17 @@ def group_lines(items):
         if not cur: cy, ch = y, h
         cur.append(it)
     if cur: rows.append(cur)
+    if max_gap:
+        split = []
+        for r in rows:
+            r.sort(key=lambda it: it[1][0]); seg = [r[0]]
+            for it in r[1:]:
+                h = max(1.0, min(it[1][3] - it[1][1], seg[-1][1][3] - seg[-1][1][1]))
+                if it[1][0] - seg[-1][1][2] > max_gap * h:
+                    split.append(seg); seg = []
+                seg.append(it)
+            split.append(seg)
+        rows = split
     out = []
     for r in rows:
         r.sort(key=lambda it: it[1][0])
@@ -205,6 +218,15 @@ class Engine:
                 self.name = "tesseract"
         txt = self._tess_text(img)
         return [(l, (0, 0, 0, 0), 1.0) for l in txt.splitlines() if l.strip()]
+
+    def segments(self, img, scale=None):
+        """Sütun duyarlı satırlar (canlı çeviri, görev okuma). Tesseract'ta lines() ile aynı."""
+        if self.name == "rapidocr":
+            try:
+                return group_lines(self._rapid_boxes(img, self.auto_scale(img) if scale is None else scale), max_gap=1.6)
+            except Exception as e:
+                log.exception("RapidOCR failed: %s", e)
+        return self.lines(img, scale)
 
     def text(self, img, scale=None):
         return "\n".join(t for t, _, _ in self.lines(img, scale))
