@@ -1374,5 +1374,6 @@
   "themedesc.hunter": "gris os et masque cramoisi",
   "themedesc.winter_ny": "Manhattan sous la neige, ardoise froide",
   "themedesc.nightops": "mission de nuit, cyan ISAC",
-  "themedesc.kenly": "le vert des bois de Kenly College"
+  "themedesc.kenly": "le vert des bois de Kenly College",
+  "lt.fullscreen_hint": "Le jeu est en plein écran exclusif : les traductions ne peuvent pas s'afficher. Choisis Mode d'affichage : Sans bordure dans le jeu ou utilise le 📱 téléphone / second écran."
 }

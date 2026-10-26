@@ -8,6 +8,24 @@
 
 Windows "kişisel bilgisayarınızı korudu" derse: **Ek bilgi → Yine de çalıştır** (dosya henüz kod imzalı değil).
 
+**6.0.0 — Nihai sürüm: güvenlik, kararlılık ve uyumluluk**
+
+Bu sürüm yeni özellikten çok sağlamlık içindir: programın tamamı güvenlik, veri sızıntısı, eşzamanlılık, donanım uyumu ve performans açısından gözden geçirildi.
+
+- **Güvenli güncelleme:** otomatik güncelleme artık yalnız bu projenin GitHub sürümünden gelen, adı ve SHA-256 özeti doğrulanan kurulum dosyasını kurar; özet bulunamazsa **kurmaz** (önceden doğrulamasız devam edebiliyordu). İndirilen dosya her seferinde yalnız sana ait yeni bir geçici klasöre iner.
+- **Gizli ayarlar şifreli:** yapay zekâ API anahtarları, Discord webhook'u, ntfy konusu, lisans anahtarı ve yerel bağlantı belirteçleri diskte Windows'un kullanıcıya bağlı şifrelemesiyle (DPAPI) saklanır. builds.json'u biriyle paylaşsan bile bu bilgiler okunamaz. (Başka bir bilgisayara taşırsan anahtarları bir kez yeniden girmen gerekir.)
+- **Ayarlar ve build'ler artık bozulmaz:** kayıtlar önce geçici dosyaya yazılıp tek adımda değiştirilir; aynı anda birden çok yerden kaydedilse ya da program kayıt sırasında kapansa bile dosya sağlam kalır. Günlük yedek (.bak) tutulur; dosya bir şekilde bozulursa program build'lerini yedekten geri yükler. Sandık ve ilerleme dosyaları için de aynısı.
+- **Veri sızıntısına karşı:**
+  - Geri bildirim raporlarında temizlenenler genişletildi: API anahtarları, Discord webhook'ları, lisans / davet kodları, yerel bağlantı belirteçleri, ev ağı IP adresleri, kullanıcı klasörü yolları, e-postalar (hem programda hem sunucuda).
+  - Ubisoft Connect / Steam / Discord bildirimleri (arkadaş adları içerir) canlı çeviriye, görev paylaşımına ve çeviri günlüğüne hiç girmez.
+  - Düzeltme önerileri gönderilmeden önce aynı temizlikten geçer.
+  - Rapor Paneli de GitHub ve yönetici belirteçlerini diskte şifreli saklar.
+- **Yerel sunucular (OBS/Stream Deck, telefon ekranı, telefon arkadaşı):** yarım bırakılan bağlantılar 15 sn'de kapanır (ev ağından gelen yüzlerce boş bağlantı programı kilitleyemez); başka bir program aynı portu ele geçiremez; topluluk sunucusu çok büyük istekleri reddeder.
+- **Türkçe kullanıcı adları:** Windows kullanıcı klasöründe ş, ğ, ı, ü gibi harfler varsa (C:\Users\Şükrü) çeviri ve konuşma modelleri yüklenemeyebiliyordu; artık güvenli bir yoldan açılıyor.
+- **Daha az bellek:** canlı çeviri 10 dakika kullanılmazsa çeviri modeli bellekten çıkarılır (~300 MB geri verilir), gerekince saniyeler içinde yeniden yüklenir.
+- **Özel tam ekran uyarısı:** oyun özel tam ekrandayken canlı çeviri açılırsa program bunu oyunun ayar dosyasından anlar ve kenarlıksız moda geçmeni ya da telefon / ikinci ekranı kullanmanı söyler.
+- Diğer: Windows konuşma tanıma komutu tam yolla ve güvenli kaçışla çalışır; model arşivlerinde her türlü yol kaçışı (.., sürücü harfi, ters eğik çizgi) reddedilir.
+
 **5.1.9 — 🌐 Çeviri artık oyunun bir parçası: yerinde çeviri, konuşma çevirisi, telefon ekranı ve tema paketleri**
 - **📍 Yerinde çeviri (yeni mod):** Türkçe metin İngilizce yazının **tam üstünde, kendi yerinde** görünür — harita, envanter, menüler. Her yazının altına oyunun panel rengine yakın **opak bir fon** konur, iki yazı üst üste binmez. Türkçe uzunsa önce yazı küçülür, yine sığmazsa kutu aşağı uzar. Menü satırları tek tek, paragraflar blok olarak çevrilir. Aynı kalan adlar (Exotic Cache…) örtülmez.
 - **🎧 Konuşma çevirisi (altyazısız sesler):**

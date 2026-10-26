@@ -89,7 +89,7 @@ import gamepad
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "5.1.9"
+APP_VERSION = "6.0.0"
 FROZEN = getattr(sys, "frozen", False)
 BASE = Path(sys.executable).parent if FROZEN else Path(__file__).resolve().parent
 TASKS_CACHE = BASE / "tasks_cache.json"  # son indirilen görev listesi
@@ -1781,6 +1781,13 @@ class App:
                 pass
         self._lt_pad_start()
         self._lt_status(t("lt.running", key=st.get("tr_hotkey", "<f7>").upper().strip("<>")), "success")
+        try:                                                 # özel tam ekranda kaplama görünmez: kullanıcıya söyle
+            gs = getattr(display, "_last_game_settings", None) or display.read_game_settings() or {}
+            if str(gs.get("display_mode", "")).lower() in ("fullscreen", "exclusive", "exclusive fullscreen"):
+                self._lt_status(t("lt.fullscreen_hint"), "warning")
+                if not quiet: self.toast(t("lt.fullscreen_hint"))
+        except Exception:
+            pass
         self._lt_ui(); return True
 
     def lt_stop(self, quiet=False):
