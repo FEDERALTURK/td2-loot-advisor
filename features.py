@@ -45,7 +45,7 @@ PUBLIC_KEY_HEX = "d70b17497241261ca45bcd05bbaedcd0fdeb3d866de4993d23db3c25274f63
 KEY_PREFIX = "TD2P-"
 # Hesap sunucusunun yetki belgesi açık anahtarı (Discord girişi + anahtar/davet/satış → TD2E belgesi).
 # scripts/account_keys.mjs ile kullanıcının KENDİ bilgisayarında üretilir; özel yarısı yalnız Cloudflare gizlisinde durur.
-ENT_PUBLIC_KEY_HEX = ""
+ENT_PUBLIC_KEY_HEX = "06da3593d93eebb1a2df46d28577eca8b5c96364973194c900b337c1d74288a0"
 ENT_PREFIX = "TD2E-"
 
 # ---------------------------------------------------------------- Ed25519 (RFC 8032, saf Python)
