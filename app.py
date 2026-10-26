@@ -89,7 +89,7 @@ import gamepad
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "6.0.0"
+APP_VERSION = "6.0.1"
 FROZEN = getattr(sys, "frozen", False)
 BASE = Path(sys.executable).parent if FROZEN else Path(__file__).resolve().parent
 TASKS_CACHE = BASE / "tasks_cache.json"  # son indirilen görev listesi
@@ -1517,8 +1517,9 @@ class App:
         """Açılışta ve 30 dakikada bir: oyunculardan toplanan güncel görev listesi."""
         st = self.cfg["settings"]
         if st.get("task_live", True):
+            first = not getattr(self, "_task_live_started", False); self._task_live_started = True
             def work():
-                try: res = tasks_live.fetch_live(self.task_server(), self.TASKS_RAW_URL)
+                try: res = tasks_live.fetch_live(self.task_server(), self.TASKS_RAW_URL, app_version=APP_VERSION, start=first)
                 except Exception as e:
                     log.info("Community tasks unavailable: %s", e); res = None
                 self.root.after(0, lambda: self._task_live_arrived(res))
@@ -1552,7 +1553,7 @@ class App:
 
     def _task_live_poll_once(self):
         def work():
-            try: res = tasks_live.fetch_live(self.task_server(), self.TASKS_RAW_URL)
+            try: res = tasks_live.fetch_live(self.task_server(), self.TASKS_RAW_URL, app_version=APP_VERSION)
             except Exception as e:
                 log.info("Community tasks unavailable: %s", e); res = None
             self.root.after(0, lambda: self._task_live_arrived(res))

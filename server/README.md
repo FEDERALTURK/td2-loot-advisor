@@ -98,3 +98,12 @@ görevi tanır ve oyuncu izin verdiyse yalnız görev yazısını ve Türkçe ç
   sunucudan, olmazsa bu dosyadan okur.
 - Tablolar ilk istekte kendiliğinden oluşur; güncellemek için yalnız `npx wrangler deploy` yeterli.
 - İsteğe bağlı değişkenler: `TASKS_MIN_REPORTERS` (2), `TASKS_PER_HOUR` (60), `TASKS_KEEP_DAYS` (8).
+
+## Sürüm sayacı ve yönetici özeti (6.0.1)
+- Program `/v1/tasks/live` isteğinde sürümünü User-Agent'ta bildirir (`TD2LootAdvisor/6.0.1`); açılıştaki ilk istekte
+  `x-td2-run: start` başlığı da gelir. Sunucu yalnız `usage_daily (gün, sürüm, açılış, yoklama)` sayaçlarını tutar —
+  IP, hesap, cihaz ya da kimlik yok. 400 günden eski sayaçlar saatlik bakımda silinir. Daha eski sürümler sayılmaz.
+- `GET /v1/admin/overview[?since=<unix>]` (Admin belirteci): Rapor Paneli'nin Gösterge sekmesi ve bildirimleri için tek
+  çağrı — sürüm dağılımı (7 gün), günlük açılış (30 gün), hesap/lisans sayıları, bekleyen öneriler, görev durumu, kuyruktaki
+  raporlar, saatlik bakımın son çalışması (`cron_last`) ve `since` sonrası olay sayıları.
+- Test: `node server/test_overview.mjs`

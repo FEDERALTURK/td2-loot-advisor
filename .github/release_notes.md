@@ -8,6 +8,10 @@
 
 Windows "kişisel bilgisayarınızı korudu" derse: **Ek bilgi → Yine de çalıştır** (dosya henüz kod imzalı değil).
 
+**6.0.1 — Sürüm sayacı**
+
+- Program topluluk görev listesini indirirken artık kendi sürüm numarasını da bildirir (açılıştaki ilk istekte ayrıca "açılış" işareti). Sunucu bunları yalnız günlük toplam olarak tutar: hangi sürüm kaç kez açıldı. Kimlik, IP, hesap ya da cihaz bilgisi gönderilmez ve saklanmaz; tek tek kullanıcılar ayırt edilemez. Böylece eski sürümlerin ne zaman bırakılabileceği görülebilir. Ayarlar'da topluluk görevleri kapatılırsa sayaç da kapanır.
+
 **6.0.0 — Nihai sürüm: güvenlik, kararlılık ve uyumluluk**
 
 Bu sürüm yeni özellikten çok sağlamlık içindir: programın tamamı güvenlik, veri sızıntısı, eşzamanlılık, donanım uyumu ve performans açısından gözden geçirildi.

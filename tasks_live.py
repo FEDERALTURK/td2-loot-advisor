@@ -231,13 +231,20 @@ def validate_feed(d):
     return {"version": str(d.get("version", ""))[:24], "generated": d.get("generated"), "tasks": out, "lines": lines}
 
 
-def fetch_live(url, raw_url=None, opener=None, timeout=10):
-    """Önce sunucudan (taze), olmazsa GitHub'daki kopyadan. Dönüş: (feed, kaynak)."""
+def fetch_live(url, raw_url=None, opener=None, timeout=10, app_version=None, start=False):
+    """Önce sunucudan (taze), olmazsa GitHub'daki kopyadan. Dönüş: (feed, kaynak).
+
+    Sunucuya yalnız program sürümü (User-Agent) ve açılıştaki ilk istek olduğu bilgisi gider; sunucu bunları kimliksiz,
+    günlük sayaç olarak tutar (hangi sürüm kaç kez açıldı). Kimlik, IP ya da cihaz bilgisi gönderilmez/saklanmaz.
+    """
     opener = opener or urllib.request.urlopen
     last = None
+    ua = "TD2LootAdvisor/" + app_version if app_version and re.fullmatch(r"\d{1,2}\.\d{1,2}\.\d{1,3}", app_version) else "TD2LootAdvisor"
     for u in [x for x in ((url or "").rstrip("/") + "/v1/tasks/live" if url else None, raw_url) if x]:
         try:
-            req = urllib.request.Request(u, headers={"user-agent": "TD2LootAdvisor"})
+            h = {"user-agent": ua}
+            if start and u != raw_url: h["x-td2-run"] = "start"
+            req = urllib.request.Request(u, headers=h)
             with opener(req, timeout=timeout) as r:
                 return validate_feed(json.loads(r.read().decode("utf-8"))), u
         except Exception as e:

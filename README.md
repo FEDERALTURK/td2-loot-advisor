@@ -77,6 +77,9 @@ Recommended game settings: English game language, borderless window, HDR off, ga
   counts for it. Sent: item, slot, rarity, attribute types, best roll %, activity, random ID — never values, name, e-mail,
   license key or computer details; the server stores no IP. Premium: what drops most in each activity, where an item
   drops (per 1000 drops). Server: Cloudflare Workers + D1, see [`server/README.md`](server/README.md).
+- Version counter (6.0.1+): when the app loads the community task list it sends only its version number and whether
+  this is the first request since start. The server keeps daily totals per version (no ID, no IP, no account), so the
+  maintainer can see which versions are still in use. Turning off community tasks turns this off too.
 - Ask the assistant about the scanned item (with your active build's requirements for that slot).
 - Read with Claude: when OCR fails, Claude Code reads the card picture (opt-in; tested on a real card: 5 s, all values right).
 - Read wrong: saves the card and opens a prefilled GitHub issue so it can become a test case.

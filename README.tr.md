@@ -91,6 +91,9 @@ tüm build'ler için **3D puan çubukları**. Uyan eşyalar otomatik kaydedilir;
   aktiviteye sayılır. Gönderilen: eşya, yuva, nadirlik, attribute türleri, en iyi rulo %, aktivite, rastgele kimlik —
   değerler, ad, e-posta, lisans anahtarı, bilgisayar bilgisi asla; sunucu IP saklamaz. Premium: aktivite başına en çok
   düşenler, bir eşyanın nerede düştüğü (1000 düşüşte). Sunucu: Cloudflare Workers + D1 — [`server/README.md`](server/README.md).
+- **Sürüm sayacı** (6.0.1+): program topluluk görev listesini indirirken yalnız sürüm numarasını ve açılıştaki ilk
+  istek olup olmadığını gönderir. Sunucu sürüm başına günlük toplam tutar (kimlik, IP, hesap yok); böylece hangi sürümlerin
+  hâlâ kullanıldığı görülür. Topluluk görevleri kapatılırsa bu da kapanır.
 - **Asistana sor**: taranan eşyayı, aktif build'inin o yuva için şartlarıyla birlikte asistana sorar.
 - **Claude ile oku**: OCR başarısız olursa kart resmi Claude Code ile okunur (isteğe bağlı; gerçek kartla denendi: 5 sn, tüm değerler doğru).
 - **Yanlış okundu**: kartı kaydeder ve hazır doldurulmuş bir GitHub hata bildirimi açar; kart test setine eklenebilir.

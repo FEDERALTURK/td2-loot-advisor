@@ -7,6 +7,7 @@ import json
 import os
 import subprocess
 import sys
+import io
 import tempfile
 import time
 from datetime import datetime, timezone
@@ -113,6 +114,28 @@ def bad_opener(req, timeout=10): raise OSError("offline")
 sub2 = T.Submitter("http://x", "c2-abcdefgh", None, opener=bad_opener)
 sub2.submit({**a, "title": "Other Task"}, None, "5.1.8", wait=True)
 ok(sub2.due({**a, "title": "Other Task"}) and sub2.last_error, "ağ hatasında yeniden denenecek")
+
+
+# --- sürüm bilgisi: yalnız User-Agent ve "açılış" işareti gider; GitHub kopyasına işaret gönderilmez
+seen = []
+
+
+class _R(io.BytesIO):
+    def __enter__(self): return self
+    def __exit__(self, *a): return False
+
+
+def _op(req, timeout=10):
+    seen.append((req.full_url, {k.lower(): v for k, v in req.header_items()}))
+    if "srv" in req.full_url: raise OSError("down")
+    return _R(json.dumps({"tasks": [], "lines": []}).encode())
+
+
+T.fetch_live("http://srv", "https://raw/x.json", opener=_op, app_version="6.0.1", start=True)
+ok(seen[0][1].get("user-agent") == "TD2LootAdvisor/6.0.1" and seen[0][1].get("x-td2-run") == "start", "sunucuya sürüm + açılış işareti")
+ok("x-td2-run" not in seen[1][1], "GitHub yedeğine açılış işareti gitmez")
+seen.clear(); T.fetch_live(None, "https://raw/x.json", opener=_op, app_version="6.0.1; evil")
+ok(seen[0][1].get("user-agent") == "TD2LootAdvisor", "geçersiz sürüm metni gönderilmez")
 
 
 # --- uçtan uca: yerel sunucu + iki oyuncu
