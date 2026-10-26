@@ -3,3 +3,5 @@ pillow
 pytesseract
 pynput
 pystray
+ctranslate2
+sentencepiece

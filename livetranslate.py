@@ -30,7 +30,7 @@ EXTRA_TERMS = [
     "Cleaners", "Rikers", "Rogue", "Rogue Agent", "Hunter", "Hunters", "Manhunt", "Scout", "HVT", "Summit", "Countdown",
     "Descent", "Incursion", "Raid", "Conflict", "Legendary", "Heroic", "Challenging", "Washington", "D.C.", "New York",
     "Brooklyn", "Kenly", "Kenly College", "White House", "Castle", "Theater", "Campus", "Capitol", "Pentagon", "DARPA",
-    "Keener", "Faye Lau", "Bardon", "Kelso", "Manny", "Odessa", "Calvin", "Hutch", "Theo", "Aaron Keener", "Agent",
+    "Keener", "Faye Lau", "Bardon", "Kelso", "Manny", "Odessa", "Calvin", "Hutch", "Theo", "Aaron Keener",
     "Targeted Loot", "Expertise", "Specialization", "Shepherd", "SHD Watch", "Season Pass", "Journey", "Classified Assignment",
     "Global Event", "Safe House", "Settlement", "Control Point", "Bounty", "Exotic", "Named", "Gear Set", "High-End",
 ]
@@ -96,6 +96,14 @@ def blocks_from_lines(lines, ui_words=()):
                 continue
         blocks.append([s, b, c])
     return [(s, tuple(b), c) for s, b, c in blocks if len(s) >= 4]
+
+
+def clean_for_mt(text):
+    """Modelin sözlüğünde olmayan işaretleri sadeleştir (yoksa ⁇ üretir)."""
+    text = (text.replace("’", "'").replace("‘", "'").replace("“", '"').replace("”", '"').replace("–", "-").replace("—", " - ")
+                .replace("…", "...").replace("\u00a0", " ").replace("×", "x"))
+    text = re.sub(r"\b(\d+(?:\.\d+)?)\s?s\b", r"\1 seconds", text)           # "15s" → "15 seconds" (yoksa "15'ler")
+    return text
 
 
 def split_sentences(text):
@@ -221,24 +229,40 @@ class Translator:
         self.engine, self.glossary, self.cache = engine, glossary, cache
 
     def translate(self, texts):
-        out, todo = [None] * len(texts), []
+        out, todo, first = [None] * len(texts), [], {}
         for i, t in enumerate(texts):
             c = self.cache.get(self.engine.name, t)
             if c is not None: out[i] = c
-            else: todo.append(i)
+            elif t in first: continue                      # aynı metin bir kez çevrilir
+            else: first[t] = i; todo.append(i)
         if todo:
-            units, owners, masks = [], [], []
+            # her metin → satırlar (madde işaretleri korunur) → cümleler; modele yalnız düz cümleler gider
+            units, owners, masks = [], [], []          # owners: (metin no, satır no, madde işareti)
             for i in todo:
-                for s in (split_sentences(texts[i]) if self.engine.name == "local" else [texts[i]]):
-                    m, found = self.glossary.mask(s)
-                    units.append(m); owners.append(i); masks.append(found)
-            res = self.engine.translate(units)
-            parts = {}
-            for i, r, found in zip(owners, res, masks):
-                parts.setdefault(i, []).append(self.glossary.unmask(r, found))
+                for ln_no, line in enumerate(texts[i].split("\n")):
+                    m_b = re.match(r"^\s*([•\-*]+)\s*", line)
+                    bullet = "• " if m_b else ""
+                    body = clean_for_mt(line[m_b.end():] if m_b else line)
+                    if not body.strip():
+                        continue
+                    sents = split_sentences(body) if self.engine.name == "local" else [body]
+                    for s_ in sents:
+                        m, found = self.glossary.mask(s_)
+                        units.append(m); owners.append((i, ln_no, bullet)); masks.append(found)
+            res = self.engine.translate(units) if units else []
+            lines = {}
+            for (i, ln_no, bullet), r, found in zip(owners, res, masks):
+                r = re.sub(r"\s*⁇\s*", " ", self.glossary.unmask(r, found)).strip()
+                if r[:1].islower(): r = r[:1].upper() + r[1:]
+                r = re.sub(r"%\s+(\d)", r"%\1", r)              # "% 30" → "%30"
+                r = re.sub(r"([^\s+\-(])%(\d)", r"\1 %\2", r)     # "boyunca%1" → "boyunca %1"
+                lines.setdefault(i, {}).setdefault(ln_no, [bullet, []])[1].append(r)
             for i in todo:
-                out[i] = " ".join(parts.get(i, []))
+                rows = lines.get(i, {})
+                out[i] = "\n".join(x for x in ((b + " ".join(parts)).strip() for _, (b, parts) in sorted(rows.items())) if x not in ("•", "")).strip()
                 self.cache.put(self.engine.name, texts[i], out[i])
+            for i, t in enumerate(texts):
+                if out[i] is None: out[i] = out[first[t]]
         return out
 
 

@@ -38,13 +38,15 @@ if errorlevel 1 (
 REM Istege bagli: yeni OCR motoru, QR, ses (kurulamazsa paket onlarsiz derlenir)
 REM onnxruntime-directml: ekran kartiyla OCR (DirectML); ekran karti yoksa islemcide calisir. Kurulamazsa normal onnxruntime.
 %PY% -m pip install onnxruntime-directml >nul 2>&1 || %PY% -m pip install onnxruntime >nul 2>&1 || echo     [UYARI] onnxruntime kurulamadi
-for %%P in (rapidocr qrcode pyttsx3 sounddevice numpy) do (
+for %%P in (rapidocr qrcode pyttsx3 sounddevice numpy ctranslate2 sentencepiece) do (
   %PY% -m pip install %%P >nul 2>&1 || echo     [UYARI] %%P kurulamadi, onsuz devam / skipped
 )
 
 REM ---- 3) OCR modellerini indir (pakete girsin, ilk acilista beklenmesin)
 echo [3/7] OCR modelleri hazirlaniyor / preparing OCR models...
 set "COLLECT="
+set "MTCOLLECT="
+%PY% -c "import ctranslate2, sentencepiece" >nul 2>&1 && set "MTCOLLECT=--collect-all ctranslate2 --collect-all sentencepiece"
 %PY% -c "import rapidocr, onnxruntime" >nul 2>&1 && (
   %PY% -c "import ocr_backend; from PIL import Image; ocr_backend.Engine('rapidocr').text(Image.new('RGB',(64,32)))" >nul 2>&1
   set "COLLECT=--collect-all rapidocr --collect-all onnxruntime"
@@ -75,10 +77,10 @@ if exist dist\TD2LootAdvisor rmdir /s /q dist\TD2LootAdvisor
   --hidden-import pyttsx3.drivers --hidden-import pyttsx3.drivers.sapi5 ^
   --hidden-import ocr_backend --hidden-import features --hidden-import stash --hidden-import vendor ^
   --hidden-import companion --hidden-import share --hidden-import dropstats --hidden-import updater ^
-  --hidden-import syncer --hidden-import gameinfo --hidden-import updates --hidden-import reports --hidden-import account --hidden-import service --hidden-import screenstate --hidden-import localapi --hidden-import presence --hidden-import notify --hidden-import knowledge --hidden-import voicepack --hidden-import pystray._win32 ^
+  --hidden-import syncer --hidden-import gameinfo --hidden-import updates --hidden-import reports --hidden-import account --hidden-import service --hidden-import screenstate --hidden-import localapi --hidden-import presence --hidden-import notify --hidden-import knowledge --hidden-import voicepack --hidden-import livetranslate --hidden-import pystray._win32 ^
   --hidden-import fx --hidden-import bgvideo --hidden-import view3d --hidden-import display ^
-  --exclude-module faster_whisper --exclude-module ctranslate2 --exclude-module torch --exclude-module av ^
-  %COLLECT% ^
+  --exclude-module faster_whisper --exclude-module torch --exclude-module av ^
+  %COLLECT% %MTCOLLECT% ^
   app.py
 if errorlevel 1 goto :fail
 if not exist "dist\TD2LootAdvisor\TD2LootAdvisor.exe" (

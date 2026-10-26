@@ -76,7 +76,9 @@ FROZEN = getattr(sys, "frozen", False)
 BASE = Path(sys.executable).parent if FROZEN else Path(__file__).resolve().parent
 TASKS_CACHE = BASE / "tasks_cache.json"  # son indirilen görev listesi
 META_CACHE = BASE / "meta_cache.json"
-NEWS_CACHE = BASE / "news_cache.json"   # son indirilen meta listesi (çevrimdışı kullanım)
+NEWS_CACHE = BASE / "news_cache.json"
+DESC_CACHE = BASE / "descriptions_cache.json"
+NEWS_POLL_MS = 30 * 60 * 1000          # program açıkken haber akışına bakma aralığı (canlı akış)   # son indirilen meta listesi (çevrimdışı kullanım)
 ART_DIR = BASE / "art"   # arka planlar / amblemler / bayraklar (kullanıcı kendi görsellerini ekleyebilir)
 BUNDLE = Path(getattr(sys, "_MEIPASS", BASE))
 CFG_PATH, LOG_PATH, DEBUG_PATH, PROG_PATH = (BASE / n for n in ("builds.json", "loot_log.csv", "last_crop.png", "progress.json"))
@@ -1399,6 +1401,8 @@ class App:
         self.root.after(1500, self.account_startup)
         self.root.after(1000, self.service_start)
         if stg.get("tr_on"): self.root.after(2500, lambda: self.lt_start(quiet=True))
+        self.root.after(NEWS_POLL_MS, self._news_poll)
+        self.root.after(2000, self._info_badge)
         if OCR.name == "tesseract" and not self.tess:
             messagebox.showwarning(APP_NAME, t("msg.no_tesseract"))
 
@@ -1428,7 +1432,8 @@ class App:
             d = GAME.data
             names = list(d.get("exotics", [])) + list(d.get("named", [])) + list(d.get("gear_sets", [])) + list(d.get("brands", [])) + \
                     list(d.get("gear_talents", [])) + list(d.get("weapon_talents", [])) + list(d.get("weapon_index", {}).keys()) + \
-                    [k for k in d.get("items", {})] + list(d.get("skills", []))
+                    [k for k in d.get("items", {})] + list(d.get("skills", [])) + \
+                    [v["talent"] for v in d.get("items", {}).values() if v.get("talent")]
             self._lt_gloss, self._lt_gloss_v = livetranslate.Glossary(names), v
         return self._lt_gloss
 
@@ -1766,11 +1771,116 @@ class App:
         self._build_enc(frames["enc"]); self._build_meta_gallery(frames["meta"])
         self._build_news(frames["news"]); self._build_quiz(frames["quiz"])
         nb.bind("<<NotebookTabChanged>>", lambda e: self._info_tab_changed())
+        self.root.after(500, self._info_badge)
 
     def _info_tab_changed(self):
         k = self._info_keys[self.info_nb.index(self.info_nb.select())]
         if k == "news": self._news_mark_seen()
         if k == "quiz" and not getattr(self, "_quiz_q", None): self.quiz_next()
+
+    # --- canlı haber akışı
+    def _news_poll(self):
+        """Program açıkken 30 dakikada bir haber akışına bakar; yeni haber gelirse sayfayı yeniden başlatmadan günceller."""
+        def work():
+            try: res = meta_sync.run_news(self.cfg, NEWS_CACHE, APP_VERSION, force=True)
+            except Exception as e:
+                log.debug("news poll: %s", e); res = None
+            self.root.after(0, lambda: self._news_arrived(res))
+        threading.Thread(target=work, daemon=True).start()
+        self.root.after(NEWS_POLL_MS, self._news_poll)
+        try: self._desc_sync()
+        except Exception: log.debug("desc sync", exc_info=True)
+
+    def _news_arrived(self, res):
+        if not res: return
+        feed = res[0]
+        old = {x["id"] for x in (self.news or {}).get("items", [])}
+        new = [x for x in feed["items"] if x["id"] not in old]
+        self.news = feed
+        try: self.refresh_info_news()
+        except Exception: pass
+        self._info_badge()
+        if new and old:
+            lang = i18n.current_language()
+            first = knowledge.pick_lang(new[0]["title"], lang)
+            log.info("News: %d new item(s): %s", len(new), ", ".join(x["id"] for x in new))
+            self.toast(t("news.new_toast", n=len(new), title=first))
+            important = [x for x in new if x["kind"] in ("season", "maintenance", "dlc", "event")]
+            if important:
+                body = "\n".join("• " + knowledge.pick_lang(x["title"], lang) for x in important[:5])
+                if self.tray and self.tray.available: self.tray.notify(body, "📰 " + t("news.push_title"))
+                self._push("news", "📰 " + t("news.push_title"), body)
+
+    def _info_badge(self):
+        """Bilgi sekmesinin başlığında okunmamış haber sayısı."""
+        if not hasattr(self, "nb") or "info" not in self.tab_keys: return
+        seen = set(self.cfg["settings"].get("news_seen", []))
+        n = sum(1 for it, stt in knowledge.news_sorted((self.news or {}).get("items", [])) if it["id"] not in seen and stt != "ended")
+        try:
+            self.nb.tab(self.tab_keys.index("info"), text=ui_theme.with_icon(t("tab.info"), "📚") + (f"  ●{n}" if n else ""))
+        except Exception:
+            pass
+
+    # --- açıklama çevirileri (10 dil, günlük akıştan) ve kullanıcının eklediği diller için yapay zekâ çevirisi
+    def desc_i18n(self):
+        if getattr(self, "_desc_i18n", None) is None:
+            self._desc_i18n = {}
+            for p_ in (DESC_CACHE, BASE / "meta" / "descriptions_i18n.json", BUNDLE / "meta" / "descriptions_i18n.json"):
+                try: self._desc_i18n = json.loads(p_.read_text(encoding="utf-8")).get("items", {}); break
+                except Exception: continue
+        return self._desc_i18n
+
+    def _desc_sync(self):
+        st = self.cfg["settings"]
+        if time.time() - st.get("desc_last", 0) < 6 * 3600: return
+        st["desc_last"] = time.time(); save_cfg(self.cfg)
+        def work():
+            urls = [u.replace("meta_builds.json", "descriptions_i18n.json") for u in meta_sync.configured_urls(st.get("meta_feed_url", ""))
+                    if u.endswith("meta_builds.json")]
+            try:
+                raw, _ = meta_sync.fetch(urls, APP_VERSION)
+                if raw.get("schema") == 1 and isinstance(raw.get("items"), dict):
+                    DESC_CACHE.write_text(json.dumps(raw, ensure_ascii=False), encoding="utf-8")
+                    self._desc_i18n = None
+                    log.info("Description translations: version %s, %d items", raw.get("version"), len(raw["items"]))
+            except Exception as e:
+                log.debug("desc sync: %s", e)
+        threading.Thread(target=work, daemon=True).start()
+
+    def localized_desc(self, name, desc, on_ready=None):
+        """Açıklamanın kullanıcının dilindeki hali. Yoksa ve bir yapay zekâ seçiliyse arka planda çevirip on_ready(metin)."""
+        lang = i18n.current_language()
+        if lang == "en" or not desc: return desc
+        tr = self.desc_i18n().get(name, {}).get(lang)
+        if tr: return tr
+        return self.ai_localize(desc, lang, on_ready) or desc
+
+    def ai_localize(self, text, lang, on_ready=None):
+        """Desteklenen 10 dil dışındaki (ya da henüz çevrilmemiş) metinler için seçili yapay zekâyla çeviri, önbellekli."""
+        if not text or self.cfg["settings"].get("ai_provider", "builtin") == "builtin": return None
+        if not getattr(self, "lt_cache", None): self.lt_cache = livetranslate.Cache(BASE / "translate_cache.json")
+        key = "ai-" + lang
+        hit = self.lt_cache.get(key, text)
+        if hit: return hit
+        pend = self.__dict__.setdefault("_ai_loc_pending", set())
+        if (lang, text) in pend: return None
+        pend.add((lang, text))
+        lang_name = i18n.english_name(lang)
+        def work():
+            try:
+                g = self.lt_glossary(); m, found = g.mask(text)
+                out = self.ai_complete("Translate the user's text from the video game The Division 2 into " + lang_name +
+                                       ". Keep tokens like ZQ0 unchanged. Return only the translation.", m)
+                out = g.unmask((out or "").strip(), found)
+                if out:
+                    self.lt_cache.put(key, text, out)
+                    if on_ready: self.root.after(0, lambda: on_ready(out))
+            except Exception as e:
+                log.debug("ai localize: %s", e)
+            finally:
+                pend.discard((lang, text))
+        threading.Thread(target=work, daemon=True).start()
+        return None
 
     # --- ansiklopedi
     def _build_enc(self, f):
@@ -1855,7 +1965,13 @@ class App:
         if e.get("talent") and e["cat"] in ("exotic", "named"):
             T.insert("end", t("enc.talent") + "\n", "h2"); T.insert("end", e["talent"] + "\n", "chip")
         if e.get("desc"):
-            T.insert("end", t("enc.desc") + "\n", "h2"); T.insert("end", e["desc"] + "\n")
+            cur = e
+            def ready(txt, cur=cur):
+                if getattr(self, "_enc_cur", None) is cur: self._enc_show(cur)
+            d_txt = self.localized_desc(e["name"], e["desc"], ready)
+            T.insert("end", t("enc.desc") + "\n", "h2"); T.insert("end", d_txt + "\n")
+            if d_txt is not e["desc"] and i18n.current_language() != "en":
+                T.insert("end", "EN: " + e["desc"][:400] + "\n", "sub")
         if e.get("bonuses"):
             T.insert("end", t("enc.bonuses") + "\n", "h2")
             for i, b in enumerate(e["bonuses"], start=1):
@@ -2099,14 +2215,17 @@ class App:
             tk.Label(head, text=t("news.s_" + stt), bg=colors[stt], fg=PAL["bg"], font=(ui_theme.FONT_SEMI, 8), padx=6).pack(side="left")
             if it["id"] not in seen and stt != "ended":
                 tk.Label(head, text=t("news.new"), bg=PAL["accent"], fg=PAL["bg"], font=(ui_theme.FONT_SEMI, 8), padx=6).pack(side="left", padx=4)
-            tk.Label(head, text=f" {icons.get(it['kind'], '•')} " + knowledge.pick_lang(it["title"], lang), bg=PAL["surface"], fg=PAL["fg"],
+            title = it["title"].get(lang) or self.ai_localize(knowledge.pick_lang(it["title"], "en"), lang, lambda _t: self.refresh_info_news()) \
+                or knowledge.pick_lang(it["title"], lang)
+            tk.Label(head, text=f" {icons.get(it['kind'], '•')} " + title, bg=PAL["surface"], fg=PAL["fg"],
                      font=(ui_theme.FONT_SEMI, 11), anchor="w").pack(side="left")
             when = ""
             if stt == "live" and it.get("end"): when = t("news.ends_in", t=knowledge.fmt_left(it["end"] - now, t("news.d"))[0])
             elif stt == "upcoming" and it.get("start"): when = t("news.starts_in", t=knowledge.fmt_left(it["start"] - now, t("news.d"))[0])
             elif it.get("date"): when = it["date"].astimezone().strftime("%Y-%m-%d")
             tk.Label(head, text=when, bg=PAL["surface"], fg=colors[stt], font=(ui_theme.FONT, 9)).pack(side="right")
-            txt = knowledge.pick_lang(it.get("text"), lang)
+            txt = (it.get("text") or {}).get(lang) or (self.ai_localize(knowledge.pick_lang(it.get("text"), "en"), lang, lambda _t: self.refresh_info_news())
+                                                       if it.get("text") else None) or knowledge.pick_lang(it.get("text"), lang)
             if txt:
                 tk.Label(card, text=txt, bg=PAL["surface"], fg=PAL["fg"] if stt != "ended" else PAL["muted"], font=(ui_theme.FONT, 10),
                          justify="left", anchor="w", wraplength=900).pack(fill="x", padx=12, pady=(4, 0))
@@ -2123,6 +2242,7 @@ class App:
         ids = [x["id"] for x in self.news["items"]]
         if set(ids) - set(st.get("news_seen", [])):
             st["news_seen"] = ids[-100:]; save_cfg(self.cfg)
+        self._info_badge()
 
     # --- bilgi yarışması
     def _build_quiz(self, f):
@@ -2498,7 +2618,7 @@ class App:
         wv = tk.StringVar(value=st.get("push_webhook", ""))
         ttk.Entry(r2, textvariable=wv, show="•").pack(side="left", fill="x", expand=True)
         ev_row = ttk.Frame(pn); ev_row.pack(anchor="w", padx=6, pady=2)
-        for k in ("drop", "build", "vendor", "session"):
+        for k in ("drop", "build", "vendor", "session", "news"):
             v = tk.BooleanVar(value=st.get("push_" + k, True))
             ttk.Checkbutton(ev_row, text=t("svc.push_" + k), variable=v,
                             command=lambda k=k, v=v: (st.__setitem__("push_" + k, bool(v.get())), save_cfg(self.cfg))).pack(side="left", padx=4)

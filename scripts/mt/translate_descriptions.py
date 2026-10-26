@@ -11,7 +11,9 @@ model_dir, out = Path(sys.argv[1]), Path(sys.argv[2])
 d = json.loads((ROOT / "meta/game_data.json").read_text(encoding="utf-8"))
 enc = knowledge.Encyclopedia(d, [ROOT / "meta/sources"])
 names = list(d.get("exotics", [])) + list(d.get("named", [])) + list(d.get("gear_sets", [])) + list(d.get("brands", [])) + \
-        list(d.get("gear_talents", [])) + list(d.get("weapon_talents", [])) + list(d.get("weapon_index", {}).keys()) + list(d.get("items", {})) + list(d.get("skills", []))
+        list(d.get("gear_talents", [])) + list(d.get("weapon_talents", [])) + list(d.get("weapon_index", {}).keys()) + list(d.get("items", {})) + list(d.get("skills", [])) + \
+        [v["talent"] for v in d.get("items", {}).values() if v.get("talent")] + \
+        [e["talent"] for e in enc.entries if e.get("talent")]
 eng = livetranslate.LocalMT(model_dir)
 tr = livetranslate.Translator(eng, livetranslate.Glossary(names), livetranslate.Cache(None, size=100000))
 old = {}
