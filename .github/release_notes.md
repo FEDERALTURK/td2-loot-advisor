@@ -8,6 +8,21 @@
 
 Windows "kişisel bilgisayarınızı korudu" derse: **Ek bilgi → Yine de çalıştır** (dosya henüz kod imzalı değil).
 
+**5.1.9 — 🌐 Çeviri artık oyunun bir parçası: yerinde çeviri, konuşma çevirisi, telefon ekranı ve tema paketleri**
+- **📍 Yerinde çeviri (yeni mod):** Türkçe metin İngilizce yazının **tam üstünde, kendi yerinde** görünür — harita, envanter, menüler. Her yazının altına oyunun panel rengine yakın **opak bir fon** konur, iki yazı üst üste binmez. Türkçe uzunsa önce yazı küçülür, yine sığmazsa kutu aşağı uzar. Menü satırları tek tek, paragraflar blok olarak çevrilir. Aynı kalan adlar (Exotic Cache…) örtülmez.
+- **🎧 Konuşma çevirisi (altyazısız sesler):**
+  - **Windows 11:** Windows'un Canlı Altyazı özelliği oyunun sesini yazıya döker, program çevirip altyazı olarak gösterir. Ek indirme yok, yük çok düşük.
+  - **Windows 10 (ve 11):** isteğe bağlı yerel **Whisper** modeli (~146 MB, bir kez). Programdaki çeviri altyapısıyla çalışır; yalnız konuşma algılanınca devreye girer. Oyun adları düzeltilir (Capitol, Black Tusk, ISAC…).
+  - En kararlısı hâlâ oyunda altyazıyı açıp "Altyazılar" modunu kullanmak.
+- **📱 Telefon / ikinci ekran:** çeviriler aynı ağdaki telefonda ya da ikinci monitörde bir sayfada akar — **oyun özel tam ekranda olsa bile.** QR kodla aç; yazı boyutu, İngilizce aç/kapa, telefonda sesli okuma, ekran açık kalır. Yalnız yazı gönderilir, yük yok denecek kadar az. Ücretsiz.
+- **🔊 Sesli okuma:** çeviriler ajan sesi paketiyle (telsiz efekti dahil) okunur — kapalı / yalnız altyazılar / her çeviri.
+- **📖 Terim açıklamaları:** çeviride geçen oyun terimleri (egzotik, adlı eşya, set, marka, yetenek ve Exotic Cache, Dark Zone, SHD gibi genel terimler) çeviri geçmişinde ve telefon sayfasında işaretli; dokununca kısa açıklama, tek tıkla Ansiklopedi.
+- **✍️ Topluluk düzeltme önerisi:** çeviri geçmişinde her satırın yanında "Daha iyi çeviri öner". Öneriler onaylanınca herkesin canlı çevirisinde o satır düzeltilmiş hâliyle görünür.
+- **⚡ Hızlı OCR:** Windows'un kendi OCR'ı da kullanılabiliyor (Windows 10 ve 11, işlemcide, ekran kartını oyuna bırakır). Program ilk çeviride ikisini ölçüp bilgisayarına hafif geleni seçer.
+- **🎮 Kumanda tuşu:** "Şimdi çevir" bir kumanda bileşimine atanabilir (varsayılan Back + RB). Kumanda yalnız okunur, oyuna hiçbir şey gönderilmez.
+- **🎨 Oyun atmosferinde tema paketleri:** SHD Turuncu, **Dark Zone, Black Tusk, Hunter, Kış New York, Gece Operasyonu, Kenly.** Ayarlar'da renk kartlarından tek tıkla; arayüz, çeviri kutuları ve telefon sayfası birlikte değişir.
+- Çeviri kutularında yazı tipi seçimi (okunaklı yazı tipleri dahil) ve kenar çizgisi; çeviri geçmişinde arama ve CSV dışa aktarma.
+
 **5.1.8 — 👥 Topluluk görevleri: canlı çeviri ile görevler birbirine bağlandı**
 - **Oyuncular görevleri birlikte topluyor.** Canlı çeviri açıkken haritada bir görev paneline (Projeler, Ödül avları, Görevlendirmeler) bakınca program görevi tanır: başlık, alt başlık, açıklama, hedef ve sayaç, ödüller, günlük / haftalık / sezon ve bitiş zamanı. İzin verdiysen görevin **yalnız yazısı** ve Türkçe çevirisi topluluk listesine gönderilir. Oyuncu adı, ekran görüntüsü ya da bilgisayar bilgisi gönderilmez. İzin canlı çeviriyi ilk açtığında bir kez sorulur, Canlı çeviri sekmesinden her zaman değiştirilebilir.
 - **Uydurma göreve karşı:** bir görev ancak **en az 2 farklı oyuncudan** aynı şekilde gelince herkese açılır; Türkçesi de en az 2 oyuncudan aynı gelmeli. Süresi dolan günlük ve haftalık görevler listeden kendiliğinden düşer.

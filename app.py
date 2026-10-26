@@ -79,10 +79,16 @@ import knowledge
 import voicepack
 import livetranslate
 import tasks_live
+import overlay
+import terms
+import trscreen
+import speech
+import winocr
+import gamepad
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "5.1.8"
+APP_VERSION = "5.1.9"
 FROZEN = getattr(sys, "frozen", False)
 BASE = Path(sys.executable).parent if FROZEN else Path(__file__).resolve().parent
 TASKS_CACHE = BASE / "tasks_cache.json"  # son indirilen görev listesi
@@ -754,7 +760,7 @@ def exclude_from_capture(win, key="overlay"):
     """Windows 10 2004+: WDA_EXCLUDEFROMCAPTURE — oyuncu pencereyi görür, ekran görüntüsünde altındaki oyun görünür.
     Desteklenmezse pencerenin yeri kaydedilir ve okunan görüntüde siyaha boyanır."""
     ok = False
-    if os.name == "nt":
+    if os.name == "nt" and not os.environ.get("TD2_SHOT_OVERLAY"):        # testler: kaplama ekran görüntüsünde görünsün
         try:
             hwnd = ctypes.windll.user32.GetParent(win.winfo_id()) or win.winfo_id()
             ok = bool(ctypes.windll.user32.SetWindowDisplayAffinity(hwnd, 0x11))
@@ -795,7 +801,7 @@ DEFAULTS.update({
     "ai_provider": "ollama", "ollama_url": "http://localhost:11434", "ollama_model": "gemma3:12b",
     "claude_model": "claude-haiku-5-5", "claude_api_key": "", "claude_code_model": "haiku", "openai_model": "gpt-4o-mini", "openai_api_key": "",
     "stt_model": "small", "stt_device": "cpu",
-    "tts_rate": 185, "tts_voice": "", "voice_hotkey": "<f9>", "speak_verdict": True, "speak_chat": True, "voice_pack": "tactical", "voice_radio": True, "quiz_xp": 0, "quiz_best": 0, "quiz_loading": False, "meta_favs": [], "meta_pop_prev": {}, "news_seen": [], "task_share": None, "task_live": True, "task_client": "", "tr_on": False, "tr_engine": "local", "tr_mode": "subtitle", "tr_region": None, "tr_hotkey": "<f7>", "tr_auto": True, "tr_font": 15, "tr_hide": 10, "tr_alpha": 0.9})
+    "tts_rate": 185, "tts_voice": "", "voice_hotkey": "<f9>", "speak_verdict": True, "speak_chat": True, "voice_pack": "tactical", "voice_radio": True, "quiz_xp": 0, "quiz_best": 0, "quiz_loading": False, "meta_favs": [], "meta_pop_prev": {}, "news_seen": [], "task_share": None, "task_live": True, "task_client": "", "tr_on": False, "tr_engine": "local", "tr_mode": "subtitle", "tr_region": None, "tr_hotkey": "<f7>", "tr_auto": True, "tr_font": 15, "tr_hide": 10, "tr_alpha": 0.9, "tr_screen": False, "tr_screen_port": 8767, "tr_screen_token": "", "tr_speak": "off", "tr_family": "", "tr_outline": False, "sp_on": False, "sp_source": "auto", "sp_hide_captions": True, "tr_ocr": "auto", "tr_ocr_pick": "", "tr_ocr_bench_t": 0, "tr_pad": "back+rb"})
 PROVIDER_KEYS = ["ollama", "claude_code", "claude", "openai", "builtin"]
 
 def provider_label(pid):
@@ -1435,6 +1441,8 @@ class App:
         self.root.after(NEWS_POLL_MS, self._news_poll)
         self.root.after(2000, self._info_badge)
         self.root.after(5000, self._task_live_poll)
+        if stg.get("tr_screen"): self.root.after(3000, self.tr_screen_apply)
+        if stg.get("sp_on"): self.root.after(4000, lambda: self.speech_start(quiet=True))
         if OCR.name == "tesseract" and not self.tess:
             messagebox.showwarning(APP_NAME, t("msg.no_tesseract"))
 
@@ -1515,6 +1523,18 @@ class App:
         except Exception: pass
         self._task_ui()
 
+    def _ts_ui(self):
+        lbl = getattr(self, "ts_url", None)
+        if not lbl or not lbl.winfo_exists(): return
+        api = getattr(self, "tr_api", None)
+        if api and api.running:
+            u = api.url("/tr"); lbl.config(text=u)
+            img = companion.qr_image(u, 3)
+            if img is not None:
+                self.ts_qr._img = ImageTk.PhotoImage(img); self.ts_qr.config(image=self.ts_qr._img)
+        else:
+            lbl.config(text=t("ts.off")); self.ts_qr.config(image=""); self.ts_qr._img = None
+
     def _task_live_poll_once(self):
         def work():
             try: res = tasks_live.fetch_live(self.task_server(), self.TASKS_RAW_URL)
@@ -1565,6 +1585,146 @@ class App:
         elif st.get("task_share") is False: parts.append(t("tl.share_off"))
         lbl.config(text="  ·  ".join(parts))
 
+    # ---------- Canlı çeviri OCR'ı: RapidOCR ya da Windows OCR (bilgisayara hafif olan)
+    def _winocr(self):
+        if getattr(self, "_wocr", None) is None: self._wocr = winocr.WinOCR()
+        return self._wocr
+
+    def lt_ocr(self, img):
+        st = self.cfg["settings"]; choice = st.get("tr_ocr", "auto")
+        rapid = lambda: OCR.segments(img) if hasattr(OCR, "segments") else OCR.lines(img)
+        if choice == "rapid": return rapid()
+        w = self._winocr()
+        if not w.available: return rapid()
+        if choice == "windows": return w.segments(img)
+        pick = st.get("tr_ocr_pick")
+        if not pick or time.time() - float(st.get("tr_ocr_bench_t", 0) or 0) > 7 * 86400:
+            return self._lt_ocr_bench(img, w)
+        return w.segments(img) if pick == "windows" else rapid()
+
+    def _lt_ocr_bench(self, img, w):
+        """İki OCR'ı aynı görüntüde ölç: Windows OCR, RapidOCR kadar okuyorsa ve daha hızlıysa (ya da ekran kartı oyunda
+        meşgulken işlemcide çalıştığı için) onu seç."""
+        st = self.cfg["settings"]
+        t0 = time.perf_counter(); r = OCR.segments(img) if hasattr(OCR, "segments") else OCR.lines(img); tr_ = time.perf_counter() - t0
+        try:
+            t0 = time.perf_counter(); wv = w.segments(img); tw = time.perf_counter() - t0
+        except Exception as e:
+            log.info("Windows OCR failed: %s", e); wv, tw = [], 99
+        sim = winocr.similar(r, wv)
+        txt = sum(len(x[0]) for x in r)
+        pick = "windows" if (sim >= 0.8 or txt < 8) and tw <= tr_ * 1.3 else "rapid"
+        st["tr_ocr_pick"], st["tr_ocr_bench_t"] = pick, time.time(); save_cfg(self.cfg)
+        log.info("Translate OCR benchmark: rapid %.0f ms, windows %.0f ms, similarity %.2f -> %s", tr_ * 1000, tw * 1000, sim, pick)
+        self.root.after(0, self._lt_ocr_ui)
+        return wv if pick == "windows" else r
+
+    def _lt_ocr_ui(self):
+        lbl = getattr(self, "lt_ocr_lbl", None)
+        if not lbl or not lbl.winfo_exists(): return
+        st = self.cfg["settings"]; w = self._winocr()
+        if not w.available: txt = t("ocr2.win_none")
+        elif st.get("tr_ocr", "auto") == "auto": txt = t("ocr2.auto_pick", e=t("ocr2.e_" + st["tr_ocr_pick"])) if st.get("tr_ocr_pick") else t("ocr2.auto_wait")
+        else: txt = ""
+        lbl.config(text=txt)
+
+    def _lt_pad_start(self):
+        st = self.cfg["settings"]
+        self._lt_pad_stop()
+        combo = st.get("tr_pad", "back+rb")
+        if not combo or combo == "off": return
+        self.lt_pad = gamepad.ComboWatcher(combo, lambda: self.root.after(0, self.lt_once))
+        if not self.lt_pad.start(): self.lt_pad = None
+        else: log.info("Gamepad translate combo: %s", combo)
+
+    def _lt_pad_stop(self):
+        if getattr(self, "lt_pad", None): self.lt_pad.stop(); self.lt_pad = None
+
+    # ---------- Konuşma çevirisi (W11 Canlı Altyazı / W10 Whisper)
+    def sp_model_dir(self):
+        return BASE / "models" / "whisper-base.en"
+
+    def sp_source(self):
+        st = self.cfg["settings"]; src = st.get("sp_source", "auto")
+        if src == "auto": src = "captions" if speech.captions_available() else "whisper"
+        return src
+
+    def speech_start(self, quiet=False):
+        st = self.cfg["settings"]
+        self.speech_stop()
+        src = self.sp_source()
+        if src == "captions":
+            if not speech.captions_available():
+                self._sp_status(t("sp.no_captions"), "warning"); return False
+            self.sp = speech.LiveCaptionsSource(self._sp_text, self._sp_state, hide=bool(st.get("sp_hide_captions", True)))
+        else:
+            if not (speech.Whisper.available() and speech.WhisperSource.capture_available()):
+                self._sp_status(t("sp.no_runtime"), "warning"); return False
+            if not speech.whisper_installed(self.sp_model_dir()):
+                self._sp_status(t("sp.need_model", mb=speech.WHISPER_MB), "warning"); return False
+            self.sp = speech.WhisperSource(self._sp_text, self.sp_model_dir(), self._sp_state)
+        try: self.lt_translator()
+        except Exception as e:
+            self._sp_status(str(e), "warning"); return False
+        self.sp.start()
+        st["sp_on"] = True; save_cfg(self.cfg)
+        log.info("Speech translation on (source=%s)", src)
+        self._sp_status(t("sp.running_" + src), "success"); self._sp_ui()
+        return True
+
+    def speech_stop(self, quiet=True):
+        sp = getattr(self, "sp", None)
+        if sp: sp.stop(); self.sp = None
+        if not quiet:
+            self.cfg["settings"]["sp_on"] = False; save_cfg(self.cfg); self._sp_status(t("sp.stopped")); self._sp_ui()
+
+    def _sp_state(self, state, detail=""):
+        if state == "error": self.root.after(0, lambda: self._sp_status(t("sp.error", e=detail), "danger"))
+
+    def _sp_text(self, en):
+        """Kaynaktan gelen İngilizce cümle → Türkçe → altyazı kutusu (arka plan iş parçacığından)."""
+        try:
+            t0 = time.time()
+            tr = self.lt_translator().translate([en])[0]
+            ms = int((time.time() - t0) * 1000)
+            g = self.scan_area() or {}
+            if not g: return
+            area = {"left": int(g["left"] + g["width"] * 0.12), "top": int(g["top"] + g["height"] * 0.70),
+                    "width": int(g["width"] * 0.76), "height": int(g["height"] * 0.24)}
+            self.root.after(0, lambda: self._lt_show([("🎧 " + en, tr, (0, 0, 0, 0))], area, ms, force_mode="subtitle"))
+        except Exception as e:
+            log.info("Speech translate failed: %s", e)
+
+    def _sp_status(self, text, kind="muted"):
+        lbl = getattr(self, "sp_stat", None)
+        if lbl and lbl.winfo_exists(): lbl.config(text=text, fg=PAL.get(kind, PAL["muted"]))
+
+    def _sp_ui(self):
+        b = getattr(self, "sp_btn", None)
+        if not b or not b.winfo_exists(): return
+        on = bool(getattr(self, "sp", None))
+        b.config(text=("■ " + t("sp.stop")) if on else ("▶ " + t("sp.start")), style="Danger.TButton" if on else "Accent.TButton")
+        src = self.sp_source()
+        need = src == "whisper" and not speech.whisper_installed(self.sp_model_dir())
+        if need: self.sp_dl.pack(side="left", padx=6)
+        else: self.sp_dl.pack_forget()
+        self.sp_src_lbl.config(text=t("sp.src_" + src))
+
+    def sp_download(self):
+        self.sp_dl.state(["disabled"]); self._sp_status(t("lt.downloading"))
+        def prog(got, total):
+            self.root.after(0, lambda: self._sp_status(t("sp.dl_prog", p=min(99, int(100 * got / max(1, total))))))
+        def go():
+            try: speech.download_whisper(self.sp_model_dir(), prog); err = None
+            except Exception as e: err = str(e)
+            def done():
+                self.sp_dl.state(["!disabled"])
+                if err: self._sp_status(t("lt.failed", e=err), "danger")
+                else: self._sp_status(t("sp.model_ready"), "success")
+                self._sp_ui()
+            self.root.after(0, done)
+        threading.Thread(target=go, daemon=True).start()
+
     def lt_area(self):
         st = self.cfg["settings"]; mode = st.get("tr_mode", "subtitle")
         if mode == "region" and st.get("tr_region"): return dict(st["tr_region"])
@@ -1604,10 +1764,12 @@ class App:
                     self.toast(t("scan.minimized")); self.root.after(1200, self.root.iconify)
             except Exception:
                 pass
+        self._lt_pad_start()
         self._lt_status(t("lt.running", key=st.get("tr_hotkey", "<f7>").upper().strip("<>")), "success")
         self._lt_ui(); return True
 
     def lt_stop(self, quiet=False):
+        self._lt_pad_stop()
         if getattr(self, "lt_stop_ev", None): self.lt_stop_ev.set(); self.lt_stop_ev = None
         if getattr(self, "lt_keys", None):
             try: self.lt_keys.stop()
@@ -1660,7 +1822,7 @@ class App:
 
     def _lt_run(self, img, area, force=False):
         try:
-            lines = OCR.segments(img) if hasattr(OCR, "segments") else OCR.lines(img)   # sütun duyarlı (yan yana paneller)
+            lines = self.lt_ocr(img)                                 # sütun duyarlı (yan yana paneller)
             blocks = livetranslate.blocks_from_lines(lines, GAME.data.get("ui_words", []))
             if not blocks:
                 if force: self.root.after(0, lambda: self._lt_status(t("lt.nothing"), "muted"))
@@ -1694,7 +1856,7 @@ class App:
         except Exception:
             log.debug("lt log", exc_info=True)
 
-    def _lt_show(self, pairs, area, ms):
+    def _lt_show(self, pairs, area, ms, force_mode=None):
         st = self.cfg["settings"]
         hist = getattr(self, "lt_hist", [])
         for en, tr, _ in pairs:
@@ -1703,24 +1865,30 @@ class App:
         self._lt_log(pairs, ms)
         self._lt_status(t("lt.done", n=len(pairs), ms=ms), "success")
         self._lt_hist_fill()
+        self._lt_after(pairs, ms)
         self._lt_hide()
-        size = int(st.get("tr_font", 15)); mode = st.get("tr_mode", "subtitle")
+        size = int(st.get("tr_font", 15)); mode = force_mode or st.get("tr_mode", "subtitle")
+        if mode == "inplace":
+            return self._lt_show_inplace(pairs, area)
+        sty = self.lt_style()
         w = self._lt_win = tk.Toplevel(self.root); w.overrideredirect(True)
         w.attributes("-topmost", True, "-alpha", float(st.get("tr_alpha", 0.9)))
-        w.configure(bg="#0d0f12")
+        w.configure(bg=sty["bg"])
         if mode == "subtitle":
             wrap = max(300, area["width"] - 40)
+            tk.Frame(w, height=3, bg=sty["accent"]).pack(fill="x")
             for en, tr, _ in pairs[-3:]:
-                tk.Label(w, text=tr, bg="#0d0f12", fg="#ffffff", font=(ui_theme.FONT_SEMI, size), wraplength=wrap, justify="center").pack(padx=18, pady=(8, 2))
+                tk.Label(w, text=tr, bg=sty["bg"], fg=sty["fg"], font=(sty["font_semi"], size), wraplength=wrap, justify="center").pack(padx=18, pady=(8, 2))
             w.update_idletasks()
             x = area["left"] + (area["width"] - w.winfo_reqwidth()) // 2
             y = max(0, area["top"] - w.winfo_reqheight() - 10)
         else:
-            tk.Label(w, text="🌐 " + t("lt.overlay_title"), bg="#0d0f12", fg=PAL["accent"], font=(ui_theme.FONT_SEMI, 10), anchor="w").pack(fill="x", padx=12, pady=(8, 0))
+            tk.Frame(w, height=3, bg=sty["accent"]).pack(fill="x")
+            tk.Label(w, text="◆ " + t("lt.overlay_title").upper(), bg=sty["bg"], fg=sty["accent"], font=(sty["font_semi"], 9), anchor="w").pack(fill="x", padx=12, pady=(6, 0))
             for en, tr, _ in pairs[:8]:
-                tk.Label(w, text=tr, bg="#0d0f12", fg="#ffffff", font=(ui_theme.FONT, max(9, size - 3)), wraplength=420, justify="left",
+                tk.Label(w, text=tr, bg=sty["bg"], fg=sty["fg"], font=(sty["font"], max(9, size - 3)), wraplength=420, justify="left",
                          anchor="w").pack(fill="x", padx=12, pady=(4, 0))
-            tk.Frame(w, height=8, bg="#0d0f12").pack()
+            tk.Frame(w, height=8, bg=sty["bg"]).pack()
             w.update_idletasks()
             x = area["left"] + area["width"] - w.winfo_reqwidth() - 20
             y = area["top"] + 70
@@ -1728,6 +1896,106 @@ class App:
         click_through(w); exclude_from_capture(w, "translate")
         w.bind("<Destroy>", lambda e, w=w: CAPTURE_MASK.pop("translate", None) if e.widget is w else None)
         self._lt_job = self.root.after(int(float(st.get("tr_hide", 10)) * 1000), self._lt_hide)
+
+    def lt_style(self):
+        """Çeviri kutularının görünümü: seçili tema paketinden (oyun panel renklerine yakın)."""
+        st = self.cfg["settings"]
+        return {"bg": PAL.get("ov_bg", "#0d0f12"), "fg": PAL.get("ov_fg", "#ffffff"), "accent": PAL.get("accent", "#ff6d10"),
+                "border": PAL.get("ov_border", "#2c313d"), "alpha": max(0.6, min(1.0, float(st.get("tr_alpha", 0.9)) + 0.06)),
+                "font": st.get("tr_family") or ui_theme.FONT, "font_semi": st.get("tr_family") or ui_theme.FONT_SEMI,
+                "outline": bool(st.get("tr_outline", False))}
+
+    def _lt_show_inplace(self, pairs, area):
+        """Yerinde çeviri: her blok kendi yerinde, opak fonla (overlay.py)."""
+        st = self.cfg["settings"]
+        body = max(8.0, float(livetranslate.BODY_H[0]))
+        sty = dict(self.lt_style(), alpha=1.0)              # yerinde: fon tamamen opak, alttaki İngilizce görünmez
+        ip = self._lt_inplace = overlay.InPlace(self.root, sty, on_window=self._lt_overlay_window)
+        blocks = [(tr, b, en, max(1, en.count("\n") + 1, round((b[3] - b[1]) / (body * 1.15)))) for en, tr, b in pairs]
+        items = overlay.layout(blocks, area, ip.measure_at)
+        if not items: return
+        self._lt_win = ip.show(items, area)
+        self._lt_job = self.root.after(int(float(st.get("tr_hide", 10)) * 1000), self._lt_hide)
+
+    def _lt_overlay_window(self, w):
+        click_through(w); exclude_from_capture(w, "translate")
+        w.bind("<Destroy>", lambda e, w=w: CAPTURE_MASK.pop("translate", None) if e.widget is w else None)
+
+    def _lt_after(self, pairs, ms):
+        """Çeviri sonrası: terimler, telefon / ikinci ekran, sesli okuma."""
+        st = self.cfg["settings"]
+        now = int(time.time())
+        items = []
+        for en, tr, _ in pairs:
+            try: tl = self.term_finder().find(en + "\n" + tr)
+            except Exception: tl = []
+            items.append({"en": en, "tr": tr, "terms": tl, "time": now})
+        self.lt_terms = dict(list(getattr(self, "lt_terms", {}).items())[-200:]) | {it["en"]: it["terms"] for it in items}
+        rec = getattr(self, "tr_recent", [])
+        recent_en = {x["en"] for x in rec[-6:]}
+        fresh = [it for it in items if it["en"] not in recent_en]          # aynı yazı art arda okunursa bir kez
+        self.tr_recent = (rec + fresh)[-20:]
+        items = fresh
+        if not items: return self._lt_speak(pairs)
+        ev = {"type": "translate", "items": items, "time": now, "theme": self.tr_theme_vars()}
+        for api in (getattr(self, "tr_api", None), getattr(self, "api", None)):
+            try:
+                if api and api.clients: api.broadcast(ev)
+            except Exception:
+                log.debug("translate broadcast", exc_info=True)
+        self._lt_speak(pairs)
+
+    def _lt_speak(self, pairs):
+        st = self.cfg["settings"]
+        mode = st.get("tr_speak", "off")
+        if mode == "all" or (mode == "subtitle" and st.get("tr_mode", "subtitle") == "subtitle"):
+            text = " ".join(tr for _, tr, _ in pairs[-3:]).strip()
+            if text and text != getattr(self, "_tr_spoken", None):
+                self._tr_spoken = text
+                try: rate = int(float(st.get("tts_rate", 185)))
+                except ValueError: rate = 185
+                fx = bool(st.get("voice_radio", True)) and st.get("voice_pack", "tactical") != "classic"
+                self.speaker.say(text, rate, "tr-tr", fx=fx)
+
+    def term_finder(self):
+        lang = i18n.current_language()
+        if getattr(self, "_terms", None) is None or self._terms_lang != lang:
+            enc = getattr(self, "_enc", None)
+            if enc is None:
+                try: enc = self._enc = knowledge.Encyclopedia(GAME.data, [BASE / "meta" / "sources", BUNDLE / "meta" / "sources"])
+                except Exception: enc = None
+            loc = lambda e, text: self.desc_i18n().get(e["name"], {}).get(lang) if lang != "en" else text
+            self._terms = terms.TermFinder(enc, [BASE / "meta" / "terms.json", BUNDLE / "meta" / "terms.json"], lang, loc)
+            self._terms_lang = lang
+        return self._terms
+
+    def tr_theme_vars(self):
+        """Telefon sayfasının renkleri: seçili tema paketi."""
+        return {"bg": PAL.get("bg"), "sf": PAL.get("surface"), "sf2": PAL.get("surface2"), "fg": PAL.get("fg"),
+                "mu": PAL.get("muted"), "ac": PAL.get("accent")}
+
+    def tr_state(self):
+        return {"translate": {"recent": getattr(self, "tr_recent", [])[-8:], "theme": self.tr_theme_vars()}, "version": APP_VERSION}
+
+    def tr_screen_apply(self, quiet=True):
+        """Telefon / ikinci ekran sunucusu (yerel ağ). Yalnız yazı gönderir; ücretsiz."""
+        st = self.cfg["settings"]
+        if getattr(self, "tr_api", None): self.tr_api.stop(); self.tr_api = None
+        if not st.get("tr_screen"): return None
+        if not st.get("tr_screen_token"):
+            import secrets as _s
+            st["tr_screen_token"] = _s.token_urlsafe(12); save_cfg(self.cfg)
+        try:
+            port = max(1024, min(65535, int(st.get("tr_screen_port", 8767))))
+            self.tr_api = localapi.LocalAPI(self.tr_state, None, port=port, token=st["tr_screen_token"], lan=True,
+                                            allow_control=False, pages={"/tr": trscreen.PAGE})
+            self.tr_api.start()
+            return self.tr_api.url("/tr")
+        except OSError as e:
+            self.tr_api = None
+            log.warning("Translation screen failed: %s", e)
+            if not quiet: messagebox.showerror(APP_NAME, t("comp.port_busy", port=st.get("tr_screen_port"), e=e))
+            return None
 
     def _lt_hide(self):
         if getattr(self, "_lt_job", None):
@@ -1774,7 +2042,7 @@ class App:
         def mode_set():
             st["tr_mode"] = self.lt_mode.get(); save_cfg(self.cfg)
             if st["tr_mode"] == "region" and not st.get("tr_region"): self.lt_pick_region()
-        for k in ("subtitle", "region", "screen"):
+        for k in ("subtitle", "region", "screen", "inplace"):
             rr = ttk.Frame(mb); rr.pack(fill="x", padx=8, pady=1)
             ttk.Radiobutton(rr, text=t("lt.m_" + k), value=k, variable=self.lt_mode, command=mode_set).pack(side="left")
             ttk.Label(rr, text=t("lt.m_" + k + "_hint"), foreground=PAL["muted"]).pack(side="left", padx=8)
@@ -1792,6 +2060,33 @@ class App:
             v = self.lt_vars[k] = tk.StringVar(value=str(st.get(k, default)))
             e = ttk.Entry(g, textvariable=v, width=w); e.grid(row=0, column=i * 2 + 1, sticky="w", padx=(0, 16))
             e.bind("<FocusOut>", lambda ev: self._lt_save_opts())
+        g2 = ttk.Frame(ob); g2.pack(fill="x", padx=8, pady=(0, 8))
+        ttk.Label(g2, text="OCR").pack(side="left")
+        ocr_keys = ("auto", "rapid", "windows")
+        self.lt_ocr_var = tk.StringVar(value=t("ocr2." + st.get("tr_ocr", "auto")))
+        cb1 = ttk.Combobox(g2, textvariable=self.lt_ocr_var, state="readonly", width=22, values=[t("ocr2." + k) for k in ocr_keys])
+        cb1.pack(side="left", padx=(4, 6))
+        cb1.bind("<<ComboboxSelected>>", lambda e: (st.__setitem__("tr_ocr", next(k for k in ocr_keys if t("ocr2." + k) == self.lt_ocr_var.get())),
+                                                     st.__setitem__("tr_ocr_pick", ""), save_cfg(self.cfg), self._lt_ocr_ui()))
+        self.lt_ocr_lbl = ttk.Label(g2, text="", foreground=PAL["muted"]); self.lt_ocr_lbl.pack(side="left", padx=(0, 16))
+        ttk.Label(g2, text="🎮 " + t("pad.label")).pack(side="left")
+        self.lt_pad_var = tk.StringVar(value=t("pad." + st.get("tr_pad", "back+rb")))
+        cb2 = ttk.Combobox(g2, textvariable=self.lt_pad_var, state="readonly", width=16, values=[t("pad." + k) for k in gamepad.COMBOS])
+        cb2.pack(side="left", padx=4)
+        def pad_set(e=None):
+            st["tr_pad"] = next(k for k in gamepad.COMBOS if t("pad." + k) == self.lt_pad_var.get()); save_cfg(self.cfg)
+            if getattr(self, "lt_stop_ev", None) or getattr(self, "lt_keys", None): self._lt_pad_start()
+        cb2.bind("<<ComboboxSelected>>", pad_set)
+        fam = ttk.Frame(ob); fam.pack(fill="x", padx=8, pady=(0, 8))
+        ttk.Label(fam, text=t("lt.family")).pack(side="left")
+        self.lt_fam = tk.StringVar(value=st.get("tr_family") or ui_theme.FONT)
+        fcb = ttk.Combobox(fam, textvariable=self.lt_fam, width=22, values=[ui_theme.FONT, "Bahnschrift", "Consolas", "Verdana", "Arial", "Tahoma", "OpenDyslexic"])
+        fcb.pack(side="left", padx=4)
+        fcb.bind("<<ComboboxSelected>>", lambda e: (st.__setitem__("tr_family", self.lt_fam.get()), save_cfg(self.cfg)))
+        self.lt_outline = tk.BooleanVar(value=bool(st.get("tr_outline", False)))
+        ttk.Checkbutton(fam, text=t("lt.outline"), variable=self.lt_outline,
+                        command=lambda: (st.__setitem__("tr_outline", bool(self.lt_outline.get())), save_cfg(self.cfg))).pack(side="left", padx=12)
+        self._lt_ocr_ui()
         # topluluk görevleri
         cb = ttk.LabelFrame(f, text="👥 " + t("tl.box")); cb.pack(fill="x", padx=10, pady=6)
         self.task_share_var = tk.BooleanVar(value=bool(st.get("task_share")))
@@ -1806,6 +2101,40 @@ class App:
         ttk.Label(cb, text=t("tl.use_hint"), foreground=PAL["muted"], wraplength=880, justify="left").pack(anchor="w", padx=28)
         self.task_stat = ttk.Label(cb, text="", foreground=PAL["muted"]); self.task_stat.pack(anchor="w", padx=8, pady=(4, 8))
         self._task_ui()
+        # telefon / ikinci ekran + sesli okuma
+        pb = ttk.LabelFrame(f, text="📱 " + t("ts.box")); pb.pack(fill="x", padx=10, pady=6)
+        prow = ttk.Frame(pb); prow.pack(fill="x", padx=8, pady=(6, 2))
+        pleft = ttk.Frame(prow); pleft.pack(side="left", fill="x", expand=True)
+        self.ts_var = tk.BooleanVar(value=bool(st.get("tr_screen")))
+        def ts_set():
+            st["tr_screen"] = bool(self.ts_var.get()); save_cfg(self.cfg)
+            self.tr_screen_apply(quiet=False); self._ts_ui()
+        ttk.Checkbutton(pleft, text=t("ts.on"), variable=self.ts_var, command=ts_set).pack(anchor="w")
+        ttk.Label(pleft, text=t("ts.hint"), foreground=PAL["muted"], wraplength=640, justify="left").pack(anchor="w", padx=20)
+        self.ts_url = ttk.Label(pleft, text="", foreground=PAL["info"], cursor="hand2"); self.ts_url.pack(anchor="w", padx=20, pady=(4, 0))
+        self.ts_url.bind("<Button-1>", lambda e: self.tr_api and webbrowser_open(self.tr_api.url("/tr")))
+        br = ttk.Frame(pleft); br.pack(anchor="w", padx=20, pady=4)
+        ttk.Button(br, text="🖥 " + t("ts.open"), command=lambda: self.tr_api and webbrowser_open(self.tr_api.url("/tr"))).pack(side="left")
+        ttk.Button(br, text="📋 " + t("ts.copy"), command=lambda: self.tr_api and (self.root.clipboard_clear(), self.root.clipboard_append(self.tr_api.url("/tr")))).pack(side="left", padx=6)
+        self.ts_qr = ttk.Label(prow); self.ts_qr.pack(side="right", padx=8)
+        sr = ttk.Frame(pb); sr.pack(fill="x", padx=8, pady=(4, 8))
+        ttk.Label(sr, text="🔊 " + t("ts.speak")).pack(side="left")
+        self.ts_speak = tk.StringVar(value=t("ts.sp_" + st.get("tr_speak", "off")))
+        sp = ttk.Combobox(sr, textvariable=self.ts_speak, state="readonly", width=26, values=[t("ts.sp_" + k) for k in ("off", "subtitle", "all")])
+        sp.pack(side="left", padx=8)
+        sp.bind("<<ComboboxSelected>>", lambda e: (st.__setitem__("tr_speak", next(k for k in ("off", "subtitle", "all") if t("ts.sp_" + k) == self.ts_speak.get())), save_cfg(self.cfg)))
+        ttk.Label(sr, text=t("ts.speak_hint"), foreground=PAL["muted"]).pack(side="left", padx=6)
+        self._ts_ui()
+        # konuşma çevirisi
+        kb = ttk.LabelFrame(f, text="🎧 " + t("sp.box")); kb.pack(fill="x", padx=10, pady=6)
+        kr = ttk.Frame(kb); kr.pack(fill="x", padx=8, pady=(6, 2))
+        self.sp_btn = ttk.Button(kr, text="", command=lambda: self.speech_stop(quiet=False) if getattr(self, "sp", None) else self.speech_start())
+        self.sp_btn.pack(side="left")
+        self.sp_dl = ttk.Button(kr, text="⬇ " + t("sp.download", mb=speech.WHISPER_MB), command=self.sp_download)
+        self.sp_src_lbl = ttk.Label(kr, text="", foreground=PAL["muted"]); self.sp_src_lbl.pack(side="left", padx=10)
+        self.sp_stat = tk.Label(kb, text="", bg=PAL["bg"], fg=PAL["muted"], anchor="w"); self.sp_stat.pack(fill="x", padx=10)
+        ttk.Label(kb, text=t("sp.hint"), foreground=PAL["muted"], wraplength=880, justify="left").pack(anchor="w", padx=10, pady=(2, 8))
+        self._sp_ui()
         # dene
         tb = ttk.LabelFrame(f, text="✍ " + t("lt.try")); tb.pack(fill="x", padx=10, pady=6)
         self.lt_in = tk.Text(tb, height=3, wrap="word", bg=PAL["entry"], fg=PAL["fg"], insertbackground=PAL["fg"], relief="flat",
@@ -1818,6 +2147,12 @@ class App:
         self.lt_out.pack(fill="x", padx=8, pady=(6, 8))
         # geçmiş
         hb = ttk.LabelFrame(f, text="🕘 " + t("lt.history")); hb.pack(fill="both", expand=True, padx=10, pady=6)
+        hbar = ttk.Frame(hb); hbar.pack(fill="x", padx=6, pady=(6, 0))
+        self.lt_q = tk.StringVar()
+        ttk.Label(hbar, text="🔎").pack(side="left")
+        qe = ttk.Entry(hbar, textvariable=self.lt_q, width=30); qe.pack(side="left", padx=4)
+        self.lt_q.trace_add("write", lambda *a: self._lt_hist_fill())
+        ttk.Button(hbar, text="⬇ CSV", command=self.lt_export).pack(side="right")
         self.lt_hist_txt = tk.Text(hb, height=12, wrap="word", bg=PAL["surface"], fg=PAL["fg"], relief="flat", font=(ui_theme.FONT, 10), padx=10, pady=8)
         self.lt_hist_txt.tag_configure("en", foreground=PAL["muted"]); self.lt_hist_txt.tag_configure("tr", font=(ui_theme.FONT_SEMI, 10))
         self.lt_hist_txt.pack(fill="both", expand=True, padx=6, pady=6)
@@ -1853,10 +2188,80 @@ class App:
         T = getattr(self, "lt_hist_txt", None)
         if not T or not T.winfo_exists(): return
         T.config(state="normal"); T.delete("1.0", "end")
-        for en, tr in reversed(getattr(self, "lt_hist", [])[-40:]):
-            T.insert("end", en + "\n", "en"); T.insert("end", tr + "\n\n", "tr")
+        terms_of = getattr(self, "lt_terms", {})
+        q = (self.lt_q.get().strip().lower() if getattr(self, "lt_q", None) else "")
+        for i, (en, tr) in enumerate(reversed(getattr(self, "lt_hist", [])[-80:])):
+            if q and q not in (en + " " + tr).lower(): continue
+            T.insert("end", en + "\n", "en"); T.insert("end", tr + "\n", "tr")
+            for k, term in enumerate(terms_of.get(en, [])):
+                tag = f"term{i}_{k}"
+                T.tag_configure(tag, foreground=PAL["accent"], underline=True)
+                T.tag_bind(tag, "<Button-1>", lambda e, tm=term: self._term_popup(tm))
+                T.tag_bind(tag, "<Enter>", lambda e: T.config(cursor="hand2")); T.tag_bind(tag, "<Leave>", lambda e: T.config(cursor=""))
+                T.insert("end", ("📖 " if k == 0 else "   ") + term["name"], tag)
+            line = (tr, en)
+            ftag = f"fix{i}"
+            T.tag_configure(ftag, foreground=PAL["muted"], underline=True)
+            T.tag_bind(ftag, "<Button-1>", lambda e, ln=line: self.lt_suggest(ln[1], ln[0]))
+            T.insert("end", ("   " if terms_of.get(en) else "") + "✍ " + t("sg.link"), ftag)
+            T.insert("end", "\n\n")
         if not getattr(self, "lt_hist", None): T.insert("end", t("lt.hist_empty"), "en")
         T.config(state="disabled")
+
+    def lt_export(self):
+        hist = getattr(self, "lt_hist", [])
+        if not hist: return messagebox.showinfo(APP_NAME, t("lt.hist_empty"))
+        p = filedialog.asksaveasfilename(defaultextension=".csv", initialfile="ceviri_gecmisi.csv", filetypes=[("CSV", "*.csv")])
+        if not p: return
+        with open(p, "w", encoding="utf-8-sig", newline="") as fh:
+            w = csv.writer(fh); w.writerow(["English", "Türkçe"])
+            for en, tr in hist: w.writerow([en, tr])
+        self.toast(t("lt.exported", n=len(hist)))
+
+    def lt_suggest(self, en, tr):
+        """Topluluk düzeltme önerisi: oyuncu daha iyi bir Türkçe yazar → sunucu → yönetici onayı → herkesin çeviri hafızası."""
+        st = self.cfg["settings"]
+        w = tk.Toplevel(self.root); w.title(t("sg.title")); w.configure(bg=PAL["surface"]); w.transient(self.root)
+        tk.Frame(w, height=3, bg=PAL["accent"]).pack(fill="x")
+        tk.Label(w, text=en, bg=PAL["surface"], fg=PAL["muted"], wraplength=560, justify="left", font=(ui_theme.FONT, 9)).pack(anchor="w", padx=16, pady=(12, 2))
+        tk.Label(w, text=t("sg.now") + "  " + tr, bg=PAL["surface"], fg=PAL["fg"], wraplength=560, justify="left").pack(anchor="w", padx=16, pady=(0, 6))
+        tk.Label(w, text=t("sg.better"), bg=PAL["surface"], fg=PAL["accent"], font=(ui_theme.FONT_SEMI, 10)).pack(anchor="w", padx=16)
+        tx = tk.Text(w, height=4, width=70, wrap="word", bg=PAL["entry"], fg=PAL["fg"], insertbackground=PAL["fg"], relief="flat", padx=8, pady=6)
+        tx.insert("1.0", tr); tx.pack(fill="x", padx=16, pady=4)
+        msg = tk.Label(w, text=t("sg.hint"), bg=PAL["surface"], fg=PAL["muted"], wraplength=560, justify="left", font=(ui_theme.FONT, 9))
+        msg.pack(anchor="w", padx=16)
+        def send():
+            new = tx.get("1.0", "end").strip()
+            if not new or new == tr: return msg.config(text=t("sg.same"), fg=PAL["warning"])
+            msg.config(text=t("acc.working"), fg=PAL["muted"])
+            def go():
+                ok_ = tasks_live.suggest(self.task_server(), st.get("task_client"), en, tr, new, APP_VERSION)
+                self.root.after(0, lambda: (msg.config(text=t("sg.sent") if ok_ else t("sg.fail"), fg=PAL["success"] if ok_ else PAL["danger"]),
+                                            ok_ and w.after(1500, w.destroy)))
+            threading.Thread(target=go, daemon=True).start()
+        bar = ttk.Frame(w); bar.pack(fill="x", padx=12, pady=12)
+        ttk.Button(bar, text="✉ " + t("sg.send"), style="Accent.TButton", command=send).pack(side="right")
+        ttk.Button(bar, text=t("btn.cancel") if t("btn.cancel") != "btn.cancel" else "✖", command=w.destroy).pack(side="right", padx=6)
+
+    def _term_popup(self, term):
+        w = tk.Toplevel(self.root); w.title(term["name"]); w.configure(bg=PAL["surface"]); w.transient(self.root)
+        tk.Frame(w, height=3, bg=PAL["accent"]).pack(fill="x")
+        tk.Label(w, text=(term.get("label") + " · " if term.get("label") else "") + term["name"], bg=PAL["surface"], fg=PAL["accent"],
+                 font=(ui_theme.FONT_SEMI, 12)).pack(anchor="w", padx=16, pady=(12, 4))
+        tk.Label(w, text=term.get("text") or "—", bg=PAL["surface"], fg=PAL["fg"], wraplength=440, justify="left",
+                 font=(ui_theme.FONT, 10)).pack(anchor="w", padx=16, pady=(0, 10))
+        bar = ttk.Frame(w); bar.pack(fill="x", padx=12, pady=(0, 12))
+        if term.get("cat") != "term":
+            ttk.Button(bar, text="📚 " + t("ts.in_enc"), command=lambda: (w.destroy(), self._open_enc(term["name"]))).pack(side="left")
+        ttk.Button(bar, text="✖", command=w.destroy).pack(side="right")
+
+    def _open_enc(self, name):
+        try:
+            self.nb.select(self.tabs["info"])
+            if hasattr(self, "enc_q"): self.enc_q.set(name)
+            if hasattr(self, "refresh_enc"): self.refresh_enc()
+        except Exception:
+            log.debug("open enc", exc_info=True)
 
     def lt_try(self):
         text = self.lt_in.get("1.0", "end").strip()
@@ -2608,7 +3013,7 @@ class App:
 
     def api_state(self):
         st = dict(self.comp_state)
-        return {"app": APP_NAME, "version": APP_VERSION, "running": self.running,
+        return {"app": APP_NAME, "version": APP_VERSION, "running": self.running, "translate": self.tr_state()["translate"],
                 "game": {"running": self.game_on, "state": self.game_state, "learned": self.screen.learned()},
                 "last": {k: st.get(k) for k in ("verdict", "verdict_label", "best", "item", "note", "time")} if st.get("verdict") else None,
                 "build": st.get("build"), "session": self._session_brief(), "tier": self.ent.tier}
@@ -2643,7 +3048,7 @@ class App:
         if not st.get("api_on") or not self.ent.has("local_api"): return
         try:
             port = max(1024, min(65535, int(st.get("api_port", 8766))))
-            self.api = localapi.LocalAPI(self.api_state, self.api_command, port=port, token=st["api_token"],
+            self.api = localapi.LocalAPI(self.api_state, self.api_command, port=port, token=st["api_token"], pages={"/tr": trscreen.PAGE},
                                          lan=bool(st.get("api_lan")), allow_control=bool(st.get("api_control", True)))
             self.api.start()
         except OSError as e:
@@ -6301,6 +6706,22 @@ class App:
                      width=18, state="readonly").pack(side="left", padx=6)
         self.bv["ui_sounds"] = tk.BooleanVar(value=bool(st.get("ui_sounds", True)))
         ttk.Checkbutton(ra, text=t("set.ui_sounds"), variable=self.bv["ui_sounds"]).pack(side="left", padx=(18, 0))
+        # oyun atmosferi paketleri: renk örneği kartları (tıkla → anında uygula)
+        gal = ttk.Frame(ap); gal.pack(fill="x", padx=8, pady=(0, 8))
+        cur = st.get("ui_theme", "dark")
+        for i, m in enumerate(ui_theme.PACKS):
+            pp = ui_theme.PALETTES[m]
+            card = tk.Frame(gal, bg=pp["surface"], highlightthickness=2, highlightbackground=pp["accent"] if m == cur else pp["border"], cursor="hand2")
+            card.grid(row=i // 4, column=i % 4, padx=4, pady=4, sticky="we")
+            tk.Frame(card, bg=pp["accent"], height=4).pack(fill="x")
+            sw = tk.Frame(card, bg=pp["bg"]); sw.pack(fill="x", padx=6, pady=(6, 2))
+            for c in (pp["accent"], pp["surface2"], pp["ov_bg"], pp["fg"]):
+                tk.Frame(sw, bg=c, width=18, height=12).pack(side="left", padx=1)
+            tk.Label(card, text=("◆ " if m == cur else "") + t("theme." + m), bg=pp["surface"], fg=pp["fg"], font=(ui_theme.FONT_SEMI, 9)).pack(anchor="w", padx=6)
+            tk.Label(card, text=t("themedesc." + m), bg=pp["surface"], fg=pp["muted"], font=(ui_theme.FONT, 8), wraplength=190, justify="left").pack(anchor="w", padx=6, pady=(0, 6))
+            for w_ in [card] + list(card.winfo_children()) + list(sw.winfo_children()):
+                w_.bind("<Button-1>", lambda e, m=m: self.apply_theme_pack(m))
+        for c in range(4): gal.columnconfigure(c, weight=1)
         rb = ttk.Frame(ap); rb.pack(fill="x", padx=8, pady=(0, 6))
         ttk.Label(rb, text=t("set.bg_interval")).pack(side="left")
         self.sv["bg_interval"] = tk.StringVar(value=str(st.get("bg_interval", 15)))
@@ -6821,6 +7242,18 @@ class App:
             self.refresh_status()
             self.apply_fx()
         self.toast(t("msg.settings_saved"))
+
+    def apply_theme_pack(self, mode):
+        st = self.cfg["settings"]
+        if mode not in ui_theme.THEME_MODES or st.get("ui_theme") == mode: return
+        st["ui_theme"] = mode; save_cfg(self.cfg)
+        log.info("Theme pack: %s", mode)
+        self.rebuild_ui(tab="settings")
+        try:
+            if getattr(self, "tr_api", None) and self.tr_api.clients:
+                self.tr_api.broadcast({"type": "translate", "items": [], "theme": self.tr_theme_vars()})
+        except Exception:
+            pass
 
     def meta_restore_hidden(self):
         self.cfg["settings"]["meta_hidden"] = []; save_cfg(self.cfg)
@@ -7518,6 +7951,10 @@ class App:
         if not force and st0.get("svc_close_to_tray") and self.tray and self.tray.available:
             self.root.withdraw(); self.tray.notify(t("svc.in_tray")); return
         self.service_stop()
+        try:
+            if getattr(self, "tr_api", None): self.tr_api.stop()
+            self.speech_stop()
+        except Exception: pass
         try: self.lt_stop(quiet=True); self.lt_cache.save() if getattr(self, "lt_cache", None) else None
         except Exception: pass
         self.stop(); self.speaker.close()
