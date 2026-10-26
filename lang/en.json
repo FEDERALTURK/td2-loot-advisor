@@ -1219,5 +1219,6 @@
   "themedesc.hunter": "bone grey and a dark crimson mask",
   "themedesc.winter_ny": "snowy Manhattan, cold slate",
   "themedesc.nightops": "night mission, ISAC cyan",
-  "themedesc.kenly": "the green of the Kenly College woods"
+  "themedesc.kenly": "the green of the Kenly College woods",
+  "lt.fullscreen_hint": "The game is in exclusive fullscreen: translation boxes can't appear. Set Display Mode: Borderless in the game or use the 📱 phone / second screen."
 }

@@ -25,7 +25,20 @@ def scrub(text):
     t = re.sub(r"(/(?:home|Users)/)[^/\s\"']+", r"\1<user>", t)
     t = re.sub(r"[\w.+-]+@[\w-]+\.[\w.-]+", "<email>", t)
     t = re.sub(r"\b(gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,})\b", "<token>", t)
+    for pat, rep in SCRUB_EXTRA: t = re.sub(pat, rep, t, flags=re.I)
     return t
+
+
+# Ek kalıplar (sunucudaki worker.js scrub ile aynı)
+SCRUB_EXTRA = [
+    (r"([A-Za-z]:/(?:Users|Documents and Settings)/)[^/\r\n\"']+", r"\1<user>"),          # C:/Users/ad
+    (r"\bsk-ant-[A-Za-z0-9_\-]{16,}", "<api-key>"), (r"\bsk-(?:proj-)?[A-Za-z0-9_\-]{20,}", "<api-key>"),
+    (r"https?://(?:canary\.|ptb\.)?discord(?:app)?\.com/api/webhooks/\d+/[\w\-]+", "<webhook>"),
+    (r"\bTD2[KIE]-[A-Za-z0-9_\-.]{6,}", "TD2-<key>"), (r"\bdpapi:[A-Za-z0-9+/=]+", "<secret>"),
+    (r"([?&](?:t|token|key|access_token)=)[^&\s\"']+", r"\1<token>"), (r"\b(Bearer|Admin|TD2)\s+[A-Za-z0-9._~+/=\-]{12,}", r"\1 <token>"),
+    (r"(ntfy\.sh/)[A-Za-z0-9_\-]+", r"\1<topic>"),
+    (r"\b(?:10|127)\.\d{1,3}\.\d{1,3}\.\d{1,3}\b|\b192\.168\.\d{1,3}\.\d{1,3}\b|\b172\.(?:1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}\b", "<lan-ip>"),
+]
 
 
 def system_info(app_version, extra=None):

@@ -81,27 +81,35 @@ def _expected_sha(info, filename):
         return None
     for line in txt.splitlines():
         parts = line.strip().split()
-        if len(parts) >= 2 and parts[-1].lstrip("*").endswith(filename): return parts[0].lower()
-        if len(parts) == 1 and re.fullmatch(r"[0-9a-fA-F]{64}", parts[0]): return parts[0].lower()
+        if len(parts) >= 2 and parts[-1].lstrip("*") == filename and re.fullmatch(r"[0-9a-fA-F]{64}", parts[0]): return parts[0].lower()
     return None
+
+
+DOWNLOAD_PREFIX = f"https://github.com/{REPO}/releases/download/"
 
 
 def install_frozen(info, progress=None):
     """Kurulum dosyasını indir, doğrula, sessiz kurulumu başlat. Çağıran program hemen kapanmalı.
+    Doğrulama zorunludur: dosya bu deponun sürümünden gelmeli ve SHA256SUMS'taki özetle eşleşmeli (yoksa kurulmaz).
     Dönüş: indirilen dosyanın yolu. Hata durumunda istisna."""
     if not info.get("setup"): raise RuntimeError("release has no installer asset")
+    for k in ("setup", "sha_url"):
+        if not str(info.get(k) or "").startswith(DOWNLOAD_PREFIX):
+            raise RuntimeError("unexpected download location — not installing")
     name = info["setup"].rsplit("/", 1)[-1]
-    data = _get(info["setup"], timeout=60, binary=True, progress=progress)
+    if not re.fullmatch(r"TD2LootAdvisor_Setup_[0-9.]+\.exe", name, re.I): raise RuntimeError("unexpected installer name")
     want = _expected_sha(info, name)
+    if not want: raise RuntimeError("no checksum published for the installer — not installing")
+    data = _get(info["setup"], timeout=60, binary=True, progress=progress)
     got = hashlib.sha256(data).hexdigest()
-    if want and want != got: raise RuntimeError("SHA-256 mismatch — download corrupted, not installing")
-    path = Path(tempfile.gettempdir()) / name
+    if want != got: raise RuntimeError("SHA-256 mismatch — download corrupted, not installing")
+    path = Path(tempfile.mkdtemp(prefix="td2upd-")) / name     # her seferinde yeni, yalnız bu kullanıcının klasörü
     path.write_bytes(data)
     flags = getattr(subprocess, "DETACHED_PROCESS", 0) | getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
     # /SILENT: ilerleme penceresi görünür ama soru sorulmaz; kurulum bitince program kendini yeniden açar ([Run] ShouldRelaunch, /RELAUNCH=1)
     subprocess.Popen([str(path), "/SILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/CLOSEAPPLICATIONS", "/RELAUNCH=1"],
                      creationflags=flags, close_fds=True)
-    log.info("Update: started installer %s (sha %s, verified=%s)", name, got[:12], bool(want))
+    log.info("Update: started installer %s (sha %s, verified)", name, got[:12])
     return path
 
 

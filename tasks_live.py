@@ -48,7 +48,9 @@ def _english(s):
 def extract(lines, resets=None, now=None):
     """Görev paneli: üstte başlık (+ alt başlık, yer), açıklama paragrafı, "Objective" başlığı + hedef, "Rewards" + liste.
     Sütun duyarlı OCR satırları beklenir (ocr_backend.Engine.segments). Bulunamazsa None."""
-    rows = [(" ".join(str(t).split()), tuple(float(v) for v in b), float(c)) for t, b, c in lines if str(t).strip()]
+    import livetranslate
+    rows = [(" ".join(str(t).split()), tuple(float(v) for v in b), float(c)) for t, b, c in lines
+            if str(t).strip() and not livetranslate.PRIVATE.search(str(t))]          # arkadaş bildirimleri vb. asla
     objs = [r for r in rows if HEAD_OBJ.match(r[0])]
     if not objs: return None
     for o in objs:
@@ -291,7 +293,8 @@ class Memory:
 def suggest(url, client, en, old, new, app_version=None, opener=None, timeout=10):
     """Çeviri satırı için daha iyi Türkçe önerisi (yönetici onaylarsa herkesin çeviri hafızasına girer). Dönüş: gönderildi mi."""
     if not url or not client: return False
-    body = {"client": client, "app": app_version, "en": en, "old": old, "new": new}
+    import reports
+    body = {"client": client, "app": app_version, "en": reports.scrub(en), "old": reports.scrub(old), "new": reports.scrub(new)}
     try:
         req = urllib.request.Request(url.rstrip("/") + "/v1/suggest", data=json.dumps(body).encode(), method="POST",
                                      headers={"content-type": "application/json", "user-agent": f"TD2LootAdvisor/{app_version}"})

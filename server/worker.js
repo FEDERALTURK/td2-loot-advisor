@@ -179,8 +179,17 @@ function scrub(t) {
     .replace(/([A-Za-z]:\\(?:Users|Documents and Settings)\\)[^\\\/\r\n"']+/gi, "$1<user>")
     .replace(/(\/(?:home|Users)\/)[^\/\s"']+/g, "$1<user>")
     .replace(/[\w.+-]+@[\w-]+\.[\w.-]+/g, "<email>")
-    .replace(/\b(gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,})\b/g, "<token>");
+    .replace(/\b(gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,})\b/g, "<token>")
+    .replace(/([A-Za-z]:\/(?:Users|Documents and Settings)\/)[^\/\r\n"']+/gi, "$1<user>")
+    .replace(/\bsk-ant-[A-Za-z0-9_\-]{16,}/gi, "<api-key>").replace(/\bsk-(?:proj-)?[A-Za-z0-9_\-]{20,}/gi, "<api-key>")
+    .replace(/https?:\/\/(?:canary\.|ptb\.)?discord(?:app)?\.com\/api\/webhooks\/\d+\/[\w\-]+/gi, "<webhook>")
+    .replace(/\bTD2[KIE]-[A-Za-z0-9_\-.]{6,}/gi, "TD2-<key>").replace(/\bdpapi:[A-Za-z0-9+\/=]+/gi, "<secret>")
+    .replace(/([?&](?:t|token|key|access_token)=)[^&\s"']+/gi, "$1<token>")
+    .replace(/\b(Bearer|Admin|TD2)\s+[A-Za-z0-9._~+\/=\-]{12,}/g, "$1 <token>")
+    .replace(/(ntfy\.sh\/)[A-Za-z0-9_\-]+/gi, "$1<topic>")
+    .replace(/\b(?:10|127)\.\d{1,3}\.\d{1,3}\.\d{1,3}\b|\b192\.168\.\d{1,3}\.\d{1,3}\b|\b172\.(?:1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}\b/g, "<lan-ip>");
 }
+export { scrub };
 
 function clip(v, n) { return typeof v === "string" ? v.replace(/\u0000/g, "").slice(0, n) : ""; }
 
@@ -312,6 +321,8 @@ export default {
       if (req.method === "OPTIONS") return json({}, 204, { "access-control-allow-methods": "GET, POST",
                                                            "access-control-allow-headers": "content-type, authorization" });
       if (u.pathname === "/v1/health") return json({ ok: true, login: !!env.DISCORD_CLIENT_ID, discord_app: env.DISCORD_CLIENT_ID || null });
+      if (req.method === "POST" && parseInt(req.headers.get("content-length") || "0", 10) > 262144)   // büyük gövde: reddet
+        return json({ error: "payload too large" }, 413);
       const tk = await tasksRoute(req, env, u.pathname, isAdmin, ctx);
       if (tk) return tk;
       const acc = await accountRoute(req, env, u.pathname);

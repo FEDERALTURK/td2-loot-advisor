@@ -148,7 +148,8 @@ class Whisper:
     def load(self):
         if self.m: return
         import ctranslate2
-        self.m = ctranslate2.models.Whisper(self.dir, device="cpu", compute_type="int8", intra_threads=self.threads)
+        import winpath
+        self.m = ctranslate2.models.Whisper(winpath.safe_dir(self.dir, "whisper"), device="cpu", compute_type="int8", intra_threads=self.threads)
 
     def transcribe(self, audio):
         import ctranslate2, numpy as np
