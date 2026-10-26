@@ -1,7 +1,7 @@
 {
  "schema": 1,
- "version": "2026-10-26.1",
- "updated": "2026-10-26T02:00:00Z",
+ "version": "2026-10-26.2",
+ "updated": "2026-10-26T13:43:21Z",
  "season": "Year 8 Season 3 – Red Horizon",
  "items": [
   {
@@ -198,8 +198,8 @@
    "id": "echoes-of-central-park",
    "kind": "dlc",
    "start": "2026-11-03T08:00:00Z",
-   "url": "https://metammo.com/division-2-guide/updates",
-   "source": "metammo",
+   "url": "https://www.ubisoft.com/en-us/game/the-division/the-division-2/news-updates/23q5ICm6Mf4PUPuPUUS0uP/the-division-2-echoes-of-central-park-coming-on-november-3",
+   "source": "Ubisoft",
    "title": {
     "en": "Echoes of Central Park",
     "tr": "Echoes of Central Park",
@@ -221,8 +221,39 @@
     "it": "Nuovi contenuti: Central Park e l'Upper West Side, tre compagni, sei nuove varianti di abilità, l'esotico Ratel e un nuovo set.",
     "pt": "Novo conteúdo: Central Park e Upper West Side, três companheiros, seis novas variantes de habilidade, o exótico Ratel e um novo conjunto.",
     "pl": "Nowa zawartość: Central Park i Upper West Side, trzech towarzyszy, sześć nowych wariantów umiejętności, egzotyk Ratel i nowy zestaw.",
-    "ru": "Новый контент: Центральный парк и Верхний Вест-Сайд, три компаньона, шесть новых вариантов навыков, экзотик Ratel и новый комплект.",
+    "ru": "Новый контент: Central Park и Upper West Side, три компаньона, шесть новых вариантов навыков, экзотик Ratel и новый комплект.",
     "nl": "Nieuwe content: Central Park en de Upper West Side, drie metgezellen, zes nieuwe skillvarianten, de exotic Ratel en een nieuwe gearset."
+   }
+  },
+  {
+   "id": "crossplay-rollout-2026",
+   "kind": "season",
+   "start": "2026-11-03T08:00:00Z",
+   "url": "https://www.ubisoft.com/en-us/game/the-division/the-division-2/news-updates/2o0p19fLQGze5j7h3iEXTN/the-division-2-echoes-of-central-park-showcase-everything-you-need-to-know",
+   "source": "Ubisoft",
+   "title": {
+    "en": "Crossplay rollout begins",
+    "tr": "Crossplay kademeli olarak geliyor",
+    "de": "Crossplay-Einführung beginnt",
+    "fr": "Début du déploiement du crossplay",
+    "es": "Comienza el despliegue del juego cruzado",
+    "it": "Inizia il rilascio del crossplay",
+    "pt": "Começa a implementação do crossplay",
+    "ru": "Начинается внедрение кроссплея",
+    "pl": "Rusza wdrażanie crossplay",
+    "nl": "Uitrol van crossplay begint"
+   },
+   "text": {
+    "en": "Massive is rolling out crossplay in stages through November, starting after the Echoes of Central Park launch; platform migration follows, and full crossplay is planned by the start of Season 4.",
+    "tr": "Massive, crossplay'i Kasım boyunca aşamalı olarak açıyor; Echoes of Central Park çıkışından sonra başlıyor, ardından platform geçişi geliyor. Tam crossplay Season 4 başlangıcına kadar planlanıyor.",
+    "de": "Massive führt Crossplay im November schrittweise ein, beginnend nach dem Start von Echoes of Central Park; danach folgt die Plattform-Migration. Volles Crossplay ist bis zum Start von Season 4 geplant.",
+    "fr": "Massive déploie le crossplay par étapes tout au long de novembre, après la sortie d'Echoes of Central Park ; la migration des plateformes suit et le crossplay complet est prévu pour le début de la Season 4.",
+    "es": "Massive activa el juego cruzado por fases durante noviembre, tras el lanzamiento de Echoes of Central Park; después llega la migración de plataformas y el juego cruzado completo está previsto para el inicio de la Season 4.",
+    "it": "Massive introduce il crossplay a fasi durante novembre, dopo l'uscita di Echoes of Central Park; segue la migrazione delle piattaforme e il crossplay completo è previsto per l'inizio della Season 4.",
+    "pt": "A Massive está a lançar o crossplay por fases ao longo de novembro, após o lançamento de Echoes of Central Park; segue-se a migração de plataformas e o crossplay completo está previsto para o início da Season 4.",
+    "ru": "Massive поэтапно вводит кроссплей в течение ноября, начиная после выхода Echoes of Central Park; затем пройдёт миграция платформ, а полный кроссплей планируется к началу Season 4.",
+    "pl": "Massive wprowadza crossplay etapami w listopadzie, po premierze Echoes of Central Park; potem nastąpi migracja platform, a pełny crossplay zaplanowano na start Season 4.",
+    "nl": "Massive rolt crossplay in november gefaseerd uit, te beginnen na de lancering van Echoes of Central Park; daarna volgt de platformmigratie en volledige crossplay staat gepland voor de start van Season 4."
    }
   }
  ]
