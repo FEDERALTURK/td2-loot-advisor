@@ -79,6 +79,7 @@ import knowledge
 import voicepack
 import livetranslate
 import tasks_live
+import safeio
 import overlay
 import terms
 import trscreen
@@ -199,13 +200,25 @@ def load_cfg():
             cfg = json.load(f)
         if not isinstance(cfg, dict) or "builds" not in cfg: raise ValueError("bad config")
     except Exception as e:
+        bakc = safeio.read_json(CFG_PATH.with_name(CFG_PATH.name + ".bak"))      # önce günlük yedek
+        if isinstance(bakc, dict) and "builds" in bakc and CFG_PATH.exists():
+            logging.getLogger("td2").warning("builds.json unreadable (%s); restored from daily backup", e)
+            try: shutil.copy(CFG_PATH, CFG_PATH.with_suffix(f".broken-{int(time.time())}.json"))
+            except Exception: pass
+            cfg = bakc
+            return _cfg_defaults(cfg)
         bak = CFG_PATH.with_suffix(f".broken-{int(time.time())}.json")
         try: shutil.copy(CFG_PATH, bak)
         except Exception: pass
         src = BUNDLE / "builds.json"
         cfg = json.loads(src.read_text(encoding="utf-8")) if src.exists() and src != CFG_PATH else {"builds": [], "attributes": {}, "settings": {}}
         logging.getLogger("td2").warning("builds.json unreadable (%s); backup %s, starting from defaults", e, bak.name)
+    return _cfg_defaults(cfg)
+
+
+def _cfg_defaults(cfg):
     cfg.setdefault("settings", {}); cfg.setdefault("builds", []); cfg.setdefault("attributes", {})
+    safeio.open_settings(cfg)                            # şifreli gizli ayarları aç (DPAPI)
     st = cfg["settings"]
     if st.get("chatgpt_hotkey") and "tasks_hotkey" not in st:      # eski ChatGPT kısayolu → Claude görev getirme
         st["tasks_hotkey"] = st["chatgpt_hotkey"]
@@ -217,8 +230,8 @@ def load_cfg():
     return cfg
 
 def save_cfg(cfg):
-    with open(CFG_PATH, "w", encoding="utf-8") as f:
-        json.dump(cfg, f, indent=2, ensure_ascii=False)
+    """Atomik yazım + kilit (birden çok iş parçacığı kaydedebilir); gizli ayarlar dosyada şifreli."""
+    safeio.write_json(CFG_PATH, safeio.seal_settings(cfg))
 
 def check_hotkey(spec):
     """Kısayol biçimini doğrular (pynput yoksa doğrulama atlanır, kayıt engellenmez)."""
@@ -230,13 +243,11 @@ def check_hotkey(spec):
 
 
 def load_progress():
-    try:
-        return json.loads(PROG_PATH.read_text(encoding="utf-8"))
-    except Exception:
-        return {}
+    d = safeio.read_json(PROG_PATH, {})                  # bozuksa günlük yedekten
+    return d if isinstance(d, dict) else {}
 
 def save_progress(p):
-    PROG_PATH.write_text(json.dumps(p, indent=2, ensure_ascii=False), encoding="utf-8")
+    safeio.write_json(PROG_PATH, p)
 
 def ensure_log():
     """Eski 5 sütunlu geçmişi 7 sütuna çevirir."""
@@ -950,15 +961,16 @@ def windows_stt(audio, lang):
     with wave.open(str(path), "wb") as w:
         w.setnchannels(1); w.setsampwidth(2); w.setframerate(16000)
         w.writeframes((np.clip(audio, -1, 1) * 32767).astype("<i2").tobytes())
+    wav = str(path).replace("'", "''")                    # PowerShell tek tırnak kaçışı (kullanıcı adında ' olabilir)
     ps = ("[Console]::OutputEncoding=[Text.Encoding]::UTF8; Add-Type -AssemblyName System.Speech; "
           "$rs=[System.Speech.Recognition.SpeechRecognitionEngine]::InstalledRecognizers(); "
           f"$p=$rs | Where-Object {{ $_.Culture.Name -like '{lang}*' }} | Select-Object -First 1; "
           "if(-not $p){$p=$rs | Select-Object -First 1}; if(-not $p){Write-Output '__NONE__'; exit}; "
           "$e=New-Object System.Speech.Recognition.SpeechRecognitionEngine($p); "
           "$e.LoadGrammar((New-Object System.Speech.Recognition.DictationGrammar)); "
-          f"$e.SetInputToWaveFile('{path}'); $o=@(); while($r=$e.Recognize()){{$o+=$r.Text}}; "
+          f"$e.SetInputToWaveFile('{wav}'); $o=@(); while($r=$e.Recognize()){{$o+=$r.Text}}; "
           "Write-Output ('__CULTURE__'+$p.Culture.Name); Write-Output ($o -join ' ')")
-    r = subprocess.run(["powershell", "-NoProfile", "-NonInteractive", "-Command", ps], capture_output=True,
+    r = subprocess.run([POWERSHELL, "-NoProfile", "-NonInteractive", "-Command", ps], capture_output=True,
                        timeout=90, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
     out = r.stdout.decode("utf-8", "replace").strip().splitlines()
     if r.returncode != 0 or not out:
@@ -969,6 +981,10 @@ def windows_stt(audio, lang):
     if not culture.lower().startswith(lang):
         log.warning("Windows speech recognizer for %r not installed; used %s", lang, culture)
     return " ".join(out[1:]).strip()
+
+
+POWERSHELL = str(Path(os.environ.get("SystemRoot", r"C:\Windows")) / "System32" / "WindowsPowerShell" / "v1.0" / "powershell.exe") \
+    if os.name == "nt" else "powershell"           # tam yol: PATH'teki sahte bir powershell.exe çalışmasın
 
 
 def voice_diagnostics(cfg):
@@ -986,7 +1002,7 @@ def voice_diagnostics(cfg):
         rows.append(f"✖ mic: {e}")
     if os.name == "nt":
         try:
-            r = subprocess.run(["powershell", "-NoProfile", "-Command",
+            r = subprocess.run([POWERSHELL, "-NoProfile", "-Command",
                                 "Add-Type -AssemblyName System.Speech; [System.Speech.Recognition.SpeechRecognitionEngine]::InstalledRecognizers() | % { $_.Culture.Name }"],
                                capture_output=True, timeout=30, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
             names = r.stdout.decode("utf-8", "replace").split()
@@ -1140,10 +1156,8 @@ def weekday_names():
     return [t(f"weekday.{i}") for i in range(7)]
 
 def load_tasks():
-    try:
-        d = json.loads(TASK_PATH.read_text(encoding="utf-8"))
-    except Exception:
-        d = {}
+    d = safeio.read_json(TASK_PATH, {})
+    if not isinstance(d, dict): d = {}
     items = d.get("items") or {}
     d["items"] = {c: [] for c in TASK_CATS}
     for key, val in items.items():                   # eski kategorileri yeni yapıya taşı
@@ -1155,7 +1169,7 @@ def load_tasks():
     return d
 
 def save_tasks(d):
-    TASK_PATH.write_text(json.dumps(d, indent=2, ensure_ascii=False), encoding="utf-8")
+    safeio.write_json(TASK_PATH, d)
 
 def daily_period_key(now, reset_hour):
     return (now - timedelta(hours=reset_hour)).date().isoformat()

@@ -35,6 +35,9 @@ EXTRA_TERMS = [
     "Global Event", "Safe House", "Settlement", "Control Point", "Bounty", "Exotic", "Named", "Gear Set", "High-End",
 ]
 NOISE = re.compile(r"^[\W\d_]{0,}$")
+# Oyunun değil sistemin yazıları: arkadaş bildirimleri (oyuncu adları içerir), kaplama araçları — okunmaz, çevrilmez, gönderilmez
+PRIVATE = re.compile(r"\bis (?:now )?(?:playing|online|offline)\b|ubisoft connect|\bwants to (?:join|play)\b|\bfriend request\b|"
+                     r"\bsent you\b|\bhas invited you\b|\bsteam\b.*\bfriend|nvidia|geforce|xbox game bar|discord", re.I)
 # Ödül sandıkları vb. adlar (ör. "Recalibration Cache", "Gear Crafting Cache") oyuncuların bildiği İngilizce adıyla kalır
 CACHE_RE = re.compile(r"(?<![\w'])(?:[A-Z][\w-]*\s){0,3}(?:Cache|Caches)(?![\w])")
 # Tek başına satır olan arayüz başlıkları: modele gitmeden sabit karşılık
@@ -113,7 +116,7 @@ def blocks_from_lines(lines, ui_words=()):
     rows = []
     for txt, box, conf in lines:
         s = " ".join(txt.split())
-        if conf < 0.5 or len(s) < 3 or NOISE.match(s) or s.lower() in ui or not is_english(s): continue
+        if conf < 0.5 or len(s) < 3 or NOISE.match(s) or s.lower() in ui or not is_english(s) or PRIVATE.search(s): continue
         s = ICON_RE.sub("", s)
         rows.append([s, list(box), conf])
     rows.sort(key=lambda r: (r[1][1], r[1][0]))
@@ -209,10 +212,9 @@ class Cache:
         if not self.path: return
         with self.lock:
             data, self.dirty = {"v": 1, "items": dict(self.d)}, 0
-        tmp = self.path + ".tmp"
         try:
-            with open(tmp, "w", encoding="utf-8") as f: json.dump(data, f, ensure_ascii=False)
-            os.replace(tmp, self.path)
+            import safeio
+            safeio.write_json(self.path, data, indent=None, backup=False)
         except OSError:
             pass
 
@@ -376,9 +378,12 @@ def download_model(dest_dir, progress=None, url=None, sha256=None, opener=None):
             if progress: progress(got, total)
     if sha256 and h.hexdigest() != sha256.lower():
         tmp.unlink(missing_ok=True); raise RuntimeError("SHA-256 mismatch")
+    root = dest.resolve()
     with zipfile.ZipFile(tmp) as z:
-        for n in z.namelist():                           # yol kaçışına karşı
-            if n.startswith("/") or ".." in Path(n).parts: raise RuntimeError("bad archive")
+        for n in z.namelist():                           # yol kaçışına karşı (mutlak yol, sürücü harfi, .., ters eğik çizgi)
+            p = n.replace("\\", "/")
+            if p.startswith("/") or ":" in p or ".." in Path(p).parts or not (root / p).resolve().is_relative_to(root):
+                raise RuntimeError("bad archive")
         z.extractall(dest)
     tmp.unlink(missing_ok=True)
     return dest / "en-tr"

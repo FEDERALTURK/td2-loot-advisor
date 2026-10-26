@@ -5,6 +5,7 @@ Yerel bir web sunucusu (yalnız okuma). Adres rastgele bir anahtar içerir; anah
 
     srv = Companion(state_fn, labels, port=8765); srv.start(); srv.url  -> http://192.168.1.20:8765/?t=...
 """
+import os
 import hmac
 import json
 import logging
@@ -90,6 +91,8 @@ class Companion:
         comp = self
 
         class H(BaseHTTPRequestHandler):
+            timeout = 15                       # yarım bırakılan bağlantılar iş parçacığı tüketmesin
+
             def log_message(self, fmt, *a):
                 log.debug("companion %s - %s", self.address_string(), fmt % a)
 
@@ -123,7 +126,10 @@ class Companion:
 
     def start(self):
         if self.httpd: return self.url
-        self.httpd = ThreadingHTTPServer(("0.0.0.0", self.port), self._handler())
+        class _S(ThreadingHTTPServer):
+            daemon_threads = True
+            allow_reuse_address = os.name != "nt"          # Windows'ta başka süreç aynı portu çalamasın
+        self.httpd = _S(("0.0.0.0", self.port), self._handler())
         self.httpd.daemon_threads = True
         self.thread = threading.Thread(target=self.httpd.serve_forever, daemon=True)
         self.thread.start()

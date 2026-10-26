@@ -170,6 +170,7 @@ class LocalAPI:
 
         class H(BaseHTTPRequestHandler):
             protocol_version = "HTTP/1.1"
+            timeout = 15                       # yarım bırakılan bağlantılar iş parçacığı tüketmesin (WebSocket'te kaldırılır)
 
             def log_message(self, fmt, *a): log.debug("api %s - %s", self.address_string(), fmt % a)
 

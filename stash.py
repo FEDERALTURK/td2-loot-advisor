@@ -65,10 +65,8 @@ class Stash:
             pass
 
     def save(self):
-        tmp = str(self.path) + ".tmp"
-        with open(tmp, "w", encoding="utf-8") as f:
-            json.dump(self.data, f, ensure_ascii=False, indent=1)
-        os.replace(tmp, self.path)
+        import safeio                                  # atomik + kilitli + günlük yedek (tarama ve arayüz aynı anda kaydedebilir)
+        safeio.write_json(self.path, self.data, indent=1)
 
     @property
     def items(self):
