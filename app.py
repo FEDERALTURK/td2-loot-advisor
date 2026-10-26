@@ -1582,8 +1582,6 @@ class App:
             with open(p, "a", encoding="utf-8") as f:
                 for en, tr, _ in pairs:
                     f.write(f"{stamp} | {ms} ms\n  EN: {en}\n  TR: {tr}\n")
-            c = getattr(self, "lt_cache", None)
-            if c and c.dirty >= 20: threading.Thread(target=c.save, daemon=True).start()
         except Exception:
             log.debug("lt log", exc_info=True)
 

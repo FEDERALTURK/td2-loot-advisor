@@ -35,6 +35,31 @@ EXTRA_TERMS = [
     "Global Event", "Safe House", "Settlement", "Control Point", "Bounty", "Exotic", "Named", "Gear Set", "High-End",
 ]
 NOISE = re.compile(r"^[\W\d_]{0,}$")
+# Ödül sandıkları vb. adlar (ör. "Recalibration Cache", "Gear Crafting Cache") oyuncuların bildiği İngilizce adıyla kalır
+CACHE_RE = re.compile(r"(?<![\w'])(?:[A-Z][\w-]*\s){0,3}(?:Cache|Caches)(?![\w])")
+# Tek başına satır olan arayüz başlıkları: modele gitmeden sabit karşılık
+UI_TR = {
+    "objective": "Hedef", "objectives": "Hedefler", "reward": "Ödül", "rewards": "Ödüller", "complete": "Tamamlandı",
+    "completed": "Tamamlandı", "requirements": "Gereksinimler", "requirement": "Gereksinim", "difficulty": "Zorluk",
+    "description": "Açıklama", "details": "Ayrıntılar", "progress": "İlerleme", "available": "Mevcut", "locked": "Kilitli",
+    "unlocked": "Açıldı", "new": "Yeni", "active": "Etkin", "expired": "Süresi doldu", "in progress": "Devam ediyor",
+    "daily project": "Günlük Proje", "weekly project": "Haftalık Proje", "season pass project": "Sezon Bileti Projesi",
+    "base of operations": "Operasyon Üssü", "track on screen": "Ekranda takip et", "close map": "Haritayı kapat",
+    "fast travel": "Hızlı seyahat", "select": "Seç", "back": "Geri", "abandon": "Bırak", "view donations": "Bağışları gör",
+    "projects": "Projeler", "bounties": "Ödül avları", "assignments": "Görevlendirmeler", "legend": "Gösterge",
+}
+# Model çıktısında sık görülen, oyuna uymayan kelimeler → oyundaki Türkçe karşılığı (ek uyumu korunarak)
+WORD_FIX = [
+    (r"\bmisyonlarını\b", "görevlerini"), (r"\bmisyonlarına\b", "görevlerine"), (r"\bmisyonları\b", "görevleri"),
+    (r"\bmisyonlar\b", "görevler"), (r"\bmisyonunu\b", "görevini"), (r"\bmisyonuna\b", "görevine"),
+    (r"\bmisyonunda\b", "görevinde"), (r"\bmisyonu\b", "görevi"), (r"\bmisyonda\b", "görevde"),
+    (r"\bmisyona\b", "göreve"), (r"\bmisyonu?n\b", "görevin"), (r"\bmisyon\b", "görev"),
+    (r"\bMisyon", "Görev"),
+    (r"(\S+) zorluğu üzerinde", r"\1 zorlukta"), (r"(\S+) zorluğunda", r"\1 zorlukta"),
+    (r"\bdişli\b", "ekipman"), (r"\bDişli\b", "Ekipman"),
+]
+COUNTER_RE = re.compile(r"(?<![\w/])(\d{1,3})\s?/\s?(\d{1,3})(?![\w/])")
+ICON_RE = re.compile(r"^(?:[^\w\s'\"(]+|[B-HJ-Zb-hj-z])\s+(?=[A-Z])")    # satır başında ikondan okunan tek harf / işaret
 
 
 # ---------------------------------------------------------------- özel adlar
@@ -43,7 +68,9 @@ class Glossary:
         terms = {n.strip() for n in list(names) + EXTRA_TERMS if n and len(n.strip()) >= 3}
         # uzun adlar önce (ör. "Kenly College" "Kenly"den önce)
         self.terms = sorted(terms, key=len, reverse=True)
-        self._re = re.compile("|".join(r"(?<![\w'])" + re.escape(t) + r"(?![\w])" for t in self.terms), re.I) if self.terms else None
+        alts = [CACHE_RE.pattern] + [r"(?<![\w'])" + re.escape(t) + r"(?![\w])" for t in self.terms]
+        self._re = re.compile("|".join(alts))  if self.terms else None
+        self._re_i = re.compile("|".join(alts[1:]), re.I) if self.terms else None
         self.canon = {t.lower(): t for t in self.terms}
 
     def mask(self, text):
@@ -52,7 +79,16 @@ class Glossary:
         found = []
         def rep(m):
             found.append(m.group(0)); return f"ZQ{len(found) - 1}"
-        return self._re.sub(rep, text), found
+        text = CACHE_RE.sub(rep, text)                       # sandık adları (büyük harf duyarlı)
+        return self._re_i.sub(rep, text), found
+
+    def whole(self, text):
+        """Satırın tamamı tek bir özel ad mı (ör. "Exotic Cache", "Legendary Roosevelt Island" değil)."""
+        t = text.strip()
+        if not t or not self._re_i: return False
+        if CACHE_RE.fullmatch(t): return True
+        m = self._re_i.fullmatch(t)
+        return bool(m)
 
     @staticmethod
     def unmask(text, found):
@@ -78,24 +114,49 @@ def blocks_from_lines(lines, ui_words=()):
     for txt, box, conf in lines:
         s = " ".join(txt.split())
         if conf < 0.5 or len(s) < 3 or NOISE.match(s) or s.lower() in ui or not is_english(s): continue
+        s = ICON_RE.sub("", s)
         rows.append([s, list(box), conf])
     rows.sort(key=lambda r: (r[1][1], r[1][0]))
+    hs = sorted(max(1.0, r[1][3] - r[1][1]) for r in rows)
+    if hs: BODY_H[0] = hs[len(hs) // 2]
     blocks = []
     for s, b, c in rows:
         h = max(1.0, b[3] - b[1])
         last = blocks[-1] if blocks else None
         if last:
-            lb = last[1]
+            lb, lh, prev = last[1], last[3], last[4]
             gap = b[1] - lb[3]
             overlap_x = min(b[2], lb[2]) - max(b[0], lb[0])
             same_col = overlap_x > -0.5 * h or abs(b[0] - lb[0]) < 2.5 * h
             if same_col and -0.4 * h <= gap <= 0.9 * h:
-                last[0] = last[0] + " " + s
+                last[0] = last[0] + _joiner(prev, s, lh, h) + s
                 last[1] = [min(lb[0], b[0]), min(lb[1], b[1]), max(lb[2], b[2]), max(lb[3], b[3])]
-                last[2] = min(last[2], c)
+                last[2] = min(last[2], c); last[3] = h; last[4] = s
                 continue
-        blocks.append([s, b, c])
-    return [(s, tuple(b), c) for s, b, c in blocks if len(s) >= 4]
+        blocks.append([s, b, c, h, s])
+    return [(s, tuple(b), c) for s, b, c, _, _ in blocks if len(s) >= 4]
+
+
+def _is_label(s):
+    """Başlık / liste öğesi gibi kısa satır: ≤4 kelime, cümle sonu yok, kelimeler büyük harfle başlıyor."""
+    w = s.split()
+    return 0 < len(w) <= 4 and not re.search(r"[.!?,;]$", s) and all(x[:1].isupper() or x[:1].isdigit() for x in w)
+
+
+def _joiner(prev, cur, prev_h, cur_h):
+    """Aynı bloktaki iki satır arasına boşluk mu (sarılmış paragraf) yeni satır mı (başlık, liste) konacağı."""
+    if _is_label(prev):
+        if _is_label(cur) and abs(prev_h - cur_h) < 0.15 * max(prev_h, cur_h) and prev_h > 1.25 * BODY_H[0]:
+            return " "                                   # büyük puntolu başlığın ikinci satırı
+        return "\n"
+    if re.search(r"[.!?:]$", prev) and cur[:1].isupper():
+        return "\n"
+    if _is_label(cur) and len(cur.split()) <= 2:       # paragraftan sonra gelen kısa başlık (ör. "Rewards")
+        return "\n"
+    return " "
+
+
+BODY_H = [24.0]          # gövde yazısı yüksekliği (blocks_from_lines her çağrıda günceller)
 
 
 def clean_for_mt(text):
@@ -227,17 +288,19 @@ class Translator:
 
     def __init__(self, engine, glossary, cache):
         self.engine, self.glossary, self.cache = engine, glossary, cache
+        self.ck = engine.name + "@2"           # önbellek anahtarı: çeviri kuralları değişince eski sonuçlar kullanılmaz
 
     def translate(self, texts):
         out, todo, first = [None] * len(texts), [], {}
         for i, t in enumerate(texts):
-            c = self.cache.get(self.engine.name, t)
+            c = self.cache.get(self.ck, t)
             if c is not None: out[i] = c
             elif t in first: continue                      # aynı metin bir kez çevrilir
             else: first[t] = i; todo.append(i)
         if todo:
             # her metin → satırlar (madde işaretleri korunur) → cümleler; modele yalnız düz cümleler gider
-            units, owners, masks = [], [], []          # owners: (metin no, satır no, madde işareti)
+            units, owners, masks = [], [], []          # owners: (metin no, satır no, madde işareti, sayaç)
+            lines = {}
             for i in todo:
                 for ln_no, line in enumerate(texts[i].split("\n")):
                     m_b = re.match(r"^\s*([•\-*]+)\s*", line)
@@ -245,14 +308,23 @@ class Translator:
                     body = clean_for_mt(line[m_b.end():] if m_b else line)
                     if not body.strip():
                         continue
+                    counters = COUNTER_RE.findall(body)            # "00/01" ilerleme sayaçları cümleden çıkarılır, sona eklenir
+                    if counters: body = " ".join(COUNTER_RE.sub(" ", body).split())
+                    fixed = UI_TR.get(body.strip().lower())
+                    if fixed or self.glossary.whole(body):
+                        lines.setdefault(i, {}).setdefault(ln_no, [bullet, []])[1].append(fixed or body.strip())
+                        if counters: lines[i][ln_no][1].append("(" + ", ".join(f"{a}/{b}" for a, b in counters) + ")")
+                        continue
                     sents = split_sentences(body) if self.engine.name == "local" else [body]
-                    for s_ in sents:
+                    for k, s_ in enumerate(sents):
                         m, found = self.glossary.mask(s_)
-                        units.append(m); owners.append((i, ln_no, bullet)); masks.append(found)
+                        tail = ("(" + ", ".join(f"{a}/{b}" for a, b in counters) + ")") if counters and k == len(sents) - 1 else ""
+                        units.append(m); owners.append((i, ln_no, bullet, tail)); masks.append(found)
             res = self.engine.translate(units) if units else []
-            lines = {}
-            for (i, ln_no, bullet), r, found in zip(owners, res, masks):
+            for (i, ln_no, bullet, tail), r, found in zip(owners, res, masks):
                 r = re.sub(r"\s*⁇\s*", " ", self.glossary.unmask(r, found)).strip()
+                for pat, rep in WORD_FIX: r = re.sub(pat, rep, r)
+                if tail: r = r + " " + tail
                 if r[:1].islower(): r = r[:1].upper() + r[1:]
                 r = re.sub(r"%\s+(\d)", r"%\1", r)              # "% 30" → "%30"
                 r = re.sub(r"([^\s+\-(])%(\d)", r"\1 %\2", r)     # "boyunca%1" → "boyunca %1"
@@ -260,7 +332,7 @@ class Translator:
             for i in todo:
                 rows = lines.get(i, {})
                 out[i] = "\n".join(x for x in ((b + " ".join(parts)).strip() for _, (b, parts) in sorted(rows.items())) if x not in ("•", "")).strip()
-                self.cache.put(self.engine.name, texts[i], out[i])
+                self.cache.put(self.ck, texts[i], out[i])
             for i, t in enumerate(texts):
                 if out[i] is None: out[i] = out[first[t]]
         return out
