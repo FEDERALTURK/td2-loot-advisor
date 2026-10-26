@@ -87,6 +87,7 @@ ok(st === 403, "yönetici belirteci olmadan 403");
 [st, j] = await call("GET", "/v1/admin/tasks", null, { authorization: "Admin " + ADMIN });
 const at = j.tasks.find(x => x.key === key);
 ok(st === 200 && j.tasks.length >= 2 && at.variants.tr.length === 2 && at.variants.tr[0].n === 2, "yönetici: tüm görevler ve çeşitleri");
+ok(j.min_reporters === 2, "yönetici listesi herkese açık eşiğini bildiriyor (2)");
 [st] = await call("POST", "/v1/admin/tasks/override", { key, tr: { ...tr, title: "Haftalık Efsanevi Görev" } }, { authorization: "Admin " + ADMIN });
 [st, j] = await call("GET", "/v1/tasks/live");
 ok(j.tasks[0].tr.title === "Haftalık Efsanevi Görev" && j.tasks[0].tr_source === "admin", "yönetici çeviriyi düzeltti");

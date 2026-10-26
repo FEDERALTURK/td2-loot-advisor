@@ -197,7 +197,7 @@ export async function liveTasks(env, { includeHidden = false, minReporters = nul
     out.push(t);
   }
   return { version: new Date(now * 1000).toISOString().slice(0, 16).replace(/[-:T]/g, ""), generated: now,
-           min_reporters: minR, tasks: out };
+           min_reporters: parseInt(env.TASKS_MIN_REPORTERS || "2", 10), tasks: out };   // herkese açık olma eşiği
 }
 
 // ------------------------------------------------------------ özel depoya günlük döküm (isteğe bağlı)
