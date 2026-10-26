@@ -166,8 +166,18 @@ class Whisper:
 HALLUCINATIONS = {"thank you.", "thanks for watching!", "thank you for watching.", "you", "bye.", "[music]", "(music)", "[blank_audio]"}
 
 
+# Whisper oyun adlarını sesteş sözcüklerle yazabilir: oyunda geçen biçime düzelt
+GAME_FIX = [
+    (r"\bcapital building\b", "Capitol Building"), (r"\bthe capital\b", "the Capitol"), (r"\bblack (?:task|tasks|tusks)\b", "Black Tusk"),
+    (r"\b(?:isaac|isack|eisack|i sack)\b", "ISAC"), (r"\bs\.? ?h\.? ?d\.?(?=\s|$|[,.!?])", "SHD"), (r"\bdark zone\b", "Dark Zone"),
+    (r"\btrue suns\b", "True Sons"), (r"\bhyena's\b", "Hyenas"), (r"\bkenley\b", "Kenly"), (r"\bfaye lao\b", "Faye Lau"),
+    (r"\bwhite house\b", "White House"), (r"\bmanhunt\b", "Manhunt"), (r"\bkeener\b", "Keener"),
+]
+
+
 def clean_text(s):
     s = re.sub(r"\s+", " ", s).strip()
+    for pat, rep in GAME_FIX: s = re.sub(pat, rep, s, flags=re.I)
     if s.lower() in HALLUCINATIONS or len(re.findall(r"[A-Za-z]", s)) < 3: return ""
     return s
 

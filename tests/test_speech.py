@@ -46,6 +46,7 @@ ok(d.feed("Agent, the Black Tusk have taken the Capitol. Head to the", 0.8) == [
 ok(d.feed("Agent, the Black Tusk have taken the Capitol. Head to the White House", 1.0) == [], "değişen yarım cümle beklenir")
 ok(d.feed("Agent, the Black Tusk have taken the Capitol. Head to the White House", 2.2) == ["Head to the White House"], "1 sn değişmeyen yarım cümle verildi")
 ok(d.feed("Thank you.", 3) == [], "sahte (halüsinasyon) metin atıldı")
+ok(speech.clean_text("the black task have taken the capital building, isaac says") == "the Black Tusk have taken the Capitol Building, ISAC says", "oyun adları düzeltildi")
 
 # --- çözümleme ve mel
 ok(speech.detok(["<|startoftranscript|>", "ĠAgent", ",", "Ġhead", "Ġto", "Ġthe", "ĠWhite", "ĠHouse", ".", "<|endoftext|>"]) == "Agent, head to the White House.", "bayt düzeyi çözümleme")
