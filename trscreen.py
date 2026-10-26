@@ -10,17 +10,17 @@ PAGE = r"""<!doctype html><html lang="tr"><head><meta charset="utf-8">
 <meta name="theme-color" content="#0f1116"><title>TD2 · Canlı çeviri</title>
 <style>
 :root{--bg:#0f1116;--sf:#171a21;--sf2:#212530;--fg:#e8eaef;--mu:#8d95a5;--ac:#ff6d10;--fs:20px}
-*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--fg);font-family:"Segoe UI",Roboto,system-ui,sans-serif}
-header{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--sf);
-  border-bottom:2px solid var(--ac)}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--fg);font-family:"Segoe UI",Roboto,system-ui,sans-serif;overflow-x:hidden}
+header{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:6px;padding:10px 12px;background:var(--sf);
+  border-bottom:2px solid var(--ac);flex-wrap:wrap}
 header b{letter-spacing:.12em;font-size:13px;color:var(--ac)}header .sp{flex:1}
 #dot{width:9px;height:9px;border-radius:50%;background:#ef4444}#dot.on{background:#22c55e}
-button{background:var(--sf2);color:var(--fg);border:1px solid #2c313d;border-radius:8px;padding:7px 10px;font-size:14px}
+button{background:var(--sf2);color:var(--fg);border:1px solid #2c313d;border-radius:8px;padding:6px 9px;font-size:14px;min-width:38px}
 button.on{border-color:var(--ac);color:var(--ac)}
-main{padding:12px 14px 40px;max-width:900px;margin:0 auto}
+main{padding:12px 12px 40px;max-width:900px;width:100%;margin:0 auto}
 .card{background:var(--sf);border-left:4px solid var(--ac);border-radius:10px;padding:12px 14px;margin:0 0 12px;animation:in .35s ease}
 .card.old{opacity:.62;border-left-color:#2c313d}
-.tr{font-size:var(--fs);line-height:1.38;white-space:pre-wrap}.en{color:var(--mu);font-size:13px;margin-top:6px;white-space:pre-wrap}
+.tr{font-size:var(--fs);line-height:1.38;white-space:pre-wrap;overflow-wrap:anywhere}.en{color:var(--mu);font-size:13px;margin-top:6px;white-space:pre-wrap;overflow-wrap:anywhere}
 .terms{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .chip{font-size:12.5px;padding:4px 9px;border-radius:999px;background:var(--sf2);color:var(--fg);border:1px solid #2c313d}
 .chip i{font-style:normal;color:var(--ac);margin-right:4px}
@@ -44,7 +44,8 @@ en.onclick=()=>{showEn=!showEn;save();opts()};say.onclick=()=>{speak=!speak;save
 function talk(t){try{const u=new SpeechSynthesisUtterance(t);u.lang="tr-TR";speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}}
 function theme(s){if(!s)return;const r=document.documentElement.style;for(const[k,v]of Object.entries(s))r.setProperty("--"+k,v)}
 function el(tag,cls,txt){const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
-function add(it,time){E.style.display="none";const c=el("div","card");
+let lastTr="";
+function add(it,time){if(it.tr===lastTr)return;lastTr=it.tr;E.style.display="none";const c=el("div","card");
  const ts=el("span","t",new Date((time||Date.now()/1000)*1000).toLocaleTimeString().slice(0,5));c.appendChild(ts);
  c.appendChild(el("div","tr",it.tr));const e=el("div","en",it.en);if(!showEn)e.style.display="none";c.appendChild(e);
  if(it.terms&&it.terms.length){const w=el("div","terms");let d=null;

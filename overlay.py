@@ -121,8 +121,9 @@ class InPlace:
                         cv.create_text(x + PAD + 4 + dx, ty + dy, text=ln, anchor="nw", font=f, fill="#000000")
                 cv.create_text(x + PAD + 4, ty, text=ln, anchor="nw", font=f, fill=s["fg"])
                 ty += lh
-        try: w.attributes("-alpha", float(s.get("alpha", 0.96)))
-        except tk.TclError: pass
+        if float(s.get("alpha", 1.0)) < 1.0:
+            try: w.attributes("-alpha", float(s["alpha"]))
+            except tk.TclError: pass
         if self.on_window: self.on_window(w)
         return w
 

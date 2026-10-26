@@ -1909,7 +1909,8 @@ class App:
         """Yerinde çeviri: her blok kendi yerinde, opak fonla (overlay.py)."""
         st = self.cfg["settings"]
         body = max(8.0, float(livetranslate.BODY_H[0]))
-        ip = self._lt_inplace = overlay.InPlace(self.root, self.lt_style(), on_window=self._lt_overlay_window)
+        sty = dict(self.lt_style(), alpha=1.0)              # yerinde: fon tamamen opak, alttaki İngilizce görünmez
+        ip = self._lt_inplace = overlay.InPlace(self.root, sty, on_window=self._lt_overlay_window)
         blocks = [(tr, b, en, max(1, en.count("\n") + 1, round((b[3] - b[1]) / (body * 1.15)))) for en, tr, b in pairs]
         items = overlay.layout(blocks, area, ip.measure_at)
         if not items: return
@@ -1931,13 +1932,21 @@ class App:
             items.append({"en": en, "tr": tr, "terms": tl, "time": now})
         self.lt_terms = dict(list(getattr(self, "lt_terms", {}).items())[-200:]) | {it["en"]: it["terms"] for it in items}
         rec = getattr(self, "tr_recent", [])
-        self.tr_recent = (rec + items)[-20:]
+        recent_en = {x["en"] for x in rec[-6:]}
+        fresh = [it for it in items if it["en"] not in recent_en]          # aynı yazı art arda okunursa bir kez
+        self.tr_recent = (rec + fresh)[-20:]
+        items = fresh
+        if not items: return self._lt_speak(pairs)
         ev = {"type": "translate", "items": items, "time": now, "theme": self.tr_theme_vars()}
         for api in (getattr(self, "tr_api", None), getattr(self, "api", None)):
             try:
                 if api and api.clients: api.broadcast(ev)
             except Exception:
                 log.debug("translate broadcast", exc_info=True)
+        self._lt_speak(pairs)
+
+    def _lt_speak(self, pairs):
+        st = self.cfg["settings"]
         mode = st.get("tr_speak", "off")
         if mode == "all" or (mode == "subtitle" and st.get("tr_mode", "subtitle") == "subtitle"):
             text = " ".join(tr for _, tr, _ in pairs[-3:]).strip()
