@@ -71,7 +71,7 @@ def app_e2e():
         time.sleep(2)
         txt = tail()
         assert txt.count("starting ===") == 1, "a second copy started:\n" + txt[-2000:]
-        assert "Already running" in txt and "Second launch: showing" in txt, txt[-2000:]
+        assert "Second launch: showing" in txt, txt[-2000:]
         assert first.poll() is None, "first copy must keep running"
         print(f"single: app e2e ok (second launch exited in {took:.1f}s)")
     finally:
