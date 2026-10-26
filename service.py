@@ -80,18 +80,27 @@ def set_low_priority(on):
     """Oyun açıkken programın işlemci önceliği 'normalin altı': oyun kare hızı önce gelir. Kapanınca normale döner."""
     if os.name != "nt": return False
     try:
-        import ctypes
-        k = ctypes.windll.kernel32
+        k = _k32()
         return bool(k.SetPriorityClass(k.GetCurrentProcess(), 0x4000 if on else 0x20))   # BELOW_NORMAL / NORMAL
     except Exception:
         return False
 
 
+def _k32():
+    """kernel32, tanıtıcı türleri doğru (64 bit'te sözde tanıtıcı -1 int'e kırpılmasın)."""
+    import ctypes
+    from ctypes import wintypes
+    k = ctypes.WinDLL("kernel32", use_last_error=True)
+    k.GetCurrentProcess.restype = wintypes.HANDLE
+    k.SetPriorityClass.argtypes = (wintypes.HANDLE, wintypes.DWORD); k.SetPriorityClass.restype = wintypes.BOOL
+    k.GetPriorityClass.argtypes = (wintypes.HANDLE,); k.GetPriorityClass.restype = wintypes.DWORD
+    return k
+
+
 def get_priority():
     if os.name != "nt": return None
     try:
-        import ctypes
-        k = ctypes.windll.kernel32
+        k = _k32()
         return k.GetPriorityClass(k.GetCurrentProcess())
     except Exception:
         return None
