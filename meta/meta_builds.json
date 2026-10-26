@@ -1,7 +1,7 @@
 {
  "schema": 1,
- "version": "2026-10-25.1",
- "updated": "2026-10-25T01:35:38Z",
+ "version": "2026-10-26.1",
+ "updated": "2026-10-26T01:34:24Z",
  "season": "Year 8 Season 3 – Red Horizon",
  "generator": "seed (manual research)",
  "popularity_method": "0-100; seed = how many independent sources feature the build, weighted by recency. Daily updater adds engagement signals (views/upvotes) where public.",
@@ -152,11 +152,15 @@
     "Perfect Optimized": 2,
     "Flatline": 3
    },
-   "popularity": 60,
+   "popularity": 64,
    "sources": [
     {
      "title": "Overgear – Division 2 builds (Red Horizon)",
      "url": "https://overgear.com/guides/division-2/best-builds-for-any-activities/"
+    },
+    {
+     "title": "widdz (YouTube, Oct 17 2026) – 3 best builds for Red Moon Unleashed",
+     "url": "https://www.youtube.com/watch?v=zLuctuWy9Ok"
     }
    ],
    "summary": {
@@ -621,11 +625,15 @@
     "Vigilance": 4,
     "Boomerang": 3
    },
-   "popularity": 45,
+   "popularity": 52,
    "sources": [
     {
      "title": "allthings.how – Red Moon Unleashed rewards, bounties and best build",
      "url": "https://allthings.how/red-moon-unleashed-in-the-division-2-event-rewards-bounties-and-best-build/"
+    },
+    {
+     "title": "widdz (YouTube, Oct 17 2026) – 3 best builds for Red Moon Unleashed",
+     "url": "https://www.youtube.com/watch?v=zLuctuWy9Ok"
     }
    ],
    "summary": {
