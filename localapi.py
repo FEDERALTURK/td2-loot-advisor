@@ -17,6 +17,7 @@ Güvenlik
   - Oyuna hiçbir girdi göndermez — yalnız programın kendi taramasını başlatır / durdurur.
 """
 import base64
+import os
 import hashlib
 import hmac
 import json
@@ -62,6 +63,8 @@ go();
 
 class _Server(ThreadingHTTPServer):
     daemon_threads = True
+    # Windows'ta SO_REUSEADDR başka bir sürecin aynı portu "çalmasına" izin verir; orada kapalı tutulur.
+    allow_reuse_address = os.name != "nt"
 
     def handle_error(self, request, client_address):          # kopan bağlantılar konsolu kirletmesin
         log.debug("api connection error from %s", client_address, exc_info=True)
@@ -240,7 +243,11 @@ class LocalAPI:
 
     def start(self):
         if self.httpd: return self.url()
-        self.httpd = _Server(("0.0.0.0" if self.lan else "127.0.0.1", self.port), self._handler())
+        try:
+            self.httpd = _Server(("0.0.0.0" if self.lan else "127.0.0.1", self.port), self._handler())
+        except OSError as e:
+            log.warning("Local API could not open port %s: %s", self.port, e); self.httpd = None
+            raise
         threading.Thread(target=self.httpd.serve_forever, daemon=True).start()
         log.info("Local API on %s:%s (lan=%s)", "0.0.0.0" if self.lan else "127.0.0.1", self.port, self.lan)
         return self.url()

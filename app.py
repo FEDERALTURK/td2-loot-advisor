@@ -81,7 +81,7 @@ import livetranslate
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "5.1.6"
+APP_VERSION = "5.1.7"
 FROZEN = getattr(sys, "frozen", False)
 BASE = Path(sys.executable).parent if FROZEN else Path(__file__).resolve().parent
 TASKS_CACHE = BASE / "tasks_cache.json"  # son indirilen görev listesi
@@ -381,6 +381,23 @@ def read_card(img, scale=None):
     """Kart metni ve satır kutuları: (metin, [(satır, kutu, güven)])."""
     lines = OCR.lines(img, ocr_scale() if scale is None else scale)
     return "\n".join(l for l, _, _ in lines), lines
+
+
+_MON_CACHE = {"t": 0.0, "v": None}
+
+
+def monitors(max_age=3.0):
+    """mss monitör listesi; tarama/çeviri döngüleri saniyede birkaç kez sorar — her seferinde mss açmak yerine önbellek."""
+    now = time.time()
+    if _MON_CACHE["v"] is None or now - _MON_CACHE["t"] > max_age:
+        with mss.mss() as sct:
+            _MON_CACHE.update(t=now, v=[dict(m) for m in sct.monitors])
+    return _MON_CACHE["v"]
+
+
+def world_wait(idle):
+    """Oyun dünyasındayken iki otomatik okuma arası en az süre (sn): kart bulunamadıkça uzar."""
+    return min(30.0, 4.0 * (2 ** min(idle, 3)))
 
 
 def find_card(img):
@@ -1571,12 +1588,27 @@ class App:
             msg = str(e)
             self.root.after(0, lambda: self._lt_status(t("lt.failed", e=msg), "danger"))
 
+    def _lt_log(self, pairs, ms):
+        """Çevirileri logs/live_translate.log dosyasına yazar (oyun üstü kutu ekran görüntüsüne girmediği için
+        sonradan kontrol edebilmek amacıyla). Dosya 256 KB'ı geçince .1 olarak saklanır."""
+        try:
+            APPLOG_DIR.mkdir(parents=True, exist_ok=True)
+            p = APPLOG_DIR / "live_translate.log"
+            if p.exists() and p.stat().st_size > 256 * 1024: os.replace(p, p.with_suffix(".log.1"))
+            stamp = time.strftime("%Y-%m-%d %H:%M:%S")
+            with open(p, "a", encoding="utf-8") as f:
+                for en, tr, _ in pairs:
+                    f.write(f"{stamp} | {ms} ms\n  EN: {en}\n  TR: {tr}\n")
+        except Exception:
+            log.debug("lt log", exc_info=True)
+
     def _lt_show(self, pairs, area, ms):
         st = self.cfg["settings"]
         hist = getattr(self, "lt_hist", [])
         for en, tr, _ in pairs:
             if not hist or hist[-1][0] != en: hist.append((en, tr))
         self.lt_hist = hist[-80:]
+        self._lt_log(pairs, ms)
         self._lt_status(t("lt.done", n=len(pairs), ms=ms), "success")
         self._lt_hist_fill()
         self._lt_hide()
@@ -2391,11 +2423,13 @@ class App:
         st = self.cfg["settings"]
         if kind == "game" and value == "started":
             self.game_on = True; self.sessions.begin()
-            log.info("Game started — session begins")
+            low = st.get("svc_low_priority", True) and service.set_low_priority(True)
+            log.info("Game started — session begins%s", " (program priority: below normal)" if low else "")
             if st.get("svc_auto_run", True) and not self.running:
                 self._auto_started = True; self.start(quiet=True); self.toast(t("svc.auto_started"))
         elif kind == "game" and value == "stopped":
             self.game_on = False; self.game_state = "unknown"
+            service.set_low_priority(False)
             c = self.sessions.end()
             log.info("Game stopped — session %s", c and {k: c[k] for k in ("scanned", "keep", "dismantle", "exotic")})
             if self._auto_started and self.running: self.stop(quiet=True)
@@ -2575,7 +2609,13 @@ class App:
         else: log.info("Tray: pystray not installed")
 
     def tray_show(self):
-        self.root.deiconify(); self.root.lift(); self.root.focus_force()
+        self.root.deiconify(); self.root.lift()
+        try:                                     # tam ekran oyunun önüne de gelsin (kısa süre en üstte)
+            self.root.attributes("-topmost", True)
+            self.root.after(600, lambda: self.root.attributes("-topmost", False))
+        except tk.TclError:
+            pass
+        self.root.focus_force()
 
     def autostart_toggle(self, var):
         try:
@@ -2938,9 +2978,10 @@ class App:
         st["_start_tab"], st["_start_page"] = tab or "", page or ""
         save_cfg(self.cfg)
         if getattr(sys, "frozen", False):
-            args = [sys.executable] + sys.argv[1:]
+            args = [sys.executable]
         else:
-            args = [sys.executable, str(Path(__file__).resolve())] + sys.argv[1:]
+            args = [sys.executable, str(Path(__file__).resolve())]
+        args += [a for a in sys.argv[1:] if a not in ("--restart", "--tray")] + ["--restart"]   # yeni kopya bu kopyanın kapanmasını bekler
         log.info("Restarting: %s", args)
         try:
             subprocess.Popen(args, cwd=str(BASE), creationflags=getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0))
@@ -3394,6 +3435,11 @@ class App:
         tried_fresh = False
         if box is None:
             box = find_card(img); tried_fresh = True
+        if box is None and auto and img.width >= 1600:
+            # Tüm oyun ekranında eşya kartı yok (dünya / harita / başka menü): ekranın tamamını tam çözünürlükte
+            # okumak (ve last_card.png olarak kaydetmek) boşa ekran kartı / disk yükü — otomatik taramada atlanır.
+            self.card_box = None
+            return False
         card = img.crop(box) if box else img
         t_ocr = time.perf_counter()
         text, lines = read_card(card)
@@ -3471,8 +3517,8 @@ class App:
         self.save_ocr_history(text, item, verdict)
         sig = signature(item)
         if auto:
-            if not valid_item(item): return
-            if sig == self.last_sig and time.time() - self.last_time < DEDUP_SECONDS: return
+            if not valid_item(item): return False
+            if sig == self.last_sig and time.time() - self.last_time < DEDUP_SECONDS: return True
         self.last_card_img = card
         try:                                              # kartın ekrandaki yeri: bindirme yanına konur
             a = self.scan_area()
@@ -3482,6 +3528,7 @@ class App:
             self.last_card_screen = None
         self.last_sig, self.last_time = sig, time.time()
         self.results.put(("ok", text, item, verdict, res, sig))
+        return True
 
     def save_ocr_history(self, text, item, verdict):
         """Tanı için son 200 okuma: logs/ocr_history/<zaman>.txt (okunan metin + programın yorumu).
@@ -3932,12 +3979,11 @@ class App:
         if st.get("scan_source", "screen") == "region" and st.get("region"):
             return st["region"]
         g = display.game_window()
-        with mss.mss() as sct:
-            mons = sct.monitors
-            area = display.clamp_to_screen(g, mons) if g else None
-            if not area:
-                m = mons[1]
-                area = {"left": m["left"], "top": m["top"], "width": m["width"], "height": m["height"]}
+        mons = monitors()
+        area = display.clamp_to_screen(g, mons) if g else None
+        if not area:
+            m = mons[1]
+            area = {"left": m["left"], "top": m["top"], "width": m["width"], "height": m["height"]}
         if g and not getattr(self, "_game_ver_checked", False):
             self._game_ver_checked = True
             threading.Thread(target=self._game_version_watch, daemon=True).start()
@@ -3964,7 +4010,7 @@ class App:
             g = display.game_window()
             return dict(display.monitor_of(g, sct.monitors) if g else sct.monitors[1])
 
-    def auto_loop(self, stop):
+    def auto_loop(self, stop):  # noqa: D401
         capture.default().keep()                         # bu döngü boyunca tek, kalıcı yakalayıcı
         try:
             self._auto_loop(stop)
@@ -3973,6 +4019,7 @@ class App:
 
     def _auto_loop(self, stop):
         prev = last_done = None; stable = 0; last_t = 0.0
+        idle = 0                                          # art arda kart bulunamayan dünya okumaları
         while not stop.is_set():
             try:
                 region = self.scan_area()
@@ -3987,13 +4034,16 @@ class App:
                     changed = last_done is None or dist(h, last_done) >= AUTO_CHANGE
                     if gs == "loading": go = False                        # yükleme ekranı: okuma yok
                     elif gs == "world":                                   # dünyada: seyrek (tamamen kapatma — yeni
-                        go = changed and stable >= 3 and time.time() - last_t > 4.0   # menü türleri öğrenilebilsin)
-                    else: go = changed and stable == 1                    # menü / bilinmiyor: eski davranış
+                        # menü türleri öğrenilebilsin); kart çıkmadıkça aralık 4 → 8 → 16 → 30 sn'ye uzar
+                        go = changed and stable >= 3 and time.time() - last_t > world_wait(idle)
+                    else:                                                 # menü / bilinmiyor: eski davranış
+                        go = changed and stable == 1; idle = 0
                     if go:
                         last_done, last_t = h, time.time()
                         img = grab(region)
                         with self.lock:
-                            self.scan_image(img, auto=True)
+                            found = self.scan_image(img, auto=True)
+                        idle = 0 if found or gs != "world" else idle + 1
             except Exception as e:
                 msg = f"{type(e).__name__}: {e}"
                 if msg != self.last_err:
@@ -7377,9 +7427,28 @@ class App:
         self.root.destroy()
 
 
-if __name__ == "__main__":
+def _instance_poll(app, inst):
+    """Başka bir açılma denemesi geldiyse pencereyi öne getir (tarama sırasında küçültülmüş olsa bile)."""
     try:
-        App().root.mainloop()
+        if inst.poll_show():
+            log.info("Second launch: showing the open window")
+            app.tray_show()
+    except Exception:
+        log.debug("instance poll", exc_info=True)
+    app.root.after(400, lambda: _instance_poll(app, inst))
+
+
+if __name__ == "__main__":
+    import single
+    _INSTANCE = single.SingleInstance()
+    if not _INSTANCE.acquire(wait=20 if "--restart" in sys.argv else 0):
+        if not START_IN_TRAY: _INSTANCE.signal_show()
+        log.info("Already running — %s", "left the open copy in the tray" if START_IN_TRAY else "showed the open window")
+        sys.exit(0)
+    try:
+        _APP = App()
+        _instance_poll(_APP, _INSTANCE)
+        _APP.root.mainloop()
     except Exception:
         log.exception("Fatal error — application stopped")
         raise

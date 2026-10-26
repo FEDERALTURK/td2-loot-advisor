@@ -41,7 +41,7 @@ ok(out[0] == "Kuşan Eagle Bearer now.\n• Git fast." and out[1] == out[0], "sa
 ok(Fake.calls[0] == ["Equip ZQ0 now.", "Go fast."], "modele maskeli ve maddesiz cümleler gitti")
 n = len(Fake.calls); tr.translate(["Equip Eagle Bearer now.\n• Go fast."])
 ok(len(Fake.calls) == n, "önbellekten geldi (model çağrılmadı)")
-cache.save(); ok(lt.Cache(cache.path).get("local", "Equip Eagle Bearer now.\n• Go fast.") == out[0], "önbellek diske yazıldı")
+cache.save(); ok(lt.Cache(cache.path).get(tr.ck, "Equip Eagle Bearer now.\n• Go fast.") == out[0], "önbellek diske yazıldı")
 
 ai = lt.AIMT(lambda sys_, user: 'Sure: ["Birinci", "İkinci"]')
 ok(ai.translate(["a", "b"]) == ["Birinci", "İkinci"], "yapay zekâ JSON yanıtı ayrıştırıldı")
@@ -79,4 +79,29 @@ if md:
     ok("Black Tusk" in r[0] and "Ajan" in r[0] and "gid" in r[0] and "saniye" in r[1] and r[1].count("\n") == 1,
        f"gerçek model: anlamlı Türkçe, adlar korundu ({dt:.1f}s)")
     ok(all(not any(w * 3 in x for w in x.split()[:3]) for x in r), "tekrar eden çıktı yok")
+# --- 5.1.7: başlık / liste satırları, sayaçlar, ikon harfi, sandık adları, kelime düzeltmeleri
+L = [("Objective", (10, 120, 120, 144), .99), ("Complete the Roosevelt Island", (10, 150, 300, 174), .99),
+     ("00/01", (320, 150, 360, 174), .99), ("mission on Legendary difficulty", (10, 178, 300, 202), .99),
+     ("Rewards", (10, 220, 110, 244), .99), ("X Recalibration Cache", (10, 250, 260, 274), .95),
+     ("Gear Crafting Cache", (10, 278, 240, 302), .99),
+     ("Weekly Legendary", (10, 0, 300, 40), .99), ("Mission", (10, 42, 150, 82), .99)]
+bl = lt.blocks_from_lines(L)
+txt = [b[0] for b in bl]
+ok(txt[0] == "Weekly Legendary Mission", "büyük başlığın satırları birleşti: %r" % txt[0])
+ok(any(t.startswith("Objective\nComplete the Roosevelt Island") and "mission on Legendary difficulty" in t for t in txt), "başlık ayrı satır, paragraf birleşik")
+ok(any(t.endswith("Rewards\nRecalibration Cache\nGear Crafting Cache") for t in txt), "liste satırları ayrı, ikon harfi atıldı: %r" % txt)
+
+class Echo:
+    name = "local"; calls = []
+    def translate(self, texts):
+        Echo.calls.append(list(texts))
+        return [x.replace("Complete the", "Tamamla:").replace("mission on", "misyonunu") .replace("difficulty", "zorluğu üzerinde") for x in texts]
+g2 = lt.Glossary(["Roosevelt Island"])
+tr2 = lt.Translator(Echo(), g2, lt.Cache(None))
+o = tr2.translate(["Objective\nComplete the Roosevelt Island 00/01 mission on Legendary difficulty", "Rewards\nGear Crafting Cache"])
+ok(o[0].startswith("Hedef\n") and o[0].endswith("(00/01)") and "00/01 " not in o[0], "sabit başlık + sayaç sona: %r" % o[0])
+ok("görevini" in o[0] and "misyon" not in o[0], "misyon → görev düzeltmesi: %r" % o[0])
+ok(o[1] == "Ödüller\nGear Crafting Cache", "sandık adı olduğu gibi kaldı: %r" % o[1])
+ok(all("Cache" not in u for c in Echo.calls for u in c if "ZQ" not in u), "sandık adları modele gitmedi")
+
 print("RESULT:", "PASS" if not fails else f"FAIL ({fails})"); sys.exit(1 if fails else 0)
