@@ -249,13 +249,20 @@ class LocalMT:
         except (OSError, ValueError): pass
         self.prefix = meta.get("target_prefix", "")
         threads = max(1, min(4, (os.cpu_count() or 2) // 2))     # oyunla işlemciyi paylaş: çekirdeklerin en çok yarısı
-        self.tr = ctranslate2.Translator(str(self.dir), device="cpu", compute_type="int8", inter_threads=1, intra_threads=threads)
-        self.sps = spm.SentencePieceProcessor(str(self.dir / "source.spm"))
-        self.spt = spm.SentencePieceProcessor(str(self.dir / "target.spm"))
+        import winpath
+        d = winpath.safe_dir(self.dir, "mt-" + self.dir.name)  # Türkçe kullanıcı adı: yerel kütüphane yolu açabilsin
+        self.tr = ctranslate2.Translator(d, device="cpu", compute_type="int8", inter_threads=1, intra_threads=threads)
+        self.sps = spm.SentencePieceProcessor(os.path.join(d, "source.spm"))
+        self.spt = spm.SentencePieceProcessor(os.path.join(d, "target.spm"))
+        self.last_use = time.time()
+
+    def unload(self):
+        """Bellekten çıkar (canlı çeviri bir süre kullanılmayınca ~300 MB geri verilir)."""
+        with self.lock: self.tr = self.sps = self.spt = None
 
     def translate(self, texts):
         with self.lock:
-            self.load()
+            self.load(); self.last_use = time.time()
             # Marian/OPUS-MT: kaynak cümle </s> ile bitmeli (yoksa model cümleyi tekrar eder)
             toks = [([self.prefix] if self.prefix else []) + self.sps.encode(t, out_type=str) + ["</s>"] for t in texts]
             res = self.tr.translate_batch(toks, beam_size=3, max_decoding_length=256, max_batch_size=16,

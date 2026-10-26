@@ -18,7 +18,7 @@ from pathlib import Path
 
 _LOCKS = {}
 _LOCKS_GUARD = threading.Lock()
-SECRET_KEYS = ("claude_api_key", "openai_api_key", "push_webhook", "push_topic", "api_token", "tr_screen_token")
+SECRET_KEYS = ("claude_api_key", "openai_api_key", "push_webhook", "push_topic", "api_token", "tr_screen_token", "license_key")
 PREFIX = "dpapi:"
 _ENTROPY = b"td2-loot-advisor/settings"
 

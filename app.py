@@ -1455,6 +1455,7 @@ class App:
         self.root.after(NEWS_POLL_MS, self._news_poll)
         self.root.after(2000, self._info_badge)
         self.root.after(5000, self._task_live_poll)
+        self.root.after(300000, self._housekeep)
         if stg.get("tr_screen"): self.root.after(3000, self.tr_screen_apply)
         if stg.get("sp_on"): self.root.after(4000, lambda: self.speech_start(quiet=True))
         if OCR.name == "tesseract" and not self.tess:
@@ -1982,6 +1983,17 @@ class App:
             self._terms = terms.TermFinder(enc, [BASE / "meta" / "terms.json", BUNDLE / "meta" / "terms.json"], lang, loc)
             self._terms_lang = lang
         return self._terms
+
+    def _housekeep(self):
+        """5 dakikada bir: kullanılmayan büyük modelleri bellekten çıkar (düşük RAM'li bilgisayarlar için)."""
+        try:
+            m = getattr(self, "_lt_local", None)
+            lt_on = bool(getattr(self, "lt_stop_ev", None) or getattr(self, "lt_keys", None) or getattr(self, "sp", None))
+            if m is not None and m.tr is not None and not lt_on and time.time() - getattr(m, "last_use", 0) > 600:
+                m.unload(); log.info("Translation model unloaded (idle)")
+        except Exception:
+            log.debug("housekeep", exc_info=True)
+        self.root.after(300000, self._housekeep)
 
     def tr_theme_vars(self):
         """Telefon sayfasının renkleri: seçili tema paketi."""

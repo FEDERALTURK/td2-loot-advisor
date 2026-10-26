@@ -79,7 +79,7 @@ if exist dist\TD2LootAdvisor rmdir /s /q dist\TD2LootAdvisor
   --hidden-import pyttsx3.drivers --hidden-import pyttsx3.drivers.sapi5 ^
   --hidden-import ocr_backend --hidden-import features --hidden-import stash --hidden-import vendor ^
   --hidden-import companion --hidden-import share --hidden-import dropstats --hidden-import updater ^
-  --hidden-import syncer --hidden-import gameinfo --hidden-import updates --hidden-import reports --hidden-import account --hidden-import service --hidden-import screenstate --hidden-import localapi --hidden-import presence --hidden-import notify --hidden-import knowledge --hidden-import voicepack --hidden-import livetranslate --hidden-import single --hidden-import tasks_live --hidden-import overlay --hidden-import terms --hidden-import trscreen --hidden-import speech --hidden-import winocr --hidden-import gamepad --hidden-import pystray._win32 ^
+  --hidden-import syncer --hidden-import gameinfo --hidden-import updates --hidden-import reports --hidden-import account --hidden-import service --hidden-import screenstate --hidden-import localapi --hidden-import presence --hidden-import notify --hidden-import knowledge --hidden-import voicepack --hidden-import livetranslate --hidden-import single --hidden-import tasks_live --hidden-import overlay --hidden-import terms --hidden-import trscreen --hidden-import speech --hidden-import winocr --hidden-import gamepad --hidden-import safeio --hidden-import winpath --hidden-import pystray._win32 ^
   --hidden-import fx --hidden-import bgvideo --hidden-import view3d --hidden-import display ^
   --exclude-module faster_whisper --exclude-module torch --exclude-module av ^
   %COLLECT% %MTCOLLECT% ^
