@@ -8,6 +8,14 @@
 
 Windows "kişisel bilgisayarınızı korudu" derse: **Ek bilgi → Yine de çalıştır** (dosya henüz kod imzalı değil).
 
+**5.1.8 — 👥 Topluluk görevleri: canlı çeviri ile görevler birbirine bağlandı**
+- **Oyuncular görevleri birlikte topluyor.** Canlı çeviri açıkken haritada bir görev paneline (Projeler, Ödül avları, Görevlendirmeler) bakınca program görevi tanır: başlık, alt başlık, açıklama, hedef ve sayaç, ödüller, günlük / haftalık / sezon ve bitiş zamanı. İzin verdiysen görevin **yalnız yazısı** ve Türkçe çevirisi topluluk listesine gönderilir. Oyuncu adı, ekran görüntüsü ya da bilgisayar bilgisi gönderilmez. İzin canlı çeviriyi ilk açtığında bir kez sorulur, Canlı çeviri sekmesinden her zaman değiştirilebilir.
+- **Uydurma göreve karşı:** bir görev ancak **en az 2 farklı oyuncudan** aynı şekilde gelince herkese açılır; Türkçesi de en az 2 oyuncudan aynı gelmeli. Süresi dolan günlük ve haftalık görevler listeden kendiliğinden düşer.
+- **Herkes faydalanıyor:**
+  - **Görevler sekmesi:** oyunculardan toplanan güncel görevler 👥 işaretiyle, Türkçesi, açıklaması ve ödülleriyle listeleniyor. Liste açılışta ve 30 dakikada bir yenilenir.
+  - **Canlı çeviri:** ekrandaki görev listede varsa çeviri modeli hiç çalışmadan **anında ve doğrulanmış Türkçesiyle** gösterilir. Çeviri ne kadar çok kullanılırsa o kadar hızlı ve tutarlı oluyor.
+- **Tam ekran çevirisinde yan yana paneller artık karışmıyor:** OCR sütunları ayırıyor; harita gibi çok sütunlu ekranlarda soldaki panelin yazısı sağdaki kartların yazısıyla aynı satıra birleşmiyor.
+
 **5.1.7 — ⚡ Performans ve daha iyi çeviri**
 - **Program artık tek kopya çalışır.** Masaüstü kısayoluna ya da Başlat menüsüne ikinci kez tıklamak yeni bir kopya açmıyor; açık olan pencere (tarama sırasında küçültülmüş olsa, oyun tam ekranda olsa bile) öne geliyor. Önceden her tıklama arka planda yeni bir kopya başlatıyordu; kopyaların hepsi ekranı okuyup ekran kartını ve işlemciyi birlikte yoruyordu ve F7 kısayolunu birbirinden kapıyordu.
 - **Oyun sırasında daha az yük:**
