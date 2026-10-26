@@ -8,6 +8,9 @@
 
 Windows "kişisel bilgisayarınızı korudu" derse: **Ek bilgi → Yine de çalıştır** (dosya henüz kod imzalı değil).
 
+**5.1.3 — düzeltme**
+- Discord ile giriş yapınca (ya da premium açılıp kapanınca) program kendiliğinden yeniden başlıyor ve aynı sekmeye, hesap penceresiyle dönüyor. Önceden girişten sonra menüler ve pencere boyutu bozuk kalabiliyordu; kapatıp açmak gerekmiyor.
+
 **5.1.2 — hesap, oyunla entegre hizmet**
 - **Yeni: isteğe bağlı hesap — Discord ile giriş.** Program girişsiz de tamamen ücretsiz çalışır. Hesap; premium anahtarını, davet / hediye kodunu ya da satın alımı bilgisayarına bağlar. Şifre yok: kim olduğunu Discord doğrular, oturum bilgisayarında Windows'un kendi şifrelemesiyle (DPAPI) saklanır. İlk açılışta karşılama penceresi çıkar ("Girişsiz devam et" ile geçilebilir); üst banttaki **👤 Giriş yap** her zaman orada.
 - **Kod kullan:** `TD2K-…` lisans anahtarı, `TD2I-…` davet kodu ya da satın alma anahtarı tek kutuya yazılır. Bir lisans bir bilgisayarda çalışır; premium 7 gün internetsiz geçerlidir ve kendiliğinden yenilenir. Eski `TD2P-` anahtarlar çalışmaya devam eder.

@@ -68,7 +68,7 @@ import notify
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "5.1.2"
+APP_VERSION = "5.1.3"
 FROZEN = getattr(sys, "frozen", False)
 BASE = Path(sys.executable).parent if FROZEN else Path(__file__).resolve().parent
 TASKS_CACHE = BASE / "tasks_cache.json"  # son indirilen görev listesi
@@ -1699,19 +1699,29 @@ class App:
         """Hesap / yetki değişti: başlığı güncelle, premium değiştiyse arayüzü yeniden kur."""
         win = getattr(self, "_acc_win", None)
         was_open = bool(win and win.winfo_exists())
-        if self._acc_apply():
-            log.info("Account tier -> %s", self.ent.tier)
+        if self._acc_apply() or getattr(self, "_acc_restart", False):
+            # Giriş / premium değişti: arayüz yerinde yeniden kurulunca menüler ve boyut bozulabiliyordu —
+            # program aynı sekmeyle yeniden açılır ve hesap penceresi sonuç mesajıyla tekrar gösterilir.
+            log.info("Account changed (tier=%s) — restarting the app", self.ent.tier)
+            self._acc_restart = False
             msg = getattr(self, "_acc_msg", None)
-            if was_open: win.destroy()                       # yeniden kurulumda eski pencere referansları silinir
-            self.rebuild_ui()
-            if was_open:
-                self.open_account(); self._acc_msg = msg; self._acc_fill()
+            st = self.cfg["settings"]
+            st["_acc_reopen"] = True
+            st["_acc_reopen_msg"] = list(msg) if msg else None
+            if was_open: win.destroy()
+            self.restart_app(tab=self.current_tab(), page=getattr(self, "_set_page", None))
+            return
         else:
             self.refresh_header()
             if was_open: self._acc_fill()
 
     def account_startup(self):
         st = self.cfg["settings"]
+        if st.pop("_acc_reopen", False):                       # giriş / premium sonrası yeniden açıldı
+            m = st.pop("_acc_reopen_msg", None); save_cfg(self.cfg)
+            self.open_account()
+            if m: self._acc_msg = tuple(m); self._acc_fill()
+            return
         if self.account.signed_in:
             ent_exp = self.ent.ent_payload.get("exp", 0) if self.ent.ent_reason in ("ok", "expired") else 0
             if self.account.needs_refresh() or (ent_exp and ent_exp - time.time() < 2 * 86400) or self.ent.ent_reason != "ok":
@@ -1831,6 +1841,7 @@ class App:
             except Exception as e: err = account.AuthError("http", str(e))
             cancel.set()
             msg = t("acc.welcome", name=self.account.username) if err is None else None
+            if err is None: self._acc_restart = True
             self.root.after(0, lambda: self._acc_after(err if not (err and err.code == "cancelled") else None, msg=msg))
         threading.Thread(target=work, daemon=True).start()
 
@@ -1932,7 +1943,7 @@ class App:
             subprocess.Popen(args, cwd=str(BASE), creationflags=getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0))
         except Exception as e:
             log.warning("Restart failed: %s", e); return
-        self.on_close()
+        self.on_close(force=True)
 
     def apply_window_profile(self, initial=False):
         """Pencereyi seçilen çözünürlük profiline göre boyutlandırır: 240p'den 4K'ya kadar her ekranda sığar.

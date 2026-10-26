@@ -26,6 +26,11 @@ app.messagebox.askyesno = lambda *a, **k: False      # açılıştaki 'yeni PC' 
 app.messagebox.showinfo = app.messagebox.showwarning = lambda *a, **k: None
 a = app.App()
 a.cfg["settings"]["acc_asked"] = False
+restarts = []
+def fake_restart(tab=None, page=None):        # gerçek yeniden başlatma yerine: aynı akış (kaydedilen bayrak + açılış) süreç içinde
+    restarts.append(tab)
+    a.rebuild_ui(tab=tab); a.account_startup()
+a.restart_app = fake_restart
 res = {"steps": []}
 
 
@@ -61,6 +66,8 @@ def s1():
 
 def s2():
     step("Discord ile giriş tamamlandı", a.account.signed_in and a.account.username == "Soner", user=a.account.username)
+    step("girişten sonra program yeniden başlatıldı ve hesap penceresi açıldı", len(restarts) == 1 and a._acc_win.winfo_exists(),
+         restarts=restarts, msg=getattr(a, "_acc_msg", None))
     shot("acc_02_signed_in", a._acc_win)
     key = admin("licenses", {"count": 1, "days": 30, "note": "ci"})["keys"][0]
     a._acc_code.insert(0, key); a._acc_btn.invoke()
@@ -133,7 +140,7 @@ _finish = finish
 def finish():
     if _done: return
     _done.append(1)
-    if len(res["steps"]) < 10: step("tüm adımlar çalıştı", False, n=len(res["steps"]))
+    if len(res["steps"]) < 11: step("tüm adımlar çalıştı", False, n=len(res["steps"]))
     _finish()
 
 
