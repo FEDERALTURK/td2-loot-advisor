@@ -38,7 +38,7 @@ def s2():
     shot("01_encyclopedia")
     n0 = len(a.cfg["builds"]); a.enc_add_to_build()
     step("gear set'ten yeni build", len(a.cfg["builds"]) == n0 + 1 and a.cfg["builds"][-1]["sets_or_brands"] == ["Striker's Battlegear"],
-         name=a.cfg["builds"][-1]["name"])
+         build=a.cfg["builds"][-1]["name"])
     a.enc_q.set(""); a.enc_cat.set(a._enc_cat_labels[1]); a._enc_fill()
     step("kategori filtresi: egzotik", len(a.enc_tv.get_children()) >= 70)
     a.info_nb.select(1); a.root.after(1200, s3)
