@@ -1,0 +1,52 @@
+# Canlı çeviri: birim testleri + gerçek model + Windows arayüz testi (sahte oyun penceresinde altyazı).
+name: Translate check
+
+on:
+  workflow_dispatch:
+  push:
+    paths: ["livetranslate.py", "tests/test_livetranslate.py", "tests/ui_translate_test.py", "meta/descriptions_i18n.json"]
+
+permissions:
+  contents: read
+  actions: read
+
+env:
+  TD2_NO_WELCOME: "1"
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with: { python-version: "3.13" }
+      - name: Install
+        shell: cmd
+        run: |
+          python -m pip install -r requirements.txt
+          python -m pip install onnxruntime rapidocr numpy
+      - name: Get translation model (latest build artifact)
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $id = gh run list --workflow mt-model.yml --status success --limit 1 --json databaseId --jq '.[0].databaseId'
+          gh run download $id -n mt-model -D mtdl
+          New-Item -ItemType Directory -Force models | Out-Null
+          Expand-Archive -Path (Get-ChildItem mtdl\*.zip | Select-Object -First 1).FullName -DestinationPath models -Force
+          Get-ChildItem models\en-tr
+      - name: Unit + real model
+        shell: cmd
+        run: set PYTHONIOENCODING=utf-8&& set MT_MODEL_DIR=models\en-tr&& python tests/test_livetranslate.py
+      - name: Live translation UI
+        shell: cmd
+        run: set PYTHONIOENCODING=utf-8&& python tests/ui_translate_test.py
+      - name: Result
+        if: always()
+        shell: pwsh
+        run: if (Test-Path tests\.translate_result.json) { Get-Content tests\.translate_result.json }; if (Test-Path logs\app.log) { Get-Content logs\app.log -Tail 40 }
+      - uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: translate-shots
+          path: shots/*

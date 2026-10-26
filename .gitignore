@@ -51,3 +51,6 @@ account.dat
 account.dat.tmp
 news_cache.json
 quiz_state.json
+translate_cache.json
+descriptions_cache.json
+models/

@@ -8,6 +8,17 @@
 
 Windows "kişisel bilgisayarınızı korudu" derse: **Ek bilgi → Yine de çalıştır** (dosya henüz kod imzalı değil).
 
+**5.1.6 — 🌐 Canlı oyun çevirisi ve canlı haber akışı**
+- **Yeni sekme: 🌐 Canlı çeviri (İngilizce → Türkçe).** Program ekrandaki İngilizce yazıyı eşya kartı okur gibi okur ve Türkçe çevirisini oyunun üstünde gösterir: altyazılar ve telsiz konuşmaları, istihbarat ve görev metinleri, menüler.
+  - **Ne çevrilsin:** Altyazılar (oyun penceresinin alt kısmı), Seçili alan (bir kez seçersin) ya da Tüm oyun penceresi (yan panelde).
+  - **Yazı değişince kendiliğinden çevirir**; ayrıca **F7** ile anında çeviri. Yazı boyutu, saydamlık ve gizlenme süresi ayarlanabilir.
+  - **Motorlar:** *Yerel sinir ağı modeli* — OPUS-MT (Helsinki-NLP, CC-BY 4.0), bilgisayarında internetsiz ve ücretsiz çalışır, cümle başına ~0,1–0,3 sn; bir kerelik ~210 MB indirme. *Gelişmiş yapay zekâ* — Asistan'da seçtiğin Claude / OpenAI / Ollama ile, oyun bağlamını bilerek.
+  - Oyun içi adlar (Black Tusk, Eagle Bearer, Striker's Battlegear, Dark Zone…) çevrilmez, Türkçe eklerle korunur ("Black Tusk'ı").
+  - Yalnız ekran okunur; oyuna dokunulmaz. Kaplamanın görünmesi için oyunu kenarlıksız ya da pencere modunda oyna.
+- **Canlı haber akışı:** program açıkken 30 dakikada bir yeni haber var mı diye bakar, sayfayı yeniden başlatmadan günceller; Bilgi sekmesinde okunmamış haber sayısı (●3) görünür. Yeni sezon, bakım, yeni içerik ve etkinliklerde tepside bildirim; telefon bildirimlerinde yeni "Haberler ve etkinlikler" seçeneği. Haber akışı artık günde 4 kez güncelleniyor.
+- **Ansiklopedi açıklamaları Türkçe:** 300 açıklamanın Türkçesi eklendi (ilk sürüm makine çevirisi; günlük görev gözden geçirip diğer dilleri de ekleyecek). Altında İngilizce özgün metin de görünür.
+- **Programa eklenen diğer diller için:** Asistan'da bir yapay zekâ seçiliyse haberler ve açıklamalar o dile bilgisayarında çevrilip saklanır.
+
 **5.1.5 — 📚 Bilgi sekmesi ve ajan sesi**
 - **Yeni sekme: 📚 Bilgi.** Dört bölüm:
   - **Ansiklopedi:** 80 egzotik, 170 adlı eşya, 29 gear set, 39 marka ve 240'tan fazla yetenek tek yerde, aranabilir. Set bonusları, parçalar, yetenek açıklamaları ve ilgili girişler; tek tıkla **build'e ekle** (gear set/marka → yeni build, egzotik/yetenek → etkin build). Premium: "Nerede düşer?" topluluk istatistiğinden.

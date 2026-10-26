@@ -1,0 +1,1507 @@
+{
+ "schema": 1,
+ "version": "2026-10-26.1",
+ "note": "Encyclopedia description translations. 'tr' seeded by OPUS-MT machine translation; other languages and reviews by the daily feed task.",
+ "items": {
+  "NinjaBike Messenger Bag": {
+   "tr": "Herhangi bir donanıma sahip Gear Set veya Marka Seti öğesiyle, bir gereksinimi yerine getirmek için yuvalar",
+   "_src": "Slots in with any equipped Gear Set or Brand Set item to fulfill a requirement t",
+   "_mt": "tr"
+  },
+  "Memento": {
+   "tr": "Öldürdüğün düşmanlar ölüm üzerine bir kupa düşürür. Kupaları toplamak, hem kısa hem de uzun vadeli bir buff sağlar; bunlardan ilki, ilgili çekirdek niteliklerin donanımlı sayısı ile ölçeklenir ve 10 saniye sürer.\n• +%5 Silah Hasarı Çekirdek başına\n• +10% Zırh Çekirdek Başına Bonus Zırh\n• Yetenek Çekirdeği başına +%5 Beceri Verimliliği Toplanan her kupa için ek bir +1% silah kazanın",
+   "_src": "Enemies you kill drop a trophy on death. Collecting trophies provides you with b",
+   "_mt": "tr"
+  },
+  "Birdie's Quick Fix Pack": {
+   "tr": "• +80% Canlandırıcı Hız\n• -50% Zayıflamış Debuff zamanlayıcı\n• +45% Hive verimliliği\n• Her iki ajana da canlanırken veya canlandırılırken +50% hasar direnci sağlar ve başarılı bir Hive Canlandırıcıdan sonra 5 saniye veya Manuel Canlanma'dan 10 saniye sonra. Herhangi bir başarılı canlanma 5 saniye boyunca +1 Beceri Katmanı sağlar.\n• Skill Tier 6'daki canlandırıcılar 15 saniyeliğine Overcharge verir.",
+   "_src": "• +80% Revive Speed\n• -50% Weakened Debuff timer\n• +45% Hive efficiency\n• Provid",
+   "_mt": "tr"
+  },
+  "Sarru": {
+   "tr": "• Savaş sırasında Ay, her 5 saniyede bir evreleri boyunca döner. 8 Ay evresi vardır.\n• Yeni Ay'dan başlayarak, anlaşma yaptığınız tüm hasarlar %5 oranında artırılacaktır. Amplifikatörün değeri, bir Dolunay sırasında %25'e ulaşana kadar her fazda %5 artacaktır, daha sonra Ay Yeni Ay'a döndükçe, döngüyü yeniden başlatarak azalacaktır.\n• Bir Dolunay sırasında, bir Decoy konuşlandırması",
+   "_src": "• While in combat, the Moon will cycle through its phases every 5s. There are 8 ",
+   "_mt": "tr"
+  },
+  "Acosta's Go-Bag": {
+   "tr": "Bir el bombası atmak geri ödeme yapar ve 15 saniye boyunca +1 beceri katmanı verir. Yetenek kademe 6'da zaten fazla ücret veriyorsa. Serinleme: 60 saniye ... Çantada iki\n• +1 Zırh Kiti Kapasitesi\n• +3 El bombası kapasitesi\n• +25% Cephane Kapasitesi\n• +10% Tamir-becerileri\n• +10% Durum Etkileri",
+   "_src": "Throwing a grenade refunds it and grants +1 skill tier for 15s. Grants overcharg",
+   "_mt": "tr"
+  },
+  "Iron Will": {
+   "tr": "• Bir sonraki vücut atışın bir headshot olarak kabul edilecektir.\n• Serinleme: 2 saniye (PvE) / 3 saniye (PVP)",
+   "_src": "• Your next body shot will be considered a headshot.\n• Cooldown: 2s (PvE)/3s (Pv",
+   "_mt": "tr"
+  },
+  "Tardigrade Armor System": {
+   "tr": "Sizin veya herhangi bir müttefikinizin zırhı kırıldığında, 10 saniye boyunca zırhınızın %80'ini bonus zırh olarak kazanırlar.\n• Müttefik başına bekleme süresi: 45 saniye.\n• Specialization silahınızla bir düşmanı öldürmek, tüm müttefikler için bu serinlemeyi ortadan kaldırır. Kategori:The Division 2 Kategoriler:Exotic Kategori:Vücut Zırhı",
+   "_src": "Whenever your or any ally's armor breaks, they gain 80% of your armor as bonus a",
+   "_mt": "tr"
+  },
+  "Harrier Pride": {
+   "tr": "• Öldürmek ve düşmanlara 3 kez vurmak Red Stacks'i oluşturur. Her yığın %0.5 Silah Hasarı sağlar\n• 3 kez vurulmak Blue Stacks'i oluşturur. Her Yığın %0.5 Hasar Direnci Sağlar\n• Toplamda 80 yığına ulaştıktan sonra, tüm yığınları kaybedin ve bir sonraki istif kapağı reac olana kadar Kırmızı Yığın başına %0.5 Hasar Direnci ve Mavi Yığın başına %0,5 Silah hasarı ayrı bir bonus alın.",
+   "_src": "• Getting kills and hitting enemies 3 times builds Red Stacks. Each stack provid",
+   "_mt": "tr"
+  },
+  "BTSU Datagloves": {
+   "tr": "Yetenek kademesi başına +15% Hive beceri acelesi verir.\n• Bir Hive'ı patlatmak, beceri serinlemelerinizi tazeler ve 15 saniye boyunca aşırı şarj sağlar. Skill Tier 6'da bu etki tüm müttefikler için de geçerlidir.\n• Bu etkiyi alan müttefikler 120 saniye boyunca bundan tekrar yararlanamazlar. Kategoriler:The Division 2 Kategori:Exotic Kategori:Gear",
+   "_src": "Grants +15% Hive skill haste per skill tier.\n• Detonating a Hive refreshes your ",
+   "_mt": "tr"
+  },
+  "Bloody Knuckles": {
+   "tr": "Bir düşmana el bombasıyla zarar vermek veya bir düşmana bir melee saldırısı ile vurmak, Kırmızı Görmek'i etkinleştirir.\n• Kırmızı görmek +25% silah hasarı ve +100% melee hasarı verir.\n• Red'i görmek 20 saniye sürer ve tamamlandıktan sonra 60 saniye bekleme süresi vardır.\n• Serinleme sırasında, bir melee saldırısıyla bir düşmana zarar vermek veya bir el bombasının etkisiyle bir düşmanı vurmak, serinleme instan'ını tamamlayacaktır.",
+   "_src": "Damaging an enemy with a grenade or striking an enemy with a melee attack activa",
+   "_mt": "tr"
+  },
+  "Shocker Punch": {
+   "tr": "\"Shocker Punch\" donanımlı iken, şok durum etkisinden ajan tarafından alınan bayılma %50 oranında azaltılacaktır.\n• Kalkan kullanmak, melee hasarına %100 zarar verecektir.\n• St. kullanmak Elmo's Engine with the Holster %100 extra melee hasarı verecek ve Shock'u hedefe uygulamak için bir sonraki melee saldırısını yapacak.\n• Her üç öğeyi kullanmak, yukarıda belirtilen bonusların tümünü sunacaktır.",
+   "_src": "While \"Shocker Punch\" is equipped, the stun received by the agent from Shock sta",
+   "_mt": "tr"
+  },
+  "Rugged Gauntlets": {
+   "tr": "• -%50 Geri tepme cezası kalçadan ateşlenirken; -%50 geri tepme penaltısı kapaktan körleşirken. Kategori:The Division 2 Kategoriler:Exotic",
+   "_src": "• -50% Recoil Penalty when hip-firing; -50% Recoil Penalty when blind-firing fro",
+   "_mt": "tr"
+  },
+  "Dodge City Gunslinger's Holster": {
+   "tr": "Tabancanız kılıflıyken, her 0.3 saniyede bir istifleme buff'ı kazanın, 100'e kadar. Takas yaptığınızda, ilk atışınız buff tüketir ve yığın başına +10% hasar verir. Bu, vurduğun her yere kafa vuruşu hasarı verir. REQUIRES Pistol donanımlı",
+   "_src": "While your pistol is holstered, gain a stacking buff every 0.3s, up to 100. When",
+   "_mt": "tr"
+  },
+  "Centurion's Scabbard": {
+   "tr": "Silahları değiştirmek, aşağıdaki bonus gruplarını sırayla birer birer verecektir:\n• 1. 20% Ateş Hızı, 20% Silah Hasarı (%10 Ateş Hızı, PvP'de %10 Silah Hasarı)\n• 2. %50 Dergi Boyutu, %50 Yeniden Yükleme Hızı (%25 Magazine Size, %50 PvP'de Yeniden Yükleme Hızı)\n• Bonuslar 12 saniye (10 saniye) veya bir sonraki silah takasına kadar aktif kalacaktır. Yan kolunuza geçiş yapmak bir sonraki grouyu tetiklemez.",
+   "_src": "Swapping weapons will give the following groups of bonuses one by one, in order:",
+   "_mt": "tr"
+  },
+  "Nimble Holster": {
+   "tr": "• Örtülü olarak çalışan her 1 m için Total Armor'unuzun %5'lik onarımlarını alın. Örtüşme yaparken alınan hasar 10 saniyeden fazla iyileşir. Kategori:Exotic Kategoriler:The Division 2 Kategori:Diş Kategori:Holsterler Kategori:Zq2 Holsters",
+   "_src": "• Receive repairs of 5% of your Total Armor for every 1m run in cover-to-cover. ",
+   "_mt": "tr"
+  },
+  "Imperial Dynasty": {
+   "tr": "Savaşta iken, 20m içinde size en yakın düşmana yanık uygular.\n• Soğutma: 35 saniye. Kategoriler:The Division 2 Kategori:Exotic Kategori:Gear",
+   "_src": "While in combat, applies burn to the enemy closest to you within 20m.\n• Cooldown",
+   "_mt": "tr"
+  },
+  "Sawyer's Kneepads": {
+   "tr": "Patlamalar tarafından engellenemez. 6 - 12 saniye boyunca ateş etmeden kapalı kalmak, 1 - 2 saniyeyi hedeflerken hasar bağışıklığı sağlar.",
+   "_src": "Cannot be staggered by explosions. Staying in cover without firing for 6 - 12s p",
+   "_mt": "tr"
+  },
+  "Nurse's Kneepads": {
+   "tr": "• Hem siz hem de 10 milyonunuzdaki Müttefikler +40% Tehlike Koruması alıyor. Kategori:The Division 2 Kategoriler:Exotic Kategori:Diş Kategorisi:Named Kneepads Kategori:Kneepads",
+   "_src": "• Both you and Allies within 10m of you receive +40% Hazard Protection. Category",
+   "_mt": "tr"
+  },
+  "Blacklisters": {
+   "tr": "• Bir düşmanı vurmak bir işaret uygular. Bir seferde sadece bir işaret aktif olabilir. İşaret 15 saniye sonra veya işaretli düşman öldüğünde kaybolur.\n• İşaretlenmiş düşmandan %600 amplifiye hasar alın.\n• İşaretsiz düşmanlara %20 Amplified Damage verin.\n• Savaşta sadece bir düşman kalırsa, işaret kaybolur ve tekrar kullanılamaz. Kategoriler:The Division 2 Kategori:Exotic Kategori:Zq2 Dizlik C",
+   "_src": "• Shooting an enemy applies a mark. Only one mark can be active at a time. The m",
+   "_mt": "tr"
+  },
+  "NinjaBike Messenger Kneepads": {
+   "tr": "Kapak yapmak veya tonozlamak için bir kapak yapmak, çizilen silahınızı yeniden doldurur ve 5 saniye boyunca +%25 bonus zırh verir.",
+   "_src": "Performing a cover to cover or vaulting reloads your drawn weapon and grants +25",
+   "_mt": "tr"
+  },
+  "Catharsis": {
+   "tr": "Hasar almak 30'luk bir kapta yığın oluşturur. Her yığın %1.5 Silah Hasarı verir. Maksimum yığınlarda hasar almak bir tasfiyeyi tetikler, tüm yığınları ve Durum Efektlerini kaldırır ve ardından buluttaki tüm müttefiklere 10 saniye boyunca Max Armor'un %5'ini geri getiren iyileştirici bir bulut düşürür.",
+   "_src": "Taking damage builds stacks to a cap of 30. Each stack grants 1.5% Weapon Damage",
+   "_mt": "tr"
+  },
+  "Coyote's Mask": {
+   "tr": "Siz ve tüm müttefikler, çarptığınız son düşmanın distance'ına dayanan bir bonus kazanırsınız. 0-15M +%25 CHD. 15-25M %10 CHD +%10 CHC. 25M +%25 CHC.",
+   "_src": "You and all allies gain a bonus based on the distance of the last enemy you hit.",
+   "_mt": "tr"
+  },
+  "Investor": {
+   "tr": "• Renklerine bağlı olarak bu öğedeki Core olmayan her özellik için bonuslar alın:\n• Kırmızı: +10% Crit Hasarı\n• Sarı: +%5 Beceri Verimliliği\n• Mavi: +1% Zırh Regen\n• Sadece PvP: +0.5% Zırh Regen\n• Bu öğe herhangi bir Çekirdek Özniteliği içerebilir.\n• Bu öğe, mod yuvası yerine üçüncü bir rastgele Öznitelik özelliğine sahiptir.\n• Bu maddede Headshot Hasarı, Sağlık veya Beceri Onarımı bulunamaz.",
+   "_src": "• Receive bonuses for each non-Core Attribute on this item, depending on the col",
+   "_mt": "tr"
+  },
+  "Vile": {
+   "tr": "Durum etkileri ayrıca 10 saniye boyunca zaman içinde bir hasar uygular.\n• Dağıtılan toplam hasar, concussion el bombası hasarının %50'sine eşittir ve durum etkisi niteliklerinizle artar. Kategoriler:The Division 2 Kategori:Exotic Kategori:Gear",
+   "_src": "Status effects also apply a damage over time debuff for 10s.\n• Total damage deal",
+   "_mt": "tr"
+  },
+  "Ridgeway's Pride": {
+   "tr": "15m içindeki düşmanları vurmak hedefe kanama uygular. 15m içinde kanayan her düşman için zırhınızın saniyede %3-48'ini onarın. Kanayan düşman sayısı başına tamir gücü: 1=3%, 2=6%, 3=12%, 4=24%, 5=48%.",
+   "_src": "Shooting enemies within 15m applies bleed to the target. Repair 3-48% of your ar",
+   "_mt": "tr"
+  },
+  "Tinkerer": {
+   "tr": "• Birincil ve İkincil silahınız Exotic veya Named değilse ve aynı tipteyse, İkincil Silahın yeteneği de Birincil Silaha uygulanacaktır. Silah Değiştirme de dahil olmak üzere yetenekler için geçerli değildir. Kategori:Exotic Kategori:Diş Kategorisi:The Division 2",
+   "_src": "• If your Primary and Secondary weapon are not Exotic or Named and of the same t",
+   "_mt": "tr"
+  },
+  "Overdogs": {
+   "tr": "• Tier hiyerarşisi içindeki en düşük rütbeli düşmanlara Silah Hasarını %30 artırır\n• Kademe 1: Hunter, Rogue, Lider, Tank, Kalkan, Ağır Silahlar, RPG, Medic, Kontrolör, Warhound, Marauder.\n• Kademe 2: Destek, Mühendis, Koruma, İmmobilizer, Bombardıman, Mini Tank, Drone Operatörü.\n• Seviye 3: proxy'ın diğer düşmanları veya yetenekleri. Kategori:Exotic Kategori:Diş Kategorisi:The Division 2",
+   "_src": "• Amplifies Weapon Damage by 30% to the lowest ranking enemies within the Tier h",
+   "_mt": "tr"
+  },
+  "Waveform": {
+   "tr": "Her saniye yeteneklerinizden birinde %3 beceri hasarı yığını oluşturun, 10 yığında kapatarak. Kapakta 10 saniye sonra yığınlar diğer becerinize geçer. İşlem daha sonra infinitium olarak tekrarlanır. Kategoriler:The Division 2 Kategori:Exotic Kategori:Gear",
+   "_src": "Generate a stack of 3% skill damage on one of your skills every second, capping ",
+   "_mt": "tr"
+  },
+  "Provocator": {
+   "tr": "• [PvE] 20m içindeki düşmanlardan +%25 Hasar Direnci Alın\n• [PvP] 15m içindeki düşmanlardan +%20 Hasar Direnci alın.",
+   "_src": "• [PvE] Receive +25% Damage Resistance from enemies within 20m\n• [PvP] Receive +",
+   "_mt": "tr"
+  },
+  "BTSU Gloves": {
+   "tr": "Bir Hive'ı patlatmak, tüm müttefiklerin beceri serinlemelerini sıfırlar ve 15 saniye boyunca aşırı şarj sağlar. 120 saniye soğuma.",
+   "_src": "Detonating a Hive resets all allies' skill cooldowns and grants overcharge for 1",
+   "_mt": "tr"
+  },
+  "Sweet Dreams": {
+   "tr": "Sandman\n• Melee saldırıları anında elit olmayan düşmanları öldürür. Serinleme: 15 saniye",
+   "_src": "Sandman\n• Melee attacks instantly kill non-elite enemies. Cooldown: 15s",
+   "_mt": "tr"
+  },
+  "Liberty": {
+   "tr": "Liberty or Death\n• Hibe +%2 silah hasarı 30 kata kadar Stacks.\n• Kafa vuruşları tüm yığınları tüketir, kalkanınızı yığın başına %3 oranında onarır.",
+   "_src": "Liberty or Death\n• Hits grant +2% weapon damage Stacks up to 30 times.\n• Headsho",
+   "_mt": "tr"
+  },
+  "The Chatterbox": {
+   "tr": "Incessant Chatter\n• Yeniden doldurduğunuzda, tüm dergi boyunca 15m içindeki her düşman için ateş oranı %25 artar.\n• Max yığınları: 5\n• Derginin %50'sini doldurur.",
+   "_src": "Incessant Chatter\n• When you reload, rate of fire is increased by 25% for each e",
+   "_mt": "tr"
+  },
+  "Pestilence": {
+   "tr": "Plague of the Outcasts\n• Vuruşlar, 10 saniye boyunca %100 silah hasarı veren bir debuff uygular. Bu, 50 kata kadar istiflenir.\n• Ne zaman bir düşman bu debuff ile ölse, yığınların %100'ü 25m içinde yakındaki bir düşmana aktarılır.",
+   "_src": "Plague of the Outcasts\n• Hits apply a debuff dealing 100% weapon damage over 10s",
+   "_mt": "tr"
+  },
+  "Nemesis": {
+   "tr": "Electromagnetic Accelerator\n• Atışlar, tetiğin serbest bırakılmadan önce ne kadar süre tutulduğuna bağlı olarak %0-100 silah hasarıyla sonuçlandı.",
+   "_src": "Electromagnetic Accelerator\n• Shots fired deal 0-100% weapon damage based on how",
+   "_mt": "tr"
+  },
+  "Eagle Bearer": {
+   "tr": "Eagle's Strike\n• Sürekli ateş ettikçe doğruluk +%30'a kadar artar.\n• Kafa vuruşu 15 saniyeliğine Tenacity buff verir.\n• Tenacity'ın gücü vücut atışları için %1 ve kafa vuruşları için %5 artar.  Tenacity\n• Alınan hasarın %40-80'i, buff sona erene kadar ertelenir.\n• Tüm Tot",
+   "_src": "Eagle's Strike\n• Accuracy increases as you continuously fire, up to +30% .\n• Hea",
+   "_mt": "tr"
+  },
+  "Merciless": {
+   "tr": "Binary Trigger\n• Bu silah tetiği çeker ve serbest bırakır.\n• Her iki mermi de aynı düşmana isabet ederse, bir yığın kazanır.\n• 7 yığında, bir düşmana ateş etmek +500% silah hasarı, yığını tüketen + 500% silah hasarını karşılayan 7m patlama yaratır.",
+   "_src": "Binary Trigger\n• This weapon fires on trigger pull and release.\n• If both bullet",
+   "_mt": "tr"
+  },
+  "Diamondback": {
+   "tr": "Agonizing Bite\n• Diamondback rastgele 20m içinde bir düşmanı işaret eder. 20m içinde düşman yoksa, size en yakın düşmanı işaret edin.\n• Düşmana vurmak işareti tüketir, kritik bir vuruşu %20 oranında artırılmış hasarla garanti eder.\n• Bir işarete çarptıktan sonra, ateş edilen tüm atışlar 5 saniye boyunca kritik isabetler garanti edilir.",
+   "_src": "Agonizing Bite\n• Diamondback randomly marks an enemy within 20m . If no enemies ",
+   "_mt": "tr"
+  },
+  "Chameleon": {
+   "tr": "Adaptive Instincts\n• 30 headshots isabet +%20 kritik vuruş şansı ve +50 %45 saniye için kritik isabet hasarı verir.\n• 65 vücut atışını vurmak, 45 saniye boyunca %0.90 silah hasarı verir.\n• 20 bacak atışına vurmak, 45 saniye boyunca +150% yeniden yükleme hızı sağlar. Buffs savaş dışıyken yenilenir.",
+   "_src": "Adaptive Instincts\n• Hitting 30 headshots grants +20% critical hit chance and +5",
+   "_mt": "tr"
+  },
+  "The Bighorn": {
+   "tr": "Big Game Hunter\n• Scoped, yarı otomatik ateş moduna geçtiğinde, her atışta %450 silah hasarı verir.\n• Headshots +%6 headshot hasarı verir. 25 kata kadar olan yığınlar, bir kez tam yığınlarda, 10 yığınlar tüm yığınlar kaldırılana kadar her 4 saniyede bir bozunur. Kafa vuruşları yığınların çürümesini geciktirir.",
+   "_src": "Big Game Hunter\n• When Scoped, switches to semi-automatic fire mode, dealing 450",
+   "_mt": "tr"
+  },
+  "Lady Death": {
+   "tr": "Breathe Free\n• Hareket ederken, saniyede 4 yığın veya sprint yapıyorsanız 8 yığın kazanın, toplam 30 yığına kadar.\n• Ateşlenen her tur, hasarı %75 oranında arttıran bir yığın tüketir.\n• 10 saniye boyunca hibe +%20 hareket hızını öldürür.",
+   "_src": "Breathe Free\n• When moving, gain 4 stacks per second, or 8 stacks if sprinting, ",
+   "_mt": "tr"
+  },
+  "The Ravenous": {
+   "tr": "Geri and Freki\n• Tetik-çekmede, iki namluyu birden ateşleyin.\n• Sağ omuzdan ateşlendiğinde, vuruşlar hücum primerleri ve sol omzundan ateşlendiğinde savunma primerlerini ekler.\n• Bir omuzdan gelen darbeler, mevcut olduğunda karşı omzun tüm primerlerini patlatacaktır.\n• Patlatıldığında veya düşmandan etkilendiğinde",
+   "_src": "Geri and Freki\n• On trigger-pull, fire both barrels at once.\n• When fired from t",
+   "_mt": "tr"
+  },
+  "Regulus": {
+   "tr": "Regicide\n• Kafa vuruşu öldürmeleri 5m patlama, %400 silah hasarı ve isabet eden tüm düşmanlara kanama uygulanması yaratır.",
+   "_src": "Regicide\n• Headshot kills create a 5m explosion, 400% weapon damage and applying",
+   "_mt": "tr"
+  },
+  "Backfire": {
+   "tr": "Payment in Kind\n• Düşmanlara zarar vermek, 10 saniye süren 100 yığına kadar +%2 kritik isabet hasarı yığını ekler.\n• Yeniden yüklemede kendinize 10 saniyelik bir kanama uygulayın, bu da yığın başına %0.5 zırh hasarı verir.",
+   "_src": "Payment in Kind\n• Dealing damage to enemies adds a stack of +2% critical hit dam",
+   "_mt": "tr"
+  },
+  "Scorpio": {
+   "tr": "Septic Shock\n• Bir hedefi vurmak, 10 saniye süren zehir yığınları uygular. Yığınların artması hedefe daha şiddetli debufflar ekler.\n• 2 - Zehir\n• 4 - Disorient\n• 6 - Şok\n• 9 - Hedef, ek bir %20 hasar alır (tüm kaynaklardan). Yığınlar artık artmıyor.\n• Durum Etkilerinin Süresi Temeldir",
+   "_src": "Septic Shock\n• Shooting a target applies stacks of venom, which last for 10s . I",
+   "_mt": "tr"
+  },
+  "Capacitor": {
+   "tr": "Capacitance\n• Düşmanları vurmak, 40'lık bir kapağa yığınlar inşa eder. Her yığın %1.5 Beceri Hasarı verir. 5 saniye sonra, yığınlar saniyede 1 bozunur.\n• Her 18px Beceri Katmanı için %7.5 Silah Hasarı elde edin.",
+   "_src": "Capacitance\n• Shooting enemies builds stacks to a cap of 40 . Each stack grants ",
+   "_mt": "tr"
+  },
+  "Ruthless": {
+   "tr": "Binary Trigger\n• Bu silah tetiği çeker ve serbest bırakır.\n• Her iki mermi de aynı düşmana isabet ederse, bir yığın kazanır.\n• 7 yığında, bir düşmana ateş etmek +500% silah hasarı, yığını tüketen + 500% silah hasarını karşılayan 7m patlama yaratır.",
+   "_src": "Binary Trigger\n• This weapon fires on trigger pull and release.\n• If both bullet",
+   "_mt": "tr"
+  },
+  "Bluescreen": {
+   "tr": "Disruptor Rounds\n• Bir düşmanı vurmak, o düşmanı işaret eder ve ajana 50 'ya kadar bir yığın ekler. İşaretli bir düşmanı vurmak işareti tazeler ve ajana yığınlar ekler.\n• Bir kalkan olmayan beceri kullandığınızda, ajan üzerindeki tüm yığınları kaldırın ve işaretlenmiş tüm hedefler bir etkiyi tetikler.\n• 1-10 Yığınlar - Pulse",
+   "_src": "Disruptor Rounds\n• Shooting an enemy marks that enemy and adds a stack to the ag",
+   "_mt": "tr"
+  },
+  "Doctor Home": {
+   "tr": "Bu silahla bir düşmanı vurmak 5 saniye boyunca bir işaret uygular. İşaretli bir hedef öldürülürse, tüm taraf için geçerli olan %10 Zırh onarım kiti verecektir. Kit vermeyecektir",
+   "_src": "Shooting an enemy with this weapon will apply a mark for 5 seconds. • If a marke",
+   "_mt": "tr"
+  },
+  "Busy Little Bee": {
+   "tr": "Farklı bir hedefe yapılan her atış 1 yığın verecek, 10'a kadar, her yığın %20 silah hasarı artışı sağlayacaktır. Yığınlar, ajan silahları değiştirdiğinde aktif hale gelecek ve 10 saniye sürecektir.",
+   "_src": "Each shot to a different target will give 1 stack, up to 10, each stack will giv",
+   "_mt": "tr"
+  },
+  "Sacrum Imperium": {
+   "tr": "The Trap\n• Crosshair olduğunda düşmanları etiketle (10 maksimum). Ajan, işaretli herhangi bir hedefi kafa atışıyla öldürürse, diğer tüm hedefler %50 (20% PVP) hareket hızına sahip olacak ve 10 saniye boyunca yanma alacaktır. Serinleme: 30 saniye.\n• Bir headshot ile başka bir düşman öldürmek 10 secon için soğumayı kısaltır",
+   "_src": "The Trap\n• Tags enemies when in crosshair (maximum of 10). If Agent kills any ma",
+   "_mt": "tr"
+  },
+  "Dread Edict": {
+   "tr": "Full Stop\n• Düşmanları vurmak, 20 lik bir kapta yığınlar oluşturur. Headshots 2 yığın verir. Her yığın %2 Silah Hasarı ve %5 Başlık Hasarı verir. Yeniden yüklemede, tüm yığınları temizleyin ve kaldırılan her yığın için 10 saniye boyunca geçici zırh olarak maksimum zırhınızın %5'ini kazanın.\n• Dread Edict ile kafa vuruşu öldürür, tüm bulle'yi geri getirir",
+   "_src": "Full Stop\n• Shooting enemies builds stacks to a cap of 20 . Headshots grants 2 s",
+   "_mt": "tr"
+  },
+  "St. Elmo's Engine": {
+   "tr": "Actum Est\n• Bu silahla bir düşmanı vurmak 1 yığın verecektir.\n• 100 yığında bir sonraki dergi şok mermisi ile doldurulacak.",
+   "_src": "Actum Est\n• Shooting an enemy with this weapon will give 1 stack .\n• At 100 stac",
+   "_mt": "tr"
+  },
+  "Ouroboros": {
+   "tr": "Rule Them All\n• Ajan kendilerine uygulanan bir Durum Etkisine sahip olduğunda, bir sonraki dergilerindeki cephanenin %50'si aynı Durum Etkisini hedeflerine uygulayacaktır.\n• Bu etki sadece savaş sırasında meydana gelecektir.",
+   "_src": "Rule Them All\n• When the agent has a Status Effect applied to them, 50% of the a",
+   "_mt": "tr"
+  },
+  "Vindicator": {
+   "tr": "Ortiz Assault Interface\n• Kapsamadayken, silah her düşmanın rastgele bir vücut bölümünü vurgulayacaktır.\n• Silah, vurgulanan gövde bölümlerine +60% Silah Hasarı veriyor.",
+   "_src": "Ortiz Assault Interface\n• While scoped , the weapon will highlight a random body",
+   "_mt": "tr"
+  },
+  "Lullaby": {
+   "tr": "Sandman\n• Melee saldırıları anında elit olmayan düşmanları öldürür. Serinleme: 15 saniye",
+   "_src": "Sandman\n• Melee attacks instantly kill non-elite enemies. Cooldown: 15s",
+   "_mt": "tr"
+  },
+  "Overlord": {
+   "tr": "Capitulate\n• Bir düşmana vurmak, 5 saniye boyunca isabet eden her top için -4% Hareket Hızı uygular.\n• Düşmanı tekrar vurmak yığınları yeniden uygulayacaktır.",
+   "_src": "Capitulate\n• Hitting an enemy applies -4% Movement Speed for each pellet hit for",
+   "_mt": "tr"
+  },
+  "Iron Lung": {
+   "tr": "Ardent\n• Ateş etmek silahı ısıtır, ısı ölçeri doldurur. Metre, silahın standart Dergi Boyutunun %50'sine eşdeğerdir.\n• Sayaç dolduğunda, silah tarafından vurulan mermiler düşmanları tutuşturur.\n• Çekim yapılmadığında, sayaç zamanla tükenir. Silahın yeniden yüklenmesi veya değiştirilmesi m'yi tamamen tüketir",
+   "_src": "Ardent\n• Shooting heats up the weapon, filling up heat meter . The meter is equi",
+   "_mt": "tr"
+  },
+  "Mosquito": {
+   "tr": "Mosquito Song\n• Düşmana vurmak bir yığın uygular. Stacks oyuncular arasında paylaşılır.\n• 5 yığında, düşman 5 saniye boyunca bir yığın uygulamak için son oyuncuyu zorla hedef alacak ve zırha %25 daha fazla zarar verecektir.\n• Stacks her 5 saniyede bir tükeniyor. Bir düşman üzerindeki etkiyi aktive etmek, diğer düşmanlardan tüm yığınları ortadan kaldıracaktır.",
+   "_src": "Mosquito Song\n• Hitting an enemy applies a stack. Stacks are shared between play",
+   "_mt": "tr"
+  },
+  "Strega": {
+   "tr": "Unnerve\n• Bir düşmanı öldürmek, 20 metre içindeki her düşmana bir işaret uygulayacaktır. Aynı düşmana birden fazla işaret uygulanabilir. Bir düşmana uygulanabilecek maksimum işaret sayısı 5'tir.\n• İşaretli düşmanlara işaret başına +%15 amplifiye hasar dağıtın.",
+   "_src": "Unnerve\n• Killing an enemy will apply a mark on every enemy within 20m of it. Mu",
+   "_mt": "tr"
+  },
+  "Oxpecker": {
+   "tr": "Symbiosis\n• Bir Shield görevlendirilirken, Shield Health'i saniyede %10 oranında kaybeder.\n• Kalkanınız, bu silahın verdiği hasarın %25'ini onarır.",
+   "_src": "Symbiosis\n• While having a Shield deployed , lose Shield Health at a rate of 10%",
+   "_mt": "tr"
+  },
+  "Shroud": {
+   "tr": "• Silah Hasarını, Tier hiyerarşisine göre şu anda savaşta en yüksek rütbeli düşmanlara %125 oranında artırır\n• Kademe 1: Hunter, Rogue, Lider, Tank, Kalkan, Ağır Silahlar, RPG, Medic, Kontrolör, Warhound, Marauder\n• Kademe 2: Destek, Mühendis, Koruma, İmmobilizer, Bombardıman, Mini Tank, Drone Operatörü.\n• Seviye 3: proxy'ın diğer düşmanları veya yetenekleri.",
+   "_src": "• Amplifies Weapon Damage by 125% to the highest ranking enemies currently in co",
+   "_mt": "tr"
+  },
+  "Instigator": {
+   "tr": "• Bir Weakpoint'i yok etmek, 15 saniye boyunca %32 silah hasarı verir.",
+   "_src": "• Destroying a Weakpoint grants 32% weapon damage for 15s.",
+   "_mt": "tr"
+  },
+  "Tempest": {
+   "tr": "• Tabanca tamamen otomatiktir ve Kalkanınız kırıldıktan sonra 20 saniye boyunca +%25 Amplified Damage verir.",
+   "_src": "• The pistol is fully automatic and deals +25% Amplified Damage for 20s after yo",
+   "_mt": "tr"
+  },
+  "Sheriff": {
+   "tr": "• +35% Silah Hasarı / +100% Doğruluk / Hasar Düşmesi Yok\n• Bu bonuslar silahın temel istatistiklerine dahil edilmiştir.",
+   "_src": "• +35% Weapon Damage/+100% Accuracy/No Damage Drop Off\n• These bonuses are built",
+   "_mt": "tr"
+  },
+  "Big Alejandro": {
+   "tr": "Kapak Nişancı\n• Kapakta ateşlenen her mermi, Silah Hasarını %1'e kadar arttırır. Bonus 15 saniye sürer.\n• Kapaktayken bu silahla bir öldürme işlemi yapmak süreyi sıfırlar.\n• Bonus hasarı yeniden doldurularak, silah değiştirilerek veya muharebeden çıkılarak iptal edilir.",
+   "_src": "Cover Shooter\n• Every bullet fired while in cover increases Weapon Damage by 1% ",
+   "_mt": "tr"
+  },
+  "Whiplash": {
+   "tr": "• Bu silahın 5 saniye boyunca kılıfına konması onu yeniden doldurur ve hazırlar. Hazırlanırken, bu silahın değiştirilmesi Birincil ve İkincil silahlarınızı yeniden yükler ve dergisi boşaltılana kadar +%20 Ateş Hızı ve +%50 Silah Hasarı verir.\n• Dergi boşaltılmadan önce bu silahın yeniden yüklenmesi veya değiştirilmesi, stat bonuslarını kaldıracaktır.",
+   "_src": "• Having this weapon holstered for 5s reloads and primes it. While primed, swapp",
+   "_mt": "tr"
+  },
+  "Agitator": {
+   "tr": "• Bu silah kılıflıyken, ateş ederken %50 daha az tehdit oluşturur. Bu silahı 10 saniye boyunca kılıfta tutmak, onu harekete geçirecektir.\n• Hazırlandığında, bu silaha takas etmek +%25 Ateş Oranı, +%30 Silah Hasarı verir ve 20 saniye boyunca çekim yaparken %100 daha fazla tehdit oluşturur.\n• Zamanlayıcı bitmeden önce bu silaha geçiş yapmak bonusları kaldırır.",
+   "_src": "• While this weapon is holstered, generate 50% less Threat when shooting. Keepin",
+   "_mt": "tr"
+  },
+  "Prima Donna": {
+   "tr": "• Savaş dışı kaldığında, 10 yığın alın.\n• Bu silah, yığın başına +%12,5 amplifiye hasar verir\n• ...ama dokunamazsın\n• 1 yığın, aldığınız bir hasar örneğini tamamen onarmak için otomatik olarak tüketilir\n• Her 3 saniyede bir 1 yığın yenilenir",
+   "_src": "• When out of combat, receive 10 stacks.\n• This weapon deals +12.5% Amplified Da",
+   "_mt": "tr"
+  },
+  "Steel & Sons ACR": {
+   "tr": "• PvE sürümü:\n• Vücut atışları düşmana 10 saniye boyunca 1 yığın ekler. Max yığınları: 4. Farklı bir düşmana vurmak tüm yığınları kaldırır.\n• Bu silah yığın başına +%4 amplifiye hasar verir.\n• Yığınları olan bir düşman üzerindeki bir sonraki kafa atışınız tüm yığınları tüketir, yığın başına +11% Amplified Damage ile uğraşır\n• Düşmanın zayıf noktasını yok etmek, sizden +%30 amplifiye hasar almalarına neden olur.",
+   "_src": "• PvE version:\n• \n• Body shots add 1 stack to the enemy for 10s. Max stacks: 4. ",
+   "_mt": "tr"
+  },
+  "Underboss": {
+   "tr": "• PvE sürümü:\n• Bu silahla bir düşmanı vurmak bir işaret uygular. Aynı anda sadece bir işaret uygulayabilirsiniz. Başka bir düşmanı vurmak işareti aktaracaktır.\n• Bu silahı kullanan diğer ajanlar tarafından aynı düşmana daha fazla işaret uygulanabilir. Bir düşmana uygulanabilecek maksimum işaret miktarı 4'tür.\n• Bu silah işaretli düşmanlara +%20 Amplified Damage verir. Bonus artırıldı",
+   "_src": "• PvE version:\n• \n• Shooting an enemy with this weapon applies a mark. You can o",
+   "_mt": "tr"
+  },
+  "Fafnir": {
+   "tr": "Dragon's Breath\n• Bu silah Dragon Breath'in kabuklarını ateşler.\n• Her atışın, Burn'u düşmana uygulama şansı yüzde 40. Bir düşman zaten yanıyorsa Burn uygulanamaz.\n• Silah Hasarı, Durum Efektleri bonusunun %50'si ile güçlendirilmiştir.",
+   "_src": "Dragon's Breath\n• This weapon fires Dragon Breath's shells\n• Each shot has a 40%",
+   "_mt": "tr"
+  },
+  "Vertigo": {
+   "tr": "Startling\n• Ne zaman bu silah yapılır ve düşman Bastırılır, düşman Disorient uygulanır ve siz ve müttefikleriniz 15 saniye boyunca Kapak Dışı Hedeflere +%30 Hasar alırsınız.",
+   "_src": "Startling\n• Whenever this weapon makes and enemy Suppressed , the enemy is appli",
+   "_mt": "tr"
+  },
+  "Caduceus": {
+   "tr": "Caduceus iki rastgele silah yeteneği rulolar, ancak üçüncü yetenek her zaman özel Exotic yeteneğidir: Yetenek Caduceus Her kritik vuruş sizi ve grubunuzu kullanıcıların %1'i için iyileştirir Beceri Gücü.",
+   "_src": "Caduceus rolls two random weapon talents, but the third talent is always its exc",
+   "_mt": "tr"
+  },
+  "The Gift": {
+   "tr": "Toplam silah hasarını %25 artırır. Hasar almak bu meraklıyı 3 saniyeliğine devre dışı bırakır.",
+   "_src": "Increases total weapon damage by 25%. Taking damage disables this buff for 3 sec",
+   "_mt": "tr"
+  },
+  "Percussive Maintenance": {
+   "tr": "Beceri öldürme, 27 saniye boyunca toplam beceri hasarını %25 artırır.",
+   "_src": "Skill kills increase total skill damage by 25% for 27 seconds.",
+   "_mt": "tr"
+  },
+  "Anarchist's Cookbook": {
+   "tr": "Durum etkisi uygulamak 27 saniye boyunca toplam silah hasarını %18 artırır.",
+   "_src": "Applying a status effect increases total weapon damage by 18% for 27 seconds.",
+   "_mt": "tr"
+  },
+  "Force Multiplier": {
+   "tr": "Bir düşmanı vurmak, toplam beceri hasarını 3 saniye boyunca %30 artırır.",
+   "_src": "Shooting an enemy increases total skill damage by 30% for 3 seconds.",
+   "_mt": "tr"
+  },
+  "Strategic Alignment": {
+   "tr": "Bir düşmana durum efekti uygulamak, 27 saniye boyunca toplam beceri hasarını ve onarımını %20 artırır.",
+   "_src": "Applying a status effect to an enemy increases total skill damage and repair by ",
+   "_mt": "tr"
+  },
+  "Devil's Due": {
+   "tr": "20% zırhın altındaysanız, kritik vuruşlar %3 eksik zırhı onarır. Kills, 4-10 saniye boyunca %100 zırhı onarmanızı sağlar.",
+   "_src": "If you are below 20% armor, critical hits repair 3% missing armor. Kills allow y",
+   "_mt": "tr"
+  },
+  "Zero F's": {
+   "tr": "Zırhınız tükendiğinde, zırhınızın %100'ünü onarın. Soğutma süresi 55 saniyedir.",
+   "_src": "When your armor is depleted, repair 100% of your armor. Cooldown is 55 seconds.",
+   "_mt": "tr"
+  },
+  "Pointman": {
+   "tr": "Bir kalkanın yerleştirilmesi, onu 5 saniye boyunca yenilmez hale getirir ve diğer tüm müttefiklere 20 saniye boyunca %50 bonus zırh verir. Serinleme süresi 25 saniyedir.",
+   "_src": "Deploying a shield makes it invulnerable for 5s and grants 50% bonus armor to al",
+   "_mt": "tr"
+  },
+  "The Sacrifice": {
+   "tr": "Dağıttığınız tüm hasarlar %30 oranında arttırılır. Aldığınız tüm hasarlar %60 oranında arttırılır.",
+   "_src": "All damage you deal is amplified by 30%. All damage you take is amplified by 60%",
+   "_mt": "tr"
+  },
+  "Rushdown": {
+   "tr": "Bir yetenekle zarar verdiğiniz son düşman işaretlenmiştir. O düşmana verilen silah hasarı, aktif bekleme sürelerini 4 saniye azaltmak için işareti tüketir. Serinleme: 4 saniye.",
+   "_src": "The last enemy you damaged with a skill is marked. Weapon damage to that enemy c",
+   "_mt": "tr"
+  },
+  "Ferocious Calm": {
+   "tr": "8 saniye boyunca gizli kalmak, siperde ya da örtünme hareketinde kaldığınız sürece, müttefiklerinizin silah ve beceri hasarlarını %12 artırır.",
+   "_src": "Staying in cover for 8s increases your and allies’ weapon and skill damage by 12",
+   "_mt": "tr"
+  },
+  "Hunter-Killer": {
+   "tr": "Bonus zırhınız olsa da, toplam silah hasarını 10 metre içinde düşmanlara %40 artırır.",
+   "_src": "While you have bonus armor, amplifies total weapon damage by 40% to enemies with",
+   "_mt": "tr"
+  },
+  "Door-Kicker's Knock": {
+   "tr": "Bir düşmana beceri ile zarar vermek, 20 saniye boyunca toplam silah hasarını %15 artırır.",
+   "_src": "Damaging an enemy with a skill increases total weapon damage by 15% for 20 secon",
+   "_mt": "tr"
+  },
+  "Vedmedytsya Vest": {
+   "tr": "Kapakta silah kullanımı %50 artarken.",
+   "_src": "While in cover weapon handling is increased by 50%.",
+   "_mt": "tr"
+  },
+  "Pristine Example": {
+   "tr": "Hedeflediğiniz her saniye toplam silah hasarını %6 artırırken, 8x veya daha yüksek bir aralıkla %60'a kadar arttırın.",
+   "_src": "Increases total weapon damage by 6% every second you are aiming while scoped 8x ",
+   "_mt": "tr"
+  },
+  "Braced": {
+   "tr": "Kapakta silah kullanımı %45 oranında artarken.",
+   "_src": "While in cover weapon handling is increased by 45%.",
+   "_mt": "tr"
+  },
+  "Efficient": {
+   "tr": "Bir zırh kiti kullanmak, zırh kitini tüketmemek için %50 şansa sahiptir. Specialization zırh kiti bonusları %100 artırılır.",
+   "_src": "Using an armor kit has a 50% chance to not consume the armor kit. Specialization",
+   "_mt": "tr"
+  },
+  "Empathic Resolve": {
+   "tr": "Bir müttefiki onarmak, 10 saniye boyunca toplam silah ve beceri hasarlarını %3-15 oranında artırır. 1-%7 benlik. Yetenek seviyenle etkililik arttı.",
+   "_src": "Repairing an ally increases their total weapon and skill damage by 3-15% for 10 ",
+   "_mt": "tr"
+  },
+  "Entrench": {
+   "tr": "%30 zırhın altındaysanız, zırhınızın %20'sini onarmak için kapaktan alınan headshotlar.",
+   "_src": "If you are below 30% armor, headshots from cover repair 20% of your armor.",
+   "_mt": "tr"
+  },
+  "Explosive Delivery": {
+   "tr": "Bir beceri inişinden 1.5 saniye sonra, 5M yarıçapı ile bir patlama yaratır. Yetenek seviyesi ile hasar ölçekleri, bir concussion el bombasının %25-100 hasarı.",
+   "_src": "1.5s after a skill lands, creates an explosion with a 5M radius. Damage scales w",
+   "_mt": "tr"
+  },
+  "Focus": {
+   "tr": "Hedeflediğiniz her saniye toplam silah hasarını %5 artırırken, 8x veya daha yüksek bir aralıkta, %50'ye kadar.",
+   "_src": "Increases total weapon damage by 5% every second you are aiming while scoped 8x ",
+   "_mt": "tr"
+  },
+  "Glass Cannon": {
+   "tr": "Dağıttığınız tüm hasarlar %25 oranında arttırılır. Aldığınız tüm hasarlar %50 oranında arttırılır.",
+   "_src": "All damage you deal is amplified by 25%. All damage you take is amplified by 50%",
+   "_mt": "tr"
+  },
+  "Gunslinger": {
+   "tr": "Silah değişimi toplam silah hasarını 5 saniye boyunca %20 artırır. Bu buff, aktifken silah takası yaparsanız 5 saniyeliğine kaybolur.",
+   "_src": "Weapon swapping increases total weapon damage by 20% for 5s. This buff is lost f",
+   "_mt": "tr"
+  },
+  "Intimidate": {
+   "tr": "Bonus zırhınız olsa da, toplam silah hasarını 10 metre içinde düşmanlara %35 artırır.",
+   "_src": "While you have bonus armor, amplifies total weapon damage by 35% to enemies with",
+   "_mt": "tr"
+  },
+  "Kinetic Momentum": {
+   "tr": "Savaşta, cooldown'da olmayan beceriler, beceri hasarını %1 ve beceri onarımını %2 artıran yığınlar oluşturur. En fazla 15 istif. Serinleme sırasında kayboldu.",
+   "_src": "When in combat, skills not on cooldown generate stacks that increase skill damag",
+   "_mt": "tr"
+  },
+  "Mad Bomber": {
+   "tr": "El bombası yarıçapı %50 arttı. Öldüren bombalar iade edilir. El bombaları artık \"pişirilebilir\". El bombalarını hedeflerken %5 bonus zırh.",
+   "_src": "Grenade radius increased by 50%. Grenades that kill are refunded. Grenades can n",
+   "_mt": "tr"
+  },
+  "Obliterate": {
+   "tr": "Kritik isabetler, toplam silah hasarını 5 saniye boyunca %1 artırır. 15 kereye kadar istiflenir.",
+   "_src": "Critical hits increase total weapon damage by 1% for 5 seconds. Stacks up to 15 ",
+   "_mt": "tr"
+  },
+  "Overwatch": {
+   "tr": "10 saniye boyunca gizli kalmak, siperde veya örtük bir harekette kaldığınız sürece sizin ve müttefiklerinizin silah ve beceri hasarlarını %12 artırır.",
+   "_src": "Staying in cover for 10s increases your and allies’ weapon and skill damage by 1",
+   "_mt": "tr"
+  },
+  "Protected Reload": {
+   "tr": "Yeniden yüklerken %20 bonus zırh verir. Savunma çekirdek özniteliğinize bağlı olarak, yeniden yüklenirken tüm müttefiklere %0-18 bonus zırh verir.",
+   "_src": "Grants 20% bonus armor while reloading. Grants 0-18% bonus armor to all allies w",
+   "_mt": "tr"
+  },
+  "Reassigned": {
+   "tr": "Bir düşmanı öldürmek, rasgele özel bir merminin 1 turunu yan kolunuza ekler. Soğutma süresi 20 saniyedir.",
+   "_src": "Killing an enemy adds 1 round of a random special ammo into your sidearm. Cooldo",
+   "_mt": "tr"
+  },
+  "Skilled": {
+   "tr": "Skill kills, beceri cooldown'larını sıfırlamak için %25 şansa sahiptir. Hiçbir beceri soğumada değilse, soğumaya başladığında bir beceriyi tazeleyen bir buff kazanın.",
+   "_src": "Skill kills have a 25% chance to reset skill cooldowns. If no skills were on coo",
+   "_mt": "tr"
+  },
+  "Spark": {
+   "tr": "Bir düşmana beceri ile zarar vermek, toplam silah hasarını 15 saniye boyunca %15 artırır.",
+   "_src": "Damaging an enemy with a skill increases total weapon damage by 15% for 15 secon",
+   "_mt": "tr"
+  },
+  "Spotter": {
+   "tr": "Darbeli düşmanlara toplam silah ve beceri hasarını %15 artırır.",
+   "_src": "Amplifies total weapon and skill damage by 15% to pulsed enemies.",
+   "_mt": "tr"
+  },
+  "Tag Team": {
+   "tr": "Bir yetenekle zarar verdiğiniz son düşman işaretlenmiştir. O düşmana verilen silah hasarı, aktif bekleme sürelerini 4 saniye azaltmak için işareti tüketir. Serinleme: 4 saniye.",
+   "_src": "The last enemy you damaged with a skill is marked. Weapon damage to that enemy c",
+   "_mt": "tr"
+  },
+  "Tamper Proof": {
+   "tr": "Hive, turret veya uzak pulse'nizin 3 metre yakınında yürüyen düşmanlar şoke olur. Kol süresi 3 saniyedir ve beceri başına bekleme süresi 10 saniyedir.",
+   "_src": "Enemies that walk within 3 meters of your hive, turret, or remote pulse are shoc",
+   "_mt": "tr"
+  },
+  "Trauma": {
+   "tr": "Kafasına isabet eden bir düşmana kör olur. Soğutma süresi 30 saniyedir. Göğsüne isabet eden bir düşmana kan akıyor. Soğutma süresi 30 saniyedir.",
+   "_src": "Applies blind to an enemy hit in the head. Cooldown is 30 seconds. Applies bleed",
+   "_mt": "tr"
+  },
+  "Unbreakable": {
+   "tr": "Zırhınız tükendiğinde, zırhınızın %95'ini onarın. Soğutma süresi 60 saniyedir.",
+   "_src": "When your armor is depleted, repair 95% of your armor. Cooldown is 60 seconds.",
+   "_mt": "tr"
+  },
+  "Vanguard": {
+   "tr": "Bir kalkanın yerleştirilmesi, onu 5 saniye boyunca yenilmez hale getirir ve diğer tüm müttefiklere 20 saniye boyunca %45 bonus zırh verir. Serinleme süresi 25 saniyedir.",
+   "_src": "Deploying a shield makes it invulnerable for 5s and grants 45% bonus armor to al",
+   "_mt": "tr"
+  },
+  "Bloodsucker": {
+   "tr": "Bir düşmanı öldürmek 10 saniye boyunca +10% bonus zırh yığını ekler ve tazeler. Max yığını 10.",
+   "_src": "Killing an enemy adds and refreshes a stack of +10% bonus armor for 10 seconds. ",
+   "_mt": "tr"
+  },
+  "Calculated": {
+   "tr": "Kapaktan gelen ölümler beceri soğumalarını %10 azaltır.",
+   "_src": "Kills from cover reduce skill cooldowns by 10%.",
+   "_mt": "tr"
+  },
+  "Clutch": {
+   "tr": "15% zırhın altındaysanız, kritik vuruşlar 3% eksik zırhı onarır. Kills, 4-10 saniye boyunca %100 zırhı onarmanızı sağlar.",
+   "_src": "If you are below 15% armor, critical hits repair 3% missing armor. Kills allow y",
+   "_mt": "tr"
+  },
+  "Composure": {
+   "tr": "Kapakta iken, toplam silah hasarını %15 artırır.",
+   "_src": "While in cover, increases total weapon damage by 15%.",
+   "_mt": "tr"
+  },
+  "Concussion": {
+   "tr": "Kafa atışları silah hasarını 1.5 saniye boyunca %10 artırır. Nişancı tüfekleri için 5 saniye. Kafa vuruşu ölümleri silah hasarını 10 saniye boyunca %15 artırır.",
+   "_src": "Headshots increase weapon damage by 10% for 1.5s. 5s for marksman rifles. Headsh",
+   "_mt": "tr"
+  },
+  "Creeping Death": {
+   "tr": "Bir durum efekti uyguladığınızda, hedefinize 5 metre mesafedeki tüm düşmanlara da uygulanır. Soğutma süresi 20 saniyedir.",
+   "_src": "When you apply a status effect, it is also applied to all enemies within 5 meter",
+   "_mt": "tr"
+  },
+  "Opportunistic": {
+   "tr": "Tüfek ve nişancı tüfekleriyle vurduğunuz düşmanlar, aldıkları hasarı 5 saniye boyunca tüm kaynaklardan %10 artırır.",
+   "_src": "Enemies you hit with shotguns and marksman rifles amplifies the damage they take",
+   "_mt": "tr"
+  },
+  "Tech Support": {
+   "tr": "Beceri öldürme, toplam beceri hasarını 20 saniye boyunca %25 artırır.",
+   "_src": "Skill kills increase total skill damage by 25% for 20 seconds.",
+   "_mt": "tr"
+  },
+  "Unstoppable Force": {
+   "tr": "Bir düşmanı öldürmek, toplam silah hasarını 15 saniye boyunca %5 artırır. 5 defaya kadar istiflenir.",
+   "_src": "Killing an enemy increases total weapon damage by 5% for 15 seconds. Stacks up t",
+   "_mt": "tr"
+  },
+  "Vigilance": {
+   "tr": "Toplam silah hasarını %25 artırır. Hasar almak bu meraklıyı 4 saniyeliğine devre dışı bırakır.",
+   "_src": "Increases total weapon damage by 25%. Taking damage disables this buff for 4 sec",
+   "_mt": "tr"
+  },
+  "Wicked": {
+   "tr": "Durum efekti uygulamak, 20 saniye boyunca toplam silah hasarını %18 artırır.",
+   "_src": "Applying a status effect increases total weapon damage by 18% for 20 seconds.",
+   "_mt": "tr"
+  },
+  "Combined Arms": {
+   "tr": "Bir düşmanı vurmak, toplam beceri hasarını 3 saniye boyunca %25 artırır.",
+   "_src": "Shooting an enemy increases total skill damage by 25% for 3 seconds.",
+   "_mt": "tr"
+  },
+  "Companion": {
+   "tr": "Bir müttefike veya beceriye 5 metre yakınken, toplam silah hasarı %15 artar.",
+   "_src": "While you are within 5 meters of an ally or skill, total weapon damage is increa",
+   "_mt": "tr"
+  },
+  "Leadership": {
+   "tr": "Kapak, size ve tüm müttefiklerinize 10 saniye boyunca %12 bonus zırh verir. Düşmanın 10 milyonu içinde biterse iki katına çıkar. Soğutma süresi 10 saniyedir.",
+   "_src": "Cover to covers grant 12% bonus armor to you & all allies for 10s. Doubled if en",
+   "_mt": "tr"
+  },
+  "Safeguard": {
+   "tr": "Tam zırhta iken, toplam beceri onarımını %100 artırır.",
+   "_src": "While at full armor, increases total skill repair by 100%.",
+   "_mt": "tr"
+  },
+  "Shock and Awe": {
+   "tr": "Bir düşmana durum efekti uygulamak, 20 saniye boyunca toplam beceri hasarını ve onarımını %20 artırır.",
+   "_src": "Applying a status effect to an enemy increases total skill damage and repair by ",
+   "_mt": "tr"
+  },
+  "Versatile": {
+   "tr": "Birincil ve ikincil silahlarınız farklıysa, 10 saniye boyunca toplam silah hasarını artırır.",
+   "_src": "Amplifies total weapon damage for 10 seconds when swapping between your primary ",
+   "_mt": "tr"
+  },
+  "Energize": {
+   "tr": "Bir zırh kiti kullanmak, 15 saniye boyunca +1 beceri katmanı verir. Zaten 6. seviye becerideyse, fazla ücret verir.",
+   "_src": "Using an armor kit grants +1 skill tier for 15 seconds. If already at skill tier",
+   "_mt": "tr"
+  },
+  "Galvanize": {
+   "tr": "Bir düşmana Kör, Ensnare, Konfüçyüs veya Şok uygulamak size ve düşmanın 20M içindeki tüm müttefiklerinize 10 saniye boyunca %40 bonus zırh verir.",
+   "_src": "Applying a Blind, Ensnare, Confuse, or Shock to an enemy grants 40% bonus armor ",
+   "_mt": "tr"
+  },
+  "Overclock": {
+   "tr": "Siz ve müttefikleriniz, konuşlandırılmış yeteneklerinizin 7 metre içinde %25 yeniden yükleme hızı elde edin ve aktif bekleme sürelerini her saniye 0.2 saniye azaltın.",
+   "_src": "You and allies within 7 meters of your deployed skills, gain 25% reload speed an",
+   "_mt": "tr"
+  },
+  "Protector": {
+   "tr": "Kalkanınız hasar gördüğünde, %5 kazanırsınız ve diğer tüm müttefikler zırhınızın %15'ini 3 saniye boyunca bonus zırh olarak kazanır. Serinleme süresi 3 saniyedir.",
+   "_src": "When your shield is damaged, you gain 5% and all other allies gain 15% of your a",
+   "_mt": "tr"
+  },
+  "Perfect Overwatch": {
+   "tr": "8 saniye boyunca gizli kalmak, siperde ya da örtünme hareketinde kaldığınız sürece, müttefiklerinizin silah ve beceri hasarlarını %12 artırır.",
+   "_src": "Staying in cover for 8s increases your and allies’ weapon and skill damage by 12",
+   "_mt": "tr"
+  },
+  "Pack Instincts": {
+   "tr": "Siz ve tüm müttefikler, çarptığınız son düşmanın distance'ına dayanan bir bonus kazanırsınız. 0-15M +%25 CHD. 15-25M %10 CHD +%10 CHC. 25M +%25 CHC.",
+   "_src": "You and all allies gain a bonus based on the distance of the last enemy you hit.",
+   "_mt": "tr"
+  },
+  "Grace Under Fire": {
+   "tr": "Patlamalar tarafından engellenemez. 6 - 12 saniye boyunca ateş etmeden kapalı kalmak, 1 - 2 saniyeyi hedeflerken hasar bağışıklığı sağlar.",
+   "_src": "Cannot be staggered by explosions. Staying in cover without firing for 6 - 12s p",
+   "_mt": "tr"
+  },
+  "Parkour!": {
+   "tr": "Kapak yapmak veya tonozlamak için bir kapak yapmak, çizilmiş silahınızı yeniden doldurur.",
+   "_src": "Performing a cover to cover or vaulting reloads your drawn weapon.",
+   "_mt": "tr"
+  },
+  "Dragon's Glare": {
+   "tr": "Savaşta iken, 20 metre içinde size en yakın düşmana yanık uygular. Serinleme: 40 saniye.",
+   "_src": "While in combat, applies burn to the enemy closest to you within 20 meters. Cool",
+   "_mt": "tr"
+  },
+  "Quick Draw": {
+   "tr": "Tabancanız kılıflıyken, her 0.5 saniyede bir 100’e kadar bir yığın kazanın. Takas yaptığınızda, ilk atışınız yığın başına +%10 hasar verir.",
+   "_src": "While your pistol is holstered, gain a stack every 0.5s, up to 100. When you swa",
+   "_mt": "tr"
+  },
+  "Transference Overclock": {
+   "tr": "Bir Hive'ı patlatmak, tüm müttefiklerin beceri serinlemelerini sıfırlar ve 15 saniye boyunca aşırı şarj sağlar. 120 saniye soğuma.",
+   "_src": "Detonating a Hive resets all allies' skill cooldowns and grants overcharge for 1",
+   "_mt": "tr"
+  },
+  "Ablative Nano-Plating": {
+   "tr": "Sizin veya bir müttefikinizin zırhı kırıldığında, 10 saniye boyunca %80 bonus zırh kazanın. 45 saniye soğuma. Specialization silahınla öldürür, soğumayı sıfırlar.",
+   "_src": "When your or an ally's armor breaks, gain 80% bonus armor for 10s. 45s cooldown.",
+   "_mt": "tr"
+  },
+  "One in Hand...": {
+   "tr": "+1 Zırh Kiti Kapasitesi +3 Grenade Kapasitesi +%25 Cephane Kapasitesi +%10 Beceri Onarımı +%10 Durum Etkileri",
+   "_src": "+1 Armor Kit Capacity +3 Grenade Capacity +25% Ammo Capacity +10% Skill Repair +",
+   "_mt": "tr"
+  },
+  "Perfect Clutch": {
+   "tr": "20% zırhın altındaysanız, kritik vuruşlar %3 eksik zırhı onarır. Kills, 4-10 saniye boyunca %100 zırhı onarmanızı sağlar.",
+   "_src": "If you are below 20% armor, critical hits repair 3% missing armor. Kills allow y",
+   "_mt": "tr"
+  },
+  "Perfect Combined Arms": {
+   "tr": "Bir düşmanı vurmak, toplam beceri hasarını 3 saniye boyunca %30 artırır.",
+   "_src": "Shooting an enemy increases total skill damage by 30% for 3 seconds.",
+   "_mt": "tr"
+  },
+  "Perfect Shock and Awe": {
+   "tr": "Bir düşmana durum efekti uygulamak, 27 saniye boyunca toplam beceri hasarını ve onarımını %20 artırır.",
+   "_src": "Applying a status effect to an enemy increases total skill damage and repair by ",
+   "_mt": "tr"
+  },
+  "Perfect Tech Support": {
+   "tr": "Beceri öldürme, 27 saniye boyunca toplam beceri hasarını %25 artırır.",
+   "_src": "Skill kills increase total skill damage by 25% for 27 seconds.",
+   "_mt": "tr"
+  },
+  "Perfect Vigilance": {
+   "tr": "Toplam silah hasarını %25 artırır. Hasar almak bu meraklıyı 3 saniyeliğine devre dışı bırakır.",
+   "_src": "Increases total weapon damage by 25%. Taking damage disables this buff for 3 sec",
+   "_mt": "tr"
+  },
+  "Perfectly Wicked": {
+   "tr": "Durum etkisi uygulamak 27 saniye boyunca toplam silah hasarını %18 artırır.",
+   "_src": "Applying a status effect increases total weapon damage by 18% for 27 seconds.",
+   "_mt": "tr"
+  },
+  "Perfect Intimidate": {
+   "tr": "Bonus zırhınız olsa da, toplam silah hasarını 10 metre içinde düşmanlara %40 artırır.",
+   "_src": "While you have bonus armor, amplifies total weapon damage by 40% to enemies with",
+   "_mt": "tr"
+  },
+  "Perfectly Unbreakable": {
+   "tr": "Zırhınız tükendiğinde, zırhınızın %100'ünü onarın. Soğutma süresi 55 saniyedir.",
+   "_src": "When your armor is depleted, repair 100% of your armor. Cooldown is 55 seconds.",
+   "_mt": "tr"
+  },
+  "Perfect Vanguard": {
+   "tr": "Bir kalkanın yerleştirilmesi, onu 5 saniye boyunca yenilmez hale getirir ve diğer tüm müttefiklere 20 saniye boyunca %50 bonus zırh verir. Serinleme süresi 25 saniyedir.",
+   "_src": "Deploying a shield makes it invulnerable for 5s and grants 50% bonus armor to al",
+   "_mt": "tr"
+  },
+  "Perfect Braced": {
+   "tr": "Kapakta silah kullanımı %50 artarken.",
+   "_src": "While in cover weapon handling is increased by 50%.",
+   "_mt": "tr"
+  },
+  "Perfect Focus": {
+   "tr": "Hedeflediğiniz her saniye toplam silah hasarını %6 artırırken, 8x veya daha yüksek bir aralıkla %60'a kadar arttırın.",
+   "_src": "Increases total weapon damage by 6% every second you are aiming while scoped 8x ",
+   "_mt": "tr"
+  },
+  "Perfect Glass Cannon": {
+   "tr": "Dağıttığınız tüm hasarlar %30 oranında arttırılır. Aldığınız tüm hasarlar %60 oranında arttırılır.",
+   "_src": "All damage you deal is amplified by 30%. All damage you take is amplified by 60%",
+   "_mt": "tr"
+  },
+  "Perfect Spark": {
+   "tr": "Bir düşmana beceri ile zarar vermek, 20 saniye boyunca toplam silah hasarını %15 artırır.",
+   "_src": "Damaging an enemy with a skill increases total weapon damage by 15% for 20 secon",
+   "_mt": "tr"
+  },
+  "Short Circuit": {
+   "tr": "Feedback Loop soğumasını 20 saniyeden 10 saniyeye düşürür.",
+   "_src": "Decreases Feedback Loop cooldown from 20s to 10s.",
+   "_mt": "tr"
+  },
+  "Positive Reinforcement": {
+   "tr": "Feedback Loop beceri hasarını ve onarım bonusunu %10'dan %20'ye yükseltir.",
+   "_src": "Increases Feedback Loop skill damage and repair bonus from 10% to 20%.",
+   "_mt": "tr"
+  },
+  "Emergency Requisition": {
+   "tr": "Silahınızı yeniden yüklemek, 40 metre içinde tüm savaş kaynaklarını (silah kitleri, cephane, el bombaları) otomatik olarak toplar.",
+   "_src": "Reloading your weapon automatically collects all combat resources (armor kits, a",
+   "_mt": "tr"
+  },
+  "Parabellum Rounds": {
+   "tr": "Hollow-Point Ammo hasarını %35'e çıkarır.",
+   "_src": "Increases Hollow-Point Ammo damage to 35%.",
+   "_mt": "tr"
+  },
+  "Patriotic Boost": {
+   "tr": "Kırmızı / Beyaz / Mavi debuff gücünü artırır. Kırmızı: %8 ila %12. Beyaz: %5 ila %8 arası. Mavi: %8 ila %12.",
+   "_src": "Increases Red / White / Blue debuff strength. Red: 8% to 12%. White: 5% to 8%. B",
+   "_mt": "tr"
+  },
+  "Waving the Flag": {
+   "tr": "Kırmızı / Beyaz / Mavi dönüş hızını 1,5 saniyeye çıkarır.",
+   "_src": "Increases Red / White / Blue rotation speed to 1.5 seconds.",
+   "_mt": "tr"
+  },
+  "Poker Face": {
+   "tr": "1 atışta ek bir Dead Man's Hand kartı çevirin.",
+   "_src": "Flip an additional Dead Man's Hand card on 1 shot.",
+   "_mt": "tr"
+  },
+  "No Limit": {
+   "tr": "Dead Man's Hand hasar bonusunu %30'dan %50'ye yükseltir.",
+   "_src": "Increases Dead Man's Hand damage bonus from 30% to 50%.",
+   "_mt": "tr"
+  },
+  "Critical Measures": {
+   "tr": "Crowd Control hasarını %60'tan %100'e kadar ek işaretli düşmanlara artırır.",
+   "_src": "Increases Crowd Control damage to additional marked enemies from 60% to 100%.",
+   "_mt": "tr"
+  },
+  "Target Rich Environment": {
+   "tr": "Crowd Control işareti 3'ten 5'e kadar sayılır.",
+   "_src": "Crowd Control mark count from 3 to 5.",
+   "_mt": "tr"
+  },
+  "Process Refinery": {
+   "tr": "Makeshift Repairs hızı 10 saniyeden 6 saniyeye.",
+   "_src": "Makeshift Repairs speed from 10 seconds to 6 seconds.",
+   "_mt": "tr"
+  },
+  "Improved Materials": {
+   "tr": "Makeshift Repairs'ı %40'tan %60'a çıkarır.",
+   "_src": "Increases Makeshift Repairs from 40% to 60%.",
+   "_mt": "tr"
+  },
+  "Strategic Combat Support": {
+   "tr": "Ground Control yakınlık onarımını %60'tan %120'ye çıkarır.",
+   "_src": "Increases Ground Control proximity repair from 60% to 120%.",
+   "_mt": "tr"
+  },
+  "Placeholder": {
+   "tr": "Ground Control hasar bonusunu %15'ten %25'e yükseltir.",
+   "_src": "Increases Ground Control damage bonus from 15% to 25%.",
+   "_mt": "tr"
+  },
+  "Risk Management": {
+   "tr": "Striker's Gamble için 3'ten 2'ye kaçırılan atışlarda kaybedilen yığınları azaltır.",
+   "_src": "Decreases stacks lost on missed shots for Striker's Gamble from 3 to 2.",
+   "_mt": "tr"
+  },
+  "Press the Advantage": {
+   "tr": "Striker's Gamble için maksimum yığınları 50'den 100'e yükseltin.",
+   "_src": "Increase max stacks for Striker's Gamble from 50 to 100.",
+   "_mt": "tr"
+  },
+  "Multithreaded Execution": {
+   "tr": "Hackstep Protocol bonus zırhını %50'den %100'e çıkarır.",
+   "_src": "Increases Hackstep Protocol bonus armor from 50% to 100%.",
+   "_mt": "tr"
+  },
+  "Compiler Optimization": {
+   "tr": "Hackstep Protocol soğumasını 20 saniyeden 15 saniyeye düşürür.",
+   "_src": "Decreases Hackstep Protocol cooldown from 20 seconds to 15 seconds.",
+   "_mt": "tr"
+  },
+  "Accurate": {
+   "tr": "Doğruluk %25 artırılır.",
+   "_src": "Accuracy is increased by 25%.",
+   "_mt": "tr"
+  },
+  "Allegro": {
+   "tr": "+%10 ateş oranı.",
+   "_src": "+10% rate of fire.",
+   "_mt": "tr"
+  },
+  "Boomerang": {
+   "tr": "Kritik isabetlerin mermiyi dergiye geri verme şansı %50. Bir mermi dergiye iade edilirse, bir sonraki atışta hasarın %40'ı artar.",
+   "_src": "Critical hits have a 50% chance to return the bullet to the magazine. If a bulle",
+   "_mt": "tr"
+  },
+  "Breadbasket": {
+   "tr": "İniş vücut atışları, 10 saniye boyunca bir sonraki headshot'a %35 bonus kafa vuruşu hasarı ekler. Max stack sayısı 3.",
+   "_src": "Landing body shots adds a stack of bonus 35% headshot damage to the next headsho",
+   "_mt": "tr"
+  },
+  "Close & Personal": {
+   "tr": "7 metre içinde bir hedefi öldürmek, 10 saniyeliğine %30 silah hasarı verir.",
+   "_src": "Killing a target within 7 meters grants 30% weapon damage for 10 seconds",
+   "_mt": "tr"
+  },
+  "Determined": {
+   "tr": "Bir hedefi öldürmek beceri gerilemelerini %7,5 oranında azaltır.",
+   "_src": "Killing a target reduces skill cooldowns by 7.5%.",
+   "_mt": "tr"
+  },
+  "Distance": {
+   "tr": "+15% Optimal Aralık.",
+   "_src": "+15% Optimal Range.",
+   "_mt": "tr"
+  },
+  "Eyeless": {
+   "tr": "Kör düşmanlara %20 silah hasarı verin. 4 cinayetten sonra, vurduğunuz bir sonraki düşmana kör uygulanır.",
+   "_src": "Deal 20% weapon damage to blinded enemies. After 4 kills, applies blind to the n",
+   "_mt": "tr"
+  },
+  "Extra": {
+   "tr": "+%20 Dergi Kapasitesi.",
+   "_src": "+20% Magazine Capacity.",
+   "_mt": "tr"
+  },
+  "Fast Hands": {
+   "tr": "Kritik isabetler, %4 yeniden yükleme hızı bonusu yığını ekler. Max yığını 40.",
+   "_src": "Critical hits add a stack of 4% reload speed bonus. Max stack is 40.",
+   "_mt": "tr"
+  },
+  "Finisher": {
+   "tr": "Bir düşmanı öldürdükten sonra 10 saniye içinde bu silahtan değiş tokuş etmek, 15 saniye boyunca %30 kritik isabet şansı ve %30 kritik isabet hasarı verir.",
+   "_src": "Swapping from this weapon within 10 seconds of killing an enemy grants 30% criti",
+   "_mt": "tr"
+  },
+  "First Blood": {
+   "tr": "Eğer dürbünlü ise, ilk atışınız savaş dışı veya boş anlaşmalardan tam olarak doldurulduktan sonra vücudun herhangi bir yerine isabet eden kafa vuruşu hasarı. 8x büyütme veya daha yüksek bir Scope gerektirir.",
+   "_src": "If scoped, your first shot fired from out of combat or after fully reloading fro",
+   "_mt": "tr"
+  },
+  "Flatline": {
+   "tr": "Silah hasarını darbeli düşmanlara %15 artırır. 3 cinayetten sonra pulse'ı vurduğunuz bir sonraki düşmana uygular.",
+   "_src": "Amplifies weapon damage by 15% to pulsed enemies. • After 3 kills, applies pulse",
+   "_mt": "tr"
+  },
+  "Frenzy": {
+   "tr": "Dergi kapasitesindeki her 10 mermi için, boştan doldurulurken 5 saniye boyunca %3 oranında ateş ve %3 silah hasarı elde edin.",
+   "_src": "For every 10 bullets in the magazine capacity, gain 3% rate of fire and 3% weapo",
+   "_mt": "tr"
+  },
+  "Future Perfect": {
+   "tr": "Silah, 15 saniye boyunca +1 beceri katmanını öldürür. 3 kata kadar yığınlar. Silah beceri kademesinde öldürür 6 15 saniye boyunca fazla şarj sağlar. Aşırı şarj soğutma: 90 saniye",
+   "_src": "Weapon kills grant +1 skill tier for 15s. Stacks up to 3 times. • Weapon kills a",
+   "_mt": "tr"
+  },
+  "Hidden Rock": {
+   "tr": "Kafa vuruşları kafa karıştırıcıdır. Serinleme: 20 saniye.",
+   "_src": "Headshots apply confuse. Cooldown: 20s.",
+   "_mt": "tr"
+  },
+  "Ignited": {
+   "tr": "Yanan düşmanlara %20 silah hasarı verin. 4 cinayetten sonra, vurduğunuz bir sonraki düşmana yanma uygular.",
+   "_src": "Deal 20% weapon damage to burning enemies. After 4 kills, applies burning to the",
+   "_mt": "tr"
+  },
+  "In Sync": {
+   "tr": "Bir düşmana vurmak, 5 saniye boyunca +15 beceri hasarı verir. Kalkan olmayan bir beceri kullanmak veya bir düşmana bir beceri ile zarar vermek, 5 saniyeliğine +1% silah hasarı sağlar. Hasar artışları iki katına çıkarılırken her ikisi de buf",
+   "_src": "Hitting an enemy grants +15% skill damage for 5s. • Using a non-shield skill or ",
+   "_mt": "tr"
+  },
+  "Jazz Hands": {
+   "tr": "+%10 yeniden yükleme hızı.",
+   "_src": "+10% reload speed.",
+   "_mt": "tr"
+  },
+  "Killer": {
+   "tr": "Kritik vuruşla bir düşmanı öldürmek, 10 saniye boyunca %40 kritik isabet hasarı verir.",
+   "_src": "Killing an enemy with a critical hit grants 40% critical hit damage for 10 secon",
+   "_mt": "tr"
+  },
+  "Lucky Shot": {
+   "tr": "Dergi kapasitesi %20 arttırılmıştır. Kapaktan kaçırılan çekimlerin dergiye dönme şansı %100'dür.",
+   "_src": "Magazine capacity is increased by 20%. Missed shots from cover have a 100% chanc",
+   "_mt": "tr"
+  },
+  "Measured": {
+   "tr": "Derginin ilk yarısında +20% yangın oranı ve -30% silah hasarı vardır. Derginin alt yarısı -%20 oranında yangın ve +30% silah hasarına sahiptir.",
+   "_src": "The top half of the magazine has +20% rate of fire and -30% weapon damage. The b",
+   "_mt": "tr"
+  },
+  "Naked": {
+   "tr": "Zırhsız bir düşmana vurmak, 5 saniye boyunca %50'lik bir kafa atışı hasarı verir.",
+   "_src": "Hitting an enemy with no armor grants 50% headshot damage for 5 seconds.",
+   "_mt": "tr"
+  },
+  "Near Sighted": {
+   "tr": "%35 optimal aralık maliyetinde %80 stabilite alın.",
+   "_src": "Receive 80% stability at the cost of 35% optimal range.",
+   "_mt": "tr"
+  },
+  "On Empty": {
+   "tr": "Boşluktan yeniden yükleme, 10 saniye boyunca %30 silah kullanımı sağlar.",
+   "_src": "Reloading from empty grants 30% weapon handling for 10 seconds.",
+   "_mt": "tr"
+  },
+  "Optimist": {
+   "tr": "Silah hasarı, dergide eksik olan her %10 mermi için %3 oranında artırılmaktadır.",
+   "_src": "Weapon damage is increased by 3% for every 10% ammo missing from the magazine.",
+   "_mt": "tr"
+  },
+  "Outsider": {
+   "tr": "Bir düşmanı öldürdükten sonra, 10 saniye boyunca %100 optimum menzil ve %100 doğruluk elde edin.",
+   "_src": "After killing an enemy, gain 100% optimal range and 100% accuracy for 10 seconds",
+   "_mt": "tr"
+  },
+  "Overflowing": {
+   "tr": "Boş olan her 3 yeniden yükleme, temel dergi kapasitenizi %100 artırır.",
+   "_src": "Every 3 reloads from empty increases your base magazine capacity by 100%.",
+   "_mt": "tr"
+  },
+  "Overwhelm": {
+   "tr": "Şu anda bastırılmamış bir düşmanı bastırmak, 12 saniye boyunca %10 silah hasarı verir. Max stack sayısı 4.",
+   "_src": "Suppressing an enemy, that is not currently suppressed, grants 10% weapon damage",
+   "_mt": "tr"
+  },
+  "Perpetuation": {
+   "tr": "Headshots, başvurduğunuz bir sonraki durum etkisine %50 durum etkisi hasarı ve süresi verir. Soğutma süresi 20 saniyedir.",
+   "_src": "Headshots grant 50% status effect damage and duration to the next status effect ",
+   "_mt": "tr"
+  },
+  "Preservation": {
+   "tr": "Bir düşmanı öldürmek, 5 saniye boyunca %10 zırhı onarır. Kafa vuruşu ölümleri onarımı %10'a kadar iyileştirir.",
+   "_src": "Killing an enemy repairs 10% armor over 5 seconds. Headshot kills improves the r",
+   "_mt": "tr"
+  },
+  "Primer Rounds": {
+   "tr": "Hasar gören düşmanlar 5 saniye boyunca %50 yanma direnci kaybederler.",
+   "_src": "Damaged enemies lose 50% burn resistance for 5 seconds.",
+   "_mt": "tr"
+  },
+  "Pummel": {
+   "tr": "3 ardışık öldürme, againze'yi yeniden doldurur ve 10 saniye boyunca %40 silah hasarı verir.",
+   "_src": "3 consecutive kills refill the magainze and grant 40% weapon damage for 10 secon",
+   "_mt": "tr"
+  },
+  "Pumped Up": {
+   "tr": "Yeniden yükleme, 10 saniye boyunca %1 silah hasarı verir. 25'e kadar yığınlar.",
+   "_src": "Reloading grants 1% weapon damage for 10 seconds. Stacks up to 25.",
+   "_mt": "tr"
+  },
+  "Ranger": {
+   "tr": "Hedefinizden uzakta olduğunuz her 5 metre için silah hasarını %2 artırır.",
+   "_src": "Amplifies weapon damage by 2% for every 5 meters you are away from your target.",
+   "_mt": "tr"
+  },
+  "Reformation": {
+   "tr": "Headshots, 8 saniye boyunca %30 beceri onarımı sağlar.",
+   "_src": "Headshots grant 30% skill repair for 8 seconds.",
+   "_mt": "tr"
+  },
+  "Rifleman": {
+   "tr": "İniş headshot'ları, 5 saniye boyunca %10 oranında bonus silah hasarı ekler. Max yığını 5'tir. Ek headshot'lar süreyi tazeler.",
+   "_src": "Landing headshots adds a stack of bonus 10% weapon damage for 5 seconds. Max sta",
+   "_mt": "tr"
+  },
+  "Sadist": {
+   "tr": "Kanayan düşmanlara %20 silah hasarı verin. 4 cinayetten sonra, çarptığınız bir sonraki düşmana kanama uygulayın.",
+   "_src": "Deal 20% weapon damage to bleeding enemies. After 4 kills, applies bleed to next",
+   "_mt": "tr"
+  },
+  "Salvage": {
+   "tr": "Bir hedefi öldürmek, dergiyi yeniden doldurmak için %70 şansa sahiptir.",
+   "_src": "Killing a target has a 70% chance to refill the magazine.",
+   "_mt": "tr"
+  },
+  "Sledgehammer": {
+   "tr": "Bir el bombası ile hasarla başa çıkmak hedefe bir işaret uygular. İşaretli hedefler zırha %15 daha fazla zarar verir ve -20% hareket hızına sahip olur. 10 saniye sonra Mark kaybolur.",
+   "_src": "Dealing damage with a grenade applies a mark on target. • Targets with mark will",
+   "_mt": "tr"
+  },
+  "Spike": {
+   "tr": "Headshots, 8 saniye boyunca %20 beceri hasarı verir.",
+   "_src": "Headshots grant 20% skill damage for 8 seconds.",
+   "_mt": "tr"
+  },
+  "Steady Handed": {
+   "tr": "Hits, %1 doğruluk ve istikrar yığını sağlar. 100 yığında, dergiyi doldurmak için onları tüketir.",
+   "_src": "Hits grant a stack of 1% accuracy and stability. At 100 stacks, consumes them to",
+   "_mt": "tr"
+  },
+  "Strained": {
+   "tr": "Ateşlediğiniz her 0.5 saniye için %10 kritik isabet hasarı kazanın. 5 defaya kadar istiflenir.",
+   "_src": "Gain 10% critical hit damage for every 0.5 seconds you are firing. Stacks up to ",
+   "_mt": "tr"
+  },
+  "Swift": {
+   "tr": "Kapak yapmak, 15 saniye boyunca %20 silah hasarı verir.",
+   "_src": "Performing a cover to cover grants 20% weapon damage for 15s.",
+   "_mt": "tr"
+  },
+  "Twinkling Lights": {
+   "tr": "Sadece geceleri twinkling lights ile kafalarını şenlik gücüyle doldurabilirsiniz.",
+   "_src": "Only at night with twinkling lights can you fill their heads with festive might.",
+   "_mt": "tr"
+  },
+  "Unhinged": {
+   "tr": "%25 stabilite ve %25 doğruluk maliyetinde %18 silah hasarı alın.",
+   "_src": "Receive 18% weapon damage at the cost of 25% stability and 25% accuracy.",
+   "_mt": "tr"
+  },
+  "Unwavering": {
+   "tr": "Bu silaha geçiş, 5 saniye boyunca %300 oranında silah işleme sağlar. ÖIdürücüler buff'ı tazeler. Takas yapmak bunu tüm silahlardan 5 saniyeliğine devre dışı bırakır.",
+   "_src": "Swapping to this weapon grants 300% weapon handling for 5 seconds. Kills refresh",
+   "_mt": "tr"
+  },
+  "Vindictive": {
+   "tr": "Durum etkisi uygulanan bir düşmanı öldürmek, 15 metre içindeki tüm grup üyelerine, %15 kritik isabet şansı ve 20 saniye boyunca %15 kritik vuruş hasarı verir.",
+   "_src": "Killing an enemy with a status effect applied grants all group members within 15",
+   "_mt": "tr"
+  },
+  "Adaptive Instincts": {
+   "tr": "30 headshots: %20 CHC, 45 saniye boyunca %50 CHD. 60 vücut atışı: 45 saniye boyunca %80 silah hasarı. 30 bacak atışı: 45 saniye boyunca 150% yeniden yükleme hızı.",
+   "_src": "30 headshots: 20% CHC, 50% CHD for 45s. 60 body shots: 80% weapon damage for 45s",
+   "_mt": "tr"
+  },
+  "Agonizing Bite": {
+   "tr": "Rastgele bir düşmana işaret eder. Düşmana vurmak işareti tüketir, kritik bir vuruşu %20 oranında artırılmış hasarla garanti eder.",
+   "_src": "Randomly marks an enemy. Hitting enemy consumes the mark, guaranteeing a critica",
+   "_mt": "tr"
+  },
+  "Big Game Hunter": {
+   "tr": "Kapsama edildiğinde, yarı otomatik ateş moduna geçer ve her atışta %450 silah hasarı verir.",
+   "_src": "When scoped, switches to semi-automatic fire mode, dealing 450% weapon damage wi",
+   "_mt": "tr"
+  },
+  "Binary Trigger": {
+   "tr": "Her iki mermi de aynı düşmana isabet ederse bir yığın kazan. 7 yığında, bir düşmana vurmak %900 silah hasarı için 7M patlama yaratır.",
+   "_src": "Gain a stack if both bullets hit the same enemy. At 7 stacks, hitting an enemy c",
+   "_mt": "tr"
+  },
+  "Breathe Free": {
+   "tr": "Kazanç 4 yığın/s hareketli, 8 sprint, 40 max. Atışlar bir yığın kullanır ve hasarı %60 arttırır. Kills, 10 saniye boyunca %20 hareket hızı sağlar.",
+   "_src": "Gain 4 stacks/s moving, 8 sprinting, 40 max. Shots use a stack, increasing damag",
+   "_mt": "tr"
+  },
+  "Bullet Hell": {
+   "tr": "Asla yeniden yüklemeye gerek yok. Düşmana isabet eden her 100 mermi için size ve müttefiklerinizin rezervlerine biraz cephane doldurun.",
+   "_src": "Never needs to be reloaded. For every 100 bullets that hit an enemy, replenish s",
+   "_mt": "tr"
+  },
+  "Capacitance": {
+   "tr": "Düşmanları vurmak 40'lık bir kapta yığınlar oluşturur. Her yığın %1.5 Beceri Hasarı verir. 5 saniye sonra, yığınlar saniyede 1 bozunur. Her Beceri Katmanı için %7.5 Silah Hasarı kazanır.",
+   "_src": "Shooting enemies builds stacks to a cap of 40. Each stack grants 1.5% Skill Dama",
+   "_mt": "tr"
+  },
+  "Disruptor Rounds": {
+   "tr": "Düşmanı vurmak düşmanı işaret eder ve ajana 50 kadar bir yığın ekler. İşaretli bir düşmanı vurmak işareti tazeler ve ajana yığınlar ekler. Bir kalkan olmayanı görevlendirdiğinizde",
+   "_src": "Shooting an enemy marks that enemy and adds a stack to the agent up to a count o",
+   "_mt": "tr"
+  },
+  "Eagle's Strike": {
+   "tr": "+ Ateş ederken doğruluk, %30'a kadar. Kafa vuruşu öldürür, 15 saniye boyunca Tenacity verir ve vücut atışları için %1, kafa vuruşları için %5 artar.",
+   "_src": "+Accuracy as you fire, up to 30%. Headshot kills grant Tenacity for 15s increasi",
+   "_mt": "tr"
+  },
+  "Tenacity": {
+   "tr": "Alınan hasarın %40-80'i, buff sona erene kadar ertelenir. Gecikmeli hasar öldürme başına %33 azalırken, buff aktiftir.",
+   "_src": "40%-80% of damage taken is delayed until buff expires. Delayed damage is reduced",
+   "_mt": "tr"
+  },
+  "Electromagnetic Accelerator": {
+   "tr": "Atışlar, tetiğin serbest bırakılmadan önce ne kadar süre tutulduğuna bağlı olarak %0-100 silah hasarıyla sonuçlandı.",
+   "_src": "Shots fired deal 0 -100% weapon damage based on how long the trigger is held bef",
+   "_mt": "tr"
+  },
+  "Full Stop": {
+   "tr": "Düşmanları vurmak, 20’lik bir kapta yığınlar oluşturur. Headshots 2 yığın verir. Her yığın %2 Silah Hasarı ve %5 Kafa Hasarı verir. Yeniden yüklemede, tüm yığınları temizleyin ve maksimum zırhınızın %5'ini kazanın",
+   "_src": "Shooting enemies builds stacks to a cap of 20. Headshots grants 2 stacks. Each s",
+   "_mt": "tr"
+  },
+  "The Trap": {
+   "tr": "Crosshair olduğunda düşmanları etiketle (10 maksimum). Ajan, işaretli herhangi bir hedefi headshot ile öldürürse, diğer tüm hedefler %50 (20% PVP) hareket hızı azaltılır ve 10 saniye boyunca yanma alır.",
+   "_src": "Tags enemies when in crosshair (maximum of 10). If Agent kills any marked target",
+   "_mt": "tr"
+  },
+  "Septic Shock": {
+   "tr": "Bir hedefi vurmak, 10 saniye süren zehir yığınları uygular. Yığınların artırılması hedefe daha şiddetli debuffs ekler.  1 - Poison 3 - Disorient  6 - Shock  7 - Hedef bir reklam alır",
+   "_src": "Shooting a target applies stacks of venom, which last for 10s. Increasing stacks",
+   "_mt": "tr"
+  },
+  "Sandman": {
+   "tr": "Melee saldırıları anında elit olmayan düşmanları öldürür. Serinleme: 15 saniye",
+   "_src": "Melee attacks instantly kill non-elite enemies. Cooldown: 15 seconds",
+   "_mt": "tr"
+  },
+  "Regicide": {
+   "tr": "Kafadan vurulmak %400 silah hasarı verir ve öldürülen düşmana 5 metre mesafedeki düşmanlara kanama uygular.",
+   "_src": "Headshot kills deals 400% weapon damage and applies bleed to enemies within 5 me",
+   "_mt": "tr"
+  },
+  "Plague of the Outcasts": {
+   "tr": "Vuruşlar, 50 saniye boyunca %100 silah hasarı için debuff uygular. Yığınlar, ölüm üzerine 25M içinde yakındaki bir düşmana aktarılır.",
+   "_src": "Hits apply debuff for 100% weapon damage over 10s stacking to 50. Stacks are tra",
+   "_mt": "tr"
+  },
+  "Payment in Kind": {
+   "tr": "Düşmanlara zarar vermek, 10 saniye süren 100 yığına kadar +%2 kritik isabet hasarı yığını ekler. Yeniden yüklemede kendinize 10 saniyelik bir kanama uygulayın, bu da yığın başına %0.5 zırh hasarı verir.",
+   "_src": "Dealing damage to enemies adds a stack of +2% critical hit damage, up to 100 sta",
+   "_mt": "tr"
+  },
+  "Behind You": {
+   "tr": "Sizi hedef almayan düşmanlara +%20 oranında silah hasarını arttırır.",
+   "_src": "Amplifies weapon damage by +20% to enemies that are not targeting you.",
+   "_mt": "tr"
+  },
+  "Optimized": {
+   "tr": "+%10 Silah Taşıma.",
+   "_src": "+10% Weapon Handling.",
+   "_mt": "tr"
+  },
+  "Stabilize": {
+   "tr": "Silahınızı ateşlemek Silah Doğruluğunu %1 arttırır ve Atış başına silah stabilitesini %60’a kadar artırır. Ateş etmeyi durdurursanız, bonuslar 4 saniye sonra sıfırlanır.",
+   "_src": "Firing your weapon increases Weapon Accuracy by 1% and Weapon Stability by 1% pe",
+   "_mt": "tr"
+  },
+  "Actum Est": {
+   "tr": "Bu silahla bir düşmanı vurmak 1 yığın verecektir. 100 yığında bir sonraki dergi şok mermisi ile doldurulacaktır.",
+   "_src": "Shooting an enemy with this weapon will give 1 stack. • At 100 stacks the next m",
+   "_mt": "tr"
+  },
+  "Ardent": {
+   "tr": "Ateş etmek silahı ısıtır, ısı ölçeri doldurur. Sayaç, silahın standart Dergi Boyutunun %50'sine eşdeğerdir. Sayaç dolduğunda, silah tarafından ateşlenen mermiler düşmanları tutuşturur",
+   "_src": "Shooting heats up the weapon, filling up heat meter. The meter is equivalent to ",
+   "_mt": "tr"
+  },
+  "In Plain Sight": {
+   "tr": "Kapsama görünümünde sizi hedef almayan düşmanlar hakkında ek bilgiler görüntülenir. Sizi hedeflemeyen düşmanlara karşı kafa vuruşu ve zayıf nokta hasarı %50 oranında arttırılır. Kafa vuruşu rese öldürür",
+   "_src": "Your scoped view displays additional information about enemies not targeting you",
+   "_mt": "tr"
+  },
+  "Ortiz Assault Interface": {
+   "tr": "Kapsamadayken, silah her düşmanın rastgele bir vücut bölümünü vurgulayacaktır. Silah vurgulanan gövde bölümlerine +60% Silah Hasarı verir.",
+   "_src": "While scoped, the weapon will highlight a random body section of each enemy. • T",
+   "_mt": "tr"
+  },
+  "Rule Them All": {
+   "tr": "Ajan kendilerine uygulanan bir Durum Etkisine sahip olduğunda, bir sonraki dergilerindeki cephanenin %50'si hedeflerine aynı Durum Etkisini uygulayacaktır. Bu etki yalnızca savaş sırasında meydana gelecektir. -",
+   "_src": "When the agent has a Status Effect applied to them, 50% of the ammo in their nex",
+   "_mt": "tr"
+  },
+  "Precision Strike": {
+   "tr": "20 metreden daha uzaktaki düşmanları öldürmek yığınlar oluşturur. Maksimum yığın 3. 20m içinde bir düşmanı vurmak, 20m içinde düşmanlara 5 saniye boyunca +20% Amplified Damage sağlamak için tüm yığınları kullanacaktır.",
+   "_src": "Killing enemies farther than 20m builds up stacks. Max stack is 3. • Hitting an ",
+   "_mt": "tr"
+  },
+  "Brazen": {
+   "tr": "Bir sonraki atışta +3.5% Amplified Damage alın, en az 6 pelet isabet ederse hedefe çarpan her top için silahla.",
+   "_src": "Receive +3.5% Amplified Damage on the next shot with the weapon for each pellet ",
+   "_mt": "tr"
+  },
+  "Geri and Freki": {
+   "tr": "İki fıçıyı birden ateşleyin. Sağ omuz vuruşları hücum primerleri, sol omuz vuruşları savunma primerleri ekler. Bir omuzdan gelen darbeler, mevcut olduğunda karşı omzun tüm primerlerini patlatacaktır. Patlatıldığında, her hücum primer %75 silah hasarı verirken, her savunma primer 5 saniyeliğine %2 bonus zırh verir. Primer etkinlik 10 yığında iki katına çıkar.",
+   "_src": "Fire both barrels at once. Right shoulder hits add offensive primers, left shoul",
+   "_mt": "tr"
+  },
+  "Refreshing": {
+   "tr": "Silah bir su akıntısı ateşler. Bir müttefik ajana vurmak onların üzerine yığınlar inşa eder. Maksimum yığın 5'tir Stacks her 2 saniyede bir tükenir. En az 1 yığına sahipken, müttefik +%50 Hazard Pr'ye sahip olacaktır",
+   "_src": "The weapon fires a stream of water. Hitting an ally agent builds stacks on them.",
+   "_mt": "tr"
+  },
+  "Capitulate": {
+   "tr": "Bir düşmana vurmak, 5 saniye boyunca isabet eden her pelet için -4% Hareket Hızı uygular. Düşmanı tekrar vurmak yığınları yeniden uygulayacaktır.",
+   "_src": "Hitting an enemy applies -4% Movement Speed for each pellet hit for 5 seconds. •",
+   "_mt": "tr"
+  },
+  "Incessant Chatter": {
+   "tr": "Yeniden yükleme, o derginin süresi boyunca 15M içindeki her düşman için ROF'u %20 artırır. En fazla 5 yığın. Derginin %50'sini doldurur.",
+   "_src": "Reloading increases ROF 20% for each enemy within 15M for the duration of that m",
+   "_mt": "tr"
+  },
+  "Liberty or Death": {
+   "tr": "Her vuruşta bir yığın kazan, 30'a kadar. Kafa vuruşları tüm yığınları tüketir, kalkanınızı yığın başına %3 oranında onarır.",
+   "_src": "Gain a stack on each hit, up to 30. Headshots consume all stacks, repairing your",
+   "_mt": "tr"
+  },
+  "Mosquito Song": {
+   "tr": "Düşmana vurmak bir yığın uygular. Yığınlar oyuncular arasında paylaşılır. 5 yığında düşman, son oyuncuyu 5 saniye boyunca bir yığın uygulamak için zorla hedef alacak ve zırha %25 daha fazla zarar verecektir.",
+   "_src": "Hitting an enemy applies a stack. Stacks are shared between players. • At 5 stac",
+   "_mt": "tr"
+  },
+  "Unnerve": {
+   "tr": "Bir düşmanı öldürmek, 20 metre içindeki her düşmana bir işaret uygulayacaktır. Aynı düşmana birden fazla işaret uygulanabilir. Bir düşmana uygulanabilecek maksimum işaret sayısı 5. Deal +%15 Ampli",
+   "_src": "Killing an enemy will apply a mark on every enemy within 20m of it. Multiple mar",
+   "_mt": "tr"
+  },
+  "Pressure Point": {
+   "tr": "Status Effects altında düşmanlara %15 oranında silah hasarını artırır.",
+   "_src": "Amplifies weapon damage by 15% to enemies under Status Effects.",
+   "_mt": "tr"
+  },
+  "Symbiosis": {
+   "tr": "Bir Kalkan konuşlandırılırken, Shield Health'i saniyede %10 oranında kaybedin. Kalkanınız bu silahın verdiği hasarın %25'ini onarır.",
+   "_src": "While having a Shield deployed, lose Shield Health at a rate of 10% per second. ",
+   "_mt": "tr"
+  },
+  "Startling": {
+   "tr": "Ne zaman bu silah üretse ve düşman bastırılsa, düşmana Disorient uygulanır ve siz ve müttefikleriniz 15 saniye boyunca Kapak Dışı Hedeflere +30% Hasar alırsınız.",
+   "_src": "Whenever this weapon makes and enemy Suppressed, the enemy is applied Disorient,",
+   "_mt": "tr"
+  },
+  "Thunder Strike": {
+   "tr": "Şok olmuş düşmanlara silah hasarını %30 artırır. 4 cinayetten sonra, çarptığınız bir sonraki düşmana şok uygular.",
+   "_src": "Amplifies weapon damage by 30% to shocked enemies. • After 4 kills, applies shoc",
+   "_mt": "tr"
+  },
+  "Perfect Allegro": {
+   "tr": "+%10 ateş oranı.",
+   "_src": "+10% rate of fire.",
+   "_mt": "tr"
+  },
+  "Perfect Boomerang": {
+   "tr": "Kritik isabetlerin mermiyi dergiye geri verme şansı %50. Bir mermi dergiye iade edilirse, bir sonraki atışta hasarın %40'ı artar.",
+   "_src": "Critical hits have a 50% chance to return the bullet to the magazine. If a bulle",
+   "_mt": "tr"
+  },
+  "Perfect Breadbasket": {
+   "tr": "İniş vücut atışları, 10 saniye boyunca bir sonraki headshot'a %50 bonus headshot hasarı ekler. Max stack sayısı 2.",
+   "_src": "Landing body shots adds a stack of bonus 50% headshot damage to the next headsho",
+   "_mt": "tr"
+  },
+  "Perfect Distance": {
+   "tr": "+15% Optimal Aralık.",
+   "_src": "+15% Optimal Range.",
+   "_mt": "tr"
+  },
+  "Perfect Eyless": {
+   "tr": "Kör olmuş düşmanlara %25 silah hasarı verin. 3 cinayetten sonra, vurduğunuz bir sonraki düşmana kör uygulanır.",
+   "_src": "Deal 25% weapon damage to blinded enemies. After 3 kills, applies blind to the n",
+   "_mt": "tr"
+  },
+  "Perfect Fast Hands": {
+   "tr": "Kritik isabetler, %8'lik bir tekrar yükleme hızı bonusu ekler. Max yığını 40.",
+   "_src": "Critical hits add a stack of 8% reload speed bonus. Max stack is 40.",
+   "_mt": "tr"
+  },
+  "Perfect Finisher": {
+   "tr": "Bir düşmanı öldürdükten sonra 10 saniye içinde bu silahtan değiş tokuş etmek, 15 saniye boyunca %30 kritik isabet şansı ve %30 kritik isabet hasarı verir.",
+   "_src": "Swapping from this weapon within 10 seconds of killing an enemy grants 30% criti",
+   "_mt": "tr"
+  },
+  "Perfect First Blood": {
+   "tr": "Eğer dürbünlü ise, ilk atışınız savaş dışı veya boş anlaşmalardan tam olarak doldurulduktan sonra vücudun herhangi bir yerine isabet eden kafa vuruşu hasarı. 8x büyütme veya daha yüksek bir Scope gerektirir.",
+   "_src": "If scoped, your first shot fired from out of combat or after fully reloading fro",
+   "_mt": "tr"
+  },
+  "Perfect Frenzy": {
+   "tr": "Dergi kapasitesindeki her 10 mermi için, boştan doldurulurken 5 saniye boyunca %3 oranında ateş ve %3 silah hasarı elde edin.",
+   "_src": "For every 10 bullets in the magazine capacity, gain 3% rate of fire and 3% weapo",
+   "_mt": "tr"
+  },
+  "Perfect Jazz Hands": {
+   "tr": "+%10 yeniden yükleme hızı.",
+   "_src": "+10% reload speed.",
+   "_mt": "tr"
+  },
+  "Perfect Killer": {
+   "tr": "Kritik vuruşla bir düşmanı öldürmek, 10 saniye boyunca %50 kritik isabet hasarı verir.",
+   "_src": "Killing an enemy with a critical hit grants 50% critical hit damage for 10 secon",
+   "_mt": "tr"
+  },
+  "Perfect Lucky Shot": {
+   "tr": "Dergi kapasitesi %30 arttırılmıştır. Kapaktan kaçırılan çekimlerin dergiye dönme şansı %100'dür.",
+   "_src": "Magazine capacity is increased by 30%. Missed shots from cover have a 100% chanc",
+   "_mt": "tr"
+  },
+  "Perfect Near Sighted": {
+   "tr": "%35 optimal aralık maliyetinde %80 stabilite alın.",
+   "_src": "Receive 80% stability at the cost of 35% optimal range.",
+   "_mt": "tr"
+  },
+  "Perfect Optimist": {
+   "tr": "Silah hasarı, dergide eksik olan her %10 mermi için %4 oranında artırılmaktadır.",
+   "_src": "Weapon damage is increased by 4% for every 10% ammo missing from the magazine.",
+   "_mt": "tr"
+  },
+  "Perfect Outsider": {
+   "tr": "Bir düşmanı öldürdükten sonra, 10 saniye boyunca %100 optimum menzil ve %100 doğruluk elde edin.",
+   "_src": "After killing an enemy, gain 100% optimal range and 100% accuracy for 10 seconds",
+   "_mt": "tr"
+  },
+  "Perfect Overflowing": {
+   "tr": "Boş olan her 2 yeniden yükleme, temel dergi kapasitenizi %100 artırır.",
+   "_src": "Every 2 reloads from empty increases your base magazine capacity by 100%.",
+   "_mt": "tr"
+  },
+  "Perfect Overwhelm": {
+   "tr": "Şu anda bastırılmamış olan bir düşmanı bastırmak, 12 saniye boyunca %12 silah hasarı verir. Max stack sayısı 4.",
+   "_src": "Suppressing an enemy, that is not currently suppressed, grants 12% weapon damage",
+   "_mt": "tr"
+  },
+  "Perfect Perpetuation": {
+   "tr": "Headshots, başvurduğunuz bir sonraki durum etkisine %50 durum etkisi hasarı ve süresi verir. Serinleme süresi 16 saniyedir.",
+   "_src": "Headshots grant 50% status effect damage and duration to the next status effect ",
+   "_mt": "tr"
+  },
+  "Perfect Preservation": {
+   "tr": "Düşmanı öldürmek, 5 saniye boyunca %12 zırh tamir eder. Kafa vuruşu ölümleri onarımı %12'ye çıkarır.",
+   "_src": "Killing an enemy repairs 12% armor over 5 seconds. Headshot kills improves the r",
+   "_mt": "tr"
+  },
+  "Perfect Pummel": {
+   "tr": "3 ardışık öldürme, againze'yi yeniden doldurur ve 10 saniye boyunca %40 silah hasarı verir.",
+   "_src": "3 consecutive kills refill the magainze and grant 40% weapon damage for 10 secon",
+   "_mt": "tr"
+  },
+  "Perfect Pumped Up": {
+   "tr": "Yeniden yükleme, 10 saniye boyunca %1 silah hasarı verir. 25'e kadar yığınlar.",
+   "_src": "Reloading grants 1% weapon damage for 10 seconds. Stacks up to 25.",
+   "_mt": "tr"
+  },
+  "Perfect Ranger": {
+   "tr": "Hedefinizden uzakta olduğunuz her 4 metre için silah hasarını %2 artırır.",
+   "_src": "Amplifies weapon damage by 2% for every 4 meters you are away from your target.",
+   "_mt": "tr"
+  },
+  "Perfect Reformation": {
+   "tr": "Headshots, 8 saniye boyunca %40 beceri onarımı sağlar.",
+   "_src": "Headshots grant 40% skill repair for 8 seconds.",
+   "_mt": "tr"
+  },
+  "Perfect Rifleman": {
+   "tr": "İniş headshot'ları, 5 saniye boyunca %10 oranında bonus silah hasarı ekler. Max yığını 5'tir. Ek headshot'lar süreyi tazeler.",
+   "_src": "Landing headshots adds a stack of bonus 10% weapon damage for 5 seconds. Max sta",
+   "_mt": "tr"
+  },
+  "Perfect Sadist": {
+   "tr": "Kanayan düşmanlara %25 silah hasarı verin. 3 cinayetten sonra, çarptığınız bir sonraki düşmana kanama uygulayın.",
+   "_src": "Deal 25% weapon damage to bleeding enemies. After 3 kills, applies bleed to next",
+   "_mt": "tr"
+  },
+  "Perfect Salvage": {
+   "tr": "Bir hedefi öldürmek, dergiyi yeniden doldurmak için %70 şansa sahiptir.",
+   "_src": "Killing a target has a 70% chance to refill the magazine.",
+   "_mt": "tr"
+  },
+  "Perfect Spike": {
+   "tr": "Headshots, 8 saniye boyunca %25 beceri hasarı verir.",
+   "_src": "Headshots grant 25% skill damage for 8 seconds.",
+   "_mt": "tr"
+  },
+  "Perfect Strained": {
+   "tr": "Ateşlediğiniz her 0.5 saniye için %10 kritik isabet hasarı kazanın. 8 kereye kadar istiflenir.",
+   "_src": "Gain 10% critical hit damage for every 0.5 seconds you are firing. Stacks up to ",
+   "_mt": "tr"
+  },
+  "Perfect Unwavering": {
+   "tr": "Bu silaha geçiş, 5 saniye boyunca %300 oranında silah işleme sağlar. ÖIdürücüler buff'ı tazeler. Takas yapmak bunu tüm silahlardan 5 saniyeliğine devre dışı bırakır.",
+   "_src": "Swapping to this weapon grants 300% weapon handling for 5 seconds. Kills refresh",
+   "_mt": "tr"
+  },
+  "Perfect Vindictive": {
+   "tr": "Durum etkisi uygulanan bir düşmanı öldürmek, 20 metre içindeki tüm grup üyelerine, %18 kritik isabet şansı ve %18 kritik vuruş hasarına 20 saniye boyunca izin verir.",
+   "_src": "Killing an enemy with a status effect applied grants all group members within 20",
+   "_mt": "tr"
+  },
+  "Perfectly Accurate": {
+   "tr": "Doğruluk %25 artırılır.",
+   "_src": "Accuracy is increased by 25%.",
+   "_mt": "tr"
+  },
+  "Perfectly Close & Personal": {
+   "tr": "7 metre içinde bir hedefi öldürmek, 10 saniye boyunca %38 silah hasarı verir.",
+   "_src": "Killing a target within 7 meters grants 38% weapon damage for 10 seconds",
+   "_mt": "tr"
+  },
+  "Perfectly Extra": {
+   "tr": "+%20 Dergi Kapasitesi.",
+   "_src": "+20% Magazine Capacity.",
+   "_mt": "tr"
+  },
+  "Perfectly Ignited": {
+   "tr": "Yanan düşmanlara %25 silah hasarı verin. 3 cinayetten sonra, vurduğunuz bir sonraki düşmana yanma uygular.",
+   "_src": "Deal 25% weapon damage to burning enemies. After 3 kills, applies burning to the",
+   "_mt": "tr"
+  },
+  "Perfectly Measured": {
+   "tr": "Derginin ilk yarısında +20% yangın oranı ve -30% silah hasarı vardır. Derginin alt yarısı -%20 oranında yangın ve +30% silah hasarına sahiptir.",
+   "_src": "The top half of the magazine has +20% rate of fire and -30% weapon damage. The b",
+   "_mt": "tr"
+  },
+  "Perfectly Naked": {
+   "tr": "Zırhsız bir düşmana vurmak, 5 saniye boyunca %50'lik bir kafa atışı hasarı verir.",
+   "_src": "Hitting an enemy with no armor grants 50% headshot damage for 5 seconds.",
+   "_mt": "tr"
+  },
+  "Perfectly On Empty": {
+   "tr": "Boşluktan yeniden yükleme, 10 saniye boyunca %40 silah kullanımı sağlar.",
+   "_src": "Reloading from empty grants 40% weapon handling for 10 seconds.",
+   "_mt": "tr"
+  },
+  "Perfectly Optimized": {
+   "tr": "+%10 Silah Taşıma.",
+   "_src": "+10% Weapon Handling.",
+   "_mt": "tr"
+  },
+  "Perfectly Steady Handed": {
+   "tr": "Hits, %1 doğruluk ve istikrar yığını sağlar. 75 istifte, dergiyi doldurmak için onları tüketir.",
+   "_src": "Hits grant a stack of 1% accuracy and stability. At 75 stacks, consumes them to ",
+   "_mt": "tr"
+  },
+  "Perfectly Unhinged": {
+   "tr": "%25 stabilite ve %25 doğruluk maliyetinde %22 silah hasarı alın.",
+   "_src": "Receive 22% weapon damage at the cost of 25% stability and 25% accuracy.",
+   "_mt": "tr"
+  }
+ }
+}

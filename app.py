@@ -32,6 +32,16 @@ if "--dml-probe" in sys.argv:          # ekran kartı (DirectML) denemesi: ayrı
         print("DMLPROBE " + json.dumps(_res), flush=True)
     sys.exit(0)
 
+if "--lt-check" in sys.argv:           # paket denetimi: çeviri altyapısı (ctranslate2 + sentencepiece) pakette mi
+    _i = sys.argv.index("--lt-check")
+    try:
+        import ctranslate2 as _ct, sentencepiece as _sp
+        _res = {"ok": True, "ctranslate2": _ct.__version__, "sentencepiece": getattr(_sp, "__version__", "?")}
+    except Exception as _e:
+        _res = {"ok": False, "reason": f"{type(_e).__name__}: {_e}"}
+    Path(sys.argv[_i + 1]).write_text(json.dumps(_res), encoding="utf-8")
+    sys.exit(0)
+
 import mss
 import capture
 from PIL import Image, ImageDraw, ImageOps, ImageTk
@@ -67,15 +77,18 @@ import presence
 import notify
 import knowledge
 import voicepack
+import livetranslate
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "5.1.5"
+APP_VERSION = "5.1.6"
 FROZEN = getattr(sys, "frozen", False)
 BASE = Path(sys.executable).parent if FROZEN else Path(__file__).resolve().parent
 TASKS_CACHE = BASE / "tasks_cache.json"  # son indirilen görev listesi
 META_CACHE = BASE / "meta_cache.json"
-NEWS_CACHE = BASE / "news_cache.json"   # son indirilen meta listesi (çevrimdışı kullanım)
+NEWS_CACHE = BASE / "news_cache.json"
+DESC_CACHE = BASE / "descriptions_cache.json"
+NEWS_POLL_MS = 30 * 60 * 1000          # program açıkken haber akışına bakma aralığı (canlı akış)   # son indirilen meta listesi (çevrimdışı kullanım)
 ART_DIR = BASE / "art"   # arka planlar / amblemler / bayraklar (kullanıcı kendi görsellerini ekleyebilir)
 BUNDLE = Path(getattr(sys, "_MEIPASS", BASE))
 CFG_PATH, LOG_PATH, DEBUG_PATH, PROG_PATH = (BASE / n for n in ("builds.json", "loot_log.csv", "last_crop.png", "progress.json"))
@@ -764,7 +777,7 @@ DEFAULTS.update({
     "ai_provider": "ollama", "ollama_url": "http://localhost:11434", "ollama_model": "gemma3:12b",
     "claude_model": "claude-haiku-5-5", "claude_api_key": "", "claude_code_model": "haiku", "openai_model": "gpt-4o-mini", "openai_api_key": "",
     "stt_model": "small", "stt_device": "cpu",
-    "tts_rate": 185, "tts_voice": "", "voice_hotkey": "<f9>", "speak_verdict": True, "speak_chat": True, "voice_pack": "tactical", "voice_radio": True, "quiz_xp": 0, "quiz_best": 0, "quiz_loading": False, "meta_favs": [], "meta_pop_prev": {}, "news_seen": []})
+    "tts_rate": 185, "tts_voice": "", "voice_hotkey": "<f9>", "speak_verdict": True, "speak_chat": True, "voice_pack": "tactical", "voice_radio": True, "quiz_xp": 0, "quiz_best": 0, "quiz_loading": False, "meta_favs": [], "meta_pop_prev": {}, "news_seen": [], "tr_on": False, "tr_engine": "local", "tr_mode": "subtitle", "tr_region": None, "tr_hotkey": "<f7>", "tr_auto": True, "tr_font": 15, "tr_hide": 10, "tr_alpha": 0.9})
 PROVIDER_KEYS = ["ollama", "claude_code", "claude", "openai", "builtin"]
 
 def provider_label(pid):
@@ -1397,8 +1410,375 @@ class App:
         self.root.after(8000, lambda: threading.Thread(target=self.gpu_check, daemon=True).start())
         self.root.after(1500, self.account_startup)
         self.root.after(1000, self.service_start)
+        if stg.get("tr_on"): self.root.after(2500, lambda: self.lt_start(quiet=True))
+        self.root.after(NEWS_POLL_MS, self._news_poll)
+        self.root.after(2000, self._info_badge)
         if OCR.name == "tesseract" and not self.tess:
             messagebox.showwarning(APP_NAME, t("msg.no_tesseract"))
+
+    # ---------- Canlı oyun çevirisi (İngilizce → Türkçe) ----------
+    def ai_complete(self, system, user):
+        """Asistan sekmesinde seçili büyük dil modeliyle tek seferlik tamamlama (arka plan iş parçacığında çağrılır)."""
+        st = self.cfg["settings"]; prov = st.get("ai_provider", "builtin")
+        hist = [{"role": "user", "content": user}]
+        if prov == "ollama": return ask_ollama(st["ollama_url"], st["ollama_model"], system, hist)
+        if prov == "claude_code": return ask_claude_code(st.get("claude_code_model", ""), system, hist)
+        if prov == "claude":
+            key = st.get("claude_api_key") or os.environ.get("ANTHROPIC_API_KEY", "")
+            if not key: raise RuntimeError(t("ai.no_key"))
+            return ask_claude(key, st["claude_model"], system, hist)
+        if prov == "openai":
+            key = st.get("openai_api_key") or os.environ.get("OPENAI_API_KEY", "")
+            if not key: raise RuntimeError(t("ai.no_key"))
+            return ask_openai(key, st["openai_model"], system, hist)
+        raise RuntimeError(t("lt.no_ai"))
+
+    def lt_model_dir(self):
+        return BASE / "models" / "en-tr"
+
+    def lt_glossary(self):
+        v = GAME.data.get("version")
+        if getattr(self, "_lt_gloss_v", None) != v:
+            d = GAME.data
+            names = list(d.get("exotics", [])) + list(d.get("named", [])) + list(d.get("gear_sets", [])) + list(d.get("brands", [])) + \
+                    list(d.get("gear_talents", [])) + list(d.get("weapon_talents", [])) + list(d.get("weapon_index", {}).keys()) + \
+                    [k for k in d.get("items", {})] + list(d.get("skills", [])) + \
+                    [v["talent"] for v in d.get("items", {}).values() if v.get("talent")]
+            self._lt_gloss, self._lt_gloss_v = livetranslate.Glossary(names), v
+        return self._lt_gloss
+
+    def lt_translator(self):
+        st = self.cfg["settings"]
+        if not getattr(self, "lt_cache", None): self.lt_cache = livetranslate.Cache(BASE / "translate_cache.json")
+        if st.get("tr_engine", "local") == "ai":
+            eng = livetranslate.AIMT(self.ai_complete)
+        else:
+            if not livetranslate.LocalMT.available(): raise RuntimeError(t("lt.no_runtime"))
+            if not getattr(self, "_lt_local", None): self._lt_local = livetranslate.LocalMT(self.lt_model_dir())
+            if not self._lt_local.installed(): raise RuntimeError(t("lt.need_model"))
+            eng = self._lt_local
+        return livetranslate.Translator(eng, self.lt_glossary(), self.lt_cache)
+
+    def lt_area(self):
+        st = self.cfg["settings"]; mode = st.get("tr_mode", "subtitle")
+        if mode == "region" and st.get("tr_region"): return dict(st["tr_region"])
+        g = self.scan_area() or {}
+        if not g: return None
+        if mode == "subtitle":
+            return {"left": int(g["left"] + g["width"] * 0.12), "top": int(g["top"] + g["height"] * 0.70),
+                    "width": int(g["width"] * 0.76), "height": int(g["height"] * 0.24)}
+        return dict(g)
+
+    def lt_start(self, quiet=False):
+        st = self.cfg["settings"]
+        try: self.lt_translator()
+        except Exception as e:
+            if not quiet: messagebox.showwarning(APP_NAME, str(e))
+            self._lt_status(str(e), "warning"); return False
+        self.lt_stop(quiet=True)
+        st["tr_on"] = True; save_cfg(self.cfg)
+        self.lt_stop_ev = threading.Event()
+        if st.get("tr_auto", True):
+            threading.Thread(target=self._lt_loop, args=(self.lt_stop_ev,), daemon=True, name="live-translate").start()
+        try:
+            from pynput import keyboard
+            self.lt_keys = keyboard.GlobalHotKeys({st.get("tr_hotkey", "<f7>"): lambda: self.root.after(0, self.lt_once)})
+            self.lt_keys.start()
+        except Exception as e:
+            self.lt_keys = None; log.info("Translate hotkey unavailable: %s", e)
+        log.info("Live translation on (engine=%s, mode=%s)", st.get("tr_engine"), st.get("tr_mode"))
+        area = self.lt_area()
+        if area:                                            # program penceresi okunan alanı kapatıyorsa küçült
+            try:
+                self.root.update_idletasks()
+                x, y = self.root.winfo_rootx(), self.root.winfo_rooty()
+                if self.rects_overlap((x, y, x + self.root.winfo_width(), y + self.root.winfo_height()),
+                                      (area["left"], area["top"], area["left"] + area["width"], area["top"] + area["height"])):
+                    self.toast(t("scan.minimized")); self.root.after(1200, self.root.iconify)
+            except Exception:
+                pass
+        self._lt_status(t("lt.running", key=st.get("tr_hotkey", "<f7>").upper().strip("<>")), "success")
+        self._lt_ui(); return True
+
+    def lt_stop(self, quiet=False):
+        if getattr(self, "lt_stop_ev", None): self.lt_stop_ev.set(); self.lt_stop_ev = None
+        if getattr(self, "lt_keys", None):
+            try: self.lt_keys.stop()
+            except Exception: pass
+            self.lt_keys = None
+        if not quiet:
+            self.cfg["settings"]["tr_on"] = False; save_cfg(self.cfg)
+            self._lt_status(t("lt.stopped"))
+            self._lt_hide()
+        self._lt_ui()
+
+    def lt_toggle(self):
+        if getattr(self, "lt_stop_ev", None) or getattr(self, "lt_keys", None): self.lt_stop()
+        else: self.lt_start()
+
+    def _lt_loop(self, stop):
+        if stop.wait(1.6): return                            # program penceresi küçülürken okuma yapma
+        g = capture.Grabber(); g.keep()
+        prev = last = None; stable = 0
+        try:
+            while not stop.is_set():
+                try:
+                    area = self.lt_area()
+                    st = self.cfg["settings"]
+                    if area and not (st.get("only_game_active", True) and not game_active()):
+                        h = g.thumb(area)
+                        stable = stable + 1 if prev is not None and dist(h, prev) < AUTO_STABLE else 0
+                        prev = h
+                        if stable == 1 and (last is None or dist(h, last) >= AUTO_CHANGE):
+                            last = h
+                            self._lt_run(grab(area), area)
+                except Exception as e:
+                    log.debug("live translate loop: %s", e)
+                stop.wait(0.35)
+        finally:
+            g.release()
+
+    def lt_once(self):
+        """Kısayol / düğme: alanı hemen bir kez oku ve çevir."""
+        area = self.lt_area()
+        if not area: return
+        try:                                                # kendi penceremizi okumayalım
+            x, y = self.root.winfo_rootx(), self.root.winfo_rooty()
+            if self.root.state() == "normal" and self.rects_overlap((x, y, x + self.root.winfo_width(), y + self.root.winfo_height()),
+                                      (area["left"], area["top"], area["left"] + area["width"], area["top"] + area["height"])):
+                self.root.iconify(); self.root.update(); time.sleep(0.4)
+        except Exception:
+            pass
+        threading.Thread(target=lambda: self._lt_run(grab(area), area, force=True), daemon=True).start()
+
+    def _lt_run(self, img, area, force=False):
+        try:
+            lines = OCR.lines(img)
+            blocks = livetranslate.blocks_from_lines(lines, GAME.data.get("ui_words", []))
+            if not blocks:
+                if force: self.root.after(0, lambda: self._lt_status(t("lt.nothing"), "muted"))
+                return
+            sig = "|".join(b[0] for b in blocks)
+            if sig == getattr(self, "_lt_last_sig", None) and not force: return
+            self._lt_last_sig = sig
+            t0 = time.time()
+            out = self.lt_translator().translate([b[0] for b in blocks])
+            ms = int((time.time() - t0) * 1000)
+            pairs = [(b[0], tr, b[1]) for b, tr in zip(blocks, out)]
+            self.root.after(0, lambda: self._lt_show(pairs, area, ms))
+        except Exception as e:
+            log.info("Live translate failed: %s", e)
+            msg = str(e)
+            self.root.after(0, lambda: self._lt_status(t("lt.failed", e=msg), "danger"))
+
+    def _lt_show(self, pairs, area, ms):
+        st = self.cfg["settings"]
+        hist = getattr(self, "lt_hist", [])
+        for en, tr, _ in pairs:
+            if not hist or hist[-1][0] != en: hist.append((en, tr))
+        self.lt_hist = hist[-80:]
+        self._lt_status(t("lt.done", n=len(pairs), ms=ms), "success")
+        self._lt_hist_fill()
+        self._lt_hide()
+        size = int(st.get("tr_font", 15)); mode = st.get("tr_mode", "subtitle")
+        w = self._lt_win = tk.Toplevel(self.root); w.overrideredirect(True)
+        w.attributes("-topmost", True, "-alpha", float(st.get("tr_alpha", 0.9)))
+        w.configure(bg="#0d0f12")
+        if mode == "subtitle":
+            wrap = max(300, area["width"] - 40)
+            for en, tr, _ in pairs[-3:]:
+                tk.Label(w, text=tr, bg="#0d0f12", fg="#ffffff", font=(ui_theme.FONT_SEMI, size), wraplength=wrap, justify="center").pack(padx=18, pady=(8, 2))
+            w.update_idletasks()
+            x = area["left"] + (area["width"] - w.winfo_reqwidth()) // 2
+            y = max(0, area["top"] - w.winfo_reqheight() - 10)
+        else:
+            tk.Label(w, text="🌐 " + t("lt.overlay_title"), bg="#0d0f12", fg=PAL["accent"], font=(ui_theme.FONT_SEMI, 10), anchor="w").pack(fill="x", padx=12, pady=(8, 0))
+            for en, tr, _ in pairs[:8]:
+                tk.Label(w, text=tr, bg="#0d0f12", fg="#ffffff", font=(ui_theme.FONT, max(9, size - 3)), wraplength=420, justify="left",
+                         anchor="w").pack(fill="x", padx=12, pady=(4, 0))
+            tk.Frame(w, height=8, bg="#0d0f12").pack()
+            w.update_idletasks()
+            x = area["left"] + area["width"] - w.winfo_reqwidth() - 20
+            y = area["top"] + 70
+        w.geometry(f"+{int(x)}+{int(y)}")
+        click_through(w); exclude_from_capture(w, "translate")
+        w.bind("<Destroy>", lambda e, w=w: CAPTURE_MASK.pop("translate", None) if e.widget is w else None)
+        self._lt_job = self.root.after(int(float(st.get("tr_hide", 10)) * 1000), self._lt_hide)
+
+    def _lt_hide(self):
+        if getattr(self, "_lt_job", None):
+            try: self.root.after_cancel(self._lt_job)
+            except Exception: pass
+            self._lt_job = None
+        w = getattr(self, "_lt_win", None)
+        if w is not None:
+            try: w.destroy()
+            except Exception: pass
+            self._lt_win = None
+
+    # --- sekme
+    def build_translate(self):
+        f = ui_theme.scrollable(self.tabs["translate"], PAL["bg"])
+        st = self.cfg["settings"]
+        hero = tk.Frame(f, bg=PAL["surface"]); hero.pack(fill="x", padx=10, pady=(10, 6))
+        tk.Label(hero, text="🌐 " + t("lt.title"), bg=PAL["surface"], fg=PAL["fg"], font=(ui_theme.FONT_SEMI, 15), anchor="w").pack(fill="x", padx=14, pady=(10, 0))
+        tk.Label(hero, text=t("lt.intro"), bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 10), justify="left", anchor="w",
+                 wraplength=900).pack(fill="x", padx=14, pady=(2, 8))
+        row = tk.Frame(hero, bg=PAL["surface"]); row.pack(fill="x", padx=14, pady=(0, 12))
+        self.lt_btn = ttk.Button(row, text="", command=self.lt_toggle, style="Accent.TButton"); self.lt_btn.pack(side="left")
+        ttk.Button(row, text="⚡ " + t("lt.now"), command=lambda: (self._lt_status(t("lt.now_hint")), self.root.after(3000, self.lt_once))).pack(side="left", padx=6)
+        self.lt_stat = tk.Label(row, text="", bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 10)); self.lt_stat.pack(side="left", padx=10)
+        # motor
+        eb = ttk.LabelFrame(f, text="🧠 " + t("lt.engine")); eb.pack(fill="x", padx=10, pady=6)
+        self.lt_eng = tk.StringVar(value=st.get("tr_engine", "local"))
+        def eng_set():
+            st["tr_engine"] = self.lt_eng.get(); save_cfg(self.cfg); self._lt_ui()
+        r1 = ttk.Frame(eb); r1.pack(fill="x", padx=8, pady=(6, 2))
+        ttk.Radiobutton(r1, text=t("lt.e_local"), value="local", variable=self.lt_eng, command=eng_set).pack(side="left")
+        self.lt_model_lbl = ttk.Label(r1, text="", foreground=PAL["muted"]); self.lt_model_lbl.pack(side="left", padx=10)
+        self.lt_dl_btn = ttk.Button(r1, text="⬇ " + t("lt.download"), command=self.lt_download); self.lt_dl_btn.pack(side="left")
+        self.lt_pb = ttk.Progressbar(r1, length=180, mode="determinate"); self.lt_pb.pack(side="left", padx=8)
+        ttk.Label(eb, text=t("lt.e_local_hint"), foreground=PAL["muted"], wraplength=880, justify="left").pack(anchor="w", padx=28)
+        r2 = ttk.Frame(eb); r2.pack(fill="x", padx=8, pady=(8, 2))
+        ttk.Radiobutton(r2, text=t("lt.e_ai"), value="ai", variable=self.lt_eng, command=eng_set).pack(side="left")
+        prov = st.get("ai_provider", "builtin")
+        ttk.Label(r2, text=t("lt.ai_now", p=provider_label(prov if prov in PROVIDER_KEYS else "builtin")), foreground=PAL["muted"]).pack(side="left", padx=10)
+        ttk.Label(eb, text=t("lt.e_ai_hint"), foreground=PAL["muted"], wraplength=880, justify="left").pack(anchor="w", padx=28, pady=(0, 8))
+        # alan
+        mb = ttk.LabelFrame(f, text="🎯 " + t("lt.mode")); mb.pack(fill="x", padx=10, pady=6)
+        self.lt_mode = tk.StringVar(value=st.get("tr_mode", "subtitle"))
+        def mode_set():
+            st["tr_mode"] = self.lt_mode.get(); save_cfg(self.cfg)
+            if st["tr_mode"] == "region" and not st.get("tr_region"): self.lt_pick_region()
+        for k in ("subtitle", "region", "screen"):
+            rr = ttk.Frame(mb); rr.pack(fill="x", padx=8, pady=1)
+            ttk.Radiobutton(rr, text=t("lt.m_" + k), value=k, variable=self.lt_mode, command=mode_set).pack(side="left")
+            ttk.Label(rr, text=t("lt.m_" + k + "_hint"), foreground=PAL["muted"]).pack(side="left", padx=8)
+            if k == "region": ttk.Button(rr, text="⛶ " + t("lt.pick"), command=self.lt_pick_region).pack(side="right")
+        # seçenekler
+        ob = ttk.LabelFrame(f, text="⚙ " + t("lt.options")); ob.pack(fill="x", padx=10, pady=6)
+        self.lt_auto = tk.BooleanVar(value=bool(st.get("tr_auto", True)))
+        ttk.Checkbutton(ob, text=t("lt.auto"), variable=self.lt_auto,
+                        command=lambda: (st.__setitem__("tr_auto", bool(self.lt_auto.get())), save_cfg(self.cfg))).pack(anchor="w", padx=8, pady=(6, 2))
+        g = ttk.Frame(ob); g.pack(fill="x", padx=8, pady=(2, 8))
+        self.lt_vars = {}
+        for i, (k, lab, default, w) in enumerate((("tr_hotkey", t("lt.hotkey"), "<f7>", 10), ("tr_font", t("lt.font"), 15, 5),
+                                                  ("tr_hide", t("lt.hide"), 10, 5), ("tr_alpha", t("lt.alpha"), 0.9, 5))):
+            ttk.Label(g, text=lab).grid(row=0, column=i * 2, sticky="w", padx=(0, 4))
+            v = self.lt_vars[k] = tk.StringVar(value=str(st.get(k, default)))
+            e = ttk.Entry(g, textvariable=v, width=w); e.grid(row=0, column=i * 2 + 1, sticky="w", padx=(0, 16))
+            e.bind("<FocusOut>", lambda ev: self._lt_save_opts())
+        # dene
+        tb = ttk.LabelFrame(f, text="✍ " + t("lt.try")); tb.pack(fill="x", padx=10, pady=6)
+        self.lt_in = tk.Text(tb, height=3, wrap="word", bg=PAL["entry"], fg=PAL["fg"], insertbackground=PAL["fg"], relief="flat",
+                             font=(ui_theme.FONT, 10), padx=8, pady=6)
+        self.lt_in.pack(fill="x", padx=8, pady=(6, 4))
+        self.lt_in.insert("1.0", "Agent, the Black Tusk have taken control of the Capitol Building. Head to the White House and talk to Manny.")
+        rr = ttk.Frame(tb); rr.pack(fill="x", padx=8)
+        ttk.Button(rr, text="➜ " + t("lt.translate"), command=self.lt_try, style="Accent.TButton").pack(side="left")
+        self.lt_out = tk.Label(tb, text="", bg=PAL["bg"], fg=PAL["fg"], font=(ui_theme.FONT, 11), justify="left", anchor="w", wraplength=880)
+        self.lt_out.pack(fill="x", padx=8, pady=(6, 8))
+        # geçmiş
+        hb = ttk.LabelFrame(f, text="🕘 " + t("lt.history")); hb.pack(fill="both", expand=True, padx=10, pady=6)
+        self.lt_hist_txt = tk.Text(hb, height=12, wrap="word", bg=PAL["surface"], fg=PAL["fg"], relief="flat", font=(ui_theme.FONT, 10), padx=10, pady=8)
+        self.lt_hist_txt.tag_configure("en", foreground=PAL["muted"]); self.lt_hist_txt.tag_configure("tr", font=(ui_theme.FONT_SEMI, 10))
+        self.lt_hist_txt.pack(fill="both", expand=True, padx=6, pady=6)
+        ttk.Label(f, text=t("lt.note"), foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=14, pady=(2, 12))
+        self._lt_hist_fill(); self._lt_ui()
+
+    def _lt_save_opts(self):
+        st = self.cfg["settings"]
+        for k, v in self.lt_vars.items():
+            val = v.get().strip()
+            if k == "tr_hotkey": st[k] = val or "<f7>"
+            else:
+                try: st[k] = float(val) if k == "tr_alpha" else int(float(val))
+                except ValueError: pass
+        st["tr_alpha"] = max(0.4, min(1.0, float(st.get("tr_alpha", 0.9))))
+        save_cfg(self.cfg)
+
+    def _lt_status(self, text, kind="muted"):
+        if getattr(self, "lt_stat", None) and self.lt_stat.winfo_exists():
+            self.lt_stat.config(text=text, fg=PAL.get(kind, PAL["muted"]))
+
+    def _lt_ui(self):
+        if not getattr(self, "lt_btn", None) or not self.lt_btn.winfo_exists(): return
+        on = bool(getattr(self, "lt_stop_ev", None) or getattr(self, "lt_keys", None))
+        self.lt_btn.config(text=("⏹ " + t("lt.stop")) if on else ("▶ " + t("lt.start")))
+        inst = livetranslate.LocalMT(self.lt_model_dir()).installed()
+        rt = livetranslate.LocalMT.available()
+        self.lt_model_lbl.config(text=t("lt.model_ok") if inst and rt else t("lt.no_runtime") if not rt else t("lt.model_missing"),
+                                 foreground=PAL["success"] if inst and rt else PAL["warning"])
+        if inst or not rt: self.lt_dl_btn.pack_forget(); self.lt_pb.pack_forget()
+
+    def _lt_hist_fill(self):
+        T = getattr(self, "lt_hist_txt", None)
+        if not T or not T.winfo_exists(): return
+        T.config(state="normal"); T.delete("1.0", "end")
+        for en, tr in reversed(getattr(self, "lt_hist", [])[-40:]):
+            T.insert("end", en + "\n", "en"); T.insert("end", tr + "\n\n", "tr")
+        if not getattr(self, "lt_hist", None): T.insert("end", t("lt.hist_empty"), "en")
+        T.config(state="disabled")
+
+    def lt_try(self):
+        text = self.lt_in.get("1.0", "end").strip()
+        if not text: return
+        self.lt_out.config(text=t("acc.working"), fg=PAL["muted"])
+        def go():
+            try:
+                t0 = time.time(); out = self.lt_translator().translate([text])[0]; ms = int((time.time() - t0) * 1000)
+                self.root.after(0, lambda: (self.lt_out.config(text=out, fg=PAL["fg"]), self._lt_status(t("lt.done", n=1, ms=ms), "success")))
+            except Exception as e:
+                msg = str(e); self.root.after(0, lambda: self.lt_out.config(text=t("lt.failed", e=msg), fg=PAL["danger"]))
+        threading.Thread(target=go, daemon=True).start()
+
+    def lt_download(self):
+        self.lt_dl_btn.state(["disabled"]); self._lt_status(t("lt.downloading"))
+        def prog(got, total):
+            if total: self.root.after(0, lambda: self.lt_pb.config(value=100 * got / total))
+        def go():
+            try:
+                livetranslate.download_model(BASE / "models", prog); err = None
+            except Exception as e:
+                err = str(e)
+            def done():
+                if err:
+                    self.lt_dl_btn.state(["!disabled"]); self._lt_status(t("lt.failed", e=err), "danger")
+                else:
+                    self._lt_local = None; self._lt_status(t("lt.model_ready"), "success"); self._lt_ui()
+            self.root.after(0, done)
+        threading.Thread(target=go, daemon=True).start()
+
+    def lt_pick_region(self):
+        if not messagebox.askokcancel(APP_NAME, t("lt.pick_ask")): return
+        self.root.withdraw(); self.root.after(4000, self._lt_region_capture)
+
+    def _lt_region_capture(self):
+        mon = self.screen_monitor()
+        with mss.mss() as sct:
+            s = sct.grab(mon); img = Image.frombytes("RGB", s.size, s.rgb)
+        self.root.deiconify()
+        w = tk.Toplevel(self.root); w.attributes("-fullscreen", True, "-topmost", True)
+        cv = tk.Canvas(w, highlightthickness=0, cursor="crosshair"); cv.pack(fill="both", expand=True)
+        w.update_idletasks()
+        sw, sh = w.winfo_width(), w.winfo_height()
+        scale = min(sw / img.width, sh / img.height)
+        w._photo = ImageTk.PhotoImage(img.resize((int(img.width * scale), int(img.height * scale))))
+        cv.create_image(0, 0, image=w._photo, anchor="nw")
+        cv.create_text(sw // 2, 30, fill="yellow", font=("Segoe UI", 18, "bold"), text=t("lt.pick_hint"))
+        stt = {}
+        def down(e): stt.update(x0=e.x, y0=e.y, r=cv.create_rectangle(e.x, e.y, e.x, e.y, outline="lime", width=3))
+        def move(e): cv.coords(stt["r"], stt["x0"], stt["y0"], e.x, e.y)
+        def up(e):
+            x1, x2 = sorted((stt["x0"], e.x)); y1, y2 = sorted((stt["y0"], e.y))
+            if x2 - x1 < 30 or y2 - y1 < 20: return
+            self.cfg["settings"]["tr_region"] = {"left": mon["left"] + int(x1 / scale), "top": mon["top"] + int(y1 / scale),
+                                                 "width": int((x2 - x1) / scale), "height": int((y2 - y1) / scale)}
+            self.cfg["settings"]["tr_mode"] = "region"; save_cfg(self.cfg)
+            if hasattr(self, "lt_mode"): self.lt_mode.set("region")
+            w.destroy(); self._lt_status(t("lt.region_set"), "success")
+        cv.bind("<ButtonPress-1>", down); cv.bind("<B1-Motion>", move); cv.bind("<ButtonRelease-1>", up)
+        w.bind("<Escape>", lambda e: w.destroy())
 
     # ---------- Bilgi: ansiklopedi, meta build vitrini, haberler ve sezon, bilgi yarışması ----------
     CAT_COLORS = {"exotic": "#ff8a3d", "named": "#e0b03a", "gear_set": "#2fbf71", "brand": "#5b8def", "talent": "#a78bfa"}
@@ -1419,11 +1799,116 @@ class App:
         self._build_enc(frames["enc"]); self._build_meta_gallery(frames["meta"])
         self._build_news(frames["news"]); self._build_quiz(frames["quiz"])
         nb.bind("<<NotebookTabChanged>>", lambda e: self._info_tab_changed())
+        self.root.after(500, self._info_badge)
 
     def _info_tab_changed(self):
         k = self._info_keys[self.info_nb.index(self.info_nb.select())]
         if k == "news": self._news_mark_seen()
         if k == "quiz" and not getattr(self, "_quiz_q", None): self.quiz_next()
+
+    # --- canlı haber akışı
+    def _news_poll(self):
+        """Program açıkken 30 dakikada bir haber akışına bakar; yeni haber gelirse sayfayı yeniden başlatmadan günceller."""
+        def work():
+            try: res = meta_sync.run_news(self.cfg, NEWS_CACHE, APP_VERSION, force=True)
+            except Exception as e:
+                log.debug("news poll: %s", e); res = None
+            self.root.after(0, lambda: self._news_arrived(res))
+        threading.Thread(target=work, daemon=True).start()
+        self.root.after(NEWS_POLL_MS, self._news_poll)
+        try: self._desc_sync()
+        except Exception: log.debug("desc sync", exc_info=True)
+
+    def _news_arrived(self, res):
+        if not res: return
+        feed = res[0]
+        old = {x["id"] for x in (self.news or {}).get("items", [])}
+        new = [x for x in feed["items"] if x["id"] not in old]
+        self.news = feed
+        try: self.refresh_info_news()
+        except Exception: pass
+        self._info_badge()
+        if new and old:
+            lang = i18n.current_language()
+            first = knowledge.pick_lang(new[0]["title"], lang)
+            log.info("News: %d new item(s): %s", len(new), ", ".join(x["id"] for x in new))
+            self.toast(t("news.new_toast", n=len(new), title=first))
+            important = [x for x in new if x["kind"] in ("season", "maintenance", "dlc", "event")]
+            if important:
+                body = "\n".join("• " + knowledge.pick_lang(x["title"], lang) for x in important[:5])
+                if self.tray and self.tray.available: self.tray.notify(body, "📰 " + t("news.push_title"))
+                self._push("news", "📰 " + t("news.push_title"), body)
+
+    def _info_badge(self):
+        """Bilgi sekmesinin başlığında okunmamış haber sayısı."""
+        if not hasattr(self, "nb") or "info" not in self.tab_keys: return
+        seen = set(self.cfg["settings"].get("news_seen", []))
+        n = sum(1 for it, stt in knowledge.news_sorted((self.news or {}).get("items", [])) if it["id"] not in seen and stt != "ended")
+        try:
+            self.nb.tab(self.tab_keys.index("info"), text=ui_theme.with_icon(t("tab.info"), "📚") + (f"  ●{n}" if n else ""))
+        except Exception:
+            pass
+
+    # --- açıklama çevirileri (10 dil, günlük akıştan) ve kullanıcının eklediği diller için yapay zekâ çevirisi
+    def desc_i18n(self):
+        if getattr(self, "_desc_i18n", None) is None:
+            self._desc_i18n = {}
+            for p_ in (DESC_CACHE, BASE / "meta" / "descriptions_i18n.json", BUNDLE / "meta" / "descriptions_i18n.json"):
+                try: self._desc_i18n = json.loads(p_.read_text(encoding="utf-8")).get("items", {}); break
+                except Exception: continue
+        return self._desc_i18n
+
+    def _desc_sync(self):
+        st = self.cfg["settings"]
+        if time.time() - st.get("desc_last", 0) < 6 * 3600: return
+        st["desc_last"] = time.time(); save_cfg(self.cfg)
+        def work():
+            urls = [u.replace("meta_builds.json", "descriptions_i18n.json") for u in meta_sync.configured_urls(st.get("meta_feed_url", ""))
+                    if u.endswith("meta_builds.json")]
+            try:
+                raw, _ = meta_sync.fetch(urls, APP_VERSION)
+                if raw.get("schema") == 1 and isinstance(raw.get("items"), dict):
+                    DESC_CACHE.write_text(json.dumps(raw, ensure_ascii=False), encoding="utf-8")
+                    self._desc_i18n = None
+                    log.info("Description translations: version %s, %d items", raw.get("version"), len(raw["items"]))
+            except Exception as e:
+                log.debug("desc sync: %s", e)
+        threading.Thread(target=work, daemon=True).start()
+
+    def localized_desc(self, name, desc, on_ready=None):
+        """Açıklamanın kullanıcının dilindeki hali. Yoksa ve bir yapay zekâ seçiliyse arka planda çevirip on_ready(metin)."""
+        lang = i18n.current_language()
+        if lang == "en" or not desc: return desc
+        tr = self.desc_i18n().get(name, {}).get(lang)
+        if tr: return tr
+        return self.ai_localize(desc, lang, on_ready) or desc
+
+    def ai_localize(self, text, lang, on_ready=None):
+        """Desteklenen 10 dil dışındaki (ya da henüz çevrilmemiş) metinler için seçili yapay zekâyla çeviri, önbellekli."""
+        if not text or self.cfg["settings"].get("ai_provider", "builtin") == "builtin": return None
+        if not getattr(self, "lt_cache", None): self.lt_cache = livetranslate.Cache(BASE / "translate_cache.json")
+        key = "ai-" + lang
+        hit = self.lt_cache.get(key, text)
+        if hit: return hit
+        pend = self.__dict__.setdefault("_ai_loc_pending", set())
+        if (lang, text) in pend: return None
+        pend.add((lang, text))
+        lang_name = i18n.english_name(lang)
+        def work():
+            try:
+                g = self.lt_glossary(); m, found = g.mask(text)
+                out = self.ai_complete("Translate the user's text from the video game The Division 2 into " + lang_name +
+                                       ". Keep tokens like ZQ0 unchanged. Return only the translation.", m)
+                out = g.unmask((out or "").strip(), found)
+                if out:
+                    self.lt_cache.put(key, text, out)
+                    if on_ready: self.root.after(0, lambda: on_ready(out))
+            except Exception as e:
+                log.debug("ai localize: %s", e)
+            finally:
+                pend.discard((lang, text))
+        threading.Thread(target=work, daemon=True).start()
+        return None
 
     # --- ansiklopedi
     def _build_enc(self, f):
@@ -1508,7 +1993,13 @@ class App:
         if e.get("talent") and e["cat"] in ("exotic", "named"):
             T.insert("end", t("enc.talent") + "\n", "h2"); T.insert("end", e["talent"] + "\n", "chip")
         if e.get("desc"):
-            T.insert("end", t("enc.desc") + "\n", "h2"); T.insert("end", e["desc"] + "\n")
+            cur = e
+            def ready(txt, cur=cur):
+                if getattr(self, "_enc_cur", None) is cur: self._enc_show(cur)
+            d_txt = self.localized_desc(e["name"], e["desc"], ready)
+            T.insert("end", t("enc.desc") + "\n", "h2"); T.insert("end", d_txt + "\n")
+            if d_txt is not e["desc"] and i18n.current_language() != "en":
+                T.insert("end", "EN: " + e["desc"][:400] + "\n", "sub")
         if e.get("bonuses"):
             T.insert("end", t("enc.bonuses") + "\n", "h2")
             for i, b in enumerate(e["bonuses"], start=1):
@@ -1752,14 +2243,17 @@ class App:
             tk.Label(head, text=t("news.s_" + stt), bg=colors[stt], fg=PAL["bg"], font=(ui_theme.FONT_SEMI, 8), padx=6).pack(side="left")
             if it["id"] not in seen and stt != "ended":
                 tk.Label(head, text=t("news.new"), bg=PAL["accent"], fg=PAL["bg"], font=(ui_theme.FONT_SEMI, 8), padx=6).pack(side="left", padx=4)
-            tk.Label(head, text=f" {icons.get(it['kind'], '•')} " + knowledge.pick_lang(it["title"], lang), bg=PAL["surface"], fg=PAL["fg"],
+            title = it["title"].get(lang) or self.ai_localize(knowledge.pick_lang(it["title"], "en"), lang, lambda _t: self.refresh_info_news()) \
+                or knowledge.pick_lang(it["title"], lang)
+            tk.Label(head, text=f" {icons.get(it['kind'], '•')} " + title, bg=PAL["surface"], fg=PAL["fg"],
                      font=(ui_theme.FONT_SEMI, 11), anchor="w").pack(side="left")
             when = ""
             if stt == "live" and it.get("end"): when = t("news.ends_in", t=knowledge.fmt_left(it["end"] - now, t("news.d"))[0])
             elif stt == "upcoming" and it.get("start"): when = t("news.starts_in", t=knowledge.fmt_left(it["start"] - now, t("news.d"))[0])
             elif it.get("date"): when = it["date"].astimezone().strftime("%Y-%m-%d")
             tk.Label(head, text=when, bg=PAL["surface"], fg=colors[stt], font=(ui_theme.FONT, 9)).pack(side="right")
-            txt = knowledge.pick_lang(it.get("text"), lang)
+            txt = (it.get("text") or {}).get(lang) or (self.ai_localize(knowledge.pick_lang(it.get("text"), "en"), lang, lambda _t: self.refresh_info_news())
+                                                       if it.get("text") else None) or knowledge.pick_lang(it.get("text"), lang)
             if txt:
                 tk.Label(card, text=txt, bg=PAL["surface"], fg=PAL["fg"] if stt != "ended" else PAL["muted"], font=(ui_theme.FONT, 10),
                          justify="left", anchor="w", wraplength=900).pack(fill="x", padx=12, pady=(4, 0))
@@ -1776,6 +2270,7 @@ class App:
         ids = [x["id"] for x in self.news["items"]]
         if set(ids) - set(st.get("news_seen", [])):
             st["news_seen"] = ids[-100:]; save_cfg(self.cfg)
+        self._info_badge()
 
     # --- bilgi yarışması
     def _build_quiz(self, f):
@@ -2151,7 +2646,7 @@ class App:
         wv = tk.StringVar(value=st.get("push_webhook", ""))
         ttk.Entry(r2, textvariable=wv, show="•").pack(side="left", fill="x", expand=True)
         ev_row = ttk.Frame(pn); ev_row.pack(anchor="w", padx=6, pady=2)
-        for k in ("drop", "build", "vendor", "session"):
+        for k in ("drop", "build", "vendor", "session", "news"):
             v = tk.BooleanVar(value=st.get("push_" + k, True))
             ttk.Checkbutton(ev_row, text=t("svc.push_" + k), variable=v,
                             command=lambda k=k, v=v: (st.__setitem__("push_" + k, bool(v.get())), save_cfg(self.cfg))).pack(side="left", padx=4)
@@ -2539,10 +3034,10 @@ class App:
                                    duration_ms=int(self.cfg["settings"].get("fx_transition_ms", 260)))
         nb = self.nb = ttk.Notebook(self.root); nb.pack(fill="both", expand=True, padx=10, pady=(6, 10))
         # Sekmeler sabit kimliklerle tutulur, başlıkları t() ile çevrilir.
-        self.tab_keys = ("dash", "builds", "progress", "stash", "stats", "info", "tasks", "assistant", "settings", "history", "log", "help")
+        self.tab_keys = ("dash", "builds", "progress", "stash", "stats", "info", "translate", "tasks", "assistant", "settings", "history", "log", "help")
         self.tabs = {k: ttk.Frame(nb) for k in self.tab_keys}
         for k in self.tab_keys: nb.add(self.tabs[k], text=ui_theme.with_icon(t(f"tab.{k}"), ui_theme.TAB_ICONS.get(k, "")))
-        self.build_dash(); self.build_builds(); self.build_prog(); self.build_stash(); self.build_stats(); self.build_info(); self.build_gorevler(); self.build_asistan()
+        self.build_dash(); self.build_builds(); self.build_prog(); self.build_stash(); self.build_stats(); self.build_info(); self.build_translate(); self.build_gorevler(); self.build_asistan()
         self.build_settings(); self.build_hist(); self.build_logtab(); self.build_help()
         nb.bind("<<NotebookTabChanged>>", self.on_tab)
         self.root.after(300, self.apply_fx)
@@ -6867,6 +7362,8 @@ class App:
         if not force and st0.get("svc_close_to_tray") and self.tray and self.tray.available:
             self.root.withdraw(); self.tray.notify(t("svc.in_tray")); return
         self.service_stop()
+        try: self.lt_stop(quiet=True); self.lt_cache.save() if getattr(self, "lt_cache", None) else None
+        except Exception: pass
         self.stop(); self.speaker.close()
         if self.companion: self.companion.stop()
         st_ = self.cfg["settings"]

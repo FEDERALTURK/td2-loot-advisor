@@ -33,11 +33,15 @@ jobs:
       - name: Fallback model (en-trk, multi-Turkic)
         if: steps.big.outcome != 'success'
         run: python scripts/mt/build_model.py Helsinki-NLP/opus-mt-en-trk out ">>tur<<"
+      - name: Seed Turkish encyclopedia descriptions
+        run: python scripts/mt/translate_descriptions.py out/model out/descriptions_i18n.json
       - name: Upload artifact
         uses: actions/upload-artifact@v5
         with:
           name: mt-model
-          path: out/*.zip*
+          path: |
+            out/*.zip*
+            out/descriptions_i18n.json
       - name: Publish to mt-models pre-release
         if: inputs.upload
         env:
