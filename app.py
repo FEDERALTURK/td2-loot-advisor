@@ -1571,12 +1571,29 @@ class App:
             msg = str(e)
             self.root.after(0, lambda: self._lt_status(t("lt.failed", e=msg), "danger"))
 
+    def _lt_log(self, pairs, ms):
+        """Çevirileri logs/live_translate.log dosyasına yazar (oyun üstü kutu ekran görüntüsüne girmediği için
+        sonradan kontrol edebilmek amacıyla). Dosya 256 KB'ı geçince .1 olarak saklanır."""
+        try:
+            APPLOG_DIR.mkdir(parents=True, exist_ok=True)
+            p = APPLOG_DIR / "live_translate.log"
+            if p.exists() and p.stat().st_size > 256 * 1024: os.replace(p, p.with_suffix(".log.1"))
+            stamp = time.strftime("%Y-%m-%d %H:%M:%S")
+            with open(p, "a", encoding="utf-8") as f:
+                for en, tr, _ in pairs:
+                    f.write(f"{stamp} | {ms} ms\n  EN: {en}\n  TR: {tr}\n")
+            c = getattr(self, "lt_cache", None)
+            if c and c.dirty >= 20: threading.Thread(target=c.save, daemon=True).start()
+        except Exception:
+            log.debug("lt log", exc_info=True)
+
     def _lt_show(self, pairs, area, ms):
         st = self.cfg["settings"]
         hist = getattr(self, "lt_hist", [])
         for en, tr, _ in pairs:
             if not hist or hist[-1][0] != en: hist.append((en, tr))
         self.lt_hist = hist[-80:]
+        self._lt_log(pairs, ms)
         self._lt_status(t("lt.done", n=len(pairs), ms=ms), "success")
         self._lt_hist_fill()
         self._lt_hide()
@@ -2575,7 +2592,13 @@ class App:
         else: log.info("Tray: pystray not installed")
 
     def tray_show(self):
-        self.root.deiconify(); self.root.lift(); self.root.focus_force()
+        self.root.deiconify(); self.root.lift()
+        try:                                     # tam ekran oyunun önüne de gelsin (kısa süre en üstte)
+            self.root.attributes("-topmost", True)
+            self.root.after(600, lambda: self.root.attributes("-topmost", False))
+        except tk.TclError:
+            pass
+        self.root.focus_force()
 
     def autostart_toggle(self, var):
         try:
@@ -2938,9 +2961,10 @@ class App:
         st["_start_tab"], st["_start_page"] = tab or "", page or ""
         save_cfg(self.cfg)
         if getattr(sys, "frozen", False):
-            args = [sys.executable] + sys.argv[1:]
+            args = [sys.executable]
         else:
-            args = [sys.executable, str(Path(__file__).resolve())] + sys.argv[1:]
+            args = [sys.executable, str(Path(__file__).resolve())]
+        args += [a for a in sys.argv[1:] if a not in ("--restart", "--tray")] + ["--restart"]   # yeni kopya bu kopyanın kapanmasını bekler
         log.info("Restarting: %s", args)
         try:
             subprocess.Popen(args, cwd=str(BASE), creationflags=getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0))
@@ -7377,9 +7401,28 @@ class App:
         self.root.destroy()
 
 
-if __name__ == "__main__":
+def _instance_poll(app, inst):
+    """Başka bir açılma denemesi geldiyse pencereyi öne getir (tarama sırasında küçültülmüş olsa bile)."""
     try:
-        App().root.mainloop()
+        if inst.poll_show():
+            log.info("Second launch: showing the open window")
+            app.tray_show()
+    except Exception:
+        log.debug("instance poll", exc_info=True)
+    app.root.after(400, lambda: _instance_poll(app, inst))
+
+
+if __name__ == "__main__":
+    import single
+    _INSTANCE = single.SingleInstance()
+    if not _INSTANCE.acquire(wait=20 if "--restart" in sys.argv else 0):
+        if not START_IN_TRAY: _INSTANCE.signal_show()
+        log.info("Already running — %s", "left the open copy in the tray" if START_IN_TRAY else "showed the open window")
+        sys.exit(0)
+    try:
+        _APP = App()
+        _instance_poll(_APP, _INSTANCE)
+        _APP.root.mainloop()
     except Exception:
         log.exception("Fatal error — application stopped")
         raise
