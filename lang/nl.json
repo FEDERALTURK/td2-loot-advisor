@@ -1240,5 +1240,6 @@
   "vp.p_classic": "Klassiek",
   "vp.p_tactical": "Tactische assistent",
   "vp.p_operator": "Rustige operator",
-  "vp.p_brief": "Kort en krachtig"
+  "vp.p_brief": "Kort en krachtig",
+  "news.d": "d"
 }

@@ -1085,5 +1085,6 @@
   "vp.p_classic": "Classic",
   "vp.p_tactical": "Tactical assistant",
   "vp.p_operator": "Calm operator",
-  "vp.p_brief": "Short and sharp"
+  "vp.p_brief": "Short and sharp",
+  "news.d": "d"
 }

@@ -138,3 +138,24 @@ Kategoriler oyundaki menülerle birebir aynıdır (başka kategori kullanma):
   `specialization_weapons`, `weapon_mods`, `gear_mods`, `skills`, `item_kinds`, `ui_words`.
   Yeni named/egzotik eklerken `items` / `weapon_index` içine de yuva/tür ile ekle. Dosyayı baştan YAZMA:
   mevcut JSON'u oku, yalnızca ekle, `version`'ı artır (ör. 2026-10-25.1). Hiçbir listeden kayıt silme.
+
+## Haber akışı — meta/news_feed.json (Bilgi → Haberler ve sezon)
+
+Programın "Haberler ve sezon" sayfası bu dosyayı gösterir. Yalnız doğrulanabilir bilgiler: Ubisoft'un resmî
+duyuruları / yama notları birincil kaynaktır; ikincil site yalnız resmî kaynak yoksa ve bağlantısıyla.
+
+- `items` en fazla 60. Her öğe: `id` (küçük harf, rakam, tire; kalıcı — değiştirme), `kind`
+  (`patch | event | season | maintenance | dlc | community`), `title` ve `text` **10 dilde**
+  (en tr de fr es it pt ru pl nl; oyun içi özel adlar İngilizce kalır; metin kendi cümlelerinle, kopya yok, en çok
+  ~300 karakter), `url` (https, kaynak sayfa), `source` (ör. "Ubisoft").
+- Zaman: süreli etkinliklerde `start` ve `end` (UTC, ISO 8601). Saat duyurulmadıysa haftalık sıfırlama saati
+  (salı 08:00 UTC) ya da günlük sıfırlama (08:00 UTC) kullanılır. Süresiz haberlerde yalnız `date`.
+- Biten etkinlikleri 3 gün sonra kaldır; yama notlarını en fazla 30 gün tut.
+- `version` = YYYY-MM-DD.N, `updated` = UTC zaman, `season` güncel sezon adı.
+
+```json
+{"schema": 1, "version": "2026-10-26.1", "updated": "2026-10-26T02:00:00Z", "season": "Year 8 Season 3 – Red Horizon",
+ "items": [{"id": "y8s3-red-moon-unleashed", "kind": "event", "start": "2026-10-15T08:00:00Z", "end": "2026-11-03T08:00:00Z",
+            "url": "https://www.ubisoft.com/...", "source": "Ubisoft",
+            "title": {"en": "Red Moon Unleashed", "tr": "...", "...": "..."}, "text": {"en": "...", "tr": "...", "...": "..."}}]}
+```

@@ -1240,5 +1240,6 @@
   "vp.p_classic": "Classique",
   "vp.p_tactical": "Assistant tactique",
   "vp.p_operator": "Opérateur calme",
-  "vp.p_brief": "Court et net"
+  "vp.p_brief": "Court et net",
+  "news.d": "j"
 }

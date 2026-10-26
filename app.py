@@ -1723,8 +1723,8 @@ class App:
         if not hasattr(self, "news_clock") or not self.news_clock["daily"].winfo_exists(): return
         now = datetime.now(timezone.utc)
         d, w = knowledge.next_resets(self._news_resets(), now)
-        self.news_clock["daily"].config(text=knowledge.fmt_left(d - now)[0])
-        self.news_clock["weekly"].config(text=knowledge.fmt_left(w - now)[0])
+        self.news_clock["daily"].config(text=knowledge.fmt_left(d - now, t("news.d"))[0])
+        self.news_clock["weekly"].config(text=knowledge.fmt_left(w - now, t("news.d"))[0])
         try:
             items = [x for v in self.tasks.get("items", {}).values() for x in v if not x.get("done")]
             self.news_clock["tasks"].config(text=str(len(items)))
@@ -1755,8 +1755,8 @@ class App:
             tk.Label(head, text=f" {icons.get(it['kind'], '•')} " + knowledge.pick_lang(it["title"], lang), bg=PAL["surface"], fg=PAL["fg"],
                      font=(ui_theme.FONT_SEMI, 11), anchor="w").pack(side="left")
             when = ""
-            if stt == "live" and it.get("end"): when = t("news.ends_in", t=knowledge.fmt_left(it["end"] - now)[0])
-            elif stt == "upcoming" and it.get("start"): when = t("news.starts_in", t=knowledge.fmt_left(it["start"] - now)[0])
+            if stt == "live" and it.get("end"): when = t("news.ends_in", t=knowledge.fmt_left(it["end"] - now, t("news.d"))[0])
+            elif stt == "upcoming" and it.get("start"): when = t("news.starts_in", t=knowledge.fmt_left(it["start"] - now, t("news.d"))[0])
             elif it.get("date"): when = it["date"].astimezone().strftime("%Y-%m-%d")
             tk.Label(head, text=when, bg=PAL["surface"], fg=colors[stt], font=(ui_theme.FONT, 9)).pack(side="right")
             txt = knowledge.pick_lang(it.get("text"), lang)

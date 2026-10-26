@@ -203,10 +203,10 @@ def next_resets(resets, now=None):
     return daily, weekly
 
 
-def fmt_left(delta):
+def fmt_left(delta, day="g"):
     s = max(0, int(delta.total_seconds()))
     d, s = divmod(s, 86400); h, s = divmod(s, 3600); m = s // 60
-    return (f"{d}g {h:02d}:{m:02d}" if d else f"{h:02d}:{m:02d}"), (d, h, m)
+    return (f"{d}{day} {h:02d}:{m:02d}" if d else f"{h:02d}:{m:02d}"), (d, h, m)
 
 
 # ---------------------------------------------------------------- meta build vitrini

@@ -1240,5 +1240,6 @@
   "vp.p_classic": "Clásico",
   "vp.p_tactical": "Asistente táctico",
   "vp.p_operator": "Operador tranquilo",
-  "vp.p_brief": "Corto y directo"
+  "vp.p_brief": "Corto y directo",
+  "news.d": "d"
 }
