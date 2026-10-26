@@ -71,7 +71,7 @@ import livetranslate
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "5.1.5"
+APP_VERSION = "5.1.6"
 FROZEN = getattr(sys, "frozen", False)
 BASE = Path(sys.executable).parent if FROZEN else Path(__file__).resolve().parent
 TASKS_CACHE = BASE / "tasks_cache.json"  # son indirilen görev listesi
@@ -1477,6 +1477,16 @@ class App:
         except Exception as e:
             self.lt_keys = None; log.info("Translate hotkey unavailable: %s", e)
         log.info("Live translation on (engine=%s, mode=%s)", st.get("tr_engine"), st.get("tr_mode"))
+        area = self.lt_area()
+        if area:                                            # program penceresi okunan alanı kapatıyorsa küçült
+            try:
+                self.root.update_idletasks()
+                x, y = self.root.winfo_rootx(), self.root.winfo_rooty()
+                if self.rects_overlap((x, y, x + self.root.winfo_width(), y + self.root.winfo_height()),
+                                      (area["left"], area["top"], area["left"] + area["width"], area["top"] + area["height"])):
+                    self.toast(t("scan.minimized")); self.root.after(1200, self.root.iconify)
+            except Exception:
+                pass
         self._lt_status(t("lt.running", key=st.get("tr_hotkey", "<f7>").upper().strip("<>")), "success")
         self._lt_ui(); return True
 
@@ -1521,6 +1531,13 @@ class App:
         """Kısayol / düğme: alanı hemen bir kez oku ve çevir."""
         area = self.lt_area()
         if not area: return
+        try:                                                # kendi penceremizi okumayalım
+            x, y = self.root.winfo_rootx(), self.root.winfo_rooty()
+            if self.root.state() == "normal" and self.rects_overlap((x, y, x + self.root.winfo_width(), y + self.root.winfo_height()),
+                                      (area["left"], area["top"], area["left"] + area["width"], area["top"] + area["height"])):
+                self.root.iconify(); self.root.update(); time.sleep(0.4)
+        except Exception:
+            pass
         threading.Thread(target=lambda: self._lt_run(grab(area), area, force=True), daemon=True).start()
 
     def _lt_run(self, img, area, force=False):

@@ -159,3 +159,15 @@ duyuruları / yama notları birincil kaynaktır; ikincil site yalnız resmî kay
             "url": "https://www.ubisoft.com/...", "source": "Ubisoft",
             "title": {"en": "Red Moon Unleashed", "tr": "...", "...": "..."}, "text": {"en": "...", "tr": "...", "...": "..."}}]}
 ```
+
+## Açıklama çevirileri — meta/descriptions_i18n.json (Bilgi → Ansiklopedi)
+
+Ansiklopedideki yetenek / egzotik / set açıklamalarının çevirileri. Anahtar: girişin adı (ör. "Obliterate").
+Her çalışmada **en fazla 40 giriş** işle (öncelik: yeni sezon eşyaları, sonra eksik diller):
+
+- Eksik dilleri ekle: tr de fr es it pt ru pl nl (İngilizce özgün metin programda zaten var). Kendi cümlelerinle,
+  doğal ve kısa; oyun içi özel adlar (eşya, yetenek, set, marka, grup, yer) İngilizce kalır; sayılar, yüzdeler ve
+  süreler aynen korunur ("15 saniye", "%5").
+- `"_mt": "tr"` işaretli girişler makine çevirisidir: Türkçesini gözden geçirip düzelt, sonra `_mt` alanını kaldır.
+- Madde işaretli satırları ("• ...") satır satır koru.
+- `version` = YYYY-MM-DD.N. Değişiklik yoksa dosyaya dokunma.

@@ -71,8 +71,6 @@ def s4():
     step("seçili alan (istihbarat metni) çevrildi", any("quartermaster" in en for en, _ in hist), hist=hist[-1:])
     shot("03_region", full=True); a._lt_hide()
     a.cfg["settings"]["tr_engine"] = "ai"
-    try: a.lt_translator(); step("yapay zekâ seçili değilken hata", False)
-    except Exception: pass
     try:
         a.lt_translator().translate(["x"]); step("yapay zekâ seçili değilken hata", False)
     except RuntimeError as e:
