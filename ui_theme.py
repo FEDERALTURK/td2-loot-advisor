@@ -17,6 +17,23 @@ import tkinter as tk
 from pathlib import Path
 from tkinter import ttk
 
+def luminance(hexcol):
+    """Göreli parlaklık (WCAG)."""
+    h = hexcol.lstrip("#"); r, g, b = (int(h[i:i + 2], 16) / 255 for i in (0, 2, 4))
+    f = lambda c: c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4
+    return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b)
+
+
+def contrast(a, b):
+    la, lb = sorted((luminance(a), luminance(b)), reverse=True)
+    return (la + 0.05) / (lb + 0.05)
+
+
+def on_color(bg):
+    """Renkli zemin üstünde okunur yazı rengi (beyaz ya da koyu)."""
+    return "#ffffff" if contrast(bg, "#ffffff") >= contrast(bg, "#0b0d11") else "#0b0d11"
+
+
 # ───────────── renk paletleri / palettes ─────────────
 PALETTES = {
     "dark": {
@@ -51,7 +68,42 @@ PALETTES = {
                        "REVIEW": "#2a5db0", "ERROR": "#555555", "IDLE": "#333333"},
     },
 }
-THEME_MODES = ("dark", "light", "classic")
+# ───────────── oyun atmosferi paketleri / game-atmosphere packs ─────────────
+# Her paket koyu tabandan türetilir: arka plan tonu, vurgu rengi ve çeviri kutusu (ov_*) renkleri değişir.
+_PACKS = {
+    # Dark Zone: kirli mor-karanlık, mor vurgu (DZ bölge sınırları)
+    "darkzone": {"bg": "#0e0b14", "surface": "#17121f", "surface2": "#221a2e", "border": "#33274a", "fg": "#ece8f4",
+                 "muted": "#9a8fb0", "accent": "#a855f7", "accent_hover": "#c084fc", "select": "#3b1f5c", "entry": "#0a0810",
+                 "ov_bg": "#140f1d", "ov_fg": "#f3eefe", "ov_border": "#5b3a8a"},
+    # Black Tusk: çelik siyah, sert kırmızı (Black Tusk arayüzü)
+    "blacktusk": {"bg": "#0b0c0e", "surface": "#141619", "surface2": "#1d2024", "border": "#2e3238", "fg": "#e9ebee",
+                  "muted": "#8a9099", "accent": "#e11d2e", "accent_hover": "#f43f4e", "select": "#4a1016", "entry": "#08090a",
+                  "ov_bg": "#121417", "ov_fg": "#ffffff", "ov_border": "#5c1a20"},
+    # Hunter: kemik grisi ve koyu kızıl (Hunter maskeleri)
+    "hunter": {"bg": "#100e0d", "surface": "#1a1715", "surface2": "#25211e", "border": "#3a332d", "fg": "#eee7df",
+               "muted": "#a39788", "accent": "#dd4560", "accent_hover": "#ec6178", "select": "#4c1520", "entry": "#0b0a09",
+               "ov_bg": "#171412", "ov_fg": "#f6efe6", "ov_border": "#6a2a34"},
+    # Kış New York: soğuk arduvaz, kar beyazı yazı, turuncu vurgu (The Division 1 Manhattan)
+    "winter_ny": {"bg": "#0d1317", "surface": "#141c22", "surface2": "#1c2830", "border": "#2b3a45", "fg": "#f2f6f8",
+                  "muted": "#93a5b1", "accent": "#ff7a1a", "accent_hover": "#ff9447", "select": "#4a2a12", "entry": "#091014",
+                  "ov_bg": "#111a20", "ov_fg": "#ffffff", "ov_border": "#3b5363"},
+    # Gece Operasyonu: lacivert, ISAC camgöbeği (gece görevleri / ISAC hologramları)
+    "nightops": {"bg": "#080d18", "surface": "#0e1626", "surface2": "#152036", "border": "#22324f", "fg": "#e6f1ff",
+                 "muted": "#8aa0bf", "accent": "#22d3ee", "accent_hover": "#67e8f9", "accent_fg": "#06121a", "select": "#0f3a4a",
+                 "entry": "#060a12", "ov_bg": "#0b1322", "ov_fg": "#eaf7ff", "ov_border": "#1f6b80"},
+    # Kenly: orman yeşili, koleji kuşatan doğa (Kenly College)
+    "kenly": {"bg": "#0b110d", "surface": "#121a15", "surface2": "#1a251e", "border": "#2a3a2f", "fg": "#e7f2ea",
+              "muted": "#8fa597", "accent": "#4ade80", "accent_hover": "#86efac", "accent_fg": "#06140b", "select": "#173d26",
+              "entry": "#080d0a", "ov_bg": "#101812", "ov_fg": "#f0fbf3", "ov_border": "#2f6b45"},
+}
+for _k, _v in _PACKS.items():
+    PALETTES[_k] = {**PALETTES["dark"], **_v}
+    PALETTES[_k]["accent_fg"] = on_color(PALETTES[_k]["accent"])     # vurgulu düğmede okunur yazı
+PALETTES["dark"].update({"ov_bg": "#111318", "ov_fg": "#ffffff", "ov_border": "#5a3417"})       # SHD Turuncu
+PALETTES["light"].update({"ov_bg": "#14161b", "ov_fg": "#ffffff", "ov_border": "#5a3417"})
+PALETTES["classic"].update({"ov_bg": "#101010", "ov_fg": "#ffffff", "ov_border": "#1f6fb2"})
+PACKS = ("dark",) + tuple(_PACKS)                                     # oyun atmosferi paketleri (sırası menüde)
+THEME_MODES = PACKS + ("light", "classic")
 
 FONT = "Segoe UI"
 FONT_SEMI = "Segoe UI Semibold"
@@ -119,7 +171,7 @@ def apply(root, mode="dark"):
           lightcolor=[("pressed", bd), ("active", bd)], darkcolor=[("pressed", bd), ("active", bd)])
     for name, col, hov in (("Accent", ac, ach), ("Success", p["success"], p["success"]),
                            ("Danger", p["danger"], p["danger"])):
-        s.configure(f"{name}.TButton", background=col, foreground="#ffffff", bordercolor=col,
+        s.configure(f"{name}.TButton", background=col, foreground=p["accent_fg"] if name == "Accent" else "#ffffff", bordercolor=col,
                     lightcolor=col, darkcolor=col, padding=(16, 7), font=(FONT_SEMI, 10))
         s.map(f"{name}.TButton", background=[("pressed", hov), ("active", hov)],
               lightcolor=[("active", hov)], darkcolor=[("active", hov)],

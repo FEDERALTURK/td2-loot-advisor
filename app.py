@@ -6697,6 +6697,22 @@ class App:
                      width=18, state="readonly").pack(side="left", padx=6)
         self.bv["ui_sounds"] = tk.BooleanVar(value=bool(st.get("ui_sounds", True)))
         ttk.Checkbutton(ra, text=t("set.ui_sounds"), variable=self.bv["ui_sounds"]).pack(side="left", padx=(18, 0))
+        # oyun atmosferi paketleri: renk örneği kartları (tıkla → anında uygula)
+        gal = ttk.Frame(ap); gal.pack(fill="x", padx=8, pady=(0, 8))
+        cur = st.get("ui_theme", "dark")
+        for i, m in enumerate(ui_theme.PACKS):
+            pp = ui_theme.PALETTES[m]
+            card = tk.Frame(gal, bg=pp["surface"], highlightthickness=2, highlightbackground=pp["accent"] if m == cur else pp["border"], cursor="hand2")
+            card.grid(row=i // 4, column=i % 4, padx=4, pady=4, sticky="we")
+            tk.Frame(card, bg=pp["accent"], height=4).pack(fill="x")
+            sw = tk.Frame(card, bg=pp["bg"]); sw.pack(fill="x", padx=6, pady=(6, 2))
+            for c in (pp["accent"], pp["surface2"], pp["ov_bg"], pp["fg"]):
+                tk.Frame(sw, bg=c, width=18, height=12).pack(side="left", padx=1)
+            tk.Label(card, text=("◆ " if m == cur else "") + t("theme." + m), bg=pp["surface"], fg=pp["fg"], font=(ui_theme.FONT_SEMI, 9)).pack(anchor="w", padx=6)
+            tk.Label(card, text=t("themedesc." + m), bg=pp["surface"], fg=pp["muted"], font=(ui_theme.FONT, 8), wraplength=190, justify="left").pack(anchor="w", padx=6, pady=(0, 6))
+            for w_ in [card] + list(card.winfo_children()) + list(sw.winfo_children()):
+                w_.bind("<Button-1>", lambda e, m=m: self.apply_theme_pack(m))
+        for c in range(4): gal.columnconfigure(c, weight=1)
         rb = ttk.Frame(ap); rb.pack(fill="x", padx=8, pady=(0, 6))
         ttk.Label(rb, text=t("set.bg_interval")).pack(side="left")
         self.sv["bg_interval"] = tk.StringVar(value=str(st.get("bg_interval", 15)))
@@ -7217,6 +7233,18 @@ class App:
             self.refresh_status()
             self.apply_fx()
         self.toast(t("msg.settings_saved"))
+
+    def apply_theme_pack(self, mode):
+        st = self.cfg["settings"]
+        if mode not in ui_theme.THEME_MODES or st.get("ui_theme") == mode: return
+        st["ui_theme"] = mode; save_cfg(self.cfg)
+        log.info("Theme pack: %s", mode)
+        self.rebuild_ui(tab="settings")
+        try:
+            if getattr(self, "tr_api", None) and self.tr_api.clients:
+                self.tr_api.broadcast({"type": "translate", "items": [], "theme": self.tr_theme_vars()})
+        except Exception:
+            pass
 
     def meta_restore_hidden(self):
         self.cfg["settings"]["meta_hidden"] = []; save_cfg(self.cfg)
