@@ -24,6 +24,9 @@ jobs:
       - name: Unit
         shell: cmd
         run: set PYTHONIOENCODING=utf-8&& python tests/test_knowledge.py
+      - name: Voice diag
+        shell: cmd
+        run: python tests/voice_diag.py
       - name: Info tab UI
         shell: cmd
         run: set PYTHONIOENCODING=utf-8&& python tests/ui_info_test.py
