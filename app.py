@@ -79,6 +79,7 @@ import knowledge
 import voicepack
 import livetranslate
 import tasks_live
+import overlay
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
@@ -1703,24 +1704,30 @@ class App:
         self._lt_log(pairs, ms)
         self._lt_status(t("lt.done", n=len(pairs), ms=ms), "success")
         self._lt_hist_fill()
+        self._lt_after(pairs, ms)
         self._lt_hide()
         size = int(st.get("tr_font", 15)); mode = st.get("tr_mode", "subtitle")
+        if mode == "inplace":
+            return self._lt_show_inplace(pairs, area)
+        sty = self.lt_style()
         w = self._lt_win = tk.Toplevel(self.root); w.overrideredirect(True)
         w.attributes("-topmost", True, "-alpha", float(st.get("tr_alpha", 0.9)))
-        w.configure(bg="#0d0f12")
+        w.configure(bg=sty["bg"])
         if mode == "subtitle":
             wrap = max(300, area["width"] - 40)
+            tk.Frame(w, height=3, bg=sty["accent"]).pack(fill="x")
             for en, tr, _ in pairs[-3:]:
-                tk.Label(w, text=tr, bg="#0d0f12", fg="#ffffff", font=(ui_theme.FONT_SEMI, size), wraplength=wrap, justify="center").pack(padx=18, pady=(8, 2))
+                tk.Label(w, text=tr, bg=sty["bg"], fg=sty["fg"], font=(sty["font_semi"], size), wraplength=wrap, justify="center").pack(padx=18, pady=(8, 2))
             w.update_idletasks()
             x = area["left"] + (area["width"] - w.winfo_reqwidth()) // 2
             y = max(0, area["top"] - w.winfo_reqheight() - 10)
         else:
-            tk.Label(w, text="🌐 " + t("lt.overlay_title"), bg="#0d0f12", fg=PAL["accent"], font=(ui_theme.FONT_SEMI, 10), anchor="w").pack(fill="x", padx=12, pady=(8, 0))
+            tk.Frame(w, height=3, bg=sty["accent"]).pack(fill="x")
+            tk.Label(w, text="◆ " + t("lt.overlay_title").upper(), bg=sty["bg"], fg=sty["accent"], font=(sty["font_semi"], 9), anchor="w").pack(fill="x", padx=12, pady=(6, 0))
             for en, tr, _ in pairs[:8]:
-                tk.Label(w, text=tr, bg="#0d0f12", fg="#ffffff", font=(ui_theme.FONT, max(9, size - 3)), wraplength=420, justify="left",
+                tk.Label(w, text=tr, bg=sty["bg"], fg=sty["fg"], font=(sty["font"], max(9, size - 3)), wraplength=420, justify="left",
                          anchor="w").pack(fill="x", padx=12, pady=(4, 0))
-            tk.Frame(w, height=8, bg="#0d0f12").pack()
+            tk.Frame(w, height=8, bg=sty["bg"]).pack()
             w.update_idletasks()
             x = area["left"] + area["width"] - w.winfo_reqwidth() - 20
             y = area["top"] + 70
@@ -1728,6 +1735,33 @@ class App:
         click_through(w); exclude_from_capture(w, "translate")
         w.bind("<Destroy>", lambda e, w=w: CAPTURE_MASK.pop("translate", None) if e.widget is w else None)
         self._lt_job = self.root.after(int(float(st.get("tr_hide", 10)) * 1000), self._lt_hide)
+
+    def lt_style(self):
+        """Çeviri kutularının görünümü: seçili tema paketinden (oyun panel renklerine yakın)."""
+        st = self.cfg["settings"]
+        return {"bg": PAL.get("ov_bg", "#0d0f12"), "fg": PAL.get("ov_fg", "#ffffff"), "accent": PAL.get("accent", "#ff6d10"),
+                "border": PAL.get("ov_border", "#2c313d"), "alpha": max(0.6, min(1.0, float(st.get("tr_alpha", 0.9)) + 0.06)),
+                "font": st.get("tr_family") or ui_theme.FONT, "font_semi": st.get("tr_family") or ui_theme.FONT_SEMI,
+                "outline": bool(st.get("tr_outline", False))}
+
+    def _lt_show_inplace(self, pairs, area):
+        """Yerinde çeviri: her blok kendi yerinde, opak fonla (overlay.py)."""
+        st = self.cfg["settings"]
+        body = max(8.0, float(livetranslate.BODY_H[0]))
+        ip = self._lt_inplace = overlay.InPlace(self.root, self.lt_style(), on_window=self._lt_overlay_window)
+        blocks = [(tr, b, en, max(1, en.count("\n") + 1, round((b[3] - b[1]) / (body * 1.15)))) for en, tr, b in pairs]
+        items = overlay.layout(blocks, area, ip.measure_at)
+        if not items: return
+        self._lt_win = ip.show(items, area)
+        self._lt_job = self.root.after(int(float(st.get("tr_hide", 10)) * 1000), self._lt_hide)
+
+    def _lt_overlay_window(self, w):
+        click_through(w); exclude_from_capture(w, "translate")
+        w.bind("<Destroy>", lambda e, w=w: CAPTURE_MASK.pop("translate", None) if e.widget is w else None)
+
+    def _lt_after(self, pairs, ms):
+        """Çeviri sonrası: telefon / ikinci ekran, sesli okuma (yeni özellikler buraya bağlanır)."""
+        pass
 
     def _lt_hide(self):
         if getattr(self, "_lt_job", None):
@@ -1774,7 +1808,7 @@ class App:
         def mode_set():
             st["tr_mode"] = self.lt_mode.get(); save_cfg(self.cfg)
             if st["tr_mode"] == "region" and not st.get("tr_region"): self.lt_pick_region()
-        for k in ("subtitle", "region", "screen"):
+        for k in ("subtitle", "region", "screen", "inplace"):
             rr = ttk.Frame(mb); rr.pack(fill="x", padx=8, pady=1)
             ttk.Radiobutton(rr, text=t("lt.m_" + k), value=k, variable=self.lt_mode, command=mode_set).pack(side="left")
             ttk.Label(rr, text=t("lt.m_" + k + "_hint"), foreground=PAL["muted"]).pack(side="left", padx=8)
