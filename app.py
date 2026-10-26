@@ -32,6 +32,16 @@ if "--dml-probe" in sys.argv:          # ekran kartı (DirectML) denemesi: ayrı
         print("DMLPROBE " + json.dumps(_res), flush=True)
     sys.exit(0)
 
+if "--lt-check" in sys.argv:           # paket denetimi: çeviri altyapısı (ctranslate2 + sentencepiece) pakette mi
+    _i = sys.argv.index("--lt-check")
+    try:
+        import ctranslate2 as _ct, sentencepiece as _sp
+        _res = {"ok": True, "ctranslate2": _ct.__version__, "sentencepiece": getattr(_sp, "__version__", "?")}
+    except Exception as _e:
+        _res = {"ok": False, "reason": f"{type(_e).__name__}: {_e}"}
+    Path(sys.argv[_i + 1]).write_text(json.dumps(_res), encoding="utf-8")
+    sys.exit(0)
+
 import mss
 import capture
 from PIL import Image, ImageDraw, ImageOps, ImageTk
@@ -1507,6 +1517,7 @@ class App:
         else: self.lt_start()
 
     def _lt_loop(self, stop):
+        if stop.wait(1.6): return                            # program penceresi küçülürken okuma yapma
         g = capture.Grabber(); g.keep()
         prev = last = None; stable = 0
         try:

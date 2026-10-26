@@ -67,6 +67,12 @@ jobs:
           Write-Host "DML probe:" (Get-Content $pj -Raw)
           if (-not ($pr.providers -contains "DmlExecutionProvider")) { throw "DirectML provider missing in package" }
           if ($pr.similarity -lt 0.97) { throw "DirectML result differs from CPU" }
+          # canlı çeviri altyapısı pakette olmalı
+          $lj = Join-Path $env:RUNNER_TEMP "lt.json"
+          $lp = Start-Process $exe -ArgumentList "--lt-check", "`"$lj`"" -PassThru
+          if (-not $lp.WaitForExit(60000)) { Stop-Process -Id $lp.Id -Force; throw "lt check hung" }
+          Write-Host "LT check:" (Get-Content $lj -Raw)
+          if (-not (Get-Content $lj -Raw | ConvertFrom-Json).ok) { throw "translation runtime missing in package" }
           # güncelleme, program sistem tepsisindeyken de kurulabilmeli (dosyalar kilitli kalmamalı)
           $cfg = Join-Path $dir "builds.json"
           $j = Get-Content $cfg -Raw | ConvertFrom-Json
