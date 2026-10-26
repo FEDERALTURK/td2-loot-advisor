@@ -84,7 +84,7 @@ def s6():
 def s7():
     fx = a.speaker.last_fx
     ok = bool(fx) and os.path.exists(fx) and os.path.getsize(fx) > 10000
-    step("ajan sesi: telsiz efektli konuşma üretildi", ok, fx=fx, size=os.path.getsize(fx) if fx and os.path.exists(fx) else 0, err=a.speaker.err)
+    step("ajan sesi: telsiz efektli konuşma üretildi (CI'da ses aygıtı yok, çalma atlanır)", ok, fx=fx, size=os.path.getsize(fx) if fx and os.path.exists(fx) else 0, err=a.speaker.err)
     finish()
 def finish():
     if res.get("done"): return

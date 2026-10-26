@@ -832,8 +832,8 @@ class Speaker:
             raw, fxp = d / "td2_voice_raw.wav", d / "td2_voice_fx.wav"
             if not voicepack.sapi_to_wav(text, raw, rate, [hint] + VOICE_HINTS.get(i18n.current_language(), [])): return False
             voicepack.radio_fx(raw, fxp)
-            winsound.PlaySound(str(fxp), winsound.SND_FILENAME)
             self.last_fx = str(fxp)
+            winsound.PlaySound(str(fxp), winsound.SND_FILENAME)      # ses aygıtı yoksa hata → düz konuşmaya düşer
             return True
         except Exception as e:
             self.err = f"radio: {type(e).__name__}: {e}"
