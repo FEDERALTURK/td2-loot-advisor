@@ -29,8 +29,9 @@ samples = ["Agent, the Black Tusk have taken control of the Capitol Building.",
            "Weekly reset: new Targeted Loot locations are available.",
            "Complete the Manhunt to face the High Value Target."]
 t0 = time.time()
-toks = [([prefix] if prefix else []) + sps.encode(s, out_type=str) for s in samples]
-res = tr.translate_batch(toks, beam_size=4, max_decoding_length=256)
+samples += ["Agent, the ZQ0 have taken control of the ZQ1.", "Equip ZQ0 and head to ZQ1 to find ZQ2."]
+toks = [([prefix] if prefix else []) + sps.encode(s, out_type=str) + ["</s>"] for s in samples]
+res = tr.translate_batch(toks, beam_size=4, max_decoding_length=256, no_repeat_ngram_size=4, repetition_penalty=1.1)
 dt = time.time() - t0
 for s, r in zip(samples, res):
     print("EN:", s); print("TR:", spt.decode(r.hypotheses[0])); print()
