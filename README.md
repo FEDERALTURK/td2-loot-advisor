@@ -93,6 +93,12 @@ Recommended game settings: English game language, borderless window, HDR off, ga
   full-window **agent-watch background** whose orange light follows the mouse (Windows, dark themes),
   original procedural header videos (`bgvideo.py`; animated WebP when `av` is not installed).
 
+**Knowledge tab (new)**
+- Encyclopedia (exotics, named items, gear sets, brands, talents; add to build), meta build gallery (tags,
+  popularity, trending, favourites), news & season (reset countdowns, events, patch notes; daily feed
+  `meta/news_feed.json`) and a quiz generated from the game library (XP and levels).
+- Agent voice: original tactical voice lines, 3 packs, 10 languages, optional radio effect (`meta/voice_lines.json`).
+
 **Account & service (new)**
 - Optional account: sign in with Discord (no password; the session is stored encrypted with Windows DPAPI). Redeem a
   license key (`TD2K-…`), invite / gift code (`TD2I-…`) or purchase key; one license = one computer, 7 days offline.

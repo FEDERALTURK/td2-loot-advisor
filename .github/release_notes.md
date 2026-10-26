@@ -8,6 +8,14 @@
 
 Windows "kişisel bilgisayarınızı korudu" derse: **Ek bilgi → Yine de çalıştır** (dosya henüz kod imzalı değil).
 
+**5.1.5 — 📚 Bilgi sekmesi ve ajan sesi**
+- **Yeni sekme: 📚 Bilgi.** Dört bölüm:
+  - **Ansiklopedi:** 80 egzotik, 170 adlı eşya, 29 gear set, 39 marka ve 240'tan fazla yetenek tek yerde, aranabilir. Set bonusları, parçalar, yetenek açıklamaları ve ilgili girişler; tek tıkla **build'e ekle** (gear set/marka → yeni build, egzotik/yetenek → etkin build). Premium: "Nerede düşer?" topluluk istatistiğinden.
+  - **Meta build vitrini:** günlük güncellenen popüler build'ler kartlar halinde — PvE/PvP/solo/grup/son oyun ve rol etiketleri, popülerlik çubuğu, ▲ yükselişte / ▼ düşüşte / ✦ yeni işaretleri, favoriler, "build'lerimde göster / gizle", kaynak bağlantıları.
+  - **Haberler ve sezon:** günlük ve haftalık sıfırlamaya geri sayım, açık görev sayısı, canlı / yakında etkinlikler ve yama notları (kalan süreyle, kaynak bağlantılı, 10 dilde). Her gün otomatik güncellenir.
+  - **Bilgi yarışması:** oyun kütüphanesinden üretilen sorular (egzotiğin yuvası, marka bonusu, set yeteneği, silah türü, yetenek açıklaması…), XP, seviye ve seri. İsteğe bağlı olarak yükleme ekranlarında küçük bir soru penceresi.
+- **Ajan sesi:** kararlar artık özgün "taktik asistan" cümleleriyle söyleniyor ("Egzotik tespit edildi. Saklaman önerilir."). Üç paket (Taktik asistan, Sakin operatör, Kısa ve net) + Klasik, 10 dilde; isteğe bağlı **telsiz efekti**. Asistan → ayarlar → Ses paketi.
+
 **5.1.4 — güncelleme düzeltmesi**
 - Otomatik güncellemede program artık sistem tepsisine küçülmüyor, tamamen kapanıyor; kurulum dosyaları değiştirip programı yeniden açabiliyor. Kurulum da başlamadan önce tepside açık kalmış bir programı kapatıyor (kaldırırken de).
 

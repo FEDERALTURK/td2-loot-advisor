@@ -95,6 +95,12 @@ tüm build'ler için **3D puan çubukları**. Uyan eşyalar otomatik kaydedilir;
 - **Claude ile oku**: OCR başarısız olursa kart resmi Claude Code ile okunur (isteğe bağlı; gerçek kartla denendi: 5 sn, tüm değerler doğru).
 - **Yanlış okundu**: kartı kaydeder ve hazır doldurulmuş bir GitHub hata bildirimi açar; kart test setine eklenebilir.
 
+### Bilgi (yeni)
+- **Ansiklopedi** (egzotikler, adlı eşyalar, setler, markalar, yetenekler; build'e ekle), **meta build vitrini**
+  (etiketler, popülerlik, yükselenler, favoriler), **haberler ve sezon** (sıfırlama geri sayımı, etkinlikler, yama
+  notları; günlük akış `meta/news_feed.json`) ve **bilgi yarışması** (sorular oyun kütüphanesinden, XP ve seviye).
+- **Ajan sesi:** özgün taktik asistan cümleleri, 3 paket, 10 dil, isteğe bağlı telsiz efekti (`meta/voice_lines.json`).
+
 ### Hesap ve hizmet (yeni)
 - **Hesap (isteğe bağlı):** 👤 Giriş yap → Discord ile giriş. Şifre yok; oturum bilgisayarda Windows şifrelemesiyle
   durur. Lisans anahtarı (`TD2K-…`), davet / hediye kodu (`TD2I-…`) ya da satın alma anahtarı tek kutudan kullanılır.
