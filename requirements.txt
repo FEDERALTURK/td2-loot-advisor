@@ -5,3 +5,4 @@ pynput
 pystray
 ctranslate2
 sentencepiece
+soundcard

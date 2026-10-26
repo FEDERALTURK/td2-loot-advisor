@@ -82,6 +82,7 @@ import tasks_live
 import overlay
 import terms
 import trscreen
+import speech
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
@@ -798,7 +799,7 @@ DEFAULTS.update({
     "ai_provider": "ollama", "ollama_url": "http://localhost:11434", "ollama_model": "gemma3:12b",
     "claude_model": "claude-haiku-5-5", "claude_api_key": "", "claude_code_model": "haiku", "openai_model": "gpt-4o-mini", "openai_api_key": "",
     "stt_model": "small", "stt_device": "cpu",
-    "tts_rate": 185, "tts_voice": "", "voice_hotkey": "<f9>", "speak_verdict": True, "speak_chat": True, "voice_pack": "tactical", "voice_radio": True, "quiz_xp": 0, "quiz_best": 0, "quiz_loading": False, "meta_favs": [], "meta_pop_prev": {}, "news_seen": [], "task_share": None, "task_live": True, "task_client": "", "tr_on": False, "tr_engine": "local", "tr_mode": "subtitle", "tr_region": None, "tr_hotkey": "<f7>", "tr_auto": True, "tr_font": 15, "tr_hide": 10, "tr_alpha": 0.9, "tr_screen": False, "tr_screen_port": 8767, "tr_screen_token": "", "tr_speak": "off", "tr_family": "", "tr_outline": False})
+    "tts_rate": 185, "tts_voice": "", "voice_hotkey": "<f9>", "speak_verdict": True, "speak_chat": True, "voice_pack": "tactical", "voice_radio": True, "quiz_xp": 0, "quiz_best": 0, "quiz_loading": False, "meta_favs": [], "meta_pop_prev": {}, "news_seen": [], "task_share": None, "task_live": True, "task_client": "", "tr_on": False, "tr_engine": "local", "tr_mode": "subtitle", "tr_region": None, "tr_hotkey": "<f7>", "tr_auto": True, "tr_font": 15, "tr_hide": 10, "tr_alpha": 0.9, "tr_screen": False, "tr_screen_port": 8767, "tr_screen_token": "", "tr_speak": "off", "tr_family": "", "tr_outline": False, "sp_on": False, "sp_source": "auto", "sp_hide_captions": True})
 PROVIDER_KEYS = ["ollama", "claude_code", "claude", "openai", "builtin"]
 
 def provider_label(pid):
@@ -1439,6 +1440,7 @@ class App:
         self.root.after(2000, self._info_badge)
         self.root.after(5000, self._task_live_poll)
         if stg.get("tr_screen"): self.root.after(3000, self.tr_screen_apply)
+        if stg.get("sp_on"): self.root.after(4000, lambda: self.speech_start(quiet=True))
         if OCR.name == "tesseract" and not self.tess:
             messagebox.showwarning(APP_NAME, t("msg.no_tesseract"))
 
@@ -1581,6 +1583,91 @@ class App:
         elif st.get("task_share") is False: parts.append(t("tl.share_off"))
         lbl.config(text="  ·  ".join(parts))
 
+    # ---------- Konuşma çevirisi (W11 Canlı Altyazı / W10 Whisper)
+    def sp_model_dir(self):
+        return BASE / "models" / "whisper-base.en"
+
+    def sp_source(self):
+        st = self.cfg["settings"]; src = st.get("sp_source", "auto")
+        if src == "auto": src = "captions" if speech.captions_available() else "whisper"
+        return src
+
+    def speech_start(self, quiet=False):
+        st = self.cfg["settings"]
+        self.speech_stop()
+        src = self.sp_source()
+        if src == "captions":
+            if not speech.captions_available():
+                self._sp_status(t("sp.no_captions"), "warning"); return False
+            self.sp = speech.LiveCaptionsSource(self._sp_text, self._sp_state, hide=bool(st.get("sp_hide_captions", True)))
+        else:
+            if not (speech.Whisper.available() and speech.WhisperSource.capture_available()):
+                self._sp_status(t("sp.no_runtime"), "warning"); return False
+            if not speech.whisper_installed(self.sp_model_dir()):
+                self._sp_status(t("sp.need_model", mb=speech.WHISPER_MB), "warning"); return False
+            self.sp = speech.WhisperSource(self._sp_text, self.sp_model_dir(), self._sp_state)
+        try: self.lt_translator()
+        except Exception as e:
+            self._sp_status(str(e), "warning"); return False
+        self.sp.start()
+        st["sp_on"] = True; save_cfg(self.cfg)
+        log.info("Speech translation on (source=%s)", src)
+        self._sp_status(t("sp.running_" + src), "success"); self._sp_ui()
+        return True
+
+    def speech_stop(self, quiet=True):
+        sp = getattr(self, "sp", None)
+        if sp: sp.stop(); self.sp = None
+        if not quiet:
+            self.cfg["settings"]["sp_on"] = False; save_cfg(self.cfg); self._sp_status(t("sp.stopped")); self._sp_ui()
+
+    def _sp_state(self, state, detail=""):
+        if state == "error": self.root.after(0, lambda: self._sp_status(t("sp.error", e=detail), "danger"))
+
+    def _sp_text(self, en):
+        """Kaynaktan gelen İngilizce cümle → Türkçe → altyazı kutusu (arka plan iş parçacığından)."""
+        try:
+            t0 = time.time()
+            tr = self.lt_translator().translate([en])[0]
+            ms = int((time.time() - t0) * 1000)
+            g = self.scan_area() or {}
+            if not g: return
+            area = {"left": int(g["left"] + g["width"] * 0.12), "top": int(g["top"] + g["height"] * 0.70),
+                    "width": int(g["width"] * 0.76), "height": int(g["height"] * 0.24)}
+            self.root.after(0, lambda: self._lt_show([("🎧 " + en, tr, (0, 0, 0, 0))], area, ms, force_mode="subtitle"))
+        except Exception as e:
+            log.info("Speech translate failed: %s", e)
+
+    def _sp_status(self, text, kind="muted"):
+        lbl = getattr(self, "sp_stat", None)
+        if lbl and lbl.winfo_exists(): lbl.config(text=text, fg=PAL.get(kind, PAL["muted"]))
+
+    def _sp_ui(self):
+        b = getattr(self, "sp_btn", None)
+        if not b or not b.winfo_exists(): return
+        on = bool(getattr(self, "sp", None))
+        b.config(text=("■ " + t("sp.stop")) if on else ("▶ " + t("sp.start")), style="Danger.TButton" if on else "Accent.TButton")
+        src = self.sp_source()
+        need = src == "whisper" and not speech.whisper_installed(self.sp_model_dir())
+        if need: self.sp_dl.pack(side="left", padx=6)
+        else: self.sp_dl.pack_forget()
+        self.sp_src_lbl.config(text=t("sp.src_" + src))
+
+    def sp_download(self):
+        self.sp_dl.state(["disabled"]); self._sp_status(t("lt.downloading"))
+        def prog(got, total):
+            self.root.after(0, lambda: self._sp_status(t("sp.dl_prog", p=min(99, int(100 * got / max(1, total))))))
+        def go():
+            try: speech.download_whisper(self.sp_model_dir(), prog); err = None
+            except Exception as e: err = str(e)
+            def done():
+                self.sp_dl.state(["!disabled"])
+                if err: self._sp_status(t("lt.failed", e=err), "danger")
+                else: self._sp_status(t("sp.model_ready"), "success")
+                self._sp_ui()
+            self.root.after(0, done)
+        threading.Thread(target=go, daemon=True).start()
+
     def lt_area(self):
         st = self.cfg["settings"]; mode = st.get("tr_mode", "subtitle")
         if mode == "region" and st.get("tr_region"): return dict(st["tr_region"])
@@ -1710,7 +1797,7 @@ class App:
         except Exception:
             log.debug("lt log", exc_info=True)
 
-    def _lt_show(self, pairs, area, ms):
+    def _lt_show(self, pairs, area, ms, force_mode=None):
         st = self.cfg["settings"]
         hist = getattr(self, "lt_hist", [])
         for en, tr, _ in pairs:
@@ -1721,7 +1808,7 @@ class App:
         self._lt_hist_fill()
         self._lt_after(pairs, ms)
         self._lt_hide()
-        size = int(st.get("tr_font", 15)); mode = st.get("tr_mode", "subtitle")
+        size = int(st.get("tr_font", 15)); mode = force_mode or st.get("tr_mode", "subtitle")
         if mode == "inplace":
             return self._lt_show_inplace(pairs, area)
         sty = self.lt_style()
@@ -1943,6 +2030,16 @@ class App:
         sp.bind("<<ComboboxSelected>>", lambda e: (st.__setitem__("tr_speak", next(k for k in ("off", "subtitle", "all") if t("ts.sp_" + k) == self.ts_speak.get())), save_cfg(self.cfg)))
         ttk.Label(sr, text=t("ts.speak_hint"), foreground=PAL["muted"]).pack(side="left", padx=6)
         self._ts_ui()
+        # konuşma çevirisi
+        kb = ttk.LabelFrame(f, text="🎧 " + t("sp.box")); kb.pack(fill="x", padx=10, pady=6)
+        kr = ttk.Frame(kb); kr.pack(fill="x", padx=8, pady=(6, 2))
+        self.sp_btn = ttk.Button(kr, text="", command=lambda: self.speech_stop(quiet=False) if getattr(self, "sp", None) else self.speech_start())
+        self.sp_btn.pack(side="left")
+        self.sp_dl = ttk.Button(kr, text="⬇ " + t("sp.download", mb=speech.WHISPER_MB), command=self.sp_download)
+        self.sp_src_lbl = ttk.Label(kr, text="", foreground=PAL["muted"]); self.sp_src_lbl.pack(side="left", padx=10)
+        self.sp_stat = tk.Label(kb, text="", bg=PAL["bg"], fg=PAL["muted"], anchor="w"); self.sp_stat.pack(fill="x", padx=10)
+        ttk.Label(kb, text=t("sp.hint"), foreground=PAL["muted"], wraplength=880, justify="left").pack(anchor="w", padx=10, pady=(2, 8))
+        self._sp_ui()
         # dene
         tb = ttk.LabelFrame(f, text="✍ " + t("lt.try")); tb.pack(fill="x", padx=10, pady=6)
         self.lt_in = tk.Text(tb, height=3, wrap="word", bg=PAL["entry"], fg=PAL["fg"], insertbackground=PAL["fg"], relief="flat",
@@ -7733,6 +7830,7 @@ class App:
         self.service_stop()
         try:
             if getattr(self, "tr_api", None): self.tr_api.stop()
+            self.speech_stop()
         except Exception: pass
         try: self.lt_stop(quiet=True); self.lt_cache.save() if getattr(self, "lt_cache", None) else None
         except Exception: pass
