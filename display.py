@@ -85,12 +85,30 @@ GAME_EXES = ("thedivision2.exe", "thedivision2_vulkan.exe", "thedivision2dx12.ex
 _GW_CACHE = {"t": 0.0, "v": None}
 
 
+_EXE_CACHE = {}            # süreç no → exe adı (oyun izleyici 2 sn'de bir tüm pencerelere bakar; süreç açmak pahalı)
+
+
 def _exe_of(hwnd):
     try:
         from ctypes import wintypes
         u, k = ctypes.windll.user32, ctypes.windll.kernel32
         pid = wintypes.DWORD(); u.GetWindowThreadProcessId(hwnd, ctypes.byref(pid))
-        h = k.OpenProcess(0x1000, False, pid.value)              # PROCESS_QUERY_LIMITED_INFORMATION
+        import time
+        now = time.time()
+        if now - _EXE_CACHE.get(-1, 0) > 60 or len(_EXE_CACHE) > 512:   # süreç numaraları yeniden kullanılabilir
+            _EXE_CACHE.clear(); _EXE_CACHE[-1] = now
+        if pid.value in _EXE_CACHE: return _EXE_CACHE[pid.value]
+        name = _exe_query(k, pid.value)
+        if name: _EXE_CACHE[pid.value] = name
+        return name
+    except Exception:
+        return ""
+
+
+def _exe_query(k, pid):
+    try:
+        from ctypes import wintypes
+        h = k.OpenProcess(0x1000, False, pid)              # PROCESS_QUERY_LIMITED_INFORMATION
         if not h: return ""
         try:
             buf = ctypes.create_unicode_buffer(520); n = wintypes.DWORD(520)

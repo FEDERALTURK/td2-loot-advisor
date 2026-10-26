@@ -21,7 +21,7 @@ RUN_NAME = "TD2LootAdvisor"
 def game_running():
     try:
         import display
-        return bool(display.find_game_hwnd())
+        return bool(display.game_window())         # tarama döngüsüyle aynı (2 sn'lik) önbellek
     except Exception:
         return False
 
@@ -31,8 +31,8 @@ def game_focused():
     try:
         import ctypes
         import display
-        h = display.find_game_hwnd()
-        return bool(h) and ctypes.windll.user32.GetForegroundWindow() == h
+        g = display.game_window()
+        return bool(g) and ctypes.windll.user32.GetForegroundWindow() == g.get("hwnd")
     except Exception:
         return False
 
@@ -74,6 +74,27 @@ class GameWatcher:
             try: self.tick()
             except Exception: log.exception("watcher tick")
             self._stop.wait(self.interval)
+
+
+def set_low_priority(on):
+    """Oyun açıkken programın işlemci önceliği 'normalin altı': oyun kare hızı önce gelir. Kapanınca normale döner."""
+    if os.name != "nt": return False
+    try:
+        import ctypes
+        k = ctypes.windll.kernel32
+        return bool(k.SetPriorityClass(k.GetCurrentProcess(), 0x4000 if on else 0x20))   # BELOW_NORMAL / NORMAL
+    except Exception:
+        return False
+
+
+def get_priority():
+    if os.name != "nt": return None
+    try:
+        import ctypes
+        k = ctypes.windll.kernel32
+        return k.GetPriorityClass(k.GetCurrentProcess())
+    except Exception:
+        return None
 
 
 # ---------------------------------------------------------------- oturum günlüğü

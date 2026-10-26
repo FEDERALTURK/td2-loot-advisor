@@ -242,7 +242,7 @@ class LocalMT:
         try: meta = json.loads((self.dir / "td2_model.json").read_text(encoding="utf-8"))
         except (OSError, ValueError): pass
         self.prefix = meta.get("target_prefix", "")
-        threads = max(1, min(4, (os.cpu_count() or 2) - 1))
+        threads = max(1, min(4, (os.cpu_count() or 2) // 2))     # oyunla işlemciyi paylaş: çekirdeklerin en çok yarısı
         self.tr = ctranslate2.Translator(str(self.dir), device="cpu", compute_type="int8", inter_threads=1, intra_threads=threads)
         self.sps = spm.SentencePieceProcessor(str(self.dir / "source.spm"))
         self.spt = spm.SentencePieceProcessor(str(self.dir / "target.spm"))
