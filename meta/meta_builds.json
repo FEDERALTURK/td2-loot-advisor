@@ -1,7 +1,7 @@
 {
  "schema": 1,
- "version": "2026-10-26.1",
- "updated": "2026-10-26T01:34:24Z",
+ "version": "2026-10-27.1",
+ "updated": "2026-10-27T01:38:26Z",
  "season": "Year 8 Season 3 – Red Horizon",
  "generator": "seed (manual research)",
  "popularity_method": "0-100; seed = how many independent sources feature the build, weighted by recency. Daily updater adds engagement signals (views/upvotes) where public.",
@@ -102,7 +102,7 @@
     "Obliterate": 2,
     "Perfect Fast Hands": 2
    },
-   "popularity": 80,
+   "popularity": 85,
    "sources": [
     {
      "title": "Overgear – Division 2 builds (Red Horizon)",
@@ -111,6 +111,10 @@
     {
      "title": "The Division Dispatch – build guides",
      "url": "https://thedivisiondispatch.com/build-guides/"
+    },
+    {
+     "title": "GrindOut – Division 2 builds (Red Horizon, updated Oct 23 2026)",
+     "url": "https://grindout.com/division-2/guides/builds"
     }
    ],
    "summary": {
@@ -152,7 +156,7 @@
     "Perfect Optimized": 2,
     "Flatline": 3
    },
-   "popularity": 64,
+   "popularity": 69,
    "sources": [
     {
      "title": "Overgear – Division 2 builds (Red Horizon)",
@@ -161,6 +165,10 @@
     {
      "title": "widdz (YouTube, Oct 17 2026) – 3 best builds for Red Moon Unleashed",
      "url": "https://www.youtube.com/watch?v=zLuctuWy9Ok"
+    },
+    {
+     "title": "GrindOut – Division 2 builds (Red Horizon, updated Oct 23 2026)",
+     "url": "https://grindout.com/division-2/guides/builds"
     }
    ],
    "summary": {
@@ -250,7 +258,7 @@
     "Resolved": 4,
     "Determined": 2
    },
-   "popularity": 68,
+   "popularity": 73,
    "sources": [
     {
      "title": "Overgear – Division 2 builds (Red Horizon)",
@@ -263,6 +271,10 @@
     {
      "title": "KeenGamer – Y8S3 Red Horizon full update guide",
      "url": "https://www.keengamer.com/articles/guides/the-division-2-y8s3-red-horizon-full-update-guide/"
+    },
+    {
+     "title": "GrindOut – Division 2 builds (Red Horizon, updated Oct 23 2026)",
+     "url": "https://grindout.com/division-2/guides/builds"
     }
    ],
    "summary": {
@@ -307,7 +319,7 @@
    "talents": {
     "Perfect Obliterate": 2
    },
-   "popularity": 70,
+   "popularity": 75,
    "sources": [
     {
      "title": "Overgear – Division 2 builds (Red Horizon)",
@@ -316,6 +328,10 @@
     {
      "title": "The Division Dispatch – build guides",
      "url": "https://thedivisiondispatch.com/build-guides/"
+    },
+    {
+     "title": "GrindOut – Division 2 builds (Red Horizon, updated Oct 23 2026)",
+     "url": "https://grindout.com/division-2/guides/builds"
     }
    ],
    "summary": {
@@ -350,11 +366,15 @@
     "Obliterate": 4,
     "Perfect Focus": 3
    },
-   "popularity": 55,
+   "popularity": 62,
    "sources": [
     {
      "title": "Overgear – Division 2 builds (Red Horizon)",
      "url": "https://overgear.com/guides/division-2/best-builds-for-any-activities/"
+    },
+    {
+     "title": "GrindOut – Division 2 builds (Red Horizon, updated Oct 23 2026)",
+     "url": "https://grindout.com/division-2/guides/builds"
     }
    ],
    "summary": {
@@ -392,7 +412,7 @@
    "talents": {
     "Perfect Spark": 2
    },
-   "popularity": 60,
+   "popularity": 66,
    "sources": [
     {
      "title": "Overgear – Division 2 builds (Red Horizon)",
@@ -401,6 +421,10 @@
     {
      "title": "LFCarry – Division 2 builds Y8S3",
      "url": "https://lfcarry.com/guides/division-2-builds"
+    },
+    {
+     "title": "GrindOut – Division 2 builds (Red Horizon, updated Oct 23 2026)",
+     "url": "https://grindout.com/division-2/guides/builds"
     }
    ],
    "summary": {
@@ -525,7 +549,7 @@
     "Unbreakable": 4,
     "Perfect Unbreakable": 4
    },
-   "popularity": 55,
+   "popularity": 61,
    "sources": [
     {
      "title": "Overgear – Division 2 builds (Red Horizon)",
@@ -534,6 +558,10 @@
     {
      "title": "The Division Dispatch – build guides",
      "url": "https://thedivisiondispatch.com/build-guides/"
+    },
+    {
+     "title": "GrindOut – Division 2 builds (Red Horizon, updated Oct 23 2026)",
+     "url": "https://grindout.com/division-2/guides/builds"
     }
    ],
    "summary": {

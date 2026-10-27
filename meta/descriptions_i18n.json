@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "version": "2026-10-26.4",
+ "version": "2026-10-27.1",
  "note": "Encyclopedia description translations. 'tr' seeded by OPUS-MT machine translation; other languages and reviews by the daily feed task.",
  "items": {
   "NinjaBike Messenger Bag": {
@@ -1444,204 +1444,484 @@
    "nl": "Kills met vaardigheden verhogen de totale vaardigheidsschade 20 seconden lang met 25%."
   },
   "Unstoppable Force": {
-   "tr": "Bir düşmanı öldürmek, toplam silah hasarını 15 saniye boyunca %5 artırır. 5 defaya kadar istiflenir.",
+   "tr": "Bir düşmanı öldürmek toplam silah hasarını 15 saniyeliğine %5 artırır. En fazla 5 kez birikir.",
    "_src": "Killing an enemy increases total weapon damage by 5% for 15 seconds. Stacks up t",
-   "_mt": "tr"
+   "de": "Ein Gegner-Kill erhöht den gesamten Waffenschaden 15 Sekunden lang um 5 %. Bis zu 5-mal stapelbar.",
+   "fr": "Tuer un ennemi augmente les dégâts d'arme totaux de 5 % pendant 15 secondes. Cumulable jusqu'à 5 fois.",
+   "es": "Matar a un enemigo aumenta el daño total de arma un 5 % durante 15 segundos. Se acumula hasta 5 veces.",
+   "it": "Uccidere un nemico aumenta il danno totale dell'arma del 5% per 15 secondi. Si accumula fino a 5 volte.",
+   "pt": "Matar um inimigo aumenta o dano total da arma em 5% por 15 segundos. Acumula até 5 vezes.",
+   "ru": "Убийство врага повышает общий урон оружия на 5% на 15 секунд. Суммируется до 5 раз.",
+   "pl": "Zabicie wroga zwiększa całkowite obrażenia broni o 5% na 15 sekund. Kumuluje się do 5 razy.",
+   "nl": "Een vijand doden verhoogt de totale wapenschade 15 seconden lang met 5%. Stapelt tot 5 keer."
   },
   "Vigilance": {
-   "tr": "Toplam silah hasarını %25 artırır. Hasar almak bu meraklıyı 4 saniyeliğine devre dışı bırakır.",
+   "tr": "Toplam silah hasarını %25 artırır. Hasar aldığında bu bonus 4 saniyeliğine kapanır.",
    "_src": "Increases total weapon damage by 25%. Taking damage disables this buff for 4 sec",
-   "_mt": "tr"
+   "de": "Erhöht den gesamten Waffenschaden um 25 %. Erlittener Schaden deaktiviert diesen Bonus für 4 Sekunden.",
+   "fr": "Augmente les dégâts d'arme totaux de 25 %. Subir des dégâts désactive ce bonus pendant 4 secondes.",
+   "es": "Aumenta el daño total de arma un 25 %. Recibir daño desactiva esta mejora durante 4 segundos.",
+   "it": "Aumenta il danno totale dell'arma del 25%. Subire danni disattiva questo bonus per 4 secondi.",
+   "pt": "Aumenta o dano total da arma em 25%. Sofrer dano desativa este bônus por 4 segundos.",
+   "ru": "Повышает общий урон оружия на 25%. Получение урона отключает этот бонус на 4 секунды.",
+   "pl": "Zwiększa całkowite obrażenia broni o 25%. Otrzymanie obrażeń wyłącza ten bonus na 4 sekundy.",
+   "nl": "Verhoogt de totale wapenschade met 25%. Schade oplopen schakelt deze bonus 4 seconden uit."
   },
   "Wicked": {
-   "tr": "Durum efekti uygulamak, 20 saniye boyunca toplam silah hasarını %18 artırır.",
+   "tr": "Bir durum etkisi uygulamak toplam silah hasarını 20 saniyeliğine %18 artırır.",
    "_src": "Applying a status effect increases total weapon damage by 18% for 20 seconds.",
-   "_mt": "tr"
+   "de": "Das Anwenden eines Statuseffekts erhöht den gesamten Waffenschaden 20 Sekunden lang um 18 %.",
+   "fr": "Appliquer un effet de statut augmente les dégâts d'arme totaux de 18 % pendant 20 secondes.",
+   "es": "Aplicar un efecto de estado aumenta el daño total de arma un 18 % durante 20 segundos.",
+   "it": "Applicare un effetto di stato aumenta il danno totale dell'arma del 18% per 20 secondi.",
+   "pt": "Aplicar um efeito de status aumenta o dano total da arma em 18% por 20 segundos.",
+   "ru": "Наложение эффекта состояния повышает общий урон оружия на 18% на 20 секунд.",
+   "pl": "Nałożenie efektu statusu zwiększa całkowite obrażenia broni o 18% na 20 sekund.",
+   "nl": "Een statuseffect toepassen verhoogt de totale wapenschade 20 seconden lang met 18%."
   },
   "Combined Arms": {
-   "tr": "Bir düşmanı vurmak, toplam beceri hasarını 3 saniye boyunca %25 artırır.",
+   "tr": "Bir düşmanı vurmak toplam yetenek hasarını 3 saniyeliğine %25 artırır.",
    "_src": "Shooting an enemy increases total skill damage by 25% for 3 seconds.",
-   "_mt": "tr"
+   "de": "Auf einen Gegner zu schießen erhöht den gesamten Fertigkeitsschaden 3 Sekunden lang um 25 %.",
+   "fr": "Tirer sur un ennemi augmente les dégâts de compétence totaux de 25 % pendant 3 secondes.",
+   "es": "Disparar a un enemigo aumenta el daño total de habilidad un 25 % durante 3 segundos.",
+   "it": "Colpire un nemico aumenta il danno totale delle abilità del 25% per 3 secondi.",
+   "pt": "Atirar em um inimigo aumenta o dano total de habilidade em 25% por 3 segundos.",
+   "ru": "Стрельба по врагу повышает общий урон навыков на 25% на 3 секунды.",
+   "pl": "Strzelanie do wroga zwiększa całkowite obrażenia umiejętności o 25% na 3 sekundy.",
+   "nl": "Op een vijand schieten verhoogt de totale vaardigheidsschade 3 seconden lang met 25%."
   },
   "Companion": {
-   "tr": "Bir müttefike veya beceriye 5 metre yakınken, toplam silah hasarı %15 artar.",
+   "tr": "Bir müttefike veya yeteneğe 5 metreden yakınken toplam silah hasarı %15 artar.",
    "_src": "While you are within 5 meters of an ally or skill, total weapon damage is increa",
-   "_mt": "tr"
+   "de": "Solange du dich innerhalb von 5 Metern um einen Verbündeten oder eine Fertigkeit befindest, steigt der gesamte Waffenschaden um 15 %.",
+   "fr": "Tant que vous êtes à moins de 5 mètres d'un allié ou d'une compétence, les dégâts d'arme totaux augmentent de 15 %.",
+   "es": "Mientras estés a menos de 5 metros de un aliado o una habilidad, el daño total de arma aumenta un 15 %.",
+   "it": "Finché sei entro 5 metri da un alleato o da un'abilità, il danno totale dell'arma aumenta del 15%.",
+   "pt": "Enquanto você estiver a até 5 metros de um aliado ou habilidade, o dano total da arma aumenta em 15%.",
+   "ru": "Пока вы находитесь в пределах 5 метров от союзника или навыка, общий урон оружия повышен на 15%.",
+   "pl": "Gdy jesteś w promieniu 5 metrów od sojusznika lub umiejętności, całkowite obrażenia broni rosną o 15%.",
+   "nl": "Zolang je binnen 5 meter van een bondgenoot of vaardigheid bent, is de totale wapenschade 15% hoger."
   },
   "Leadership": {
-   "tr": "Kapak, size ve tüm müttefiklerinize 10 saniye boyunca %12 bonus zırh verir. Düşmanın 10 milyonu içinde biterse iki katına çıkar. Soğutma süresi 10 saniyedir.",
+   "tr": "Siperden sipere geçiş sana ve tüm müttefiklere 10 saniyeliğine %12 bonus zırh verir. Geçiş bir düşmana 10 m'den yakın biterse iki katına çıkar. Bekleme süresi 10 saniye.",
    "_src": "Cover to covers grant 12% bonus armor to you & all allies for 10s. Doubled if en",
-   "_mt": "tr"
+   "de": "Deckungswechsel gewähren dir und allen Verbündeten 10 s lang 12 % Bonuspanzerung. Verdoppelt, wenn der Wechsel innerhalb von 10 m zu einem Gegner endet. Abklingzeit 10 Sekunden.",
+   "fr": "Les déplacements de couvert à couvert vous octroient, ainsi qu'à tous vos alliés, 12 % d'armure bonus pendant 10 s. Doublé si le déplacement se termine à moins de 10 m d'un ennemi. Recharge : 10 secondes.",
+   "es": "Moverte de cobertura a cobertura te da a ti y a todos los aliados un 12 % de blindaje adicional durante 10 s. Se duplica si terminas a menos de 10 m de un enemigo. Enfriamiento de 10 segundos.",
+   "it": "Gli spostamenti da copertura a copertura danno a te e a tutti gli alleati il 12% di armatura bonus per 10 s. Raddoppia se termini entro 10 m da un nemico. Tempo di recupero 10 secondi.",
+   "pt": "Mudar de cobertura para cobertura concede a você e a todos os aliados 12% de blindagem bônus por 10 s. Dobra se terminar a até 10 m de um inimigo. Recarga de 10 segundos.",
+   "ru": "Перебежки между укрытиями дают вам и всем союзникам 12% бонусной брони на 10 с. Удваивается, если перебежка заканчивается в пределах 10 м от врага. Перезарядка 10 секунд.",
+   "pl": "Przejścia między osłonami dają tobie i wszystkim sojusznikom 12% dodatkowego pancerza na 10 s. Podwojone, jeśli kończysz w promieniu 10 m od wroga. Czas odnowienia 10 sekund.",
+   "nl": "Dekking-naar-dekking-bewegingen geven jou en alle bondgenoten 10 s lang 12% bonuspantser. Verdubbeld als je binnen 10 m van een vijand eindigt. Afkoeltijd 10 seconden."
   },
   "Safeguard": {
-   "tr": "Tam zırhta iken, toplam beceri onarımını %100 artırır.",
+   "tr": "Zırhın tamken toplam yetenek onarımını %100 artırır.",
    "_src": "While at full armor, increases total skill repair by 100%.",
-   "_mt": "tr"
+   "de": "Bei voller Panzerung wird die gesamte Fertigkeitsreparatur um 100 % erhöht.",
+   "fr": "Lorsque votre armure est pleine, la réparation de compétence totale augmente de 100 %.",
+   "es": "Con el blindaje completo, aumenta la reparación total de habilidad un 100 %.",
+   "it": "Con l'armatura piena, aumenta la riparazione totale delle abilità del 100%.",
+   "pt": "Com a blindagem cheia, aumenta o reparo total de habilidade em 100%.",
+   "ru": "При полной броне общий ремонт навыков повышается на 100%.",
+   "pl": "Przy pełnym pancerzu całkowita naprawa umiejętności rośnie o 100%.",
+   "nl": "Bij volledig pantser wordt de totale vaardigheidsreparatie met 100% verhoogd."
   },
   "Shock and Awe": {
-   "tr": "Bir düşmana durum efekti uygulamak, 20 saniye boyunca toplam beceri hasarını ve onarımını %20 artırır.",
+   "tr": "Bir düşmana durum etkisi uygulamak toplam yetenek hasarını ve onarımını 20 saniyeliğine %20 artırır.",
    "_src": "Applying a status effect to an enemy increases total skill damage and repair by ",
-   "_mt": "tr"
+   "de": "Das Anwenden eines Statuseffekts auf einen Gegner erhöht Fertigkeitsschaden und -reparatur 20 Sekunden lang um 20 %.",
+   "fr": "Appliquer un effet de statut à un ennemi augmente les dégâts et la réparation de compétence totaux de 20 % pendant 20 secondes.",
+   "es": "Aplicar un efecto de estado a un enemigo aumenta el daño y la reparación total de habilidad un 20 % durante 20 segundos.",
+   "it": "Applicare un effetto di stato a un nemico aumenta danno e riparazione totali delle abilità del 20% per 20 secondi.",
+   "pt": "Aplicar um efeito de status a um inimigo aumenta o dano e o reparo total de habilidade em 20% por 20 segundos.",
+   "ru": "Наложение эффекта состояния на врага повышает общий урон и ремонт навыков на 20% на 20 секунд.",
+   "pl": "Nałożenie efektu statusu na wroga zwiększa całkowite obrażenia i naprawę umiejętności o 20% na 20 sekund.",
+   "nl": "Een statuseffect op een vijand toepassen verhoogt de totale vaardigheidsschade en -reparatie 20 seconden lang met 20%."
   },
   "Versatile": {
-   "tr": "Birincil ve ikincil silahlarınız farklıysa, 10 saniye boyunca toplam silah hasarını artırır.",
+   "tr": "Birincil ve ikincil silahın farklı türdeyse, aralarında geçiş yaptığında toplam silah hasarı 10 saniyeliğine yükselir.",
    "_src": "Amplifies total weapon damage for 10 seconds when swapping between your primary ",
-   "_mt": "tr"
+   "de": "Verstärkt den gesamten Waffenschaden 10 Sekunden lang, wenn du zwischen Primär- und Sekundärwaffe wechselst, sofern sie unterschiedlich sind.",
+   "fr": "Amplifie les dégâts d'arme totaux pendant 10 secondes quand vous passez de l'arme principale à la secondaire, si elles sont différentes.",
+   "es": "Amplifica el daño total de arma durante 10 segundos al cambiar entre el arma principal y la secundaria si son distintas.",
+   "it": "Amplifica il danno totale dell'arma per 10 secondi quando passi dall'arma primaria alla secondaria, se sono diverse.",
+   "pt": "Amplifica o dano total da arma por 10 segundos ao trocar entre a arma primária e a secundária, se forem diferentes.",
+   "ru": "Усиливает общий урон оружия на 10 секунд при смене основного и дополнительного оружия, если они разного типа.",
+   "pl": "Wzmacnia całkowite obrażenia broni na 10 sekund przy zmianie broni głównej na dodatkową, jeśli są różne.",
+   "nl": "Versterkt de totale wapenschade 10 seconden lang bij het wisselen tussen primair en secundair wapen, als ze verschillend zijn."
   },
   "Energize": {
-   "tr": "Bir zırh kiti kullanmak, 15 saniye boyunca +1 beceri katmanı verir. Zaten 6. seviye becerideyse, fazla ücret verir.",
+   "tr": "Zırh kiti kullanmak 15 saniyeliğine +1 yetenek kademesi verir. Zaten 6. kademedeysen overcharge verir.",
    "_src": "Using an armor kit grants +1 skill tier for 15 seconds. If already at skill tier",
-   "_mt": "tr"
+   "de": "Ein Panzerungskit zu benutzen gewährt 15 Sekunden lang +1 Fertigkeitsstufe. Bist du bereits auf Fertigkeitsstufe 6, erhältst du Overcharge.",
+   "fr": "Utiliser un kit d'armure octroie +1 niveau de compétence pendant 15 secondes. Si vous êtes déjà au niveau 6, octroie une surcharge (overcharge).",
+   "es": "Usar un kit de blindaje otorga +1 nivel de habilidad durante 15 segundos. Si ya estás en el nivel 6, otorga sobrecarga (overcharge).",
+   "it": "Usare un kit armatura concede +1 livello abilità per 15 secondi. Se sei già al livello 6, concede l'overcharge.",
+   "pt": "Usar um kit de blindagem concede +1 nível de habilidade por 15 segundos. Se já estiver no nível 6, concede sobrecarga (overcharge).",
+   "ru": "Использование ремкомплекта брони даёт +1 уровень навыков на 15 секунд. Если уровень навыков уже 6, даёт перегрузку (overcharge).",
+   "pl": "Użycie zestawu pancerza daje +1 poziom umiejętności na 15 sekund. Jeśli masz już poziom 6, daje overcharge.",
+   "nl": "Een pantserkit gebruiken geeft 15 seconden lang +1 vaardigheidsniveau. Zit je al op niveau 6, dan krijg je overcharge."
   },
   "Galvanize": {
-   "tr": "Bir düşmana Kör, Ensnare, Konfüçyüs veya Şok uygulamak size ve düşmanın 20M içindeki tüm müttefiklerinize 10 saniye boyunca %40 bonus zırh verir.",
+   "tr": "Bir düşmana Blind, Ensnare, Confuse veya Shock uygulamak, sana ve o düşmanın 20 m yakınındaki tüm müttefiklere 10 saniyeliğine %40 bonus zırh verir.",
    "_src": "Applying a Blind, Ensnare, Confuse, or Shock to an enemy grants 40% bonus armor ",
-   "_mt": "tr"
+   "de": "Wendest du Blind, Ensnare, Confuse oder Shock auf einen Gegner an, erhalten du und alle Verbündeten innerhalb von 20 m um den Gegner 10 Sekunden lang 40 % Bonuspanzerung.",
+   "fr": "Appliquer Blind, Ensnare, Confuse ou Shock à un ennemi octroie 40 % d'armure bonus pendant 10 secondes à vous et à tous les alliés à moins de 20 m de l'ennemi.",
+   "es": "Aplicar Blind, Ensnare, Confuse o Shock a un enemigo te da a ti y a todos los aliados a menos de 20 m del enemigo un 40 % de blindaje adicional durante 10 segundos.",
+   "it": "Applicare Blind, Ensnare, Confuse o Shock a un nemico concede a te e a tutti gli alleati entro 20 m dal nemico il 40% di armatura bonus per 10 secondi.",
+   "pt": "Aplicar Blind, Ensnare, Confuse ou Shock a um inimigo concede a você e a todos os aliados a até 20 m do inimigo 40% de blindagem bônus por 10 segundos.",
+   "ru": "Наложение Blind, Ensnare, Confuse или Shock на врага даёт вам и всем союзникам в пределах 20 м от него 40% бонусной брони на 10 секунд.",
+   "pl": "Nałożenie na wroga Blind, Ensnare, Confuse lub Shock daje tobie i wszystkim sojusznikom w promieniu 20 m od wroga 40% dodatkowego pancerza na 10 sekund.",
+   "nl": "Blind, Ensnare, Confuse of Shock op een vijand toepassen geeft jou en alle bondgenoten binnen 20 m van de vijand 10 seconden lang 40% bonuspantser."
   },
   "Overclock": {
-   "tr": "Siz ve müttefikleriniz, konuşlandırılmış yeteneklerinizin 7 metre içinde %25 yeniden yükleme hızı elde edin ve aktif bekleme sürelerini her saniye 0.2 saniye azaltın.",
+   "tr": "Sen ve kurulu yeteneklerinin 7 metre yakınındaki müttefikler %25 şarjör değiştirme hızı kazanır; aktif bekleme süreleri her saniye 0,2 sn azalır.",
    "_src": "You and allies within 7 meters of your deployed skills, gain 25% reload speed an",
-   "_mt": "tr"
+   "de": "Du und Verbündete innerhalb von 7 Metern um deine platzierten Fertigkeiten erhaltet 25 % Nachladegeschwindigkeit, und aktive Abklingzeiten sinken jede Sekunde um 0,2 s.",
+   "fr": "Vous et les alliés à moins de 7 mètres de vos compétences déployées gagnez 25 % de vitesse de rechargement, et les temps de recharge actifs diminuent de 0,2 s chaque seconde.",
+   "es": "Tú y los aliados a menos de 7 metros de tus habilidades desplegadas ganáis un 25 % de velocidad de recarga y los enfriamientos activos se reducen 0,2 s cada segundo.",
+   "it": "Tu e gli alleati entro 7 metri dalle tue abilità schierate ottenete il 25% di velocità di ricarica e i tempi di recupero attivi calano di 0,2 s ogni secondo.",
+   "pt": "Você e os aliados a até 7 metros das suas habilidades implantadas ganham 25% de velocidade de recarga, e as recargas ativas diminuem 0,2 s a cada segundo.",
+   "ru": "Вы и союзники в пределах 7 метров от ваших развёрнутых навыков получаете +25% к скорости перезарядки оружия, а активные откаты сокращаются на 0,2 с каждую секунду.",
+   "pl": "Ty i sojusznicy w promieniu 7 metrów od twoich rozstawionych umiejętności zyskujecie 25% szybkości przeładowania, a aktywne czasy odnowienia skracają się o 0,2 s co sekundę.",
+   "nl": "Jij en bondgenoten binnen 7 meter van je geplaatste vaardigheden krijgen 25% herlaadsnelheid, en actieve afkoeltijden dalen elke seconde met 0,2 s."
   },
   "Protector": {
-   "tr": "Kalkanınız hasar gördüğünde, %5 kazanırsınız ve diğer tüm müttefikler zırhınızın %15'ini 3 saniye boyunca bonus zırh olarak kazanır. Serinleme süresi 3 saniyedir.",
+   "tr": "Kalkanın hasar aldığında, zırhının %5'i kadarını sen, %15'i kadarını diğer tüm müttefikler 3 saniyeliğine bonus zırh olarak kazanır. Bekleme süresi 3 saniye.",
    "_src": "When your shield is damaged, you gain 5% and all other allies gain 15% of your a",
-   "_mt": "tr"
+   "de": "Wird dein Schild beschädigt, erhältst du 5 % und alle anderen Verbündeten 15 % deiner Panzerung 3 Sekunden lang als Bonuspanzerung. Abklingzeit 3 Sekunden.",
+   "fr": "Quand votre bouclier subit des dégâts, vous gagnez 5 % et tous les autres alliés 15 % de votre armure en armure bonus pendant 3 secondes. Recharge : 3 secondes.",
+   "es": "Cuando tu escudo recibe daño, tú ganas un 5 % y los demás aliados un 15 % de tu blindaje como blindaje adicional durante 3 segundos. Enfriamiento de 3 segundos.",
+   "it": "Quando il tuo scudo subisce danni, tu ottieni il 5% e tutti gli altri alleati il 15% della tua armatura come armatura bonus per 3 secondi. Tempo di recupero 3 secondi.",
+   "pt": "Quando seu escudo sofre dano, você ganha 5% e todos os outros aliados ganham 15% da sua blindagem como blindagem bônus por 3 segundos. Recarga de 3 segundos.",
+   "ru": "Когда ваш щит получает урон, вы получаете 5%, а все остальные союзники — 15% вашей брони в виде бонусной брони на 3 секунды. Перезарядка 3 секунды.",
+   "pl": "Gdy twoja tarcza otrzyma obrażenia, ty zyskujesz 5%, a pozostali sojusznicy 15% twojego pancerza jako dodatkowy pancerz na 3 sekundy. Czas odnowienia 3 sekundy.",
+   "nl": "Als je schild schade oploopt, krijg jij 5% en krijgen alle andere bondgenoten 15% van je pantser 3 seconden lang als bonuspantser. Afkoeltijd 3 seconden."
   },
   "Perfect Overwatch": {
-   "tr": "8 saniye boyunca gizli kalmak, siperde ya da örtünme hareketinde kaldığınız sürece, müttefiklerinizin silah ve beceri hasarlarını %12 artırır.",
+   "tr": "8 saniye siperde kalmak, siperde veya siperden sipere geçişte kaldığın sürece senin ve müttefiklerinin silah ve yetenek hasarını %12 artırır.",
    "_src": "Staying in cover for 8s increases your and allies’ weapon and skill damage by 12",
-   "_mt": "tr"
+   "de": "8 s in Deckung zu bleiben erhöht Waffen- und Fertigkeitsschaden von dir und deinen Verbündeten um 12 %, solange du in Deckung oder in einem Deckungswechsel bleibst.",
+   "fr": "Rester à couvert pendant 8 s augmente vos dégâts d'arme et de compétence et ceux de vos alliés de 12 %, tant que vous restez à couvert ou en déplacement de couvert à couvert.",
+   "es": "Permanecer 8 s a cubierto aumenta tu daño de arma y de habilidad y el de tus aliados un 12 % mientras sigas a cubierto o moviéndote de cobertura a cobertura.",
+   "it": "Restare in copertura per 8 s aumenta del 12% il danno di armi e abilità tuo e degli alleati, finché resti in copertura o in uno spostamento da copertura a copertura.",
+   "pt": "Ficar 8 s em cobertura aumenta em 12% o dano de arma e de habilidade seu e dos aliados enquanto você permanecer em cobertura ou mudando de cobertura.",
+   "ru": "8 с в укрытии повышают урон оружия и навыков у вас и союзников на 12%, пока вы остаётесь в укрытии или перебегаете между укрытиями.",
+   "pl": "Pozostanie w osłonie przez 8 s zwiększa obrażenia broni i umiejętności twoje i sojuszników o 12%, dopóki jesteś w osłonie lub przechodzisz między osłonami.",
+   "nl": "8 s in dekking blijven verhoogt de wapen- en vaardigheidsschade van jou en je bondgenoten met 12%, zolang je in dekking blijft of van dekking naar dekking beweegt."
   },
   "Pack Instincts": {
-   "tr": "Siz ve tüm müttefikler, çarptığınız son düşmanın distance'ına dayanan bir bonus kazanırsınız. 0-15M +%25 CHD. 15-25M %10 CHD +%10 CHC. 25M +%25 CHC.",
+   "tr": "Sen ve tüm müttefikler, en son vurduğun düşmanın uzaklığına göre bonus kazanırsınız. 0-15 m: +%25 CHD. 15-25 m: +%10 CHD ve +%10 CHC. 25 m üstü: +%25 CHC.",
    "_src": "You and all allies gain a bonus based on the distance of the last enemy you hit.",
-   "_mt": "tr"
+   "de": "Du und alle Verbündeten erhaltet einen Bonus abhängig von der Entfernung des zuletzt getroffenen Gegners. 0-15 m: +25 % CHD. 15-25 m: +10 % CHD und +10 % CHC. Ab 25 m: +25 % CHC.",
+   "fr": "Vous et tous vos alliés obtenez un bonus selon la distance du dernier ennemi touché. 0-15 m : +25 % CHD. 15-25 m : +10 % CHD et +10 % CHC. Au-delà de 25 m : +25 % CHC.",
+   "es": "Tú y todos los aliados obtenéis una bonificación según la distancia del último enemigo al que golpeaste. 0-15 m: +25 % CHD. 15-25 m: +10 % CHD y +10 % CHC. Más de 25 m: +25 % CHC.",
+   "it": "Tu e tutti gli alleati ottenete un bonus in base alla distanza dell'ultimo nemico colpito. 0-15 m: +25% CHD. 15-25 m: +10% CHD e +10% CHC. Oltre 25 m: +25% CHC.",
+   "pt": "Você e todos os aliados ganham um bônus conforme a distância do último inimigo atingido. 0-15 m: +25% CHD. 15-25 m: +10% CHD e +10% CHC. Acima de 25 m: +25% CHC.",
+   "ru": "Вы и все союзники получаете бонус в зависимости от расстояния до последнего поражённого врага. 0-15 м: +25% CHD. 15-25 м: +10% CHD и +10% CHC. Дальше 25 м: +25% CHC.",
+   "pl": "Ty i wszyscy sojusznicy otrzymujecie bonus zależny od odległości ostatniego trafionego wroga. 0-15 m: +25% CHD. 15-25 m: +10% CHD i +10% CHC. Powyżej 25 m: +25% CHC.",
+   "nl": "Jij en alle bondgenoten krijgen een bonus op basis van de afstand tot de laatst geraakte vijand. 0-15 m: +25% CHD. 15-25 m: +10% CHD en +10% CHC. Boven 25 m: +25% CHC."
   },
   "Grace Under Fire": {
-   "tr": "Patlamalar tarafından engellenemez. 6 - 12 saniye boyunca ateş etmeden kapalı kalmak, 1 - 2 saniyeyi hedeflerken hasar bağışıklığı sağlar.",
+   "tr": "Patlamalar seni sendeletemez. 6-12 saniye ateş etmeden siperde kalmak, nişan alırken 1-2 saniyelik hasar bağışıklığı verir.",
    "_src": "Cannot be staggered by explosions. Staying in cover without firing for 6 - 12s p",
-   "_mt": "tr"
+   "de": "Explosionen können dich nicht ins Taumeln bringen. 6-12 s ohne zu feuern in Deckung zu bleiben gewährt beim Zielen 1-2 s Schadensimmunität.",
+   "fr": "Les explosions ne peuvent pas vous déstabiliser. Rester à couvert sans tirer pendant 6 à 12 s procure une immunité aux dégâts de 1 à 2 s en visant.",
+   "es": "Las explosiones no pueden aturdirte. Permanecer a cubierto sin disparar durante 6-12 s otorga inmunidad al daño durante 1-2 s mientras apuntas.",
+   "it": "Le esplosioni non possono farti barcollare. Restare in copertura senza sparare per 6-12 s dà immunità ai danni per 1-2 s mentre miri.",
+   "pt": "Explosões não conseguem desestabilizar você. Ficar em cobertura sem atirar por 6-12 s concede imunidade a dano por 1-2 s enquanto mira.",
+   "ru": "Взрывы не могут вас оглушить. 6-12 с в укрытии без стрельбы дают 1-2 с неуязвимости к урону при прицеливании.",
+   "pl": "Eksplozje nie mogą cię zachwiać. Pozostanie w osłonie bez strzelania przez 6-12 s daje 1-2 s odporności na obrażenia podczas celowania.",
+   "nl": "Explosies kunnen je niet uit balans brengen. 6-12 s in dekking blijven zonder te vuren geeft tijdens het richten 1-2 s schade-immuniteit."
   },
   "Parkour!": {
-   "tr": "Kapak yapmak veya tonozlamak için bir kapak yapmak, çizilmiş silahınızı yeniden doldurur.",
+   "tr": "Siperden sipere geçiş yapmak veya bir engelin üstünden atlamak elindeki silahı yeniden doldurur.",
    "_src": "Performing a cover to cover or vaulting reloads your drawn weapon.",
-   "_mt": "tr"
+   "de": "Ein Deckungswechsel oder das Überspringen eines Hindernisses lädt deine gezogene Waffe nach.",
+   "fr": "Un déplacement de couvert à couvert ou un saut d'obstacle recharge l'arme en main.",
+   "es": "Moverte de cobertura a cobertura o saltar un obstáculo recarga el arma que llevas en la mano.",
+   "it": "Uno spostamento da copertura a copertura o il superamento di un ostacolo ricarica l'arma impugnata.",
+   "pt": "Mudar de cobertura ou saltar um obstáculo recarrega a arma em mãos.",
+   "ru": "Перебежка между укрытиями или перепрыгивание через препятствие перезаряжает оружие в руках.",
+   "pl": "Przejście między osłonami lub przeskok przez przeszkodę przeładowuje trzymaną broń.",
+   "nl": "Van dekking naar dekking bewegen of over een obstakel springen herlaadt je getrokken wapen."
   },
   "Dragon's Glare": {
-   "tr": "Savaşta iken, 20 metre içinde size en yakın düşmana yanık uygular. Serinleme: 40 saniye.",
+   "tr": "Çatışmadayken 20 metre içinde sana en yakın düşmana yanma uygular. Bekleme süresi: 40 saniye.",
    "_src": "While in combat, applies burn to the enemy closest to you within 20 meters. Cool",
-   "_mt": "tr"
+   "de": "Im Kampf wird der nächste Gegner innerhalb von 20 Metern in Brand gesetzt. Abklingzeit: 40 Sekunden.",
+   "fr": "En combat, applique une brûlure à l'ennemi le plus proche dans un rayon de 20 mètres. Recharge : 40 secondes.",
+   "es": "En combate, aplica quemadura al enemigo más cercano a menos de 20 metros. Enfriamiento: 40 segundos.",
+   "it": "In combattimento, applica bruciatura al nemico più vicino entro 20 metri. Tempo di recupero: 40 secondi.",
+   "pt": "Em combate, aplica queimadura ao inimigo mais próximo a até 20 metros. Recarga: 40 segundos.",
+   "ru": "В бою поджигает ближайшего к вам врага в радиусе 20 метров. Перезарядка: 40 секунд.",
+   "pl": "W walce podpala najbliższego wroga w promieniu 20 metrów. Czas odnowienia: 40 sekund.",
+   "nl": "In gevecht zet het de dichtstbijzijnde vijand binnen 20 meter in brand. Afkoeltijd: 40 seconden."
   },
   "Quick Draw": {
-   "tr": "Tabancanız kılıflıyken, her 0.5 saniyede bir 100’e kadar bir yığın kazanın. Takas yaptığınızda, ilk atışınız yığın başına +%10 hasar verir.",
+   "tr": "Tabancan kılıfındayken her 0,5 saniyede bir yük kazanırsın (en fazla 100). Tabancaya geçtiğinde ilk atışın yük başına +%10 hasar verir.",
    "_src": "While your pistol is holstered, gain a stack every 0.5s, up to 100. When you swa",
-   "_mt": "tr"
+   "de": "Solange deine Pistole geholstert ist, erhältst du alle 0,5 s einen Stapel, bis zu 100. Wechselst du zu ihr, verursacht dein erster Schuss +10 % Schaden pro Stapel.",
+   "fr": "Tant que votre pistolet est rangé, vous gagnez une charge toutes les 0,5 s, jusqu'à 100. Quand vous le dégainez, votre premier tir inflige +10 % de dégâts par charge.",
+   "es": "Mientras tu pistola está enfundada, ganas una acumulación cada 0,5 s, hasta 100. Al cambiar a ella, tu primer disparo inflige +10 % de daño por acumulación.",
+   "it": "Finché la pistola è nella fondina, ottieni un accumulo ogni 0,5 s, fino a 100. Quando la impugni, il primo colpo infligge +10% di danno per accumulo.",
+   "pt": "Enquanto sua pistola está no coldre, você ganha um acúmulo a cada 0,5 s, até 100. Ao trocar para ela, o primeiro tiro causa +10% de dano por acúmulo.",
+   "ru": "Пока пистолет в кобуре, вы получаете заряд каждые 0,5 с, до 100. При переключении на него первый выстрел наносит +10% урона за каждый заряд.",
+   "pl": "Gdy pistolet jest w kaburze, co 0,5 s zyskujesz ładunek, maksymalnie 100. Po wyjęciu go pierwszy strzał zadaje +10% obrażeń za każdy ładunek.",
+   "nl": "Zolang je pistool in de holster zit, krijg je elke 0,5 s een stapel, tot 100. Als je ernaar wisselt, doet je eerste schot +10% schade per stapel."
   },
   "Transference Overclock": {
-   "tr": "Bir Hive'ı patlatmak, tüm müttefiklerin beceri serinlemelerini sıfırlar ve 15 saniye boyunca aşırı şarj sağlar. 120 saniye soğuma.",
+   "tr": "Bir Hive patlatmak tüm müttefiklerin yetenek bekleme sürelerini sıfırlar ve 15 saniyeliğine overcharge verir. Bekleme süresi 120 saniye.",
    "_src": "Detonating a Hive resets all allies' skill cooldowns and grants overcharge for 1",
-   "_mt": "tr"
+   "de": "Das Zünden eines Hive setzt die Fertigkeits-Abklingzeiten aller Verbündeten zurück und gewährt 15 Sekunden lang Overcharge. 120 s Abklingzeit.",
+   "fr": "Faire exploser une Hive réinitialise les temps de recharge des compétences de tous les alliés et octroie une surcharge (overcharge) pendant 15 secondes. Recharge : 120 s.",
+   "es": "Detonar una Hive reinicia los enfriamientos de habilidades de todos los aliados y otorga sobrecarga (overcharge) durante 15 segundos. Enfriamiento de 120 s.",
+   "it": "Far detonare un Hive azzera i tempi di recupero delle abilità di tutti gli alleati e concede l'overcharge per 15 secondi. Tempo di recupero 120 s.",
+   "pt": "Detonar uma Hive zera as recargas de habilidade de todos os aliados e concede sobrecarga (overcharge) por 15 segundos. Recarga de 120 s.",
+   "ru": "Подрыв Hive сбрасывает откаты навыков всех союзников и даёт перегрузку (overcharge) на 15 секунд. Перезарядка 120 с.",
+   "pl": "Zdetonowanie Hive resetuje czasy odnowienia umiejętności wszystkich sojuszników i daje overcharge na 15 sekund. Czas odnowienia 120 s.",
+   "nl": "Een Hive laten ontploffen reset de vaardigheidsafkoeltijden van alle bondgenoten en geeft 15 seconden overcharge. Afkoeltijd 120 s."
   },
   "Ablative Nano-Plating": {
-   "tr": "Sizin veya bir müttefikinizin zırhı kırıldığında, 10 saniye boyunca %80 bonus zırh kazanın. 45 saniye soğuma. Specialization silahınla öldürür, soğumayı sıfırlar.",
+   "tr": "Senin ya da bir müttefikinin zırhı kırıldığında 10 saniyeliğine %80 bonus zırh kazanırsın. Bekleme süresi 45 sn. Specialization silahınla yapılan öldürmeler bekleme süresini sıfırlar.",
    "_src": "When your or an ally's armor breaks, gain 80% bonus armor for 10s. 45s cooldown.",
-   "_mt": "tr"
+   "de": "Bricht deine Panzerung oder die eines Verbündeten, erhältst du 10 s lang 80 % Bonuspanzerung. 45 s Abklingzeit. Kills mit deiner Spezialisierungswaffe setzen die Abklingzeit zurück.",
+   "fr": "Quand votre armure ou celle d'un allié est brisée, vous gagnez 80 % d'armure bonus pendant 10 s. Recharge : 45 s. Les éliminations avec votre arme de spécialisation réinitialisent la recharge.",
+   "es": "Cuando tu blindaje o el de un aliado se rompe, ganas un 80 % de blindaje adicional durante 10 s. Enfriamiento de 45 s. Las bajas con tu arma de especialización reinician el enfriamiento.",
+   "it": "Quando la tua armatura o quella di un alleato si rompe, ottieni l'80% di armatura bonus per 10 s. Tempo di recupero 45 s. Le uccisioni con l'arma di specializzazione azzerano il recupero.",
+   "pt": "Quando sua blindagem ou a de um aliado quebra, você ganha 80% de blindagem bônus por 10 s. Recarga de 45 s. Abates com sua arma de especialização zeram a recarga.",
+   "ru": "Когда ваша броня или броня союзника разрушается, вы получаете 80% бонусной брони на 10 с. Перезарядка 45 с. Убийства оружием специализации сбрасывают перезарядку.",
+   "pl": "Gdy twój pancerz lub pancerz sojusznika pęknie, zyskujesz 80% dodatkowego pancerza na 10 s. Czas odnowienia 45 s. Zabójstwa bronią specjalizacji resetują odnowienie.",
+   "nl": "Als jouw pantser of dat van een bondgenoot breekt, krijg je 10 s lang 80% bonuspantser. Afkoeltijd 45 s. Kills met je specialisatiewapen resetten de afkoeltijd."
   },
   "One in Hand...": {
-   "tr": "+1 Zırh Kiti Kapasitesi +3 Grenade Kapasitesi +%25 Cephane Kapasitesi +%10 Beceri Onarımı +%10 Durum Etkileri",
+   "tr": "+1 zırh kiti kapasitesi +3 el bombası kapasitesi +%25 cephane kapasitesi +%10 yetenek onarımı +%10 durum etkileri",
    "_src": "+1 Armor Kit Capacity +3 Grenade Capacity +25% Ammo Capacity +10% Skill Repair +",
-   "_mt": "tr"
+   "de": "+1 Panzerungskit-Kapazität +3 Granatenkapazität +25 % Munitionskapazität +10 % Fertigkeitsreparatur +10 % Statuseffekte",
+   "fr": "+1 capacité de kits d'armure +3 capacité de grenades +25 % capacité de munitions +10 % réparation de compétence +10 % effets de statut",
+   "es": "+1 capacidad de kits de blindaje +3 capacidad de granadas +25 % capacidad de munición +10 % reparación de habilidad +10 % efectos de estado",
+   "it": "+1 capacità kit armatura +3 capacità granate +25% capacità munizioni +10% riparazione abilità +10% effetti di stato",
+   "pt": "+1 capacidade de kits de blindagem +3 capacidade de granadas +25% capacidade de munição +10% reparo de habilidade +10% efeitos de status",
+   "ru": "+1 к запасу ремкомплектов брони +3 к запасу гранат +25% к запасу патронов +10% к ремонту навыков +10% к эффектам состояния",
+   "pl": "+1 pojemność zestawów pancerza +3 pojemność granatów +25% pojemność amunicji +10% naprawa umiejętności +10% efekty statusu",
+   "nl": "+1 capaciteit pantserkits +3 capaciteit granaten +25% munitiecapaciteit +10% vaardigheidsreparatie +10% statuseffecten"
   },
   "Perfect Clutch": {
-   "tr": "20% zırhın altındaysanız, kritik vuruşlar %3 eksik zırhı onarır. Kills, 4-10 saniye boyunca %100 zırhı onarmanızı sağlar.",
+   "tr": "Zırhın %20'nin altındayken kritik vuruşlar eksik zırhın %3'ünü onarır. Öldürmeler 4-10 saniye boyunca zırhının %100'üne kadar onarılmasını sağlar.",
    "_src": "If you are below 20% armor, critical hits repair 3% missing armor. Kills allow y",
-   "_mt": "tr"
+   "de": "Liegt deine Panzerung unter 20 %, reparieren kritische Treffer 3 % der fehlenden Panzerung. Kills erlauben 4-10 Sekunden lang eine Reparatur bis zu 100 % Panzerung.",
+   "fr": "Si votre armure est sous 20 %, les coups critiques réparent 3 % de l'armure manquante. Les éliminations permettent de réparer jusqu'à 100 % de l'armure pendant 4 à 10 secondes.",
+   "es": "Si tu blindaje está por debajo del 20 %, los golpes críticos reparan el 3 % del blindaje que falta. Las bajas permiten reparar hasta el 100 % del blindaje durante 4-10 segundos.",
+   "it": "Se la tua armatura è sotto il 20%, i colpi critici riparano il 3% dell'armatura mancante. Le uccisioni permettono di riparare fino al 100% dell'armatura per 4-10 secondi.",
+   "pt": "Se sua blindagem estiver abaixo de 20%, acertos críticos reparam 3% da blindagem perdida. Abates permitem reparar até 100% da blindagem por 4-10 segundos.",
+   "ru": "Если броня ниже 20%, критические попадания восстанавливают 3% недостающей брони. Убийства позволяют восстанавливать до 100% брони в течение 4-10 секунд.",
+   "pl": "Gdy pancerz spadnie poniżej 20%, trafienia krytyczne naprawiają 3% brakującego pancerza. Zabójstwa pozwalają naprawić do 100% pancerza przez 4-10 sekund.",
+   "nl": "Als je pantser onder 20% is, herstellen kritieke treffers 3% van het ontbrekende pantser. Kills laten je 4-10 seconden lang tot 100% pantser herstellen."
   },
   "Perfect Combined Arms": {
-   "tr": "Bir düşmanı vurmak, toplam beceri hasarını 3 saniye boyunca %30 artırır.",
+   "tr": "Bir düşmanı vurmak toplam yetenek hasarını 3 saniyeliğine %30 artırır.",
    "_src": "Shooting an enemy increases total skill damage by 30% for 3 seconds.",
-   "_mt": "tr"
+   "de": "Auf einen Gegner zu schießen erhöht den gesamten Fertigkeitsschaden 3 Sekunden lang um 30 %.",
+   "fr": "Tirer sur un ennemi augmente les dégâts de compétence totaux de 30 % pendant 3 secondes.",
+   "es": "Disparar a un enemigo aumenta el daño total de habilidad un 30 % durante 3 segundos.",
+   "it": "Colpire un nemico aumenta il danno totale delle abilità del 30% per 3 secondi.",
+   "pt": "Atirar em um inimigo aumenta o dano total de habilidade em 30% por 3 segundos.",
+   "ru": "Стрельба по врагу повышает общий урон навыков на 30% на 3 секунды.",
+   "pl": "Strzelanie do wroga zwiększa całkowite obrażenia umiejętności o 30% na 3 sekundy.",
+   "nl": "Op een vijand schieten verhoogt de totale vaardigheidsschade 3 seconden lang met 30%."
   },
   "Perfect Shock and Awe": {
-   "tr": "Bir düşmana durum efekti uygulamak, 27 saniye boyunca toplam beceri hasarını ve onarımını %20 artırır.",
+   "tr": "Bir düşmana durum etkisi uygulamak toplam yetenek hasarını ve onarımını 27 saniyeliğine %20 artırır.",
    "_src": "Applying a status effect to an enemy increases total skill damage and repair by ",
-   "_mt": "tr"
+   "de": "Das Anwenden eines Statuseffekts auf einen Gegner erhöht Fertigkeitsschaden und -reparatur 27 Sekunden lang um 20 %.",
+   "fr": "Appliquer un effet de statut à un ennemi augmente les dégâts et la réparation de compétence totaux de 20 % pendant 27 secondes.",
+   "es": "Aplicar un efecto de estado a un enemigo aumenta el daño y la reparación total de habilidad un 20 % durante 27 segundos.",
+   "it": "Applicare un effetto di stato a un nemico aumenta danno e riparazione totali delle abilità del 20% per 27 secondi.",
+   "pt": "Aplicar um efeito de status a um inimigo aumenta o dano e o reparo total de habilidade em 20% por 27 segundos.",
+   "ru": "Наложение эффекта состояния на врага повышает общий урон и ремонт навыков на 20% на 27 секунд.",
+   "pl": "Nałożenie efektu statusu na wroga zwiększa całkowite obrażenia i naprawę umiejętności o 20% na 27 sekund.",
+   "nl": "Een statuseffect op een vijand toepassen verhoogt de totale vaardigheidsschade en -reparatie 27 seconden lang met 20%."
   },
   "Perfect Tech Support": {
-   "tr": "Beceri öldürme, 27 saniye boyunca toplam beceri hasarını %25 artırır.",
+   "tr": "Yetenekle yapılan öldürmeler toplam yetenek hasarını 27 saniyeliğine %25 artırır.",
    "_src": "Skill kills increase total skill damage by 25% for 27 seconds.",
-   "_mt": "tr"
+   "de": "Fertigkeits-Kills erhöhen den gesamten Fertigkeitsschaden 27 Sekunden lang um 25 %.",
+   "fr": "Les éliminations par compétence augmentent les dégâts de compétence totaux de 25 % pendant 27 secondes.",
+   "es": "Las bajas con habilidades aumentan el daño total de habilidad un 25 % durante 27 segundos.",
+   "it": "Le uccisioni con le abilità aumentano il danno totale delle abilità del 25% per 27 secondi.",
+   "pt": "Abates com habilidades aumentam o dano total de habilidade em 25% por 27 segundos.",
+   "ru": "Убийства навыками повышают общий урон навыков на 25% на 27 секунд.",
+   "pl": "Zabójstwa umiejętnościami zwiększają całkowite obrażenia umiejętności o 25% na 27 sekund.",
+   "nl": "Kills met vaardigheden verhogen de totale vaardigheidsschade 27 seconden lang met 25%."
   },
   "Perfect Vigilance": {
-   "tr": "Toplam silah hasarını %25 artırır. Hasar almak bu meraklıyı 3 saniyeliğine devre dışı bırakır.",
+   "tr": "Toplam silah hasarını %25 artırır. Hasar aldığında bu bonus 3 saniyeliğine kapanır.",
    "_src": "Increases total weapon damage by 25%. Taking damage disables this buff for 3 sec",
-   "_mt": "tr"
+   "de": "Erhöht den gesamten Waffenschaden um 25 %. Erlittener Schaden deaktiviert diesen Bonus für 3 Sekunden.",
+   "fr": "Augmente les dégâts d'arme totaux de 25 %. Subir des dégâts désactive ce bonus pendant 3 secondes.",
+   "es": "Aumenta el daño total de arma un 25 %. Recibir daño desactiva esta mejora durante 3 segundos.",
+   "it": "Aumenta il danno totale dell'arma del 25%. Subire danni disattiva questo bonus per 3 secondi.",
+   "pt": "Aumenta o dano total da arma em 25%. Sofrer dano desativa este bônus por 3 segundos.",
+   "ru": "Повышает общий урон оружия на 25%. Получение урона отключает этот бонус на 3 секунды.",
+   "pl": "Zwiększa całkowite obrażenia broni o 25%. Otrzymanie obrażeń wyłącza ten bonus na 3 sekundy.",
+   "nl": "Verhoogt de totale wapenschade met 25%. Schade oplopen schakelt deze bonus 3 seconden uit."
   },
   "Perfectly Wicked": {
-   "tr": "Durum etkisi uygulamak 27 saniye boyunca toplam silah hasarını %18 artırır.",
+   "tr": "Bir durum etkisi uygulamak toplam silah hasarını 27 saniyeliğine %18 artırır.",
    "_src": "Applying a status effect increases total weapon damage by 18% for 27 seconds.",
-   "_mt": "tr"
+   "de": "Das Anwenden eines Statuseffekts erhöht den gesamten Waffenschaden 27 Sekunden lang um 18 %.",
+   "fr": "Appliquer un effet de statut augmente les dégâts d'arme totaux de 18 % pendant 27 secondes.",
+   "es": "Aplicar un efecto de estado aumenta el daño total de arma un 18 % durante 27 segundos.",
+   "it": "Applicare un effetto di stato aumenta il danno totale dell'arma del 18% per 27 secondi.",
+   "pt": "Aplicar um efeito de status aumenta o dano total da arma em 18% por 27 segundos.",
+   "ru": "Наложение эффекта состояния повышает общий урон оружия на 18% на 27 секунд.",
+   "pl": "Nałożenie efektu statusu zwiększa całkowite obrażenia broni o 18% na 27 sekund.",
+   "nl": "Een statuseffect toepassen verhoogt de totale wapenschade 27 seconden lang met 18%."
   },
   "Perfect Intimidate": {
-   "tr": "Bonus zırhınız olsa da, toplam silah hasarını 10 metre içinde düşmanlara %40 artırır.",
+   "tr": "Bonus zırhın varken 10 metre içindeki düşmanlara verdiğin toplam silah hasarı %40 yükselir.",
    "_src": "While you have bonus armor, amplifies total weapon damage by 40% to enemies with",
-   "_mt": "tr"
+   "de": "Solange du Bonuspanzerung hast, wird der gesamte Waffenschaden gegen Gegner innerhalb von 10 Metern um 40 % verstärkt.",
+   "fr": "Tant que vous avez de l'armure bonus, les dégâts d'arme totaux contre les ennemis à moins de 10 mètres sont amplifiés de 40 %.",
+   "es": "Mientras tengas blindaje adicional, el daño total de arma contra enemigos a menos de 10 metros se amplifica un 40 %.",
+   "it": "Finché hai armatura bonus, il danno totale dell'arma contro i nemici entro 10 metri è amplificato del 40%.",
+   "pt": "Enquanto você tiver blindagem bônus, o dano total da arma contra inimigos a até 10 metros é amplificado em 40%.",
+   "ru": "Пока у вас есть бонусная броня, общий урон оружия по врагам в пределах 10 метров усилен на 40%.",
+   "pl": "Gdy masz dodatkowy pancerz, całkowite obrażenia broni zadawane wrogom w promieniu 10 metrów są wzmocnione o 40%.",
+   "nl": "Zolang je bonuspantser hebt, wordt de totale wapenschade tegen vijanden binnen 10 meter met 40% versterkt."
   },
   "Perfectly Unbreakable": {
-   "tr": "Zırhınız tükendiğinde, zırhınızın %100'ünü onarın. Soğutma süresi 55 saniyedir.",
+   "tr": "Zırhın tükendiğinde zırhının %100'ünü onarır. Bekleme süresi 55 saniye.",
    "_src": "When your armor is depleted, repair 100% of your armor. Cooldown is 55 seconds.",
-   "_mt": "tr"
+   "de": "Ist deine Panzerung aufgebraucht, werden 100 % deiner Panzerung repariert. Abklingzeit 55 Sekunden.",
+   "fr": "Quand votre armure est épuisée, 100 % de votre armure est réparée. Recharge : 55 secondes.",
+   "es": "Cuando tu blindaje se agota, se repara el 100 % de tu blindaje. Enfriamiento de 55 segundos.",
+   "it": "Quando la tua armatura si esaurisce, ripara il 100% della tua armatura. Tempo di recupero 55 secondi.",
+   "pt": "Quando sua blindagem se esgota, 100% dela é reparada. Recarga de 55 segundos.",
+   "ru": "Когда броня полностью разрушена, восстанавливает 100% брони. Перезарядка 55 секунд.",
+   "pl": "Gdy pancerz się wyczerpie, naprawia 100% pancerza. Czas odnowienia 55 sekund.",
+   "nl": "Als je pantser op is, wordt 100% van je pantser hersteld. Afkoeltijd 55 seconden."
   },
   "Perfect Vanguard": {
-   "tr": "Bir kalkanın yerleştirilmesi, onu 5 saniye boyunca yenilmez hale getirir ve diğer tüm müttefiklere 20 saniye boyunca %50 bonus zırh verir. Serinleme süresi 25 saniyedir.",
+   "tr": "Kalkan yerleştirmek onu 5 saniyeliğine hasar almaz yapar ve diğer tüm müttefiklere 20 saniyeliğine %50 bonus zırh verir. Bekleme süresi 25 sn.",
    "_src": "Deploying a shield makes it invulnerable for 5s and grants 50% bonus armor to al",
-   "_mt": "tr"
+   "de": "Das Platzieren eines Schilds macht ihn 5 s lang unverwundbar und gewährt allen anderen Verbündeten 20 s lang 50 % Bonuspanzerung. Abklingzeit 25 s.",
+   "fr": "Déployer un bouclier le rend invulnérable pendant 5 s et octroie 50 % d'armure bonus à tous les autres alliés pendant 20 s. Recharge : 25 s.",
+   "es": "Desplegar un escudo lo vuelve invulnerable durante 5 s y otorga un 50 % de blindaje adicional al resto de aliados durante 20 s. Enfriamiento de 25 s.",
+   "it": "Schierare uno scudo lo rende invulnerabile per 5 s e concede il 50% di armatura bonus a tutti gli altri alleati per 20 s. Tempo di recupero 25 s.",
+   "pt": "Implantar um escudo o torna invulnerável por 5 s e concede 50% de blindagem bônus a todos os outros aliados por 20 s. Recarga de 25 s.",
+   "ru": "Развёрнутый щит становится неуязвимым на 5 с, а все остальные союзники получают 50% бонусной брони на 20 с. Перезарядка 25 с.",
+   "pl": "Rozstawienie tarczy czyni ją niezniszczalną na 5 s i daje pozostałym sojusznikom 50% dodatkowego pancerza na 20 s. Czas odnowienia 25 s.",
+   "nl": "Een schild plaatsen maakt het 5 s onkwetsbaar en geeft alle andere bondgenoten 20 s lang 50% bonuspantser. Afkoeltijd 25 s."
   },
   "Perfect Braced": {
-   "tr": "Kapakta silah kullanımı %50 artarken.",
+   "tr": "Siperdeyken silah kontrolü %50 artar.",
    "_src": "While in cover weapon handling is increased by 50%.",
-   "_mt": "tr"
+   "de": "In Deckung ist die Waffenhandhabung um 50 % erhöht.",
+   "fr": "À couvert, la maniabilité de l'arme augmente de 50 %.",
+   "es": "A cubierto, el manejo del arma aumenta un 50 %.",
+   "it": "In copertura la maneggevolezza dell'arma aumenta del 50%.",
+   "pt": "Em cobertura, o manuseio da arma aumenta em 50%.",
+   "ru": "В укрытии управляемость оружия повышена на 50%.",
+   "pl": "W osłonie poręczność broni rośnie o 50%.",
+   "nl": "In dekking is de wapenhantering 50% hoger."
   },
   "Perfect Focus": {
-   "tr": "Hedeflediğiniz her saniye toplam silah hasarını %6 artırırken, 8x veya daha yüksek bir aralıkla %60'a kadar arttırın.",
+   "tr": "8x veya daha büyük dürbünle nişan aldığın her saniye toplam silah hasarı %6 artar, en fazla %60.",
    "_src": "Increases total weapon damage by 6% every second you are aiming while scoped 8x ",
-   "_mt": "tr"
+   "de": "Erhöht den gesamten Waffenschaden um 6 % pro Sekunde, die du mit 8-fach-Zielfernrohr oder stärker zielst, bis zu 60 %.",
+   "fr": "Augmente les dégâts d'arme totaux de 6 % par seconde de visée avec une lunette x8 ou plus, jusqu'à 60 %.",
+   "es": "Aumenta el daño total de arma un 6 % por cada segundo que apuntas con una mira de 8x o superior, hasta un 60 %.",
+   "it": "Aumenta il danno totale dell'arma del 6% per ogni secondo in cui miri con un'ottica 8x o superiore, fino al 60%.",
+   "pt": "Aumenta o dano total da arma em 6% a cada segundo mirando com luneta de 8x ou mais, até 60%.",
+   "ru": "Повышает общий урон оружия на 6% за каждую секунду прицеливания через прицел 8x или сильнее, до 60%.",
+   "pl": "Zwiększa całkowite obrażenia broni o 6% za każdą sekundę celowania przez lunetę 8x lub mocniejszą, do 60%.",
+   "nl": "Verhoogt de totale wapenschade met 6% per seconde dat je richt met een 8x of sterkere vizierkijker, tot 60%."
   },
   "Perfect Glass Cannon": {
-   "tr": "Dağıttığınız tüm hasarlar %30 oranında arttırılır. Aldığınız tüm hasarlar %60 oranında arttırılır.",
+   "tr": "Verdiğin tüm hasar %30 yükselir. Aldığın tüm hasar %60 yükselir.",
    "_src": "All damage you deal is amplified by 30%. All damage you take is amplified by 60%",
-   "_mt": "tr"
+   "de": "Jeder Schaden, den du verursachst, wird um 30 % verstärkt. Jeder Schaden, den du erleidest, wird um 60 % verstärkt.",
+   "fr": "Tous les dégâts que vous infligez sont amplifiés de 30 %. Tous les dégâts que vous subissez sont amplifiés de 60 %.",
+   "es": "Todo el daño que infliges se amplifica un 30 %. Todo el daño que recibes se amplifica un 60 %.",
+   "it": "Tutti i danni che infliggi sono amplificati del 30%. Tutti i danni che subisci sono amplificati del 60%.",
+   "pt": "Todo o dano que você causa é amplificado em 30%. Todo o dano que você sofre é amplificado em 60%.",
+   "ru": "Весь наносимый вами урон усилен на 30%. Весь получаемый урон усилен на 60%.",
+   "pl": "Wszystkie zadawane obrażenia są wzmocnione o 30%. Wszystkie otrzymywane obrażenia są wzmocnione o 60%.",
+   "nl": "Alle schade die je doet wordt met 30% versterkt. Alle schade die je oploopt wordt met 60% versterkt."
   },
   "Perfect Spark": {
-   "tr": "Bir düşmana beceri ile zarar vermek, 20 saniye boyunca toplam silah hasarını %15 artırır.",
+   "tr": "Bir düşmana yetenekle hasar vermek toplam silah hasarını 20 saniyeliğine %15 artırır.",
    "_src": "Damaging an enemy with a skill increases total weapon damage by 15% for 20 secon",
-   "_mt": "tr"
+   "de": "Einem Gegner mit einer Fertigkeit Schaden zuzufügen erhöht den gesamten Waffenschaden 20 Sekunden lang um 15 %.",
+   "fr": "Infliger des dégâts à un ennemi avec une compétence augmente les dégâts d'arme totaux de 15 % pendant 20 secondes.",
+   "es": "Dañar a un enemigo con una habilidad aumenta el daño total de arma un 15 % durante 20 segundos.",
+   "it": "Danneggiare un nemico con un'abilità aumenta il danno totale dell'arma del 15% per 20 secondi.",
+   "pt": "Causar dano a um inimigo com uma habilidade aumenta o dano total da arma em 15% por 20 segundos.",
+   "ru": "Урон по врагу навыком повышает общий урон оружия на 15% на 20 секунд.",
+   "pl": "Zranienie wroga umiejętnością zwiększa całkowite obrażenia broni o 15% na 20 sekund.",
+   "nl": "Een vijand met een vaardigheid schade toebrengen verhoogt de totale wapenschade 20 seconden lang met 15%."
   },
   "Short Circuit": {
-   "tr": "Feedback Loop soğumasını 20 saniyeden 10 saniyeye düşürür.",
+   "tr": "Feedback Loop bekleme süresini 20 sn'den 10 sn'ye indirir.",
    "_src": "Decreases Feedback Loop cooldown from 20s to 10s.",
-   "_mt": "tr"
+   "de": "Senkt die Abklingzeit von Feedback Loop von 20 s auf 10 s.",
+   "fr": "Réduit la recharge de Feedback Loop de 20 s à 10 s.",
+   "es": "Reduce el enfriamiento de Feedback Loop de 20 s a 10 s.",
+   "it": "Riduce il tempo di recupero di Feedback Loop da 20 s a 10 s.",
+   "pt": "Reduz a recarga de Feedback Loop de 20 s para 10 s.",
+   "ru": "Сокращает перезарядку Feedback Loop с 20 с до 10 с.",
+   "pl": "Skraca czas odnowienia Feedback Loop z 20 s do 10 s.",
+   "nl": "Verlaagt de afkoeltijd van Feedback Loop van 20 s naar 10 s."
   },
   "Positive Reinforcement": {
-   "tr": "Feedback Loop beceri hasarını ve onarım bonusunu %10'dan %20'ye yükseltir.",
+   "tr": "Feedback Loop'un yetenek hasarı ve onarım bonusunu %10'dan %20'ye çıkarır.",
    "_src": "Increases Feedback Loop skill damage and repair bonus from 10% to 20%.",
-   "_mt": "tr"
+   "de": "Erhöht den Fertigkeitsschaden- und Reparaturbonus von Feedback Loop von 10 % auf 20 %.",
+   "fr": "Augmente le bonus de dégâts et de réparation de compétence de Feedback Loop de 10 % à 20 %.",
+   "es": "Aumenta la bonificación de daño y reparación de habilidad de Feedback Loop del 10 % al 20 %.",
+   "it": "Aumenta il bonus a danno e riparazione delle abilità di Feedback Loop dal 10% al 20%.",
+   "pt": "Aumenta o bônus de dano e reparo de habilidade de Feedback Loop de 10% para 20%.",
+   "ru": "Повышает бонус Feedback Loop к урону и ремонту навыков с 10% до 20%.",
+   "pl": "Zwiększa premię Feedback Loop do obrażeń i naprawy umiejętności z 10% do 20%.",
+   "nl": "Verhoogt de vaardigheidsschade- en reparatiebonus van Feedback Loop van 10% naar 20%."
   },
   "Emergency Requisition": {
-   "tr": "Silahınızı yeniden yüklemek, 40 metre içinde tüm savaş kaynaklarını (silah kitleri, cephane, el bombaları) otomatik olarak toplar.",
+   "tr": "Silahını yeniden doldurmak 40 metre içindeki tüm savaş kaynaklarını (zırh kitleri, cephane, el bombaları) otomatik olarak toplar.",
    "_src": "Reloading your weapon automatically collects all combat resources (armor kits, a",
-   "_mt": "tr"
+   "de": "Beim Nachladen deiner Waffe werden alle Kampfressourcen (Panzerungskits, Munition, Granaten) im Umkreis von 40 Metern automatisch eingesammelt.",
+   "fr": "Recharger votre arme ramasse automatiquement toutes les ressources de combat (kits d'armure, munitions, grenades) dans un rayon de 40 mètres.",
+   "es": "Recargar tu arma recoge automáticamente todos los recursos de combate (kits de blindaje, munición, granadas) a menos de 40 metros.",
+   "it": "Ricaricare l'arma raccoglie automaticamente tutte le risorse di combattimento (kit armatura, munizioni, granate) entro 40 metri.",
+   "pt": "Recarregar a arma coleta automaticamente todos os recursos de combate (kits de blindagem, munição, granadas) a até 40 metros.",
+   "ru": "Перезарядка оружия автоматически собирает все боевые ресурсы (ремкомплекты брони, патроны, гранаты) в радиусе 40 метров.",
+   "pl": "Przeładowanie broni automatycznie zbiera wszystkie zasoby bojowe (zestawy pancerza, amunicję, granaty) w promieniu 40 metrów.",
+   "nl": "Je wapen herladen verzamelt automatisch alle gevechtsmiddelen (pantserkits, munitie, granaten) binnen 40 meter."
   },
   "Parabellum Rounds": {
    "tr": "Hollow-Point Ammo hasarını %35'e çıkarır.",
    "_src": "Increases Hollow-Point Ammo damage to 35%.",
-   "_mt": "tr"
+   "de": "Erhöht den Schaden von Hollow-Point Ammo auf 35 %.",
+   "fr": "Porte les dégâts des Hollow-Point Ammo à 35 %.",
+   "es": "Aumenta el daño de Hollow-Point Ammo al 35 %.",
+   "it": "Porta il danno di Hollow-Point Ammo al 35%.",
+   "pt": "Aumenta o dano de Hollow-Point Ammo para 35%.",
+   "ru": "Повышает урон Hollow-Point Ammo до 35%.",
+   "pl": "Zwiększa obrażenia Hollow-Point Ammo do 35%.",
+   "nl": "Verhoogt de schade van Hollow-Point Ammo naar 35%."
   },
   "Patriotic Boost": {
-   "tr": "Kırmızı / Beyaz / Mavi debuff gücünü artırır. Kırmızı: %8 ila %12. Beyaz: %5 ila %8 arası. Mavi: %8 ila %12.",
+   "tr": "Red / White / Blue zayıflatma etkilerinin gücünü artırır. Red: %8'den %12'ye. White: %5'ten %8'e. Blue: %8'den %12'ye.",
    "_src": "Increases Red / White / Blue debuff strength. Red: 8% to 12%. White: 5% to 8%. B",
-   "_mt": "tr"
+   "de": "Verstärkt die Red-/White-/Blue-Debuffs. Red: 8 % auf 12 %. White: 5 % auf 8 %. Blue: 8 % auf 12 %.",
+   "fr": "Renforce les malus Red / White / Blue. Red : de 8 % à 12 %. White : de 5 % à 8 %. Blue : de 8 % à 12 %.",
+   "es": "Aumenta la potencia de los perjuicios Red / White / Blue. Red: del 8 % al 12 %. White: del 5 % al 8 %. Blue: del 8 % al 12 %.",
+   "it": "Aumenta la potenza dei malus Red / White / Blue. Red: dall'8% al 12%. White: dal 5% all'8%. Blue: dall'8% al 12%.",
+   "pt": "Aumenta a força das penalidades Red / White / Blue. Red: de 8% para 12%. White: de 5% para 8%. Blue: de 8% para 12%.",
+   "ru": "Усиливает дебаффы Red / White / Blue. Red: с 8% до 12%. White: с 5% до 8%. Blue: с 8% до 12%.",
+   "pl": "Wzmacnia osłabienia Red / White / Blue. Red: z 8% do 12%. White: z 5% do 8%. Blue: z 8% do 12%.",
+   "nl": "Versterkt de Red-/White-/Blue-debuffs. Red: van 8% naar 12%. White: van 5% naar 8%. Blue: van 8% naar 12%."
   },
   "Waving the Flag": {
    "tr": "Kırmızı / Beyaz / Mavi dönüş hızını 1,5 saniyeye çıkarır.",
