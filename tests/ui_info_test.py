@@ -1,5 +1,5 @@
 """Windows CI: Bilgi sekmesi uçtan uca — ansiklopedi (arama, ayrıntı, build'e ekleme), meta vitrini (kartlar, favori),
-haberler ve sezon (sayaçlar, kartlar), yarışma (doğru/yanlış, XP), yükleme ekranı penceresi, ajan sesi (telsiz efekti).
+haberler ve sezon (sayaçlar, kartlar), yarışma (doğru/yanlış, XP), yükleme ekranı penceresi, doğal ses paketi.
     python tests/ui_info_test.py  → tests/.info_result.json + shots/info_*.png"""
 import json, os, sys, time
 from pathlib import Path
@@ -77,14 +77,19 @@ def s6():
     pop = a._quiz_pop
     step("yükleme ekranı yarışma penceresi", pop.winfo_exists() and pop.winfo_ismapped())
     shot("05_quiz_popup", pop); pop.destroy()
-    a.cfg["settings"].update(voice_pack="tactical", voice_radio=True)
-    a.speaker.last_fx = None
+    a.cfg["settings"].update(voice_pack="natural_tr", voice_radio=False, voice_online=False)
+    a._tested_recordings = []
+    # CI has no audio device: observe the actual speaker-worker playback calls.
+    app.voicepack.play_audio = lambda path: a._tested_recordings.append(str(path))
     a.speak_verdict("KEEP", {"name": "Ninjabike", "rarity": ["EXOTIC"]}, [(92, "Striker (PvE)", None)], None)
-    a.root.after(15000, s7)
+    a.root.after(2000, s7)
 def s7():
-    fx = a.speaker.last_fx
-    ok = bool(fx) and os.path.exists(fx) and os.path.getsize(fx) > 10000
-    step("ajan sesi: telsiz efektli konuşma üretildi (CI'da ses aygıtı yok, çalma atlanır)", ok, fx=fx, size=os.path.getsize(fx) if fx and os.path.exists(fx) else 0, err=a.speaker.err)
+    clips = a._tested_recordings
+    ok = (len(clips) >= 2 and all(Path(path).is_file() and Path(path).stat().st_size > 10000 for path in clips)
+          and any(Path(path).name == "exotic.wav" for path in clips)
+          and any(Path(path).name == "keep.wav" for path in clips)
+          and all(Path(path).parent.name == "natural_tr" for path in clips))
+    step("doğal Türkçe bildirimleri ses işçisine ulaştı (CI'da ses aygıtı olmadan)", ok, clips=clips, err=a.speaker.err)
     finish()
 def finish():
     if res.get("done"): return
