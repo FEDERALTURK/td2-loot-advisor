@@ -17,7 +17,8 @@ import threading
 import time
 import urllib.request
 import zipfile
-from collections import OrderedDict
+from collections import OrderedDict, Counter
+from decimal import Decimal
 from pathlib import Path
 
 MODEL_RELEASE = "https://github.com/FEDERALTURK/td2-loot-advisor/releases/download/mt-models/"
@@ -182,11 +183,14 @@ def split_sentences(text):
 # ---------------------------------------------------------------- önbellek
 class Cache:
     def __init__(self, path=None, size=6000):
-        self.path, self.size, self.d = (str(path) if path else None), size, OrderedDict()
+        self.path, self.size, self.d = (str(path) if path else None), max(1, min(6000, int(size))), OrderedDict()
         self.lock = threading.Lock(); self.dirty = 0
         if self.path:
             try:
-                with open(self.path, encoding="utf-8") as f: self.d.update(json.load(f).get("items", {}))
+                with open(self.path, encoding="utf-8") as f: data = json.load(f).get("items", {})
+                if isinstance(data, dict):
+                    self.d.update((k, v) for k, v in data.items() if isinstance(k, str) and isinstance(v, str) and v.strip())
+                    while len(self.d) > self.size: self.d.popitem(last=False)
             except (OSError, ValueError):
                 pass
 
@@ -202,6 +206,7 @@ class Cache:
             return v
 
     def put(self, engine, text, value):
+        if not isinstance(value, str) or not value.strip(): return
         with self.lock:
             self.d[self.key(engine, text)] = value
             while len(self.d) > self.size: self.d.popitem(last=False)
@@ -260,6 +265,16 @@ class LocalMT:
         """Bellekten çıkar (canlı çeviri bir süre kullanılmayınca ~300 MB geri verilir)."""
         with self.lock: self.tr = self.sps = self.spt = None
 
+    def unload_if_idle(self, idle_seconds=300):
+        """UI bakım çağrısı çalışan çeviriyi beklemez; boşta duran model bırakılır."""
+        if not self.lock.acquire(blocking=False): return False
+        try:
+            if self.tr is None or time.time() - getattr(self, "last_use", time.time()) < idle_seconds: return False
+            self.tr = self.sps = self.spt = None
+            return True
+        finally:
+            self.lock.release()
+
     def translate(self, texts):
         with self.lock:
             self.load(); self.last_use = time.time()
@@ -291,9 +306,10 @@ class AIMT:
         except ValueError:
             out = None
         if not isinstance(out, list) or len(out) != len(texts):
-            if len(texts) == 1 and raw.strip(): return [raw.strip().strip('"')]
             raise RuntimeError("AI translation format")
-        return [str(x) for x in out]
+        if any(not isinstance(x, str) or not x.strip() for x in out):
+            raise RuntimeError("AI translation format")
+        return out
 
 
 class Translator:
@@ -301,14 +317,14 @@ class Translator:
 
     def __init__(self, engine, glossary, cache):
         self.engine, self.glossary, self.cache = engine, glossary, cache
-        self.ck = engine.name + "@2"           # önbellek anahtarı: çeviri kuralları değişince eski sonuçlar kullanılmaz
+        self.ck = engine.name + "@3"           # doğrulanmamış eski çeviriler yeniden üretilir
         self.memory = None                     # topluluk görevleri (tasks_live.Memory): bilinen satırın doğrulanmış Türkçesi
         self.memory_hits = 0
 
     def set_memory(self, memory):
         """Hafıza değişince önbellek anahtarı da değişir (düzeltilmiş çeviri eski önbellekten gelmesin)."""
         self.memory = memory if memory is not None and len(memory) else None
-        self.ck = self.engine.name + "@2" + (":" + getattr(memory, "version", "") if self.memory else "")
+        self.ck = self.engine.name + "@3" + (":" + getattr(memory, "version", "") if self.memory else "")
 
     def translate(self, texts):
         out, todo, first = [None] * len(texts), [], {}
@@ -344,7 +360,18 @@ class Translator:
                         tail = ("(" + ", ".join(f"{a}/{b}" for a, b in counters) + ")") if counters and k == len(sents) - 1 else ""
                         units.append(m); owners.append((i, ln_no, bullet, tail)); masks.append(found)
             res = self.engine.translate(units) if units else []
-            for (i, ln_no, bullet, tail), r, found in zip(owners, res, masks):
+            if not isinstance(res, (list, tuple)) or len(res) != len(units) or any(
+                    not isinstance(r, str) or not r.strip() for r in res):
+                raise RuntimeError("Incomplete translation; retry the text")
+            for unit_index, ((i, ln_no, bullet, tail), r, found) in enumerate(zip(owners, res, masks)):
+                # OCR'daki sayısal hedefler değişmişse hatalı çeviriyi gösterme/önbelleğe alma.
+                placeholders = lambda value: Counter(int(n) for n in re.findall(r"Z\s*Q\s*(\d+)", value, flags=re.I))
+                if placeholders(units[unit_index]) != placeholders(r):
+                    raise RuntimeError("Translation lost a game name; retry the text")
+                clean = lambda value: re.sub(r"Z\s*Q\s*\d+", "", value, flags=re.I)
+                digits = lambda value: sorted(Decimal(n.replace(",", ".")) for n in re.findall(r"(?<!\w)\d+(?:[.,]\d+)?", clean(value)))
+                if digits(units[unit_index]) != digits(r):
+                    raise RuntimeError("Translation changed a number; retry the text")
                 r = re.sub(r"\s*⁇\s*", " ", self.glossary.unmask(r, found)).strip()
                 for pat, rep in WORD_FIX: r = re.sub(pat, rep, r)
                 if tail: r = r + " " + tail

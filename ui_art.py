@@ -481,6 +481,8 @@ class Banner:
 
     def _poll_ready(self):
         if not self.alive: return
+        if self._animation_budget(40)[0]:
+            self._after("ready", 300, self._poll_ready); return
         if not self._ready:
             self._after("ready", 250, self._poll_ready); return
         self.paths = self._found
@@ -496,6 +498,16 @@ class Banner:
             try: self.cv.after_cancel(old)
             except Exception: pass
         self._jobs[key] = self.cv.after(ms, fn)
+
+    def _animation_budget(self, delay_ms):
+        try: root = self.cv._root()
+        except (AttributeError, tk.TclError): root = self.cv
+        paused = bool(getattr(root, "_td2_suspend_animations", False))
+        try:
+            speed = float(getattr(root, "_td2_animation_multiplier", 1.0))
+            if not math.isfinite(speed): speed = 1.0
+        except (TypeError, ValueError): speed = 1.0
+        return paused, max(1, int(delay_ms / max(0.1, min(1.0, speed))))
 
     def destroy(self):
         self.alive = False
@@ -563,10 +575,13 @@ class Banner:
 
     def _fade(self, a, b, step, steps=7):
         if not self.alive: return
+        paused, delay = self._animation_budget(45)
+        if paused:
+            self._after("fade", 300, lambda: self._fade(a, b, step, steps)); return
         if step >= steps:
             self._show(b); return
         self._show(Image.blend(a, b, (step + 1) / steps), keep=False)
-        self._after("fade", 45, lambda: self._fade(a, b, step + 1, steps))
+        self._after("fade", delay, lambda: self._fade(a, b, step + 1, steps))
 
     def set_transparent(self, on):
         self.transparent = bool(on)
@@ -637,6 +652,9 @@ class Banner:
         self._after("resize", 120, self._resized)
 
     def _resized(self):
+        if not self.alive: return
+        if self._animation_budget(40)[0]:
+            self._after("resize", 300, self._resized); return
         self.base = self._fitted(self._current_path())
         self.frame = None
         self._render()
@@ -660,10 +678,13 @@ class Banner:
 
     def _video_tick(self):
         if not self.alive or not self.video_on: return
+        paused, delay = self._animation_budget(40)
+        if paused:
+            self._after("video", 300, self._video_tick); return
         f, self._vframe = self._vframe, None
         if f is not None and f.size == self._wh() and self.flash_state is None:
             self._show(self._compose(f), keep=False)
-        self._after("video", 40, self._video_tick)
+        self._after("video", delay, self._video_tick)
 
     # --- dönüş ---
     def set_interval(self, seconds):
@@ -679,6 +700,9 @@ class Banner:
             self._after("rotate", self.interval * 1000, self.next)
 
     def next(self):
+        if not self.alive: return
+        if self._animation_budget(40)[0]:
+            self._after("rotate", 300, self.next); return
         if self.flash_state is None and self.paths and not self.video_on:
             self.idx = (self.idx + 1) % len(self.paths)
             self.base = self._fitted(self._current_path())

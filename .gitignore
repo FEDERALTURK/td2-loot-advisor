@@ -54,3 +54,4 @@ quiz_state.json
 translate_cache.json
 descriptions_cache.json
 models/
+cache/

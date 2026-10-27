@@ -15,6 +15,7 @@ import time
 import uuid
 
 import engine
+import itempolicy
 
 GEAR = engine.GEAR_SLOTS
 ITEM_KINDS = ("gear", "weapon")
@@ -284,18 +285,20 @@ def duplicates(items):
 def audit(items, builds=None, plan_fn=None, game=None):
     """Sandık özeti: karar sayıları, kırılacaklar, kopyalar, kütüphane adayları, en yakın build'ler."""
     from collections import Counter
-    items = [i for i in items if i.get("kind") in ITEM_KINDS]
-    counts = Counter(i.get("verdict") or "REVIEW" for i in items)
+    items = [i for i in items if isinstance(i, dict) and i.get("kind") in ITEM_KINDS]
+    counts = Counter(itempolicy.protect_verdict(i, i.get("verdict") or "REVIEW") for i in items)
+    valid = [i for i in items if itempolicy.item_valid(i)]
     used = set()
     ranks = []
     if builds and plan_fn:
-        ranks = rank_builds(builds, plan_fn, items, game)
+        ranks = rank_builds(builds, plan_fn, valid, game)
         for _c, _n, r in ranks[:5]:                    # en yakın 5 build'in kullandığı parçalar korunur
             used |= {v["item"]["id"] for v in r["slots"].values() if v.get("item")}
-    dups = duplicates(items)
+    dups = duplicates(valid)
     dup_ids = {d["id"] for _best, rest in dups for d in rest}
-    dismantle = [i for i in items if i["id"] not in used and
-                 (i.get("verdict") == "DISMANTLE" or i["id"] in dup_ids) and "EXOTIC" not in (i.get("rarity") or [])]
+    dismantle = [i for i in valid if i.get("id") and i["id"] not in used and
+                 (i.get("verdict") == "DISMANTLE" or i["id"] in dup_ids) and
+                 itempolicy.protect_verdict(i, "DISMANTLE") == "DISMANTLE"]
     # kırmadan önce kütüphaneye ekle: kırılacak eşyada %95+ attribute
     library = [(i, a, (i.get("quality") or {}).get(a)) for i in dismantle for a in (i.get("attrs") or {})
                if (i.get("quality") or {}).get(a, 0) >= 95]

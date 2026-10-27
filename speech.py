@@ -7,7 +7,8 @@ Kaynaklar
     aynı. Bilgisayarın ses çıkışı (loopback) dinlenir, yalnız konuşma algılanınca model çalışır. Model ilk kullanımda
     sabit bir sürümden indirilir ve SHA-256 ile doğrulanır. İsteğe bağlıdır, varsayılan kapalıdır.
 Oyunun belleğine / dosyalarına dokunulmaz; yalnız Windows'un ses çıkışı ve Canlı Altyazı penceresinin yazısı okunur.
-Not: ses çıkışını dinlediği için sesli sohbet (Discord) de yazıya dökülebilir; her şey bu bilgisayarda kalır.
+Not: ses çıkışını dinlediği için sesli sohbet (Discord) de yazıya dökülebilir. Konuşma tanıma yereldir;
+çeviri seçilen motora bağlıdır ve çevrimiçi sağlayıcı seçildiyse döküm o sağlayıcıya gönderilir.
 """
 import hashlib
 import json

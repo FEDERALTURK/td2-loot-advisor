@@ -8,8 +8,11 @@
     "keep_threshold": 70,
     "consider_threshold": 40,
     "region": null,
-    "save_debug_crop": true,
-    "log_csv": true
+    "save_debug_crop": false,
+    "log_csv": true,
+    "perf_mode": "balanced",
+    "tr_engine": "local",
+    "tr_log": false
   },
   "attributes": {
     "weapon_damage": [

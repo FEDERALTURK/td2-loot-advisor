@@ -23,6 +23,7 @@ GAME_LANG_TO_REC = {"en": "en", "tr": "latin", "de": "latin", "fr": "latin", "es
 
 _rapid_cache = {}
 _rapid_lock = threading.Lock()
+_rapid_run_lock = threading.RLock()       # warm-up, calibration and app OCR share one inference budget
 _rapid_error = None
 USE_DML = False                 # ekran kartıyla hızlandırma (DirectML); program, ilk açılıştaki denemeden sonra açar
 
@@ -184,7 +185,8 @@ class Engine:
         def go():
             try:
                 from PIL import Image
-                _rapid(self.rec_lang)(_np(Image.new("RGB", (64, 32))))
+                with _rapid_run_lock:
+                    _rapid(self.rec_lang)(_np(Image.new("RGB", (64, 32))))
             except Exception as e:
                 log.warning("RapidOCR warm-up failed: %s", e)
         threading.Thread(target=go, daemon=True).start()
@@ -195,7 +197,8 @@ class Engine:
         src = img
         if scale != 1.0:
             src = img.resize((int(img.width * scale), int(img.height * scale)), Image.LANCZOS)
-        r = _rapid(self.rec_lang)(_np(src))
+        with _rapid_run_lock:
+            r = _rapid(self.rec_lang)(_np(src))
         if r is None or r.txts is None: return []
         out = []
         for box, txt, conf in zip(r.boxes, r.txts, r.scores):

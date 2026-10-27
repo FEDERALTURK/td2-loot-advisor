@@ -164,3 +164,16 @@ to the game.
 
 MIT (`LICENSE`). Parts of the game data: CC BY-NC-SA 4.0 (mx-division-builds) and CC BY-SA (The Division Wiki).
 The Division is a trademark of Ubisoft; this project is not affiliated with Ubisoft.
+
+
+### Stability and performance changes (local source build)
+
+Balanced is the default profile. The performance button switches to Game priority, which reduces automatic OCR retries and scan frequency while preserving manual scan settings. Background animation pauses while the game is foreground or the window is minimized. GPU selection is unchanged and requires measurement with the game running.
+
+Invalid or incomplete OCR is routed to review. Exotic, Named and Prototype items cannot receive DISMANTLE through evaluation, progress tracking or stash auditing. Translation uses one active job and at most one latest pending job; stale results are discarded. Number and game-term preservation is checked before results enter the cache.
+
+Fresh settings use local translation, with translation text logging and debug crop saving disabled. Existing settings are preserved. Selecting online AI explains text routing and requests consent. Speech recognition is local, while the selected translation provider may receive the transcript online. The timing button shows bounded recent timing samples and queue status.
+
+Start source builds with `scripts\run.bat`. Normal startup skips pip when installed requirements have not changed. `--check` only checks required modules, `--repair` reinstalls requirements, and `--extras` installs optional voice/video dependencies. Test dependencies are in `requirements-dev.txt`.
+
+These changes are included in release 6.0.2. See [local validation results](docs/stability-6.0.2.md). In-game FPS/GPU behavior and operation on a real 8 GB computer remain unverified.

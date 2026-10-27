@@ -11,6 +11,17 @@ import time
 import tkinter as tk
 
 
+def _animation_budget(widget, delay_ms):
+    try: root = widget._root()
+    except (AttributeError, tk.TclError): root = widget
+    paused = bool(getattr(root, "_td2_suspend_animations", False))
+    try:
+        speed = float(getattr(root, "_td2_animation_multiplier", 1.0))
+        if not math.isfinite(speed): speed = 1.0
+    except (TypeError, ValueError): speed = 1.0
+    return paused, max(1, int(delay_ms / max(0.1, min(1.0, speed))))
+
+
 def _hex(c):
     c = c.lstrip("#"); return tuple(int(c[i:i + 2], 16) for i in (0, 2, 4))
 
@@ -150,6 +161,8 @@ class Scene3D(tk.Canvas):
     def spin(self, step=0.012, every=40):
         """Boşta yavaşça döndür (sürüklerken durur)."""
         if not self._alive: return
+        if _animation_budget(self, every)[0]:
+            self.after(300, lambda: self.spin(step, every)); return
         delay = every
         if self.auto_spin and not self._drag and self.winfo_ismapped():
             t0 = time.perf_counter()
@@ -158,7 +171,7 @@ class Scene3D(tk.Canvas):
             self._spin_ms = 0.8 * getattr(self, "_spin_ms", ms) + 0.2 * ms
             delay = int(max(every, min(200, self._spin_ms * 3)))          # çizim yavaşsa daha seyrek çiz (arayüz akıcı kalsın)
         self._spin_delay = delay
-        self.after(delay, lambda: self.spin(step, every))
+        self.after(_animation_budget(self, delay)[1], lambda: self.spin(step, every))
 
     # --- çizim
     center_y = 0.0
@@ -520,7 +533,7 @@ class AgentView(Scene3D):
         return c
 
     def spin(self, step=0.012, every=40):
-        self._pulse += 0.25
+        if not _animation_budget(self, every)[0]: self._pulse += 0.25
         super().spin(step, every)
 
 
@@ -605,6 +618,7 @@ class SpriteAgentView(tk.Canvas):
             d = self.base / self.model
             img = Image.open(d / f"f{i:02d}.webp").convert("RGBA"); img.load()
             msk = Image.open(d / f"m{i:02d}.png").convert("L"); msk.load()
+            if len(self._frames) >= 8: self._frames.pop(next(iter(self._frames)))
             self._frames[i] = (img, msk)
         return self._frames[i]
 
@@ -646,7 +660,7 @@ class SpriteAgentView(tk.Canvas):
         canvas = self._background(w, h).copy()
         canvas.alpha_composite(comp, (max(0, ox), max(0, oy)) if ox >= 0 and oy >= 0 else (0, 0))
         ph = ImageTk.PhotoImage(canvas)
-        if len(self._cache) > 64: self._cache.pop(next(iter(self._cache)))
+        if len(self._cache) >= 16: self._cache.pop(next(iter(self._cache)))
         self._cache[key] = ph
         return ph
 
@@ -732,8 +746,11 @@ class SpriteAgentView(tk.Canvas):
 
     def spin(self, every=110):
         if not self._alive: return
+        paused, delay = _animation_budget(self, every)
+        if paused:
+            self.after(300, lambda: self.spin(every)); return
         self._pulse += 0.6
         if self.winfo_ismapped() and self.model:
             if self.auto_spin and not self._drag: self.frame = (self.frame + 1) % self.n
             if self.auto_spin or any(v == "miss" for v in self.status.values()): self.render()
-        self.after(every, lambda: self.spin(every))
+        self.after(delay, lambda: self.spin(every))

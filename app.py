@@ -12,7 +12,8 @@ respect to Ubisoft's stance on overlay/automation tools.
 
 See README.md for setup and usage.
 """
-import csv, ctypes, json, math, logging, logging.handlers, os, queue, re, shutil, subprocess, sys, threading, time
+import csv, ctypes, json, math, logging, logging.handlers, os, queue, re, shutil, subprocess, sys, threading, time, tempfile
+from contextlib import nullcontext
 import urllib.error, urllib.parse, urllib.request
 import tkinter as tk
 from collections import Counter
@@ -86,10 +87,13 @@ import trscreen
 import speech
 import winocr
 import gamepad
+import itempolicy
+import performance
+import workqueue
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "6.0.1"
+APP_VERSION = "6.0.2"
 FROZEN = getattr(sys, "frozen", False)
 BASE = Path(sys.executable).parent if FROZEN else Path(__file__).resolve().parent
 TASKS_CACHE = BASE / "tasks_cache.json"  # son indirilen görev listesi
@@ -135,7 +139,8 @@ SLOT_WORDS = {"mask": "Mask", "backpack": "Backpack", "chest": "Chest", "vest": 
               "marksman rifle": "Weapon", "sniper rifle": "Weapon", "shotgun": "Weapon", "rifle": "Weapon",
               "smg": "Weapon", "lmg": "Weapon", "pistol": "Sidearm"}
 DEFAULTS = {"scan_mode": "hotkey", "auto_interval_ms": 700, "auto_record": True, "track_progress": True,
-            "sound": True, "save_debug_crop": True, "log_csv": True, "overlay_corner": "top_right",
+            "sound": True, "save_debug_crop": False, "log_csv": True, "overlay_corner": "top_right",
+            "perf_mode": "balanced", "tr_engine": "local", "tr_log": False,
             "overlay_seconds": 8, "keep_threshold": 70, "consider_threshold": 40, "hotkey": "<f8>", "ocr_lang": "eng",
             "daily_reset_hour": 2, "weekly_reset_day": 1, "weekly_reset_hour": 2,  # weekly_reset_day: 0=Monday
             "tasks_hotkey": "<f10>",
@@ -225,6 +230,12 @@ def _cfg_defaults(cfg):
     for k in OBSOLETE_SETTINGS: st.pop(k, None)
     for k, v in DEFAULTS.items():
         st.setdefault(k, v)
+    if st.get("perf_mode") not in performance.MODES: st["perf_mode"] = "balanced"
+    try:
+        st["keep_threshold"], st["consider_threshold"] = itempolicy.validate_thresholds(st["keep_threshold"], st["consider_threshold"])
+    except ValueError:
+        st["keep_threshold"], st["consider_threshold"] = 70, 40
+        logging.getLogger("td2").warning("Invalid saved decision thresholds restored to safe defaults")
     for b in cfg["builds"]:
         b.setdefault("sets_or_brands", []); b.setdefault("attributes", {}); b.setdefault("talents", {})
     return cfg
@@ -554,14 +565,7 @@ def signature(item):
     return item["name"].lower() + "|" + ",".join(f"{k}={v:g}" for k, v in sorted(item["attrs"].items())) + "|" + ",".join(sorted(item["talents"]))
 
 def valid_item(item):
-    if "confidence" in item:                      # oyun verisiyle tanındıysa: güven eşiği
-        # kart yapısı da gerekli (attribute / talent / kart bölümleri): harita, projeler gibi ekranlardaki
-        # bir marka adı ("Palisade Steelworks") eşya sanılmasın
-        card_like = bool(item.get("attrs") or item.get("talents") or (item.get("sections") and item.get("rarity"))
-                         or item.get("kind") not in ("gear", "weapon"))
-        return item["confidence"] >= 0.5 and item["name"] != "?" and card_like
-    letters = sum(c.isalpha() for c in item["name"])
-    return letters >= 4 and (len(item["attrs"]) >= 1 or item["rarity"])
+    return itempolicy.item_valid(item)
 
 def set_matches(item, names, low):
     """Build'in set/marka adı eşyada var mı? Önce tanınan marka/set, yoksa metinde arar."""
@@ -598,14 +602,20 @@ def evaluate(text, cfg):
     if GAME.ok:
         item = parse_item(text, cfg)
         item["_text"] = text
+        if not valid_item(item):
+            item["_note"] = t("note.partial_card" if item.get("partial") else "note.no_item")
+            return item, "REVIEW", []
         res = engine.evaluate(item, text, cfg, GAME)
         verdict, nk, npar = engine.decide(item, res, cfg)
         item["_note"] = t(nk, **npar) if nk else ""
-        return item, verdict, res
+        return item, itempolicy.protect_verdict(item, verdict), res
     return evaluate_legacy(text, cfg)
 
 def evaluate_legacy(text, cfg):
     item, low = parse_item(text, cfg), text.lower()
+    if not valid_item(item):
+        item["_note"] = t("note.partial_card" if item.get("partial") else "note.no_item")
+        return item, "REVIEW", []
     res = []
     for b in cfg["builds"]:
         pct, why = score_build(item, b, low)
@@ -620,7 +630,7 @@ def evaluate_legacy(text, cfg):
         verdict = "CONSIDER"
     else:
         verdict = "DISMANTLE"
-    return item, verdict, res
+    return item, itempolicy.protect_verdict(item, verdict), res
 
 def build_by_name(cfg, name):
     return next((b for b in cfg["builds"] if b["name"] == name), None)
@@ -1088,8 +1098,9 @@ def ask_claude_code(model, system, history, timeout=CLAUDE_CODE_TIMEOUT, tools="
     # Ayrı, boş bir çalışma klasörü: kullanıcının projelerindeki CLAUDE.md vb. yüklenmez.
     work = BASE / "logs" / "claude_code"
     work.mkdir(parents=True, exist_ok=True)
-    sys_file = work / "system_prompt.txt"
-    sys_file.write_text(system, encoding="utf-8")
+    with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", suffix=".txt", prefix="prompt-", dir=work, delete=False) as f:
+        f.write(system)
+        sys_file = Path(f.name)
     args = [exe, "-p", "--output-format", "json",
             "--system-prompt-file", str(sys_file),
             "--tools", tools,               # varsayılan: hiç araç yok (yalnızca cevap). Görev getirme: WebSearch,WebFetch
@@ -1108,6 +1119,9 @@ def ask_claude_code(model, system, history, timeout=CLAUDE_CODE_TIMEOUT, tools="
                               timeout=timeout, cwd=str(work), creationflags=flags)
     except subprocess.TimeoutExpired:
         raise RuntimeError(t("ai.cc_timeout", s=timeout))
+    finally:
+        try: sys_file.unlink(missing_ok=True)
+        except OSError: log.debug("Claude prompt cleanup failed", exc_info=True)
     out = (proc.stdout or "").strip()
     try:
         data = json.loads(out.splitlines()[-1]) if out else {}
@@ -1369,7 +1383,13 @@ def translate_task_text(app, text):
 # ───────────── Uygulama ─────────────
 class App:
     def __init__(self):
+        startup = time.perf_counter()
         self.cfg = load_cfg()
+        self.timings = performance.TimingStats()
+        self._translation_jobs = workqueue.LatestWorker("translation")
+        self._debug_jobs = workqueue.LatestWorker("scan-debug")
+        self._closing = False
+        self._lt_retry_at, self._lt_failures = 0.0, 0
         stg = self.cfg["settings"]
         setup_logging(stg.get("log_level", "INFO"), stg.get("log_max_kb", 1024), stg.get("log_backups", 3))
         log.info("=== %s v%s starting ===", APP_NAME, APP_VERSION)
@@ -1429,6 +1449,9 @@ class App:
 
         display.set_dpi_aware()                         # %125/%150 Windows ölçeğinde koordinatlar kaymasın
         self.root = tk.Tk()
+        self._perf_policy = performance.get_policy(stg)
+        self.root._td2_suspend_animations = False
+        self.root._td2_animation_multiplier = 1.0
         self.root.title(f"{APP_NAME} v{APP_VERSION}")
         self.set_app_icon()
         self._base_scaling = float(self.root.tk.call("tk", "scaling"))
@@ -1451,6 +1474,7 @@ class App:
         self.root.after(8000, lambda: threading.Thread(target=self.gpu_check, daemon=True).start())
         self.root.after(1500, self.account_startup)
         self.root.after(1000, self.service_start)
+        self.root.after(1000, self._performance_tick)
         if stg.get("tr_on"): self.root.after(2500, lambda: self.lt_start(quiet=True))
         self.root.after(NEWS_POLL_MS, self._news_poll)
         self.root.after(2000, self._info_badge)
@@ -1460,6 +1484,53 @@ class App:
         if stg.get("sp_on"): self.root.after(4000, lambda: self.speech_start(quiet=True))
         if OCR.name == "tesseract" and not self.tess:
             messagebox.showwarning(APP_NAME, t("msg.no_tesseract"))
+        self.timings.record("startup", (time.perf_counter() - startup) * 1000)
+
+    def _policy(self):
+        return getattr(self, "_perf_policy", None) or performance.get_policy(self.cfg["settings"])
+
+    def _performance_tick(self):
+        if getattr(self, "_closing", False): return
+        try:
+            hidden = self.root.state() != "normal"
+            foreground = bool(getattr(self, "game_on", False) and game_active())
+            self._perf_policy = performance.get_policy(self.cfg["settings"], foreground, hidden)
+            self.root._td2_suspend_animations = self._perf_policy.suspend_animations
+            self.root._td2_animation_multiplier = self._perf_policy.ui_animation_multiplier
+        except tk.TclError:
+            return
+        self.root.after(1000, self._performance_tick)
+
+    def toggle_performance(self):
+        st = self.cfg["settings"]
+        st["perf_mode"] = "game" if st.get("perf_mode", "balanced") == "balanced" else "balanced"
+        self._perf_policy = performance.get_policy(st)
+        save_cfg(self.cfg)
+        self.refresh_header()
+        if getattr(self, "perf_btn", None): self.perf_btn.config(text="⚖ " + t("perf." + st["perf_mode"]))
+        self.toast(t("perf.changed", mode=t("perf." + st["perf_mode"])))
+
+    def show_performance(self):
+        stats = self.timings.snapshot()
+        rows = [t("perf.measure_hint")]
+        for phase, values in sorted(stats.items()):
+            rows.append(f"{phase}: n={values['count']}  median={values['median_ms']:.0f} ms  p95={values['p95_ms']:.0f} ms")
+        rows.append(t("perf.queue", **self._translation_jobs.stats()))
+        messagebox.showinfo(t("perf.measure"), "\n\n".join(rows), parent=self.root)
+
+    def _post_translation(self, token, callback):
+        if not getattr(self, "_closing", False) and self._translation_jobs.is_current(token):
+            self.results.put(("translation", token, callback))
+
+    def _invalidate_translation(self):
+        self._translation_jobs.invalidate()
+        self._lt_revision = getattr(self, "_lt_revision", 0) + 1
+        self._lt_last_sig = None
+        self._lt_retry_at, self._lt_failures = 0.0, 0
+
+    def _translation_privacy(self):
+        key = "lt.privacy_local" if self.cfg["settings"].get("tr_engine", "local") == "local" else "lt.privacy_ai"
+        return t(key)
 
     # ---------- Canlı oyun çevirisi (İngilizce → Türkçe) ----------
     def ai_complete(self, system, user):
@@ -1494,7 +1565,7 @@ class App:
 
     def lt_translator(self):
         st = self.cfg["settings"]
-        if not getattr(self, "lt_cache", None): self.lt_cache = livetranslate.Cache(BASE / "translate_cache.json")
+        if not getattr(self, "lt_cache", None): self.lt_cache = livetranslate.Cache(BASE / "translate_cache.json", size=1500)
         if st.get("tr_engine", "local") == "ai":
             eng = livetranslate.AIMT(self.ai_complete)
         else:
@@ -1691,6 +1762,7 @@ class App:
     def speech_stop(self, quiet=True):
         sp = getattr(self, "sp", None)
         if sp: sp.stop(); self.sp = None
+        if sp: self._invalidate_translation()
         if not quiet:
             self.cfg["settings"]["sp_on"] = False; save_cfg(self.cfg); self._sp_status(t("sp.stopped")); self._sp_ui()
 
@@ -1699,17 +1771,22 @@ class App:
 
     def _sp_text(self, en):
         """Kaynaktan gelen İngilizce cümle → Türkçe → altyazı kutusu (arka plan iş parçacığından)."""
-        try:
-            t0 = time.time()
-            tr = self.lt_translator().translate([en])[0]
-            ms = int((time.time() - t0) * 1000)
-            g = self.scan_area() or {}
-            if not g: return
-            area = {"left": int(g["left"] + g["width"] * 0.12), "top": int(g["top"] + g["height"] * 0.70),
-                    "width": int(g["width"] * 0.76), "height": int(g["height"] * 0.24)}
-            self.root.after(0, lambda: self._lt_show([("🎧 " + en, tr, (0, 0, 0, 0))], area, ms, force_mode="subtitle"))
-        except Exception as e:
-            log.info("Speech translate failed: %s", e)
+        if not en or livetranslate.PRIVATE.search(en) or getattr(self, "_closing", False): return
+        def run(token):
+            try:
+                if not self._translation_jobs.is_current(token): return
+                with self.timings.measure("speech_translate"):
+                    t0 = time.perf_counter()
+                    tr = self.lt_translator().translate([en])[0]
+                    ms = int((time.perf_counter() - t0) * 1000)
+                g = self.scan_area() or {}
+                if not g: return
+                area = {"left": int(g["left"] + g["width"] * 0.12), "top": int(g["top"] + g["height"] * 0.70),
+                        "width": int(g["width"] * 0.76), "height": int(g["height"] * 0.24)}
+                self._post_translation(token, lambda: self._lt_show([("🎧 " + en, tr, (0, 0, 0, 0))], area, ms, force_mode="subtitle"))
+            except Exception as e:
+                log.info("Speech translate failed: %s", e)
+        self._translation_jobs.submit(run)
 
     def _sp_status(self, text, kind="muted"):
         lbl = getattr(self, "sp_stat", None)
@@ -1792,6 +1869,7 @@ class App:
         self._lt_ui(); return True
 
     def lt_stop(self, quiet=False):
+        self._invalidate_translation()
         self._lt_pad_stop()
         if getattr(self, "lt_stop_ev", None): self.lt_stop_ev.set(); self.lt_stop_ev = None
         if getattr(self, "lt_keys", None):
@@ -1812,21 +1890,28 @@ class App:
         if stop.wait(1.6): return                            # program penceresi küçülürken okuma yapma
         g = capture.Grabber(); g.keep()
         prev = last = None; stable = 0
+        revision = getattr(self, "_lt_revision", 0)
         try:
             while not stop.is_set():
                 try:
+                    if revision != getattr(self, "_lt_revision", 0):
+                        prev = last = None; stable = 0
+                        revision = getattr(self, "_lt_revision", 0)
                     area = self.lt_area()
                     st = self.cfg["settings"]
                     if area and not (st.get("only_game_active", True) and not game_active()):
                         h = g.thumb(area)
                         stable = stable + 1 if prev is not None and dist(h, prev) < AUTO_STABLE else 0
                         prev = h
-                        if stable == 1 and (last is None or dist(h, last) >= AUTO_CHANGE):
+                        retry = bool(getattr(self, "_lt_retry_at", 0) and time.monotonic() >= self._lt_retry_at)
+                        busy = self._translation_jobs.stats()
+                        if stable >= 1 and (last is None or dist(h, last) >= AUTO_CHANGE or
+                                            (retry and not busy["active"] and not busy["pending"])):
                             last = h
-                            self._lt_run(grab(area), area)
+                            self._queue_translation(area)
                 except Exception as e:
                     log.debug("live translate loop: %s", e)
-                stop.wait(0.35)
+                stop.wait(self._policy().translation_poll_s)
         finally:
             g.release()
 
@@ -1838,36 +1923,77 @@ class App:
             x, y = self.root.winfo_rootx(), self.root.winfo_rooty()
             if self.root.state() == "normal" and self.rects_overlap((x, y, x + self.root.winfo_width(), y + self.root.winfo_height()),
                                       (area["left"], area["top"], area["left"] + area["width"], area["top"] + area["height"])):
-                self.root.iconify(); self.root.update(); time.sleep(0.4)
+                self.root.iconify()
+                self.root.after(450, lambda: self._queue_translation(area, force=True))
+                return
         except Exception:
             pass
-        threading.Thread(target=lambda: self._lt_run(grab(area), area, force=True), daemon=True).start()
+        self._queue_translation(area, force=True)
 
-    def _lt_run(self, img, area, force=False):
+    def _queue_translation(self, area, force=False):
+        if getattr(self, "_closing", False): return
+        area = dict(area)
+        def run(token):
+            if not self._translation_jobs.is_current(token): return
+            capture.default().keep()
+            try:
+                with self.timings.measure("translate_capture"):
+                    img = grab(area)
+                self._lt_run(img, area, force, token)
+            except Exception as e:
+                self._lt_failure(token, e)
+            finally:
+                capture.default().release()
+        return self._translation_jobs.submit(run)
+
+    def _lt_failure(self, token, error):
+        if not self._translation_jobs.is_current(token): return
+        self._lt_failures = min(5, getattr(self, "_lt_failures", 0) + 1)
+        self._lt_retry_at = time.monotonic() + min(30, 2 ** self._lt_failures)
+        log.info("Live translate failed: %s", error)
+        msg = str(error)
+        self._post_translation(token, lambda: self._lt_status(t("lt.failed", e=msg), "danger"))
+
+    def _lt_run(self, img, area, force=False, token=None):
+        if token is None:
+            return self._translation_jobs.submit(lambda tok: self._lt_run(img, area, force, tok))
         try:
-            lines = self.lt_ocr(img)                                 # sütun duyarlı (yan yana paneller)
+            if not self._translation_jobs.is_current(token): return
+            # OCR motoru eşya okumasıyla eşzamanlı çalıştırılmaz; model çevirisi F8 kilidini tutmaz.
+            with getattr(self, "lock", nullcontext()):
+                if not self._translation_jobs.is_current(token): return
+                with self.timings.measure("translate_ocr"):
+                    lines = self.lt_ocr(img)
             blocks = livetranslate.blocks_from_lines(lines, GAME.data.get("ui_words", []))
             if not blocks:
-                if force: self.root.after(0, lambda: self._lt_status(t("lt.nothing"), "muted"))
+                if force: self._post_translation(token, lambda: self._lt_status(t("lt.nothing"), "muted"))
                 return
             sig = "|".join(b[0] for b in blocks)
             if sig == getattr(self, "_lt_last_sig", None) and not force: return
-            self._lt_last_sig = sig
-            t0 = time.time()
+            if not self._translation_jobs.is_current(token): return
+            t0 = time.perf_counter()
             translator = self.lt_translator()
-            out = translator.translate([b[0] for b in blocks])
-            self._task_seen(lines, translator)
-            ms = int((time.time() - t0) * 1000)
+            with self.timings.measure("translate_model"):
+                out = translator.translate([b[0] for b in blocks])
+            if len(out) != len(blocks) or any(not isinstance(x, str) or not x.strip() for x in out):
+                raise RuntimeError(t("lt.invalid_result"))
+            ms = int((time.perf_counter() - t0) * 1000)
             pairs = [(b[0], tr, b[1]) for b, tr in zip(blocks, out)]
-            self.root.after(0, lambda: self._lt_show(pairs, area, ms))
+            def deliver():
+                self._lt_last_sig = sig
+                self._lt_retry_at, self._lt_failures = 0.0, 0
+                self._lt_show(pairs, area, ms)
+            self._post_translation(token, deliver)
+            if self._translation_jobs.is_current(token):
+                try: self._task_seen(lines, translator)
+                except Exception: log.debug("task extraction after translation", exc_info=True)
         except Exception as e:
-            log.info("Live translate failed: %s", e)
-            msg = str(e)
-            self.root.after(0, lambda: self._lt_status(t("lt.failed", e=msg), "danger"))
+            self._lt_failure(token, e)
 
     def _lt_log(self, pairs, ms):
         """Çevirileri logs/live_translate.log dosyasına yazar (oyun üstü kutu ekran görüntüsüne girmediği için
         sonradan kontrol edebilmek amacıyla). Dosya 256 KB'ı geçince .1 olarak saklanır."""
+        if not self.cfg["settings"].get("tr_log", False): return
         try:
             APPLOG_DIR.mkdir(parents=True, exist_ok=True)
             p = APPLOG_DIR / "live_translate.log"
@@ -1996,12 +2122,12 @@ class App:
         """5 dakikada bir: kullanılmayan büyük modelleri bellekten çıkar (düşük RAM'li bilgisayarlar için)."""
         try:
             m = getattr(self, "_lt_local", None)
-            lt_on = bool(getattr(self, "lt_stop_ev", None) or getattr(self, "lt_keys", None) or getattr(self, "sp", None))
-            if m is not None and m.tr is not None and not lt_on and time.time() - getattr(m, "last_use", 0) > 600:
-                m.unload(); log.info("Translation model unloaded (idle)")
+            idle = 180 if self._policy().mode == "game" else 300
+            if m is not None and m.unload_if_idle(idle):
+                log.info("Translation model unloaded (idle)")
         except Exception:
             log.debug("housekeep", exc_info=True)
-        self.root.after(300000, self._housekeep)
+        if not getattr(self, "_closing", False): self.root.after(60000, self._housekeep)
 
     def tr_theme_vars(self):
         """Telefon sayfasının renkleri: seçili tema paketi."""
@@ -2058,7 +2184,13 @@ class App:
         eb = ttk.LabelFrame(f, text="🧠 " + t("lt.engine")); eb.pack(fill="x", padx=10, pady=6)
         self.lt_eng = tk.StringVar(value=st.get("tr_engine", "local"))
         def eng_set():
-            st["tr_engine"] = self.lt_eng.get(); save_cfg(self.cfg); self._lt_ui()
+            choice = self.lt_eng.get()
+            if choice == "ai" and st.get("tr_engine", "local") != "ai":
+                if not messagebox.askyesno(APP_NAME, t("lt.ai_consent"), parent=self.root):
+                    self.lt_eng.set(st.get("tr_engine", "local")); return
+            self._invalidate_translation()
+            st["tr_engine"] = choice; save_cfg(self.cfg); self._lt_ui()
+            self.lt_privacy_lbl.config(text=self._translation_privacy())
         r1 = ttk.Frame(eb); r1.pack(fill="x", padx=8, pady=(6, 2))
         ttk.Radiobutton(r1, text=t("lt.e_local"), value="local", variable=self.lt_eng, command=eng_set).pack(side="left")
         self.lt_model_lbl = ttk.Label(r1, text="", foreground=PAL["muted"]); self.lt_model_lbl.pack(side="left", padx=10)
@@ -2070,10 +2202,13 @@ class App:
         prov = st.get("ai_provider", "builtin")
         ttk.Label(r2, text=t("lt.ai_now", p=provider_label(prov if prov in PROVIDER_KEYS else "builtin")), foreground=PAL["muted"]).pack(side="left", padx=10)
         ttk.Label(eb, text=t("lt.e_ai_hint"), foreground=PAL["muted"], wraplength=880, justify="left").pack(anchor="w", padx=28, pady=(0, 8))
+        self.lt_privacy_lbl = ttk.Label(eb, text=self._translation_privacy(), foreground=PAL["info"], wraplength=880, justify="left")
+        self.lt_privacy_lbl.pack(anchor="w", padx=12, pady=(0, 8))
         # alan
         mb = ttk.LabelFrame(f, text="🎯 " + t("lt.mode")); mb.pack(fill="x", padx=10, pady=6)
         self.lt_mode = tk.StringVar(value=st.get("tr_mode", "subtitle"))
         def mode_set():
+            self._invalidate_translation()
             st["tr_mode"] = self.lt_mode.get(); save_cfg(self.cfg)
             if st["tr_mode"] == "region" and not st.get("tr_region"): self.lt_pick_region()
         for k in ("subtitle", "region", "screen", "inplace"):
@@ -2086,6 +2221,9 @@ class App:
         self.lt_auto = tk.BooleanVar(value=bool(st.get("tr_auto", True)))
         ttk.Checkbutton(ob, text=t("lt.auto"), variable=self.lt_auto,
                         command=lambda: (st.__setitem__("tr_auto", bool(self.lt_auto.get())), save_cfg(self.cfg))).pack(anchor="w", padx=8, pady=(6, 2))
+        self.lt_log_var = tk.BooleanVar(value=bool(st.get("tr_log", False)))
+        ttk.Checkbutton(ob, text=t("lt.log_opt"), variable=self.lt_log_var,
+                        command=lambda: (st.__setitem__("tr_log", bool(self.lt_log_var.get())), save_cfg(self.cfg))).pack(anchor="w", padx=8, pady=2)
         g = ttk.Frame(ob); g.pack(fill="x", padx=8, pady=(2, 8))
         self.lt_vars = {}
         for i, (k, lab, default, w) in enumerate((("tr_hotkey", t("lt.hotkey"), "<f7>", 10), ("tr_font", t("lt.font"), 15, 5),
@@ -2301,13 +2439,13 @@ class App:
         text = self.lt_in.get("1.0", "end").strip()
         if not text: return
         self.lt_out.config(text=t("acc.working"), fg=PAL["muted"])
-        def go():
+        def go(token):
             try:
                 t0 = time.time(); out = self.lt_translator().translate([text])[0]; ms = int((time.time() - t0) * 1000)
-                self.root.after(0, lambda: (self.lt_out.config(text=out, fg=PAL["fg"]), self._lt_status(t("lt.done", n=1, ms=ms), "success")))
+                self._post_translation(token, lambda: (self.lt_out.config(text=out, fg=PAL["fg"]), self._lt_status(t("lt.done", n=1, ms=ms), "success")))
             except Exception as e:
-                msg = str(e); self.root.after(0, lambda: self.lt_out.config(text=t("lt.failed", e=msg), fg=PAL["danger"]))
-        threading.Thread(target=go, daemon=True).start()
+                msg = str(e); self._post_translation(token, lambda: self.lt_out.config(text=t("lt.failed", e=msg), fg=PAL["danger"]))
+        self._translation_jobs.submit(go)
 
     def lt_download(self):
         self.lt_dl_btn.state(["disabled"]); self._lt_status(t("lt.downloading"))
@@ -3593,7 +3731,8 @@ class App:
             if st.get("fx_video", True) and not watch_on:
                 (ART_DIR / "videos").mkdir(parents=True, exist_ok=True)
                 self.video = fx.VideoFX(ART_DIR / "videos", self.banner.push_video, self.banner.video_size,
-                                        dim=min(0.7, float(st.get("fx_video_dim", 0.35))))
+                                        dim=min(0.7, float(st.get("fx_video_dim", 0.35))),
+                                        pause_fn=lambda: bool(getattr(self.root, "_td2_suspend_animations", False)))
                 if self.video.start():
                     self.banner.start_video(); log.info("Background video on (%s)", fx.video_backend())
                 else:
@@ -3710,6 +3849,7 @@ class App:
         self.banner.set_chips([(self._acc_chip_text(), "btn" if not self.account.signed_in else "on", self.open_account),
                                ("🐞 " + t("fb.btn_short"), "off", self.open_feedback),
                                ("🔄 " + t("sync.btn_short"), "btn", self.run_sync),
+                                ("⚖ " + t("perf." + st.get("perf_mode", "balanced")), "btn", self.toggle_performance),
                                *([("🎮 " + t("svc.st_" + self.game_state), "on")] if getattr(self, "game_on", False) else []),
                                (("● " + t("state.running")) if self.running else ("○ " + t("state.stopped")),
                                 "on" if self.running else "off"),
@@ -3747,6 +3887,10 @@ class App:
         ttk.Button(top, text="🔍 " + t("btn.scan_now"), command=self.trigger, style="Accent.TButton").pack(side="left", padx=6)
         ttk.Button(top, text=ui_theme.with_icon(t("btn.pick_region"), "⛶"), command=self.calibrate).pack(side="left")
         ttk.Button(top, text=ui_theme.with_icon(t("btn.test_image"), "🖼"), command=self.test_image).pack(side="left", padx=6)
+        perf_row = ttk.Frame(left); perf_row.pack(fill="x", pady=(6, 0))
+        self.perf_btn = ttk.Button(perf_row, text="⚖ " + t("perf." + st.get("perf_mode", "balanced")), command=self.toggle_performance)
+        self.perf_btn.pack(side="left")
+        ttk.Button(perf_row, text=t("perf.measure"), command=self.show_performance).pack(side="left", padx=6)
 
         src = ttk.Frame(left); src.pack(fill="x", pady=(8, 0))
         ttk.Label(src, text=t("panel.source"), foreground=PAL["muted"]).pack(side="left")
@@ -3961,21 +4105,27 @@ class App:
         region = self.scan_area()
         if region and self.cfg["settings"].get("only_game_active", True) and not game_active():
             return log.info("Hotkey ignored: game window is not in front")
-        if region and not self.lock.locked():
-            threading.Thread(target=self.manual_scan, args=(region,), daemon=True).start()
+        if region and self.lock.acquire(blocking=False):
+            threading.Thread(target=self.manual_scan, args=(region, True), daemon=True).start()
 
-    def manual_scan(self, region):
-        with self.lock:
-            try:
-                self.scan_image(grab(region), auto=False)
-            except Exception as e:
-                log.exception("Manual scan failed")
-                self.results.put(("err", f"{type(e).__name__}: {e}"))
+    def manual_scan(self, region, acquired=False):
+        if not acquired and not self.lock.acquire(blocking=False): return
+        capture.default().keep()
+        try:
+            with self.timings.measure("capture"):
+                img = grab(region)
+            with self.timings.measure("scan_total"):
+                self.scan_image(img, auto=False)
+        except Exception as e:
+            log.exception("Manual scan failed")
+            self.results.put(("err", f"{type(e).__name__}: {e}"))
+        finally:
+            capture.default().release()
+            self.lock.release()
 
     def scan_image(self, img, auto):
         s = self.cfg["settings"]
-        if s.get("save_debug_crop"):
-            img.save(DEBUG_PATH)
+        timings = getattr(self, "timings", None)
         box = getattr(self, "card_box", None)
         tried_fresh = False
         if box is None:
@@ -3988,7 +4138,9 @@ class App:
         card = img.crop(box) if box else img
         t_ocr = time.perf_counter()
         text, lines = read_card(card)
-        self._note_ocr_time(time.perf_counter() - t_ocr)
+        ocr_elapsed = time.perf_counter() - t_ocr
+        self._note_ocr_time(ocr_elapsed)
+        if timings is not None: timings.record("ocr", ocr_elapsed * 1000)
         item, verdict, res = evaluate(text, self.cfg)
         if not valid_item(item) and not tried_fresh:                  # kart yer değiştirmiş: yeniden bul
             box = find_card(img)
@@ -4001,6 +4153,9 @@ class App:
         else:
             try: passes = max(1, min(3, int(s.get("ocr_passes", 3))))
             except (TypeError, ValueError): passes = 3
+        if auto:
+            policy = getattr(self, "_perf_policy", None) or performance.get_policy(s)
+            passes = min(passes, policy.ocr_passes)
         fresh = not (auto and signature(item) == self.last_sig and time.time() - self.last_time < DEDUP_SECONDS)
         skip = passes > 1 and valid_item(item) and fresh and first_pass_confident(item, lines)
         if skip:
@@ -4042,13 +4197,6 @@ class App:
                     log.info("Name from inventory list: %r / %r -> %r slot=%s", hint["name"], hint["sub"], item2["name"], item2.get("slot"))
                     text, item, verdict, res = text2, item2, verdict2, res2
                     item["_from_list"] = True
-        def _save_last(c=card.copy(), tx=text):           # diske yazma arka planda (taramayı bekletmesin)
-            try:
-                c.save(BASE / "last_card.png", compress_level=1)
-                (APPLOG_DIR / "last_ocr.txt").write_text(tx, encoding="utf-8")
-            except Exception:
-                pass
-        threading.Thread(target=_save_last, daemon=True).start()
         text, item, verdict, res = self.merge_scrolled(text, item, verdict, res)
         try:
             learned = GAME.learn(item) if GAME.ok else []
@@ -4058,12 +4206,22 @@ class App:
                 self.root.after(0, lambda m="; ".join(learned): self.toast("📚 " + m))
         except Exception:
             log.debug("library learn failed", exc_info=True)
-        verdict = color_hints(card, lines, item, verdict)
-        self.save_ocr_history(text, item, verdict)
+        verdict = itempolicy.protect_verdict(item, color_hints(card, lines, item, verdict))
         sig = signature(item)
         if auto:
             if not valid_item(item): return False
             if sig == self.last_sig and time.time() - self.last_time < DEDUP_SECONDS: return True
+        if s.get("save_debug_crop") and valid_item(item) and getattr(self, "_debug_jobs", None):
+            def save_debug(token, c=card.copy(), tx=text, whole=img):
+                if not self._debug_jobs.is_current(token): return
+                try:
+                    APPLOG_DIR.mkdir(parents=True, exist_ok=True)
+                    c.save(BASE / "last_card.png", compress_level=1)
+                    (APPLOG_DIR / "last_ocr.txt").write_text(tx, encoding="utf-8")
+                    if not auto or self._policy().mode == "balanced": whole.save(DEBUG_PATH, compress_level=1)
+                    self.save_ocr_history(tx, item, verdict)
+                except Exception: log.debug("scan debug save", exc_info=True)
+            self._debug_jobs.submit(save_debug)
         self.last_card_img = card
         try:                                              # kartın ekrandaki yeri: bindirme yanına konur
             a = self.scan_area()
@@ -4593,12 +4751,17 @@ class App:
                 msg = f"{type(e).__name__}: {e}"
                 if msg != self.last_err:
                     self.last_err = msg; self.results.put(("err", msg))
-            stop.wait(max(0.2, float(self.cfg["settings"]["auto_interval_ms"]) / 1000))
+            stop.wait(self._policy().auto_interval_s)
 
     def poll(self):
         try:
             while True:
                 r = self.results.get_nowait()
+                if r[0] == "translation":
+                    if self._translation_jobs.is_current(r[1]) and not getattr(self, "_closing", False):
+                        try: r[2]()
+                        except Exception: log.exception("Translation UI update failed")
+                    continue
                 if r[0] == "err":
                     it = {"name": r[1][:60], "rarity": [], "attrs": {}, "talents": [], "slot": None}
                     self.show_result("", it, "ERROR", []); self.popup("ERROR", it, [], None)
@@ -4633,8 +4796,10 @@ class App:
 
     def handle_result(self, text, item, verdict, res, sig):
         s, note, act, diff = self.cfg["settings"], None, None, None
-        if s.get("track_progress"):
+        verdict = itempolicy.protect_verdict(item, verdict)
+        if s.get("track_progress") and valid_item(item):
             verdict, note, act, diff = apply_progress(self.cfg, self.progress, item, verdict, res)
+        verdict = itempolicy.protect_verdict(item, verdict)
         self.last_scan = (item, res, sig)
         if act and s.get("auto_record"):
             self.record(act[0], act[1], act[2], item, sig)
@@ -5101,8 +5266,7 @@ class App:
         if not path: return
         try:
             data = json.loads(Path(path).read_text(encoding="utf-8"))
-            incoming = data.get("builds", data) if isinstance(data, dict) else data
-            if not isinstance(incoming, list): raise ValueError(t("build.import_bad"))
+            incoming = itempolicy.validate_imported_builds(data)
         except Exception as e:
             return messagebox.showerror(APP_NAME, t("err.file_read", e=e))
         existing = {b["name"] for b in self.cfg["builds"]}
@@ -7229,10 +7393,15 @@ class App:
         self.root.bind("<Key>", on_key)
 
     def save_settings(self):
-        st = self.cfg["settings"]
+        st = dict(self.cfg["settings"])
         try:
             check_hotkey(self.sv["hotkey"].get())
-            for k in ("keep_threshold", "consider_threshold", "overlay_seconds", "auto_interval_ms"): st[k] = float(self.sv[k].get())
+            st["keep_threshold"], st["consider_threshold"] = itempolicy.validate_thresholds(
+                self.sv["keep_threshold"].get(), self.sv["consider_threshold"].get())
+            for k in ("overlay_seconds", "auto_interval_ms"):
+                value = float(self.sv[k].get())
+                if not math.isfinite(value) or value <= 0: raise ValueError(t("perf.positive_setting"))
+                st[k] = value
             st["log_max_kb"] = max(16, int(float(self.sv["log_max_kb"].get())))
             st["log_backups"] = max(0, int(float(self.sv["log_backups"].get())))
             st["bg_interval"] = max(0, int(float(self.sv["bg_interval"].get() or 0)))
@@ -7256,6 +7425,9 @@ class App:
             st["overlay_size"] = round(float(self.ov_size.get()), 2)
         except Exception as e:
             return messagebox.showerror(APP_NAME, t("err.bad_setting", e=e))
+        current_settings = self.cfg["settings"]
+        current_settings.update(st)
+        st = current_settings
         for k in ("hotkey", "overlay_corner", "ocr_lang", "tesseract_cmd", "log_level", "meta_feed_url"): st[k] = self.sv[k].get().strip()
         for k, v in self.bv.items(): st[k] = v.get()
         if hasattr(self, "fxv"): self._fx_from_ui()
@@ -7984,6 +8156,10 @@ class App:
         st0 = self.cfg["settings"]
         if not force and st0.get("svc_close_to_tray") and self.tray and self.tray.available:
             self.root.withdraw(); self.tray.notify(t("svc.in_tray")); return
+        self._closing = True
+        for name in ("_translation_jobs", "_debug_jobs"):
+            worker = getattr(self, name, None)
+            if worker: worker.close()
         self.service_stop()
         try:
             if getattr(self, "tr_api", None): self.tr_api.stop()

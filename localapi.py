@@ -23,6 +23,7 @@ import hashlib
 import hmac
 import json
 import logging
+import queue
 import secrets
 import socket
 import struct
@@ -36,6 +37,10 @@ GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
 COMMANDS = ("get_state", "start", "stop", "toggle", "scan")
 MAX_FRAME = 64 * 1024
 MAX_MSGS_PER_10S = 40
+MAX_CLIENTS = 8
+MAX_OUTGOING = 64
+MAX_QUEUED_BYTES = 1024 * 1024
+SOCKET_TIMEOUT = 2.0
 
 OVERLAY = r"""<!doctype html><html><head><meta charset="utf-8"><title>TD2 overlay</title>
 <style>
@@ -84,22 +89,85 @@ def _frame(payload, opcode=0x1):
 
 
 class _Client:
-    def __init__(self, sock):
+    def __init__(self, sock, max_pending=MAX_OUTGOING, max_bytes=MAX_QUEUED_BYTES, start=True):
         self.sock, self.lock, self.alive = sock, threading.Lock(), True
         self.times = []
+        self.outgoing = queue.Queue(maxsize=max(2, int(max_pending)))
+        self.max_bytes, self.queued_bytes = int(max_bytes), 0
+        self.closed = threading.Event()
+        # This bounds sendall. recv_frame retries idle read timeouts, so quiet
+        # browser/OBS connections do not disconnect every two seconds.
+        self.sock.settimeout(SOCKET_TIMEOUT)
+        self.writer = threading.Thread(target=self._write_loop, daemon=True, name="local-api-writer")
+        if start: self.writer.start()
 
     def send(self, obj):
-        if not self.alive: return
+        return self.send_frame(json.dumps(obj, ensure_ascii=False))
+
+    def send_frame(self, payload, opcode=0x1):
+        """Enqueue without socket I/O; safe from the Tk thread.
+
+        Close a lagging client instead of retaining unbounded events. Text,
+        pong and close frames all pass through one writer, so frames cannot
+        interleave on the wire.
+        """
+        frame = _frame(payload, opcode)
+        with self.lock:
+            if not self.alive: return False
+            if self.queued_bytes + len(frame) <= self.max_bytes:
+                try:
+                    self.outgoing.put_nowait(frame)
+                    self.queued_bytes += len(frame)
+                    return True
+                except queue.Full:
+                    pass
+        self.close()
+        return False
+
+    def _shutdown(self):
+        try: self.sock.shutdown(socket.SHUT_RDWR)
+        except OSError: pass
+        try: self.sock.close()
+        except OSError: pass
+
+    def close(self, graceful=False):
+        """Never wait for the writer; shutdown interrupts a blocked send."""
+        with self.lock:
+            if self.alive:
+                self.alive = False
+                while True:
+                    try:
+                        old = self.outgoing.get_nowait()
+                        if old is not None: self.queued_bytes -= len(old)
+                    except queue.Empty:
+                        break
+                if graceful:
+                    frame = _frame(b"", 0x8)
+                    self.outgoing.put_nowait(frame)
+                    self.queued_bytes += len(frame)
+                self.outgoing.put_nowait(None)
+        if not graceful: self._shutdown()
+
+    def _write_loop(self):
         try:
-            with self.lock: self.sock.sendall(_frame(json.dumps(obj, ensure_ascii=False)))
+            while True:
+                frame = self.outgoing.get()
+                if frame is None: return
+                with self.lock: self.queued_bytes -= len(frame)
+                self.sock.sendall(frame)
         except OSError:
-            self.alive = False
+            self.close()
+        finally:
+            self._shutdown()
+            self.closed.set()
 
     def recv_frame(self):
         def need(n):
             buf = b""
             while len(buf) < n:
-                chunk = self.sock.recv(n - len(buf))
+                if not self.alive: raise ConnectionError
+                try: chunk = self.sock.recv(n - len(buf))
+                except socket.timeout: continue
                 if not chunk: raise ConnectionError
                 buf += chunk
             return buf
@@ -120,6 +188,7 @@ class LocalAPI:
         self.port, self.lan, self.allow_control = int(port), bool(lan), bool(allow_control)
         self.token = token or secrets.token_urlsafe(16)
         self.httpd = None; self.clients = []; self._lock = threading.Lock()
+        self._opening, self._stopping = 0, False
 
     # ---- adresler
     @property
@@ -146,8 +215,7 @@ class LocalAPI:
         with self._lock:
             self.clients = [c for c in self.clients if c.alive]
             cl = list(self.clients)
-        for c in cl: c.send(event)
-        return len(cl)
+        return sum(bool(c.send(event)) for c in cl)
 
     def _command(self, cmd, args=None):
         if cmd == "get_state": return {"ok": True, "state": self._state()}
@@ -213,20 +281,32 @@ class LocalAPI:
                 key = self.headers.get("Sec-WebSocket-Key", "")
                 if self.headers.get("Upgrade", "").lower() != "websocket" or not key:
                     return self._send(400, '{"error":"websocket upgrade required"}')
-                self.send_response(101, "Switching Protocols")
-                self.send_header("Upgrade", "websocket"); self.send_header("Connection", "Upgrade")
-                self.send_header("Sec-WebSocket-Accept", _accept(key)); self.end_headers()
-                self.wfile.flush()
-                c = _Client(self.connection)
-                self.connection.settimeout(None)
-                with api._lock: api.clients.append(c)
-                c.send({"type": "hello", "version": 1, "commands": list(COMMANDS) if api.allow_control else ["get_state"],
-                        "state": api._state()})
+                with api._lock:
+                    api.clients = [c for c in api.clients if c.alive]
+                    full = api._stopping or len(api.clients) + api._opening >= MAX_CLIENTS
+                    if not full: api._opening += 1
+                if full: return self._send(503, '{"error":"too many clients"}')
+                c, reserved = None, True
                 try:
+                    self.send_response(101, "Switching Protocols")
+                    self.send_header("Upgrade", "websocket"); self.send_header("Connection", "Upgrade")
+                    self.send_header("Sec-WebSocket-Accept", _accept(key)); self.end_headers()
+                    self.wfile.flush()
+                    c = _Client(self.connection, start=False)
+                    # Hello must enter the queue before broadcast can see this
+                    # client. No socket operation is performed under api._lock.
+                    c.send({"type": "hello", "version": 1, "commands": list(COMMANDS) if api.allow_control else ["get_state"],
+                            "state": api._state()})
+                    with api._lock:
+                        api._opening -= 1; reserved = False
+                        accepted = not api._stopping and c.alive
+                        if accepted: api.clients.append(c)
+                    if not accepted: c.close()
+                    c.writer.start()
                     while c.alive:
                         op, data = c.recv_frame()
                         if op == 0x8: break                                   # kapat
-                        if op == 0x9: c.sock.sendall(_frame(data, 0xA)); continue   # ping → pong
+                        if op == 0x9: c.send_frame(data, 0xA); continue         # ping → pong (same writer)
                         if op != 0x1: continue
                         now = time.time(); c.times = [x for x in c.times if now - x < 10] + [now]
                         if len(c.times) > MAX_MSGS_PER_10S:
@@ -239,14 +319,23 @@ class LocalAPI:
                 except (ConnectionError, OSError, struct.error):
                     pass
                 finally:
-                    c.alive = False
-                    try: c.sock.sendall(_frame(b"", 0x8))
-                    except OSError: pass
+                    with api._lock:
+                        if reserved: api._opening -= 1
+                        if c in api.clients: api.clients.remove(c)
+                    if c is not None:
+                        if c.writer.ident is None:
+                            c.close()                       # setup failed before writer start
+                        else:
+                            c.close(graceful=True)
+                            # Only this connection's handler waits for close, never
+                            # broadcast/Tk. A non-reading peer is bounded by timeout.
+                            if not c.closed.wait(SOCKET_TIMEOUT + 0.2): c.close()
                     self.close_connection = True
         return H
 
     def start(self):
         if self.httpd: return self.url()
+        with self._lock: self._stopping = False
         try:
             self.httpd = _Server(("0.0.0.0" if self.lan else "127.0.0.1", self.port), self._handler())
         except OSError as e:
@@ -257,13 +346,12 @@ class LocalAPI:
         return self.url()
 
     def stop(self):
-        if not self.httpd: return
         with self._lock:
-            for c in self.clients:
-                c.alive = False
-                try: c.sock.shutdown(socket.SHUT_RDWR)
-                except OSError: pass
+            self._stopping = True
+            clients = self.clients
             self.clients = []
+        for c in clients: c.close()
+        if not self.httpd: return
         try: self.httpd.shutdown(); self.httpd.server_close()
         except Exception: pass
         self.httpd = None

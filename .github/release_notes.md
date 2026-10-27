@@ -8,6 +8,17 @@
 
 Windows "kişisel bilgisayarınızı korudu" derse: **Ek bilgi → Yine de çalıştır** (dosya henüz kod imzalı değil).
 
+**6.0.2 — OCR, çeviri ve performans kararlılığı**
+
+- **Ortak eşya koruması:** eksik/geçersiz OCR incelemeye yönlendirilir. Exotic, Named ve Prototype eşyalar değerlendirme, ilerleme takibi ve depo denetiminde KIR sonucuna düşmez.
+- **Dengeli / Oyun öncelikli:** başlıktan tek tıkla profil değiştirilebilir. Oyun öncelikli profil otomatik OCR denemelerini ve tarama sıklığını azaltır; elle tarama ayarlarını korur. GPU sağlayıcısı otomatik değiştirilmez.
+- **Sınırlı iş kuyrukları:** çeviride eski isteklerin sonuçları uygulanmaz; bekleyen işler birikmez. OCR modelinin ısınmasıyla taraması aynı anda çalışmaz. Yavaş yerel API istemcileri yayını bekletmez.
+- **Çeviri doğrulaması:** sayıların ve oyun terimlerinin korunması denetlenir; eksik/bozuk çıktı önbelleğe alınmaz. Başarısız çeviri aynı ekran için tekrar denenebilir.
+- **Yerel çeviri ve açık veri aktarımı:** yeni ayarlarda yerel çeviri varsayılandır. Çevrimiçi AI seçiminde veri aktarımı açıklanır. Çeviri metni günlüğü ve OCR görüntüsü kaydı yeni ayarlarda kapalıdır; mevcut kullanıcı ayarları korunur.
+- **Daha kontrollü kaynak kullanımı:** oyun öndeyken veya pencere küçültülmüşken arka plan animasyonları bekler; görsel önbellekler sınırlıdır. Ölçüm düğmesi son işlem sürelerini ve kuyruk durumunu gösterir.
+- **Kaynak sürümünü başlatma:** normal açılışta gereksiz pip çalıştırılmaz. `--check`, `--repair` ve `--extras` seçenekleri eklendi.
+- **Doğrulama:** yerel çalıştırmada 18 test grubu geçti. İki gerçek kartın dört çözünürlükteki sekiz OCR kontrolü geçti. Gerçek 8 GB bilgisayarda ve oyun açıkken FPS/GPU etkisi henüz ölçülmedi; yüzde hızlanma iddiası yoktur.
+
 **6.0.1 — Sürüm sayacı**
 
 - Program topluluk görev listesini indirirken artık kendi sürüm numarasını da bildirir (açılıştaki ilk istekte ayrıca "açılış" işareti). Sunucu bunları yalnız günlük toplam olarak tutar: hangi sürüm kaç kez açıldı. Kimlik, IP, hesap ya da cihaz bilgisi gönderilmez ve saklanmaz; tek tek kullanıcılar ayırt edilemez. Böylece eski sürümlerin ne zaman bırakılabileceği görülebilir. Ayarlar'da topluluk görevleri kapatılırsa sayaç da kapanır.

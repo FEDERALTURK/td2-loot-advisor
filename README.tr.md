@@ -205,3 +205,16 @@ Kayıtlı build, görev ve ilerleme sabit kimliklerle tutulduğu için dil deği
 
 MIT (`LICENSE`). Oyun verisinin bir kısmı CC BY-NC-SA 4.0 (mx-division-builds) ve CC BY-SA (The Division Wiki) lisanslıdır.
 The Division ve ilgili adlar Ubisoft'a aittir; bu proje Ubisoft ile bağlantılı değildir.
+
+
+### Kararlılık ve performans geliştirmeleri (yerel kaynak sürümü)
+
+Dengeli profil varsayılandır; başlıktaki performans düğmesiyle Oyun öncelikli profile geçilir. Bu profil otomatik OCR deneme sayısını ve tarama sıklığını azaltır. Elle tarama ayarları korunur. Oyun öndeyken veya pencere küçültülmüşken arka plan animasyonları bekler. GPU seçimi otomatik değiştirilmez; oyun içindeki etkisi ayrıca ölçülmelidir.
+
+Eksik veya geçersiz OCR sonucu incelemeye yönlendirilir. Exotic, Named ve Prototype eşyalar değerlendirme, ilerleme ve depo denetimi yollarında KIR sonucuna düşmez. Çeviri işleri bir etkin ve en fazla bir güncel bekleyen işle sınırlandırılır; eski isteklerin sonuçları arayüze uygulanmaz. Çeviride sayı ve oyun terimi kaybı doğrulanır; hatalı çıktı önbelleğe alınmaz.
+
+Yeni ayarlarda yerel çeviri kullanılır. Mevcut kullanıcı ayarları korunur. Çevrimiçi AI seçimi veri aktarımını açıklayan onay gösterir; ses tanıma yereldir fakat seçilen çeviri sağlayıcısı metni çevrimiçi alabilir. Çeviri metni günlüğü ve OCR hata ayıklama görüntüsü yeni ayarlarda kapalıdır. Ölçüm düğmesi sınırlı sayıda süre örneği ve iş kuyruğu durumunu gösterir.
+
+Kaynak koddan başlatma: `scripts\run.bat`. Kurulu bağımlılıklar değişmemişse normal açılışta pip çalışmaz. `scripts\run.bat --check` kurulum yapmadan gerekli modülleri denetler; `--repair` gereksinimleri yeniden kurar; `--extras` isteğe bağlı ses/video paketlerini kurar. Test için `python -m pip install -r requirements-dev.txt` kullanılabilir.
+
+Bu geliştirmeler 6.0.2 sürümüne dahildir. Test kapsamı ve sınırlar: [yerel doğrulama raporu](docs/stability-6.0.2.md). Gerçek 8 GB bilgisayarda ve oyun açıkken FPS/GPU ölçümü ayrıca gereklidir.

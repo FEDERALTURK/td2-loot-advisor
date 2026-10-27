@@ -1,0 +1,2 @@
+# Existing Excel-library consistency check and development tools; not needed by the player runtime.
+openpyxl

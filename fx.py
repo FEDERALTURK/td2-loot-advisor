@@ -24,6 +24,21 @@ VIDEO_EXT = (".mp4", ".mkv", ".webm", ".mov", ".avi", ".m4v")
 ANIM_EXT = (".webp", ".gif")            # Pillow ile ek paket olmadan oynatılır
 
 
+def _animation_budget(widget, delay_ms):
+    """Read the root's cached policy; never probe window focus from an animation."""
+    try:
+        root = widget._root()
+    except (AttributeError, tk.TclError):
+        root = widget
+    paused = bool(getattr(root, "_td2_suspend_animations", False))
+    try:
+        speed = float(getattr(root, "_td2_animation_multiplier", 1.0))
+        if not math.isfinite(speed): speed = 1.0
+    except (TypeError, ValueError):
+        speed = 1.0
+    return paused, max(1, int(delay_ms / max(0.1, min(1.0, speed))))
+
+
 # ---------------------------------------------------------------- .cur dosyası
 def _hex(c):
     c = c.lstrip("#"); return tuple(int(c[i:i + 2], 16) for i in (0, 2, 4))
@@ -204,6 +219,9 @@ class TrailFX:
             r = self.root
             if r.state() == "iconic" or not r.winfo_viewable():
                 self.win.withdraw(); self.root.after(200, self._tick); return
+            paused, _ = _animation_budget(r, 33)
+            if paused:
+                self.win.withdraw(); self.root.after(300, self._tick); return
             if self.win.state() == "withdrawn": self.win.deiconify()
             x, y, w, h = r.winfo_rootx(), r.winfo_rooty(), r.winfo_width(), r.winfo_height()
             geo = f"{w}x{h}+{x}+{y}"
@@ -230,7 +248,7 @@ class TrailFX:
                 self.cv.create_oval(hx - 3, hy - 3, hx + 3, hy + 3, fill=self.color, outline="")
         except Exception:
             pass
-        self.root.after(33, self._tick)
+        self.root.after(_animation_budget(self.root, 33)[1], self._tick)
 
 
 # ---------------------------------------------------------------- sekme geçişi
@@ -388,10 +406,15 @@ def list_videos(folder, backend=None):
 class VideoFX:
     """Videoları sırayla/karışık döngüde çözer, (genişlik, yükseklik) boyutunda karartılmış PIL kareleri verir."""
 
-    def __init__(self, folder, on_frame, size_fn, fps=24, dim=0.45):
+    def __init__(self, folder, on_frame, size_fn, fps=24, dim=0.45, pause_fn=None):
         self.folder, self.on_frame, self.size_fn = Path(folder), on_frame, size_fn
         self.fps, self.dim = fps, dim
         self.alive, self.thread, self.error = False, None, None
+        self.pause_fn = pause_fn
+
+    def _paused(self):
+        try: return bool(self.pause_fn and self.pause_fn())
+        except Exception: return False
 
     def start(self):
         if self.alive: return True
@@ -446,16 +469,24 @@ class VideoFX:
                 gen = self._frames_pil if v.suffix.lower() in ANIM_EXT else (self._frames_av if be == "av" else self._frames_cv2)
                 self._frame_dt = 1.0 / self.fps
                 try:
-                    for img in gen(v):
-                        if not self.alive: break
-                        t0 = time.time()
-                        w, h = self.size_fn()
-                        if w < 10 or h < 10: time.sleep(0.2); continue
-                        frame = ImageOps.fit(img, (w, h), Image.BILINEAR)
-                        if self.dim > 0:
-                            frame = Image.blend(frame, Image.new("RGB", frame.size, (8, 9, 12)), self.dim)
-                        self.on_frame(frame)
-                        time.sleep(max(0.0, self._frame_dt - (time.time() - t0)))
+                    frames = iter(gen(v))
+                    try:
+                        while self.alive:
+                            if self._paused():
+                                time.sleep(0.3); continue       # do not decode/resize a hidden frame
+                            try: img = next(frames)
+                            except StopIteration: break
+                            t0 = time.time()
+                            w, h = self.size_fn()
+                            if w < 10 or h < 10: time.sleep(0.2); continue
+                            frame = ImageOps.fit(img, (w, h), Image.BILINEAR)
+                            if self.dim > 0:
+                                frame = Image.blend(frame, Image.new("RGB", frame.size, (8, 9, 12)), self.dim)
+                            self.on_frame(frame)
+                            time.sleep(max(0.0, self._frame_dt - (time.time() - t0)))
+                    finally:
+                        close = getattr(frames, "close", None)
+                        if close: close()
                 except Exception as e:
                     self.error = f"{type(e).__name__}: {e}"
                     time.sleep(0.5)
@@ -794,6 +825,8 @@ class WatchBackground:
                 if self.win.state() != "withdrawn": self.win.withdraw()
                 self._geo = None
                 self.root.after(250, self._tick); return
+            if _animation_budget(r, 50)[0]:
+                self.root.after(300, self._tick); return       # keep last frame and click forwarding intact
             self._n += 1
             active = self._active()
             fps = self.fps if active else 5
@@ -811,4 +844,4 @@ class WatchBackground:
             self.watch.render()
         except Exception:
             fps = 5
-        self.root.after(int(1000 / max(1, fps)), self._tick)
+        self.root.after(_animation_budget(self.root, int(1000 / max(1, fps)))[1], self._tick)

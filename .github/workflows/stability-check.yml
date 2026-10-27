@@ -1,0 +1,38 @@
+name: Stability and workload policy
+on:
+  workflow_dispatch:
+  push:
+    paths: ["app.py", "engine.py", "stash.py", "itempolicy.py", "workqueue.py", "performance.py", "ocr_backend.py", "scripts/**", "requirements-dev.txt", "livetranslate.py", "localapi.py", "fx.py", "ui_art.py", "view3d.py", "tests/test_*stability.py", "tests/test_itempolicy.py", "tests/test_workqueue.py", "tests/test_performance.py", "tests/test_animation_policy.py", "tests/test_translation_reliability.py", "tests/test_localapi_backpressure.py", ".github/workflows/stability-check.yml"]
+  pull_request:
+    paths: ["*.py", "scripts/**", "requirements-dev.txt", "tests/**", "lang/**", ".github/workflows/stability-check.yml"]
+permissions:
+  contents: read
+jobs:
+  regressions:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    env:
+      PYTHONIOENCODING: utf-8
+      TD2_NO_WELCOME: "1"
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with: {python-version: "3.13"}
+      - uses: actions/setup-node@v5
+        with: {node-version: "22"}
+      - run: python -m pip install mss pillow pytesseract pynput numpy -r requirements-dev.txt
+      - name: Policy, queues, app integration and translation integrity
+        shell: pwsh
+        run: |
+          $suites = @('test_itempolicy.py', 'test_workqueue.py', 'test_performance.py', 'test_animation_policy.py', 'test_app_stability.py', 'test_translation_reliability.py', 'test_localapi_backpressure.py', 'test_launcher.py', 'test_ocr_serialization.py')
+          foreach ($suite in $suites) {
+            python -B "tests/$suite"
+            if ($LASTEXITCODE -ne 0) { throw "$suite failed" }
+          }
+      - name: Existing core, local API and translation regressions
+        shell: pwsh
+        run: |
+          foreach ($suite in @('test_core.py', 'test_localapi.py', 'test_livetranslate.py', 'test_autoscan.py')) {
+            python -B "tests/$suite"
+            if ($LASTEXITCODE -ne 0) { throw "$suite failed" }
+          }

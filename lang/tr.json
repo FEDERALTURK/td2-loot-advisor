@@ -1482,7 +1482,7 @@
   "sp.start": "Konuşma çevirisini başlat",
   "sp.stop": "Durdur",
   "sp.download": "Konuşma modelini indir (~{mb} MB)",
-  "sp.hint": "En kararlısı oyunda altyazıyı açıp 'Altyazılar' modunu kullanmak. Altyazısı olmayan telsiz ve ISAC sesleri için: Windows 11'de Windows'un Canlı Altyazı özelliği (dili İngilizce olmalı), Windows 10'da yerel Whisper modeli (işlemciyi daha çok kullanır, yalnız konuşma algılanınca çalışır). Bilgisayarın tüm sesi dinlendiği için sesli sohbet de yazıya dökülebilir; her şey bu bilgisayarda kalır.",
+  "sp.hint": "En kararlısı oyunda altyazıyı açıp 'Altyazılar' modunu kullanmak. Altyazısı olmayan telsiz ve ISAC sesleri için: Windows 11'de Windows'un Canlı Altyazı özelliği (dili İngilizce olmalı), Windows 10'da yerel Whisper modeli (işlemciyi daha çok kullanır, yalnız konuşma algılanınca çalışır). Bilgisayarın tüm sesi dinlendiği için sesli sohbet de yazıya dökülebilir; konuşma tanıma bu bilgisayarda yapılır; çeviri seçili motora göre çalışır ve dökümü çevrimiçi sağlayıcıya gönderebilir.",
   "sp.no_captions": "Canlı Altyazı bu Windows'ta yok (Windows 11 22H2 gerekir) — kaynak: Whisper",
   "sp.no_runtime": "Konuşma bileşenleri bu kurulumda yok.",
   "sp.need_model": "Önce konuşma modelini indir (~{mb} MB, bir kez).",
@@ -1522,5 +1522,17 @@
   "themedesc.winter_ny": "karlı Manhattan, soğuk arduvaz",
   "themedesc.nightops": "gece görevi, ISAC camgöbeği",
   "themedesc.kenly": "Kenly College ormanlarının yeşili",
-  "lt.fullscreen_hint": "Oyun özel tam ekranda: çeviri kutuları görünmez. Oyunda Görüntü modu: Kenarlıksız (Borderless) seç ya da 📱 telefon / ikinci ekranı kullan."
+  "lt.fullscreen_hint": "Oyun özel tam ekranda: çeviri kutuları görünmez. Oyunda Görüntü modu: Kenarlıksız (Borderless) seç ya da 📱 telefon / ikinci ekranı kullan.",
+  "perf.balanced": "Dengeli",
+  "perf.game": "Oyun öncelikli",
+  "perf.changed": "Performans: {mode}",
+  "perf.measure": "Süre ölçümleri",
+  "perf.measure_hint": "Bu bilgisayardaki son işlem süreleri. Değerler karta ve seçilen motora göre değişir; burada ekran metni saklanmaz.",
+  "perf.queue": "Çeviri: {active} çalışan, {pending} bekleyen iş",
+  "perf.positive_setting": "Süre ve tarama aralığı pozitif ve sonlu bir sayı olmalı.",
+  "lt.invalid_result": "Çeviri eksik geldi. Lütfen yeniden dene.",
+  "lt.log_opt": "Çevrilen metinleri diske kaydet (isteğe bağlı)",
+  "lt.privacy_local": "Yerel çeviri: okunan metin ve konuşma dökümleri bu bilgisayarda çevrilir. Topluluk paylaşımı, telefon ekranı ve metin kaydının ayrı anahtarları vardır.",
+  "lt.privacy_ai": "Yapay zekâ çevirisi: okunan metin ve konuşma dökümleri seçili asistan sağlayıcısına gider. Çevrimiçi sağlayıcılar bu metni internetten alır. Paylaşım ve metin kaydı ayrıca açılır.",
+  "lt.ai_consent": "Okunan ekran metni ve konuşma dökümleri Asistan sekmesinde seçtiğin sağlayıcıya iletilecek. Sağlayıcı çevrimiçiyse bu metin bilgisayarından çıkar. Yapay zekâ çevirisine geçilsin mi?"
 }

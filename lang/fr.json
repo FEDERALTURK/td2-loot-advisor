@@ -1335,7 +1335,7 @@
   "sp.start": "Démarrer la traduction de la parole",
   "sp.stop": "Arrêter",
   "sp.download": "Télécharger le modèle vocal (~{mb} Mo)",
-  "sp.hint": "Le plus fiable : activer les sous-titres dans le jeu et utiliser le mode « Sous-titres ». Pour la radio et ISAC sans sous-titres : sous Windows 11, les sous-titres en direct de Windows (langue anglaise) ; sous Windows 10, un modèle Whisper local (plus de CPU, ne tourne que lorsque la parole est détectée). Tout le son du PC est écouté, le chat vocal peut donc aussi être transcrit ; tout reste sur ce PC.",
+  "sp.hint": "Le plus fiable : activer les sous-titres dans le jeu et utiliser le mode « Sous-titres ». Pour la radio et ISAC sans sous-titres : sous Windows 11, les sous-titres en direct de Windows (langue anglaise) ; sous Windows 10, un modèle Whisper local (plus de CPU, ne tourne que lorsque la parole est détectée). Tout le son du PC est écouté, le chat vocal peut donc aussi être transcrit ; la reconnaissance se fait sur ce PC ; la traduction utilise le moteur choisi et peut envoyer le texte à un fournisseur en ligne.",
   "sp.no_captions": "Les sous-titres en direct ne sont pas disponibles sur ce Windows (Windows 11 22H2 requis) — source : Whisper",
   "sp.no_runtime": "Les composants vocaux manquent dans cette installation.",
   "sp.need_model": "Télécharge d'abord le modèle vocal (~{mb} Mo, une fois).",
@@ -1375,5 +1375,17 @@
   "themedesc.winter_ny": "Manhattan sous la neige, ardoise froide",
   "themedesc.nightops": "mission de nuit, cyan ISAC",
   "themedesc.kenly": "le vert des bois de Kenly College",
-  "lt.fullscreen_hint": "Le jeu est en plein écran exclusif : les traductions ne peuvent pas s'afficher. Choisis Mode d'affichage : Sans bordure dans le jeu ou utilise le 📱 téléphone / second écran."
+  "lt.fullscreen_hint": "Le jeu est en plein écran exclusif : les traductions ne peuvent pas s'afficher. Choisis Mode d'affichage : Sans bordure dans le jeu ou utilise le 📱 téléphone / second écran.",
+  "perf.balanced": "Balanced",
+  "perf.game": "Game priority",
+  "perf.changed": "Performance: {mode}",
+  "perf.measure": "Timings",
+  "perf.measure_hint": "Recent timings on this PC. Values depend on the card and selected engine; no screen text is stored here.",
+  "perf.queue": "Translation: {active} active, {pending} waiting",
+  "perf.positive_setting": "Time and scan interval values must be finite positive numbers.",
+  "lt.invalid_result": "The translation was incomplete. Please retry.",
+  "lt.log_opt": "Save translated text to disk (optional)",
+  "lt.privacy_local": "Local translation: recognized text and speech transcripts are translated on this PC. Community sharing, the phone display and text logging have separate switches.",
+  "lt.privacy_ai": "AI translation: recognized text and speech transcripts go to the selected assistant provider. Online providers receive this text over the internet. Sharing and text logging have separate switches.",
+  "lt.ai_consent": "Recognized screen text and speech transcripts will be sent to the assistant provider selected in Assistant. If that provider is online, this text leaves your PC. Switch to AI translation?"
 }

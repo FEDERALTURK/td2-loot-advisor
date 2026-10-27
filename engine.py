@@ -11,6 +11,7 @@ Oyunun belleğine dokunulmaz.
 import re
 
 import gamedata
+import itempolicy
 
 WEAPON_WORDS = {  # build adındaki kısaltmalardan silah türü tahmini
     "assault rifle": ["ar", "assault rifle", "st elmo", "st. elmo", "police m4", "famas", "carbine"],
@@ -287,6 +288,10 @@ def evaluate(item, text, cfg, game):
 
 def decide(item, res, cfg):
     """(karar, not anahtarı, not parametreleri)."""
+    if isinstance(item, dict) and item.get("partial"):
+        return "REVIEW", "note.partial_card", {}
+    if not itempolicy.item_valid(item):
+        return "REVIEW", "note.no_item", {}
     st = cfg["settings"]
     best = res[0][0] if res else 0
     kind = item.get("kind")
@@ -294,26 +299,13 @@ def decide(item, res, cfg):
         return "REVIEW", "note.kind_" + kind, {}               # build kararı gerekmeyen eşya: kırma önerilmez
     if item.get("spec"):
         return "KEEP", "note.spec_weapon", {"spec": item["spec"]}
-    if item.get("name") in ("?", "", None) and not item.get("attrs") and not item.get("talents") and kind in ("gear", "weapon"):
-        return "REVIEW", "note.no_item", {}                   # eşya kartı değil (menü, harita, Summit ekranı …)
-    if item.get("partial"):
-        return "REVIEW", "note.partial_card", {}
-    if kind == "gear_mod":
-        if best >= st["keep_threshold"]: return "KEEP", None, {}
-        if best >= st["consider_threshold"]: return "CONSIDER", None, {}
-        return "DISMANTLE", None, {}
-    rare = {"EXOTIC", "NAMED"} & set(item.get("rarity", []))
-    if rare:
+    if itempolicy.is_protected_item(item):
         users = [b["name"] for b in cfg["builds"] if build_mentions(b, item.get("name", ""))]
         if users:
             return "KEEP", "note.rare_used", {"builds": ", ".join(users[:2])}
         if best >= st["keep_threshold"]:
             return "KEEP", None, {}
         return "REVIEW", "note.rare_unused", {}
-    if "NAMED" in item.get("rarity", []) and best < st["consider_threshold"]:
-        return "CONSIDER", "note.named_unused", {}                # named: önce kütüphane/kalibrasyon için bak
-    if "PROTOTYPE" in item.get("rarity", []) and best >= st["consider_threshold"]:
-        return "KEEP", None, {}
     if best >= st["keep_threshold"]:
         return "KEEP", None, {}
     if best >= st["consider_threshold"]:

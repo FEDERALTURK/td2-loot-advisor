@@ -1335,7 +1335,7 @@
   "sp.start": "Uruchom tłumaczenie mowy",
   "sp.stop": "Zatrzymaj",
   "sp.download": "Pobierz model mowy (~{mb} MB)",
-  "sp.hint": "Najpewniej: włącz napisy w grze i użyj trybu „Napisy”. Dla radia i ISAC bez napisów: w Windows 11 napisy na żywo systemu Windows (język angielski), w Windows 10 lokalny model Whisper (więcej CPU, działa tylko przy wykrytej mowie). Słyszany jest cały dźwięk PC, więc czat głosowy też może zostać zapisany; wszystko zostaje na tym PC.",
+  "sp.hint": "Najpewniej: włącz napisy w grze i użyj trybu „Napisy”. Dla radia i ISAC bez napisów: w Windows 11 napisy na żywo systemu Windows (język angielski), w Windows 10 lokalny model Whisper (więcej CPU, działa tylko przy wykrytej mowie). Słyszany jest cały dźwięk PC, więc czat głosowy też może zostać zapisany; rozpoznawanie działa na tym PC; tłumaczenie używa wybranego silnika i może wysyłać tekst do dostawcy online.",
   "sp.no_captions": "Napisy na żywo nie są dostępne w tym Windows (wymaga Windows 11 22H2) — źródło: Whisper",
   "sp.no_runtime": "W tej instalacji brakuje składników mowy.",
   "sp.need_model": "Najpierw pobierz model mowy (~{mb} MB, jednorazowo).",
@@ -1375,5 +1375,17 @@
   "themedesc.winter_ny": "zaśnieżony Manhattan, zimny łupek",
   "themedesc.nightops": "nocna misja, cyjan ISAC",
   "themedesc.kenly": "zieleń lasów wokół Kenly College",
-  "lt.fullscreen_hint": "Gra działa w trybie pełnoekranowym na wyłączność: tłumaczenia nie mogą się pojawić. Ustaw w grze Tryb wyświetlania: Bez ramki albo użyj 📱 telefonu / drugiego ekranu."
+  "lt.fullscreen_hint": "Gra działa w trybie pełnoekranowym na wyłączność: tłumaczenia nie mogą się pojawić. Ustaw w grze Tryb wyświetlania: Bez ramki albo użyj 📱 telefonu / drugiego ekranu.",
+  "perf.balanced": "Balanced",
+  "perf.game": "Game priority",
+  "perf.changed": "Performance: {mode}",
+  "perf.measure": "Timings",
+  "perf.measure_hint": "Recent timings on this PC. Values depend on the card and selected engine; no screen text is stored here.",
+  "perf.queue": "Translation: {active} active, {pending} waiting",
+  "perf.positive_setting": "Time and scan interval values must be finite positive numbers.",
+  "lt.invalid_result": "The translation was incomplete. Please retry.",
+  "lt.log_opt": "Save translated text to disk (optional)",
+  "lt.privacy_local": "Local translation: recognized text and speech transcripts are translated on this PC. Community sharing, the phone display and text logging have separate switches.",
+  "lt.privacy_ai": "AI translation: recognized text and speech transcripts go to the selected assistant provider. Online providers receive this text over the internet. Sharing and text logging have separate switches.",
+  "lt.ai_consent": "Recognized screen text and speech transcripts will be sent to the assistant provider selected in Assistant. If that provider is online, this text leaves your PC. Switch to AI translation?"
 }
