@@ -16,6 +16,8 @@ permissions:
   contents: write
 
 env:
+  PYTHONIOENCODING: utf-8
+  PYTHONUTF8: "1"
   TD2_NO_WELCOME: "1"      # hesap karşılama penceresi diğer arayüz testlerini örtmesin
 jobs:
   build:
