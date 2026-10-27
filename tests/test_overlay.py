@@ -35,11 +35,11 @@ ok(pt2 == overlay.MIN_PT and h2 > 20, "en küçük puntoda da sığmazsa kutu a�
 
 # gerçek harita ekranı: OCR → bloklar → (sahte) çeviri → yerleşim
 L = json.loads((ROOT / "tests/samples/tasks/map_projects_full.json").read_text())["lines"]
-blocks = lt.blocks_from_lines([tuple(x) for x in L])
+blocks = lt.blocks_from_lines([tuple(x) for x in L], preserve_lines=True)
 fake = {"Rewards\nExotic Cache\nRecalibration Cache\nRecalibration Cache\nGear Crafting Cache\nOptimization Cache":
         "Ödüller\nExotic Cache\nRecalibration Cache\nRecalibration Cache\nGear Crafting Cache\nOptimization Cache"}
 body = lt.BODY_H[0]
-items = overlay.layout([(fake.get(en, en.upper() + " (TR)"), b, en, max(1, en.count("\n") + 1, round((b[3] - b[1]) / (body * 1.15))))
+items = overlay.layout([(fake.get(en, en.upper() + " (TR)"), b, en, max(1, en.count("\n") + 1))
                         for en, b, _ in blocks], area, measure_at)
 ok(len(items) == len(blocks), "her bloğa bir kutu (%d)" % len(items))
 ok(all(0 <= i["x"] and i["x"] + i["w"] <= area["width"] and 0 <= i["y"] and i["y"] + i["h"] <= area["height"] for i in items), "kutular ekran içinde")

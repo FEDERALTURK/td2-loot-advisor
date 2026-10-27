@@ -12,7 +12,10 @@
     "log_csv": true,
     "perf_mode": "balanced",
     "tr_engine": "local",
-    "tr_log": false
+    "tr_log": false,
+    "voice_pack": "auto",
+    "voice_radio": false,
+    "voice_online": false
   },
   "attributes": {
     "weapon_damage": [

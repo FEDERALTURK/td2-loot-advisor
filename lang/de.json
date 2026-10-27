@@ -1391,5 +1391,11 @@
   "lt.log_opt": "Save translated text to disk (optional)",
   "lt.privacy_local": "Local translation: recognized text and speech transcripts are translated on this PC. Community sharing, the phone display and text logging have separate switches.",
   "lt.privacy_ai": "AI translation: recognized text and speech transcripts go to the selected assistant provider. Online providers receive this text over the internet. Sharing and text logging have separate switches.",
-  "lt.ai_consent": "Recognized screen text and speech transcripts will be sent to the assistant provider selected in Assistant. If that provider is online, this text leaves your PC. Switch to AI translation?"
+  "lt.ai_consent": "Recognized screen text and speech transcripts will be sent to the assistant provider selected in Assistant. If that provider is online, this text leaves your PC. Switch to AI translation?",
+  "vp.p_natural_tr": "Türkçe — Natural (Emel)",
+  "vp.p_natural_en": "English — Natural (Aria)",
+  "vp.online": "Online natural voice for chat and translation",
+  "vp.online_privacy": "Online voice is enabled: text to be read is sent to Microsoft's speech service. Audio is cached locally; screen images and microphone audio are not sent by this voice feature.",
+  "vp.natural_hint": "Two notification packs: Turkish / English. Recorded notifications work offline without radio distortion. Dynamic chat uses the interface language; translated speech uses Turkish. With online voice off, dynamic text uses the Windows voice. With it on, text goes to Microsoft's speech service and audio is cached locally.",
+  "vp.online_route": "When enabled, text to be spoken is sent to Microsoft's speech service. Recorded notifications stay offline. When disabled, dynamic text uses the Windows voice."
 }

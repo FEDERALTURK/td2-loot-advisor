@@ -1,8 +1,8 @@
-"""Ajan sesi: kararları özgün "taktik asistan" cümleleriyle söyler, isteğe bağlı telsiz efektiyle.
+"""TR/EN Neural recordings, optional online speech, and legacy SAPI helpers.
 
-Cümleler meta/voice_lines.json'dadır (10 dil × 3 paket; topluluk yeni dil/paket ekleyebilir). Ses Windows'un
-kendi konuşma motoruyla (SAPI) üretilir; telsiz efekti üretilen sese burada uygulanır (bant geçiren süzgeç,
-hafif doyum, başta/sonda cızırtı). Hiçbir oyun sesi ya da başka bir yapımın sesi kullanılmaz.
+Fixed recordings in meta/voices play offline. Dynamic text is sent to the
+Microsoft Edge speech service only when online voice is enabled. Legacy voice
+lines, SAPI and radio filtering remain available for fallback and compatibility.
 """
 import json
 import random
@@ -11,6 +11,107 @@ import wave
 from pathlib import Path
 
 PACKS = ("classic", "tactical", "operator", "brief")
+NATURAL_PACKS = ("natural_tr", "natural_en")
+NATURAL_VOICES = {"natural_tr": "tr-TR-EmelNeural", "natural_en": "en-US-AriaNeural"}
+
+
+def natural_pack(pack, lang="tr"):
+    return pack if pack in NATURAL_PACKS else ("natural_tr" if lang == "tr" else "natural_en")
+
+
+class Recordings:
+    """Fixed notifications shipped in meta; no service calls at runtime."""
+    EVENTS = frozenset({"keep", "consider", "dismantle", "review", "exotic", "named", "build", "fills_gap", "upgrade", "demo"})
+
+    def __init__(self, *meta_dirs):
+        self.roots = [Path(p) for p in meta_dirs]
+
+    def event(self, pack, event):
+        if pack not in NATURAL_PACKS or event not in self.EVENTS: return None
+        for root in self.roots:
+            p = root / "voices" / pack / (event + ".wav")
+            if p.is_file() and p.stat().st_size > 1000: return p
+        return None
+
+    def verdict(self, pack, verdict, rarity=(), build=False, note=None):
+        events = []
+        tags = set(rarity or [])
+        if verdict in ("KEEP", "CONSIDER", "REVIEW"):
+            if "EXOTIC" in tags: events.append("exotic")
+            elif "NAMED" in tags: events.append("named")
+        event = {"KEEP": "keep", "CONSIDER": "consider", "DISMANTLE": "dismantle", "REVIEW": "review"}.get(verdict)
+        if event: events.append(event)
+        if note in ("fills_gap", "upgrade"): events.append(note)
+        elif build and verdict in ("KEEP", "CONSIDER"): events.append("build")
+        return [p for event in events if (p := self.event(pack, event))]
+
+
+def neural_audio(text, pack, cache_dir, rate_wpm=185):
+    """Opt-in online speech. Cache stores hashed filenames, never text metadata.
+
+    Uses Edge's online speech service through edge-tts, not a local model or an
+    Azure subscription. Call only from the speaker worker after user opt-in.
+    """
+    import asyncio
+    import hashlib
+    import tempfile
+    import time
+    if pack not in NATURAL_VOICES: raise ValueError("Unknown voice pack")
+    if not isinstance(text, str) or not text.strip() or len(text) > 5000: raise ValueError("Invalid speech text")
+    rate = max(-35, min(35, round((float(rate_wpm) / 185 - 1) * 100 - 5)))
+    voice = NATURAL_VOICES[pack]
+    key = hashlib.sha256(json.dumps([voice, rate, text], ensure_ascii=False).encode("utf-8")).hexdigest()
+    cache = Path(cache_dir); cache.mkdir(parents=True, exist_ok=True)
+    target = cache / (key + ".mp3")
+    if target.exists() and target.stat().st_size > 1000:
+        target.touch()
+        return target
+    import edge_tts
+    async def synth(path):
+        await edge_tts.Communicate(text, voice, rate=f"{rate:+d}%", pitch="+0Hz",
+                                   connect_timeout=10, receive_timeout=25).save(str(path))
+    with tempfile.NamedTemporaryFile(dir=cache, suffix=".part", delete=False) as tmp:
+        part = Path(tmp.name)
+    try:
+        asyncio.run(synth(part))
+        data = part.read_bytes()
+        if len(data) <= 1000 or not (data.startswith(b"ID3") or data[0] == 0xff):
+            raise RuntimeError("Speech service returned invalid audio")
+        part.replace(target)
+    finally:
+        part.unlink(missing_ok=True)
+    # Bounded disk use: newest 128 clips, at most 32 MiB. Incomplete files are
+    # cleaned separately and never treated as playable cache entries.
+    files = sorted(cache.glob("*.mp3"), key=lambda p: p.stat().st_mtime, reverse=True)
+    total = 0
+    for index, path in enumerate(files):
+        total += path.stat().st_size
+        if index >= 128 or total > 32 * 1024 * 1024:
+            if path != target: path.unlink(missing_ok=True)
+    for path in cache.glob("*.part"):
+        if time.time() - path.stat().st_mtime > 3600: path.unlink(missing_ok=True)
+    return target
+
+
+def play_audio(path):
+    """Blocking playback on the speech worker; PCM WAV or cached neural MP3."""
+    import ctypes
+    import uuid
+    path = Path(path).resolve()
+    if path.suffix.lower() == ".wav":
+        import winsound
+        winsound.PlaySound(str(path), winsound.SND_FILENAME)
+        return
+    alias = "td2voice" + uuid.uuid4().hex
+    send = ctypes.windll.winmm.mciSendStringW
+    def command(text):
+        error = send(text, None, 0, None)
+        if error: raise RuntimeError(f"Audio playback error {error}")
+    try:
+        command(f'open "{path}" type mpegvideo alias {alias}')
+        command(f"play {alias} wait")
+    finally:
+        send(f"close {alias}", None, 0, None)
 
 
 class Lines:

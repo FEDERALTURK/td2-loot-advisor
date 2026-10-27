@@ -177,3 +177,8 @@ Fresh settings use local translation, with translation text logging and debug cr
 Start source builds with `scripts\run.bat`. Normal startup skips pip when installed requirements have not changed. `--check` only checks required modules, `--repair` reinstalls requirements, and `--extras` installs optional voice/video dependencies. Test dependencies are in `requirements-dev.txt`.
 
 These changes are included in release 6.0.2. See [local validation results](docs/stability-6.0.2.md). In-game FPS/GPU behavior and operation on a real 8 GB computer remain unverified.
+
+
+### 6.0.3: in-place translation and natural voice
+
+Source-anchored overlay fixes, two recorded Turkish/English Neural notification packs and optional online natural speech are available in the local source build. These changes are included in release 6.0.3. See [usage, data routing and validation](docs/overlay_voice_local.md).

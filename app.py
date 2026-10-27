@@ -43,6 +43,32 @@ if "--lt-check" in sys.argv:           # paket denetimi: çeviri altyapısı (ct
     Path(sys.argv[_i + 1]).write_text(json.dumps(_res), encoding="utf-8")
     sys.exit(0)
 
+if "--voice-check" in sys.argv:
+    # Installed-package verification: no window, personal settings or network.
+    import hashlib as _hashlib, wave as _wave
+    from importlib.metadata import version as _package_version
+    _i = sys.argv.index("--voice-check")
+    try:
+        import edge_tts as _edge
+        _bundle = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent))
+        _manifest = json.loads((_bundle / "meta/voice_packs.json").read_text(encoding="utf-8"))
+        assert set(_manifest["packs"]) == {"natural_tr", "natural_en"}
+        _count = 0
+        for _pack, _meta in _manifest["packs"].items():
+            assert len(_meta["events"]) == 10
+            for _event, _clip in _meta["events"].items():
+                _path = _bundle / "meta/voices" / _pack / (_event + ".wav")
+                assert _hashlib.sha256(_path.read_bytes()).hexdigest() == _clip["sha256"]
+                with _wave.open(str(_path)) as _audio:
+                    assert (_audio.getnchannels(), _audio.getsampwidth(), _audio.getframerate()) == (1, 2, 24000)
+                    assert _audio.getnframes() / _audio.getframerate() > .3
+                _count += 1
+        _res = {"ok": True, "recordings": _count, "edge_tts": _package_version("edge-tts")}
+    except Exception as _e:
+        _res = {"ok": False, "reason": f"{type(_e).__name__}: {_e}"}
+    Path(sys.argv[_i + 1]).write_text(json.dumps(_res), encoding="utf-8")
+    sys.exit(0 if _res["ok"] else 1)
+
 import mss
 import capture
 from PIL import Image, ImageDraw, ImageOps, ImageTk
@@ -93,7 +119,7 @@ import workqueue
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "6.0.2"
+APP_VERSION = "6.0.3"
 FROZEN = getattr(sys, "frozen", False)
 BASE = Path(sys.executable).parent if FROZEN else Path(__file__).resolve().parent
 TASKS_CACHE = BASE / "tasks_cache.json"  # son indirilen görev listesi
@@ -822,7 +848,7 @@ DEFAULTS.update({
     "ai_provider": "ollama", "ollama_url": "http://localhost:11434", "ollama_model": "gemma3:12b",
     "claude_model": "claude-haiku-5-5", "claude_api_key": "", "claude_code_model": "haiku", "openai_model": "gpt-4o-mini", "openai_api_key": "",
     "stt_model": "small", "stt_device": "cpu",
-    "tts_rate": 185, "tts_voice": "", "voice_hotkey": "<f9>", "speak_verdict": True, "speak_chat": True, "voice_pack": "tactical", "voice_radio": True, "quiz_xp": 0, "quiz_best": 0, "quiz_loading": False, "meta_favs": [], "meta_pop_prev": {}, "news_seen": [], "task_share": None, "task_live": True, "task_client": "", "tr_on": False, "tr_engine": "local", "tr_mode": "subtitle", "tr_region": None, "tr_hotkey": "<f7>", "tr_auto": True, "tr_font": 15, "tr_hide": 10, "tr_alpha": 0.9, "tr_screen": False, "tr_screen_port": 8767, "tr_screen_token": "", "tr_speak": "off", "tr_family": "", "tr_outline": False, "sp_on": False, "sp_source": "auto", "sp_hide_captions": True, "tr_ocr": "auto", "tr_ocr_pick": "", "tr_ocr_bench_t": 0, "tr_pad": "back+rb"})
+    "tts_rate": 185, "tts_voice": "", "voice_hotkey": "<f9>", "speak_verdict": True, "speak_chat": True, "voice_pack": "auto", "voice_radio": False, "voice_online": False, "quiz_xp": 0, "quiz_best": 0, "quiz_loading": False, "meta_favs": [], "meta_pop_prev": {}, "news_seen": [], "task_share": None, "task_live": True, "task_client": "", "tr_on": False, "tr_engine": "local", "tr_mode": "subtitle", "tr_region": None, "tr_hotkey": "<f7>", "tr_auto": True, "tr_font": 15, "tr_hide": 10, "tr_alpha": 0.9, "tr_screen": False, "tr_screen_port": 8767, "tr_screen_token": "", "tr_speak": "off", "tr_family": "", "tr_outline": False, "sp_on": False, "sp_source": "auto", "sp_hide_captions": True, "tr_ocr": "auto", "tr_ocr_pick": "", "tr_ocr_bench_t": 0, "tr_pad": "back+rb"})
 PROVIDER_KEYS = ["ollama", "claude_code", "claude", "openai", "builtin"]
 
 def provider_label(pid):
@@ -848,9 +874,10 @@ VOICE_HINTS = {"tr": ["turk", "tr-tr", "tolga", "emel"], "en": ["en-us", "englis
 
 
 class Speaker:
-    """Çevrimdışı konuşma (Windows SAPI, pyttsx3). Kendi iş parçacığında çalışır."""
+    """Bounded worker for recordings, opt-in Neural speech and SAPI fallback."""
     def __init__(self):
-        self.q, self.err, self.last_fx = queue.Queue(), None, None
+        self.q, self.err, self.last_fx = queue.Queue(maxsize=4), None, None
+        self._serial, self._closed = 0, False
         threading.Thread(target=self.run, daemon=True).start()
 
     def run(self):
@@ -864,9 +891,30 @@ class Speaker:
             job = self.q.get()
             if job is None:
                 break
-            if not eng:
-                continue
-            text, rate, hint, fx = job if len(job) == 4 else (*job, False)
+            if isinstance(job, dict):
+                if job["serial"] != self._serial or self._closed: continue
+                if "files" in job:
+                    try:
+                        for path in job["files"]:
+                            if job["serial"] != self._serial or self._closed: break
+                            voicepack.play_audio(path)
+                    except Exception as e:
+                        self.err = f"recording: {type(e).__name__}"
+                        log.warning("Recorded speech playback failed: %s", type(e).__name__)
+                    continue
+                text, rate, hint, fx = job["text"], job["rate"], job["hint"], job["fx"]
+                if job.get("online"):
+                    try:
+                        audio = voicepack.neural_audio(text, job["pack"], BASE / "cache" / "voice", rate)
+                        if job["serial"] == self._serial and not self._closed: voicepack.play_audio(audio)
+                        continue
+                    except Exception as e:
+                        self.err = f"online speech: {type(e).__name__}; system voice fallback"
+                        log.warning("Online speech unavailable (%s); using system voice", type(e).__name__)
+                if job["serial"] != self._serial or self._closed: continue
+            else:
+                text, rate, hint, fx = job if len(job) == 4 else (*job, False)
+            if not eng: continue
             try:
                 voices = eng.getProperty("voices")
                 pick = None
@@ -897,16 +945,35 @@ class Speaker:
             self.err = f"radio: {type(e).__name__}: {e}"
             return False
 
-    def say(self, text, rate=185, hint="", interrupt=True, fx=False):
+    def _put(self, job, interrupt=True):
+        if self._closed: return
         if interrupt:
+            self._serial += 1
             try:
                 while True: self.q.get_nowait()
             except queue.Empty:
                 pass
-        self.q.put((text, rate, hint, fx))
+        job["serial"] = self._serial
+        try: self.q.put_nowait(job)
+        except queue.Full:
+            try: self.q.get_nowait()
+            except queue.Empty: pass
+            try: self.q.put_nowait(job)
+            except queue.Full: pass
+
+    def say(self, text, rate=185, hint="", interrupt=True, fx=False, pack=None, online=False):
+        self._put(dict(text=text, rate=rate, hint=hint, fx=fx, pack=pack, online=online), interrupt)
+
+    def files(self, paths):
+        self._put({"files": list(paths)})
 
     def close(self):
-        self.q.put(None)
+        self._closed = True
+        self._serial += 1
+        try:
+            while True: self.q.get_nowait()
+        except queue.Empty: pass
+        self.q.put_nowait(None)
 
 
 class Recorder:
@@ -1530,7 +1597,15 @@ class App:
 
     def _translation_privacy(self):
         key = "lt.privacy_local" if self.cfg["settings"].get("tr_engine", "local") == "local" else "lt.privacy_ai"
-        return t(key)
+        return t(key) + ("\n" + t("vp.online_privacy") if self.cfg["settings"].get("voice_online", False) else "")
+
+    def set_online_voice(self, enabled):
+        self.cfg["settings"]["voice_online"] = bool(enabled)
+        for name in ("vp_online", "ts_online_voice"):
+            variable = getattr(self, name, None)
+            if variable is not None: variable.set(bool(enabled))
+        save_cfg(self.cfg)
+        if getattr(self, "lt_privacy_lbl", None): self.lt_privacy_lbl.config(text=self._translation_privacy())
 
     # ---------- Canlı oyun çevirisi (İngilizce → Türkçe) ----------
     def ai_complete(self, system, user):
@@ -1964,11 +2039,18 @@ class App:
                 if not self._translation_jobs.is_current(token): return
                 with self.timings.measure("translate_ocr"):
                     lines = self.lt_ocr(img)
-            blocks = livetranslate.blocks_from_lines(lines, GAME.data.get("ui_words", []))
+            inplace = self.cfg["settings"].get("tr_mode") == "inplace"
+            blocks = livetranslate.blocks_from_lines(lines, GAME.data.get("ui_words", []), preserve_lines=inplace)
             if not blocks:
-                if force: self._post_translation(token, lambda: self._lt_status(t("lt.nothing"), "muted"))
+                def clear_overlay():
+                    self._lt_hide()
+                    self._lt_last_sig = None
+                    if force: self._lt_status(t("lt.nothing"), "muted")
+                self._post_translation(token, clear_overlay)
                 return
             sig = "|".join(b[0] for b in blocks)
+            if inplace:
+                sig += "@" + repr((area, [tuple(round(v) for v in b[1]) for b in blocks]))
             if sig == getattr(self, "_lt_last_sig", None) and not force: return
             if not self._translation_jobs.is_current(token): return
             t0 = time.perf_counter()
@@ -2057,10 +2139,9 @@ class App:
     def _lt_show_inplace(self, pairs, area):
         """Yerinde çeviri: her blok kendi yerinde, opak fonla (overlay.py)."""
         st = self.cfg["settings"]
-        body = max(8.0, float(livetranslate.BODY_H[0]))
         sty = dict(self.lt_style(), alpha=1.0)              # yerinde: fon tamamen opak, alttaki İngilizce görünmez
         ip = self._lt_inplace = overlay.InPlace(self.root, sty, on_window=self._lt_overlay_window)
-        blocks = [(tr, b, en, max(1, en.count("\n") + 1, round((b[3] - b[1]) / (body * 1.15)))) for en, tr, b in pairs]
+        blocks = [(tr, b, en, max(1, en.count("\n") + 1)) for en, tr, b in pairs]
         items = overlay.layout(blocks, area, ip.measure_at)
         if not items: return
         self._lt_win = ip.show(items, area)
@@ -2103,8 +2184,8 @@ class App:
                 self._tr_spoken = text
                 try: rate = int(float(st.get("tts_rate", 185)))
                 except ValueError: rate = 185
-                fx = bool(st.get("voice_radio", True)) and st.get("voice_pack", "tactical") != "classic"
-                self.speaker.say(text, rate, "tr-tr", fx=fx)
+                self.speaker.say(text, rate, "tr-tr", fx=False, pack="natural_tr",
+                                 online=bool(st.get("voice_online", False)))
 
     def term_finder(self):
         lang = i18n.current_language()
@@ -2296,6 +2377,11 @@ class App:
         sp.pack(side="left", padx=8)
         sp.bind("<<ComboboxSelected>>", lambda e: (st.__setitem__("tr_speak", next(k for k in ("off", "subtitle", "all") if t("ts.sp_" + k) == self.ts_speak.get())), save_cfg(self.cfg)))
         ttk.Label(sr, text=t("ts.speak_hint"), foreground=PAL["muted"]).pack(side="left", padx=6)
+        self.ts_online_voice = tk.BooleanVar(value=bool(st.get("voice_online", False)))
+        ttk.Checkbutton(pb, text=t("vp.online"), variable=self.ts_online_voice,
+                        command=lambda: self.set_online_voice(self.ts_online_voice.get())).pack(anchor="w", padx=10)
+        ttk.Label(pb, text=t("vp.online_route"), foreground=PAL["muted"], wraplength=880,
+                  justify="left").pack(anchor="w", padx=28, pady=(0, 8))
         self._ts_ui()
         # konuşma çevirisi
         kb = ttk.LabelFrame(f, text="🎧 " + t("sp.box")); kb.pack(fill="x", padx=10, pady=6)
@@ -4126,10 +4212,26 @@ class App:
     def scan_image(self, img, auto):
         s = self.cfg["settings"]
         timings = getattr(self, "timings", None)
+        ocr_seconds = 0.0
+        def timed_read(card, scale=None):
+            nonlocal ocr_seconds
+            started = time.perf_counter()
+            try:
+                return read_card(card, scale=scale)
+            finally:
+                elapsed = time.perf_counter() - started
+                ocr_seconds += elapsed
+                if timings is not None: timings.record("ocr", elapsed * 1000)
         box = getattr(self, "card_box", None)
         tried_fresh = False
-        if box is None:
-            box = find_card(img); tried_fresh = True
+        # An explicitly selected narrow region is already the user's card crop.
+        # Read it first; locating a card with OCR would duplicate the first pass.
+        region_first = (box is None and s.get("scan_source") == "region"
+                        and bool(s.get("region")) and img.width < 1600)
+        if box is None and not region_first:
+            with timings.measure("card_locate") if timings is not None else nullcontext():
+                box = find_card(img)
+            tried_fresh = True
         if box is None and auto and img.width >= 1600:
             # Tüm oyun ekranında eşya kartı yok (dünya / harita / başka menü): ekranın tamamını tam çözünürlükte
             # okumak (ve last_card.png olarak kaydetmek) boşa ekran kartı / disk yükü — otomatik taramada atlanır.
@@ -4137,16 +4239,18 @@ class App:
             return False
         card = img.crop(box) if box else img
         t_ocr = time.perf_counter()
-        text, lines = read_card(card)
+        text, lines = timed_read(card)
         ocr_elapsed = time.perf_counter() - t_ocr
         self._note_ocr_time(ocr_elapsed)
-        if timings is not None: timings.record("ocr", ocr_elapsed * 1000)
-        item, verdict, res = evaluate(text, self.cfg)
-        if not valid_item(item) and not tried_fresh:                  # kart yer değiştirmiş: yeniden bul
-            box = find_card(img)
-            card = img.crop(box) if box else img
-            text, lines = read_card(card)
+        with timings.measure("evaluate") if timings is not None else nullcontext():
             item, verdict, res = evaluate(text, self.cfg)
+        if not valid_item(item) and not tried_fresh:                  # kart yer değiştirmiş / bölge belirsiz
+            with timings.measure("card_locate") if timings is not None else nullcontext():
+                box = find_card(img)
+            if box or not region_first:
+                card = img.crop(box) if box else img
+                text, lines = timed_read(card)
+                item, verdict, res = evaluate(text, self.cfg)
         self.card_box = box if valid_item(item) else None
         if s.get("ocr_passes_auto", True):
             passes = self.auto_passes()                      # bilgisayarın hızına göre 1-3 okuma
@@ -4169,13 +4273,13 @@ class App:
                 if OCR.name == "rapidocr":
                     a = ocr_scale() or ocr_backend.Engine.auto_scale(card)
                     for sc in [x for x in (2.0, 1.0, 1.5) if abs(x - a) > 0.1][:passes - 1]:
-                        tx, _ = read_card(card, scale=sc)
+                        tx, _ = timed_read(card, scale=sc)
                         q = ocr_quality(tx)
                         if q > best_q: best_q, best_t = q, tx
                 else:
                     for th in (base + 10, base - 40)[:passes - 1]:
                         gamedata.THRESHOLD = max(90, min(235, th))
-                        tx, _ = read_card(card)
+                        tx, _ = timed_read(card)
                         q = ocr_quality(tx)
                         if q > best_q: best_q, best_t = q, tx
             finally:
@@ -4208,6 +4312,7 @@ class App:
             log.debug("library learn failed", exc_info=True)
         verdict = itempolicy.protect_verdict(item, color_hints(card, lines, item, verdict))
         sig = signature(item)
+        if timings is not None: timings.record("ocr_total", ocr_seconds * 1000)
         if auto:
             if not valid_item(item): return False
             if sig == self.last_sig and time.time() - self.last_time < DEDUP_SECONDS: return True
@@ -4724,6 +4829,7 @@ class App:
         prev = last_done = None; stable = 0; last_t = 0.0
         idle = 0                                          # art arda kart bulunamayan dünya okumaları
         while not stop.is_set():
+            policy = self._policy()
             try:
                 region = self.scan_area()
                 if region and self.cfg["settings"].get("only_game_active", True) and not game_active():
@@ -4740,18 +4846,25 @@ class App:
                         # menü türleri öğrenilebilsin); kart çıkmadıkça aralık 4 → 8 → 16 → 30 sn'ye uzar
                         go = changed and stable >= 3 and time.time() - last_t > world_wait(idle)
                     else:                                                 # menü / bilinmiyor: eski davranış
-                        go = changed and stable == 1; idle = 0
-                    if go:
-                        last_done, last_t = h, time.time()
-                        img = grab(region)
-                        with self.lock:
-                            found = self.scan_image(img, auto=True)
-                        idle = 0 if found or gs != "world" else idle + 1
+                        go = changed and stable >= 2 and time.time() - last_t >= policy.auto_interval_s
+                        idle = 0
+                    if go and self.lock.acquire(blocking=False):
+                        try:
+                            # If translation is using the OCR engine, retry with a fresh
+                            # screen sample instead of waiting on an obsolete capture.
+                            last_done, last_t = h, time.time()
+                            img = grab(region)
+                            timings = getattr(self, "timings", None)
+                            with timings.measure("scan_total") if timings is not None else nullcontext():
+                                found = self.scan_image(img, auto=True)
+                            idle = 0 if found or gs != "world" else idle + 1
+                        finally:
+                            self.lock.release()
             except Exception as e:
                 msg = f"{type(e).__name__}: {e}"
                 if msg != self.last_err:
                     self.last_err = msg; self.results.put(("err", msg))
-            stop.wait(self._policy().auto_interval_s)
+            stop.wait(policy.scan_poll_s)
 
     def poll(self):
         try:
@@ -5844,17 +5957,20 @@ class App:
         ttk.Button(box, text=t("btn.save"), command=self.save_ai_settings, style="Accent.TButton").grid(row=4, column=2, sticky="w", padx=16)
         vp = ttk.Frame(box); vp.grid(row=5, column=2, rowspan=4, sticky="nw", padx=16, pady=(6, 0))
         ttk.Label(vp, text="🎙 " + t("vp.pack")).pack(anchor="w")
-        packs = list(voicepack.PACKS)
-        self.vp_var = tk.StringVar(value=t("vp.p_" + st.get("voice_pack", "tactical")))
+        packs = list(voicepack.NATURAL_PACKS)
+        selected = voicepack.natural_pack(st.get("voice_pack"), i18n.current_language())
+        self.vp_var = tk.StringVar(value=t("vp.p_" + selected))
         cb = ttk.Combobox(vp, textvariable=self.vp_var, values=[t("vp.p_" + p) for p in packs], state="readonly", width=24); cb.pack(anchor="w", pady=2)
-        self.vp_radio = tk.BooleanVar(value=bool(st.get("voice_radio", True)))
+        self.vp_radio = tk.BooleanVar(value=False)
+        self.vp_online = tk.BooleanVar(value=bool(st.get("voice_online", False)))
         def vp_save(*_):
             st["voice_pack"] = packs[[t("vp.p_" + p) for p in packs].index(self.vp_var.get())]
-            st["voice_radio"] = bool(self.vp_radio.get()); save_cfg(self.cfg)
+            st["voice_radio"] = False
+            self.set_online_voice(self.vp_online.get())
         cb.bind("<<ComboboxSelected>>", vp_save)
-        ttk.Checkbutton(vp, text=t("vp.radio"), variable=self.vp_radio, command=vp_save).pack(anchor="w")
+        ttk.Checkbutton(vp, text=t("vp.online"), variable=self.vp_online, command=vp_save).pack(anchor="w")
         ttk.Button(vp, text="▶ " + t("vp.test"), command=self.voice_demo).pack(anchor="w", pady=(4, 0))
-        ttk.Label(vp, text=t("vp.hint"), foreground=PAL["muted"], wraplength=260, justify="left").pack(anchor="w", pady=(4, 0))
+        ttk.Label(vp, text=t("vp.natural_hint"), foreground=PAL["muted"], wraplength=300, justify="left").pack(anchor="w", pady=(4, 0))
         ttk.Label(box, text=t("ai.key_warning"),
                  foreground=PAL["muted"]).grid(row=len(fields) + 1, column=0, columnspan=2, sticky="w", padx=8, pady=(6, 0))
         self.chat_add("sys", t("ai.examples"))
@@ -5880,19 +5996,30 @@ class App:
         st = self.cfg["settings"]
         try: rate = int(float(st.get("tts_rate", 185)))
         except ValueError: rate = 185
-        if fx is None: fx = bool(st.get("voice_radio", True)) and st.get("voice_pack", "tactical") != "classic"
-        self.speaker.say(text, rate, st.get("tts_voice", ""), fx=fx)
+        pack = voicepack.natural_pack(None, i18n.current_language())
+        hint = "tr-tr" if pack == "natural_tr" else "en-us"
+        self.speaker.say(text, rate, st.get("tts_voice") or hint, fx=False, pack=pack,
+                         online=bool(st.get("voice_online", False)))
 
     def voice_demo(self):
         st = self.cfg["settings"]
-        pack = st.get("voice_pack", "tactical")
-        if pack == "classic": return self.speak(t("ai.voice_test"))
-        self.speak(self.voice_lines.compose(i18n.current_language(), pack, "KEEP", "EXOTIC", "Striker", 92, "upgrade"))
+        pack = voicepack.natural_pack(st.get("voice_pack"), i18n.current_language())
+        clip = voicepack.Recordings(BASE / "meta", BUNDLE / "meta").event(pack, "demo")
+        if clip: self.speaker.files([clip])
+        else: self.speak(t("ai.voice_test"))
 
     def speak_verdict(self, verdict, item, res, note):
         if verdict == "ERROR": return
         st = self.cfg["settings"]
         pack = st.get("voice_pack", "tactical")
+        natural = voicepack.natural_pack(pack, i18n.current_language())
+        nk = None
+        if note:
+            head = note.split(":")[0]
+            nk = "fills_gap" if head == t("prog.fills_gap") else "upgrade" if head == t("prog.upgrade") else None
+        clips = voicepack.Recordings(BASE / "meta", BUNDLE / "meta").verdict(
+            natural, verdict, item.get("rarity"), bool(res and res[0][0] > 0), nk)
+        if clips: return self.speaker.files(clips)
         if pack != "classic" and getattr(self, "voice_lines", None):
             nk = None
             if note:

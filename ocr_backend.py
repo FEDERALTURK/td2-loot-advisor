@@ -140,7 +140,8 @@ def group_lines(items, max_gap=None):
     rows, cur, cy, ch = [], [], None, 0
     for it in items:
         y = (it[1][1] + it[1][3]) / 2; h = it[1][3] - it[1][1]
-        if cy is not None and abs(y - cy) > 0.6 * max(h, ch):
+        incompatible = max_gap and min(h, ch) > 0 and max(h, ch) > 1.6 * min(h, ch)
+        if cy is not None and (abs(y - cy) > 0.6 * max(h, ch) or incompatible):
             rows.append(cur); cur = []
         if not cur: cy, ch = y, h
         cur.append(it)

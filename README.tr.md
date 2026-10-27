@@ -218,3 +218,8 @@ Yeni ayarlarda yerel çeviri kullanılır. Mevcut kullanıcı ayarları korunur.
 Kaynak koddan başlatma: `scripts\run.bat`. Kurulu bağımlılıklar değişmemişse normal açılışta pip çalışmaz. `scripts\run.bat --check` kurulum yapmadan gerekli modülleri denetler; `--repair` gereksinimleri yeniden kurar; `--extras` isteğe bağlı ses/video paketlerini kurar. Test için `python -m pip install -r requirements-dev.txt` kullanılabilir.
 
 Bu geliştirmeler 6.0.2 sürümüne dahildir. Test kapsamı ve sınırlar: [yerel doğrulama raporu](docs/stability-6.0.2.md). Gerçek 8 GB bilgisayarda ve oyun açıkken FPS/GPU ölçümü ayrıca gereklidir.
+
+
+### Yerinde çeviri ve doğal ses: 6.0.3
+
+Yerinde çevirinin satır konumlarını koruyan düzeltmeler, iki hazır Türkçe/İngilizce Neural bildirim paketi ve isteğe bağlı çevrimiçi doğal ses eklendi. Bu değişiklikler 6.0.3 sürümüne dahildir. Kullanım, veri aktarımı ve doğrulama: [6.0.3 notları](docs/overlay_voice_local.md).

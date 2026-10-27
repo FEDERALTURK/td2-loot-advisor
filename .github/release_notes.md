@@ -8,6 +8,16 @@
 
 Windows "kişisel bilgisayarınızı korudu" derse: **Ek bilgi → Yine de çalıştır** (dosya henüz kod imzalı değil).
 
+**6.0.3 — Daha hızlı eşya okuma, yerinde çeviri ve doğal ses**
+
+- **Daha çabuk otomatik algılama:** hafif görüntü kontrolü OCR bekleme aralığından ayrıldı. Dengeli profilde 200 ms, Oyun öncelikli profilde 300 ms kontrol yapılır; ağır OCR işlemlerinin hız sınırı korunur. OCR meşgulse eski yakalama sırada beklemez.
+- **Seçili kart bölgesinde daha az OCR:** dar bir kart bölgesi seçildiğinde doğrudan okunur; geçerli sonuçta konum bulmak için ek OCR yapılmaz. Eksik sonuçta mevcut arama yoluna dönülür. Kazanç seçilen bölgeye ve karta bağlıdır; oyun içi genel hızlanma yüzdesi iddiası yoktur.
+- **Yerinde çeviri konumları:** ayrı satırlar büyük bir paragraf kutusunda birleştirilmez. Kutular komşu yazıları aşağı kaydırmaz. Ölçüm ve çizim aynı fontla yapılır; uzun adlar bölünebilir. Çok dar alanda üç nokta kullanılır, tam çeviri geçmişte kalır.
+- **Eski çeviriler temizlenir:** aynı metin başka yere taşınırsa kaplama yeniden konumlanır; boş ekran okumasında önceki kutular kaldırılır.
+- **İki doğal bildirim paketi:** Türkçe Emel Neural ve İngilizce Aria Neural. Toplam 20 hazır kayıt çevrimdışı çalar ve telsiz bozulması uygulanmaz. Hazır kayıtlarda değişken build adı/yüzdesi yerine genel bildirim kullanılır; tam değerler ekranda kalır.
+- **İsteğe bağlı çevrimiçi doğal ses:** Asistan ve Canlı Çeviri sekmelerinden açılır. Okunacak metin Microsoft Edge ses hizmetine gönderilir; ses yerelde sınırlı önbelleğe alınır. Yeni ayarlarda kapalıdır. Kapalıyken veya hizmet çalışmazsa değişken metin Windows sesiyle okunur. Hazır bildirimler çevrimdışı kalır.
+- **Doğrulama ve paketleme:** yerleşim, konum değişikliği, ses önbelleği, çevrimdışı davranış ve hata dönüşleri için testler eklendi. Kurulan EXE'de 20 ses kaydı ve çevrimiçi ses bağımlılıkları ayrıca denetlenir. Gerçek oyunda tüm ekran düzenleri ve 8 GB bilgisayarda performans henüz doğrulanmadı.
+
 **6.0.2 — OCR, çeviri ve performans kararlılığı**
 
 - **Ortak eşya koruması:** eksik/geçersiz OCR incelemeye yönlendirilir. Exotic, Named ve Prototype eşyalar değerlendirme, ilerleme takibi ve depo denetiminde KIR sonucuna düşmez.

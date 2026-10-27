@@ -247,6 +247,39 @@ class AppStabilityTests(unittest.TestCase):
             obj._lt_failure.assert_called_once()
             obj._lt_show.assert_not_called()
 
+    def test_inplace_repositions_identical_text_when_source_moves(self):
+        obj = self.translation_app(Mock(return_value=["Hedef"]))
+        obj.cfg["settings"]["tr_mode"] = "inplace"
+        area = {"left": 0, "top": 0, "width": 1000, "height": 700}
+        for box in [(10, 10, 100, 30), (200, 200, 290, 220)]:
+            with patch.object(self.app.livetranslate, "blocks_from_lines", return_value=[("Objective", box)]) as blocks:
+                obj._lt_run(None, area, token=7)
+                self.assertTrue(blocks.call_args.kwargs["preserve_lines"])
+            obj.poll()
+        self.assertEqual(obj._lt_show.call_count, 2)
+        self.assertEqual(obj._lt_show.call_args.args[0][0][2], (200, 200, 290, 220))
+
+    def test_empty_screen_removes_previous_overlay(self):
+        obj = self.translation_app(Mock())
+        obj._lt_hide = Mock()
+        with patch.object(self.app.livetranslate, "blocks_from_lines", return_value=[]):
+            obj._lt_run(None, {}, token=7)
+        obj.poll()
+        obj._lt_hide.assert_called_once()
+        self.assertIsNone(obj._lt_last_sig)
+
+    def test_online_voice_switch_updates_both_controls_and_privacy(self):
+        obj = self.bare_app()
+        obj.vp_online, obj.ts_online_voice, obj.lt_privacy_lbl = Mock(), Mock(), Mock()
+        obj._translation_privacy = Mock(return_value="Text goes to the speech service")
+        with patch.object(self.app, "save_cfg") as save:
+            obj.set_online_voice(True)
+        self.assertTrue(obj.cfg["settings"]["voice_online"])
+        obj.vp_online.set.assert_called_once_with(True)
+        obj.ts_online_voice.set.assert_called_once_with(True)
+        obj.lt_privacy_lbl.config.assert_called_once_with(text="Text goes to the speech service")
+        save.assert_called_once_with(obj.cfg)
+
     def test_translation_superseded_during_model_run_is_discarded(self):
         current = [7]
         def translate(text):

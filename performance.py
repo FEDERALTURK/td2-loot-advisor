@@ -46,6 +46,11 @@ class PerformancePolicy:
     def auto_interval_s(self):
         return self.auto_interval_ms / 1000.0
 
+    @property
+    def scan_poll_s(self):
+        """Cheap change detection is independent of the expensive OCR budget."""
+        return 0.30 if self.mode == "game" else 0.20
+
 
 def get_policy(settings, game_active=False, minimized=False):
     """Compute a budget without modifying the user's settings.

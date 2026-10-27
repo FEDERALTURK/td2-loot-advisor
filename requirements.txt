@@ -6,3 +6,4 @@ pystray
 ctranslate2
 sentencepiece
 soundcard
+edge-tts>=7.3.1,<8

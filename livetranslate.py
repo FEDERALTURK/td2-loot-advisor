@@ -111,7 +111,7 @@ def is_english(text):
     return ascii_ratio > 0.9 and len(re.findall(r"[A-Za-z]{2,}", text)) >= 1
 
 
-def blocks_from_lines(lines, ui_words=()):
+def blocks_from_lines(lines, ui_words=(), preserve_lines=False):
     """OCR satırlarını [(metin, kutu, güven)] paragraf bloklarına toplar; arayüz gürültüsünü atar."""
     ui = {w.lower() for w in ui_words}
     rows = []
@@ -123,6 +123,10 @@ def blocks_from_lines(lines, ui_words=()):
     rows.sort(key=lambda r: (r[1][1], r[1][0]))
     hs = sorted(max(1.0, r[1][3] - r[1][1]) for r in rows)
     if hs: BODY_H[0] = hs[len(hs) // 2]
+    if preserve_lines:
+        # In-place text must retain each OCR segment's own source rectangle.
+        # Paragraph union boxes erase unrelated UI and lose line positions.
+        return [(s, tuple(b), c) for s, b, c in rows if len(s) >= 4]
     blocks = []
     for s, b, c in rows:
         h = max(1.0, b[3] - b[1])

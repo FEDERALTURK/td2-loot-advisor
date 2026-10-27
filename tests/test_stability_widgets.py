@@ -92,6 +92,12 @@ def main():
                 with patch.object(obj.root,"state",return_value="normal"),patch.object(app,"game_active",return_value=False):
                     obj._performance_tick();assert not obj.root._td2_suspend_animations
             obj.nb.select(obj.tabs["translate"]);obj.root.update()
+            assert obj.vp_var.get() == app.t("vp.p_natural_tr")
+            obj.set_online_voice(True)
+            assert obj.vp_online.get() and obj.ts_online_voice.get()
+            assert app.t("vp.online_privacy") in obj.lt_privacy_lbl.cget("text")
+            obj.set_online_voice(False)
+            assert not obj.vp_online.get() and not obj.ts_online_voice.get()
             result["working_set_mb"]=memory_mb();result["callback_errors"]=errors
             assert not errors,errors
             result["ok"]=True

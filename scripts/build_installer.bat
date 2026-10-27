@@ -73,6 +73,7 @@ if exist dist\TD2LootAdvisor rmdir /s /q dist\TD2LootAdvisor
   --add-data "build\pkg\builds.json;." ^
   --add-data "lang;lang" ^
   --add-data "meta;meta" ^
+  --collect-all edge_tts --collect-all aiohttp --copy-metadata edge-tts ^
   --add-data "icon;icon" ^
   --hidden-import PIL._tkinter_finder --hidden-import PIL.ImageTk ^
   --hidden-import pynput.keyboard._win32 --hidden-import pynput.mouse._win32 ^

@@ -35,7 +35,7 @@ jobs:
         run: |
           python -m pip install mss pillow pytesseract pynput numpy -r requirements-dev.txt
           if ($LASTEXITCODE -ne 0) { throw "test dependency installation failed" }
-          foreach ($suite in @('test_itempolicy.py', 'test_workqueue.py', 'test_performance.py', 'test_animation_policy.py', 'test_app_stability.py', 'test_translation_reliability.py', 'test_localapi_backpressure.py', 'test_launcher.py', 'test_ocr_serialization.py', 'test_core.py', 'test_livetranslate.py', 'test_autoscan.py')) {
+          foreach ($suite in @('test_itempolicy.py', 'test_workqueue.py', 'test_performance.py', 'test_animation_policy.py', 'test_app_stability.py', 'test_translation_reliability.py', 'test_localapi_backpressure.py', 'test_launcher.py', 'test_ocr_serialization.py', 'test_inplace_anchors.py', 'test_natural_voice.py', 'test_overlay.py', 'test_scan_latency.py', 'test_region_scan_fastpath.py', 'test_core.py', 'test_livetranslate.py', 'test_autoscan.py')) {
             python -B "tests/$suite"
             if ($LASTEXITCODE -ne 0) { throw "$suite failed" }
           }
@@ -85,6 +85,14 @@ jobs:
           if (-not $lp.WaitForExit(60000)) { Stop-Process -Id $lp.Id -Force; throw "lt check hung" }
           Write-Host "LT check:" (Get-Content $lj -Raw)
           if (-not (Get-Content $lj -Raw | ConvertFrom-Json).ok) { throw "translation runtime missing in package" }
+          # Both recorded packs and online speech dependencies must be present.
+          $vj = Join-Path $env:RUNNER_TEMP "voice.json"
+          $vp = Start-Process $exe -ArgumentList "--voice-check", "`"$vj`"" -PassThru
+          if (-not $vp.WaitForExit(60000)) { Stop-Process -Id $vp.Id -Force; throw "voice check hung" }
+          if (-not (Test-Path $vj)) { throw "voice check wrote no result" }
+          $vr = Get-Content $vj -Raw | ConvertFrom-Json
+          Write-Host "Voice check:" (Get-Content $vj -Raw)
+          if (-not $vr.ok -or $vr.recordings -ne 20) { throw "voice packs or online runtime missing in package" }
           # güncelleme, program sistem tepsisindeyken de kurulabilmeli (dosyalar kilitli kalmamalı)
           $cfg = Join-Path $dir "builds.json"
           $j = Get-Content $cfg -Raw | ConvertFrom-Json
