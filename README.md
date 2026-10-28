@@ -184,6 +184,10 @@ These changes are included in release 6.0.2. See [local validation results](docs
 Source-anchored overlay fixes, two recorded Turkish/English Neural notification packs and optional online natural speech are available in the local source build. These changes are included in release 6.0.3. See [usage, data routing and validation](docs/overlay_voice_local.md).
 
 
+### 9.0.7: proper names and pronoun context in live translation
+
+Story and world names are preserved during live translation, with their verified sources recorded in the glossary. Pronouns are translated in context instead of being masked, while preserving their referent and singular/plural meaning. Pronoun-bearing multi-sentence lines stay together for local translation, and the translation cache is refreshed so prior output is regenerated with the updated rules. The inventory OCR regression now clearly skips when RapidOCR/ONNX Runtime are absent; CI installs them and runs the image checks.
+
 ### 9.0.6: broader game library and more accurate item recognition
 
 This release publishes the item-library and OCR recognition fixes accumulated after 9.0.5. A pinned Div2Hub community-data snapshot was merged with the existing sources, bringing the catalog to 898 gear/item records, 379 weapon index records, detailed talent/mod data, 43 skill variants and 9 Prototype Augments. Health Damage no longer collides with Health; numeric parsing, accented-name normalization and Perfect talent matching were corrected. Fixed talents on Named/Exotic weapons and Prototype Augments now flow through scan/build matching, and build scoring compares talents only with eligible item types. The encyclopedia uses the expanded talent descriptions and lists one gear-set item per slot. The Excel library was regenerated from the same details. Source attribution is included. A complete verified Skill Mod catalog is not available, so missing records are not fabricated.

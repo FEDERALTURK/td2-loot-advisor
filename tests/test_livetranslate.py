@@ -21,6 +21,25 @@ ok(g.unmask("ZQ0'ı ve Z Q1'i kuşan, sonra ZQ3'de ZQ2 ile savaş.", found) ==
    "Eagle Bearer'ı ve Striker's Battlegear'i kuşan, sonra Dark Zone'de Black Tusk ile savaş.", "ad geri konuldu, Türkçe ek korunuyor")
 ok(g.mask("Kenly College")[1] == ["Kenly College"] and g.mask("agentless")[1] == [], "kelime sınırları")
 
+proper = lt.load_proper_names([ROOT / "meta" / "proper_names.json"])
+story = lt.Glossary(proper_names=proper)
+name_data = json.loads((ROOT / "meta" / "proper_names.json").read_text(encoding="utf-8"))
+source_ids = set(name_data["sources"])
+ok(all(e.get("source") in source_ids for e in proper) and
+   all(name_data["sources"][s].startswith("https://") for s in source_ids),
+   "özel adların tüm kaynak anahtarları geçerli ve HTTPS")
+variants = [v.casefold() for e in proper for v in [e["name"], *e.get("aliases", [])]]
+ok(len(variants) == len(set(variants)), "özel adlar ve kısa adlar çakışmıyor")
+masked, found = story.mask("Faye Lau warned Aaron Keener. She told him they would not trust him.")
+ok(found == ["Faye Lau", "Aaron Keener"] and all(p in masked for p in ("She", "him", "they")),
+   "öykü özel adları korunur, zamirler İngilizce token olarak maskelenmez")
+ok(lt.PERSONAL_PRONOUN_RE.search("Who told them that?"),
+   "soru, ilgi ve işaret zamirleri de bağlam korumasını tetikler")
+ok(story.pronoun_hints(found) == ["Faye Lau uses she/her"] and "Mel Arnold uses they/them" in
+   story.pronoun_hints(["Mel Arnold"]), "yalnız kaynakta doğrulanan karakter zamirleri bağlama eklenir")
+ok("singular they" in lt.AIMT.SYSTEM and "referent" in lt.AIMT.SYSTEM,
+   "AI yönergesi kişi ve tekil/çoğul gönderimini korur")
+
 lines = [("Agent, the Black Tusk have taken", (100, 500, 700, 530), 0.95), ("control of the Capitol Building.", (102, 534, 690, 562), 0.93),
          ("MAP", (20, 20, 60, 40), 0.99), ("250 / 300", (900, 20, 980, 40), 0.99), ("Ajan, Türkçe çeviri", (100, 300, 400, 330), 0.99),
          ("Head to the safe house.", (100, 700, 500, 730), 0.9), ("x", (5, 5, 9, 9), 0.4)]
@@ -39,12 +58,19 @@ tr = lt.Translator(Fake(), g, cache)
 out = tr.translate(["Equip Eagle Bearer now.\n• Go fast.", "Equip Eagle Bearer now.\n• Go fast."])
 ok(out[0] == "Kuşan Eagle Bearer now.\n• Git fast." and out[1] == out[0], "satır/madde korunur, ⁇ temizlenir, büyük harf")
 ok(Fake.calls[0] == ["Equip ZQ0 now.", "Go fast."], "modele maskeli ve maddesiz cümleler gitti")
+tr.translate(["Faye Lau warned Aaron Keener. She told him she would stop him."])
+ok(Fake.calls[-1] == ["ZQ0 warned ZQ1. She told him she would stop him."],
+   "zamirli çok cümleli satır bağlam kaybolmasın diye birlikte çevrilir")
 n = len(Fake.calls); tr.translate(["Equip Eagle Bearer now.\n• Go fast."])
 ok(len(Fake.calls) == n, "önbellekten geldi (model çağrılmadı)")
 cache.save(); ok(lt.Cache(cache.path).get(tr.ck, "Equip Eagle Bearer now.\n• Go fast.") == out[0], "önbellek diske yazıldı")
 
 ai = lt.AIMT(lambda sys_, user: 'Sure: ["Birinci", "İkinci"]')
 ok(ai.translate(["a", "b"]) == ["Birinci", "İkinci"], "yapay zekâ JSON yanıtı ayrıştırıldı")
+seen = {}
+ai_hints = lt.AIMT(lambda system, user: seen.update(system=system, user=user) or '["Ona söyledi."]')
+ok(ai_hints.translate(["ZQ0 told ZQ1."], [["Faye Lau uses she/her"]]) == ["Ona söyledi."] and
+   "Faye Lau uses she/her" in seen["system"], "AI çevirisine yalnız doğrulanmış zamir bilgisi verilir")
 try: lt.AIMT(lambda s, u: "nonsense").translate(["a", "b"]); ok(False, "biçim")
 except RuntimeError: ok(True, "bozuk yapay zekâ yanıtı hata verir")
 

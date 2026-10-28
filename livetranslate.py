@@ -41,6 +41,11 @@ PRIVATE = re.compile(r"\bis (?:now )?(?:playing|online|offline)\b|ubisoft connec
                      r"\bsent you\b|\bhas invited you\b|\bsteam\b.*\bfriend|nvidia|geforce|xbox game bar|discord", re.I)
 # Ödül sandıkları vb. adlar (ör. "Recalibration Cache", "Gear Crafting Cache") oyuncuların bildiği İngilizce adıyla kalır
 CACHE_RE = re.compile(r"(?<![\w'])(?:[A-Z][\w-]*\s){0,3}(?:Cache|Caches)(?![\w])")
+PERSONAL_PRONOUN_RE = re.compile(
+    r"\b(?:i|me|my|mine|myself|we|us|our|ours|ourselves|you|your|yours|yourself|yourselves|"
+    r"he|him|his|himself|she|her|hers|herself|it|its|itself|they|them|their|theirs|"
+    r"themself|themselves|who|whom|whose|whoever|whomever|which|whichever|that|this|these|those|"
+    r"one|ones|oneself)\b", re.I)
 # Tek başına satır olan arayüz başlıkları: modele gitmeden sabit karşılık
 UI_TR = {
     "objective": "Hedef", "objectives": "Hedefler", "reward": "Ödül", "rewards": "Ödüller", "complete": "Tamamlandı",
@@ -67,15 +72,50 @@ ICON_RE = re.compile(r"^(?:[^\w\s'\"(]+|[B-HJ-Zb-hj-z])\s+(?=[A-Z])")    # satı
 
 
 # ---------------------------------------------------------------- özel adlar
+def load_proper_names(paths):
+    """Load curated story/world entities from bundled or source meta JSON files."""
+    entries, seen = [], set()
+    for path in paths:
+        try:
+            data = json.loads(Path(path).read_text(encoding="utf-8"))
+        except (OSError, ValueError, TypeError):
+            continue
+        for entry in data.get("entities", []) if isinstance(data, dict) else []:
+            if not isinstance(entry, dict) or not isinstance(entry.get("name"), str):
+                continue
+            key = entry["name"].casefold()
+            if key not in seen:
+                entries.append(entry); seen.add(key)
+    return entries
+
+
 class Glossary:
-    def __init__(self, names=()):
-        terms = {n.strip() for n in list(names) + EXTRA_TERMS if n and len(n.strip()) >= 3}
+    def __init__(self, names=(), proper_names=()):
+        self.proper_names = [e for e in proper_names if isinstance(e, dict) and e.get("name")]
+        curated = []
+        self.pronoun_by_alias = {}
+        for entry in self.proper_names:
+            variants = [entry["name"], *entry.get("aliases", [])]
+            curated.extend(variants)
+            if entry.get("pronouns"):
+                for variant in variants:
+                    self.pronoun_by_alias[variant.casefold()] = (entry["name"], entry["pronouns"])
+        terms = {n.strip() for n in list(names) + EXTRA_TERMS + curated if isinstance(n, str) and len(n.strip()) >= 3}
         # uzun adlar önce (ör. "Kenly College" "Kenly"den önce)
         self.terms = sorted(terms, key=len, reverse=True)
         alts = [CACHE_RE.pattern] + [r"(?<![\w'])" + re.escape(t) + r"(?![\w])" for t in self.terms]
         self._re = re.compile("|".join(alts))  if self.terms else None
         self._re_i = re.compile("|".join(alts[1:]), re.I) if self.terms else None
         self.canon = {t.lower(): t for t in self.terms}
+
+    def pronoun_hints(self, found):
+        """Return only source-confirmed pronouns for recognized character names."""
+        hints = set()
+        for name in found:
+            info = self.pronoun_by_alias.get(name.casefold())
+            if info:
+                hints.add(f"{info[0]} uses {info[1]}")
+        return sorted(hints)
 
     def mask(self, text):
         """Özel adları ZQ0, ZQ1… belirteçleriyle değiştirir. Dönüş: (maskeli metin, [özgün adlar])."""
@@ -294,16 +334,26 @@ class AIMT:
     name = "ai"
     SYSTEM = ("You translate on-screen text from the video game Tom Clancy's The Division 2 from English into natural, "
               "fluent Turkish for a player. Keep tokens like ZQ0, ZQ1 exactly as they are (they are proper names); add Turkish "
-              "suffixes after them with an apostrophe when grammar needs it (ZQ0'ı). Keep numbers, percentages and units. "
+              "suffixes after them with an apostrophe when grammar needs it (ZQ0'ı). Preserve each pronoun's referent, "
+              "person, grammatical role and singular/plural meaning. Translate pronouns naturally into Turkish; do not leave "
+              "English pronouns, change who they refer to, or change singular they into a gendered character. Turkish may "
+              "omit a pronoun only when the referent and role remain unambiguous. Keep numbers, percentages and units. "
               "Use the informal 'sen' form for instructions. Return ONLY a JSON array of strings, one translation per input "
               "line, in the same order, nothing else.")
 
     def __init__(self, complete):
         self.complete = complete
 
-    def translate(self, texts):
+    def translate(self, texts, pronoun_hints=None):
         payload = json.dumps(texts, ensure_ascii=False)
-        raw = self.complete(self.SYSTEM, payload) or ""
+        hints = []
+        for i, values in enumerate(pronoun_hints or []):
+            if values:
+                hints.append(f"Input {i + 1}: " + "; ".join(values))
+        system = self.SYSTEM
+        if hints:
+            system += " Use only these verified character pronouns when the name is present and clearly referred to: " + " | ".join(hints) + "."
+        raw = self.complete(system, payload) or ""
         m = re.search(r"\[.*\]", raw, re.S)
         try:
             out = json.loads(m.group(0)) if m else None
@@ -321,14 +371,14 @@ class Translator:
 
     def __init__(self, engine, glossary, cache):
         self.engine, self.glossary, self.cache = engine, glossary, cache
-        self.ck = engine.name + "@3"           # doğrulanmamış eski çeviriler yeniden üretilir
+        self.ck = engine.name + "@4"           # ad sözlüğü ve zamir/bağlam kuralları değişti; eski çıktılar yenilenir
         self.memory = None                     # topluluk görevleri (tasks_live.Memory): bilinen satırın doğrulanmış Türkçesi
         self.memory_hits = 0
 
     def set_memory(self, memory):
         """Hafıza değişince önbellek anahtarı da değişir (düzeltilmiş çeviri eski önbellekten gelmesin)."""
         self.memory = memory if memory is not None and len(memory) else None
-        self.ck = self.engine.name + "@3" + (":" + getattr(memory, "version", "") if self.memory else "")
+        self.ck = self.engine.name + "@4" + (":" + getattr(memory, "version", "") if self.memory else "")
 
     def translate(self, texts):
         out, todo, first = [None] * len(texts), [], {}
@@ -339,7 +389,7 @@ class Translator:
             else: first[t] = i; todo.append(i)
         if todo:
             # her metin → satırlar (madde işaretleri korunur) → cümleler; modele yalnız düz cümleler gider
-            units, owners, masks = [], [], []          # owners: (metin no, satır no, madde işareti, sayaç)
+            units, owners, masks, pronoun_hints = [], [], [], []  # owners: (metin no, satır no, madde işareti, sayaç)
             lines = {}
             for i in todo:
                 for ln_no, line in enumerate(texts[i].split("\n")):
@@ -359,11 +409,19 @@ class Translator:
                         if counters: lines[i][ln_no][1].append("(" + ", ".join(f"{a}/{b}" for a, b in counters) + ")")
                         continue
                     sents = split_sentences(body) if self.engine.name == "local" else [body]
+                    # Sentence-by-sentence MT loses antecedents. Keep a short paragraph
+                    # together when personal pronouns need the preceding sentence for context.
+                    if len(sents) > 1 and PERSONAL_PRONOUN_RE.search(body):
+                        sents = [body]
                     for k, s_ in enumerate(sents):
                         m, found = self.glossary.mask(s_)
                         tail = ("(" + ", ".join(f"{a}/{b}" for a, b in counters) + ")") if counters and k == len(sents) - 1 else ""
                         units.append(m); owners.append((i, ln_no, bullet, tail)); masks.append(found)
-            res = self.engine.translate(units) if units else []
+                        pronoun_hints.append(self.glossary.pronoun_hints(found))
+            if units and self.engine.name == "ai":
+                res = self.engine.translate(units, pronoun_hints=pronoun_hints)
+            else:
+                res = self.engine.translate(units) if units else []
             if not isinstance(res, (list, tuple)) or len(res) != len(units) or any(
                     not isinstance(r, str) or not r.strip() for r in res):
                 raise RuntimeError("Incomplete translation; retry the text")

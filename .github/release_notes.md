@@ -8,6 +8,14 @@
 
 Windows "kişisel bilgisayarınızı korudu" derse: **Ek bilgi → Yine de çalıştır** (dosya henüz kod imzalı değil).
 
+**9.0.7 — Canlı çeviride özel ad ve zamir doğruluğu**
+
+- The Division 2 hikâyesi ve dünyasındaki karakter, grup, kurum, teknoloji, bölge ve başlık adları çeviride korunur. Doğrulanmış adlar ve kaynakları `meta/proper_names.json` dosyasında tutulur; ekipman ve yetenek adları mevcut oyun kütüphanesinden alınmaya devam eder.
+- Zamirler özel ad gibi maskelenmez. Çeviri yönergesi kişi, gönderme, tekil/çoğul anlamı ve cümledeki rolün korunmasını ister; kaynakta doğrulanmış karakter zamirleri bağlam olarak verilir.
+- Yerel çeviri motoruna zamir içeren çok cümleli satırlar birlikte gönderilir; önceki cümledeki kişi bilgisinin kaybolma riski azalır.
+- Çeviri önbelleği yenilendi; önceki sürümde oluşmuş metinler yeni ad ve bağlam kurallarıyla tekrar çevrilir.
+- OCR testinde RapidOCR/ONNX Runtime kurulu değilse zorunlu Tesseract hatası yerine açık bir `SKIP` nedeni gösterilir. RapidOCR kurulu CI ortamında asıl görüntü testi çalışır.
+
 **9.0.6 — Daha kapsamlı oyun kütüphanesi ve doğru eşya tanıma**
 
 - Div2Hub'ın sabitlenmiş CC BY 4.0 veri anlık görüntüsü mevcut kaynaklarla birleştirildi. Katalogda 898 ekipman/eşya kaydı, 379 silah indeksi kaydı, 224 ekipman yeteneği, 181 silah yeteneği, 255 silah modu, 17 ekipman modu, 43 skill varyantı ve 9 Prototype Augment bulunur.

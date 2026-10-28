@@ -147,7 +147,7 @@ import game_assistant
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.0.6"
+APP_VERSION = "9.0.7"
 FROZEN = getattr(sys, "frozen", False)
 BASE = Path(sys.executable).parent if FROZEN else Path(__file__).resolve().parent
 TASKS_CACHE = BASE / "tasks_cache.json"  # son indirilen görev listesi
@@ -1791,7 +1791,9 @@ class App:
                     list(d.get("gear_talents", [])) + list(d.get("weapon_talents", [])) + list(d.get("weapon_index", {}).keys()) + \
                     [k for k in d.get("items", {})] + list(d.get("skills", [])) + \
                     [v["talent"] for v in d.get("items", {}).values() if v.get("talent")]
-            self._lt_gloss, self._lt_gloss_v = livetranslate.Glossary(names), v
+            entities = livetranslate.load_proper_names([BASE / "meta" / "proper_names.json",
+                                                        BUNDLE / "meta" / "proper_names.json"])
+            self._lt_gloss, self._lt_gloss_v = livetranslate.Glossary(names, entities), v
         return self._lt_gloss
 
     def lt_translator(self):

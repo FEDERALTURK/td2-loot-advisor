@@ -16,6 +16,12 @@ CASES = [  # dosya, beklenen ad, yuva, set/marka, kart tek başına adı göster
 
 
 def main():
+    # Engine("rapidocr") deliberately falls back to Tesseract when RapidOCR is
+    # absent. This image-only regression specifically needs RapidOCR; otherwise
+    # the fallback obscures the missing optional dependency with a Tesseract error.
+    if not ocr_backend.rapid_available():
+        print("SKIP: this regression requires RapidOCR and ONNX Runtime; install them with: python -m pip install onnxruntime rapidocr", flush=True)
+        return 0
     E = ocr_backend.Engine("rapidocr")
     G = gamedata.GameData(str(ROOT / "meta" / "game_data.json"))
     ok = True
