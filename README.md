@@ -12,7 +12,7 @@ Türkçe tam kılavuz: [`README.tr.md`](README.tr.md).
 ## Download
 
 **[Latest release → Releases](https://github.com/FEDERALTURK/td2-loot-advisor/releases/latest)**:
-`TD2LootAdvisor_Setup_<version>.exe` (installer, recommended), `TD2LootAdvisor_<version>_portable.zip`, and the Android `TD2LootAdvisor_Companion_0.1.1-beta.apk`.
+`TD2LootAdvisor_Setup_<version>.exe` (installer, recommended), `TD2LootAdvisor_<version>_portable.zip`, and the Android `TD2LootAdvisor_Companion_0.1.2-beta.apk`.
 Phone pairing steps: [Turkish connection guide](docs/mobile_companion_connection_tr.md).
 
 ## Updating
@@ -184,6 +184,10 @@ These changes are included in release 6.0.2. See [local validation results](docs
 
 Source-anchored overlay fixes, two recorded Turkish/English Neural notification packs and optional online natural speech are available in the local source build. These changes are included in release 6.0.3. See [usage, data routing and validation](docs/overlay_voice_local.md).
 
+
+### 9.0.9: Android companion launch fix
+
+The Android Companion startup crash caused by a mismatch between the manifest launcher activity and the Kotlin package name is fixed. Companion 0.1.2 includes this fix. Google Play preparation documents are included; a Play-signed AAB still requires the developer's upload key and Play Console setup.
 
 ### 9.0.8: Android companion and QR pairing
 

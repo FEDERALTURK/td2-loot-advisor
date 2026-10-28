@@ -23,7 +23,7 @@ Working name: **TD2 Loot Advisor Companion**. Launch the first store version fre
 ## Existing project pieces
 
 - The desktop app is Python/Tkinter. Its UI is not reusable as a mobile UI; item/build rules and JSON data can inform the mobile models.
-- `companion.py` provides a separate, read-only LAN web view with a QR URL and random query token. Mobile Companion 0.1.1-beta can scan this QR and poll `/api/state`; it accepts only RFC1918 private IPv4 addresses and keeps the pairing token in memory.
+- `companion.py` provides a separate, read-only LAN web view with a QR URL and random query token. Mobile Companion 0.1.2-beta can scan this QR and poll `/api/state`; it accepts only RFC1918 private IPv4 addresses and keeps the pairing token in memory.
 - `localapi.py` is a separate loopback-first WebSocket/HTTP API with allow-listed desktop commands. It is not used by the mobile APK and must not be exposed to the public internet.
 - `server/worker.js` and `server/accounts.js` run on Cloudflare Workers + D1. They currently handle community data, tasks, Discord-based desktop login, licensing, and account lookup. There is no mobile sync, pairing, push-token, or account-deletion endpoint yet.
 - Desktop account state is protected using Windows DPAPI and a license entitlement can be bound to one device. A phone needs its own portable session and an explicit policy for which devices count against a license.
@@ -104,7 +104,7 @@ Public task/news/game-data endpoints should be reused where their schemas and ca
 ## Current local development readiness
 
 - The Windows workspace has user-local Flutter 3.47.8, Dart 3.13.7, Java 21, and Android SDK 36 toolchains. They are invoked by explicit paths and need not be on global `PATH`.
-- Android Companion 0.1.1-beta passed `flutter analyze` and built as a release APK on this Windows host. It has not been tested on a physical phone or published to Google Play.
+- Android Companion 0.1.2-beta fixes an Android launcher/Kotlin `MainActivity` package mismatch. Static APK checks confirm the manifest's launcher class now exists in DEX, Flutter analysis and the first-frame widget smoke test pass, and both APK and AAB build on this Windows host. A real HONOR Android 16 device retest and Google Play upload signing remain outstanding.
 - iOS project files are present, but no iOS archive, signing, physical-device check, or App Store submission has been completed; these require macOS/Xcode and Apple developer signing.
 - The proposed Cloudflare mobile API above is still a future design, not a live backend or the transport used by this local beta.
 

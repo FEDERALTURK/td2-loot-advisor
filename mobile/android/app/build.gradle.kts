@@ -1,7 +1,24 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+}
+
+val playSigningFile = rootProject.file("key.properties")
+val usePlaySigning = providers.gradleProperty("playRelease").orNull == "true"
+val playSigningProperties = Properties()
+if (usePlaySigning) {
+    require(playSigningFile.isFile) {
+        "Play signing requested, but android/key.properties is missing. See mobile/PLAY_STORE_RELEASE_TR.md."
+    }
+    playSigningFile.inputStream().use { playSigningProperties.load(it) }
+    listOf("storeFile", "storePassword", "keyAlias", "keyPassword").forEach { key ->
+        require(!playSigningProperties.getProperty(key).isNullOrBlank()) {
+            "Play signing property '$key' is missing in android/key.properties."
+        }
+    }
 }
 
 android {
@@ -28,11 +45,25 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        if (usePlaySigning) {
+            create("playRelease") {
+                storeFile = rootProject.file(playSigningProperties.getProperty("storeFile"))
+                storePassword = playSigningProperties.getProperty("storePassword")
+                keyAlias = playSigningProperties.getProperty("keyAlias")
+                keyPassword = playSigningProperties.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            // GitHub beta builds stay debug-signed; Play builds require explicit opt-in and a private upload key.
+            signingConfig = if (usePlaySigning) {
+                signingConfigs.getByName("playRelease")
+            } else {
+                signingConfigs.getByName("debug")
+            }
         }
     }
 }

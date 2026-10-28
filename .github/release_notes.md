@@ -4,10 +4,17 @@
 |---|---|
 | `TD2LootAdvisor_Setup_<sürüm>.exe` | **Kurulum dosyası** (önerilen). Yönetici izni gerekmez; kullanıcı klasörüne kurulur, Başlat menüsü ve masaüstü kısayolu, Programlar'dan kaldırma. |
 | `TD2LootAdvisor_<sürüm>_portable.zip` | Kurulumsuz sürüm: bir klasöre çıkar, `TD2LootAdvisor.exe`'yi çalıştır. |
-| `TD2LootAdvisor_Companion_0.1.1-beta.apk` | Android telefon beta uygulaması. Kurulum ve QR eşleştirme: `TD2LootAdvisor_9.0.8_Telefon_Baglanti_TR.md`. |
+| `TD2LootAdvisor_Companion_0.1.2-beta.apk` | Android telefon beta uygulaması. Kurulum ve QR eşleştirme: `TD2LootAdvisor_9.0.9_Telefon_Baglanti_TR.md`. |
 | Source code (zip / tar.gz) | Kaynak kod (Python). |
 
 Windows "kişisel bilgisayarınızı korudu" derse: **Ek bilgi → Yine de çalıştır** (dosya henüz kod imzalı değil).
+
+**9.0.9 — Android Companion açılış düzeltmesi**
+
+- Android 16 cihazlarında Companion uygulamasının açılışta kapanmasına yol açan başlatıcı sınıfı paket adı uyuşmazlığı düzeltildi.
+- Companion sürümü 0.1.2 olarak güncellendi; APK başlatıcı sınıfı Android manifesti ile eşleşiyor.
+- Google Play hazırlık notları, gizlilik politikası ve mağaza metni eklendi. Google Play'e yüklenebilir imzalı AAB için geliştiricinin kendi upload anahtarı ve Play Console yapılandırması gerekir; bu beta APK'sı Play üretim paketi değildir.
+- Flutter analiz ve başlangıç widget testi geçti; CI, yayın öncesi Windows paketleme ve Android APK kontrollerini tekrar çalıştırır.
 
 **9.0.8 — Telefon uygulaması ve QR eşleştirme betası**
 

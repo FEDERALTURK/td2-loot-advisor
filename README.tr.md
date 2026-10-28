@@ -8,7 +8,7 @@ senin dilinde gösterir. 10 dil; herkes kendi dilini ekleyebilir.
 ## İndir
 
 **[En son sürüm → Releases](https://github.com/FEDERALTURK/td2-loot-advisor/releases/latest)**:
-`TD2LootAdvisor_Setup_<sürüm>.exe` (kurulum, önerilen), `TD2LootAdvisor_<sürüm>_portable.zip` (kurulumsuz) ve Android için `TD2LootAdvisor_Companion_0.1.1-beta.apk`.
+`TD2LootAdvisor_Setup_<sürüm>.exe` (kurulum, önerilen), `TD2LootAdvisor_<sürüm>_portable.zip` (kurulumsuz) ve Android için `TD2LootAdvisor_Companion_0.1.2-beta.apk`.
 Telefon eşleştirme adımları: [Türkçe bağlantı kılavuzu](docs/mobile_companion_connection_tr.md).
 
 ## Güncelleme
@@ -225,6 +225,10 @@ Bu geliştirmeler 6.0.2 sürümüne dahildir. Test kapsamı ve sınırlar: [yere
 
 Yerinde çevirinin satır konumlarını koruyan düzeltmeler, iki hazır Türkçe/İngilizce Neural bildirim paketi ve isteğe bağlı çevrimiçi doğal ses eklendi. Bu değişiklikler 6.0.3 sürümüne dahildir. Kullanım, veri aktarımı ve doğrulama: [6.0.3 notları](docs/overlay_voice_local.md).
 
+
+### 9.0.9: Android telefon arkadaşı açılış düzeltmesi
+
+9.0.9 sürümü, Android Companion'ın açılışta kapanmasına yol açan manifest/Kotlin başlatıcı sınıfı paket uyuşmazlığını düzeltir. Companion 0.1.2 APK'sı ve hazırlık belgeleri GitHub Release'e eklenecektir. Google Play üretim imzalı AAB için geliştiricinin upload anahtarı ve Play Console kurulumu gerekir. Ayrıntılar: [Telefon-bağlantı kılavuzu](docs/mobile_companion_connection_tr.md).
 
 ### 9.0.8: Android telefon arkadaşı ve QR eşleştirme
 

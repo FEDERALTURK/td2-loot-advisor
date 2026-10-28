@@ -295,7 +295,7 @@ class CompanionModel extends ChangeNotifier {
       final response = await http
           .get(
             endpoint,
-            headers: const {'User-Agent': 'TD2-Loot-Advisor-Companion/0.1.1'},
+            headers: const {'User-Agent': 'TD2-Loot-Advisor-Companion/0.1.2'},
           )
           .timeout(const Duration(seconds: 4));
       if (response.statusCode != 200) {
@@ -402,7 +402,7 @@ class _MainShellState extends State<MainShell> {
                     ),
                   ),
                   Text(
-                    'COMPANION  ·  BETA 0.1.1',
+                    'COMPANION  ·  BETA 0.1.2',
                     style: TextStyle(
                       fontSize: 9,
                       color: _soft,
@@ -1502,15 +1502,23 @@ Future<void> _newBuild(BuildContext context, CompanionModel model) async {
 void _about(BuildContext context) => showAboutDialog(
   context: context,
   applicationName: 'TD2 Loot Advisor Companion',
-  applicationVersion: '0.1.1-beta',
+  applicationVersion: '0.1.2-beta',
   applicationIcon: const Icon(Icons.hexagon_outlined, color: _orange, size: 34),
-  children: const [
-    Text(
+  children: [
+    const Text(
       'Görev, haber ve yerel build takibine ek olarak aynı Wi-Fi ağındaki Windows programına QR kodla salt-okunur bağlanır.',
     ),
-    SizedBox(height: 10),
-    Text(
+    const SizedBox(height: 10),
+    const Text(
       'The Division 2, Ubisoft’un ticari markasıdır. Bu bağımsız yardımcı uygulama Ubisoft ile bağlantılı veya Ubisoft tarafından desteklenen bir ürün değildir.',
+    ),
+    const SizedBox(height: 8),
+    TextButton.icon(
+      onPressed: () => _open(
+        'https://github.com/FEDERALTURK/td2-loot-advisor/blob/main/mobile/PRIVACY_POLICY_TR.md',
+      ),
+      icon: Icon(Icons.privacy_tip_outlined),
+      label: Text('Gizlilik politikası'),
     ),
   ],
 );

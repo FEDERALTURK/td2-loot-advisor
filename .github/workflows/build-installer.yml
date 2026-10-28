@@ -148,10 +148,10 @@ jobs:
           try {
             flutter analyze
             if ($LASTEXITCODE -ne 0) { throw "Flutter analysis failed" }
-            flutter build apk --release --build-name=0.1.1 --build-number=2
+            flutter build apk --release --build-name=0.1.2 --build-number=3
             if ($LASTEXITCODE -ne 0) { throw "Android APK build failed" }
           } finally { Pop-Location }
-          Copy-Item mobile\build\app\outputs\flutter-apk\app-release.apk installer\TD2LootAdvisor_Companion_0.1.1-beta.apk
+          Copy-Item mobile\build\app\outputs\flutter-apk\app-release.apk installer\TD2LootAdvisor_Companion_0.1.2-beta.apk
 
       - name: Checksums
         shell: pwsh
