@@ -6,7 +6,7 @@ sounddevice
 numpy
 faster-whisper
 # Arka plan videosu / background video (optional)
-av
+av>=14,<19
 # Yeni OCR motoru (onerilen) / new OCR engine (recommended)
 onnxruntime
 rapidocr

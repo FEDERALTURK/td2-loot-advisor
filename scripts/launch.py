@@ -12,7 +12,7 @@ from pathlib import Path
 import subprocess
 import sys
 
-CORE = ("mss", "PIL", "pytesseract", "pynput", "pystray", "ctranslate2", "sentencepiece", "soundcard", "edge_tts")
+CORE = ("mss", "PIL", "pytesseract", "pynput", "pystray", "ctranslate2", "sentencepiece", "soundcard", "edge_tts", "sounddevice", "faster_whisper", "pyttsx3")
 OCR = (("onnxruntime", "onnxruntime"), ("rapidocr", "rapidocr"))
 EXTRAS = (("pyttsx3", "pyttsx3"), ("sounddevice", "sounddevice"), ("numpy", "numpy"),
           ("faster-whisper", "faster_whisper"), ("qrcode", "qrcode"), ("av", "av"))

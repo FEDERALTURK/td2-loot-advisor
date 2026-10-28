@@ -70,7 +70,7 @@ def main():
         stack.enter_context(patch.object(app.ui_art,"ensure_backgrounds",lambda folder: []))
         stack.enter_context(patch.object(app.App,"gpu_apply_cached",lambda self: True))
         for name in ("meta_sync_start","vendor_refresh","ask_drop_consent","check_new_pc","update_center","_drops_tick",
-                     "gpu_check","account_startup","service_start","_news_poll","_info_badge","_task_live_poll"):
+                     "gpu_check","account_startup","service_start","_news_poll","_info_badge","_task_live_poll","_bind_global_hotkeys"):
             stack.enter_context(patch.object(app.App,name,lambda *a,**k: None))
         for name in ("askyesno","askokcancel","showinfo","showwarning","showerror"):
             stack.enter_context(patch.object(app.messagebox,name,lambda *a,**k: False))

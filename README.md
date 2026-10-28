@@ -182,3 +182,8 @@ These changes are included in release 6.0.2. See [local validation results](docs
 ### 6.0.3: in-place translation and natural voice
 
 Source-anchored overlay fixes, two recorded Turkish/English Neural notification packs and optional online natural speech are available in the local source build. These changes are included in release 6.0.3. See [usage, data routing and validation](docs/overlay_voice_local.md).
+
+
+### 9.0.4: in-game voice assistant
+
+F6 stops/resumes live translation. Press F9 to open the microphone, then press it again to send your question and receive a spoken answer. F12 cancels the request and speech. Shortcuts work independently of item scanning. Prepare the speech model in Assistant before first use and configure an AI provider. Audio is transcribed locally; question text and item/build context go to the selected provider. [Setup, data routing and validation limits](docs/game_assistant_9.0.4.md).

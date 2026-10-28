@@ -8,6 +8,19 @@
 
 Windows "kişisel bilgisayarınızı korudu" derse: **Ek bilgi → Yine de çalıştır** (dosya henüz kod imzalı değil).
 
+**9.0.4 — Oyun içi sesli AI asistanı ve çeviri kontrolü**
+
+- **F6: çeviriyi durdur / devam et.** Canlı ekran ve konuşma çevirisi tek tuşla durdurulup önceki kaynaklarla yeniden başlatılır. Durdurma, kısayol dinleyicisini kapatmaz. Eski kaynak ve gecikmiş ekran yakalama işleri iptal sonrasında kaplamayı yeniden açamaz.
+- **F9: oyun içinden soru sor.** İlk basış mikrofonu açar; tekrar basış kaydı gönderir. En fazla 20 saniye kayıt alınır. Yerel çok dilli Whisper soruyu metne çevirir; seçili sağlayıcı yanıtlar ve yanıt sesli okunur. Genel sohbet seslendirmesi kapalı olsa da sesli sorunun yanıtı okunur.
+- **F12: isteği ve sesi iptal et.** Eski soru/yanıt çıktıları sonradan uygulanmaz. Kullanıcı konuşurken programın kendi çeviri ve eşya sesleri bekler. Daha önce gönderilmiş bulut isteği geri alınmayabilir.
+- **Asistan sekmesi yenilendi.** Kısayol açıklamaları, konuşma modelini hazırlama düğmesi, sağlayıcı/veri aktarımı açıklamaları ve oyun üstü durum/yanıt penceresi eklendi. AI sağlayıcısı ayrıca yapılandırılmalıdır; yerleşik yardımcı sınırlı kurallarla çalışır.
+- **Tarama bağımsız kısayollar.** F6/F7/F9/F12 uygulama açıkken eşya taraması durdurulmuş olsa da çalışır. Boş veya çakışan atamalar reddedilir. F7 tek seferlik çeviri, F8 eşya taraması, F10 görev getirme işlevlerini korur.
+- **Paketlenmiş konuşma altyapısı.** Mikrofon ve yerel Whisper çalışma zamanı pakette; model ilk hazırlamada indirilir. Yeni ayarlarda base/CPU/int8, iki CPU iş parçacığı; mevcut model ve sağlayıcı seçimi korunur. Boştaki konuşma modeli bellekten bırakılabilir. PyAV uyumluluğu sabitlendi.
+- **Veri aktarımı açık.** Mikrofon sesi yerelde metne dönüşür. Soru ve build/eşya bağlamı seçili AI sağlayıcısına gider; çevrimiçi doğal ses açıksa yanıt metni Microsoft ses hizmetine de gönderilir. Sağlayıcı hatasında yerleşik yardımcıya dönülmesi sesli olarak açıklanır.
+- **Yayın öncesi kontroller.** Kısayol, kayıt, iptal, eski zamanlayıcı/yanıt korumaları ve yerel HTTP sağlayıcı akışı test edilir; kurulan EXE'de asistan çalışma zamanı ve gerçek Türkçe ses tanıma ayrıca sınanır. Gerçek oyun + kullanıcı mikrofonu + bulut hesabıyla uçtan uca kullanım henüz doğrulanmadı.
+
+Sürüm numarası kullanıcı isteği doğrultusunda **9.0.4** olarak belirlenmiştir. Önceki kararlı sürüm 6.0.3'tür.
+
 **6.0.3 — Daha hızlı eşya okuma, yerinde çeviri ve doğal ses**
 
 - **Daha çabuk otomatik algılama:** hafif görüntü kontrolü OCR bekleme aralığından ayrıldı. Dengeli profilde 200 ms, Oyun öncelikli profilde 300 ms kontrol yapılır; ağır OCR işlemlerinin hız sınırı korunur. OCR meşgulse eski yakalama sırada beklemez.

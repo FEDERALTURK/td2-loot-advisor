@@ -82,6 +82,14 @@ class NaturalVoiceTests(unittest.TestCase):
             self.run_speaker(obj)
         play.assert_not_called()
 
+    def test_cancelled_system_audio_is_not_played_or_retried(self):
+        obj = self.speaker(); obj.say("old", cancellable=True)
+        def render(*args): obj._serial += 1; return True
+        engine = Mock()
+        with patch.object(voicepack, "sapi_to_wav", side_effect=render), patch.object(voicepack, "play_audio") as play:
+            self.run_speaker(obj, engine)
+        play.assert_not_called(); engine.say.assert_not_called()
+
     def test_queue_is_bounded_and_close_does_not_block(self):
         obj = self.speaker()
         for n in range(30): obj.say(str(n), interrupt=False)

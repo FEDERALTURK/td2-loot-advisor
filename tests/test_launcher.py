@@ -33,7 +33,7 @@ class LauncherTests(unittest.TestCase):
         self.assertTrue(self.prepare()[0]);self.assertEqual(len(self.calls),1)
     def test_optional_voice_is_only_installed_on_request(self):
         self.prepare();self.assertEqual(self.calls,[]);self.prepare(extras=True)
-        self.assertIn("faster-whisper",self.calls[0]);self.assertNotIn("onnxruntime",self.calls[0])
+        self.assertIn("av",self.calls[0]);self.assertNotIn("onnxruntime",self.calls[0])
     def test_existing_directml_module_is_not_replaced(self):
         self.installed.remove("rapidocr");self.prepare();self.assertIn("rapidocr",self.calls[0])
         self.assertNotIn("onnxruntime",self.calls[0]);self.prepare();self.assertEqual(len(self.calls),1)

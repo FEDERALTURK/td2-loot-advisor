@@ -15,7 +15,12 @@
     "tr_log": false,
     "voice_pack": "auto",
     "voice_radio": false,
-    "voice_online": false
+    "voice_online": false,
+    "tr_toggle_hotkey": "<f6>",
+    "assistant_cancel_hotkey": "<f12>",
+    "assistant_hud": true,
+    "stt_model": "base",
+    "stt_device": "cpu"
   },
   "attributes": {
     "weapon_damage": [

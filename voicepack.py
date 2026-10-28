@@ -8,11 +8,25 @@ import json
 import random
 import struct
 import wave
+import threading
 from pathlib import Path
 
 PACKS = ("classic", "tactical", "operator", "brief")
 NATURAL_PACKS = ("natural_tr", "natural_en")
 NATURAL_VOICES = {"natural_tr": "tr-TR-EmelNeural", "natural_en": "en-US-AriaNeural"}
+_PLAYBACK_LOCK = threading.Lock()
+_PLAYBACK_ALIAS = None
+
+
+def stop_audio():
+    """Stop current file playback; synthesis results are invalidated by Speaker."""
+    import os
+    if os.name != "nt": return
+    import ctypes, winsound
+    with _PLAYBACK_LOCK: alias = _PLAYBACK_ALIAS
+    if alias: ctypes.windll.winmm.mciSendStringW(f"stop {alias}", None, 0, None)
+    try: winsound.PlaySound(None, 0)
+    except RuntimeError: pass
 
 
 def natural_pack(pack, lang="tr"):
@@ -97,6 +111,7 @@ def play_audio(path):
     """Blocking playback on the speech worker; PCM WAV or cached neural MP3."""
     import ctypes
     import uuid
+    global _PLAYBACK_ALIAS
     path = Path(path).resolve()
     if path.suffix.lower() == ".wav":
         import winsound
@@ -109,8 +124,11 @@ def play_audio(path):
         if error: raise RuntimeError(f"Audio playback error {error}")
     try:
         command(f'open "{path}" type mpegvideo alias {alias}')
+        with _PLAYBACK_LOCK: _PLAYBACK_ALIAS = alias
         command(f"play {alias} wait")
     finally:
+        with _PLAYBACK_LOCK:
+            if _PLAYBACK_ALIAS == alias: _PLAYBACK_ALIAS = None
         send(f"close {alias}", None, 0, None)
 
 

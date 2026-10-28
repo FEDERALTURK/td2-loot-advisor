@@ -2,7 +2,7 @@ name: Stability and workload policy
 on:
   workflow_dispatch:
   push:
-    paths: ["app.py", "overlay.py", "voicepack.py", "meta/voice_packs.json", "meta/voices/**", "requirements.txt", "engine.py", "stash.py", "itempolicy.py", "workqueue.py", "performance.py", "ocr_backend.py", "scripts/**", "requirements-dev.txt", "livetranslate.py", "localapi.py", "fx.py", "ui_art.py", "view3d.py", "tests/test_*stability.py", "tests/test_itempolicy.py", "tests/test_workqueue.py", "tests/test_performance.py", "tests/test_animation_policy.py", "tests/test_translation_reliability.py", "tests/test_localapi_backpressure.py", ".github/workflows/stability-check.yml"]
+    paths: ["app.py", "game_assistant.py", "tests/test_game_assistant.py", "overlay.py", "voicepack.py", "meta/voice_packs.json", "meta/voices/**", "requirements.txt", "engine.py", "stash.py", "itempolicy.py", "workqueue.py", "performance.py", "ocr_backend.py", "scripts/**", "requirements-dev.txt", "livetranslate.py", "localapi.py", "fx.py", "ui_art.py", "view3d.py", "tests/test_*stability.py", "tests/test_itempolicy.py", "tests/test_workqueue.py", "tests/test_performance.py", "tests/test_animation_policy.py", "tests/test_translation_reliability.py", "tests/test_localapi_backpressure.py", ".github/workflows/stability-check.yml"]
   pull_request:
     paths: ["*.py", "scripts/**", "requirements-dev.txt", "tests/**", "lang/**", ".github/workflows/stability-check.yml"]
 permissions:
@@ -24,7 +24,7 @@ jobs:
       - name: Policy, queues, app integration and translation integrity
         shell: pwsh
         run: |
-          $suites = @('test_itempolicy.py', 'test_workqueue.py', 'test_performance.py', 'test_animation_policy.py', 'test_app_stability.py', 'test_translation_reliability.py', 'test_localapi_backpressure.py', 'test_launcher.py', 'test_ocr_serialization.py', 'test_inplace_anchors.py', 'test_natural_voice.py', 'test_overlay.py', 'test_scan_latency.py', 'test_region_scan_fastpath.py')
+          $suites = @('test_game_assistant.py', 'test_itempolicy.py', 'test_workqueue.py', 'test_performance.py', 'test_animation_policy.py', 'test_app_stability.py', 'test_translation_reliability.py', 'test_localapi_backpressure.py', 'test_launcher.py', 'test_ocr_serialization.py', 'test_inplace_anchors.py', 'test_natural_voice.py', 'test_overlay.py', 'test_scan_latency.py', 'test_region_scan_fastpath.py')
           foreach ($suite in $suites) {
             python -B "tests/$suite"
             if ($LASTEXITCODE -ne 0) { throw "$suite failed" }

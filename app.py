@@ -43,6 +43,33 @@ if "--lt-check" in sys.argv:           # paket denetimi: çeviri altyapısı (ct
     Path(sys.argv[_i + 1]).write_text(json.dumps(_res), encoding="utf-8")
     sys.exit(0)
 
+if "--assistant-stt-probe" in sys.argv:
+    _i = sys.argv.index("--assistant-stt-probe")
+    try:
+        from faster_whisper import WhisperModel as _WM
+        _bundle = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent))
+        _model = _WM("base", device="cpu", compute_type="int8", cpu_threads=2,
+                     download_root=sys.argv[_i + 1])
+        _segments, _ = _model.transcribe(str(_bundle / "meta/voices/natural_tr/demo.wav"), language="tr", vad_filter=True, beam_size=2)
+        _text = " ".join(_s.text.strip() for _s in _segments).strip()
+        _res = {"ok": bool(_text and len(_text) > 8), "text": _text, "model": "base", "device": "cpu"}
+    except Exception as _e:
+        _res = {"ok": False, "reason": f"{type(_e).__name__}: {_e}"}
+    Path(sys.argv[_i + 2]).write_text(json.dumps(_res, ensure_ascii=False), encoding="utf-8")
+    sys.exit(0 if _res["ok"] else 1)
+
+if "--assistant-check" in sys.argv:
+    _i = sys.argv.index("--assistant-check")
+    try:
+        import faster_whisper as _fw, sounddevice as _sd, av as _av, pyttsx3 as _tts
+        import game_assistant as _ga
+        _res = {"ok": True, "shortcuts": _ga.bindings({}), "whisper": _fw.__version__,
+                "sounddevice": _sd.__version__, "av": _av.__version__, "model_download_on_setup": True}
+    except Exception as _e:
+        _res = {"ok": False, "reason": f"{type(_e).__name__}: {_e}"}
+    Path(sys.argv[_i + 1]).write_text(json.dumps(_res), encoding="utf-8")
+    sys.exit(0 if _res["ok"] else 1)
+
 if "--voice-check" in sys.argv:
     # Installed-package verification: no window, personal settings or network.
     import hashlib as _hashlib, wave as _wave
@@ -116,10 +143,11 @@ import gamepad
 import itempolicy
 import performance
 import workqueue
+import game_assistant
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "6.0.3"
+APP_VERSION = "9.0.4"
 FROZEN = getattr(sys, "frozen", False)
 BASE = Path(sys.executable).parent if FROZEN else Path(__file__).resolve().parent
 TASKS_CACHE = BASE / "tasks_cache.json"  # son indirilen görev listesi
@@ -847,9 +875,10 @@ def draw_bars(cv, title, data, empty=None):
 DEFAULTS.update({
     "ai_provider": "ollama", "ollama_url": "http://localhost:11434", "ollama_model": "gemma3:12b",
     "claude_model": "claude-haiku-5-5", "claude_api_key": "", "claude_code_model": "haiku", "openai_model": "gpt-4o-mini", "openai_api_key": "",
-    "stt_model": "small", "stt_device": "cpu",
+    "stt_model": "base", "stt_device": "cpu",
     "tts_rate": 185, "tts_voice": "", "voice_hotkey": "<f9>", "speak_verdict": True, "speak_chat": True, "voice_pack": "auto", "voice_radio": False, "voice_online": False, "quiz_xp": 0, "quiz_best": 0, "quiz_loading": False, "meta_favs": [], "meta_pop_prev": {}, "news_seen": [], "task_share": None, "task_live": True, "task_client": "", "tr_on": False, "tr_engine": "local", "tr_mode": "subtitle", "tr_region": None, "tr_hotkey": "<f7>", "tr_auto": True, "tr_font": 15, "tr_hide": 10, "tr_alpha": 0.9, "tr_screen": False, "tr_screen_port": 8767, "tr_screen_token": "", "tr_speak": "off", "tr_family": "", "tr_outline": False, "sp_on": False, "sp_source": "auto", "sp_hide_captions": True, "tr_ocr": "auto", "tr_ocr_pick": "", "tr_ocr_bench_t": 0, "tr_pad": "back+rb"})
 PROVIDER_KEYS = ["ollama", "claude_code", "claude", "openai", "builtin"]
+DEFAULTS.update(tr_toggle_hotkey="<f6>", assistant_cancel_hotkey="<f12>", assistant_hud=True)
 
 def provider_label(pid):
     return t(f"provider.{pid}")
@@ -915,6 +944,16 @@ class Speaker:
             else:
                 text, rate, hint, fx = job if len(job) == 4 else (*job, False)
             if not eng: continue
+            if isinstance(job, dict) and job.get("cancellable"):
+                try:
+                    with tempfile.TemporaryDirectory(prefix="td2-answer-") as folder:
+                        audio = Path(folder) / "answer.wav"
+                        ok = voicepack.sapi_to_wav(text, audio, rate, [hint])
+                        if ok and job["serial"] == self._serial and not self._closed: voicepack.play_audio(audio)
+                        if not ok: self.err = "System speech file could not be generated"
+                except Exception as error:
+                    self.err = f"system speech: {type(error).__name__}"
+                continue
             try:
                 voices = eng.getProperty("voices")
                 pick = None
@@ -961,13 +1000,21 @@ class Speaker:
             try: self.q.put_nowait(job)
             except queue.Full: pass
 
-    def say(self, text, rate=185, hint="", interrupt=True, fx=False, pack=None, online=False):
-        self._put(dict(text=text, rate=rate, hint=hint, fx=fx, pack=pack, online=online), interrupt)
+    def say(self, text, rate=185, hint="", interrupt=True, fx=False, pack=None, online=False, cancellable=False):
+        self._put(dict(text=text, rate=rate, hint=hint, fx=fx, pack=pack, online=online, cancellable=cancellable), interrupt)
 
     def files(self, paths):
         self._put({"files": list(paths)})
 
+    def stop(self):
+        self._serial += 1
+        try:
+            while True: self.q.get_nowait()
+        except queue.Empty: pass
+        voicepack.stop_audio()
+
     def close(self):
+        self.stop()
         self._closed = True
         self._serial += 1
         try:
@@ -984,48 +1031,75 @@ class Recorder:
     def start(self):
         import sounddevice as sd
         self.frames = []
+        self.samples = 0
+        def receive(indata, n, tm, status):
+            remaining = max(0, 20 * 16000 - self.samples)
+            if remaining:
+                chunk = indata[:remaining].copy()
+                self.frames.append(chunk); self.samples += len(chunk)
         self.stream = sd.InputStream(samplerate=16000, channels=1, dtype="float32",
-                                     callback=lambda indata, n, tm, s: self.frames.append(indata.copy()))
-        self.stream.start(); self.active = True
+                                     callback=receive)
+        try: self.stream.start(); self.active = True
+        except Exception:
+            self.stream.close(); self.stream = None
+            raise
 
     def stop(self):
         import numpy as np
         self.active = False
         if self.stream:
-            self.stream.stop(); self.stream.close(); self.stream = None
-        return np.concatenate(self.frames)[:, 0] if self.frames else np.zeros(0, dtype="float32")
+            try: self.stream.stop()
+            finally: self.stream.close(); self.stream = None
+        frames, self.frames = self.frames, []
+        return np.concatenate(frames)[:, 0] if frames else np.zeros(0, dtype="float32")
 
 
-_WHISPER = {"key": None, "model": None}
+_WHISPER = {"key": None, "model": None, "used": 0.0}
+_WHISPER_LOCK = threading.RLock()
 STT_LANGS = {"tr": "tr", "en": "en", "de": "de", "fr": "fr", "es": "es", "it": "it", "pt": "pt", "ru": "ru", "pl": "pl", "nl": "nl"}
 
 
+def load_assistant_stt(cfg):
+    from faster_whisper import WhisperModel
+    st = cfg["settings"]
+    model, device = st.get("stt_model", "base"), st.get("stt_device", "cpu")
+    key = (model, device)
+    with _WHISPER_LOCK:
+        if _WHISPER["key"] != key or _WHISPER["model"] is None:
+            options = dict(download_root=str(BASE / "models" / "assistant"), cpu_threads=2, num_workers=1)
+            try:
+                instance = WhisperModel(model, device=device, compute_type="float16" if device == "cuda" else "int8", **options)
+            except Exception:
+                if device == "cpu": raise
+                instance = WhisperModel(model, device="cpu", compute_type="int8", **options)
+            _WHISPER.update(key=key, model=instance)
+        _WHISPER["used"] = time.monotonic()
+        return _WHISPER["model"]
+
+
 def transcribe(audio, cfg):
-    """Konuşma tanıma. 1) faster-whisper (yerel, en iyi), 2) yoksa Windows'un kendi konuşma tanıması (System.Speech).
-    Dil arayüz dilini izler. Hata ayrıntısı logs/app.log'a yazılır."""
+    """Local multilingual Whisper, with installed Windows recognition fallback."""
     lang = STT_LANGS.get(i18n.current_language(), "en")
     try:
-        from faster_whisper import WhisperModel
-    except Exception as e:
-        log.warning("faster-whisper not available (%s: %s) — Python %s; trying Windows speech recognition",
-                    type(e).__name__, e, sys.version.split()[0])
+        import faster_whisper
+    except ImportError:
         return windows_stt(audio, lang)
-    st = cfg["settings"]
-    key = (st["stt_model"], st["stt_device"])
-    if _WHISPER["key"] != key:
-        log.info("Loading Whisper model %s on %s (first time downloads the model)", *key)
-        try:
-            _WHISPER["model"] = WhisperModel(st["stt_model"], device=st["stt_device"],
-                                             compute_type="float16" if st["stt_device"] == "cuda" else "int8")
-        except Exception as e:
-            if st["stt_device"] != "cpu":                  # CUDA/cuDNN yoksa CPU'ya düş
-                log.warning("Whisper on %s failed (%s); falling back to CPU", st["stt_device"], e)
-                _WHISPER["model"] = WhisperModel(st["stt_model"], device="cpu", compute_type="int8")
-            else:
-                raise
-        _WHISPER["key"] = key
-    segs, _ = _WHISPER["model"].transcribe(audio, language=lang, vad_filter=True)
-    return " ".join(s.text.strip() for s in segs).strip()
+    with _WHISPER_LOCK:
+        model = load_assistant_stt(cfg)
+        segments, _ = model.transcribe(audio, language=lang, vad_filter=True, beam_size=2,
+                                       condition_on_previous_text=False)
+        text = " ".join(segment.text.strip() for segment in segments).strip()
+        _WHISPER["used"] = time.monotonic()
+        return text
+
+
+def unload_assistant_stt(idle=300):
+    if not _WHISPER_LOCK.acquire(blocking=False): return False
+    try:
+        if _WHISPER["model"] is None or time.monotonic() - _WHISPER["used"] < idle: return False
+        _WHISPER.update(key=None, model=None)
+        return True
+    finally: _WHISPER_LOCK.release()
 
 
 def windows_stt(audio, lang):
@@ -1455,6 +1529,8 @@ class App:
         self.timings = performance.TimingStats()
         self._translation_jobs = workqueue.LatestWorker("translation")
         self._debug_jobs = workqueue.LatestWorker("scan-debug")
+        self._assistant_jobs = workqueue.LatestWorker("assistant-answer")
+        self._assistant_setup_jobs = workqueue.LatestWorker("assistant-setup")
         self._closing = False
         self._lt_retry_at, self._lt_failures = 0.0, 0
         stg = self.cfg["settings"]
@@ -1508,6 +1584,10 @@ class App:
         self.root_after_resets = None
         self.last_sig, self.last_time, self.last_err = None, 0, ""
         self.speaker, self.rec, self.voice_busy, self.chat_hist = Speaker(), Recorder(), False, []
+        self._voice_session = game_assistant.VoiceSession(
+            self.rec, lambda audio: transcribe(audio, self.cfg),
+            lambda generation, kind, value: self.results.put(("voice_session", generation, kind, value)))
+        self._global_hotkeys = game_assistant.Hotkeys(lambda action: self.results.put(("hotkey", action)))
         self.voice_lines = voicepack.Lines(BASE / "meta" / "voice_lines.json", BUNDLE / "meta" / "voice_lines.json")
         self.news = None
         for np_ in (NEWS_CACHE, BASE / "meta" / "news_feed.json", BUNDLE / "meta" / "news_feed.json"):
@@ -1542,6 +1622,7 @@ class App:
         self.root.after(1500, self.account_startup)
         self.root.after(1000, self.service_start)
         self.root.after(1000, self._performance_tick)
+        self.root.after(300, self._bind_global_hotkeys)
         if stg.get("tr_on"): self.root.after(2500, lambda: self.lt_start(quiet=True))
         self.root.after(NEWS_POLL_MS, self._news_poll)
         self.root.after(2000, self._info_badge)
@@ -1555,6 +1636,81 @@ class App:
 
     def _policy(self):
         return getattr(self, "_perf_policy", None) or performance.get_policy(self.cfg["settings"])
+
+    def _bind_global_hotkeys(self):
+        if getattr(self, "_closing", False): return False
+        try:
+            self._global_hotkeys.configure(self.cfg["settings"])
+            st = self.cfg["settings"]
+            if getattr(self, "ga_help", None):
+                self.ga_help.config(text=t("ga.help", voice=st.get("voice_hotkey", "<f9>"), pause=st.get("tr_toggle_hotkey", "<f6>"), cancel=st.get("assistant_cancel_hotkey", "<f12>")))
+            if getattr(self, "ga_privacy", None): self.ga_privacy.config(text=t("ga.privacy", provider=provider_label(st.get("ai_provider", "builtin"))))
+            if getattr(self, "ga_builtin", None): self.ga_builtin.config(text=t("ga.builtin") if st.get("ai_provider") == "builtin" else "")
+            return True
+        except Exception as error:
+            log.warning("Global shortcuts unavailable: %s", error)
+            if getattr(self, "vstatus", None): self.vstatus.config(text=t("ga.hotkey_error", e=error))
+            return False
+
+    def _hotkey_action(self, action):
+        if getattr(self, "_closing", False): return
+        if action == "translate_toggle": self.lt_toggle()
+        elif action == "translate_once": self.lt_once()
+        elif action == "voice": self.toggle_voice()
+        elif action == "cancel": self.cancel_assistant()
+        elif action == "scan" and self.running: self.trigger()
+        elif action == "tasks": self.run_claude_fetch()
+
+    def _microphone_busy(self):
+        session = getattr(self, "_voice_session", None)
+        return bool(session and session.recording)
+
+    def _assistant_status(self, text, answer=False):
+        if getattr(self, "vstatus", None): self.vstatus.config(text=text)
+        if not self.cfg["settings"].get("assistant_hud", True): return
+        old = getattr(self, "_assistant_hud", None)
+        if old:
+            try: old.destroy()
+            except tk.TclError: pass
+        area = display.game_window()
+        if not area: return
+        w = self._assistant_hud = tk.Toplevel(self.root)
+        w.withdraw(); w.overrideredirect(True); w.attributes("-topmost", True)
+        sty = self.lt_style()
+        w.configure(bg=sty["bg"])
+        width = min(440, max(240, area["width"] - 40))
+        tk.Label(w, text="◆ " + t("ga.title"), bg=sty["bg"], fg=sty["accent"],
+                 font=(ui_theme.FONT_SEMI, 10), anchor="w").pack(fill="x", padx=12, pady=(8, 2))
+        tk.Label(w, text=text[:1400], bg=sty["bg"], fg=sty["fg"], wraplength=width - 24,
+                 justify="left", font=(ui_theme.FONT, 11)).pack(padx=12, pady=(0, 8))
+        w.update_idletasks()
+        x, y = area["left"] + area["width"] - width - 20, area["top"] + 60
+        w.geometry(f"{width}x{w.winfo_reqheight()}{int(x):+d}{int(y):+d}")
+        click_through(w)
+        if os.name == "nt":
+            hwnd = ctypes.windll.user32.GetParent(w.winfo_id()) or w.winfo_id()
+            flags = ctypes.windll.user32.GetWindowLongW(hwnd, -20)
+            ctypes.windll.user32.SetWindowLongW(hwnd, -20, flags | 0x08000000)
+        w.deiconify(); exclude_from_capture(w, "assistant")
+        def remove():
+            if getattr(self, "_assistant_hud", None) is w:
+                try: w.destroy()
+                except tk.TclError: pass
+                self._assistant_hud = None
+                CAPTURE_MASK.pop("assistant", None)
+        self.root.after(20000 if answer else 25000, remove)
+
+    def _voice_event(self, generation, kind, value):
+        if not self._voice_session.current(generation): return
+        if kind == "text":
+            self.voice_busy = False
+            self.ask(value, voice=True, voice_generation=generation)
+            return
+        messages = {"starting": "ga.starting", "listening": "ga.listening", "transcribing": "ai.transcribing",
+                    "too_short": "ai.too_short", "empty": "ai.not_understood", "busy": "ga.busy", "error": "ga.error"}
+        self.voice_busy = kind in ("transcribing", "busy")
+        self._assistant_status(t(messages.get(kind, "ga.ready"), e=value,
+                                 key=self.cfg["settings"].get("voice_hotkey", "<f9>")))
 
     def _performance_tick(self):
         if getattr(self, "_closing", False): return
@@ -1795,7 +1951,8 @@ class App:
         self._lt_pad_stop()
         combo = st.get("tr_pad", "back+rb")
         if not combo or combo == "off": return
-        self.lt_pad = gamepad.ComboWatcher(combo, lambda: self.root.after(0, self.lt_once))
+        revision = getattr(self, "_lt_revision", 0)
+        self.lt_pad = gamepad.ComboWatcher(combo, lambda: self.results.put(("translate_pad", revision)))
         if not self.lt_pad.start(): self.lt_pad = None
         else: log.info("Gamepad translate combo: %s", combo)
 
@@ -1814,19 +1971,23 @@ class App:
     def speech_start(self, quiet=False):
         st = self.cfg["settings"]
         self.speech_stop()
+        generation = getattr(self, "_speech_generation", 0)
+        on_text = lambda text: self._sp_text(text, generation)
+        on_state = lambda state, detail="": self.results.put(("speech_state", generation, state, detail))
         src = self.sp_source()
         if src == "captions":
             if not speech.captions_available():
                 self._sp_status(t("sp.no_captions"), "warning"); return False
-            self.sp = speech.LiveCaptionsSource(self._sp_text, self._sp_state, hide=bool(st.get("sp_hide_captions", True)))
+            self.sp = speech.LiveCaptionsSource(on_text, on_state, hide=bool(st.get("sp_hide_captions", True)))
         else:
             if not (speech.Whisper.available() and speech.WhisperSource.capture_available()):
                 self._sp_status(t("sp.no_runtime"), "warning"); return False
             if not speech.whisper_installed(self.sp_model_dir()):
                 self._sp_status(t("sp.need_model", mb=speech.WHISPER_MB), "warning"); return False
-            self.sp = speech.WhisperSource(self._sp_text, self.sp_model_dir(), self._sp_state)
+            self.sp = speech.WhisperSource(on_text, self.sp_model_dir(), on_state)
         try: self.lt_translator()
         except Exception as e:
+            self.sp = None
             self._sp_status(str(e), "warning"); return False
         self.sp.start()
         st["sp_on"] = True; save_cfg(self.cfg)
@@ -1835,6 +1996,7 @@ class App:
         return True
 
     def speech_stop(self, quiet=True):
+        self._speech_generation = getattr(self, "_speech_generation", 0) + 1
         sp = getattr(self, "sp", None)
         if sp: sp.stop(); self.sp = None
         if sp: self._invalidate_translation()
@@ -1844,12 +2006,14 @@ class App:
     def _sp_state(self, state, detail=""):
         if state == "error": self.root.after(0, lambda: self._sp_status(t("sp.error", e=detail), "danger"))
 
-    def _sp_text(self, en):
+    def _sp_text(self, en, generation=None):
         """Kaynaktan gelen İngilizce cümle → Türkçe → altyazı kutusu (arka plan iş parçacığından)."""
         if not en or livetranslate.PRIVATE.search(en) or getattr(self, "_closing", False): return
+        generation = getattr(self, "_speech_generation", 0) if generation is None else generation
+        if generation != getattr(self, "_speech_generation", 0): return
         def run(token):
             try:
-                if not self._translation_jobs.is_current(token): return
+                if generation != getattr(self, "_speech_generation", 0) or not self._translation_jobs.is_current(token): return
                 with self.timings.measure("speech_translate"):
                     t0 = time.perf_counter()
                     tr = self.lt_translator().translate([en])[0]
@@ -1858,7 +2022,8 @@ class App:
                 if not g: return
                 area = {"left": int(g["left"] + g["width"] * 0.12), "top": int(g["top"] + g["height"] * 0.70),
                         "width": int(g["width"] * 0.76), "height": int(g["height"] * 0.24)}
-                self._post_translation(token, lambda: self._lt_show([("🎧 " + en, tr, (0, 0, 0, 0))], area, ms, force_mode="subtitle"))
+                if generation == getattr(self, "_speech_generation", 0):
+                    self._post_translation(token, lambda: self._lt_show([("🎧 " + en, tr, (0, 0, 0, 0))], area, ms, force_mode="subtitle"))
             except Exception as e:
                 log.info("Speech translate failed: %s", e)
         self._translation_jobs.submit(run)
@@ -1915,12 +2080,6 @@ class App:
         self.lt_stop_ev = threading.Event()
         if st.get("tr_auto", True):
             threading.Thread(target=self._lt_loop, args=(self.lt_stop_ev,), daemon=True, name="live-translate").start()
-        try:
-            from pynput import keyboard
-            self.lt_keys = keyboard.GlobalHotKeys({st.get("tr_hotkey", "<f7>"): lambda: self.root.after(0, self.lt_once)})
-            self.lt_keys.start()
-        except Exception as e:
-            self.lt_keys = None; log.info("Translate hotkey unavailable: %s", e)
         log.info("Live translation on (engine=%s, mode=%s)", st.get("tr_engine"), st.get("tr_mode"))
         area = self.lt_area()
         if area:                                            # program penceresi okunan alanı kapatıyorsa küçült
@@ -1958,8 +2117,20 @@ class App:
         self._lt_ui()
 
     def lt_toggle(self):
-        if getattr(self, "lt_stop_ev", None) or getattr(self, "lt_keys", None): self.lt_stop()
-        else: self.lt_start()
+        active = bool(getattr(self, "lt_stop_ev", None) or getattr(self, "sp", None))
+        if active:
+            self._paused_translation = (bool(getattr(self, "lt_stop_ev", None)), bool(getattr(self, "sp", None)))
+            self.lt_stop()
+            self.speech_stop(quiet=False)
+            if not self._microphone_busy(): self.speaker.stop()
+            self._lt_hide()
+            self.toast(t("ga.translation_paused"))
+        else:
+            screen, audio = getattr(self, "_paused_translation", (True, False))
+            restored = False
+            if screen: restored = bool(self.lt_start(quiet=True))
+            if audio: restored = bool(self.speech_start(quiet=True)) or restored
+            self.toast(t("ga.translation_resumed" if restored else "ga.translation_unavailable"))
 
     def _lt_loop(self, stop):
         if stop.wait(1.6): return                            # program penceresi küçülürken okuma yapma
@@ -1982,8 +2153,9 @@ class App:
                         busy = self._translation_jobs.stats()
                         if stable >= 1 and (last is None or dist(h, last) >= AUTO_CHANGE or
                                             (retry and not busy["active"] and not busy["pending"])):
+                            if stop.is_set(): break
                             last = h
-                            self._queue_translation(area)
+                            self._queue_translation(area, revision=revision)
                 except Exception as e:
                     log.debug("live translate loop: %s", e)
                 stop.wait(self._policy().translation_poll_s)
@@ -1999,17 +2171,20 @@ class App:
             if self.root.state() == "normal" and self.rects_overlap((x, y, x + self.root.winfo_width(), y + self.root.winfo_height()),
                                       (area["left"], area["top"], area["left"] + area["width"], area["top"] + area["height"])):
                 self.root.iconify()
-                self.root.after(450, lambda: self._queue_translation(area, force=True))
+                revision = getattr(self, "_lt_revision", 0)
+                self.root.after(450, lambda: self._queue_translation(area, force=True, revision=revision))
                 return
         except Exception:
             pass
         self._queue_translation(area, force=True)
 
-    def _queue_translation(self, area, force=False):
+    def _queue_translation(self, area, force=False, revision=None):
         if getattr(self, "_closing", False): return
+        revision = getattr(self, "_lt_revision", 0) if revision is None else revision
+        if revision != getattr(self, "_lt_revision", 0): return
         area = dict(area)
         def run(token):
-            if not self._translation_jobs.is_current(token): return
+            if revision != getattr(self, "_lt_revision", 0) or not self._translation_jobs.is_current(token): return
             capture.default().keep()
             try:
                 with self.timings.measure("translate_capture"):
@@ -2176,6 +2351,7 @@ class App:
         self._lt_speak(pairs)
 
     def _lt_speak(self, pairs):
+        if self._microphone_busy(): return
         st = self.cfg["settings"]
         mode = st.get("tr_speak", "off")
         if mode == "all" or (mode == "subtitle" and st.get("tr_mode", "subtitle") == "subtitle"):
@@ -2206,6 +2382,7 @@ class App:
             idle = 180 if self._policy().mode == "game" else 300
             if m is not None and m.unload_if_idle(idle):
                 log.info("Translation model unloaded (idle)")
+            if unload_assistant_stt(300): log.info("Assistant speech model unloaded (idle)")
         except Exception:
             log.debug("housekeep", exc_info=True)
         if not getattr(self, "_closing", False): self.root.after(60000, self._housekeep)
@@ -2307,11 +2484,11 @@ class App:
                         command=lambda: (st.__setitem__("tr_log", bool(self.lt_log_var.get())), save_cfg(self.cfg))).pack(anchor="w", padx=8, pady=2)
         g = ttk.Frame(ob); g.pack(fill="x", padx=8, pady=(2, 8))
         self.lt_vars = {}
-        for i, (k, lab, default, w) in enumerate((("tr_hotkey", t("lt.hotkey"), "<f7>", 10), ("tr_font", t("lt.font"), 15, 5),
+        for i, (k, lab, default, w) in enumerate((("tr_hotkey", t("lt.hotkey"), "<f7>", 10), ("tr_toggle_hotkey", t("ga.pause_key"), "<f6>", 10), ("tr_font", t("lt.font"), 15, 5),
                                                   ("tr_hide", t("lt.hide"), 10, 5), ("tr_alpha", t("lt.alpha"), 0.9, 5))):
-            ttk.Label(g, text=lab).grid(row=0, column=i * 2, sticky="w", padx=(0, 4))
+            ttk.Label(g, text=lab).grid(row=i // 3, column=(i % 3) * 2, sticky="w", padx=(0, 4))
             v = self.lt_vars[k] = tk.StringVar(value=str(st.get(k, default)))
-            e = ttk.Entry(g, textvariable=v, width=w); e.grid(row=0, column=i * 2 + 1, sticky="w", padx=(0, 16))
+            e = ttk.Entry(g, textvariable=v, width=w); e.grid(row=i // 3, column=(i % 3) * 2 + 1, sticky="w", padx=(0, 16))
             e.bind("<FocusOut>", lambda ev: self._lt_save_opts())
         g2 = ttk.Frame(ob); g2.pack(fill="x", padx=8, pady=(0, 8))
         ttk.Label(g2, text="OCR").pack(side="left")
@@ -2419,14 +2596,20 @@ class App:
 
     def _lt_save_opts(self):
         st = self.cfg["settings"]
+        candidate = dict(st)
+        for key in ("tr_hotkey", "tr_toggle_hotkey"): candidate[key] = self.lt_vars[key].get().strip()
+        try: game_assistant.bindings(candidate, check_hotkey)
+        except Exception as error:
+            self._lt_status(t("ga.hotkey_error", e=error), "danger"); return False
         for k, v in self.lt_vars.items():
             val = v.get().strip()
-            if k == "tr_hotkey": st[k] = val or "<f7>"
+            if k in ("tr_hotkey", "tr_toggle_hotkey"): st[k] = val
             else:
                 try: st[k] = float(val) if k == "tr_alpha" else int(float(val))
                 except ValueError: pass
         st["tr_alpha"] = max(0.4, min(1.0, float(st.get("tr_alpha", 0.9))))
         save_cfg(self.cfg)
+        self._bind_global_hotkeys()
 
     def _lt_status(self, text, kind="muted"):
         if getattr(self, "lt_stat", None) and self.lt_stat.winfo_exists():
@@ -4139,19 +4322,7 @@ class App:
     def start(self, quiet=False):
         if self.cfg["settings"].get("scan_source", "screen") == "region" and not self.cfg["settings"].get("region"):
             return messagebox.showinfo(APP_NAME, t("msg.pick_region_first"))
-        try:
-            from pynput import keyboard
-            hk = {self.cfg["settings"]["hotkey"]: self.trigger}
-            vh = self.cfg["settings"].get("voice_hotkey")
-            if vh and vh not in hk: hk[vh] = self.toggle_voice
-            gh = self.cfg["settings"].get("tasks_hotkey")
-            if gh and gh not in hk: hk[gh] = self.run_claude_fetch
-            self.listener = keyboard.GlobalHotKeys(hk)
-            self.listener.start()
-        except Exception as e:
-            self.listener = None
-            if self.cfg["settings"]["scan_mode"] == "hotkey":
-                return messagebox.showerror(APP_NAME, t("err.hotkey_listener", e=e))
+        if not getattr(self._global_hotkeys, "listener", None): self._bind_global_hotkeys()
         if self.cfg["settings"]["scan_mode"] == "auto":
             self.auto_stop = threading.Event()
             threading.Thread(target=self.auto_loop, args=(self.auto_stop,), daemon=True).start()
@@ -4870,6 +5041,22 @@ class App:
         try:
             while True:
                 r = self.results.get_nowait()
+                if r[0] == "hotkey":
+                    self._hotkey_action(r[1]); continue
+                if r[0] == "translate_pad":
+                    if r[1] == getattr(self, "_lt_revision", 0): self.lt_once()
+                    continue
+                if r[0] == "speech_state":
+                    if r[1] == getattr(self, "_speech_generation", 0) and r[2] == "error": self._sp_status(t("sp.error", e=r[3]), "danger")
+                    continue
+                if r[0] == "voice_session":
+                    self._voice_event(*r[1:]); continue
+                if r[0] == "assistant":
+                    if self._assistant_jobs.is_current(r[1]) and not getattr(self, "_closing", False): r[2]()
+                    continue
+                if r[0] == "assistant_setup":
+                    if self._assistant_setup_jobs.is_current(r[1]): self._assistant_status(r[2])
+                    continue
                 if r[0] == "translation":
                     if self._translation_jobs.is_current(r[1]) and not getattr(self, "_closing", False):
                         try: r[2]()
@@ -5921,6 +6108,20 @@ class App:
     # ---------- Asistan ----------
     def build_asistan(self):
         f, st = ui_theme.scrollable(self.tabs["assistant"], PAL["bg"]), self.cfg["settings"]
+        quick = ttk.LabelFrame(f, text="🎮 " + t("ga.title")); quick.pack(fill="x", padx=10, pady=(8, 0))
+        self.ga_help = ttk.Label(quick, text=t("ga.help", voice=st.get("voice_hotkey", "<f9>"),
+                                pause=st.get("tr_toggle_hotkey", "<f6>"), cancel=st.get("assistant_cancel_hotkey", "<f12>")),
+                                wraplength=880, justify="left")
+        self.ga_help.pack(anchor="w", padx=10, pady=6)
+        self.ga_privacy = ttk.Label(quick, text=t("ga.privacy", provider=provider_label(st.get("ai_provider", "builtin"))),
+                                   wraplength=880, justify="left", foreground=PAL["muted"])
+        self.ga_privacy.pack(anchor="w", padx=10)
+        controls = ttk.Frame(quick); controls.pack(fill="x", padx=10, pady=8)
+        ttk.Button(controls, text=t("ga.prepare"), command=self.prepare_assistant).pack(side="left")
+        ttk.Button(controls, text=t("ga.cancel"), command=self.cancel_assistant).pack(side="left", padx=8)
+        self.ga_builtin = ttk.Label(quick, text=t("ga.builtin") if st.get("ai_provider") == "builtin" else "",
+                                    foreground=PAL["warning"], wraplength=880)
+        self.ga_builtin.pack(anchor="w", padx=10, pady=4)
         self.chat = tk.Text(f, height=13, state="disabled", wrap="word", font=("Segoe UI", 10))
         self.chat.tag_configure("user", foreground=PAL["accent"], font=(ui_theme.FONT_SEMI, 10))
         self.chat.tag_configure("asistan", foreground=PAL["fg"], spacing3=4)
@@ -5938,7 +6139,7 @@ class App:
         box = ttk.LabelFrame(f, text=t("ai.settings")); box.pack(fill="x", padx=10, pady=8)
         self.av = {k: tk.StringVar(value=str(st.get(k, ""))) for k in
                    ("ollama_url", "ollama_model", "claude_code_model", "claude_model", "claude_api_key", "openai_model", "openai_api_key",
-                    "stt_model", "stt_device", "tts_rate", "tts_voice", "voice_hotkey")}
+                    "stt_model", "stt_device", "tts_rate", "tts_voice", "voice_hotkey", "assistant_cancel_hotkey")}
         self.av["ai_provider"] = tk.StringVar(value=provider_label(st["ai_provider"] if st["ai_provider"] in PROVIDER_KEYS else "ollama"))
         self.abv = {k: tk.BooleanVar(value=bool(st.get(k, True))) for k in ("speak_verdict", "speak_chat")}
         ttk.Label(box, text=t("ai.provider")).grid(row=0, column=0, sticky="w", padx=8, pady=3)
@@ -5947,7 +6148,8 @@ class App:
                   (t("ai.cc_model"), "claude_code_model", 30), (t("ai.claude_model"), "claude_model", 30),
                   (t("ai.claude_key"), "claude_api_key", 30), (t("ai.openai_model"), "openai_model", 30), (t("ai.openai_key"), "openai_api_key", 30),
                   (t("ai.stt_model"), "stt_model", 12), (t("ai.stt_device"), "stt_device", 12),
-                  (t("ai.tts_rate"), "tts_rate", 12), (t("ai.tts_voice"), "tts_voice", 12), (t("ai.voice_hotkey"), "voice_hotkey", 12)]
+                  (t("ai.tts_rate"), "tts_rate", 12), (t("ai.tts_voice"), "tts_voice", 12), (t("ai.voice_hotkey"), "voice_hotkey", 12),
+                  (t("ga.cancel_key"), "assistant_cancel_hotkey", 12)]
         for i, (lab, k, w) in enumerate(fields, start=1):
             ttk.Label(box, text=lab).grid(row=i, column=0, sticky="w", padx=8, pady=2)
             ttk.Entry(box, textvariable=self.av[k], width=w, show="*" if k in ("claude_api_key", "openai_api_key") else "").grid(row=i, column=1, sticky="w")
@@ -5984,6 +6186,7 @@ class App:
         self.chat.see("end"); self.chat.config(state="disabled")
 
     def clear_chat(self):
+        self.cancel_assistant()
         self.chat_hist = []
         self.chat.config(state="normal"); self.chat.delete("1.0", "end"); self.chat.config(state="disabled")
 
@@ -5992,14 +6195,15 @@ class App:
         if txt:
             self.chat_in.delete(0, "end"); self.ask(txt)
 
-    def speak(self, text, fx=None):
+    def speak(self, text, fx=None, cancellable=False):
+        if self._microphone_busy(): return
         st = self.cfg["settings"]
         try: rate = int(float(st.get("tts_rate", 185)))
         except ValueError: rate = 185
         pack = voicepack.natural_pack(None, i18n.current_language())
         hint = "tr-tr" if pack == "natural_tr" else "en-us"
         self.speaker.say(text, rate, st.get("tts_voice") or hint, fx=False, pack=pack,
-                         online=bool(st.get("voice_online", False)))
+                         online=bool(st.get("voice_online", False)), cancellable=cancellable)
 
     def voice_demo(self):
         st = self.cfg["settings"]
@@ -6009,6 +6213,7 @@ class App:
         else: self.speak(t("ai.voice_test"))
 
     def speak_verdict(self, verdict, item, res, note):
+        if self._microphone_busy(): return
         if verdict == "ERROR": return
         st = self.cfg["settings"]
         pack = st.get("voice_pack", "tactical")
@@ -6078,13 +6283,16 @@ class App:
             return t("quick.last_plain", item=it["name"])
         return t("quick.help")
 
-    def ask(self, text, voice=False):
+    def ask(self, text, voice=False, voice_generation=None):
+        if not isinstance(text, str) or not text.strip() or getattr(self, "_closing", False): return
+        text = text.strip()[:4000]
         self.chat_add("user", text)
-        st, ctx = self.cfg["settings"], self.build_context()
+        st, ctx = dict(self.cfg["settings"]), self.build_context()
         self.chat_hist = (getattr(self, "chat_hist", []) + [{"role": "user", "content": text}])[-10:]
         hist, prov = list(self.chat_hist), st["ai_provider"]
         system = system_prompt() + t("ai.context_header") + ctx
-        def work():
+        if voice: self._assistant_status(t("ga.thinking") + "\n" + text[:180])
+        def work(token):
             try:
                 if prov == "ollama":
                     ans = ask_ollama(st["ollama_url"], st["ollama_model"], system, hist)
@@ -6100,25 +6308,51 @@ class App:
                     ans = ask_openai(key, st["openai_model"], system, hist)
                 else:
                     ans = self.quick_answer(text)
-                self.chat_hist.append({"role": "assistant", "content": ans})
+                if not isinstance(ans, str) or not ans.strip(): raise RuntimeError(t("ga.empty_answer"))
+                error = None
             except Exception as e:
-                self.results.put(("chat", "sys", t("ai.failed", e=e)))
+                error = t("ai.failed", e=e)
                 ans = self.quick_answer(text)
-            self.results.put(("chat", "asistan", ans))
-        threading.Thread(target=work, daemon=True).start()
+            def deliver():
+                if voice_generation is not None and not self._voice_session.current(voice_generation): return
+                if error: self.chat_add("sys", error)
+                self.chat_hist = (self.chat_hist + [{"role": "assistant", "content": ans}])[-10:]
+                self.chat_add("asistan", ans)
+                if voice:
+                    spoken = (t("ga.provider_fallback") + " " if error else "") + ans
+                    self._assistant_status(spoken, answer=True)
+                    self.speak(spoken, cancellable=True)
+                elif self.cfg["settings"].get("speak_chat"): self.speak(ans)
+            if self._assistant_jobs.is_current(token): self.results.put(("assistant", token, deliver))
+        self._assistant_jobs.submit(work)
 
     # ---------- sesli komut ----------
-    def toggle_voice(self):  # pynput thread'inden de çağrılır: tk'ya dokunma
-        try:
-            if not self.rec.active:
-                self.rec.start()
-                self.results.put(("vstatus", t("ai.listening")))
-                threading.Timer(15, lambda: self.rec.active and self.finish_voice()).start()
-            else:
-                self.finish_voice()
-        except Exception as e:
-            log.exception("Microphone failed")
-            self.results.put(("vstatus", t("err.mic", e=e)))
+    def toggle_voice(self):
+        if getattr(self, "_closing", False): return
+        if not self._voice_session.recording and self._voice_session.state == "idle":
+            self._assistant_jobs.invalidate()
+            self._assistant_setup_jobs.invalidate()
+            self.speaker.stop()
+        self._voice_session.toggle()
+
+    def cancel_assistant(self):
+        self._voice_session.cancel()
+        self._assistant_jobs.invalidate()
+        self._assistant_setup_jobs.invalidate()
+        self.speaker.stop()
+        self.voice_busy = False
+        self._assistant_status(t("ga.cancelled"))
+
+    def prepare_assistant(self):
+        self._assistant_status(t("ga.preparing"))
+        def prepare(token):
+            try:
+                load_assistant_stt(self.cfg)
+                message = t("ga.ready")
+            except Exception as error:
+                message = t("ga.error", e=error)
+            if self._assistant_setup_jobs.is_current(token): self.results.put(("assistant_setup", token, message))
+        self._assistant_setup_jobs.submit(prepare)
 
     def run_voice_diag(self):
         self.vstatus.config(text=t("ai.diag_running"))
@@ -6129,39 +6363,25 @@ class App:
         threading.Thread(target=work, daemon=True).start()
 
     def finish_voice(self):
-        if self.voice_busy: return
-        self.voice_busy = True
-        def work():
-            try:
-                audio = self.rec.stop()
-                if len(audio) < 8000:
-                    return self.results.put(("vstatus", t("ai.too_short")))
-                self.results.put(("vstatus", t("ai.transcribing")))
-                text = transcribe(audio, self.cfg)
-                self.results.put(("voice", text) if text else ("vstatus", t("ai.not_understood")))
-            except RuntimeError as e:                  # konuşma tanıyıcı kurulu değil: beklenen durum, iz kaydı gerekmez
-                log.warning("Voice command unavailable: %s", e)
-                self.results.put(("vstatus", t("err.stt", e=e)))
-            except Exception as e:
-                log.exception("Voice command failed")
-                self.results.put(("vstatus", t("err.stt", e=e)))
-            finally:
-                self.voice_busy = False
-        threading.Thread(target=work, daemon=True).start()
+        self._voice_session.finish()
 
     def save_ai_settings(self):
         st = self.cfg["settings"]
         try:
             check_hotkey(self.av["voice_hotkey"].get())
+            candidate = dict(st, voice_hotkey=self.av["voice_hotkey"].get(), assistant_cancel_hotkey=self.av["assistant_cancel_hotkey"].get())
+            game_assistant.bindings(candidate, check_hotkey)
             st["tts_rate"] = int(float(self.av["tts_rate"].get()))
         except Exception as e:
             return messagebox.showerror(APP_NAME, t("err.bad_setting", e=e))
         st["ai_provider"] = next((k for k in PROVIDER_KEYS if provider_label(k) == self.av["ai_provider"].get()), "ollama")
         for k in ("ollama_url", "ollama_model", "claude_code_model", "claude_model", "claude_api_key", "openai_model", "openai_api_key",
-                  "stt_model", "stt_device", "tts_voice", "voice_hotkey"):
+                  "stt_model", "stt_device", "tts_voice", "voice_hotkey", "assistant_cancel_hotkey"):
             st[k] = self.av[k].get().strip()
         for k, v in self.abv.items(): st[k] = v.get()
         save_cfg(self.cfg)
+        self._bind_global_hotkeys()
+        self.ga_help.config(text=t("ga.help", voice=st["voice_hotkey"], pause=st.get("tr_toggle_hotkey", "<f6>"), cancel=st["assistant_cancel_hotkey"]))
         if self.running: self.stop(quiet=True); self.start(quiet=True)
         self.refresh_header()
         self.toast(t("ai.saved"))
@@ -6314,11 +6534,13 @@ class App:
         st = self.cfg["settings"]
         try:
             check_hotkey(self.gv["tasks_hotkey"].get())
+            game_assistant.bindings(dict(st, tasks_hotkey=self.gv["tasks_hotkey"].get()), check_hotkey)
         except Exception as e:
             return messagebox.showerror(APP_NAME, t("err.bad_setting", e=e))
         st["tasks_hotkey"] = self.gv["tasks_hotkey"].get().strip()
         st["claude_tasks_replace"] = bool(self.cl_replace.get())
         save_cfg(self.cfg)
+        self._bind_global_hotkeys()
         if self.running: self.stop(); self.start()
         self.toast(t("msg.settings_saved"))
 
@@ -7523,6 +7745,7 @@ class App:
         st = dict(self.cfg["settings"])
         try:
             check_hotkey(self.sv["hotkey"].get())
+            game_assistant.bindings(dict(st, hotkey=self.sv["hotkey"].get()), check_hotkey)
             st["keep_threshold"], st["consider_threshold"] = itempolicy.validate_thresholds(
                 self.sv["keep_threshold"].get(), self.sv["consider_threshold"].get())
             for k in ("overlay_seconds", "auto_interval_ms"):
@@ -7565,6 +7788,7 @@ class App:
         st["ui_theme"] = next((m for m in ui_theme.THEME_MODES if t("theme." + m) == self.theme_var.get()), old_theme)
         self.sounds.enabled = bool(st.get("ui_sounds", True))
         save_cfg(self.cfg); self.tess = find_tesseract(self.cfg)
+        self._bind_global_hotkeys()
         setup_logging(st["log_level"], st["log_max_kb"], st["log_backups"])
         log.info("Settings saved (log level %s)", st["log_level"])
         if self.running: self.stop(quiet=True); self.start(quiet=True)
@@ -8284,7 +8508,9 @@ class App:
         if not force and st0.get("svc_close_to_tray") and self.tray and self.tray.available:
             self.root.withdraw(); self.tray.notify(t("svc.in_tray")); return
         self._closing = True
-        for name in ("_translation_jobs", "_debug_jobs"):
+        self._global_hotkeys.stop()
+        self._voice_session.close()
+        for name in ("_translation_jobs", "_debug_jobs", "_assistant_jobs", "_assistant_setup_jobs"):
             worker = getattr(self, name, None)
             if worker: worker.close()
         self.service_stop()
