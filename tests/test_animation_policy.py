@@ -19,6 +19,7 @@ class FakeRoot:
         self._td2_animation_multiplier = 1.0
         self.jobs = []
         self.draws = 0
+        self.pointer = (-1, -1)
 
     def _root(self): return self
     def state(self): return "normal"
@@ -30,8 +31,11 @@ class FakeRoot:
     def winfo_rootx(self): return 0
     def winfo_rooty(self): return 0
     def winfo_height(self): return 16
-    def winfo_pointerxy(self): return (-1, -1)
+    def winfo_pointerxy(self): return self.pointer
     def delete(self, *args): self.draws += 1
+    def create_oval(self, *args, **kwargs): self.draws += 1; return self.draws
+    def coords(self, *args): pass
+    def itemconfigure(self, *args, **kwargs): pass
 
 
 class FakeWindow:
@@ -52,9 +56,10 @@ class AnimationTests(unittest.TestCase):
         self.assertEqual(root.jobs[-1][0], 300)
         self.assertTrue(trail.alive)
         root._td2_suspend_animations = False
+        root.pointer = (5, 5)
         root.jobs[-1][1]()
         self.assertEqual(root.draws, 1)
-        self.assertEqual(root.jobs[-1][0], 33)
+        self.assertEqual(root.jobs[-1][0], 40)
 
     def test_watch_keeps_last_frame_and_resumes(self):
         root = FakeRoot()
