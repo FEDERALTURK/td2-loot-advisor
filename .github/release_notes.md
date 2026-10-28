@@ -10,7 +10,7 @@ Windows "kişisel bilgisayarınızı korudu" derse: **Ek bilgi → Yine de çal�
 
 **9.0.6 — Daha kapsamlı oyun kütüphanesi ve doğru eşya tanıma**
 
-- Div2Hub'ın sabitlenmiş CC BY 4.0 veri anlık görüntüsü mevcut kaynaklarla birleştirildi. Katalogda 898 ekipman/eşya kaydı, 380 silah indeksi kaydı, 224 ekipman yeteneği, 181 silah yeteneği, 255 silah modu, 17 ekipman modu, 43 skill varyantı ve 9 Prototype Augment bulunur.
+- Div2Hub'ın sabitlenmiş CC BY 4.0 veri anlık görüntüsü mevcut kaynaklarla birleştirildi. Katalogda 898 ekipman/eşya kaydı, 379 silah indeksi kaydı, 224 ekipman yeteneği, 181 silah yeteneği, 255 silah modu, 17 ekipman modu, 43 skill varyantı ve 9 Prototype Augment bulunur.
 - Health Damage eşleştirmesi artık Health ile çakışmaz. Beş ve daha fazla basamaklı sayılar, aksanlı ad normalizasyonu ve Perfect yetenek adlarının eşleştirilmesi düzeltildi.
 - Named/Exotic silahların sabit yetenekleri tarama sonucuna eklenir. Prototype Augment'ler kütüphanede ve build hedeflerinde görünür; eşya puanlaması yeteneği yalnız uyumlu slot/tür ve Prototype eşyalarla karşılaştırır.
 - Kütüphane Excel dosyası yetenek ilişkileri, mod uyumluluğu/etkileri ve skill varyantlarıyla yeniden üretildi. Div2Hub lisans/atıf ve senkronizasyon yönergesi eklendi.
