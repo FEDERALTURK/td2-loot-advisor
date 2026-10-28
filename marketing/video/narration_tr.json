@@ -1,0 +1,50 @@
+[
+  {
+    "chapter": "WASHINGTON, D.C. — THE DIVISION 2",
+    "title": "Her düşüş, yeni bir karar.",
+    "body": "Washington sokaklarında her görevden sonra yeni bir eşya düşüyor. Sandık doluyor, seçenekler çoğalıyor. Peki bu parça, kurduğun build’e gerçekten katkı sağlar mı? TD2 Loot Advisor, karar verirken ihtiyacın olan bilgileri bir araya getiriyor.",
+    "visual": "intro"
+  },
+  {
+    "chapter": "01 / EKRANDAN OKUMA",
+    "title": "Kartı aç. F8’e bas.",
+    "body": "Eşya kartını açıp F8’e basıyorsun. Program ekrandaki yazıları okuyor; eşya adını, özelliklerini ve yeteneklerini tanımaya çalışıyor. Sonra bilgileri oyun kütüphanesiyle karşılaştırıyor. İstersen otomatik taramayı da açabilirsin.",
+    "visual": "scan"
+  },
+  {
+    "chapter": "02 / BUILD ANALİZİ",
+    "title": "Build hedefinle karşılaştır.",
+    "body": "Şimdi eşyan, aktif build’inle karşılaştırılıyor. Özelliklerin ne kadar uyduğunu, rulo kalitesini ve nelerin eksik kaldığını görüyorsun. Sonuç; Sakla, Düşün, Kır ya da Kontrol Et diye gösteriliyor. Yine de karar senin.",
+    "visual": "build"
+  },
+  {
+    "chapter": "03 / SANDIK VE EKSİK PARÇA",
+    "title": "Elindekini tanı. Eksiğini izle.",
+    "body": "Taranan parçalar sandık envanterinde birikiyor. Build düzenleyici, elindeki parçaları birbiriyle karşılaştırıyor ve sıradaki olası yükseltmeleri gösteriyor. Eksik parça görünümü de tamamlamak istediğin build için hangi yuvaya odaklanacağını hatırlatıyor.",
+    "visual": "stash"
+  },
+  {
+    "chapter": "04 / GÖREVLER VE OYUN BİLGİSİ",
+    "title": "Hedefler, build’ler, oyun bilgisi.",
+    "body": "Günlük ve haftalık görevlerini, sezon hedeflerini, ilerlemeni tek yerden takip et. Build’lerini düzenle; meta build’lere, eşya ansiklopedisine ve haber akışına göz at. Görev ayrıntılarında adımlar ve kaynak bağlantıları da var.",
+    "visual": "tasks"
+  },
+  {
+    "chapter": "05 / TELEFON ARKADAŞI",
+    "title": "Masaüstü bilgisi, telefonunda.",
+    "body": "Telefon Arkadaşı uygulaması, masaüstündeki son tarama ve build bilgilerini aynı özel Wi-Fi ağında gösteriyor. QR kodla eşleştirmen yeterli. Telefon bilgileri yalnızca görüntüler; masaüstüne komut göndermez. Android uygulaması şu an beta.",
+    "visual": "phone"
+  },
+  {
+    "chapter": "TASARIM İLKESİ / GÜVEN VE KONTROL",
+    "title": "Oyun belleğine dokunmaz.",
+    "body": "Program oyun ekranını ve oyun ayar dosyasını okur. Oyun belleğine erişmez, oyuna tuş göndermez. Ekran tanıma yanılabilir. Özellikle nadir bir eşyayı parçalamadan önce, oyun içindeki bilgileri mutlaka bir kez daha kontrol et.",
+    "visual": "safety"
+  },
+  {
+    "chapter": "AJAN, EKİPMANINI TANI.",
+    "title": "Daha bilinçli loot kararları.",
+    "body": "Kısacası: eşyanı tara, build’ini takip et, kararını kendin ver. TD2 Loot Advisor’ın en yeni masaüstü sürümüne GitHub Releases sayfasından ulaşabilirsin. Bu, Ubisoft ve Massive Entertainment’tan bağımsız bir topluluk projesidir.",
+    "visual": "outro"
+  }
+]

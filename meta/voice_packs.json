@@ -1,0 +1,141 @@
+{
+  "schema": 1,
+  "engine": "Microsoft Edge Neural via edge-tts",
+  "runtime": "offline PCM WAV",
+  "packs": {
+    "natural_tr": {
+      "language": "tr",
+      "title": "Türkçe — Doğal",
+      "voice": "tr-TR-EmelNeural",
+      "events": {
+        "keep": {
+          "file": "voices/natural_tr/keep.wav",
+          "text": "Bu eşyayı sakla. İşine yarayabilir.",
+          "seconds": 4.464,
+          "sha256": "64f0411030a9dbae6522afdf8f6af41b53505f9341d1b4e75181156a3eeb9484"
+        },
+        "consider": {
+          "file": "voices/natural_tr/consider.wav",
+          "text": "Bu eşya değerlendirilmeye değer. Bir göz at.",
+          "seconds": 4.896,
+          "sha256": "5aca8a136e506c06bca18650427acc66af0f00e0bf53fa46b765de6a8aae5927"
+        },
+        "dismantle": {
+          "file": "voices/natural_tr/dismantle.wav",
+          "text": "Mevcut tercihlerine göre bu eşyayı parçalayabilirsin.",
+          "seconds": 4.176,
+          "sha256": "3bfe46ddb889695600e61d20f5115d2bd966baf291e49f2fe844e7fa86e80f1b"
+        },
+        "review": {
+          "file": "voices/natural_tr/review.wav",
+          "text": "Bu eşyayı elle kontrol etmeni öneriyorum.",
+          "seconds": 3.792,
+          "sha256": "3017acfe25ebcea4ca286fe66ba5a937565cb469e1ac8801e3815397653ae275"
+        },
+        "exotic": {
+          "file": "voices/natural_tr/exotic.wav",
+          "text": "Egzotik bir eşya bulundu. Saklamayı unutma.",
+          "seconds": 4.8,
+          "sha256": "2d8f82281a9e764bab8809b6ae7c9f841549d6ffb2ea028daaeafc188eb98378"
+        },
+        "named": {
+          "file": "voices/natural_tr/named.wav",
+          "text": "Özel isimli bir eşya bulundu.",
+          "seconds": 2.832,
+          "sha256": "38c2c52de11ed063c5d9a7b5d97899218dcfd32e258fa72988f15566aa2edade"
+        },
+        "build": {
+          "file": "voices/natural_tr/build.wav",
+          "text": "Seçili diziliminle uyumlu bir eşya.",
+          "seconds": 3.192,
+          "sha256": "6fb9f68b01ed64ada465d37dd56ad180d3222877e4602c1ec41068db6347f2e2"
+        },
+        "fills_gap": {
+          "file": "voices/natural_tr/fills_gap.wav",
+          "text": "Bu parça eksik bir yuvayı tamamlıyor.",
+          "seconds": 3.264,
+          "sha256": "35cb5d78fcf46859442a116ca82921544ecc3715b6b539c064658b32168a1b0f"
+        },
+        "upgrade": {
+          "file": "voices/natural_tr/upgrade.wav",
+          "text": "Güzel bir gelişme. Mevcut parçandan daha iyi görünüyor.",
+          "seconds": 5.352,
+          "sha256": "7fcc7cabe8ba663b4580889c4c9eb02911dede900e7a3855e79d2ed231896995"
+        },
+        "demo": {
+          "file": "voices/natural_tr/demo.wav",
+          "text": "Merhaba ajan. Eşyalarını birlikte değerlendirelim. Hazırım, başlayabiliriz.",
+          "seconds": 7.776,
+          "sha256": "10f7a36ca20ce4217405d4aa9f7b58cb868cbb6ab6601411ec6d4e89fc82f9db"
+        }
+      }
+    },
+    "natural_en": {
+      "language": "en",
+      "title": "English — Natural",
+      "voice": "en-US-AriaNeural",
+      "events": {
+        "keep": {
+          "file": "voices/natural_en/keep.wav",
+          "text": "Keep this item. It could be useful.",
+          "seconds": 3.984,
+          "sha256": "b099fe1694f14614b5ad2ac74a3d08ea118e021725c90e82c896bf079b34674e"
+        },
+        "consider": {
+          "file": "voices/natural_en/consider.wav",
+          "text": "This item is worth a closer look.",
+          "seconds": 2.904,
+          "sha256": "0fd8a247d2952283acae93ff04e3f69fbf8b1e0370ba4e23bb463da0802972c1"
+        },
+        "dismantle": {
+          "file": "voices/natural_en/dismantle.wav",
+          "text": "Based on your current preferences, you can dismantle this item.",
+          "seconds": 4.368,
+          "sha256": "90d8da90e84f61d17c952ea5b89239beb0c4b01f672c7b3f44107d7e972e4282"
+        },
+        "review": {
+          "file": "voices/natural_en/review.wav",
+          "text": "I recommend checking this item yourself.",
+          "seconds": 3.12,
+          "sha256": "a33f0ccef502e0df600ff5c5f378b5bd61161961c8196fe3887e9aaecbb260f6"
+        },
+        "exotic": {
+          "file": "voices/natural_en/exotic.wav",
+          "text": "Exotic item detected. Make sure to keep it safe.",
+          "seconds": 4.92,
+          "sha256": "0874c41a8305ba92c794c1c899df83e0fc5b52e6d50587d3c6492e2b6f71741c"
+        },
+        "named": {
+          "file": "voices/natural_en/named.wav",
+          "text": "A named item has been found.",
+          "seconds": 2.712,
+          "sha256": "e19c4054f915a5976af19a8515ed7c64bb102ca29670a8cf1cac0e3c52fa0302"
+        },
+        "build": {
+          "file": "voices/natural_en/build.wav",
+          "text": "This item matches your selected build.",
+          "seconds": 3.168,
+          "sha256": "22e4ebba25e997025a63bba14fc717577e27a20e04b9de7bdf7134a03172dfe7"
+        },
+        "fills_gap": {
+          "file": "voices/natural_en/fills_gap.wav",
+          "text": "This piece fills an empty slot in your build.",
+          "seconds": 3.36,
+          "sha256": "362c264d0c6bbb717bae9945b64543f5c95403f0500ec932f35062f3ee37144d"
+        },
+        "upgrade": {
+          "file": "voices/natural_en/upgrade.wav",
+          "text": "A nice upgrade. This looks better than your current piece.",
+          "seconds": 5.016,
+          "sha256": "b4364e9dcaf7217a790ae3e99449383fd66af5c70a0421feccf9a9f689af0a01"
+        },
+        "demo": {
+          "file": "voices/natural_en/demo.wav",
+          "text": "Hello, agent. Let's take a look at your gear. I'm ready when you are.",
+          "seconds": 6.624,
+          "sha256": "a6128db9d4decd49c5bafceeae007ca89c62360cb5e81cf565793ea0d6f28698"
+        }
+      }
+    }
+  }
+}

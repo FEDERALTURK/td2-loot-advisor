@@ -1,0 +1,51 @@
+# Canlı çeviri modeli: OPUS-MT (Helsinki-NLP, CC-BY 4.0) → CTranslate2 int8 paketi → "mt-models" ön sürümüne yüklenir.
+# Program modeli ilk kullanımda buradan indirir ve SHA-256 ile doğrular. Yalnız elle çalıştırılır.
+name: Build translation model
+
+on:
+  workflow_dispatch:
+    inputs:
+      upload:
+        description: "mt-models ön sürümüne yükle"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with: { python-version: "3.12" }
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install "transformers<5" sentencepiece ctranslate2 huggingface_hub sacremoses
+      - name: Big model (tc-big en-tr)
+        id: big
+        continue-on-error: true
+        run: python scripts/mt/build_model.py Helsinki-NLP/opus-mt-tc-big-en-tr out
+      - name: Fallback model (en-trk, multi-Turkic)
+        if: steps.big.outcome != 'success'
+        run: python scripts/mt/build_model.py Helsinki-NLP/opus-mt-en-trk out ">>tur<<"
+      - name: Seed Turkish encyclopedia descriptions
+        run: python scripts/mt/translate_descriptions.py out/model out/descriptions_i18n.json
+      - name: Upload artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: mt-model
+          path: |
+            out/*.zip*
+            out/descriptions_i18n.json
+      - name: Publish to mt-models pre-release
+        if: inputs.upload
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view mt-models >/dev/null 2>&1 || gh release create mt-models --prerelease --latest=false --title "Translation models" --notes "OPUS-MT (Helsinki-NLP, CC-BY 4.0) models converted to CTranslate2 for TD2 Loot Advisor live translation. Not an app release."
+          gh release upload mt-models out/*.zip out/*.sha256 --clobber

@@ -1,0 +1,50 @@
+# Özgün 3D ajanların 360° kareleri: her kıyafet ayrı makinede (Blender bpy, Cycles CPU) render edilir.
+name: Render agents
+
+on:
+  workflow_dispatch:
+    inputs:
+      frames:
+        description: "Kare sayısı (360°)"
+        default: "48"
+      samples:
+        description: "Cycles örnek sayısı"
+        default: "40"
+      outfits:
+        description: "Kıyafetler (JSON liste)"
+        default: '["operator","scout","heavy","urban","arctic"]'
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        outfit: ${{ fromJSON(github.event.inputs.outfits) }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Install Blender (bpy) + libs
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libxrender1 libxi6 libxkbcommon0 libsm6 libgl1 libxxf86vm1 libxfixes3 libegl1 >/dev/null
+          python -m pip install -q bpy numpy pillow
+          python -c "import bpy; print('Blender', bpy.app.version_string)"
+      - name: MakeHuman base body (CC0)
+        run: |
+          git clone -q --depth 1 --filter=blob:none --sparse https://github.com/makehumancommunity/makehuman mh
+          git -C mh sparse-checkout set makehuman/data/3dobjs makehuman/data/rigs
+          python scripts/agents3d/mh_pose.py mh/makehuman/data posed.json
+      - name: Render ${{ matrix.outfit }}
+        run: |
+          python scripts/agents3d/build_mh.py -- --pose posed.json --outfit ${{ matrix.outfit }} \
+            --turntable ${{ github.event.inputs.frames }} --size 480x560 --samples ${{ github.event.inputs.samples }} --out render
+      - name: Pack frames
+        run: python scripts/agents3d/pack_frames.py render meta/agents/${{ matrix.outfit }} ${{ matrix.outfit }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: agent-${{ matrix.outfit }}
+          path: meta/agents/${{ matrix.outfit }}

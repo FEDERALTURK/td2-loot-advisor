@@ -1,0 +1,167 @@
+# Windows kurulum dosyasını GitHub'ın Windows sunucusunda derler.
+# Elle: Actions → "Build Windows installer" → Run workflow.  Etiket (v5.0 gibi) gönderilince Releases'e de ekler.
+name: Build Windows installer
+
+on:
+  workflow_dispatch:
+    inputs:
+      release:
+        description: "Releases'te sürüm yayınla (etiket v<sürüm> oluşturulur)"
+        type: boolean
+        default: false
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+env:
+  PYTHONIOENCODING: utf-8
+  PYTHONUTF8: "1"
+  HF_HUB_DISABLE_XET: "1"
+  TD2_NO_WELCOME: "1"      # hesap karşılama penceresi diğer arayüz testlerini örtmesin
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Stability regressions before packaging
+        shell: pwsh
+        run: |
+          python -m pip install mss pillow pytesseract pynput numpy -r requirements-dev.txt
+          if ($LASTEXITCODE -ne 0) { throw "test dependency installation failed" }
+          foreach ($suite in @('test_game_assistant.py', 'test_itempolicy.py', 'test_workqueue.py', 'test_performance.py', 'test_animation_policy.py', 'test_app_stability.py', 'test_translation_reliability.py', 'test_localapi_backpressure.py', 'test_launcher.py', 'test_ocr_serialization.py', 'test_inplace_anchors.py', 'test_natural_voice.py', 'test_overlay.py', 'test_scan_latency.py', 'test_region_scan_fastpath.py', 'test_core.py', 'test_livetranslate.py', 'test_autoscan.py', 'test_stability_widgets.py')) {
+            python -B "tests/$suite"
+            if ($LASTEXITCODE -ne 0) { throw "$suite failed" }
+          }
+
+      - name: Build installer
+        shell: cmd
+        env:
+          CI: "1"
+        run: scripts\build_installer.bat
+
+      - name: Test - install silently and start the app
+        shell: pwsh
+        timeout-minutes: 15
+        run: |
+          $setup = Get-ChildItem installer\TD2LootAdvisor_Setup_*.exe | Select-Object -First 1
+          if (-not $setup) { throw "no installer" }
+          $dir = "$env:RUNNER_TEMP\td2app"
+          Start-Process $setup.FullName -ArgumentList "/VERYSILENT","/SUPPRESSMSGBOXES","/NORESTART","/DIR=$dir" -Wait
+          $exe = Join-Path $dir "TD2LootAdvisor.exe"
+          if (-not (Test-Path $exe)) { throw "exe not installed" }
+          $p = Start-Process $exe -PassThru
+          $ok = $false
+          for ($i = 0; $i -lt 60; $i++) {
+            Start-Sleep -Seconds 2
+            $log = Join-Path $dir "logs\app.log"
+            if ((Test-Path $log) -and (Select-String -Path $log -Pattern "UI ready" -Quiet)) { $ok = $true; break }
+            if ($p.HasExited) { break }
+          }
+          if (Test-Path (Join-Path $dir "logs\app.log")) { Get-Content (Join-Path $dir "logs\app.log") -Tail 25 }
+          Get-Process TD2LootAdvisor -ErrorAction SilentlyContinue | Stop-Process -Force
+          if (-not $ok) { throw "app did not reach 'UI ready'" }
+          if (Select-String -Path (Join-Path $dir "logs\app.log") -Pattern "Traceback" -Quiet) { throw "traceback in app.log" }
+          Write-Host "App started fine."
+          # ekran kartı (DirectML) denemesi kurulu .exe'den: pencere modunda da sonuç dosyaya yazılmalı
+          $card = Get-ChildItem -Path $dir -Recurse -Filter bench_card.jpg | Select-Object -First 1
+          $pj = Join-Path $env:RUNNER_TEMP "probe.json"
+          $pp = Start-Process $exe -ArgumentList "--dml-probe", "`"$($card.FullName)`"", "`"$pj`"" -PassThru
+          if (-not $pp.WaitForExit(240000)) { Stop-Process -Id $pp.Id -Force; throw "dml probe hung" }
+          if (-not (Test-Path $pj)) { throw "dml probe wrote no result" }
+          $pr = Get-Content $pj -Raw | ConvertFrom-Json
+          Write-Host "DML probe:" (Get-Content $pj -Raw)
+          if (-not ($pr.providers -contains "DmlExecutionProvider")) { throw "DirectML provider missing in package" }
+          if ($pr.similarity -lt 0.97) { throw "DirectML result differs from CPU" }
+          # canlı çeviri altyapısı pakette olmalı
+          $lj = Join-Path $env:RUNNER_TEMP "lt.json"
+          $lp = Start-Process $exe -ArgumentList "--lt-check", "`"$lj`"" -PassThru
+          if (-not $lp.WaitForExit(60000)) { Stop-Process -Id $lp.Id -Force; throw "lt check hung" }
+          Write-Host "LT check:" (Get-Content $lj -Raw)
+          if (-not (Get-Content $lj -Raw | ConvertFrom-Json).ok) { throw "translation runtime missing in package" }
+          # Both recorded packs and online speech dependencies must be present.
+          $vj = Join-Path $env:RUNNER_TEMP "voice.json"
+          $vp = Start-Process $exe -ArgumentList "--voice-check", "`"$vj`"" -PassThru
+          if (-not $vp.WaitForExit(60000)) { Stop-Process -Id $vp.Id -Force; throw "voice check hung" }
+          if (-not (Test-Path $vj)) { throw "voice check wrote no result" }
+          $vr = Get-Content $vj -Raw | ConvertFrom-Json
+          Write-Host "Voice check:" (Get-Content $vj -Raw)
+          if (-not $vr.ok -or $vr.recordings -ne 20) { throw "voice packs or online runtime missing in package" }
+          $aj = Join-Path $env:RUNNER_TEMP "assistant.json"
+          $ap = Start-Process $exe -ArgumentList "--assistant-check", "`"$aj`"" -PassThru
+          if (-not $ap.WaitForExit(60000)) { Stop-Process -Id $ap.Id -Force; throw "assistant check hung" }
+          if (-not (Test-Path $aj)) { throw "assistant check wrote no result" }
+          Write-Host "Assistant check:" (Get-Content $aj -Raw)
+          if (-not (Get-Content $aj -Raw | ConvertFrom-Json).ok) { throw "assistant runtime missing" }
+          $sj = Join-Path $env:RUNNER_TEMP "assistant-stt.json"
+          $sm = Join-Path $env:RUNNER_TEMP "assistant-model"
+          $sp = Start-Process $exe -ArgumentList "--assistant-stt-probe", "`"$sm`"", "`"$sj`"" -PassThru
+          if (-not $sp.WaitForExit(360000)) { Stop-Process -Id $sp.Id -Force; throw "packaged Turkish STT probe hung" }
+          if (-not (Test-Path $sj)) { throw "STT probe wrote no result" }
+          Write-Host "Packaged Turkish STT:" (Get-Content $sj -Raw)
+          if (-not (Get-Content $sj -Raw | ConvertFrom-Json).ok) { throw "packaged Turkish recognition failed" }
+          # güncelleme, program sistem tepsisindeyken de kurulabilmeli (dosyalar kilitli kalmamalı)
+          $cfg = Join-Path $dir "builds.json"
+          $j = Get-Content $cfg -Raw | ConvertFrom-Json
+          $j.settings | Add-Member -NotePropertyName svc_close_to_tray -NotePropertyValue $true -Force
+          $j | ConvertTo-Json -Depth 50 | Set-Content -Encoding utf8 $cfg
+          $n0 = (Select-String -Path (Join-Path $dir "logs\app.log") -Pattern "UI ready").Count
+          $p = Start-Process $exe -PassThru
+          for ($i = 0; $i -lt 60; $i++) { Start-Sleep 2; if ((Select-String -Path (Join-Path $dir "logs\app.log") -Pattern "UI ready").Count -gt $n0) { break } }
+          Start-Sleep 4
+          $null = $p.CloseMainWindow(); Start-Sleep 4
+          $alive = @(Get-Process TD2LootAdvisor -ErrorAction SilentlyContinue).Count
+          Write-Host "after closing the window (close-to-tray on): processes alive = $alive"
+          if ($alive -lt 1) { throw "close-to-tray test did not keep the app in the tray" }
+          $u = Start-Process $setup.FullName -ArgumentList "/SILENT","/SUPPRESSMSGBOXES","/NORESTART","/CLOSEAPPLICATIONS","/DIR=$dir" -PassThru
+          if (-not $u.WaitForExit(300000)) { Stop-Process -Id $u.Id -Force; throw "update over tray app hung" }
+          Write-Host "update installer exit code:" $u.ExitCode
+          if ($u.ExitCode -ne 0) { throw "update over a tray app failed (exit $($u.ExitCode))" }
+          if (@(Get-Process TD2LootAdvisor -ErrorAction SilentlyContinue).Count -gt 0) { Get-Process TD2LootAdvisor | Stop-Process -Force; throw "old app still running after update" }
+          Write-Host "Update over tray app: OK"
+
+      - name: Portable zip
+        shell: pwsh
+        run: |
+          $ver = (python scripts/version.py).Trim()
+          Compress-Archive -Path dist\TD2LootAdvisor\* -DestinationPath "installer\TD2LootAdvisor_${ver}_portable.zip" -Force
+          # uygulama içi güncelleyici indirdiği dosyayı bununla doğrular
+          Get-ChildItem installer -File | Where-Object { $_.Extension -in ".exe", ".zip" } | ForEach-Object {
+            "{0}  {1}" -f (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower(), $_.Name
+          } | Set-Content -Encoding ascii "installer\SHA256SUMS.sha256"
+          Get-Content installer\SHA256SUMS.sha256
+          Get-ChildItem installer | Format-Table Name, Length
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v5
+        with:
+          name: TD2LootAdvisor-installer
+          path: installer/*
+          if-no-files-found: error
+
+      - name: Release version
+        id: ver
+        shell: pwsh
+        run: |
+          $v = (python scripts/version.py).Trim()
+          if ("${{ github.ref_type }}" -eq "tag") { $t = "${{ github.ref_name }}" } else { $t = "v$v" }
+          "tag=$t" >> $env:GITHUB_OUTPUT
+
+      - name: Publish release
+        if: startsWith(github.ref, 'refs/tags/') || inputs.release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.ver.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          name: TD2 Loot Advisor ${{ steps.ver.outputs.tag }}
+          make_latest: true
+          files: installer/*
+          body_path: .github/release_notes.md
+          generate_release_notes: true

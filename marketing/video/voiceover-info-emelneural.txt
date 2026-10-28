@@ -1,0 +1,3 @@
+Ses motoru: Microsoft Edge Neural / tr-TR-EmelNeural
+Ses uzunluğu: 142.75 saniye
+Okuma ayarı: Edge Neural, rate +0%, pitch +0Hz

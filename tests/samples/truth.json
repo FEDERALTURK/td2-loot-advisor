@@ -1,0 +1,10 @@
+{
+  "_note": "Real game cards captured at 3440x1440. 'scale' simulates other screen heights. Add new samples: card PNG + an entry here.",
+  "samples": [
+    {"file": "holster_scrolled_3440x1440.png", "name": null, "kind": "gear",
+     "attrs": {"weapon_damage": 15.0, "crit_chance": 6.0}},
+    {"file": "stoner_lamg_3440x1440.png", "name": "Stoner LAMG", "kind": "weapon", "slot": "Weapon",
+     "attrs": {"weapon_type_damage": 11.1, "damage_out_of_cover": 7.0, "crit_chance": 8.5}}
+  ],
+  "resolutions": {"1440p": 1.0, "1080p": 0.75, "720p": 0.5, "480p": 0.3333}
+}

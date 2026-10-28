@@ -1,0 +1,6303 @@
+{
+ "schema": 1,
+ "version": "2026-10-25.5",
+ "source": "The Division Wiki (fandom) + mx-division-builds data (CC BY-NC-SA 4.0, mxswat) + manual + wiki library builder (brand/gear set pieces) + TD2_Kutuphane.xlsx (Ubisoft sezon notları Y8)",
+ "prototype_multiplier": 1.5,
+ "gear_sets": [
+  "Striker's Battlegear",
+  "True Patriot",
+  "Hunter's Fury",
+  "Heartbreaker",
+  "Umbra Initiative",
+  "Hotshot",
+  "Aces & Eights",
+  "Eclipse Protocol",
+  "Foundry Bulwark",
+  "Future Initiative",
+  "Hard Wired",
+  "Ortiz: Exuro",
+  "Cavalier",
+  "Aegis",
+  "Negotiator's Dilemma",
+  "Rigger",
+  "Refactor",
+  "Tipping Scales",
+  "Concentrated Company",
+  "Core Strength",
+  "Breaking Point",
+  "Ongoing Directive",
+  "Measured Assembly",
+  "Tip of the Spear",
+  "Virtuoso",
+  "System Corruption",
+  "Ortiz: Reficere",
+  "Ember Engine",
+  "AlphaBridge"
+ ],
+ "brands": [
+  "5.11 Tactical",
+  "Airaldi Holdings",
+  "Alps Summit Armament",
+  "Badger Tuff",
+  "Belstone Armory",
+  "Česká Výroba s.r.o.",
+  "China Light Industries Corporation",
+  "Douglas & Harding",
+  "Empress International",
+  "Fenris Group AB",
+  "Gila Guard",
+  "Grupo Sombra S.A.",
+  "Golan Gear Ltd",
+  "Hana-U Corporation",
+  "Murakami Industries",
+  "Overlord Armaments",
+  "Petrov Defense Group",
+  "Richter & Kaiser GmbH",
+  "Sokolov Concern",
+  "Walker, Harris & Co.",
+  "Wyvern Wear",
+  "Yaahl Gear",
+  "Brazos de Arcabuz",
+  "Habsburg Guard",
+  "Uzina Getica",
+  "Electrique",
+  "Legatus S.p.A.",
+  "Lengmo",
+  "Palisade Steelworks",
+  "Shiny Monkey Gear",
+  "Imminence Armaments",
+  "Urban Lookout",
+  "Royal Works",
+  "Edelweiss GPz",
+  "Zwiadowka Sp. z.o.o.",
+  "Providence Defense",
+  "Ceska Vyroba",
+  "Golan Gear",
+  "Unit Alloys"
+ ],
+ "exotics": [
+  "NinjaBike Messenger Bag",
+  "Memento",
+  "Birdie's Quick Fix Pack",
+  "Sarru",
+  "Acosta's Go-Bag",
+  "Iron Will",
+  "Tardigrade Armor System",
+  "Collector",
+  "Harrier Pride",
+  "BTSU Datagloves",
+  "Bloody Knuckles",
+  "Shocker Punch",
+  "Rugged Gauntlets",
+  "Dodge City Gunslinger's Holster",
+  "Centurion's Scabbard",
+  "Nimble Holster",
+  "Imperial Dynasty",
+  "Sawyer's Kneepads",
+  "Nurse's Kneepads",
+  "Blacklisters",
+  "NinjaBike Messenger Kneepads",
+  "Catharsis",
+  "Coyote's Mask",
+  "Investor",
+  "Vile",
+  "Ridgeway's Pride",
+  "Tinkerer",
+  "Overdogs",
+  "Waveform",
+  "Provocator",
+  "BTSU Gloves",
+  "Bullet King",
+  "Sweet Dreams",
+  "Liberty",
+  "The Chatterbox",
+  "Pestilence",
+  "Nemesis",
+  "Eagle Bearer",
+  "Merciless",
+  "Diamondback",
+  "Chameleon",
+  "The Bighorn",
+  "Lady Death",
+  "The Ravenous",
+  "Regulus",
+  "Backfire",
+  "Scorpio",
+  "Capacitor",
+  "Ruthless",
+  "Bluescreen",
+  "Doctor Home",
+  "Busy Little Bee",
+  "Sacrum Imperium",
+  "Dread Edict",
+  "St. Elmo's Engine",
+  "Ouroboros",
+  "Vindicator",
+  "Lullaby",
+  "Overlord",
+  "Iron Lung",
+  "Mosquito",
+  "Mantis",
+  "Strega",
+  "Oxpecker",
+  "Shroud",
+  "Instigator",
+  "Tempest",
+  "Sheriff",
+  "Big Alejandro",
+  "Whiplash",
+  "Agitator",
+  "Prima Donna",
+  "Steel & Sons ACR",
+  "Underboss",
+  "Fafnir",
+  "Vertigo",
+  "Bullfrog",
+  "Showstopper",
+  "Caduceus",
+  "Loaded for Bear"
+ ],
+ "named": [
+  "The Courier",
+  "Vigil",
+  "The Gift",
+  "Bulldog",
+  "Momma Badger",
+  "Keeper",
+  "Cap'n",
+  "Percussive Maintenance",
+  "Anarchist's Cookbook",
+  "The Setup",
+  "Hermano",
+  "Force Multiplier",
+  "Axel",
+  "Backbone",
+  "Proxy",
+  "Melon Baller",
+  "Lavoisier",
+  "Strategic Alignment",
+  "Devil's Due",
+  "Zero F's",
+  "Pointman",
+  "Equalizer",
+  "Sleight",
+  "The Sacrifice",
+  "Trick Shot",
+  "Closer",
+  "Rushdown",
+  "Carpenter",
+  "Cherished",
+  "Chainkiller",
+  "Impetus",
+  "Everyday Carrier",
+  "Henri",
+  "Caesar's Guard",
+  "Bober",
+  "Combustor",
+  "Ferocious Calm",
+  "Hunter-Killer",
+  "Door-Kicker's Knock",
+  "Vedmedytsya Vest",
+  "Firm Handshake",
+  "Contractor's Gloves",
+  "Deathgrips",
+  "Eagle's Grasp",
+  "Motherly Love",
+  "Spot-On",
+  "Salvo",
+  "Forge",
+  "Claws Out",
+  "Ammo Dump",
+  "Picaro's Holster",
+  "Fox's Prayer",
+  "Cloak",
+  "Grease",
+  "Emperor's Guard",
+  "The Hollow Man",
+  "Chill Out",
+  "Punch Drunk",
+  "Visionario",
+  "Nightwatcher",
+  "Maxim 9",
+  "Diceros Special",
+  "Sharpshooter 93R",
+  "P320 XCompact",
+  "Survivalist D50",
+  "Mozambique Special",
+  "Orbit",
+  "Swap Chain",
+  "Dark Winter",
+  "The Sleigher",
+  "Safety Distance",
+  "The Apartment",
+  "Cold Relations",
+  "Pyromaniac",
+  "Glory Daze",
+  "Burn Out",
+  "Shield Splinterer",
+  "Test Subject",
+  "Scalpel",
+  "Dare",
+  "Kingbreaker",
+  "Oh Carol",
+  "Prophet",
+  "The Railsplitter",
+  "Carnage",
+  "Invisible Hand",
+  "New Reliable",
+  "Lefty",
+  "The Darkness",
+  "Everlasting Gaze",
+  "The Send-Off",
+  "Backup Boomstick",
+  "Boomstick",
+  "Surge",
+  "Harmony",
+  "Cabaret",
+  "Savage Wolverine",
+  "Big Show",
+  "Stage Left",
+  "Mechanical Animal",
+  "The White Death",
+  "Brutus",
+  "Thorn",
+  "Like Glue",
+  "Enforcer",
+  "Born Great",
+  "Grown Great",
+  "Whisper",
+  "Manic",
+  "The Mop",
+  "Baker's Dozen",
+  "Quiet Roar",
+  "Cuélebre",
+  "Tsunami",
+  "Good Times",
+  "Emeline's Guard",
+  "Relic",
+  "Lightning Rod",
+  "Tabula Rasa",
+  "Designated Hitter",
+  "Ekim's Long Stick",
+  "Artist's Tool",
+  "Commando",
+  "Firestarter",
+  "Pinprick",
+  "Adrestia",
+  "Black Friday",
+  "The Stinger",
+  "Cricket",
+  "The Virginian",
+  "The Harvest",
+  "The Drill",
+  "Sleipnir",
+  "Lexington",
+  "First Sight",
+  "Rusty",
+  "Goalie",
+  "Handbasket",
+  "Lud",
+  "Quickstep",
+  "Lockdown",
+  "Achilles",
+  "First Bloom",
+  "The Headline-grabber",
+  "The Archivist",
+  "Brain Break",
+  "Trader",
+  "The Claw",
+  "Teapot",
+  "Incendia",
+  "Steamer",
+  "Lichtenberg",
+  "Robin",
+  "Gear Shift",
+  "Chatterbox",
+  "Burnout",
+  "Sleipner",
+  "Thompson M1928",
+  "Tommy Gun",
+  "Urban MDR",
+  "Liquid Engineer",
+  "Benefactor",
+  "Battery Pack",
+  "Emperors Guard",
+  "TDI \"Kard\" Custom",
+  "Pristine Example",
+  "Insult to Injury",
+  "Interchange",
+  "Rock n' Roll",
+  "The Grudge"
+ ],
+ "gear_talents": [
+  "Braced",
+  "Efficient",
+  "Empathic Resolve",
+  "Entrench",
+  "Explosive Delivery",
+  "Focus",
+  "Glass Cannon",
+  "Gunslinger",
+  "Headhunter",
+  "Intimidate",
+  "Kinetic Momentum",
+  "Mad Bomber",
+  "Obliterate",
+  "Overwatch",
+  "Protected Reload",
+  "Reassigned",
+  "Skilled",
+  "Spark",
+  "Spotter",
+  "Tag Team",
+  "Tamper Proof",
+  "Trauma",
+  "Unbreakable",
+  "Vanguard",
+  "Bloodsucker",
+  "Calculated",
+  "Clutch",
+  "Composure",
+  "Concussion",
+  "Creeping Death",
+  "Opportunistic",
+  "Tech Support",
+  "Unstoppable Force",
+  "Vigilance",
+  "Wicked",
+  "Combined Arms",
+  "Companion",
+  "Leadership",
+  "Safeguard",
+  "Shock and Awe",
+  "Versatile",
+  "Energize",
+  "Galvanize",
+  "Overclock",
+  "Protector",
+  "Perfect Overwatch",
+  "Pack Instincts",
+  "Grace Under Fire",
+  "Parkour!",
+  "Dragon's Glare",
+  "Quick Draw",
+  "Transference Overclock",
+  "Ablative Nano-Plating",
+  "One in Hand...",
+  "Perfect Clutch",
+  "Perfect Combined Arms",
+  "Perfect Shock and Awe",
+  "Perfect Tech Support",
+  "Perfect Vigilance",
+  "Perfectly Wicked",
+  "Perfect Intimidate",
+  "Perfectly Unbreakable",
+  "Perfect Vanguard",
+  "Perfect Braced",
+  "Perfect Focus",
+  "Perfect Glass Cannon",
+  "Perfect Spark",
+  "Short Circuit",
+  "Positive Reinforcement",
+  "Emergency Requisition",
+  "Parabellum Rounds",
+  "Patriotic Boost",
+  "Waving the Flag",
+  "Poker Face",
+  "No Limit",
+  "Critical Measures",
+  "Target Rich Environment",
+  "Process Refinery",
+  "Improved Materials",
+  "Strategic Combat Support",
+  "Placeholder",
+  "Risk Management",
+  "Press the Advantage",
+  "Multithreaded Execution",
+  "Compiler Optimization",
+  "Adrenaline Rush",
+  "Field Medic",
+  "Perfectionist",
+  "Resolved",
+  "Afterburn",
+  "Core Exercise",
+  "Flashpoint",
+  "Impervious",
+  "Improved Dampeners",
+  "Inner Core",
+  "Ortiz Rapid Application Nanite Prototype",
+  "Outer Core",
+  "Overcharged Nanites",
+  "Slotted",
+  "Spontaneous Combustion",
+  "White Hot"
+ ],
+ "weapon_talents": [
+  "Accurate",
+  "Allegro",
+  "Boomerang",
+  "Breadbasket",
+  "Close & Personal",
+  "Determined",
+  "Distance",
+  "Eyeless",
+  "Extra",
+  "Fast Hands",
+  "Finisher",
+  "First Blood",
+  "Flatline",
+  "Frenzy",
+  "Future Perfect",
+  "Hidden Rock",
+  "Ignited",
+  "In Sync",
+  "Jazz Hands",
+  "Killer",
+  "Lucky Shot",
+  "Measured",
+  "Naked",
+  "Near Sighted",
+  "On Empty",
+  "Optimist",
+  "Outsider",
+  "Overflowing",
+  "Overwhelm",
+  "Perpetuation",
+  "Preservation",
+  "Primer Rounds",
+  "Pummel",
+  "Pumped Up",
+  "Ranger",
+  "Reformation",
+  "Rifleman",
+  "Sadist",
+  "Salvage",
+  "Sledgehammer",
+  "Spike",
+  "Steady Handed",
+  "Strained",
+  "Swift",
+  "Twinkling Lights",
+  "Unhinged",
+  "Unwavering",
+  "Vindictive",
+  "Adaptive Instincts",
+  "Agonizing Bite",
+  "Big Game Hunter",
+  "Binary Trigger",
+  "Breathe Free",
+  "Bullet Hell",
+  "Busy Little Bee",
+  "Capacitance",
+  "Disruptor Rounds",
+  "Doctor Home",
+  "Eagle's Strike",
+  "Tenacity",
+  "Electromagnetic Accelerator",
+  "Full Stop",
+  "The Trap",
+  "Septic Shock",
+  "Sandman",
+  "Regicide",
+  "Plague of the Outcasts",
+  "Payment in Kind",
+  "Behind You",
+  "Optimized",
+  "Stabilize",
+  "Actum Est",
+  "Ardent",
+  "In Plain Sight",
+  "Ortiz Assault Interface",
+  "Rule Them All",
+  "Precision Strike",
+  "Brazen",
+  "Geri and Freki",
+  "Refreshing",
+  "Capitulate",
+  "Incessant Chatter",
+  "Liberty or Death",
+  "Mosquito Song",
+  "Unnerve",
+  "Pressure Point",
+  "Symbiosis",
+  "Startling",
+  "Back and Forth",
+  "Boiling Point",
+  "Soft Spot",
+  "Streamline",
+  "Thunder Strike",
+  "Galvanize",
+  "Perfect Allegro",
+  "Perfect Boomerang",
+  "Perfect Breadbasket",
+  "Perfect Distance",
+  "Perfect Eyless",
+  "Perfect Fast Hands",
+  "Perfect Finisher",
+  "Perfect First Blood",
+  "Perfect Frenzy",
+  "Perfect Jazz Hands",
+  "Perfect Killer",
+  "Perfect Lucky Shot",
+  "Perfect Near Sighted",
+  "Perfect Optimist",
+  "Perfect Outsider",
+  "Perfect Overflowing",
+  "Perfect Overwhelm",
+  "Perfect Perpetuation",
+  "Perfect Preservation",
+  "Perfect Pummel",
+  "Perfect Pumped Up",
+  "Perfect Ranger",
+  "Perfect Reformation",
+  "Perfect Rifleman",
+  "Perfect Sadist",
+  "Perfect Salvage",
+  "Perfect Spike",
+  "Perfect Strained",
+  "Perfect Unwavering",
+  "Perfect Vindictive",
+  "Perfectly Accurate",
+  "Perfectly Close & Personal",
+  "Perfectly Extra",
+  "Perfectly Ignited",
+  "Perfectly Measured",
+  "Perfectly Naked",
+  "Perfectly On Empty",
+  "Perfectly Optimized",
+  "Perfectly Steady Handed",
+  "Perfectly Unhinged",
+  "Head Scratcher",
+  "Immobilize",
+  "Caduceus",
+  "Dragon's Breath",
+  "Faster Than Reloading",
+  "Gangland Hit",
+  "Perturb"
+ ],
+ "attributes": {
+  "weapon_damage": {
+   "aliases": [
+    "weapon damage"
+   ],
+   "max": 15,
+   "core": true,
+   "unit": "%"
+  },
+  "armor": {
+   "aliases": [
+    "armor"
+   ],
+   "max": 170370,
+   "core": true,
+   "unit": ""
+  },
+  "skill_tier": {
+   "aliases": [
+    "skill tier"
+   ],
+   "max": 1,
+   "core": true,
+   "unit": ""
+  },
+  "crit_chance": {
+   "aliases": [
+    "critical hit chance",
+    "crit hit chance",
+    "critical chance"
+   ],
+   "max": 6,
+   "unit": "%",
+   "weapon_max": 9.5,
+   "weapon_limit": 21
+  },
+  "crit_damage": {
+   "aliases": [
+    "critical hit damage",
+    "crit hit damage",
+    "critical damage"
+   ],
+   "max": 12,
+   "unit": "%",
+   "weapon_max": 10,
+   "weapon_limit": 17
+  },
+  "headshot_damage": {
+   "aliases": [
+    "headshot damage"
+   ],
+   "max": 10,
+   "unit": "%",
+   "weapon_max": 10,
+   "weapon_limit": 111
+  },
+  "weapon_handling": {
+   "aliases": [
+    "weapon handling"
+   ],
+   "max": 8,
+   "unit": "%",
+   "weapon_max": 8,
+   "weapon_limit": 8
+  },
+  "armor_regen": {
+   "aliases": [
+    "armor regeneration",
+    "armor regen"
+   ],
+   "max": 4925,
+   "unit": ""
+  },
+  "hazard_protection": {
+   "aliases": [
+    "hazard protection"
+   ],
+   "max": 10,
+   "unit": "%"
+  },
+  "health": {
+   "aliases": [
+    "health"
+   ],
+   "max": 18935,
+   "unit": ""
+  },
+  "explosive_resist": {
+   "aliases": [
+    "explosive resistance"
+   ],
+   "max": 10,
+   "unit": "%"
+  },
+  "skill_damage": {
+   "aliases": [
+    "skill damage"
+   ],
+   "max": 10,
+   "unit": "%"
+  },
+  "skill_haste": {
+   "aliases": [
+    "skill haste"
+   ],
+   "max": 12,
+   "unit": "%"
+  },
+  "repair_skills": {
+   "aliases": [
+    "repair skills"
+   ],
+   "max": 20,
+   "unit": "%"
+  },
+  "status_effects": {
+   "aliases": [
+    "status effects"
+   ],
+   "max": 10,
+   "unit": "%"
+  },
+  "skill_duration": {
+   "aliases": [
+    "skill duration"
+   ],
+   "max": 10,
+   "unit": "%"
+  },
+  "rate_of_fire": {
+   "aliases": [
+    "rate of fire"
+   ],
+   "unit": "%",
+   "weapon_max": 5,
+   "weapon_limit": 5
+  },
+  "reload_speed": {
+   "aliases": [
+    "reload speed"
+   ],
+   "unit": "%",
+   "weapon_max": 12,
+   "weapon_limit": 12
+  },
+  "magazine_size": {
+   "aliases": [
+    "magazine size"
+   ],
+   "unit": "%",
+   "weapon_max": 12.5,
+   "weapon_limit": 12.5
+  },
+  "optimal_range": {
+   "aliases": [
+    "optimal range"
+   ],
+   "unit": "",
+   "weapon_max": 24,
+   "weapon_limit": 24
+  },
+  "damage_to_armor": {
+   "aliases": [
+    "damage to armor"
+   ],
+   "unit": "%",
+   "weapon_max": 6,
+   "weapon_limit": 12
+  },
+  "damage_to_health": {
+   "aliases": [
+    "damage to health",
+    "health damage"
+   ],
+   "unit": "%",
+   "weapon_max": 10,
+   "weapon_limit": 21
+  },
+  "damage_to_elites": {
+   "aliases": [
+    "damage to elites"
+   ],
+   "unit": "%",
+   "weapon_max": 10,
+   "weapon_limit": 10
+  },
+  "pulse_resistance": {
+   "aliases": [
+    "pulse resistance"
+   ],
+   "unit": "%"
+  },
+  "skill_health": {
+   "aliases": [
+    "skill health"
+   ],
+   "unit": "%"
+  },
+  "weapon_type_damage": {
+   "aliases": [
+    "assault rifle damage",
+    "ar damage",
+    "smg damage",
+    "submachine gun damage",
+    "lmg damage",
+    "light machine gun damage",
+    "rifle damage",
+    "marksman rifle damage",
+    "mmr damage",
+    "shotgun damage",
+    "pistol damage"
+   ],
+   "unit": "%",
+   "max": 15,
+   "weapon_max": 15,
+   "weapon_limit": 15
+  },
+  "damage_out_of_cover": {
+   "aliases": [
+    "dmg to target out of cover",
+    "damage to target out of cover"
+   ],
+   "unit": "%",
+   "max": 10,
+   "weapon_max": 10,
+   "weapon_limit": 12
+  },
+  "armor_on_kill": {
+   "aliases": [
+    "armor on kill"
+   ],
+   "max": 18935,
+   "core": false,
+   "unit": ""
+  },
+  "incoming_repairs": {
+   "aliases": [
+    "incoming repairs"
+   ],
+   "max": 20,
+   "core": false,
+   "unit": "%"
+  },
+  "protection_from_elites": {
+   "aliases": [
+    "protection from elites"
+   ],
+   "max": 13,
+   "core": false,
+   "unit": "%"
+  },
+  "bleed_resist": {
+   "aliases": [
+    "bleed resistance"
+   ],
+   "max": 10,
+   "core": false,
+   "unit": "%"
+  },
+  "blind_resist": {
+   "aliases": [
+    "blind resistance",
+    "blind deaf resistance"
+   ],
+   "max": 10,
+   "core": false,
+   "unit": "%"
+  },
+  "burn_resist": {
+   "aliases": [
+    "burn resistance"
+   ],
+   "max": 10,
+   "core": false,
+   "unit": "%"
+  },
+  "disrupt_resist": {
+   "aliases": [
+    "disrupt resistance"
+   ],
+   "max": 10,
+   "core": false,
+   "unit": "%"
+  },
+  "shock_resist": {
+   "aliases": [
+    "shock resistance"
+   ],
+   "max": 10,
+   "core": false,
+   "unit": "%"
+  },
+  "ensnare_resist": {
+   "aliases": [
+    "ensnare resistance"
+   ],
+   "max": 10,
+   "core": false,
+   "unit": "%"
+  },
+  "stability": {
+   "aliases": [
+    "stability"
+   ],
+   "max": 12,
+   "core": false,
+   "unit": "%",
+   "weapon_max": 12,
+   "weapon_limit": 12
+  },
+  "accuracy": {
+   "aliases": [
+    "accuracy"
+   ],
+   "max": 12,
+   "core": false,
+   "unit": "%",
+   "weapon_max": 12,
+   "weapon_limit": 12
+  },
+  "swap_speed": {
+   "aliases": [
+    "swap speed"
+   ],
+   "max": 6,
+   "core": false,
+   "unit": "%",
+   "weapon_max": 15,
+   "weapon_limit": 15
+  }
+ },
+ "weapon_types": [
+  "Assault Rifle",
+  "Submachine Gun",
+  "Light Machine Gun",
+  "Light Machinegun",
+  "Shotgun",
+  "Marksman Rifle",
+  "Rifle",
+  "Pistol",
+  "Sidearm"
+ ],
+ "slots": {
+  "mask": "Mask",
+  "backpack": "Backpack",
+  "body armor": "Chest",
+  "chest": "Chest",
+  "vest": "Chest",
+  "gloves": "Gloves",
+  "holster": "Holster",
+  "kneepads": "Kneepads",
+  "knee pads": "Kneepads",
+  "chestplate": "Chest",
+  "harness": "Chest",
+  "plate carrier": "Chest"
+ },
+ "weapons": [
+  "1886",
+  "M4",
+  "ACR",
+  "AK-47",
+  "AK-M",
+  "POF P416",
+  "P416",
+  "SCAR-L",
+  "FAL",
+  "G36",
+  "Carbine 7",
+  "CTAR-21",
+  "F2000",
+  "PDR-C",
+  "Honey Badger",
+  "SIG 556",
+  "FAMAS 2010",
+  "TKB-408",
+  "AUG A3-CQC",
+  "Mk16",
+  "Vector",
+  "MP5",
+  "T821",
+  "SMG-9",
+  "MP7",
+  "AUG A3",
+  "PP-19",
+  "UMP-45",
+  "CMMG Banshee",
+  "P90",
+  "SIG MPX",
+  "M60",
+  "L86 LSW",
+  "RPK-74",
+  "M249 B",
+  "MG5",
+  "Stoner LAMG",
+  "GR9",
+  "IMI Negev",
+  "MK46",
+  "M870",
+  "Double Barrel Shotgun",
+  "SASG-12",
+  "Super 90",
+  "Double Barrel Sawed Off",
+  "SPAS-12",
+  "SIX12",
+  "ACS-12",
+  "KSG",
+  "M700",
+  "SRS",
+  "M1A",
+  "M44",
+  "SCAR-H",
+  "SVD",
+  "SR-1",
+  "SOCOM Mk20 SSR",
+  "Tactical .308",
+  "G28",
+  "LVOA-C",
+  "ACR SS",
+  "M16A2",
+  "Lightweight M4",
+  "USC.45 ACP",
+  "SIG 716",
+  "UIC15 MOD2",
+  "Resolute Mk47",
+  "Px4 Storm",
+  "M9",
+  "M1911",
+  "PF45",
+  "Rhino",
+  "X-45",
+  "93R",
+  "D50",
+  "KARD",
+  "Model 686",
+  "P320",
+  "ACR-E",
+  "Black Market AK-M",
+  "Black Market AK-M Replica",
+  "Military AK-M",
+  "F2000 Replica",
+  "FAL SA-58",
+  "FAL SA-58 Para",
+  "FAL SA-58 Para Replica",
+  "FAMAS 2010 Replica",
+  "G36 C",
+  "G36 Enhanced",
+  "G36 Enhanced Replica",
+  "Military G36",
+  "Police M4",
+  "Police M4 Replica",
+  "Custom P416 G3",
+  "Military P416",
+  "SOCOM Mk16",
+  "Tactical Mk 16",
+  "Tactical Mk 16 Replica",
+  "Custom L86 A2",
+  "Custom L86 A2 Replica",
+  "Military L86 LSW",
+  "Military MK46",
+  "Military MK46 Replica",
+  "Tactical M249 Para",
+  "Black Market M60 E6",
+  "Black Market M60 E6 Replica",
+  "Classic M60",
+  "Classic M60 Replica",
+  "Military M60 E4",
+  "Infantry MG5",
+  "Infantry MG5 Replica",
+  "Black Market RPK-74 E",
+  "Black Market RPK-74 E Replica",
+  "Classic RPK-74",
+  "Military RPK-74 M",
+  "IWI NEGEV",
+  "Classic M44 Carbine",
+  "Classic M44 Carbine Replica",
+  "Custom M44",
+  "Custom M44 Replica",
+  "Hunting M44",
+  "M700 Carbon",
+  "M700 Carbon Replica",
+  "M700 Tactical",
+  "Model 700",
+  "Model 700 Replica",
+  "SOCOM Mk20 SSR Replica",
+  "SR-1 Replica",
+  "Covert SRS",
+  "SRS A1",
+  "SRS A1 Replica",
+  "Paratrooper SVD",
+  "Surplus SVD",
+  "586 Magnum",
+  "Police 686 Magnum",
+  "Police 686 Magnum Replica",
+  "M45A1",
+  "Tactical M1911",
+  "Tactical M1911 Replica",
+  "Military M9",
+  "Military M9 Replica",
+  "Officer's M9 A1",
+  "Custom PF45",
+  "First Wave PF45",
+  "Px4 Storm Type F",
+  "Px4 Storm Type T",
+  "Px4 Storm Type T Replica",
+  "Diceros",
+  "Diceros Replica",
+  "Snubnosed Diceros",
+  "X-45 Tactical",
+  "X-45 Tactical Replica",
+  "M16A2 Replica",
+  "Classic M1A",
+  "M1A CQB",
+  "M1A CQB Replica",
+  "SOCOM M1A",
+  "LVOA-C Replica",
+  "Urban MDR Replica",
+  "Military Mk17",
+  "Police Mk17",
+  "Police Mk17 Replica",
+  "SIG 716 CQB",
+  "SIG 716 Replica",
+  "USC .45 ACP",
+  "USC .45 ACP Replica",
+  "Double Barrel Shotgun Replica",
+  "Custom M870 MCS",
+  "Custom M870 MCS Replica",
+  "M870 Express",
+  "M870 Express Replica",
+  "Military M870",
+  "KSG Shotgun",
+  "Black Market SASG-12 S",
+  "Black Market SASG-12 S Replica",
+  "Tactical SASG-12 K",
+  "SPAS-12 Replica",
+  "Marine Super 90",
+  "Super 90 Replica",
+  "Tactical Super 90 SBS",
+  "Tactical Super 90 SBS Replica",
+  "AUG A3 Para XS",
+  "Enhanced AUG A3P",
+  "Tactical AUG A3P",
+  "Tactical AUG A3P Replica",
+  "MP5 ST",
+  "MP5 ST Replica",
+  "MP5-N",
+  "MP5A2",
+  "MPX",
+  "P90 Replica",
+  "Enhanced PP-19",
+  "Converted SMG-9",
+  "Converted SMG-9 A2",
+  "Converted SMG-9 Replica",
+  "Black Market T821",
+  "Black Market T821 Replica",
+  "Police T821",
+  "M1928",
+  "Tommy Gun",
+  "Police UMP-45",
+  "Tactical UMP-45",
+  "Tactical UMP-45 Replica",
+  "Tactical Vector SBR 9mm",
+  "Vector SBR .45 ACP",
+  "Vector SBR .45 ACP Replica",
+  "Vector SBR 9mm",
+  "Maxim 9",
+  "Minigun",
+  "P320 XCompact",
+  "TAC-50 C Rifle",
+  "Urban MDR",
+  "Military M4",
+  "Tactical M1A",
+  "Custom M870",
+  "Military M60",
+  "Mk17",
+  "Converted USC",
+  "Police 686",
+  "Custom Legion",
+  "Custom Police Mk17",
+  "Mk 17",
+  "Stoner Light Machine Gun",
+  "Military RPK-74",
+  "RPK-74 M",
+  "Military M249",
+  "Converted USC .45 ACP",
+  "Insult to Injury",
+  "Interchange"
+ ],
+ "license_note": "Item lists and max values compiled from The Division Wiki and mx-division-builds (CC BY-NC-SA 4.0). Non-commercial use with attribution.",
+ "items": {
+  "Acosta's Go-Bag": {
+   "slot": "Backpack",
+   "quality": "exotic",
+   "talent": "One in Hand..."
+  },
+  "Ammo Dump": {
+   "slot": "Holster",
+   "quality": "named",
+   "brand": "Badger Tuff"
+  },
+  "Anarchist's Cookbook": {
+   "slot": "Backpack",
+   "quality": "named",
+   "talent": "Perfectly Wicked",
+   "brand": "Golan Gear Ltd"
+  },
+  "Axel": {
+   "slot": "Backpack",
+   "quality": "named"
+  },
+  "BTSU Datagloves": {
+   "slot": "Gloves",
+   "quality": "exotic"
+  },
+  "BTSU Gloves": {
+   "slot": "Gloves",
+   "quality": "exotic",
+   "talent": "Transference Overclock"
+  },
+  "Backbone": {
+   "slot": "Backpack",
+   "quality": "named"
+  },
+  "Birdie's Quick Fix Pack": {
+   "slot": "Backpack",
+   "quality": "exotic"
+  },
+  "Blacklisters": {
+   "slot": "Kneepads",
+   "quality": "exotic"
+  },
+  "Bloody Knuckles": {
+   "slot": "Gloves",
+   "quality": "exotic"
+  },
+  "Bober": {
+   "slot": "Chest",
+   "quality": "named"
+  },
+  "Bulldog": {
+   "slot": "Holster",
+   "quality": "named",
+   "brand": "Royal Works",
+   "talent": "Perfect Composure"
+  },
+  "Caesar's Guard": {
+   "slot": "Chest",
+   "quality": "named"
+  },
+  "Cap'n": {
+   "slot": "Backpack",
+   "quality": "named"
+  },
+  "Carpenter": {
+   "slot": "Chest",
+   "quality": "named"
+  },
+  "Catharsis": {
+   "slot": "Mask",
+   "quality": "exotic"
+  },
+  "Centurion's Scabbard": {
+   "slot": "Holster",
+   "quality": "exotic"
+  },
+  "Chainkiller": {
+   "slot": "Chest",
+   "quality": "named"
+  },
+  "Cherished": {
+   "slot": "Chest",
+   "quality": "named"
+  },
+  "Chill Out": {
+   "slot": "Mask",
+   "quality": "named"
+  },
+  "Claws Out": {
+   "slot": "Holster",
+   "quality": "named",
+   "brand": "Wyvern Wear"
+  },
+  "Cloak": {
+   "slot": "Kneepads",
+   "quality": "named"
+  },
+  "Closer": {
+   "slot": "Chest",
+   "quality": "named"
+  },
+  "Collector": {
+   "slot": "Chest",
+   "quality": "exotic"
+  },
+  "Combustor": {
+   "slot": "Chest",
+   "quality": "named"
+  },
+  "Contractor's Gloves": {
+   "slot": "Gloves",
+   "quality": "named",
+   "brand": "Petrov Defense Group"
+  },
+  "Coyote's Mask": {
+   "slot": "Mask",
+   "quality": "exotic",
+   "talent": "Pack Instincts"
+  },
+  "Deathgrips": {
+   "slot": "Gloves",
+   "quality": "named",
+   "brand": "5.11 Tactical"
+  },
+  "Devil's Due": {
+   "slot": "Backpack",
+   "quality": "named",
+   "talent": "Perfect Clutch",
+   "brand": "Ceska Vyroba s.r.o."
+  },
+  "Dodge City Gunslinger's Holster": {
+   "slot": "Holster",
+   "quality": "exotic",
+   "talent": "Quick Draw"
+  },
+  "Door-Kicker's Knock": {
+   "slot": "Chest",
+   "quality": "named",
+   "talent": "Perfect Spark",
+   "brand": "Grupo Sombra S.A."
+  },
+  "Eagle's Grasp": {
+   "slot": "Gloves",
+   "quality": "named"
+  },
+  "Emperor's Guard": {
+   "slot": "Kneepads",
+   "quality": "named",
+   "brand": "Murakami Industries"
+  },
+  "Equalizer": {
+   "slot": "Chest",
+   "quality": "named",
+   "brand": "Unit Alloys"
+  },
+  "Everyday Carrier": {
+   "slot": "Chest",
+   "quality": "named"
+  },
+  "Ferocious Calm": {
+   "slot": "Chest",
+   "quality": "named",
+   "talent": "Perfect Overwatch",
+   "brand": "Fenris Group AB"
+  },
+  "Firm Handshake": {
+   "slot": "Gloves",
+   "quality": "named",
+   "brand": "Sokolov Concern"
+  },
+  "Force Multiplier": {
+   "slot": "Backpack",
+   "quality": "named",
+   "talent": "Perfect Combined Arms",
+   "brand": "Hana-U Corporation"
+  },
+  "Forge": {
+   "slot": "Holster",
+   "quality": "named",
+   "brand": "Richter & Kaiser GmbH"
+  },
+  "Fox's Prayer": {
+   "slot": "Kneepads",
+   "quality": "named",
+   "brand": "Overlord Armaments"
+  },
+  "Grease": {
+   "slot": "Kneepads",
+   "quality": "named"
+  },
+  "Harrier Pride": {
+   "slot": "Chest",
+   "quality": "exotic"
+  },
+  "Henri": {
+   "slot": "Chest",
+   "quality": "named"
+  },
+  "Hermano": {
+   "slot": "Backpack",
+   "quality": "named"
+  },
+  "Hunter-Killer": {
+   "slot": "Chest",
+   "quality": "named",
+   "talent": "Perfect Intimidate",
+   "brand": "Golan Gear Ltd"
+  },
+  "Imperial Dynasty": {
+   "slot": "Holster",
+   "quality": "exotic",
+   "talent": "Dragon's Glare"
+  },
+  "Impetus": {
+   "slot": "Chest",
+   "quality": "named"
+  },
+  "Investor": {
+   "slot": "Mask",
+   "quality": "exotic",
+   "talent": "Slotted"
+  },
+  "Iron Will": {
+   "slot": "Chest",
+   "quality": "exotic",
+   "talent": "Resolved"
+  },
+  "Keeper": {
+   "slot": "Backpack",
+   "quality": "named",
+   "brand": "5.11 Tactical",
+   "talent": "Perfect Protector"
+  },
+  "Lavoisier": {
+   "slot": "Backpack",
+   "quality": "named"
+  },
+  "Melon Baller": {
+   "slot": "Backpack",
+   "quality": "named",
+   "brand": "Airaldi Holdings",
+   "talent": "Perfect Concussion"
+  },
+  "Memento": {
+   "slot": "Backpack",
+   "quality": "exotic",
+   "talent": "Kill Confirmed"
+  },
+  "Momma Badger": {
+   "slot": "Backpack",
+   "quality": "named",
+   "brand": "Edelweiss GPz",
+   "talent": "Perfect Safeguard"
+  },
+  "Motherly Love": {
+   "slot": "Gloves",
+   "quality": "named",
+   "brand": "Alps Summit Armaments"
+  },
+  "Nightwatcher": {
+   "slot": "Mask",
+   "quality": "named",
+   "brand": "Gila Guard"
+  },
+  "Nimble Holster": {
+   "slot": "Holster",
+   "quality": "exotic"
+  },
+  "NinjaBike Messenger Bag": {
+   "slot": "Backpack",
+   "quality": "exotic"
+  },
+  "NinjaBike Messenger Kneepads": {
+   "slot": "Kneepads",
+   "quality": "exotic",
+   "talent": "Parkour!"
+  },
+  "Nurse's Kneepads": {
+   "slot": "Kneepads",
+   "quality": "exotic",
+   "talent": "Impervious"
+  },
+  "Overdogs": {
+   "slot": "Mask",
+   "quality": "exotic"
+  },
+  "Percussive Maintenance": {
+   "slot": "Backpack",
+   "quality": "named",
+   "talent": "Perfect Tech Support",
+   "brand": "Alps Summit Armaments"
+  },
+  "Picaro's Holster": {
+   "slot": "Holster",
+   "quality": "named"
+  },
+  "Pointman": {
+   "slot": "Chest",
+   "quality": "named",
+   "talent": "Perfect Vanguard",
+   "brand": "Gila Guard"
+  },
+  "Pristine Example": {
+   "slot": "Chest",
+   "quality": "named",
+   "talent": "Perfect Focus",
+   "brand": "Airaldi Holdings"
+  },
+  "Provocator": {
+   "slot": "Mask",
+   "quality": "exotic"
+  },
+  "Proxy": {
+   "slot": "Backpack",
+   "quality": "named"
+  },
+  "Punch Drunk": {
+   "slot": "Mask",
+   "quality": "named",
+   "brand": "Douglas & Harding"
+  },
+  "Ridgeway's Pride": {
+   "slot": "Mask",
+   "quality": "exotic"
+  },
+  "Rugged Gauntlets": {
+   "slot": "Gloves",
+   "quality": "exotic"
+  },
+  "Rushdown": {
+   "slot": "Chest",
+   "quality": "named",
+   "brand": "Richter & Kaiser GmbH",
+   "talent": "Tag Team"
+  },
+  "Salvo": {
+   "slot": "Holster",
+   "quality": "named",
+   "brand": "Unit Alloys"
+  },
+  "Sarru": {
+   "slot": "Backpack",
+   "quality": "exotic"
+  },
+  "Sawyer's Kneepads": {
+   "slot": "Kneepads",
+   "quality": "exotic",
+   "talent": "Grace Under Fire"
+  },
+  "Shocker Punch": {
+   "slot": "Gloves",
+   "quality": "exotic"
+  },
+  "Sleight": {
+   "slot": "Chest",
+   "quality": "named"
+  },
+  "Spot-On": {
+   "slot": "Holster",
+   "quality": "named"
+  },
+  "Strategic Alignment": {
+   "slot": "Backpack",
+   "quality": "named",
+   "talent": "Perfect Shock and Awe",
+   "brand": "China Light Industries Corporation"
+  },
+  "Tardigrade Armor System": {
+   "slot": "Chest",
+   "quality": "exotic",
+   "talent": "Ablative Nano-Plating"
+  },
+  "The Courier": {
+   "slot": "Backpack",
+   "quality": "named"
+  },
+  "The Gift": {
+   "slot": "Backpack",
+   "quality": "named",
+   "talent": "Perfect Vigilance",
+   "brand": "Providence Defense"
+  },
+  "The Hollow Man": {
+   "slot": "Mask",
+   "quality": "named",
+   "brand": "Yaahl Gear"
+  },
+  "The Sacrifice": {
+   "slot": "Chest",
+   "quality": "named",
+   "talent": "Perfect Glass Cannon",
+   "brand": "Providence Defense"
+  },
+  "The Setup": {
+   "slot": "Backpack",
+   "quality": "named"
+  },
+  "Tinkerer": {
+   "slot": "Mask",
+   "quality": "exotic"
+  },
+  "Trick Shot": {
+   "slot": "Chest",
+   "quality": "named",
+   "brand": "Imminence Armaments",
+   "talent": "Perfect Reassigned"
+  },
+  "Vedmedytsya Vest": {
+   "slot": "Chest",
+   "quality": "named",
+   "talent": "Perfect Braced",
+   "brand": "Petrov Defense Group"
+  },
+  "Vigil": {
+   "slot": "Backpack",
+   "quality": "named"
+  },
+  "Vile": {
+   "slot": "Mask",
+   "quality": "exotic"
+  },
+  "Visionario": {
+   "slot": "Mask",
+   "quality": "named"
+  },
+  "Waveform": {
+   "slot": "Mask",
+   "quality": "exotic"
+  },
+  "Zero F's": {
+   "slot": "Chest",
+   "quality": "named",
+   "talent": "Perfectly Unbreakable",
+   "brand": "Badger Tuff"
+  },
+  "All Hazards Nitro Backpack": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "5.11 Tactical"
+  },
+  "All Hazards Prime Backpack": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "5.11 Tactical"
+  },
+  "AMP24": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "5.11 Tactical"
+  },
+  "RUSH12 Backpack": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "5.11 Tactical"
+  },
+  "RUSH24 Backpack": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "5.11 Tactical"
+  },
+  "RUSH72 Backpack": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "5.11 Tactical"
+  },
+  "TacLite Plate Carrier": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "5.11 Tactical"
+  },
+  "Protective Tactical Mask": {
+   "slot": "Mask",
+   "quality": "high-end",
+   "brand": "5.11 Tactical"
+  },
+  "Station Grip Gloves": {
+   "slot": "Gloves",
+   "quality": "high-end",
+   "brand": "5.11 Tactical"
+  },
+  "EXO.K1 Kneepad": {
+   "slot": "Kneepads",
+   "quality": "high-end",
+   "brand": "5.11 Tactical"
+  },
+  "Compact Holster Pouch": {
+   "slot": "Holster",
+   "quality": "high-end",
+   "brand": "5.11 Tactical"
+  },
+  "LBE Compact Holster": {
+   "slot": "Holster",
+   "quality": "high-end",
+   "brand": "5.11 Tactical"
+  },
+  "Apollo Operator Pack": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Airaldi Holdings"
+  },
+  "Demeter Quick-Stash": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Airaldi Holdings"
+  },
+  "Athena Missile Vest": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "Airaldi Holdings"
+  },
+  "Aphrodite Glint Concealer": {
+   "slot": "Mask",
+   "quality": "high-end",
+   "brand": "Airaldi Holdings"
+  },
+  "Heracles Dexterity Gloves": {
+   "slot": "Gloves",
+   "quality": "high-end",
+   "brand": "Airaldi Holdings"
+  },
+  "Persephone Precision Gloves": {
+   "slot": "Gloves",
+   "quality": "high-end",
+   "brand": "Airaldi Holdings"
+  },
+  "Dionysus Rounded Padding": {
+   "slot": "Kneepads",
+   "quality": "high-end",
+   "brand": "Airaldi Holdings"
+  },
+  "Artemis Fast Draw Holster": {
+   "slot": "Holster",
+   "quality": "high-end",
+   "brand": "Airaldi Holdings"
+  },
+  "Hera Pouch-Holster Combo": {
+   "slot": "Holster",
+   "quality": "high-end",
+   "brand": "Airaldi Holdings"
+  },
+  "Element Outdoors Rucksack": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Alps Summit Armament"
+  },
+  "Mountain Hiking Pack": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Alps Summit Armament"
+  },
+  "Trekking Elite Pack": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Alps Summit Armament"
+  },
+  "Reinforced Utility Vest": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "Alps Summit Armament"
+  },
+  "X-TREYME Pro Ribcage": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "Alps Summit Armament"
+  },
+  "High Altitude O2 Facer": {
+   "slot": "Mask",
+   "quality": "high-end",
+   "brand": "Alps Summit Armament"
+  },
+  "Climbing Gloves": {
+   "slot": "Gloves",
+   "quality": "high-end",
+   "brand": "Alps Summit Armament"
+  },
+  "Hybrid FL Gloves": {
+   "slot": "Gloves",
+   "quality": "high-end",
+   "brand": "Alps Summit Armament"
+  },
+  "Clutch XO-Skin Sport Pads": {
+   "slot": "Kneepads",
+   "quality": "high-end",
+   "brand": "Alps Summit Armament"
+  },
+  "Torque Enabled Leg Rig": {
+   "slot": "Holster",
+   "quality": "high-end",
+   "brand": "Alps Summit Armament"
+  },
+  "Long Range Pack \"Sett\"": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Badger Tuff"
+  },
+  "Roamer Pack \"Sow\"": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Badger Tuff"
+  },
+  "Winter Carryall \"Bergmann\"": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Badger Tuff"
+  },
+  "Strong Vest \"Bauson\"": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "Badger Tuff"
+  },
+  "Combat Mask \"Cete\"": {
+   "slot": "Mask",
+   "quality": "high-end",
+   "brand": "Badger Tuff"
+  },
+  "Durability Gloves \"Meles\"": {
+   "slot": "Gloves",
+   "quality": "high-end",
+   "brand": "Badger Tuff"
+  },
+  "Knee Mesh \"Jonti\"": {
+   "slot": "Kneepads",
+   "quality": "high-end",
+   "brand": "Badger Tuff"
+  },
+  "Holster \"Huffle\"": {
+   "slot": "Holster",
+   "quality": "high-end",
+   "brand": "Badger Tuff"
+  },
+  "Cavalry TAC-Pack": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Belstone Armory"
+  },
+  "Lancer Chestplate System": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "Belstone Armory"
+  },
+  "Bevor Air Guard": {
+   "slot": "Mask",
+   "quality": "high-end",
+   "brand": "Belstone Armory"
+  },
+  "Vambrace Gloves": {
+   "slot": "Gloves",
+   "quality": "high-end",
+   "brand": "Belstone Armory"
+  },
+  "Poleyn Knee Protector": {
+   "slot": "Kneepads",
+   "quality": "high-end",
+   "brand": "Belstone Armory"
+  },
+  "Fauld & Tasset Holster": {
+   "slot": "Holster",
+   "quality": "high-end",
+   "brand": "Belstone Armory"
+  },
+  "Liquid Engineer": {
+   "slot": "Backpack",
+   "quality": "named",
+   "brand": "Belstone Armory"
+  },
+  "Llave Backpack": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Brazos de Arcabuz"
+  },
+  "Feugo Campea": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "Brazos de Arcabuz"
+  },
+  "Reyes Mask": {
+   "slot": "Mask",
+   "quality": "high-end",
+   "brand": "Brazos de Arcabuz"
+  },
+  "Caballería Gloves": {
+   "slot": "Gloves",
+   "quality": "high-end",
+   "brand": "Brazos de Arcabuz"
+  },
+  "Ceriñola Kneepads": {
+   "slot": "Kneepads",
+   "quality": "high-end",
+   "brand": "Brazos de Arcabuz"
+  },
+  "Guerra Holster": {
+   "slot": "Holster",
+   "quality": "high-end",
+   "brand": "Brazos de Arcabuz"
+  },
+  "KM 9": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "China Light Industries Corporation"
+  },
+  "PS 282": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "China Light Industries Corporation"
+  },
+  "MJ 54": {
+   "slot": "Mask",
+   "quality": "high-end",
+   "brand": "China Light Industries Corporation"
+  },
+  "ST 520": {
+   "slot": "Gloves",
+   "quality": "high-end",
+   "brand": "China Light Industries Corporation"
+  },
+  "HX 02": {
+   "slot": "Kneepads",
+   "quality": "high-end",
+   "brand": "China Light Industries Corporation"
+  },
+  "FK 910": {
+   "slot": "Holster",
+   "quality": "high-end",
+   "brand": "China Light Industries Corporation"
+  },
+  "\"Maree\" Range Pack": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Douglas & Harding"
+  },
+  "\"Ericht\" Chest System": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "Douglas & Harding"
+  },
+  "\"Lomond\" Medium Breather": {
+   "slot": "Mask",
+   "quality": "high-end",
+   "brand": "Douglas & Harding"
+  },
+  "\"Lochy\" Hand Savers": {
+   "slot": "Gloves",
+   "quality": "high-end",
+   "brand": "Douglas & Harding"
+  },
+  "\"Tay\" Protective Pads": {
+   "slot": "Kneepads",
+   "quality": "high-end",
+   "brand": "Douglas & Harding"
+  },
+  "\"Awe\" Thigh Mag/Holster": {
+   "slot": "Holster",
+   "quality": "high-end",
+   "brand": "Douglas & Harding"
+  },
+  "\"Morar\" Holster System": {
+   "slot": "Holster",
+   "quality": "high-end",
+   "brand": "Douglas & Harding"
+  },
+  "Crash Kit Backpack": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Edelweiss GPz"
+  },
+  "First Responder Chest": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "Edelweiss GPz"
+  },
+  "Field Medic Mask": {
+   "slot": "Mask",
+   "quality": "high-end",
+   "brand": "Edelweiss GPz"
+  },
+  "Sterile Gloves": {
+   "slot": "Gloves",
+   "quality": "high-end",
+   "brand": "Edelweiss GPz"
+  },
+  "Brace Kneepads": {
+   "slot": "Kneepads",
+   "quality": "high-end",
+   "brand": "Edelweiss GPz"
+  },
+  "Corpsman Holster": {
+   "slot": "Holster",
+   "quality": "high-end",
+   "brand": "Edelweiss GPz"
+  },
+  "Benefactor": {
+   "slot": "Chest",
+   "quality": "named",
+   "brand": "Edelweiss GPz",
+   "talent": "Perfect Empathic Resolve"
+  },
+  "Electrique Back": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Electrique"
+  },
+  "Electrique Chest": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "Electrique"
+  },
+  "Electrique Mask": {
+   "slot": "Mask",
+   "quality": "high-end",
+   "brand": "Electrique"
+  },
+  "Electrique Gloves": {
+   "slot": "Gloves",
+   "quality": "high-end",
+   "brand": "Electrique"
+  },
+  "Electrique Kneepads": {
+   "slot": "Kneepads",
+   "quality": "high-end",
+   "brand": "Electrique"
+  },
+  "Electrique Holster": {
+   "slot": "Holster",
+   "quality": "high-end",
+   "brand": "Electrique"
+  },
+  "Swag Pack": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Empress International"
+  },
+  "B.O.T. Protector": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "Empress International"
+  },
+  "\"New Face\" Ventilator": {
+   "slot": "Mask",
+   "quality": "high-end",
+   "brand": "Empress International"
+  },
+  "Faux Leather Mitts": {
+   "slot": "Gloves",
+   "quality": "high-end",
+   "brand": "Empress International"
+  },
+  "Wear-anywhere Protector": {
+   "slot": "Kneepads",
+   "quality": "high-end",
+   "brand": "Empress International"
+  },
+  "Rugged Gun Guard": {
+   "slot": "Holster",
+   "quality": "high-end",
+   "brand": "Empress International"
+  },
+  "Battery Pack": {
+   "slot": "Backpack",
+   "quality": "named",
+   "brand": "Empress International"
+  },
+  "Stridssäck Combat Sack": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Fenris Group AB"
+  },
+  "Förstärkt Breastplate": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "Fenris Group AB"
+  },
+  "Harnesk Armor": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "Fenris Group AB"
+  },
+  "Stridsväst Combat Vest": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "Fenris Group AB"
+  },
+  "Luktskydd Protective Mask": {
+   "slot": "Mask",
+   "quality": "high-end",
+   "brand": "Fenris Group AB"
+  },
+  "Tassar Fist Enhancers": {
+   "slot": "Gloves",
+   "quality": "high-end",
+   "brand": "Fenris Group AB"
+  },
+  "Knäskydd Knee Protectors": {
+   "slot": "Kneepads",
+   "quality": "high-end",
+   "brand": "Fenris Group AB"
+  },
+  "Fodral Holster": {
+   "slot": "Holster",
+   "quality": "high-end",
+   "brand": "Fenris Group AB"
+  },
+  "Banner Pack": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Gila Guard"
+  },
+  "Big Horn Pack": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Gila Guard"
+  },
+  "Gila Inventory System": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Gila Guard"
+  },
+  "Armadillo Vest": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "Gila Guard"
+  },
+  "Iguana Hauberk": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "Gila Guard"
+  },
+  "Javelina Mask": {
+   "slot": "Mask",
+   "quality": "high-end",
+   "brand": "Gila Guard"
+  },
+  "Diamondback Gloves": {
+   "slot": "Gloves",
+   "quality": "high-end",
+   "brand": "Gila Guard"
+  },
+  "Sidewinder Kneepads": {
+   "slot": "Kneepads",
+   "quality": "high-end",
+   "brand": "Gila Guard"
+  },
+  "Jackrabbit Holster": {
+   "slot": "Holster",
+   "quality": "high-end",
+   "brand": "Gila Guard"
+  },
+  "Chemar Backpack": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Golan Gear"
+  },
+  "Chatzatz Chest": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "Golan Gear"
+  },
+  "Emet Mask": {
+   "slot": "Mask",
+   "quality": "high-end",
+   "brand": "Golan Gear"
+  },
+  "Ayal Gloves": {
+   "slot": "Gloves",
+   "quality": "high-end",
+   "brand": "Golan Gear"
+  },
+  "Nahar Knees": {
+   "slot": "Kneepads",
+   "quality": "high-end",
+   "brand": "Golan Gear"
+  },
+  "Shomer Holster": {
+   "slot": "Holster",
+   "quality": "high-end",
+   "brand": "Golan Gear"
+  },
+  "Antumbra Backpack": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Grupo Sombra S.A."
+  },
+  "Umbra Plate Carrier": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "Grupo Sombra S.A."
+  },
+  "Penumbra Mask": {
+   "slot": "Mask",
+   "quality": "high-end",
+   "brand": "Grupo Sombra S.A."
+  },
+  "Dusk Attack Gloves": {
+   "slot": "Gloves",
+   "quality": "high-end",
+   "brand": "Grupo Sombra S.A."
+  },
+  "Sundown Knee Guards": {
+   "slot": "Kneepads",
+   "quality": "high-end",
+   "brand": "Grupo Sombra S.A."
+  },
+  "Tenebrous Sidearm Mount": {
+   "slot": "Holster",
+   "quality": "high-end",
+   "brand": "Grupo Sombra S.A."
+  },
+  "HG Backpack": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Habsburg Guard"
+  },
+  "HG Chest": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "Habsburg Guard"
+  },
+  "HG Mask": {
+   "slot": "Mask",
+   "quality": "high-end",
+   "brand": "Habsburg Guard"
+  },
+  "HG Gloves": {
+   "slot": "Gloves",
+   "quality": "high-end",
+   "brand": "Habsburg Guard"
+  },
+  "HG Kneepads": {
+   "slot": "Kneepads",
+   "quality": "high-end",
+   "brand": "Habsburg Guard"
+  },
+  "HG Holster": {
+   "slot": "Holster",
+   "quality": "high-end",
+   "brand": "Habsburg Guard"
+  },
+  "Crash Bag": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Hana-U Corporation"
+  },
+  "Flak Jacket": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "Hana-U Corporation"
+  },
+  "Filter Mask": {
+   "slot": "Mask",
+   "quality": "high-end",
+   "brand": "Hana-U Corporation"
+  },
+  "Plated Gloves": {
+   "slot": "Gloves",
+   "quality": "high-end",
+   "brand": "Hana-U Corporation"
+  },
+  "Knee Savers": {
+   "slot": "Kneepads",
+   "quality": "high-end",
+   "brand": "Hana-U Corporation"
+  },
+  "Duel Holster": {
+   "slot": "Holster",
+   "quality": "high-end",
+   "brand": "Hana-U Corporation"
+  },
+  "Mission Pack": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Imminence Armaments"
+  },
+  "Urban Assault Vest": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "Imminence Armaments"
+  },
+  "Prototype Mask": {
+   "slot": "Mask",
+   "quality": "high-end",
+   "brand": "Imminence Armaments"
+  },
+  "Infiltrator Gloves": {
+   "slot": "Gloves",
+   "quality": "high-end",
+   "brand": "Imminence Armaments"
+  },
+  "Operator Kneepads": {
+   "slot": "Kneepads",
+   "quality": "high-end",
+   "brand": "Imminence Armaments"
+  },
+  "Spider Silk Holster": {
+   "slot": "Holster",
+   "quality": "high-end",
+   "brand": "Imminence Armaments"
+  },
+  "Alpine Carrier": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Legatus S.p.A."
+  },
+  "Lupus Chestplate": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "Legatus S.p.A."
+  },
+  "Bauta Mask": {
+   "slot": "Mask",
+   "quality": "high-end",
+   "brand": "Legatus S.p.A."
+  },
+  "Praefactus Gloves": {
+   "slot": "Gloves",
+   "quality": "high-end",
+   "brand": "Legatus S.p.A."
+  },
+  "Ibex Kneepads": {
+   "slot": "Kneepads",
+   "quality": "high-end",
+   "brand": "Legatus S.p.A."
+  },
+  "Tribunus Holster": {
+   "slot": "Holster",
+   "quality": "high-end",
+   "brand": "Legatus S.p.A."
+  },
+  "Lengmo Backpack": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Lengmo"
+  },
+  "Lengmo Bomb Armor": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "Lengmo"
+  },
+  "Lengmo Mask": {
+   "slot": "Mask",
+   "quality": "high-end",
+   "brand": "Lengmo"
+  },
+  "Lengmo Ballistic Gloves": {
+   "slot": "Gloves",
+   "quality": "high-end",
+   "brand": "Lengmo"
+  },
+  "Lengmo Kneepads": {
+   "slot": "Kneepads",
+   "quality": "high-end",
+   "brand": "Lengmo"
+  },
+  "Lengmo Holster": {
+   "slot": "Holster",
+   "quality": "high-end",
+   "brand": "Lengmo"
+  },
+  "\"Horo\" CarryBack": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Murakami Industries"
+  },
+  "\"Sashimono\" Backpack": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Murakami Industries"
+  },
+  "\"Tatami\" Cuirass": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "Murakami Industries"
+  },
+  "\"Mengu\" Face Protection": {
+   "slot": "Mask",
+   "quality": "high-end",
+   "brand": "Murakami Industries"
+  },
+  "\"Kote\" Hand Guards": {
+   "slot": "Gloves",
+   "quality": "high-end",
+   "brand": "Murakami Industries"
+  },
+  "\"Yugake\" Firearm Gloves": {
+   "slot": "Gloves",
+   "quality": "high-end",
+   "brand": "Murakami Industries"
+  },
+  "\"Suneate\" Knee Braces": {
+   "slot": "Kneepads",
+   "quality": "high-end",
+   "brand": "Murakami Industries"
+  },
+  "\"Haidate\" Thigh System": {
+   "slot": "Holster",
+   "quality": "high-end",
+   "brand": "Murakami Industries"
+  },
+  "Emperors Guard": {
+   "slot": "Kneepads",
+   "quality": "named",
+   "brand": "Murakami Industries"
+  },
+  "\"Vert\" Carry Rail": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Overlord Armaments"
+  },
+  "\"Big Drum\" Body Armor": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "Overlord Armaments"
+  },
+  "\"Fortitude\" Plate Carrier": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "Overlord Armaments"
+  },
+  "\"Pointblank\" Protection Vest": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "Overlord Armaments"
+  },
+  "\"Deadstick\" Protection Mask": {
+   "slot": "Mask",
+   "quality": "high-end",
+   "brand": "Overlord Armaments"
+  },
+  "\"Neptune\" Protection Gloves": {
+   "slot": "Gloves",
+   "quality": "high-end",
+   "brand": "Overlord Armaments"
+  },
+  "\"Dingson\" Protection Pads": {
+   "slot": "Kneepads",
+   "quality": "high-end",
+   "brand": "Overlord Armaments"
+  },
+  "\"Graffham\" Thigh Combo": {
+   "slot": "Holster",
+   "quality": "high-end",
+   "brand": "Overlord Armaments"
+  },
+  "Steelwork Backpack": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Palisade Steelworks"
+  },
+  "Steelwork Chestplate": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "Palisade Steelworks"
+  },
+  "Steelwork Mask": {
+   "slot": "Mask",
+   "quality": "high-end",
+   "brand": "Palisade Steelworks"
+  },
+  "Steelwork Gloves": {
+   "slot": "Gloves",
+   "quality": "high-end",
+   "brand": "Palisade Steelworks"
+  },
+  "Steelwork Kneepads": {
+   "slot": "Kneepads",
+   "quality": "high-end",
+   "brand": "Palisade Steelworks"
+  },
+  "Steelwork Holster": {
+   "slot": "Holster",
+   "quality": "high-end",
+   "brand": "Palisade Steelworks"
+  },
+  "Support Weapons Bag": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Petrov Defense Group"
+  },
+  "TacSack": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Petrov Defense Group"
+  },
+  "Crew-Adapted Chest Rig": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "Petrov Defense Group"
+  },
+  "Ops Armor": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "Petrov Defense Group"
+  },
+  "Guardrail VI Face Rig": {
+   "slot": "Mask",
+   "quality": "high-end",
+   "brand": "Petrov Defense Group"
+  },
+  "Battle Gloves": {
+   "slot": "Gloves",
+   "quality": "high-end",
+   "brand": "Petrov Defense Group"
+  },
+  "Pivot Pads": {
+   "slot": "Kneepads",
+   "quality": "high-end",
+   "brand": "Petrov Defense Group"
+  },
+  "Drop Leg Holster": {
+   "slot": "Holster",
+   "quality": "high-end",
+   "brand": "Petrov Defense Group"
+  },
+  "Aegis Knapsack": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Richter & Kaiser GmbH"
+  },
+  "Ancile Rucksack": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Richter & Kaiser GmbH"
+  },
+  "Duban Fitted Hauler": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Richter & Kaiser GmbH"
+  },
+  "Khetaka Thorax": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "Richter & Kaiser GmbH"
+  },
+  "Svalinn Heavy Breather": {
+   "slot": "Mask",
+   "quality": "high-end",
+   "brand": "Richter & Kaiser GmbH"
+  },
+  "Srivatsa War Grips": {
+   "slot": "Gloves",
+   "quality": "high-end",
+   "brand": "Richter & Kaiser GmbH"
+  },
+  "Hulian Joint Braces": {
+   "slot": "Kneepads",
+   "quality": "high-end",
+   "brand": "Richter & Kaiser GmbH"
+  },
+  "Jaivardhan Thigh Rig": {
+   "slot": "Holster",
+   "quality": "high-end",
+   "brand": "Richter & Kaiser GmbH"
+  },
+  "Pridwen Holster": {
+   "slot": "Holster",
+   "quality": "high-end",
+   "brand": "Richter & Kaiser GmbH"
+  },
+  "Thistle Backpack": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Royal Works"
+  },
+  "Cushag Plate": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "Royal Works"
+  },
+  "Flax Mask": {
+   "slot": "Mask",
+   "quality": "high-end",
+   "brand": "Royal Works"
+  },
+  "Lion Gloves": {
+   "slot": "Gloves",
+   "quality": "high-end",
+   "brand": "Royal Works"
+  },
+  "Rose Kneepads": {
+   "slot": "Kneepads",
+   "quality": "high-end",
+   "brand": "Royal Works"
+  },
+  "Daffodil Holster": {
+   "slot": "Holster",
+   "quality": "high-end",
+   "brand": "Royal Works"
+  },
+  "Robin": {
+   "slot": "Chest",
+   "quality": "named",
+   "brand": "Royal Works",
+   "talent": "Perfect Gunslinger"
+  },
+  "Artificer's Toolbox": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Shiny Monkey Gear"
+  },
+  "Service Vest": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "Shiny Monkey Gear"
+  },
+  "Machinist's Mask": {
+   "slot": "Mask",
+   "quality": "high-end",
+   "brand": "Shiny Monkey Gear"
+  },
+  "Garage Gloves": {
+   "slot": "Gloves",
+   "quality": "high-end",
+   "brand": "Shiny Monkey Gear"
+  },
+  "Labored Kneepads": {
+   "slot": "Kneepads",
+   "quality": "high-end",
+   "brand": "Shiny Monkey Gear"
+  },
+  "Artisan Holster": {
+   "slot": "Holster",
+   "quality": "high-end",
+   "brand": "Shiny Monkey Gear"
+  },
+  "Rally Point Secure Pack": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Sokolov Concern"
+  },
+  "Escorter Combat Harness": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "Sokolov Concern"
+  },
+  "Lightweight Ballistic Vest": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "Sokolov Concern"
+  },
+  "Salvaged Special Operations Mask": {
+   "slot": "Mask",
+   "quality": "high-end",
+   "brand": "Sokolov Concern"
+  },
+  "Special Operations Mask": {
+   "slot": "Mask",
+   "quality": "high-end",
+   "brand": "Sokolov Concern"
+  },
+  "Micro Plated Gloves": {
+   "slot": "Gloves",
+   "quality": "high-end",
+   "brand": "Sokolov Concern"
+  },
+  "Nimble Knee Protectors": {
+   "slot": "Kneepads",
+   "quality": "high-end",
+   "brand": "Sokolov Concern"
+  },
+  "Vertical Y Holster": {
+   "slot": "Holster",
+   "quality": "high-end",
+   "brand": "Sokolov Concern"
+  },
+  "Hills Backpack": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Urban Lookout"
+  },
+  "Marked Chest": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "Urban Lookout"
+  },
+  "Scout Mask": {
+   "slot": "Mask",
+   "quality": "high-end",
+   "brand": "Urban Lookout"
+  },
+  "Mud Resistant Gloves": {
+   "slot": "Gloves",
+   "quality": "high-end",
+   "brand": "Urban Lookout"
+  },
+  "Trekking Kneepads": {
+   "slot": "Kneepads",
+   "quality": "high-end",
+   "brand": "Urban Lookout"
+  },
+  "Rough Holster": {
+   "slot": "Holster",
+   "quality": "high-end",
+   "brand": "Urban Lookout"
+  },
+  "Gavriil Rucksack": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Uzina Getica"
+  },
+  "Parascheva Guard": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "Uzina Getica"
+  },
+  "Ilarion Filter": {
+   "slot": "Mask",
+   "quality": "high-end",
+   "brand": "Uzina Getica"
+  },
+  "Theodora Grips": {
+   "slot": "Gloves",
+   "quality": "high-end",
+   "brand": "Uzina Getica"
+  },
+  "Dosoftei Braces": {
+   "slot": "Kneepads",
+   "quality": "high-end",
+   "brand": "Uzina Getica"
+  },
+  "Constantin Sheath": {
+   "slot": "Holster",
+   "quality": "high-end",
+   "brand": "Uzina Getica"
+  },
+  "Horizons Rucksack": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Walker, Harris & Co."
+  },
+  "Matador": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Walker, Harris & Co."
+  },
+  "Ranger Ballistics Vest": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "Walker, Harris & Co."
+  },
+  "Breathe-Easy Mask": {
+   "slot": "Mask",
+   "quality": "high-end",
+   "brand": "Walker, Harris & Co."
+  },
+  "Savanna Field Gloves": {
+   "slot": "Gloves",
+   "quality": "high-end",
+   "brand": "Walker, Harris & Co."
+  },
+  "Mesa Knee Guards": {
+   "slot": "Kneepads",
+   "quality": "high-end",
+   "brand": "Walker, Harris & Co."
+  },
+  "Tactical Range Holster": {
+   "slot": "Holster",
+   "quality": "high-end",
+   "brand": "Walker, Harris & Co."
+  },
+  "\"Pygostyle\" Sack": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Wyvern Wear"
+  },
+  "\"Scapula\" Bug-out Bag": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Wyvern Wear"
+  },
+  "\"Trapezius\" Go-bag": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Wyvern Wear"
+  },
+  "\"Keel\" Belly Guard": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "Wyvern Wear"
+  },
+  "\"Maxillam\" Respirator": {
+   "slot": "Mask",
+   "quality": "high-end",
+   "brand": "Wyvern Wear"
+  },
+  "\"Digits\" Finger Stabilizer": {
+   "slot": "Gloves",
+   "quality": "high-end",
+   "brand": "Wyvern Wear"
+  },
+  "\"Patella\" Knee Cups": {
+   "slot": "Kneepads",
+   "quality": "high-end",
+   "brand": "Wyvern Wear"
+  },
+  "\"Didactyl\" Pad Holster": {
+   "slot": "Holster",
+   "quality": "high-end",
+   "brand": "Wyvern Wear"
+  },
+  "\"Talon\" Tactical Holster": {
+   "slot": "Holster",
+   "quality": "high-end",
+   "brand": "Wyvern Wear"
+  },
+  "Garibaldi Pack": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Yaahl Gear"
+  },
+  "Glacier Bay Vest": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "Yaahl Gear"
+  },
+  "Ranier Vest": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "Yaahl Gear"
+  },
+  "Cascades Mask": {
+   "slot": "Mask",
+   "quality": "high-end",
+   "brand": "Yaahl Gear"
+  },
+  "Olympic Gloves": {
+   "slot": "Gloves",
+   "quality": "high-end",
+   "brand": "Yaahl Gear"
+  },
+  "Shasta Gloves": {
+   "slot": "Gloves",
+   "quality": "high-end",
+   "brand": "Yaahl Gear"
+  },
+  "Yukon Kneepads": {
+   "slot": "Kneepads",
+   "quality": "high-end",
+   "brand": "Yaahl Gear"
+  },
+  "Snoqualmie Holster": {
+   "slot": "Holster",
+   "quality": "high-end",
+   "brand": "Yaahl Gear"
+  },
+  "Guerilla Backpack": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Česká Výroba s.r.o."
+  },
+  "Mechanized Infantry Armor": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "Česká Výroba s.r.o."
+  },
+  "Rapid Deployment Mask": {
+   "slot": "Mask",
+   "quality": "high-end",
+   "brand": "Česká Výroba s.r.o."
+  },
+  "NBC Gloves": {
+   "slot": "Gloves",
+   "quality": "high-end",
+   "brand": "Česká Výroba s.r.o."
+  },
+  "Logistics Kneepads": {
+   "slot": "Kneepads",
+   "quality": "high-end",
+   "brand": "Česká Výroba s.r.o."
+  },
+  "Reconnaissance Holster": {
+   "slot": "Holster",
+   "quality": "high-end",
+   "brand": "Česká Výroba s.r.o."
+  },
+  "Lowlands Carrier": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Zwiadowka Sp. z.o.o."
+  },
+  "\"Zofia\" Armor System": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "Zwiadowka Sp. z.o.o."
+  },
+  "Burza Breather": {
+   "slot": "Mask",
+   "quality": "high-end",
+   "brand": "Zwiadowka Sp. z.o.o."
+  },
+  "Lucznik Gloves": {
+   "slot": "Gloves",
+   "quality": "high-end",
+   "brand": "Zwiadowka Sp. z.o.o."
+  },
+  "Bizon Guards": {
+   "slot": "Kneepads",
+   "quality": "high-end",
+   "brand": "Zwiadowka Sp. z.o.o."
+  },
+  "White-Tailed Holster": {
+   "slot": "Holster",
+   "quality": "high-end",
+   "brand": "Zwiadowka Sp. z.o.o."
+  },
+  "Police SW Backpack": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Providence Defense"
+  },
+  "Tactical 48h Backpack": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Providence Defense"
+  },
+  "Body Armor System": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "Providence Defense"
+  },
+  "Counterforce Vest": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "Providence Defense"
+  },
+  "Field Protective Mask": {
+   "slot": "Mask",
+   "quality": "high-end",
+   "brand": "Providence Defense"
+  },
+  "Tactical Assault Gloves": {
+   "slot": "Gloves",
+   "quality": "high-end",
+   "brand": "Providence Defense"
+  },
+  "Urban Warfare Kneepads": {
+   "slot": "Kneepads",
+   "quality": "high-end",
+   "brand": "Providence Defense"
+  },
+  "Modular Holster": {
+   "slot": "Holster",
+   "quality": "high-end",
+   "brand": "Providence Defense"
+  },
+  "Unmatched Backpack": {
+   "slot": "Backpack",
+   "quality": "high-end",
+   "brand": "Unit Alloys"
+  },
+  "Unbalanced Chestplate": {
+   "slot": "Chest",
+   "quality": "high-end",
+   "brand": "Unit Alloys"
+  },
+  "Unfazed Mask": {
+   "slot": "Mask",
+   "quality": "high-end",
+   "brand": "Unit Alloys"
+  },
+  "Unburnable Gloves": {
+   "slot": "Gloves",
+   "quality": "high-end",
+   "brand": "Unit Alloys"
+  },
+  "Unequaled Kneepads": {
+   "slot": "Kneepads",
+   "quality": "high-end",
+   "brand": "Unit Alloys"
+  },
+  "Uncontested Holster": {
+   "slot": "Holster",
+   "quality": "high-end",
+   "brand": "Unit Alloys"
+  },
+  "Roza Stable Gloves": {
+   "slot": "Gloves",
+   "quality": "gear set",
+   "gear_set": "Aces & Eights"
+  },
+  "Klavdiya Sidearm Holder": {
+   "slot": "Holster",
+   "quality": "gear set",
+   "gear_set": "Aces & Eights"
+  },
+  "Nina Prone Pads": {
+   "slot": "Kneepads",
+   "quality": "gear set",
+   "gear_set": "Aces & Eights"
+  },
+  "Lyudmila Snipers Mask": {
+   "slot": "Mask",
+   "quality": "gear set",
+   "gear_set": "Aces & Eights"
+  },
+  "Ziba Low Profile Pack": {
+   "slot": "Backpack",
+   "quality": "gear set",
+   "gear_set": "Aces & Eights"
+  },
+  "Tania Silent Vest": {
+   "slot": "Chest",
+   "quality": "gear set",
+   "gear_set": "Aces & Eights"
+  },
+  "Aegis Gloves": {
+   "slot": "Gloves",
+   "quality": "gear set",
+   "gear_set": "Aegis"
+  },
+  "Aegis Holster": {
+   "slot": "Holster",
+   "quality": "gear set",
+   "gear_set": "Aegis"
+  },
+  "Aegis Kneepads": {
+   "slot": "Kneepads",
+   "quality": "gear set",
+   "gear_set": "Aegis"
+  },
+  "Aegis Mask": {
+   "slot": "Mask",
+   "quality": "gear set",
+   "gear_set": "Aegis"
+  },
+  "Aegis Backpack": {
+   "slot": "Backpack",
+   "quality": "gear set",
+   "gear_set": "Aegis"
+  },
+  "Aegis Chestplate": {
+   "slot": "Chest",
+   "quality": "gear set",
+   "gear_set": "Aegis"
+  },
+  "Pathfinder's Mask": {
+   "slot": "Mask",
+   "quality": "gear set",
+   "gear_set": "Breaking Point"
+  },
+  "Pointer's Backpack": {
+   "slot": "Backpack",
+   "quality": "gear set",
+   "gear_set": "Breaking Point"
+  },
+  "Forefront Armor": {
+   "slot": "Chest",
+   "quality": "gear set",
+   "gear_set": "Breaking Point"
+  },
+  "Knifepoint Gloves": {
+   "slot": "Gloves",
+   "quality": "gear set",
+   "gear_set": "Breaking Point"
+  },
+  "Deadeye Holster": {
+   "slot": "Holster",
+   "quality": "gear set",
+   "gear_set": "Breaking Point"
+  },
+  "Cavalier Gloves": {
+   "slot": "Gloves",
+   "quality": "gear set",
+   "gear_set": "Cavalier"
+  },
+  "Cavalier Holster": {
+   "slot": "Holster",
+   "quality": "gear set",
+   "gear_set": "Cavalier"
+  },
+  "Cavalier Kneepads": {
+   "slot": "Kneepads",
+   "quality": "gear set",
+   "gear_set": "Cavalier"
+  },
+  "Cavalier Mask": {
+   "slot": "Mask",
+   "quality": "gear set",
+   "gear_set": "Cavalier"
+  },
+  "Cavalier Backpack": {
+   "slot": "Backpack",
+   "quality": "gear set",
+   "gear_set": "Cavalier"
+  },
+  "Cavalier Chest": {
+   "slot": "Chest",
+   "quality": "gear set",
+   "gear_set": "Cavalier"
+  },
+  "Pointer Gloves": {
+   "slot": "Gloves",
+   "quality": "gear set",
+   "gear_set": "Concentrated Company"
+  },
+  "Targeting Holster": {
+   "slot": "Holster",
+   "quality": "gear set",
+   "gear_set": "Concentrated Company"
+  },
+  "Tracking Kneepads": {
+   "slot": "Kneepads",
+   "quality": "gear set",
+   "gear_set": "Concentrated Company"
+  },
+  "Focused Mask": {
+   "slot": "Mask",
+   "quality": "gear set",
+   "gear_set": "Concentrated Company"
+  },
+  "Directed Backpack": {
+   "slot": "Backpack",
+   "quality": "gear set",
+   "gear_set": "Concentrated Company"
+  },
+  "Fastened Plate": {
+   "slot": "Chest",
+   "quality": "gear set",
+   "gear_set": "Concentrated Company"
+  },
+  "Training Mask": {
+   "slot": "Mask",
+   "quality": "gear set",
+   "gear_set": "Core Strength"
+  },
+  "Weighted Vest": {
+   "slot": "Chest",
+   "quality": "gear set",
+   "gear_set": "Core Strength"
+  },
+  "Marathon Holster": {
+   "slot": "Holster",
+   "quality": "gear set",
+   "gear_set": "Core Strength"
+  },
+  "Gym Backpack": {
+   "slot": "Backpack",
+   "quality": "gear set",
+   "gear_set": "Core Strength"
+  },
+  "Shadow Boxing Gloves": {
+   "slot": "Gloves",
+   "quality": "gear set",
+   "gear_set": "Core Strength"
+  },
+  "Leg Day Kneepads": {
+   "slot": "Kneepads",
+   "quality": "gear set",
+   "gear_set": "Core Strength"
+  },
+  "Medical Grade Tac-Gloves": {
+   "slot": "Gloves",
+   "quality": "gear set",
+   "gear_set": "Eclipse Protocol"
+  },
+  "PPE Adapter Thigh Rig Holster": {
+   "slot": "Holster",
+   "quality": "gear set",
+   "gear_set": "Eclipse Protocol"
+  },
+  "Anti-Tear Joint Shielding Kneepads": {
+   "slot": "Kneepads",
+   "quality": "gear set",
+   "gear_set": "Eclipse Protocol"
+  },
+  "Biohazard Mask": {
+   "slot": "Mask",
+   "quality": "gear set",
+   "gear_set": "Eclipse Protocol"
+  },
+  "Containment Carryall Backpack": {
+   "slot": "Backpack",
+   "quality": "gear set",
+   "gear_set": "Eclipse Protocol"
+  },
+  "Sealed Chest Guard": {
+   "slot": "Chest",
+   "quality": "gear set",
+   "gear_set": "Eclipse Protocol"
+  },
+  "Fireproof Gloves": {
+   "slot": "Gloves",
+   "quality": "gear set",
+   "gear_set": "Ember Engine"
+  },
+  "Hot Hands Holster": {
+   "slot": "Holster",
+   "quality": "gear set",
+   "gear_set": "Ember Engine"
+  },
+  "Fireproof Kneepads": {
+   "slot": "Kneepads",
+   "quality": "gear set",
+   "gear_set": "Ember Engine"
+  },
+  "SCBA Mask": {
+   "slot": "Mask",
+   "quality": "gear set",
+   "gear_set": "Ember Engine"
+  },
+  "Tank Carrier": {
+   "slot": "Backpack",
+   "quality": "gear set",
+   "gear_set": "Ember Engine"
+  },
+  "Blast-Resistant Plate": {
+   "slot": "Chest",
+   "quality": "gear set",
+   "gear_set": "Ember Engine"
+  },
+  "Crucible Gauntlets Gloves": {
+   "slot": "Gloves",
+   "quality": "gear set",
+   "gear_set": "Foundry Bulwark"
+  },
+  "Anvil Toolbelt Holster": {
+   "slot": "Holster",
+   "quality": "gear set",
+   "gear_set": "Foundry Bulwark"
+  },
+  "Hammer Guards Kneepads": {
+   "slot": "Kneepads",
+   "quality": "gear set",
+   "gear_set": "Foundry Bulwark"
+  },
+  "Heat Mask": {
+   "slot": "Mask",
+   "quality": "gear set",
+   "gear_set": "Foundry Bulwark"
+  },
+  "Shield Carrier Backpack": {
+   "slot": "Backpack",
+   "quality": "gear set",
+   "gear_set": "Foundry Bulwark"
+  },
+  "Forged Place Armor": {
+   "slot": "Chest",
+   "quality": "gear set",
+   "gear_set": "Foundry Bulwark"
+  },
+  "APM Controller Gloves": {
+   "slot": "Gloves",
+   "quality": "gear set",
+   "gear_set": "Future Initiative"
+  },
+  "Rush Tactics Holster": {
+   "slot": "Holster",
+   "quality": "gear set",
+   "gear_set": "Future Initiative"
+  },
+  "Bounding Kneepads": {
+   "slot": "Kneepads",
+   "quality": "gear set",
+   "gear_set": "Future Initiative"
+  },
+  "Fog of War Mask": {
+   "slot": "Mask",
+   "quality": "gear set",
+   "gear_set": "Future Initiative"
+  },
+  "2k-RTS Radio Carrier Backpack": {
+   "slot": "Backpack",
+   "quality": "gear set",
+   "gear_set": "Future Initiative"
+  },
+  "Terrapin Armored Rig Vest": {
+   "slot": "Chest",
+   "quality": "gear set",
+   "gear_set": "Future Initiative"
+  },
+  "\"Molesey\" ESD Gloves": {
+   "slot": "Gloves",
+   "quality": "gear set",
+   "gear_set": "Hard Wired"
+  },
+  "\"Ullswater\" Proxy Rig Holster": {
+   "slot": "Holster",
+   "quality": "gear set",
+   "gear_set": "Hard Wired"
+  },
+  "\"Strines\" Stabilizing Pads": {
+   "slot": "Kneepads",
+   "quality": "gear set",
+   "gear_set": "Hard Wired"
+  },
+  "\"Rhodeswood\" AR Mask": {
+   "slot": "Mask",
+   "quality": "gear set",
+   "gear_set": "Hard Wired"
+  },
+  "\"Abberton\" Dynamo Carrier Backpack": {
+   "slot": "Backpack",
+   "quality": "gear set",
+   "gear_set": "Hard Wired"
+  },
+  "\"Serpentine\" Array Vest": {
+   "slot": "Chest",
+   "quality": "gear set",
+   "gear_set": "Hard Wired"
+  },
+  "Light Touch Gloves": {
+   "slot": "Gloves",
+   "quality": "gear set",
+   "gear_set": "Heartbreaker"
+  },
+  "Ever-Ready Holster": {
+   "slot": "Holster",
+   "quality": "gear set",
+   "gear_set": "Heartbreaker"
+  },
+  "Aggressor Kneepads": {
+   "slot": "Kneepads",
+   "quality": "gear set",
+   "gear_set": "Heartbreaker"
+  },
+  "Concealed Breath Mask": {
+   "slot": "Mask",
+   "quality": "gear set",
+   "gear_set": "Heartbreaker"
+  },
+  "Burdenless Pack": {
+   "slot": "Backpack",
+   "quality": "gear set",
+   "gear_set": "Heartbreaker"
+  },
+  "Unflinching Vest": {
+   "slot": "Chest",
+   "quality": "gear set",
+   "gear_set": "Heartbreaker"
+  },
+  "Hotshot Gloves": {
+   "slot": "Gloves",
+   "quality": "gear set",
+   "gear_set": "Hotshot"
+  },
+  "Hotshot Holster": {
+   "slot": "Holster",
+   "quality": "gear set",
+   "gear_set": "Hotshot"
+  },
+  "Hotshot Kneepads": {
+   "slot": "Kneepads",
+   "quality": "gear set",
+   "gear_set": "Hotshot"
+  },
+  "Hotshot Mask": {
+   "slot": "Mask",
+   "quality": "gear set",
+   "gear_set": "Hotshot"
+  },
+  "Hotshot Backpack": {
+   "slot": "Backpack",
+   "quality": "gear set",
+   "gear_set": "Hotshot"
+  },
+  "Hotshot Vest": {
+   "slot": "Chest",
+   "quality": "gear set",
+   "gear_set": "Hotshot"
+  },
+  "Hunter's Claws": {
+   "slot": "Gloves",
+   "quality": "gear set",
+   "gear_set": "Hunter's Fury"
+  },
+  "Hunter's Quiver": {
+   "slot": "Holster",
+   "quality": "gear set",
+   "gear_set": "Hunter's Fury"
+  },
+  "Hunter's Stride": {
+   "slot": "Kneepads",
+   "quality": "gear set",
+   "gear_set": "Hunter's Fury"
+  },
+  "Hunter's Muzzle": {
+   "slot": "Mask",
+   "quality": "gear set",
+   "gear_set": "Hunter's Fury"
+  },
+  "Hunter's Kit": {
+   "slot": "Backpack",
+   "quality": "gear set",
+   "gear_set": "Hunter's Fury"
+  },
+  "Hunter's Cage": {
+   "slot": "Chest",
+   "quality": "gear set",
+   "gear_set": "Hunter's Fury"
+  },
+  "Measure Gloves": {
+   "slot": "Gloves",
+   "quality": "gear set",
+   "gear_set": "Measured Assembly"
+  },
+  "Final Holster": {
+   "slot": "Holster",
+   "quality": "gear set",
+   "gear_set": "Measured Assembly"
+  },
+  "Measure Kneepads": {
+   "slot": "Kneepads",
+   "quality": "gear set",
+   "gear_set": "Measured Assembly"
+  },
+  "Final Mask": {
+   "slot": "Mask",
+   "quality": "gear set",
+   "gear_set": "Measured Assembly"
+  },
+  "Measure Backpack": {
+   "slot": "Backpack",
+   "quality": "gear set",
+   "gear_set": "Measured Assembly"
+  },
+  "Final Armor": {
+   "slot": "Chest",
+   "quality": "gear set",
+   "gear_set": "Measured Assembly"
+  },
+  "Mirror Gloves": {
+   "slot": "Gloves",
+   "quality": "gear set",
+   "gear_set": "Negotiator's Dilemma"
+  },
+  "Bogey Thigh Rig": {
+   "slot": "Holster",
+   "quality": "gear set",
+   "gear_set": "Negotiator's Dilemma"
+  },
+  "Lowball Kneepads": {
+   "slot": "Kneepads",
+   "quality": "gear set",
+   "gear_set": "Negotiator's Dilemma"
+  },
+  "Snow Job Mask": {
+   "slot": "Mask",
+   "quality": "gear set",
+   "gear_set": "Negotiator's Dilemma"
+  },
+  "Nibble Backpack": {
+   "slot": "Backpack",
+   "quality": "gear set",
+   "gear_set": "Negotiator's Dilemma"
+  },
+  "Highball Armor": {
+   "slot": "Chest",
+   "quality": "gear set",
+   "gear_set": "Negotiator's Dilemma"
+  },
+  "Gatherer's Mask": {
+   "slot": "Mask",
+   "quality": "gear set",
+   "gear_set": "Ongoing Directive"
+  },
+  "Loadout Frame": {
+   "slot": "Backpack",
+   "quality": "gear set",
+   "gear_set": "Ongoing Directive"
+  },
+  "Resource Harness": {
+   "slot": "Chest",
+   "quality": "gear set",
+   "gear_set": "Ongoing Directive"
+  },
+  "CQB Fist Guards": {
+   "slot": "Gloves",
+   "quality": "gear set",
+   "gear_set": "Ongoing Directive"
+  },
+  "Special Ammo Holster": {
+   "slot": "Holster",
+   "quality": "gear set",
+   "gear_set": "Ongoing Directive"
+  },
+  "Knee Poleyn": {
+   "slot": "Kneepads",
+   "quality": "gear set",
+   "gear_set": "Ongoing Directive"
+  },
+  "Exuro Tactical Gloves": {
+   "slot": "Gloves",
+   "quality": "gear set",
+   "gear_set": "Ortiz: Exuro"
+  },
+  "Exuro Holster": {
+   "slot": "Holster",
+   "quality": "gear set",
+   "gear_set": "Ortiz: Exuro"
+  },
+  "Exuro Kneepads": {
+   "slot": "Kneepads",
+   "quality": "gear set",
+   "gear_set": "Ortiz: Exuro"
+  },
+  "Exuro Mask": {
+   "slot": "Mask",
+   "quality": "gear set",
+   "gear_set": "Ortiz: Exuro"
+  },
+  "Exuro Backpack": {
+   "slot": "Backpack",
+   "quality": "gear set",
+   "gear_set": "Ortiz: Exuro"
+  },
+  "Exuro Chestplate": {
+   "slot": "Chest",
+   "quality": "gear set",
+   "gear_set": "Ortiz: Exuro"
+  },
+  "Arc Mask": {
+   "slot": "Mask",
+   "quality": "gear set",
+   "gear_set": "Ortiz: Reficere"
+  },
+  "Nanite Carrier": {
+   "slot": "Backpack",
+   "quality": "gear set",
+   "gear_set": "Ortiz: Reficere"
+  },
+  "Tech Plate": {
+   "slot": "Chest",
+   "quality": "gear set",
+   "gear_set": "Ortiz: Reficere"
+  },
+  "Hot Work Gloves": {
+   "slot": "Gloves",
+   "quality": "gear set",
+   "gear_set": "Ortiz: Reficere"
+  },
+  "Thermoplastic Holster": {
+   "slot": "Holster",
+   "quality": "gear set",
+   "gear_set": "Ortiz: Reficere"
+  },
+  "Workshop Kneepads": {
+   "slot": "Kneepads",
+   "quality": "gear set",
+   "gear_set": "Ortiz: Reficere"
+  },
+  "Reshuffled Gloves": {
+   "slot": "Gloves",
+   "quality": "gear set",
+   "gear_set": "Refactor"
+  },
+  "Revised Holster": {
+   "slot": "Holster",
+   "quality": "gear set",
+   "gear_set": "Refactor"
+  },
+  "Remodeled Kneepads": {
+   "slot": "Kneepads",
+   "quality": "gear set",
+   "gear_set": "Refactor"
+  },
+  "Reformed Mask": {
+   "slot": "Mask",
+   "quality": "gear set",
+   "gear_set": "Refactor"
+  },
+  "Reorganized Backpack": {
+   "slot": "Backpack",
+   "quality": "gear set",
+   "gear_set": "Refactor"
+  },
+  "Reformed Vest": {
+   "slot": "Chest",
+   "quality": "gear set",
+   "gear_set": "Refactor"
+  },
+  "Rigger Anti-Slip Gloves": {
+   "slot": "Gloves",
+   "quality": "gear set",
+   "gear_set": "Rigger"
+  },
+  "Rigger Utility Pouch": {
+   "slot": "Holster",
+   "quality": "gear set",
+   "gear_set": "Rigger"
+  },
+  "Rigger Collision Guards": {
+   "slot": "Kneepads",
+   "quality": "gear set",
+   "gear_set": "Rigger"
+  },
+  "Rigger Dust Mask": {
+   "slot": "Mask",
+   "quality": "gear set",
+   "gear_set": "Rigger"
+  },
+  "Rigger Gear Bag": {
+   "slot": "Backpack",
+   "quality": "gear set",
+   "gear_set": "Rigger"
+  },
+  "Rigger Quick Access Harness": {
+   "slot": "Chest",
+   "quality": "gear set",
+   "gear_set": "Rigger"
+  },
+  "Striker's Gloves": {
+   "slot": "Gloves",
+   "quality": "gear set",
+   "gear_set": "Striker's Battlegear"
+  },
+  "Striker's Holster": {
+   "slot": "Holster",
+   "quality": "gear set",
+   "gear_set": "Striker's Battlegear"
+  },
+  "Striker's Kneepads": {
+   "slot": "Kneepads",
+   "quality": "gear set",
+   "gear_set": "Striker's Battlegear"
+  },
+  "Striker's Mask": {
+   "slot": "Mask",
+   "quality": "gear set",
+   "gear_set": "Striker's Battlegear"
+  },
+  "Striker's Pack": {
+   "slot": "Backpack",
+   "quality": "gear set",
+   "gear_set": "Striker's Battlegear"
+  },
+  "Striker's Chest": {
+   "slot": "Chest",
+   "quality": "gear set",
+   "gear_set": "Striker's Battlegear"
+  },
+  "Haptic Bypass Gloves": {
+   "slot": "Gloves",
+   "quality": "gear set",
+   "gear_set": "System Corruption"
+  },
+  "Frame Injection Holster": {
+   "slot": "Holster",
+   "quality": "gear set",
+   "gear_set": "System Corruption"
+  },
+  "Zero Day Kneepads": {
+   "slot": "Kneepads",
+   "quality": "gear set",
+   "gear_set": "System Corruption"
+  },
+  "Stack Overflow Container": {
+   "slot": "Backpack",
+   "quality": "gear set",
+   "gear_set": "System Corruption"
+  },
+  "Blended Threat Armor": {
+   "slot": "Chest",
+   "quality": "gear set",
+   "gear_set": "System Corruption"
+  },
+  "Lilley Holster System": {
+   "slot": "Holster",
+   "quality": "gear set",
+   "gear_set": "Tip of the Spear"
+  },
+  "Glued Gloves": {
+   "slot": "Gloves",
+   "quality": "gear set",
+   "gear_set": "Tipping Scales"
+  },
+  "Doc Holster": {
+   "slot": "Holster",
+   "quality": "gear set",
+   "gear_set": "Tipping Scales"
+  },
+  "Driven Kneepads": {
+   "slot": "Kneepads",
+   "quality": "gear set",
+   "gear_set": "Tipping Scales"
+  },
+  "Sustainable Mask": {
+   "slot": "Mask",
+   "quality": "gear set",
+   "gear_set": "Tipping Scales"
+  },
+  "Endurance Backpack": {
+   "slot": "Backpack",
+   "quality": "gear set",
+   "gear_set": "Tipping Scales"
+  },
+  "Burst-resistant Plate": {
+   "slot": "Chest",
+   "quality": "gear set",
+   "gear_set": "Tipping Scales"
+  },
+  "Ross Hand Protectors": {
+   "slot": "Gloves",
+   "quality": "gear set",
+   "gear_set": "True Patriot"
+  },
+  "Young Low-Friction Holster": {
+   "slot": "Holster",
+   "quality": "gear set",
+   "gear_set": "True Patriot"
+  },
+  "Sheridan Kneelers": {
+   "slot": "Kneepads",
+   "quality": "gear set",
+   "gear_set": "True Patriot"
+  },
+  "Heft Grade A Mask": {
+   "slot": "Mask",
+   "quality": "gear set",
+   "gear_set": "True Patriot"
+  },
+  "Driver Excursion Pack": {
+   "slot": "Backpack",
+   "quality": "gear set",
+   "gear_set": "True Patriot"
+  },
+  "Appleton Body Armor": {
+   "slot": "Chest",
+   "quality": "gear set",
+   "gear_set": "True Patriot"
+  },
+  "Umbra Initiative Gloves": {
+   "slot": "Gloves",
+   "quality": "gear set",
+   "gear_set": "Umbra Initiative"
+  },
+  "Umbra Initiative Holster": {
+   "slot": "Holster",
+   "quality": "gear set",
+   "gear_set": "Umbra Initiative"
+  },
+  "Umbra Initiative Kneepads": {
+   "slot": "Kneepads",
+   "quality": "gear set",
+   "gear_set": "Umbra Initiative"
+  },
+  "Umbra Initiative Mask": {
+   "slot": "Mask",
+   "quality": "gear set",
+   "gear_set": "Umbra Initiative"
+  },
+  "Umbra Initiative Backpack": {
+   "slot": "Backpack",
+   "quality": "gear set",
+   "gear_set": "Umbra Initiative"
+  },
+  "Umbra Initiative Vest": {
+   "slot": "Chest",
+   "quality": "gear set",
+   "gear_set": "Umbra Initiative"
+  },
+  "Sharp Gloves": {
+   "slot": "Gloves",
+   "quality": "gear set",
+   "gear_set": "Virtuoso"
+  },
+  "Grave Holster": {
+   "slot": "Holster",
+   "quality": "gear set",
+   "gear_set": "Virtuoso"
+  },
+  "Saltando Kneepads": {
+   "slot": "Kneepads",
+   "quality": "gear set",
+   "gear_set": "Virtuoso"
+  },
+  "Fermata Mask": {
+   "slot": "Mask",
+   "quality": "gear set",
+   "gear_set": "Virtuoso"
+  },
+  "Medley Backpack": {
+   "slot": "Backpack",
+   "quality": "gear set",
+   "gear_set": "Virtuoso"
+  },
+  "Bravura Guard": {
+   "slot": "Chest",
+   "quality": "gear set",
+   "gear_set": "Virtuoso"
+  },
+  "Loaded for Bear": {
+   "slot": "Gloves",
+   "quality": "exotic",
+   "talent": "Afterburn"
+  }
+ },
+ "weapon_index": {
+  "1886": {
+   "type": "Rifle",
+   "quality": "high-end"
+  },
+  "586 Magnum": {
+   "type": "Pistol",
+   "quality": "high-end"
+  },
+  "93R": {
+   "type": "Pistol",
+   "quality": "high-end"
+  },
+  "ACR": {
+   "type": "Assault Rifle",
+   "quality": "high-end"
+  },
+  "ACR SS": {
+   "type": "Rifle",
+   "quality": "high-end"
+  },
+  "ACR-E": {
+   "type": "Assault Rifle",
+   "quality": "high-end"
+  },
+  "ACS-12": {
+   "type": "Shotgun",
+   "quality": "high-end"
+  },
+  "AK-47": {
+   "type": "Assault Rifle",
+   "quality": "high-end"
+  },
+  "AK-M": {
+   "type": "Assault Rifle",
+   "quality": "high-end"
+  },
+  "AUG A3": {
+   "type": "Submachine Gun",
+   "quality": "high-end"
+  },
+  "AUG A3 Para XS": {
+   "type": "Submachine Gun",
+   "quality": "high-end"
+  },
+  "AUG A3-CQC": {
+   "type": "Assault Rifle",
+   "quality": "high-end"
+  },
+  "Achilles": {
+   "type": "Rifle",
+   "quality": "named"
+  },
+  "Adrestia": {
+   "type": "Marksman Rifle",
+   "quality": "named"
+  },
+  "Agitator": {
+   "type": "Assault Rifle",
+   "quality": "exotic"
+  },
+  "Artist's Tool": {
+   "type": "Rifle",
+   "quality": "named"
+  },
+  "Backfire": {
+   "type": "Submachine Gun",
+   "quality": "exotic"
+  },
+  "Backup Boomstick": {
+   "type": "Shotgun",
+   "quality": "named"
+  },
+  "Baker's Dozen": {
+   "type": "Rifle",
+   "quality": "named"
+  },
+  "Big Alejandro": {
+   "type": "Light Machine Gun",
+   "quality": "exotic"
+  },
+  "Big Show": {
+   "type": "Light Machine Gun",
+   "quality": "named"
+  },
+  "Black Friday": {
+   "type": "Light Machine Gun",
+   "quality": "named"
+  },
+  "Black Market AK-M": {
+   "type": "Assault Rifle",
+   "quality": "high-end"
+  },
+  "Black Market AK-M Replica": {
+   "type": "Assault Rifle",
+   "quality": "high-end"
+  },
+  "Black Market M60 E6": {
+   "type": "Light Machine Gun",
+   "quality": "high-end"
+  },
+  "Black Market M60 E6 Replica": {
+   "type": "Light Machine Gun",
+   "quality": "high-end"
+  },
+  "Black Market RPK-74 E": {
+   "type": "Light Machine Gun",
+   "quality": "high-end"
+  },
+  "Black Market RPK-74 E Replica": {
+   "type": "Light Machine Gun",
+   "quality": "high-end"
+  },
+  "Black Market SASG-12 S": {
+   "type": "Shotgun",
+   "quality": "high-end"
+  },
+  "Black Market SASG-12 S Replica": {
+   "type": "Shotgun",
+   "quality": "high-end"
+  },
+  "Black Market T821": {
+   "type": "Submachine Gun",
+   "quality": "high-end"
+  },
+  "Black Market T821 Replica": {
+   "type": "Submachine Gun",
+   "quality": "high-end"
+  },
+  "Bluescreen": {
+   "type": "Light Machine Gun",
+   "quality": "exotic"
+  },
+  "Boomstick": {
+   "type": "Shotgun",
+   "quality": "named"
+  },
+  "Born Great": {
+   "type": "Submachine Gun",
+   "quality": "named"
+  },
+  "Brain Break": {
+   "type": "Rifle",
+   "quality": "named"
+  },
+  "Brutus": {
+   "type": "Marksman Rifle",
+   "quality": "named"
+  },
+  "Bullet King": {
+   "type": "Light Machine Gun",
+   "quality": "exotic"
+  },
+  "Bullfrog": {
+   "type": "Assault Rifle",
+   "quality": "exotic"
+  },
+  "Burn Out": {
+   "type": "Assault Rifle",
+   "quality": "named"
+  },
+  "Burnout": {
+   "type": "Assault Rifle",
+   "quality": "named"
+  },
+  "Busy Little Bee": {
+   "type": "Pistol",
+   "quality": "exotic"
+  },
+  "CMMG Banshee": {
+   "type": "Submachine Gun",
+   "quality": "high-end"
+  },
+  "CTAR-21": {
+   "type": "Assault Rifle",
+   "quality": "high-end"
+  },
+  "Cabaret": {
+   "type": "Submachine Gun",
+   "quality": "named"
+  },
+  "Caduceus": {
+   "type": "Assault Rifle",
+   "quality": "exotic"
+  },
+  "Capacitor": {
+   "type": "Assault Rifle",
+   "quality": "exotic"
+  },
+  "Carbine 7": {
+   "type": "Assault Rifle",
+   "quality": "high-end"
+  },
+  "Carnage": {
+   "type": "Light Machine Gun",
+   "quality": "named"
+  },
+  "Chameleon": {
+   "type": "Assault Rifle",
+   "quality": "exotic"
+  },
+  "Chatterbox": {
+   "type": "Submachine Gun",
+   "quality": "named"
+  },
+  "Classic M1A": {
+   "type": "Rifle",
+   "quality": "high-end"
+  },
+  "Classic M44 Carbine": {
+   "type": "Marksman Rifle",
+   "quality": "high-end"
+  },
+  "Classic M44 Carbine Replica": {
+   "type": "Marksman Rifle",
+   "quality": "high-end"
+  },
+  "Classic M60": {
+   "type": "Light Machine Gun",
+   "quality": "high-end"
+  },
+  "Classic M60 Replica": {
+   "type": "Light Machine Gun",
+   "quality": "high-end"
+  },
+  "Classic RPK-74": {
+   "type": "Light Machine Gun",
+   "quality": "high-end"
+  },
+  "Cold Relations": {
+   "type": "Submachine Gun",
+   "quality": "named"
+  },
+  "Commando": {
+   "type": "Marksman Rifle",
+   "quality": "named"
+  },
+  "Converted SMG-9": {
+   "type": "Submachine Gun",
+   "quality": "high-end"
+  },
+  "Converted SMG-9 A2": {
+   "type": "Submachine Gun",
+   "quality": "high-end"
+  },
+  "Converted SMG-9 Replica": {
+   "type": "Submachine Gun",
+   "quality": "high-end"
+  },
+  "Covert SRS": {
+   "type": "Marksman Rifle",
+   "quality": "high-end"
+  },
+  "Cricket": {
+   "type": "Light Machine Gun",
+   "quality": "named"
+  },
+  "Custom L86 A2": {
+   "type": "Light Machine Gun",
+   "quality": "high-end"
+  },
+  "Custom L86 A2 Replica": {
+   "type": "Light Machine Gun",
+   "quality": "high-end"
+  },
+  "Custom M44": {
+   "type": "Marksman Rifle",
+   "quality": "high-end"
+  },
+  "Custom M44 Replica": {
+   "type": "Marksman Rifle",
+   "quality": "high-end"
+  },
+  "Custom M870 MCS": {
+   "type": "Shotgun",
+   "quality": "high-end"
+  },
+  "Custom M870 MCS Replica": {
+   "type": "Shotgun",
+   "quality": "high-end"
+  },
+  "Custom P416 G3": {
+   "type": "Assault Rifle",
+   "quality": "high-end"
+  },
+  "Custom PF45": {
+   "type": "Pistol",
+   "quality": "high-end"
+  },
+  "Cuélebre": {
+   "type": "Shotgun",
+   "quality": "named"
+  },
+  "D50": {
+   "type": "Pistol",
+   "quality": "high-end"
+  },
+  "Dare": {
+   "type": "Light Machine Gun",
+   "quality": "named"
+  },
+  "Dark Winter": {
+   "type": "Submachine Gun",
+   "quality": "named"
+  },
+  "Designated Hitter": {
+   "type": "Marksman Rifle",
+   "quality": "named"
+  },
+  "Diamondback": {
+   "type": "Rifle",
+   "quality": "exotic"
+  },
+  "Diceros": {
+   "type": "Pistol",
+   "quality": "high-end"
+  },
+  "Diceros Replica": {
+   "type": "Pistol",
+   "quality": "high-end"
+  },
+  "Diceros Special": {
+   "type": "Pistol",
+   "quality": "specialization",
+   "spec": "Demolitionist"
+  },
+  "Doctor Home": {
+   "type": "Rifle",
+   "quality": "exotic"
+  },
+  "Double Barrel Sawed Off": {
+   "type": "Shotgun",
+   "quality": "high-end"
+  },
+  "Double Barrel Shotgun": {
+   "type": "Shotgun",
+   "quality": "high-end"
+  },
+  "Double Barrel Shotgun Replica": {
+   "type": "Shotgun",
+   "quality": "high-end"
+  },
+  "Dread Edict": {
+   "type": "Marksman Rifle",
+   "quality": "exotic"
+  },
+  "Eagle Bearer": {
+   "type": "Assault Rifle",
+   "quality": "exotic"
+  },
+  "Ekim's Long Stick": {
+   "type": "Marksman Rifle",
+   "quality": "named"
+  },
+  "Emeline's Guard": {
+   "type": "Submachine Gun",
+   "quality": "named"
+  },
+  "Enforcer": {
+   "type": "Shotgun",
+   "quality": "named"
+  },
+  "Enhanced AUG A3P": {
+   "type": "Submachine Gun",
+   "quality": "high-end"
+  },
+  "Enhanced PP-19": {
+   "type": "Submachine Gun",
+   "quality": "high-end"
+  },
+  "Everlasting Gaze": {
+   "type": "Rifle",
+   "quality": "named"
+  },
+  "F2000": {
+   "type": "Assault Rifle",
+   "quality": "high-end"
+  },
+  "F2000 Replica": {
+   "type": "Assault Rifle",
+   "quality": "high-end"
+  },
+  "FAL": {
+   "type": "Assault Rifle",
+   "quality": "high-end"
+  },
+  "FAL SA-58": {
+   "type": "Assault Rifle",
+   "quality": "high-end"
+  },
+  "FAL SA-58 Para": {
+   "type": "Assault Rifle",
+   "quality": "high-end"
+  },
+  "FAL SA-58 Para Replica": {
+   "type": "Assault Rifle",
+   "quality": "high-end"
+  },
+  "FAMAS 2010": {
+   "type": "Assault Rifle",
+   "quality": "high-end"
+  },
+  "FAMAS 2010 Replica": {
+   "type": "Assault Rifle",
+   "quality": "high-end"
+  },
+  "Fafnir": {
+   "type": "Shotgun",
+   "quality": "exotic"
+  },
+  "Firestarter": {
+   "type": "Shotgun",
+   "quality": "named"
+  },
+  "First Bloom": {
+   "type": "Assault Rifle",
+   "quality": "named"
+  },
+  "First Sight": {
+   "type": "Assault Rifle",
+   "quality": "named"
+  },
+  "First Wave PF45": {
+   "type": "Pistol",
+   "quality": "high-end"
+  },
+  "G28": {
+   "type": "Marksman Rifle",
+   "quality": "high-end"
+  },
+  "G36": {
+   "type": "Assault Rifle",
+   "quality": "high-end"
+  },
+  "G36 C": {
+   "type": "Assault Rifle",
+   "quality": "high-end"
+  },
+  "G36 Enhanced": {
+   "type": "Assault Rifle",
+   "quality": "high-end"
+  },
+  "G36 Enhanced Replica": {
+   "type": "Assault Rifle",
+   "quality": "high-end"
+  },
+  "GR9": {
+   "type": "Light Machine Gun",
+   "quality": "high-end"
+  },
+  "Gear Shift": {
+   "type": "Submachine Gun",
+   "quality": "named"
+  },
+  "Glory Daze": {
+   "type": "Assault Rifle",
+   "quality": "named"
+  },
+  "Goalie": {
+   "type": "Assault Rifle",
+   "quality": "named"
+  },
+  "Good Times": {
+   "type": "Light Machine Gun",
+   "quality": "named"
+  },
+  "Grown Great": {
+   "type": "Submachine Gun",
+   "quality": "named"
+  },
+  "Handbasket": {
+   "type": "Marksman Rifle",
+   "quality": "named"
+  },
+  "Harmony": {
+   "type": "Rifle",
+   "quality": "named"
+  },
+  "Honey Badger": {
+   "type": "Assault Rifle",
+   "quality": "high-end"
+  },
+  "Hunting M44": {
+   "type": "Marksman Rifle",
+   "quality": "high-end"
+  },
+  "IMI Negev": {
+   "type": "Light Machine Gun",
+   "quality": "high-end"
+  },
+  "IWI NEGEV": {
+   "type": "Light Machine Gun",
+   "quality": "high-end"
+  },
+  "Incendia": {
+   "type": "Marksman Rifle",
+   "quality": "named"
+  },
+  "Infantry MG5": {
+   "type": "Light Machine Gun",
+   "quality": "high-end"
+  },
+  "Infantry MG5 Replica": {
+   "type": "Light Machine Gun",
+   "quality": "high-end"
+  },
+  "Instigator": {
+   "type": "Marksman Rifle",
+   "quality": "exotic"
+  },
+  "Invisible Hand": {
+   "type": "Assault Rifle",
+   "quality": "named"
+  },
+  "Iron Lung": {
+   "type": "Light Machine Gun",
+   "quality": "exotic"
+  },
+  "KARD": {
+   "type": "Pistol",
+   "quality": "high-end"
+  },
+  "KSG": {
+   "type": "Shotgun",
+   "quality": "high-end"
+  },
+  "KSG Shotgun": {
+   "type": "Shotgun",
+   "quality": "high-end"
+  },
+  "Kingbreaker": {
+   "type": "Assault Rifle",
+   "quality": "named"
+  },
+  "L86 LSW": {
+   "type": "Light Machine Gun",
+   "quality": "high-end"
+  },
+  "LVOA-C": {
+   "type": "Rifle",
+   "quality": "high-end"
+  },
+  "LVOA-C Replica": {
+   "type": "Rifle",
+   "quality": "high-end"
+  },
+  "Lady Death": {
+   "type": "Submachine Gun",
+   "quality": "exotic"
+  },
+  "Lefty": {
+   "type": "Shotgun",
+   "quality": "named"
+  },
+  "Lexington": {
+   "type": "Assault Rifle",
+   "quality": "named"
+  },
+  "Liberty": {
+   "type": "Pistol",
+   "quality": "exotic"
+  },
+  "Lichtenberg": {
+   "type": "Rifle",
+   "quality": "named"
+  },
+  "Lightning Rod": {
+   "type": "Pistol",
+   "quality": "named"
+  },
+  "Lightweight M4": {
+   "type": "Rifle",
+   "quality": "high-end"
+  },
+  "Like Glue": {
+   "type": "Shotgun",
+   "quality": "named"
+  },
+  "Lockdown": {
+   "type": "Shotgun",
+   "quality": "named"
+  },
+  "Lud": {
+   "type": "Assault Rifle",
+   "quality": "named"
+  },
+  "Lullaby": {
+   "type": "Shotgun",
+   "quality": "exotic"
+  },
+  "M16A2": {
+   "type": "Rifle",
+   "quality": "high-end"
+  },
+  "M16A2 Replica": {
+   "type": "Rifle",
+   "quality": "high-end"
+  },
+  "M1911": {
+   "type": "Pistol",
+   "quality": "high-end"
+  },
+  "M1928": {
+   "type": "Submachine Gun",
+   "quality": "high-end"
+  },
+  "M1A": {
+   "type": "Marksman Rifle",
+   "quality": "high-end"
+  },
+  "M1A CQB": {
+   "type": "Rifle",
+   "quality": "high-end"
+  },
+  "M1A CQB Replica": {
+   "type": "Rifle",
+   "quality": "high-end"
+  },
+  "M249 B": {
+   "type": "Light Machine Gun",
+   "quality": "high-end"
+  },
+  "M4": {
+   "type": "Assault Rifle",
+   "quality": "high-end"
+  },
+  "M44": {
+   "type": "Marksman Rifle",
+   "quality": "high-end"
+  },
+  "M45A1": {
+   "type": "Pistol",
+   "quality": "high-end"
+  },
+  "M60": {
+   "type": "Light Machine Gun",
+   "quality": "high-end"
+  },
+  "M700": {
+   "type": "Marksman Rifle",
+   "quality": "high-end"
+  },
+  "M700 Carbon": {
+   "type": "Marksman Rifle",
+   "quality": "high-end"
+  },
+  "M700 Carbon Replica": {
+   "type": "Marksman Rifle",
+   "quality": "high-end"
+  },
+  "M700 Tactical": {
+   "type": "Marksman Rifle",
+   "quality": "high-end"
+  },
+  "M870": {
+   "type": "Shotgun",
+   "quality": "high-end"
+  },
+  "M870 Express": {
+   "type": "Shotgun",
+   "quality": "high-end"
+  },
+  "M870 Express Replica": {
+   "type": "Shotgun",
+   "quality": "high-end"
+  },
+  "M9": {
+   "type": "Pistol",
+   "quality": "high-end"
+  },
+  "MG5": {
+   "type": "Light Machine Gun",
+   "quality": "high-end"
+  },
+  "MK46": {
+   "type": "Light Machine Gun",
+   "quality": "high-end"
+  },
+  "MP5": {
+   "type": "Submachine Gun",
+   "quality": "high-end"
+  },
+  "MP5 ST": {
+   "type": "Submachine Gun",
+   "quality": "high-end"
+  },
+  "MP5 ST Replica": {
+   "type": "Submachine Gun",
+   "quality": "high-end"
+  },
+  "MP5-N": {
+   "type": "Submachine Gun",
+   "quality": "high-end"
+  },
+  "MP5A2": {
+   "type": "Submachine Gun",
+   "quality": "high-end"
+  },
+  "MP7": {
+   "type": "Submachine Gun",
+   "quality": "high-end"
+  },
+  "MPX": {
+   "type": "Submachine Gun",
+   "quality": "high-end"
+  },
+  "Manic": {
+   "type": "Assault Rifle",
+   "quality": "named"
+  },
+  "Mantis": {
+   "type": "Marksman Rifle",
+   "quality": "exotic"
+  },
+  "Marine Super 90": {
+   "type": "Shotgun",
+   "quality": "high-end"
+  },
+  "Maxim 9": {
+   "type": "Pistol",
+   "quality": "specialization",
+   "spec": "Technician"
+  },
+  "Mechanical Animal": {
+   "type": "Assault Rifle",
+   "quality": "named"
+  },
+  "Merciless": {
+   "type": "Rifle",
+   "quality": "exotic"
+  },
+  "Military AK-M": {
+   "type": "Assault Rifle",
+   "quality": "high-end"
+  },
+  "Military G36": {
+   "type": "Assault Rifle",
+   "quality": "high-end"
+  },
+  "Military L86 LSW": {
+   "type": "Light Machine Gun",
+   "quality": "high-end"
+  },
+  "Military M60 E4": {
+   "type": "Light Machine Gun",
+   "quality": "high-end"
+  },
+  "Military M870": {
+   "type": "Shotgun",
+   "quality": "high-end"
+  },
+  "Military M9": {
+   "type": "Pistol",
+   "quality": "high-end"
+  },
+  "Military M9 Replica": {
+   "type": "Pistol",
+   "quality": "high-end"
+  },
+  "Military MK46": {
+   "type": "Light Machine Gun",
+   "quality": "high-end"
+  },
+  "Military MK46 Replica": {
+   "type": "Light Machine Gun",
+   "quality": "high-end"
+  },
+  "Military Mk17": {
+   "type": "Rifle",
+   "quality": "high-end"
+  },
+  "Military P416": {
+   "type": "Assault Rifle",
+   "quality": "high-end"
+  },
+  "Military RPK-74 M": {
+   "type": "Light Machine Gun",
+   "quality": "high-end"
+  },
+  "Mk16": {
+   "type": "Assault Rifle",
+   "quality": "high-end"
+  },
+  "Model 686": {
+   "type": "Pistol",
+   "quality": "high-end"
+  },
+  "Model 700": {
+   "type": "Marksman Rifle",
+   "quality": "high-end"
+  },
+  "Model 700 Replica": {
+   "type": "Marksman Rifle",
+   "quality": "high-end"
+  },
+  "Mosquito": {
+   "type": "Pistol",
+   "quality": "exotic"
+  },
+  "Mozambique Special": {
+   "type": "Pistol",
+   "quality": "named"
+  },
+  "Nemesis": {
+   "type": "Marksman Rifle",
+   "quality": "exotic"
+  },
+  "New Reliable": {
+   "type": "Light Machine Gun",
+   "quality": "named"
+  },
+  "Officer's M9 A1": {
+   "type": "Pistol",
+   "quality": "high-end"
+  },
+  "Oh Carol": {
+   "type": "Marksman Rifle",
+   "quality": "named"
+  },
+  "Orbit": {
+   "type": "Pistol",
+   "quality": "named"
+  },
+  "Ouroboros": {
+   "type": "Submachine Gun",
+   "quality": "exotic"
+  },
+  "Overlord": {
+   "type": "Shotgun",
+   "quality": "exotic"
+  },
+  "Oxpecker": {
+   "type": "Submachine Gun",
+   "quality": "exotic"
+  },
+  "P320": {
+   "type": "Pistol",
+   "quality": "high-end"
+  },
+  "P320 XCompact": {
+   "type": "Pistol",
+   "quality": "named"
+  },
+  "P416": {
+   "type": "Assault Rifle",
+   "quality": "high-end"
+  },
+  "P90": {
+   "type": "Submachine Gun",
+   "quality": "high-end"
+  },
+  "P90 Replica": {
+   "type": "Submachine Gun",
+   "quality": "high-end"
+  },
+  "PDR-C": {
+   "type": "Assault Rifle",
+   "quality": "high-end"
+  },
+  "PF45": {
+   "type": "Pistol",
+   "quality": "high-end"
+  },
+  "POF P416": {
+   "type": "Assault Rifle",
+   "quality": "high-end"
+  },
+  "PP-19": {
+   "type": "Submachine Gun",
+   "quality": "high-end"
+  },
+  "Paratrooper SVD": {
+   "type": "Marksman Rifle",
+   "quality": "high-end"
+  },
+  "Pestilence": {
+   "type": "Light Machine Gun",
+   "quality": "exotic"
+  },
+  "Pinprick": {
+   "type": "Marksman Rifle",
+   "quality": "named"
+  },
+  "Police 686 Magnum": {
+   "type": "Pistol",
+   "quality": "high-end"
+  },
+  "Police 686 Magnum Replica": {
+   "type": "Pistol",
+   "quality": "high-end"
+  },
+  "Police M4": {
+   "type": "Assault Rifle",
+   "quality": "high-end"
+  },
+  "Police M4 Replica": {
+   "type": "Assault Rifle",
+   "quality": "high-end"
+  },
+  "Police Mk17": {
+   "type": "Rifle",
+   "quality": "high-end"
+  },
+  "Police Mk17 Replica": {
+   "type": "Rifle",
+   "quality": "high-end"
+  },
+  "Police T821": {
+   "type": "Submachine Gun",
+   "quality": "high-end"
+  },
+  "Police UMP-45": {
+   "type": "Submachine Gun",
+   "quality": "high-end"
+  },
+  "Prima Donna": {
+   "type": "Marksman Rifle",
+   "quality": "exotic"
+  },
+  "Prophet": {
+   "type": "Pistol",
+   "quality": "named"
+  },
+  "Px4 Storm": {
+   "type": "Pistol",
+   "quality": "high-end"
+  },
+  "Px4 Storm Type F": {
+   "type": "Pistol",
+   "quality": "high-end"
+  },
+  "Px4 Storm Type T": {
+   "type": "Pistol",
+   "quality": "high-end"
+  },
+  "Px4 Storm Type T Replica": {
+   "type": "Pistol",
+   "quality": "high-end"
+  },
+  "Pyromaniac": {
+   "type": "Assault Rifle",
+   "quality": "named"
+  },
+  "Quickstep": {
+   "type": "Submachine Gun",
+   "quality": "named"
+  },
+  "Quiet Roar": {
+   "type": "Light Machine Gun",
+   "quality": "named"
+  },
+  "RPK-74": {
+   "type": "Light Machine Gun",
+   "quality": "high-end"
+  },
+  "Regulus": {
+   "type": "Pistol",
+   "quality": "exotic"
+  },
+  "Relic": {
+   "type": "Marksman Rifle",
+   "quality": "named"
+  },
+  "Resolute Mk47": {
+   "type": "Rifle",
+   "quality": "high-end"
+  },
+  "Rhino": {
+   "type": "Pistol",
+   "quality": "high-end"
+  },
+  "Robin": {
+   "type": "Marksman Rifle",
+   "quality": "named"
+  },
+  "Rock n' Roll": {
+   "type": "Shotgun",
+   "quality": "named"
+  },
+  "Rusty": {
+   "type": "Light Machine Gun",
+   "quality": "named"
+  },
+  "Ruthless": {
+   "type": "Rifle",
+   "quality": "exotic"
+  },
+  "SASG-12": {
+   "type": "Shotgun",
+   "quality": "high-end"
+  },
+  "SCAR-H": {
+   "type": "Marksman Rifle",
+   "quality": "high-end"
+  },
+  "SCAR-L": {
+   "type": "Assault Rifle",
+   "quality": "high-end"
+  },
+  "SIG 556": {
+   "type": "Assault Rifle",
+   "quality": "high-end"
+  },
+  "SIG 716": {
+   "type": "Rifle",
+   "quality": "high-end"
+  },
+  "SIG 716 CQB": {
+   "type": "Rifle",
+   "quality": "high-end"
+  },
+  "SIG 716 Replica": {
+   "type": "Rifle",
+   "quality": "high-end"
+  },
+  "SIG MPX": {
+   "type": "Submachine Gun",
+   "quality": "high-end"
+  },
+  "SIX12": {
+   "type": "Shotgun",
+   "quality": "high-end"
+  },
+  "SMG-9": {
+   "type": "Submachine Gun",
+   "quality": "high-end"
+  },
+  "SOCOM M1A": {
+   "type": "Rifle",
+   "quality": "high-end"
+  },
+  "SOCOM Mk16": {
+   "type": "Assault Rifle",
+   "quality": "high-end"
+  },
+  "SOCOM Mk20 SSR": {
+   "type": "Marksman Rifle",
+   "quality": "high-end"
+  },
+  "SOCOM Mk20 SSR Replica": {
+   "type": "Marksman Rifle",
+   "quality": "high-end"
+  },
+  "SPAS-12": {
+   "type": "Shotgun",
+   "quality": "high-end"
+  },
+  "SPAS-12 Replica": {
+   "type": "Shotgun",
+   "quality": "high-end"
+  },
+  "SR-1": {
+   "type": "Marksman Rifle",
+   "quality": "high-end"
+  },
+  "SR-1 Replica": {
+   "type": "Marksman Rifle",
+   "quality": "high-end"
+  },
+  "SRS": {
+   "type": "Marksman Rifle",
+   "quality": "high-end"
+  },
+  "SRS A1": {
+   "type": "Marksman Rifle",
+   "quality": "high-end"
+  },
+  "SRS A1 Replica": {
+   "type": "Marksman Rifle",
+   "quality": "high-end"
+  },
+  "SVD": {
+   "type": "Marksman Rifle",
+   "quality": "high-end"
+  },
+  "Sacrum Imperium": {
+   "type": "Marksman Rifle",
+   "quality": "exotic"
+  },
+  "Safety Distance": {
+   "type": "Submachine Gun",
+   "quality": "named"
+  },
+  "Savage Wolverine": {
+   "type": "Assault Rifle",
+   "quality": "named"
+  },
+  "Scalpel": {
+   "type": "Marksman Rifle",
+   "quality": "named"
+  },
+  "Scorpio": {
+   "type": "Shotgun",
+   "quality": "exotic"
+  },
+  "Sharpshooter 93R": {
+   "type": "Pistol",
+   "quality": "specialization",
+   "spec": "Sharpshooter"
+  },
+  "Sheriff": {
+   "type": "Shotgun",
+   "quality": "exotic"
+  },
+  "Shield Splinterer": {
+   "type": "Assault Rifle",
+   "quality": "named"
+  },
+  "Showstopper": {
+   "type": "Shotgun",
+   "quality": "exotic"
+  },
+  "Shroud": {
+   "type": "Marksman Rifle",
+   "quality": "exotic"
+  },
+  "Sleipner": {
+   "type": "Light Machine Gun",
+   "quality": "named"
+  },
+  "Sleipnir": {
+   "type": "Light Machine Gun",
+   "quality": "named"
+  },
+  "Snubnosed Diceros": {
+   "type": "Pistol",
+   "quality": "high-end"
+  },
+  "St. Elmo's Engine": {
+   "type": "Assault Rifle",
+   "quality": "exotic"
+  },
+  "Stage Left": {
+   "type": "Rifle",
+   "quality": "named"
+  },
+  "Steamer": {
+   "type": "Assault Rifle",
+   "quality": "named"
+  },
+  "Steel & Sons ACR": {
+   "type": "Rifle",
+   "quality": "exotic"
+  },
+  "Stoner LAMG": {
+   "type": "Light Machine Gun",
+   "quality": "high-end"
+  },
+  "Strega": {
+   "type": "Assault Rifle",
+   "quality": "exotic"
+  },
+  "Super 90": {
+   "type": "Shotgun",
+   "quality": "high-end"
+  },
+  "Super 90 Replica": {
+   "type": "Shotgun",
+   "quality": "high-end"
+  },
+  "Surge": {
+   "type": "Rifle",
+   "quality": "named"
+  },
+  "Surplus SVD": {
+   "type": "Marksman Rifle",
+   "quality": "high-end"
+  },
+  "Survivalist D50": {
+   "type": "Pistol",
+   "quality": "specialization",
+   "spec": "Survivalist"
+  },
+  "Swap Chain": {
+   "type": "Submachine Gun",
+   "quality": "named"
+  },
+  "Sweet Dreams": {
+   "type": "Shotgun",
+   "quality": "exotic"
+  },
+  "T821": {
+   "type": "Submachine Gun",
+   "quality": "high-end"
+  },
+  "TKB-408": {
+   "type": "Assault Rifle",
+   "quality": "high-end"
+  },
+  "Tabula Rasa": {
+   "type": "Light Machine Gun",
+   "quality": "named"
+  },
+  "Tactical .308": {
+   "type": "Marksman Rifle",
+   "quality": "high-end"
+  },
+  "Tactical AUG A3P": {
+   "type": "Submachine Gun",
+   "quality": "high-end"
+  },
+  "Tactical AUG A3P Replica": {
+   "type": "Submachine Gun",
+   "quality": "high-end"
+  },
+  "Tactical M1911": {
+   "type": "Pistol",
+   "quality": "high-end"
+  },
+  "Tactical M1911 Replica": {
+   "type": "Pistol",
+   "quality": "high-end"
+  },
+  "Tactical M249 Para": {
+   "type": "Light Machine Gun",
+   "quality": "high-end"
+  },
+  "Tactical Mk 16": {
+   "type": "Assault Rifle",
+   "quality": "high-end"
+  },
+  "Tactical Mk 16 Replica": {
+   "type": "Assault Rifle",
+   "quality": "high-end"
+  },
+  "Tactical SASG-12 K": {
+   "type": "Shotgun",
+   "quality": "high-end"
+  },
+  "Tactical Super 90 SBS": {
+   "type": "Shotgun",
+   "quality": "high-end"
+  },
+  "Tactical Super 90 SBS Replica": {
+   "type": "Shotgun",
+   "quality": "high-end"
+  },
+  "Tactical UMP-45": {
+   "type": "Submachine Gun",
+   "quality": "high-end"
+  },
+  "Tactical UMP-45 Replica": {
+   "type": "Submachine Gun",
+   "quality": "high-end"
+  },
+  "Tactical Vector SBR 9mm": {
+   "type": "Submachine Gun",
+   "quality": "high-end"
+  },
+  "Teapot": {
+   "type": "Rifle",
+   "quality": "named"
+  },
+  "Tempest": {
+   "type": "Pistol",
+   "quality": "exotic"
+  },
+  "Test Subject": {
+   "type": "Assault Rifle",
+   "quality": "named"
+  },
+  "The Apartment": {
+   "type": "Submachine Gun",
+   "quality": "named"
+  },
+  "The Archivist": {
+   "type": "Assault Rifle",
+   "quality": "named"
+  },
+  "The Bighorn": {
+   "type": "Assault Rifle",
+   "quality": "exotic"
+  },
+  "The Chatterbox": {
+   "type": "Submachine Gun",
+   "quality": "exotic"
+  },
+  "The Claw": {
+   "type": "Rifle",
+   "quality": "named"
+  },
+  "The Darkness": {
+   "type": "Marksman Rifle",
+   "quality": "named"
+  },
+  "The Drill": {
+   "type": "Assault Rifle",
+   "quality": "named"
+  },
+  "The Grudge": {
+   "type": "Submachine Gun",
+   "quality": "named"
+  },
+  "The Harvest": {
+   "type": "Pistol",
+   "quality": "named"
+  },
+  "The Headline-grabber": {
+   "type": "Light Machine Gun",
+   "quality": "named"
+  },
+  "The Mop": {
+   "type": "Shotgun",
+   "quality": "named"
+  },
+  "The Railsplitter": {
+   "type": "Rifle",
+   "quality": "named"
+  },
+  "The Ravenous": {
+   "type": "Rifle",
+   "quality": "exotic"
+  },
+  "The Send-Off": {
+   "type": "Shotgun",
+   "quality": "named"
+  },
+  "The Sleigher": {
+   "type": "Submachine Gun",
+   "quality": "named"
+  },
+  "The Stinger": {
+   "type": "Light Machine Gun",
+   "quality": "named"
+  },
+  "The Virginian": {
+   "type": "Rifle",
+   "quality": "named"
+  },
+  "The White Death": {
+   "type": "Marksman Rifle",
+   "quality": "named"
+  },
+  "Thompson M1928": {
+   "type": "Submachine Gun",
+   "quality": "high-end"
+  },
+  "Thorn": {
+   "type": "Shotgun",
+   "quality": "named"
+  },
+  "Tommy Gun": {
+   "type": "Submachine Gun",
+   "quality": "high-end"
+  },
+  "Trader": {
+   "type": "Assault Rifle",
+   "quality": "named"
+  },
+  "Tsunami": {
+   "type": "Shotgun",
+   "quality": "named"
+  },
+  "UIC15 MOD2": {
+   "type": "Rifle",
+   "quality": "high-end"
+  },
+  "UMP-45": {
+   "type": "Submachine Gun",
+   "quality": "high-end"
+  },
+  "USC .45 ACP": {
+   "type": "Rifle",
+   "quality": "high-end"
+  },
+  "USC .45 ACP Replica": {
+   "type": "Rifle",
+   "quality": "high-end"
+  },
+  "USC.45 ACP": {
+   "type": "Rifle",
+   "quality": "high-end"
+  },
+  "Underboss": {
+   "type": "Submachine Gun",
+   "quality": "exotic"
+  },
+  "Urban MDR": {
+   "type": "Assault Rifle",
+   "quality": "high-end"
+  },
+  "Urban MDR Replica": {
+   "type": "Rifle",
+   "quality": "high-end"
+  },
+  "Vector": {
+   "type": "Submachine Gun",
+   "quality": "high-end"
+  },
+  "Vector SBR .45 ACP": {
+   "type": "Submachine Gun",
+   "quality": "high-end"
+  },
+  "Vector SBR .45 ACP Replica": {
+   "type": "Submachine Gun",
+   "quality": "high-end"
+  },
+  "Vector SBR 9mm": {
+   "type": "Submachine Gun",
+   "quality": "high-end"
+  },
+  "Vertigo": {
+   "type": "Light Machine Gun",
+   "quality": "exotic"
+  },
+  "Vindicator": {
+   "type": "Rifle",
+   "quality": "exotic"
+  },
+  "Whiplash": {
+   "type": "Pistol",
+   "quality": "exotic"
+  },
+  "Whisper": {
+   "type": "Rifle",
+   "quality": "named"
+  },
+  "X-45": {
+   "type": "Pistol",
+   "quality": "high-end"
+  },
+  "X-45 Tactical": {
+   "type": "Pistol",
+   "quality": "high-end"
+  },
+  "X-45 Tactical Replica": {
+   "type": "Pistol",
+   "quality": "high-end"
+  },
+  "TDI \"Kard\" Custom": {
+   "type": "Pistol",
+   "quality": "named"
+  },
+  "Insult to Injury": {
+   "type": "Light Machine Gun",
+   "quality": "named"
+  },
+  "Interchange": {
+   "type": "Assault Rifle",
+   "quality": "named"
+  }
+ },
+ "specialization_weapons": {
+  "signature": [
+   "TAC-50 C Rifle",
+   "Crossbow",
+   "Explosive Tipped Crossbow",
+   "M32A1 Multi-shot Grenade Launcher",
+   "P-017 Missile Launcher",
+   "Multi Missile Launcher",
+   "Minigun",
+   "K8-JetStream Flamethrower"
+  ],
+  "sidearms": {
+   "Sharpshooter 93R": "Sharpshooter",
+   "Diceros Special": "Demolitionist",
+   "Survivalist D50": "Survivalist",
+   "Maxim 9": "Technician"
+  }
+ },
+ "weapon_mods": [
+  "Open Iron Sights",
+  "Streamlined Iron Sights",
+  "Weighted Iron Sights",
+  "Low Reflex Sight",
+  "Rugged Mini Reflex Sight",
+  "PRO Red Dot Sight",
+  "Reflex Sight",
+  "Russian Red Dot Sight",
+  "T2 Micro Red Dot Sight",
+  "552 Holo Sight",
+  "ACOG Scope (4x)",
+  "C7 Scope (3.4x)",
+  "CQBSS Scope (8x)",
+  "Digital Scope",
+  "EXPS3 Holo Sight",
+  "VX-1 Scope (12x)",
+  "Compact Coupled Laser Pointer",
+  "Compact Coupled Small Laser Pointer",
+  "Pistol Flashlight",
+  "Laser Pointer",
+  "Small Laser Pointer",
+  "Angled Grip",
+  "Vertical Grip",
+  "Handstop",
+  "Short Grip",
+  "Linked Laser Pointer",
+  "Tactical Short Grip",
+  "Extended .45 ACP Mag",
+  "Force Feed .45 ACP Mag",
+  "Oversized .45 ACP Mag",
+  "Precision Feeding .45 Mag",
+  "Short Spring .45 ACP Mag",
+  "Balanced Spring 5.56 Mag",
+  "Infantry 5.56 Mag",
+  "Light Extended 5.56 Mag",
+  "Sturdy Extended 5.56 Mag",
+  "Tactical 5.56 Mag",
+  "Light Extended 7.62 Mag",
+  "Precision 7.62 Mag",
+  "Sturdy Extended 7.62 Mag",
+  "Thin 7.62 Mag",
+  "Weighted 7.62 Mag",
+  "Extended 9mm Mag",
+  "Heavy Spring 9mm Mag",
+  "Oversized 9mm Mag",
+  "Segmented 9mm Mag",
+  "Calibrated Link",
+  "Large Pouch",
+  "Nimble Link Belt",
+  "Non-disruptive Link",
+  "Tactical Small Pouch",
+  "Gunner Large Pouch",
+  "Compensated Integrated Spring",
+  "Overbalanced Integrated Spring",
+  "Stiff Integrated Spring",
+  "Underbalanced Integrated Spring",
+  "Lightweight Marksman Mag",
+  "Mended Marksman Mag",
+  "Sturdy Marksman Mag",
+  "Tightly Packed Marksman Mag",
+  "Extended Pistol Mag",
+  "Field Pistol Mag",
+  "Police Pistol Mag",
+  "Speed Loading Revolver Drum",
+  "Counter-Clockwise Tubular Spring",
+  "Flexible Tubular Spring",
+  "Hard Tubular Spring",
+  "QDC Sound Supressor",
+  "Compensator .45",
+  "Flash Hider .45",
+  "Loud Vent Brake .45",
+  "Muzzle Brake .45",
+  "Osprey .45 Suppressor",
+  "Small Suppressor .45",
+  "Compensator 5.56",
+  "Flash Hider 5.56",
+  "Large Suppressor 5.56",
+  "Loud Vent Brake 5.56",
+  "Muzzle Brake 5.56",
+  "Omega 5.56 Rifle Suppressor",
+  "Compensator 7.62",
+  "Flash Hider 7.62",
+  "Large Suppressor 7.62",
+  "Loud Vent Brake 7.62",
+  "Muzzle Brake 7.62",
+  "Omega 7.62 Rifle Suppressor",
+  "Compensator 9mm",
+  "Flash Hider 9mm",
+  "Loud Vent Brake 9mm",
+  "Small Suppressor 9mm",
+  "Muzzle Brake 9mm",
+  "Osprey 9mm Suppressor",
+  "Nemesis Digital Scope",
+  "Nemesis Bolt",
+  "Nemesis Barrel",
+  "Nemesis Bipod",
+  "Modified Optics",
+  "Chatterbox Magazine",
+  "Chatterbox Muzzle",
+  "Chatterbox Cannister",
+  "Outcast Optics",
+  "Modified Feed System",
+  "Stunner",
+  "Damaged Optics",
+  "Hardened Grip",
+  "Merciless Optics",
+  "Merciless Magazine",
+  "Merciless Muzzle",
+  "Merciless Grip",
+  "Unidentified Custom Russian Sight",
+  "Ruthless Magazine",
+  "Mayhem's Muzzle",
+  "Ruthless Grip",
+  "Plagued Magazine",
+  "Plagured Muzzle",
+  "Caution Tape",
+  "Liberty Sight",
+  "Trigger Mechanisim",
+  "Liberty Customs",
+  "Liberty Grip",
+  "Engraved Drum",
+  "Engraved Muzzle",
+  "Diamondback Dot Sight",
+  "Diamondback Lever",
+  "Diamondback Grip",
+  "Rattlesnake Ornamentation",
+  "Predatory Optics",
+  "Gluttonous Magazines",
+  "Devouring Maw",
+  "Wolf's Claw",
+  "Gaze of Death",
+  "Death's Hand",
+  "Death's Maw",
+  "Kiss of Death",
+  "Mag of Holding",
+  "Gold Plated Muzzle",
+  "Solid Gold Bipod",
+  "Chameleon Optics",
+  "Chameleon ActivCamo Processor",
+  "Chameleon Dampener",
+  "Chameleon Grip",
+  "Eagle Eye Sight",
+  "Bullet Eyrie",
+  "Talon Grip",
+  "Jagged Break",
+  "Fire Select Scope",
+  "Tension Spring Magazine",
+  "Carbon Steel Muzzle",
+  "Bighorn Grip"
+ ],
+ "gear_mods": [
+  {
+   "stat": "Critical Hit Chance",
+   "max": 6.0,
+   "type": "offensive"
+  },
+  {
+   "stat": "Critical Hit Damage",
+   "max": 12.0,
+   "type": "offensive"
+  },
+  {
+   "stat": "Headshot Damage",
+   "max": 10.0,
+   "type": "offensive"
+  },
+  {
+   "stat": "Armor on Kill",
+   "max": 18935.0,
+   "type": "defensive"
+  },
+  {
+   "stat": "Incoming Repairs",
+   "max": 20.0,
+   "type": "defensive"
+  },
+  {
+   "stat": "Protection from Elites",
+   "max": 13.0,
+   "type": "defensive"
+  },
+  {
+   "stat": "Bleed Resistance",
+   "max": 10.0,
+   "type": "defensive"
+  },
+  {
+   "stat": "Blind Resistance",
+   "max": 10.0,
+   "type": "defensive"
+  },
+  {
+   "stat": "Burn Resistance",
+   "max": 10.0,
+   "type": "defensive"
+  },
+  {
+   "stat": "Disrupt Resistance",
+   "max": 10.0,
+   "type": "defensive"
+  },
+  {
+   "stat": "Shock Resistance",
+   "max": 10.0,
+   "type": "defensive"
+  },
+  {
+   "stat": "Repair Skills",
+   "max": 20.0,
+   "type": "utility"
+  },
+  {
+   "stat": "Skill Haste",
+   "max": 12.0,
+   "type": "utility"
+  },
+  {
+   "stat": "Status Effects",
+   "max": 10.0,
+   "type": "utility"
+  },
+  {
+   "stat": "Skill Duration",
+   "max": 10.0,
+   "type": "utility"
+  }
+ ],
+ "skills": [
+  "Pulse",
+  "Seeker Mine",
+  "Turret",
+  "Sticky Bomb",
+  "Ballistic Shield",
+  "Crusader Shield",
+  "Deflector Shield",
+  "Bulwark Shield",
+  "Striker Shield",
+  "Chem Launcher",
+  "Drone",
+  "Hive",
+  "Firefly",
+  "Decoy",
+  "Trap",
+  "Assault Turret",
+  "Incinerator Turret",
+  "Sniper Turret",
+  "Artificer Hive",
+  "Restorer Hive",
+  "Reviver Hive",
+  "Booster Hive",
+  "Stinger Hive",
+  "Striker Drone",
+  "Defender Drone",
+  "Fixer Drone",
+  "Tactician Drone",
+  "Bombardier Drone",
+  "Shock Trap",
+  "Repair Trap",
+  "Shrapnel Trap",
+  "Burster Firefly",
+  "Demolisher Firefly",
+  "Blinder Firefly",
+  "Explosive Seeker",
+  "Airburst Seeker",
+  "Cluster Seeker",
+  "Mender Seeker",
+  "Riot Foam",
+  "Oxidizer",
+  "Reinforcer",
+  "Firestarter Chem Launcher"
+ ],
+ "item_kinds": {
+  "gear_mod": [
+   "gear mod",
+   "offensive mod",
+   "defensive mod",
+   "utility mod",
+   "protocol"
+  ],
+  "weapon_mod": [
+   "weapon mod",
+   "optic",
+   "muzzle",
+   "underbarrel",
+   "under barrel",
+   "magazine mod"
+  ],
+  "skill_mod": [
+   "skill mod",
+   "skill modification"
+  ],
+  "cosmetic": [
+   "apparel",
+   "outfit",
+   "emote",
+   "weapon skin",
+   "vanity",
+   "sprayer",
+   "dye pack",
+   "appearance item"
+  ],
+  "consumable": [
+   "consumable",
+   "armor kit",
+   "grenade",
+   "food",
+   "water",
+   "ammo"
+  ],
+  "material": [
+   "crafting material",
+   "exotic component",
+   "steel",
+   "ceramics",
+   "polycarbonate",
+   "carbon fiber",
+   "electronics",
+   "titanium"
+  ],
+  "cache": [
+   "cache",
+   "loot box",
+   "apparel cache"
+  ]
+ },
+ "ui_words": [
+  "gear modding",
+  "weapon modding",
+  "inventory",
+  "stash",
+  "compare",
+  "deconstruct",
+  "select",
+  "back",
+  "strip slots",
+  "toggle view stats",
+  "show all",
+  "options",
+  "the summit",
+  "summit floor",
+  "summit",
+  "countdown",
+  "descent",
+  "projects",
+  "map",
+  "dark zone",
+  "conflict",
+  "loadouts",
+  "loadout",
+  "tutorials",
+  "resources",
+  "stats",
+  "owned",
+  "source looted",
+  "appearance slot",
+  "dye slot",
+  "recalibration",
+  "optimization",
+  "library",
+  "mark as junk",
+  "favorite",
+  "equipped"
+ ],
+ "gear_talent_slots": {
+  "Bloodsucker": {
+   "slot": "Backpack",
+   "kind": "normal"
+  },
+  "Calculated": {
+   "slot": "Backpack",
+   "kind": "normal"
+  },
+  "Clutch": {
+   "slot": "Backpack",
+   "kind": "normal"
+  },
+  "Combined Arms": {
+   "slot": "Backpack",
+   "kind": "normal"
+  },
+  "Companion": {
+   "slot": "Backpack",
+   "kind": "normal"
+  },
+  "Composure": {
+   "slot": "Backpack",
+   "kind": "normal"
+  },
+  "Concussion": {
+   "slot": "Backpack",
+   "kind": "normal"
+  },
+  "Creeping Death": {
+   "slot": "Backpack",
+   "kind": "normal"
+  },
+  "Energize": {
+   "slot": "Backpack",
+   "kind": "normal"
+  },
+  "Galvanize": {
+   "slot": "Backpack",
+   "kind": "normal"
+  },
+  "Leadership": {
+   "slot": "Backpack",
+   "kind": "normal"
+  },
+  "Opportunistic": {
+   "slot": "Backpack",
+   "kind": "normal"
+  },
+  "Overclock": {
+   "slot": "Backpack",
+   "kind": "normal"
+  },
+  "Protector": {
+   "slot": "Backpack",
+   "kind": "normal"
+  },
+  "Reassigned": {
+   "slot": "Backpack",
+   "kind": "normal"
+  },
+  "Safeguard": {
+   "slot": "Backpack",
+   "kind": "normal"
+  },
+  "Shock and Awe": {
+   "slot": "Backpack",
+   "kind": "normal"
+  },
+  "Tech Support": {
+   "slot": "Backpack",
+   "kind": "normal"
+  },
+  "Unstoppable Force": {
+   "slot": "Backpack",
+   "kind": "normal"
+  },
+  "Versatile": {
+   "slot": "Backpack",
+   "kind": "normal"
+  },
+  "Vigilance": {
+   "slot": "Backpack",
+   "kind": "normal"
+  },
+  "Wicked": {
+   "slot": "Backpack",
+   "kind": "normal"
+  },
+  "Empathic Resolve": {
+   "slot": "Chest",
+   "kind": "normal"
+  },
+  "Mad Bomber": {
+   "slot": "Chest",
+   "kind": "normal"
+  },
+  "Overwatch": {
+   "slot": "Chest",
+   "kind": "normal"
+  },
+  "Perfect Overwatch": {
+   "slot": "Chest",
+   "kind": "perfect"
+  },
+  "Trauma": {
+   "slot": "Chest",
+   "kind": "normal"
+  },
+  "Explosive Delivery": {
+   "slot": "Chest",
+   "kind": "normal"
+  },
+  "Kinetic Momentum": {
+   "slot": "Chest",
+   "kind": "normal"
+  },
+  "Skilled": {
+   "slot": "Chest",
+   "kind": "normal"
+  },
+  "Spotter": {
+   "slot": "Chest",
+   "kind": "normal"
+  },
+  "Tag Team": {
+   "slot": "Chest",
+   "kind": "normal"
+  },
+  "Tamper Proof": {
+   "slot": "Chest",
+   "kind": "normal"
+  },
+  "Efficient": {
+   "slot": "Chest",
+   "kind": "normal"
+  },
+  "Entrench": {
+   "slot": "Chest",
+   "kind": "normal"
+  },
+  "Intimidate": {
+   "slot": "Chest",
+   "kind": "normal"
+  },
+  "Protected Reload": {
+   "slot": "Chest",
+   "kind": "normal"
+  },
+  "Unbreakable": {
+   "slot": "Chest",
+   "kind": "normal"
+  },
+  "Vanguard": {
+   "slot": "Chest",
+   "kind": "normal"
+  },
+  "Braced": {
+   "slot": "Chest",
+   "kind": "normal"
+  },
+  "Focus": {
+   "slot": "Chest",
+   "kind": "normal"
+  },
+  "Glass Cannon": {
+   "slot": "Chest",
+   "kind": "normal"
+  },
+  "Gunslinger": {
+   "slot": "Chest",
+   "kind": "normal"
+  },
+  "Obliterate": {
+   "slot": "Chest",
+   "kind": "normal"
+  },
+  "Spark": {
+   "slot": "Chest",
+   "kind": "normal"
+  },
+  "Pack Instincts": {
+   "slot": "Exotic",
+   "kind": "exotic"
+  },
+  "Grace Under Fire": {
+   "slot": "Exotic",
+   "kind": "exotic"
+  },
+  "Parkour!": {
+   "slot": "Exotic",
+   "kind": "exotic"
+  },
+  "Dragon's Glare": {
+   "slot": "Exotic",
+   "kind": "exotic"
+  },
+  "Quick Draw": {
+   "slot": "Exotic",
+   "kind": "exotic"
+  },
+  "Transference Overclock": {
+   "slot": "Exotic",
+   "kind": "exotic"
+  },
+  "Ablative Nano-Plating": {
+   "slot": "Exotic",
+   "kind": "exotic"
+  },
+  "One in Hand...": {
+   "slot": "Exotic",
+   "kind": "exotic"
+  },
+  "Perfect Clutch": {
+   "slot": "Backpack",
+   "kind": "perfect"
+  },
+  "Perfect Combined Arms": {
+   "slot": "Backpack",
+   "kind": "perfect"
+  },
+  "Perfect Shock and Awe": {
+   "slot": "Backpack",
+   "kind": "perfect"
+  },
+  "Perfect Tech Support": {
+   "slot": "Backpack",
+   "kind": "perfect"
+  },
+  "Perfect Vigilance": {
+   "slot": "Backpack",
+   "kind": "perfect"
+  },
+  "Perfectly Wicked": {
+   "slot": "Backpack",
+   "kind": "perfect"
+  },
+  "Perfect Intimidate": {
+   "slot": "Chest",
+   "kind": "perfect"
+  },
+  "Perfectly Unbreakable": {
+   "slot": "Chest",
+   "kind": "perfect"
+  },
+  "Perfect Vanguard": {
+   "slot": "Chest",
+   "kind": "perfect"
+  },
+  "Perfect Braced": {
+   "slot": "Chest",
+   "kind": "perfect"
+  },
+  "Perfect Focus": {
+   "slot": "Chest",
+   "kind": "perfect"
+  },
+  "Perfect Glass Cannon": {
+   "slot": "Chest",
+   "kind": "perfect"
+  },
+  "Perfect Spark": {
+   "slot": "Chest",
+   "kind": "perfect"
+  },
+  "Short Circuit": {
+   "slot": "Backpack",
+   "kind": "gear_set"
+  },
+  "Positive Reinforcement": {
+   "slot": "Chest",
+   "kind": "gear_set"
+  },
+  "Emergency Requisition": {
+   "slot": "Backpack",
+   "kind": "gear_set"
+  },
+  "Parabellum Rounds": {
+   "slot": "Chest",
+   "kind": "gear_set"
+  },
+  "Patriotic Boost": {
+   "slot": "Backpack",
+   "kind": "gear_set"
+  },
+  "Waving the Flag": {
+   "slot": "Chest",
+   "kind": "gear_set"
+  },
+  "Poker Face": {
+   "slot": "Backpack",
+   "kind": "gear_set"
+  },
+  "No Limit": {
+   "slot": "Chest",
+   "kind": "gear_set"
+  },
+  "Critical Measures": {
+   "slot": "Backpack",
+   "kind": "gear_set"
+  },
+  "Target Rich Environment": {
+   "slot": "Chest",
+   "kind": "gear_set"
+  },
+  "Process Refinery": {
+   "slot": "Backpack",
+   "kind": "gear_set"
+  },
+  "Improved Materials": {
+   "slot": "Chest",
+   "kind": "gear_set"
+  },
+  "Strategic Combat Support": {
+   "slot": "Backpack",
+   "kind": "gear_set"
+  },
+  "Risk Management": {
+   "slot": "Backpack",
+   "kind": "gear_set"
+  },
+  "Press the Advantage": {
+   "slot": "Chest",
+   "kind": "gear_set"
+  },
+  "Multithreaded Execution": {
+   "slot": "Backpack",
+   "kind": "gear_set"
+  },
+  "Compiler Optimization": {
+   "slot": "Chest",
+   "kind": "gear_set"
+  },
+  "Headhunter": {
+   "slot": "Chest",
+   "kind": "normal"
+  },
+  "Placeholder": {
+   "slot": "Chest",
+   "kind": "normal"
+  }
+ },
+ "brand_bonuses": {
+  "5.11 Tactical": [
+   "10% Health",
+   "15% Incoming Repairs",
+   "10% Hazard Protection"
+  ],
+  "Airaldi Holdings": [
+   "10% Marksman Rifle Damage",
+   "10% Headshot Damage",
+   "5% Damage to Armor"
+  ],
+  "Alps Summit Armaments": [
+   "15% Repair Skills",
+   "20% Skill Duration",
+   "10% Cooldown Reduction"
+  ],
+  "Badger Tuff": [
+   "10% Shotgun Damage",
+   "5% % Armor",
+   "10% Armor on Kill"
+  ],
+  "Ceska Vyroba s.r.o.": [
+   "10% Critical Hit Chance",
+   "10% Hazard Protection",
+   "10% Health"
+  ],
+  "China Light Industries Corporation": [
+   "15% Explosive Damage",
+   "10% Cooldown Reduction",
+   "10% Status Effects"
+  ],
+  "Douglas & Harding": [
+   "20% Pistol Damage",
+   "10% Stability",
+   "10% Accuracy"
+  ],
+  "Fenris Group AB": [
+   "10% Assault Rifle Damage",
+   "10% Reload Speed %",
+   "10% Stability"
+  ],
+  "Gila Guard": [
+   "5% % Armor",
+   "10% Health",
+   "1% Armor Regeneration %"
+  ],
+  "Golan Gear Ltd": [
+   "10% Status Effects",
+   "1% Armor Regeneration %",
+   "5% % Armor"
+  ],
+  "Grupo Sombra S.A.": [
+   "15% Critical Hit Damage",
+   "15% Explosive Damage",
+   "10% Headshot Damage"
+  ],
+  "Hana-U Corporation": [
+   "10% Cooldown Reduction",
+   "10% Skill Damage",
+   "5% Weapon Damage"
+  ],
+  "Murakami Industries": [
+   "20% Skill Duration",
+   "15% Repair Skills",
+   "10% Skill Damage"
+  ],
+  "Overlord Armaments": [
+   "10% Rifle Damage",
+   "10% Accuracy",
+   "10% Weapon Handling"
+  ],
+  "Petrov Defense Group": [
+   "10% LMG Damage",
+   "10% Weapon Handling",
+   "20% Ammo Capacity"
+  ],
+  "Providence Defense": [
+   "10% Headshot Damage",
+   "10% Critical Hit Chance",
+   "15% Critical Hit Damage"
+  ],
+  "Richter & Kaiser GmbH": [
+   "15% Incoming Repairs",
+   "10% Explosive Resistance",
+   "15% Skill Repair"
+  ],
+  "Sokolov Concern": [
+   "10% SMG Damage",
+   "15% Critical Hit Damage",
+   "10% Critical Hit Chance"
+  ],
+  "Wyvern Wear": [
+   "10% Skill Damage",
+   "10% Status Effects",
+   "20% Skill Duration"
+  ],
+  "Yaahl Gear": [
+   "10% Hazard Protection",
+   "5% Weapon Damage",
+   "40% Pulse Resistance"
+  ],
+  "Hard Wired": [
+   "15% Skill Haste",
+   "15% Skill Damage",
+   "15% Repair Skills"
+  ],
+  "Ongoing Directive": [
+   "15% Status Effects",
+   "20% Reload Speed %"
+  ],
+  "True Patriot": [
+   "30% Ammo Capacity",
+   "30% Magazine Size %"
+  ],
+  "Aces and Eights": [
+   "15% Marksman Rifle Damage",
+   "20% Headshot Damage"
+  ],
+  "Negotiator's Dilemma": [
+   "15% Critical Hit Chance",
+   "20% Critical Hit Damage"
+  ],
+  "Tip of the Spear": [
+   "10% Signature Weapon Damage",
+   "10% Weapon Damage"
+  ],
+  "Foundry Bullwark": [
+   "10% % Armor",
+   "3% Armor Regeneration %"
+  ],
+  "Future Initiative": [
+   "15% Skill Repair",
+   "15% Skill Duration",
+   "15% Cooldown Reduction"
+  ],
+  "Striker's Battlegear": [
+   "15% Weapon Handling",
+   "15% Rate of Fire %"
+  ],
+  "System Corruption": [
+   "15% Armor on Kill",
+   "40% Disrupt Resistance",
+   "40% Pulse Resistance"
+  ],
+  "Unit Alloys": [
+   "5% Rate of Fire",
+   "24% Assault Rifle Damage",
+   "50% Magazine Size"
+  ],
+  "Alps Summit Armament": [
+   "18% Skill Repair",
+   "30% Skill Duration",
+   "30% Skill Haste"
+  ],
+  "Belstone Armory": [
+   "1% Armor Regen",
+   "100% Increased Threat",
+   "36% Protection from Elites"
+  ],
+  "Brazos de Arcabuz": [
+   "10% Skill Haste",
+   "1 Skill Tier",
+   "50% Magazine Size"
+  ],
+  "Edelweiss GPz": [
+   "18% Repair Skills",
+   "20% Skill Haste",
+   "8% Skill Efficiency"
+  ],
+  "Electrique": [
+   "10% Status Effects",
+   "20% Hazard Protection",
+   "8% Skill Efficiency"
+  ],
+  "Empress International": [
+   "10% Skill Health",
+   "13% Skill Damage",
+   "8% Skill Efficiency"
+  ],
+  "Golan Gear": [
+   "20% Explosive Resistance",
+   "1.5% Armor Regen",
+   "150% Increased Threat"
+  ],
+  "Habsburg Guard": [
+   "13% Headshot Damage",
+   "20% Marksman Rifle Damage",
+   "25% Status Effects"
+  ],
+  "Imminence Armaments": [
+   "6% Weapon Damage",
+   "48% Pistol Damage",
+   "30% Skill Health"
+  ],
+  "Legatus S.p.A.": [
+   "15% Magazine Size",
+   "24% SMG Damage",
+   "105% Optimal Range"
+  ],
+  "Lengmo": [
+   "15% Reload Speed",
+   "24% LMG Damage",
+   "30% Weapon Handling"
+  ],
+  "Palisade Steelworks": [
+   "10% Armor on Kill",
+   "24% Protection from Elites",
+   "1 Skill Tier"
+  ],
+  "Royal Works": [
+   "5% Weapon Handling",
+   "32.5% Magazine Size",
+   "15% Critical Hit Damage"
+  ],
+  "Shiny Monkey Gear": [
+   "15% Skill Duration",
+   "5% Skill Efficiency",
+   "52% Repair Skills"
+  ],
+  "Urban Lookout": [
+   "5% Weapon Handling",
+   "24% Marksman Rifle Damage",
+   "45% Skill Duration"
+  ],
+  "Uzina Getica": [
+   "5% Armor",
+   "10% Armor on kill",
+   "30% Hazard protection"
+  ],
+  "Walker, Harris & Co.": [
+   "6% Weapon Damage",
+   "5% Damage to Armor",
+   "10% Damage to Health"
+  ],
+  "Česká Výroba s.r.o.": [
+   "8% Critical Hit Chance",
+   "24% Shotgun Damage",
+   "30% Hazard Protection"
+  ],
+  "Zwiadowka Sp. z.o.o.": [
+   "15% Magazine Size",
+   "24% Rifle Damage",
+   "30% Weapon Handling"
+  ]
+ },
+ "named_multiplier": 2.0,
+ "gear_set_bonuses": {
+  "Aces & Eights": [
+   "+30% Marksman Rifle Damage & +30% Rifle Damage",
+   "+30% Headshot Damage & 30% Weapon Handling",
+   "Talent: Dead Man's Hand"
+  ],
+  "Aegis": [
+   "+70% Health",
+   "+15% Total Armor",
+   "Talent: Stoic"
+  ],
+  "Breaking Point": [
+   "+30% Marksman Rifle Damage & +30% Rifle Damage",
+   "+30% Headshot Damage & +30% Weapon Handling",
+   "Talent: On Point"
+  ],
+  "Cavalier": [
+   "+30% Hazard Protection",
+   "+40% Repair Skills",
+   "Talent: Charging / Charged"
+  ],
+  "Concentrated Company": [
+   "+10% Weapon Damage",
+   "+30% Weapon Handling",
+   "Talent: Camarederie"
+  ],
+  "Core Strength": [
+   "+10% Weapon Handling",
+   "+5% Weapon Damage, +5% Armor, +5% Skill Efficiency",
+   "Talent: Core Exercise"
+  ],
+  "Eclipse Protocol": [
+   "+15% Status Effects",
+   "+15% Skill Haste & +30% Hazard Protection",
+   "Talent: Indirect Transmission"
+  ],
+  "Ember Engine": [
+   "+8% Skill Efficiency",
+   "+30% Status Effect",
+   "Talent: Spontaneous Combustion"
+  ],
+  "Foundry Bulwark": [
+   "+10% Total Armor",
+   "+1% Armor Regeneration & +50% Shield Health",
+   "Talent: Makeshift Repairs"
+  ],
+  "Future Initiative": [
+   "+30% Repair Skills",
+   "+15% Skill Haste & +30% Skill Duration",
+   "Talent: Ground Control"
+  ],
+  "Hard Wired": [
+   "+15% Skill Haste",
+   "+15% Skill Damage & +30% Repair Skills",
+   "Talent: Feedback Loop"
+  ],
+  "Heartbreaker": [
+   "+15% Assault Rifle Damage & +15% LMG Damage",
+   "+15% Weapon Handling",
+   "Talent: Heartstopper"
+  ],
+  "Hotshot": [
+   "+30% Marksman Rifle Damage & +30% Weapon Handling",
+   "+30% Headshot Damage",
+   "Talent: Headache"
+  ],
+  "Hunter's Fury": [
+   "+15% Shotgun Damage & +15% SMG Damage",
+   "+20% Armor on Kill & +50% Health on Kill",
+   "Talent: Apex Predator"
+  ],
+  "Measured Assembly": [
+   "+15% Skill Haste",
+   "+60% Repair Skills & +40% Explosive Resistance",
+   "Talent: Huddle"
+  ],
+  "Negotiator's Dilemma": [
+   "+15% Critical Hit Chance",
+   "+20% Critical Hit Damage",
+   "Talent: Crowd Control"
+  ],
+  "Ongoing Directive": [
+   "+15% Status Effect",
+   "+30% Reload Speed",
+   "Talent: Rules of Engagement"
+  ],
+  "Ortiz: Exuro": [
+   "+20% Increased Burn Duration & +15% Skill Health",
+   "+40% Burn Damage",
+   "Talent: Ortiz Incinerator Turret Prototype"
+  ],
+  "Ortiz: Reficere": [
+   "+8% Skill Efficiency",
+   "+60% Repair Skills",
+   "Talent: Ortiz Rapid Application Nanite Prototype"
+  ],
+  "Refactor": [
+   "+15% Status Effects",
+   "+25% Skill Damage",
+   "Talent: Return to Sender"
+  ],
+  "Rigger": [
+   "+15% Skill Haste",
+   "+15% Skill Duration",
+   "Talent: Tend and Befriend"
+  ],
+  "Striker's Battlegear": [
+   "+15% Weapons Handling",
+   "+15% Rate of Fire",
+   "Talent: Striker's Gamble"
+  ],
+  "System Corruption": [
+   "+15% Armor on Kill",
+   "+40% Disrupt Resistance & +40% Pulse Resistance",
+   "Talent: Hackstep Protocol"
+  ],
+  "Tip of the Spear": [
+   "+20% Signature Weapon Damage",
+   "+10% Weapon Damage",
+   "Talent: Aggressive Recon"
+  ],
+  "Tipping Scales": [
+   "+30% Magazine Size",
+   "+30% LMG Damage",
+   "Talent: Throttle Control"
+  ],
+  "True Patriot": [
+   "+15% Weapon Handling",
+   "+30% Magazine Size",
+   "Talent: Red, White, and Blue"
+  ],
+  "Umbra Initiative": [
+   "+15% Critical Hit Chance",
+   "+30% Reload Speed",
+   "Talent: From the Shadows / Into the Light"
+  ],
+  "Virtuoso": [
+   "+15% Weapon Handling & +15% Magazine Size",
+   "+15% Weapon Damage",
+   "Talent: Symphony"
+  ]
+ }
+}

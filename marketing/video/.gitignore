@@ -1,0 +1,10 @@
+.work/
+preview-*.png
+voice-check.*
+retry.mp3
+long-check.*
+short-check.mp3
+full-neural.*
+full-neural-api.mp3
+narration_full.txt
+neural-*-preview.mp3

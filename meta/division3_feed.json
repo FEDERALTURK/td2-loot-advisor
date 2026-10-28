@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "checked": "2026-10-28",
+  "status_tr": "Ubisoft, The Division 3'ün Massive Entertainment tarafından geliştirilmekte olduğunu doğruluyor. Ekim 2026 itibarıyla oynanış, platformlar ve çıkış tarihi hakkında resmî ayrıntı yayımlanmadı.",
+  "updates": [
+    {
+      "date": "2023-09-21",
+      "title": "Ubisoft resmî duyurusu",
+      "summary_tr": "Ubisoft, The Division 3'ün Massive Entertainment liderliğinde geliştirildiğini ve proje ekibinin kurulduğunu duyurdu. Bu duyuru bir çıkış tarihi veya oynanış tanıtımı içermiyor.",
+      "url": "https://news.ubisoft.com/en-au/article/18oNmwEFQzGDu0TYVOAcJN/julian-gerighty-appointed-executive-producer-for-the-division-brand"
+    },
+    {
+      "date": "2026-10-28",
+      "title": "Güncel Ubisoft Massive kariyer sayfaları",
+      "summary_tr": "Massive Entertainment'ın güncel iş ilanları The Division 3'ü üzerinde çalıştığı projeler arasında sayıyor. Ubisoft, oyun ayrıntılarını henüz açıklayamayacağını belirtiyor; ilanlardaki görev tanımları tamamlanmış oyun özellikleri olarak yorumlanmamalı.",
+      "url": "https://www.ubisoft.com/en-us/company/careers/search/744000127417779-senior-ai-game-designer-tom-clancy-s-the-division-3-"
+    }
+  ],
+  "sources": [
+    {
+      "name": "Ubisoft News — The Division",
+      "url": "https://www.ubisoft.com/en-gb/game/the-division/news-updates",
+      "note_tr": "Seriyle ilgili resmî duyuru, etkinlik ve oyun haberleri. Yeni Division 3 haberi çıktığında ilk kontrol edilecek kaynak."
+    },
+    {
+      "name": "Ubisoft — The Division 3 duyurusu",
+      "url": "https://news.ubisoft.com/en-au/article/18oNmwEFQzGDu0TYVOAcJN/julian-gerighty-appointed-executive-producer-for-the-division-brand",
+      "note_tr": "Massive Entertainment liderliğindeki geliştirme sürecini doğrulayan birincil kaynak."
+    },
+    {
+      "name": "Massive Entertainment — güncel iş ilanı",
+      "url": "https://www.ubisoft.com/en-us/company/careers/search/744000127417779-senior-ai-game-designer-tom-clancy-s-the-division-3-",
+      "note_tr": "Projenin hâlen geliştirme ve ekip kurma bağlamında anıldığını doğrular; özellik veya çıkış tarihi duyurusu değildir."
+    }
+  ]
+}

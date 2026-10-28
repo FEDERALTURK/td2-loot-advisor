@@ -1,0 +1,31 @@
+﻿1
+00:00:00,000 --> 00:00:18,360
+Washington sokaklarında her görevden sonra yeni bir eşya düşüyor. Sandık doluyor, seçenekler çoğalıyor. Peki bu parça, kurduğun build’e gerçekten katkı sağlar mı? TD2 Loot Advisor, karar verirken ihtiyacın olan bilgileri bir araya getiriyor.
+
+2
+00:00:18,360 --> 00:00:36,340
+Eşya kartını açıp F8’e basıyorsun. Program ekrandaki yazıları okuyor; eşya adını, özelliklerini ve yeteneklerini tanımaya çalışıyor. Sonra bilgileri oyun kütüphanesiyle karşılaştırıyor. İstersen otomatik taramayı da açabilirsin.
+
+3
+00:00:36,340 --> 00:00:53,280
+Şimdi eşyan, aktif build’inle karşılaştırılıyor. Özelliklerin ne kadar uyduğunu, rulo kalitesini ve nelerin eksik kaldığını görüyorsun. Sonuç; Sakla, Düşün, Kır ya da Kontrol Et diye gösteriliyor. Yine de karar senin.
+
+4
+00:00:53,280 --> 00:01:10,940
+Taranan parçalar sandık envanterinde birikiyor. Build düzenleyici, elindeki parçaları birbiriyle karşılaştırıyor ve sıradaki olası yükseltmeleri gösteriyor. Eksik parça görünümü de tamamlamak istediğin build için hangi yuvaya odaklanacağını hatırlatıyor.
+
+5
+00:01:10,940 --> 00:01:28,100
+Günlük ve haftalık görevlerini, sezon hedeflerini, ilerlemeni tek yerden takip et. Build’lerini düzenle; meta build’lere, eşya ansiklopedisine ve haber akışına göz at. Görev ayrıntılarında adımlar ve kaynak bağlantıları da var.
+
+6
+00:01:28,100 --> 00:01:47,710
+Telefon Arkadaşı uygulaması, masaüstündeki son tarama ve build bilgilerini aynı özel Wi-Fi ağında gösteriyor. QR kodla eşleştirmen yeterli. Telefon bilgileri yalnızca görüntüler; masaüstüne komut göndermez. Android uygulaması şu an beta.
+
+7
+00:01:47,710 --> 00:02:05,730
+Program oyun ekranını ve oyun ayar dosyasını okur. Oyun belleğine erişmez, oyuna tuş göndermez. Ekran tanıma yanılabilir. Özellikle nadir bir eşyayı parçalamadan önce, oyun içindeki bilgileri mutlaka bir kez daha kontrol et.
+
+8
+00:02:05,730 --> 00:02:22,750
+Kısacası: eşyanı tara, build’ini takip et, kararını kendin ver. TD2 Loot Advisor’ın en yeni masaüstü sürümüne GitHub Releases sayfasından ulaşabilirsin. Bu, Ubisoft ve Massive Entertainment’tan bağımsız bir topluluk projesidir.

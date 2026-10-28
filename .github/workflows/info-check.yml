@@ -1,0 +1,41 @@
+# Bilgi sekmesi (ansiklopedi, meta vitrini, haberler, yarışma) ve ajan sesi — birim + Windows arayüz testi.
+name: Info check
+
+on:
+  workflow_dispatch:
+  push:
+    paths: ["knowledge.py", "voicepack.py", "meta/news_feed.json", "meta/voice_lines.json", "tests/test_knowledge.py", "tests/ui_info_test.py"]
+
+env:
+  TD2_NO_WELCOME: "1"
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with: { python-version: "3.13" }
+      - name: Install
+        shell: cmd
+        run: |
+          python -m pip install -r requirements.txt
+          python -m pip install onnxruntime rapidocr qrcode numpy pyttsx3
+      - name: Unit
+        shell: cmd
+        run: set PYTHONIOENCODING=utf-8&& python tests/test_knowledge.py
+      - name: Voice diag
+        shell: cmd
+        run: python tests/voice_diag.py
+      - name: Info tab UI
+        shell: cmd
+        run: set PYTHONIOENCODING=utf-8&& python tests/ui_info_test.py
+      - name: Result
+        if: always()
+        shell: pwsh
+        run: if (Test-Path tests\.info_result.json) { Get-Content tests\.info_result.json }; if (Test-Path logs\app.log) { Get-Content logs\app.log -Tail 40 }
+      - uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: info-shots
+          path: shots/*

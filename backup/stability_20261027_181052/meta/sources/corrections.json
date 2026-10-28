@@ -1,0 +1,50 @@
+{
+ "_note": "Kütüphane düzeltmeleri (The Division Wiki ve mx-division-builds ile doğrulandı, 25 Ekim 2026).",
+ "remove_td1": [
+  "Cassidy",
+  "Warlord",
+  "Tenebrae",
+  "Historian",
+  "Centurion",
+  "Medved",
+  "Pakhan",
+  "Golden Rhino",
+  "The House",
+  "Midas",
+  "Damascus",
+  "Hungry Hog",
+  "Liberator",
+  "Defiler",
+  "Barrett's Bulletproof Vest",
+  "Colonel Bliss's Holster",
+  "Ferro's Oxygen Mask",
+  "Shortbow Championship Pads",
+  "Skulls MC Gloves",
+  "Eir",
+  "Hildr",
+  "Free Republic"
+ ],
+ "remove_from_exotics": [
+  "Sharpshooter",
+  "Grudge",
+  "Ravenous",
+  "Urban MDR",
+  "Thompson M1928",
+  "Pristine Example",
+  "Rock n' Roll",
+  "The Grudge"
+ ],
+ "weapon_quality": {
+  "Urban MDR": "high-end",
+  "Tommy Gun": "high-end",
+  "Thompson M1928": "high-end",
+  "The Grudge": "named"
+ },
+ "exotic_alias": {
+  "Ravenous": "The Ravenous"
+ },
+ "talents": {
+  "Memento": "Kill Confirmed",
+  "Mantis": "In Plain Sight"
+ }
+}

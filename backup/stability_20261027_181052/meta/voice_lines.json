@@ -1,0 +1,1031 @@
+{
+ "schema": 1,
+ "events": [
+  "keep",
+  "consider",
+  "dismantle",
+  "review",
+  "exotic",
+  "named",
+  "build",
+  "fills_gap",
+  "upgrade"
+ ],
+ "packs": [
+  "tactical",
+  "operator",
+  "brief"
+ ],
+ "lines": {
+  "en": {
+   "tactical": {
+    "keep": [
+     "Item secured. Recommend keeping it.",
+     "Positive match. Keep this one."
+    ],
+    "consider": [
+     "Partial match. Review before you decide.",
+     "Marginal value detected. Your call, agent."
+    ],
+    "dismantle": [
+     "No match. Safe to dismantle.",
+     "Low value. Recommend dismantling."
+    ],
+    "review": [
+     "Rare item detected. Manual review required.",
+     "Unusual signature. Check it yourself."
+    ],
+    "exotic": [
+     "Exotic detected."
+    ],
+    "named": [
+     "Named item detected."
+    ],
+    "build": [
+     "{build} match at {pct} percent."
+    ],
+    "fills_gap": [
+     "This fills an empty slot."
+    ],
+    "upgrade": [
+     "Upgrade over your current piece."
+    ]
+   },
+   "operator": {
+    "keep": [
+     "Nice find. I'd hold on to that.",
+     "That's a keeper."
+    ],
+    "consider": [
+     "Could be useful. Take a closer look.",
+     "Not bad. Worth a second look."
+    ],
+    "dismantle": [
+     "Nothing we need. Break it down.",
+     "You can scrap this one."
+    ],
+    "review": [
+     "Something rare here. Have a look yourself.",
+     "Hold on, this one's rare."
+    ],
+    "exotic": [
+     "Ooh, an exotic."
+    ],
+    "named": [
+     "A named item."
+    ],
+    "build": [
+     "Fits {build}, {pct} percent."
+    ],
+    "fills_gap": [
+     "That fills a gap in your build."
+    ],
+    "upgrade": [
+     "Better than what you're wearing."
+    ]
+   },
+   "brief": {
+    "keep": [
+     "Keep.",
+     "Keep it."
+    ],
+    "consider": [
+     "Maybe.",
+     "Check it."
+    ],
+    "dismantle": [
+     "Scrap.",
+     "Dismantle."
+    ],
+    "review": [
+     "Rare. Check.",
+     "Review."
+    ],
+    "exotic": [
+     "Exotic."
+    ],
+    "named": [
+     "Named."
+    ],
+    "build": [
+     "{build}, {pct}."
+    ],
+    "fills_gap": [
+     "New slot."
+    ],
+    "upgrade": [
+     "Upgrade."
+    ]
+   }
+  },
+  "tr": {
+   "tactical": {
+    "keep": [
+     "Eşya güvene alındı. Saklaman önerilir.",
+     "Olumlu eşleşme. Bunu sakla."
+    ],
+    "consider": [
+     "Kısmi eşleşme. Karar vermeden incele.",
+     "Sınırda değer tespit edildi. Karar senin, ajan."
+    ],
+    "dismantle": [
+     "Eşleşme yok. Güvenle kırabilirsin.",
+     "Düşük değer. Kırman önerilir."
+    ],
+    "review": [
+     "Nadir eşya tespit edildi. Elle inceleme gerekli.",
+     "Olağandışı eşya. Kendin kontrol et."
+    ],
+    "exotic": [
+     "Egzotik tespit edildi."
+    ],
+    "named": [
+     "Adlı eşya tespit edildi."
+    ],
+    "build": [
+     "{build} ile yüzde {pct} uyum."
+    ],
+    "fills_gap": [
+     "Bu boş bir yuvayı dolduruyor."
+    ],
+    "upgrade": [
+     "Mevcut parçana göre yükseltme."
+    ]
+   },
+   "operator": {
+    "keep": [
+     "Güzel bulgu. Bence sakla.",
+     "Bu saklanır."
+    ],
+    "consider": [
+     "İşe yarayabilir. Bir daha bak.",
+     "Fena değil. İkinci bir bakışa değer."
+    ],
+    "dismantle": [
+     "İhtiyacımız yok. Kırabilirsin.",
+     "Bunu parçalayabilirsin."
+    ],
+    "review": [
+     "Burada nadir bir şey var. Kendin bir bak.",
+     "Dur, bu nadir."
+    ],
+    "exotic": [
+     "Vay, egzotik."
+    ],
+    "named": [
+     "Adlı bir eşya."
+    ],
+    "build": [
+     "{build} için yüzde {pct}."
+    ],
+    "fills_gap": [
+     "Build'indeki bir boşluğu dolduruyor."
+    ],
+    "upgrade": [
+     "Taktığından daha iyi."
+    ]
+   },
+   "brief": {
+    "keep": [
+     "Sakla.",
+     "Tut."
+    ],
+    "consider": [
+     "Belki.",
+     "Bak."
+    ],
+    "dismantle": [
+     "Kır.",
+     "Parçala."
+    ],
+    "review": [
+     "Nadir. Bak.",
+     "İncele."
+    ],
+    "exotic": [
+     "Egzotik."
+    ],
+    "named": [
+     "Adlı."
+    ],
+    "build": [
+     "{build}, yüzde {pct}."
+    ],
+    "fills_gap": [
+     "Yeni yuva."
+    ],
+    "upgrade": [
+     "Yükseltme."
+    ]
+   }
+  },
+  "de": {
+   "tactical": {
+    "keep": [
+     "Gegenstand gesichert. Behalten empfohlen.",
+     "Positiver Treffer. Behalte ihn."
+    ],
+    "consider": [
+     "Teilweiser Treffer. Vor der Entscheidung prüfen.",
+     "Grenzwertiger Nutzen. Deine Entscheidung, Agent."
+    ],
+    "dismantle": [
+     "Kein Treffer. Kann zerlegt werden.",
+     "Geringer Wert. Zerlegen empfohlen."
+    ],
+    "review": [
+     "Seltener Gegenstand erkannt. Manuelle Prüfung nötig.",
+     "Ungewöhnlicher Fund. Prüfe ihn selbst."
+    ],
+    "exotic": [
+     "Exotic erkannt."
+    ],
+    "named": [
+     "Benannter Gegenstand erkannt."
+    ],
+    "build": [
+     "{build}: {pct} Prozent Übereinstimmung."
+    ],
+    "fills_gap": [
+     "Das füllt einen leeren Slot."
+    ],
+    "upgrade": [
+     "Upgrade gegenüber deinem aktuellen Teil."
+    ]
+   },
+   "operator": {
+    "keep": [
+     "Guter Fund. Den würde ich behalten.",
+     "Den behältst du."
+    ],
+    "consider": [
+     "Könnte nützlich sein. Schau genauer hin.",
+     "Nicht schlecht. Einen zweiten Blick wert."
+    ],
+    "dismantle": [
+     "Brauchen wir nicht. Zerleg ihn.",
+     "Den kannst du verschrotten."
+    ],
+    "review": [
+     "Hier ist etwas Seltenes. Schau selbst.",
+     "Moment, der ist selten."
+    ],
+    "exotic": [
+     "Oh, ein Exotic."
+    ],
+    "named": [
+     "Ein benannter Gegenstand."
+    ],
+    "build": [
+     "Passt zu {build}, {pct} Prozent."
+    ],
+    "fills_gap": [
+     "Das schließt eine Lücke im Build."
+    ],
+    "upgrade": [
+     "Besser als das, was du trägst."
+    ]
+   },
+   "brief": {
+    "keep": [
+     "Behalten.",
+     "Behalte."
+    ],
+    "consider": [
+     "Vielleicht.",
+     "Prüfen."
+    ],
+    "dismantle": [
+     "Zerlegen.",
+     "Schrott."
+    ],
+    "review": [
+     "Selten. Prüfen.",
+     "Prüfen."
+    ],
+    "exotic": [
+     "Exotic."
+    ],
+    "named": [
+     "Benannt."
+    ],
+    "build": [
+     "{build}, {pct}."
+    ],
+    "fills_gap": [
+     "Neuer Slot."
+    ],
+    "upgrade": [
+     "Upgrade."
+    ]
+   }
+  },
+  "fr": {
+   "tactical": {
+    "keep": [
+     "Objet sécurisé. Conservation recommandée.",
+     "Correspondance positive. Garde-le."
+    ],
+    "consider": [
+     "Correspondance partielle. Vérifie avant de décider.",
+     "Valeur limite détectée. À toi de voir, agent."
+    ],
+    "dismantle": [
+     "Aucune correspondance. Tu peux le démonter.",
+     "Faible valeur. Démontage recommandé."
+    ],
+    "review": [
+     "Objet rare détecté. Vérification manuelle requise.",
+     "Signature inhabituelle. Vérifie toi-même."
+    ],
+    "exotic": [
+     "Exotique détecté."
+    ],
+    "named": [
+     "Objet nommé détecté."
+    ],
+    "build": [
+     "{build} : {pct} pour cent de correspondance."
+    ],
+    "fills_gap": [
+     "Ça remplit un emplacement vide."
+    ],
+    "upgrade": [
+     "Amélioration par rapport à ta pièce actuelle."
+    ]
+   },
+   "operator": {
+    "keep": [
+     "Belle trouvaille. Je le garderais.",
+     "Celui-là, on le garde."
+    ],
+    "consider": [
+     "Ça pourrait servir. Regarde de plus près.",
+     "Pas mal. Ça vaut un second regard."
+    ],
+    "dismantle": [
+     "On n'en a pas besoin. Démonte-le.",
+     "Tu peux le recycler."
+    ],
+    "review": [
+     "Il y a quelque chose de rare ici. Regarde toi-même.",
+     "Attends, celui-ci est rare."
+    ],
+    "exotic": [
+     "Oh, un exotique."
+    ],
+    "named": [
+     "Un objet nommé."
+    ],
+    "build": [
+     "Convient à {build}, {pct} pour cent."
+    ],
+    "fills_gap": [
+     "Ça comble un trou dans ton build."
+    ],
+    "upgrade": [
+     "Mieux que ce que tu portes."
+    ]
+   },
+   "brief": {
+    "keep": [
+     "Garde.",
+     "À garder."
+    ],
+    "consider": [
+     "Peut-être.",
+     "Vérifie."
+    ],
+    "dismantle": [
+     "Démonte.",
+     "Recycle."
+    ],
+    "review": [
+     "Rare. Vérifie.",
+     "À vérifier."
+    ],
+    "exotic": [
+     "Exotique."
+    ],
+    "named": [
+     "Nommé."
+    ],
+    "build": [
+     "{build}, {pct}."
+    ],
+    "fills_gap": [
+     "Nouvel emplacement."
+    ],
+    "upgrade": [
+     "Amélioration."
+    ]
+   }
+  },
+  "es": {
+   "tactical": {
+    "keep": [
+     "Objeto asegurado. Se recomienda conservarlo.",
+     "Coincidencia positiva. Guárdalo."
+    ],
+    "consider": [
+     "Coincidencia parcial. Revísalo antes de decidir.",
+     "Valor dudoso detectado. Tú decides, agente."
+    ],
+    "dismantle": [
+     "Sin coincidencia. Puedes desmontarlo.",
+     "Valor bajo. Se recomienda desmontar."
+    ],
+    "review": [
+     "Objeto raro detectado. Se requiere revisión manual.",
+     "Firma inusual. Compruébalo tú mismo."
+    ],
+    "exotic": [
+     "Exótico detectado."
+    ],
+    "named": [
+     "Objeto con nombre detectado."
+    ],
+    "build": [
+     "{build}: {pct} por ciento de coincidencia."
+    ],
+    "fills_gap": [
+     "Esto llena una ranura vacía."
+    ],
+    "upgrade": [
+     "Mejora sobre tu pieza actual."
+    ]
+   },
+   "operator": {
+    "keep": [
+     "Buen hallazgo. Yo lo guardaría.",
+     "Este se queda."
+    ],
+    "consider": [
+     "Podría servir. Míralo mejor.",
+     "No está mal. Merece otra mirada."
+    ],
+    "dismantle": [
+     "No lo necesitamos. Desmóntalo.",
+     "Puedes reciclar este."
+    ],
+    "review": [
+     "Aquí hay algo raro. Échale un vistazo.",
+     "Espera, este es raro."
+    ],
+    "exotic": [
+     "Vaya, un exótico."
+    ],
+    "named": [
+     "Un objeto con nombre."
+    ],
+    "build": [
+     "Encaja con {build}, {pct} por ciento."
+    ],
+    "fills_gap": [
+     "Cubre un hueco de tu build."
+    ],
+    "upgrade": [
+     "Mejor que lo que llevas."
+    ]
+   },
+   "brief": {
+    "keep": [
+     "Guárdalo.",
+     "Guarda."
+    ],
+    "consider": [
+     "Quizá.",
+     "Revisa."
+    ],
+    "dismantle": [
+     "Desmonta.",
+     "Recicla."
+    ],
+    "review": [
+     "Raro. Revisa.",
+     "Revisar."
+    ],
+    "exotic": [
+     "Exótico."
+    ],
+    "named": [
+     "Con nombre."
+    ],
+    "build": [
+     "{build}, {pct}."
+    ],
+    "fills_gap": [
+     "Ranura nueva."
+    ],
+    "upgrade": [
+     "Mejora."
+    ]
+   }
+  },
+  "it": {
+   "tactical": {
+    "keep": [
+     "Oggetto acquisito. Si consiglia di tenerlo.",
+     "Corrispondenza positiva. Tienilo."
+    ],
+    "consider": [
+     "Corrispondenza parziale. Controlla prima di decidere.",
+     "Valore incerto rilevato. Decidi tu, agente."
+    ],
+    "dismantle": [
+     "Nessuna corrispondenza. Puoi smontarlo.",
+     "Valore basso. Si consiglia di smontarlo."
+    ],
+    "review": [
+     "Oggetto raro rilevato. Serve un controllo manuale.",
+     "Firma insolita. Controllalo tu."
+    ],
+    "exotic": [
+     "Esotico rilevato."
+    ],
+    "named": [
+     "Oggetto con nome rilevato."
+    ],
+    "build": [
+     "{build}: corrispondenza del {pct} per cento."
+    ],
+    "fills_gap": [
+     "Questo riempie uno slot vuoto."
+    ],
+    "upgrade": [
+     "Miglioramento rispetto al pezzo attuale."
+    ]
+   },
+   "operator": {
+    "keep": [
+     "Bel colpo. Io lo terrei.",
+     "Questo si tiene."
+    ],
+    "consider": [
+     "Potrebbe servire. Guardalo meglio.",
+     "Niente male. Merita un'altra occhiata."
+    ],
+    "dismantle": [
+     "Non ci serve. Smontalo.",
+     "Puoi riciclarlo."
+    ],
+    "review": [
+     "C'è qualcosa di raro. Dai un'occhiata.",
+     "Aspetta, questo è raro."
+    ],
+    "exotic": [
+     "Oh, un esotico."
+    ],
+    "named": [
+     "Un oggetto con nome."
+    ],
+    "build": [
+     "Adatto a {build}, {pct} per cento."
+    ],
+    "fills_gap": [
+     "Riempie un vuoto nella build."
+    ],
+    "upgrade": [
+     "Meglio di quello che indossi."
+    ]
+   },
+   "brief": {
+    "keep": [
+     "Tieni.",
+     "Da tenere."
+    ],
+    "consider": [
+     "Forse.",
+     "Controlla."
+    ],
+    "dismantle": [
+     "Smonta.",
+     "Ricicla."
+    ],
+    "review": [
+     "Raro. Controlla.",
+     "Da controllare."
+    ],
+    "exotic": [
+     "Esotico."
+    ],
+    "named": [
+     "Con nome."
+    ],
+    "build": [
+     "{build}, {pct}."
+    ],
+    "fills_gap": [
+     "Nuovo slot."
+    ],
+    "upgrade": [
+     "Miglioramento."
+    ]
+   }
+  },
+  "pt": {
+   "tactical": {
+    "keep": [
+     "Item garantido. Recomendo guardar.",
+     "Correspondência positiva. Guarde este."
+    ],
+    "consider": [
+     "Correspondência parcial. Revise antes de decidir.",
+     "Valor limítrofe detectado. A decisão é sua, agente."
+    ],
+    "dismantle": [
+     "Sem correspondência. Pode desmontar.",
+     "Valor baixo. Recomendo desmontar."
+    ],
+    "review": [
+     "Item raro detectado. Revisão manual necessária.",
+     "Assinatura incomum. Verifique você mesmo."
+    ],
+    "exotic": [
+     "Exótico detectado."
+    ],
+    "named": [
+     "Item nomeado detectado."
+    ],
+    "build": [
+     "{build}: {pct} por cento de correspondência."
+    ],
+    "fills_gap": [
+     "Isso preenche um espaço vazio."
+    ],
+    "upgrade": [
+     "Melhoria em relação à peça atual."
+    ]
+   },
+   "operator": {
+    "keep": [
+     "Bom achado. Eu guardaria.",
+     "Esse fica."
+    ],
+    "consider": [
+     "Pode ser útil. Olhe com calma.",
+     "Nada mal. Vale outra olhada."
+    ],
+    "dismantle": [
+     "Não precisamos disso. Desmonte.",
+     "Pode reciclar esse."
+    ],
+    "review": [
+     "Tem algo raro aqui. Dê uma olhada.",
+     "Espera, esse é raro."
+    ],
+    "exotic": [
+     "Opa, um exótico."
+    ],
+    "named": [
+     "Um item nomeado."
+    ],
+    "build": [
+     "Combina com {build}, {pct} por cento."
+    ],
+    "fills_gap": [
+     "Preenche uma lacuna no seu build."
+    ],
+    "upgrade": [
+     "Melhor do que o que você está usando."
+    ]
+   },
+   "brief": {
+    "keep": [
+     "Guarde.",
+     "Guardar."
+    ],
+    "consider": [
+     "Talvez.",
+     "Confira."
+    ],
+    "dismantle": [
+     "Desmonte.",
+     "Recicle."
+    ],
+    "review": [
+     "Raro. Confira.",
+     "Revisar."
+    ],
+    "exotic": [
+     "Exótico."
+    ],
+    "named": [
+     "Nomeado."
+    ],
+    "build": [
+     "{build}, {pct}."
+    ],
+    "fills_gap": [
+     "Espaço novo."
+    ],
+    "upgrade": [
+     "Melhoria."
+    ]
+   }
+  },
+  "pl": {
+   "tactical": {
+    "keep": [
+     "Przedmiot zabezpieczony. Zalecam zachować.",
+     "Pozytywne dopasowanie. Zachowaj go."
+    ],
+    "consider": [
+     "Częściowe dopasowanie. Sprawdź przed decyzją.",
+     "Graniczna wartość. Twoja decyzja, agencie."
+    ],
+    "dismantle": [
+     "Brak dopasowania. Można rozebrać.",
+     "Niska wartość. Zalecam rozebrać."
+    ],
+    "review": [
+     "Wykryto rzadki przedmiot. Wymagana ręczna ocena.",
+     "Nietypowa sygnatura. Sprawdź sam."
+    ],
+    "exotic": [
+     "Wykryto egzotyk."
+    ],
+    "named": [
+     "Wykryto przedmiot nazwany."
+    ],
+    "build": [
+     "{build}: dopasowanie {pct} procent."
+    ],
+    "fills_gap": [
+     "To wypełnia pusty slot."
+    ],
+    "upgrade": [
+     "Ulepszenie względem obecnej części."
+    ]
+   },
+   "operator": {
+    "keep": [
+     "Dobre znalezisko. Ja bym zatrzymał.",
+     "Ten zostaje."
+    ],
+    "consider": [
+     "Może się przydać. Przyjrzyj się.",
+     "Nieźle. Warto spojrzeć drugi raz."
+    ],
+    "dismantle": [
+     "Nie potrzebujemy. Rozbierz.",
+     "Możesz to rozebrać."
+    ],
+    "review": [
+     "Jest tu coś rzadkiego. Sprawdź sam.",
+     "Chwila, to coś rzadkiego."
+    ],
+    "exotic": [
+     "O, egzotyk."
+    ],
+    "named": [
+     "Przedmiot nazwany."
+    ],
+    "build": [
+     "Pasuje do {build}, {pct} procent."
+    ],
+    "fills_gap": [
+     "Wypełnia lukę w buildzie."
+    ],
+    "upgrade": [
+     "Lepsze niż to, co nosisz."
+    ]
+   },
+   "brief": {
+    "keep": [
+     "Zachowaj.",
+     "Trzymaj."
+    ],
+    "consider": [
+     "Może.",
+     "Sprawdź."
+    ],
+    "dismantle": [
+     "Rozbierz.",
+     "Złom."
+    ],
+    "review": [
+     "Rzadki. Sprawdź.",
+     "Ocena."
+    ],
+    "exotic": [
+     "Egzotyk."
+    ],
+    "named": [
+     "Nazwany."
+    ],
+    "build": [
+     "{build}, {pct}."
+    ],
+    "fills_gap": [
+     "Nowy slot."
+    ],
+    "upgrade": [
+     "Ulepszenie."
+    ]
+   }
+  },
+  "ru": {
+   "tactical": {
+    "keep": [
+     "Предмет получен. Рекомендую оставить.",
+     "Положительное совпадение. Оставь его."
+    ],
+    "consider": [
+     "Частичное совпадение. Проверь перед решением.",
+     "Пограничная ценность. Решать тебе, агент."
+    ],
+    "dismantle": [
+     "Совпадений нет. Можно разобрать.",
+     "Низкая ценность. Рекомендую разобрать."
+    ],
+    "review": [
+     "Обнаружен редкий предмет. Нужна ручная проверка.",
+     "Необычная сигнатура. Проверь сам."
+    ],
+    "exotic": [
+     "Обнаружен экзотик."
+    ],
+    "named": [
+     "Обнаружен именной предмет."
+    ],
+    "build": [
+     "{build}: совпадение {pct} процентов."
+    ],
+    "fills_gap": [
+     "Это закрывает пустой слот."
+    ],
+    "upgrade": [
+     "Улучшение по сравнению с текущим."
+    ]
+   },
+   "operator": {
+    "keep": [
+     "Хорошая находка. Я бы оставил.",
+     "Это оставляем."
+    ],
+    "consider": [
+     "Может пригодиться. Присмотрись.",
+     "Неплохо. Стоит взглянуть ещё раз."
+    ],
+    "dismantle": [
+     "Нам это не нужно. Разбирай.",
+     "Можно разобрать."
+    ],
+    "review": [
+     "Тут что-то редкое. Посмотри сам.",
+     "Стоп, это редкость."
+    ],
+    "exotic": [
+     "О, экзотик."
+    ],
+    "named": [
+     "Именной предмет."
+    ],
+    "build": [
+     "Подходит к {build}, {pct} процентов."
+    ],
+    "fills_gap": [
+     "Закрывает пробел в билде."
+    ],
+    "upgrade": [
+     "Лучше того, что на тебе."
+    ]
+   },
+   "brief": {
+    "keep": [
+     "Оставить.",
+     "Оставь."
+    ],
+    "consider": [
+     "Возможно.",
+     "Проверь."
+    ],
+    "dismantle": [
+     "Разобрать.",
+     "Лом."
+    ],
+    "review": [
+     "Редкий. Проверь.",
+     "Проверка."
+    ],
+    "exotic": [
+     "Экзотик."
+    ],
+    "named": [
+     "Именной."
+    ],
+    "build": [
+     "{build}, {pct}."
+    ],
+    "fills_gap": [
+     "Новый слот."
+    ],
+    "upgrade": [
+     "Улучшение."
+    ]
+   }
+  },
+  "nl": {
+   "tactical": {
+    "keep": [
+     "Item veiliggesteld. Bewaren aanbevolen.",
+     "Positieve match. Bewaar deze."
+    ],
+    "consider": [
+     "Gedeeltelijke match. Controleer voordat je beslist.",
+     "Twijfelachtige waarde. Jouw keuze, agent."
+    ],
+    "dismantle": [
+     "Geen match. Kan ontmanteld worden.",
+     "Lage waarde. Ontmantelen aanbevolen."
+    ],
+    "review": [
+     "Zeldzaam item gedetecteerd. Handmatige controle nodig.",
+     "Ongewone vondst. Controleer het zelf."
+    ],
+    "exotic": [
+     "Exotic gedetecteerd."
+    ],
+    "named": [
+     "Benoemd item gedetecteerd."
+    ],
+    "build": [
+     "{build}: {pct} procent match."
+    ],
+    "fills_gap": [
+     "Dit vult een leeg slot."
+    ],
+    "upgrade": [
+     "Upgrade ten opzichte van je huidige stuk."
+    ]
+   },
+   "operator": {
+    "keep": [
+     "Mooie vondst. Ik zou hem houden.",
+     "Die houden we."
+    ],
+    "consider": [
+     "Kan handig zijn. Kijk nog eens goed.",
+     "Niet slecht. Een tweede blik waard."
+    ],
+    "dismantle": [
+     "Hebben we niet nodig. Ontmantel hem.",
+     "Die kun je slopen."
+    ],
+    "review": [
+     "Hier zit iets zeldzaams. Kijk zelf.",
+     "Wacht, deze is zeldzaam."
+    ],
+    "exotic": [
+     "Oh, een exotic."
+    ],
+    "named": [
+     "Een benoemd item."
+    ],
+    "build": [
+     "Past bij {build}, {pct} procent."
+    ],
+    "fills_gap": [
+     "Dat vult een gat in je build."
+    ],
+    "upgrade": [
+     "Beter dan wat je draagt."
+    ]
+   },
+   "brief": {
+    "keep": [
+     "Houden.",
+     "Bewaar."
+    ],
+    "consider": [
+     "Misschien.",
+     "Check."
+    ],
+    "dismantle": [
+     "Slopen.",
+     "Ontmantel."
+    ],
+    "review": [
+     "Zeldzaam. Check.",
+     "Controleren."
+    ],
+    "exotic": [
+     "Exotic."
+    ],
+    "named": [
+     "Benoemd."
+    ],
+    "build": [
+     "{build}, {pct}."
+    ],
+    "fills_gap": [
+     "Nieuw slot."
+    ],
+    "upgrade": [
+     "Upgrade."
+    ]
+   }
+  }
+ }
+}

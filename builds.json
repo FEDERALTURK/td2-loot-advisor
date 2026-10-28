@@ -1,0 +1,1174 @@
+{
+  "settings": {
+    "hotkey": "<f8>",
+    "overlay_seconds": 8.0,
+    "overlay_corner": "top_right",
+    "ocr_lang": "eng",
+    "tesseract_cmd": "C:\\Program Files\\Tesseract-OCR\\tesseract.exe",
+    "keep_threshold": 70.0,
+    "consider_threshold": 40.0,
+    "region": {
+      "left": 2370,
+      "top": 547,
+      "width": 490,
+      "height": 439
+    },
+    "save_debug_crop": true,
+    "log_csv": true,
+    "scan_mode": "auto",
+    "auto_interval_ms": 700.0,
+    "auto_record": true,
+    "track_progress": true,
+    "sound": true,
+    "daily_reset_hour": 11,
+    "weekly_reset_day": 1,
+    "weekly_reset_hour": 11,
+    "language": "tr",
+    "log_level": "INFO",
+    "log_max_kb": 1024,
+    "log_backups": 3,
+    "ai_provider": "claude_code",
+    "ollama_url": "http://localhost:11434",
+    "ollama_model": "gemma3:12b",
+    "claude_model": "claude-haiku-5-5",
+    "claude_api_key": "",
+    "openai_model": "gpt-4o-mini",
+    "openai_api_key": "",
+    "stt_model": "small",
+    "stt_device": "cpu",
+    "tts_rate": 185,
+    "tts_voice": "",
+    "voice_hotkey": "<f9>",
+    "speak_verdict": true,
+    "speak_chat": true,
+    "claude_code_model": "haiku",
+    "ui_theme": "blacktusk",
+    "ui_sounds": true,
+    "bg_interval": 15,
+    "meta_sync": true,
+    "meta_feed_url": "",
+    "meta_last_try": 1793220935.2234712,
+    "meta_last_sync": "2026-10-28T20:55:35+00:00",
+    "meta_version": "2026-10-27.1",
+    "meta_hidden": [],
+    "tasks_sync": true,
+    "auto_reset_times": true,
+    "tasks_version": "2026-10-25.1",
+    "tasks_last_try": 1793205878.3280838,
+    "wiki_sync": true,
+    "wiki_last_try": 1793205878.328084,
+    "only_game_active": true,
+    "scan_source": "screen",
+    "res_profile": "auto",
+    "ocr_threshold": 164,
+    "ocr_scale": "auto",
+    "ocr_psm": 6,
+    "ocr_passes": 3,
+    "overlay_mode": "card",
+    "overlay_alpha": 0.94,
+    "overlay_size": 1.0,
+    "ui_depth": true,
+    "fx_cursor": true,
+    "fx_cursor_style": "smg",
+    "fx_cursor_color": "#e11d2e",
+    "fx_cursor_custom": "",
+    "fx_trail": true,
+    "fx_trail_color": "#e11d2e",
+    "fx_trail_len": 25,
+    "fx_transitions": true,
+    "fx_video": true,
+    "fx_video_dim": 0.67,
+    "active_build": "Striker AR/SMG DPS (PvE)",
+    "tasks_hotkey": "<f10>",
+    "fx_transition_ms": 450,
+    "fx_bgwatch": true,
+    "fx_bgwatch_dim": 0.0,
+    "ocr_engine": "auto",
+    "license_key": "dpapi:AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAAbve5SRP6ZEq5bP+XhptYUgAAAAACAAAAAAAQZgAAAAEAACAAAACL8wioSBEj/9Kd9FKdKT0J0a5OzTfBAAW/BU/9MzJ9WgAAAAAOgAAAAAIAACAAAAAu8ALDKmrjzrzL/GREnulBtXJuIYAZ0KynwqgLd5OUpMAAAAC4Iva/0IboDzcj7rkYhMPFCdDWGUZl0feh6yduv/c7L8CuKB3AEDIn9j4YFgObYjHPqlc1Tcj+O2YwF2XOUYGQtl+k/9uQstKOz67xTUUPXuXWSTQHZ4bPN0/USXm3MmRNNYRzz/Py5VQISrEaQpCy0h/V+uPBF4d9aJp/5n5Q2DaXBEdPc4Zu7iO800FYe5HriYXGlp0m4sk0F5qkV//yi9waFWCPHYUOu/vKqovZkerBBH8P3BhS8TPguqGFLFVAAAAAPMEVTxuF9tEj8l1vsEsSeBDK1eVbZfcPyRmu74yIfqsyPJYzKp2lFv7DsxwZ0gvdhNZivez2Hgo6MS8w+fYztA==",
+    "stash_record": true,
+    "vendor_mode": false,
+    "vendor_auto": true,
+    "drop_share": true,
+    "drop_asked": true,
+    "drop_activity": "none",
+    "drop_server": "",
+    "drop_client": "957d2e44da9a4ec19516d85bfe196e4a",
+    "vision_ok": false,
+    "vendor_notified": "2026-10-27",
+    "companion_port": 8765,
+    "update_check": true,
+    "update_last": 1793112011.0536983,
+    "update_skip": "",
+    "ocr_gpu": "auto",
+    "svc_tray": true,
+    "svc_close_to_tray": false,
+    "svc_auto_run": true,
+    "smart_scan": true,
+    "api_on": true,
+    "api_port": 8766,
+    "api_lan": true,
+    "api_control": true,
+    "api_token": "dpapi:AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAAbve5SRP6ZEq5bP+XhptYUgAAAAACAAAAAAAQZgAAAAEAACAAAABBxCRPvBOunqPDuOon0BDBJjHs/FvBBCgBp45I9elK4QAAAAAOgAAAAAIAACAAAACbn/WXJPnc6ZCsFBs+TuYlD2oZY8+YK232UQmtkr0BHiAAAACsy/0VKE2tt/k+YWw8tjh7lNBcIndWmZ71ofH1ApSpr0AAAABduQMq5X61/++rT62f6BT394hx+6mK2FKKs8Lpmp4qYIBgNgJjFyKG+t0GFWapfYHy5TkwI7b+TM6JHnxaRYjG",
+    "rpc_on": true,
+    "rpc_client_id": "",
+    "push_on": false,
+    "push_topic": "",
+    "push_webhook": "",
+    "push_drop": true,
+    "push_build": true,
+    "push_vendor": true,
+    "push_session": true,
+    "agent_model": "operator",
+    "agent_outfit": "night",
+    "agent_skin": 1,
+    "voice_pack": "tactical",
+    "voice_radio": true,
+    "quiz_xp": 0,
+    "quiz_best": 0,
+    "quiz_loading": false,
+    "meta_favs": [],
+    "meta_pop_prev": {},
+    "news_seen": [],
+    "task_share": null,
+    "task_live": true,
+    "task_client": "53481a4cf2304d2baea4710a2ff886f6",
+    "tr_on": false,
+    "tr_engine": "local",
+    "tr_mode": "subtitle",
+    "tr_region": null,
+    "tr_hotkey": "<f7>",
+    "tr_auto": true,
+    "tr_font": 15,
+    "tr_hide": 10,
+    "tr_alpha": 0.9,
+    "tr_screen": false,
+    "tr_screen_port": 8767,
+    "tr_screen_token": "",
+    "tr_speak": "off",
+    "tr_family": "",
+    "tr_outline": false,
+    "sp_on": false,
+    "sp_source": "auto",
+    "sp_hide_captions": true,
+    "tr_ocr": "auto",
+    "tr_ocr_pick": "",
+    "tr_ocr_bench_t": 0,
+    "tr_pad": "back+rb",
+    "meta_pop_hist": {
+      "prev": null,
+      "cur": {
+        "v": "2026-10-27.1",
+        "pop": {
+          "st-elmos-striker": 95,
+          "striker-equalizer-raid": 85,
+          "heartbreaker-ar-pve": 69,
+          "hunters-fury-ouroboros": 70,
+          "iron-will-hotshot": 73,
+          "tipping-scales-lmg": 75,
+          "negotiators-pestilence": 62,
+          "refactor-drone-turret": 66,
+          "future-initiative-healer": 50,
+          "foundry-bulwark-hybrid": 60,
+          "system-corruption-pvp": 61,
+          "ember-engine-fafnir": 60,
+          "aces-eights-palisade-rifle": 52
+        }
+      }
+    },
+    "acc_asked": true,
+    "game_install": {
+      "path": "F:\\Tom Clancy's The Division 2\\TheDivision2.exe",
+      "version": "1.0.0.0",
+      "mtime": 1792148080,
+      "size": 84502008,
+      "source": "ubisoft"
+    },
+    "res_profile_lock": false,
+    "ocr_tuned": true,
+    "game_lang": "en",
+    "sync_fp": "84cf9d70504a30d9",
+    "sync_time": "2026-10-28 19:44",
+    "_start_tab": "",
+    "_start_page": "",
+    "ocr_gpu_probe": {
+      "providers": [
+        "DmlExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "ok": true,
+      "cpu_ms": 417,
+      "dml_ms": 113,
+      "similarity": 1.0,
+      "key": "9.1.2|3.13"
+    },
+    "ocr_passes_auto": true,
+    "perf_mode": "balanced",
+    "tr_log": false,
+    "voice_online": false,
+    "tr_toggle_hotkey": "<f6>",
+    "assistant_cancel_hotkey": "<f12>",
+    "assistant_hud": true,
+    "event_fx": "isac"
+  },
+  "attributes": {
+    "weapon_damage": [
+      "weapon damage"
+    ],
+    "crit_chance": [
+      "critical hit chance",
+      "crit hit chance"
+    ],
+    "crit_damage": [
+      "critical hit damage",
+      "crit hit damage"
+    ],
+    "headshot_damage": [
+      "headshot damage"
+    ],
+    "rate_of_fire": [
+      "rate of fire"
+    ],
+    "weapon_handling": [
+      "weapon handling"
+    ],
+    "reload_speed": [
+      "reload speed"
+    ],
+    "magazine_size": [
+      "magazine size"
+    ],
+    "optimal_range": [
+      "optimal range"
+    ],
+    "damage_to_armor": [
+      "damage to armor"
+    ],
+    "damage_to_health": [
+      "damage to health"
+    ],
+    "damage_to_elites": [
+      "damage to elites"
+    ],
+    "armor": [
+      "armor"
+    ],
+    "health": [
+      "health"
+    ],
+    "armor_regen": [
+      "armor regeneration"
+    ],
+    "hazard_protection": [
+      "hazard protection"
+    ],
+    "explosive_resist": [
+      "explosive resistance"
+    ],
+    "pulse_resistance": [
+      "pulse resistance"
+    ],
+    "skill_damage": [
+      "skill damage"
+    ],
+    "skill_haste": [
+      "skill haste"
+    ],
+    "skill_duration": [
+      "skill duration"
+    ],
+    "skill_health": [
+      "skill health"
+    ],
+    "repair_skills": [
+      "repair skills"
+    ],
+    "status_effects": [
+      "status effects"
+    ],
+    "skill_tier": [
+      "skill tier"
+    ]
+  },
+  "builds": [
+    {
+      "name": "Striker AR/SMG DPS (PvE)",
+      "sets_or_brands": [
+        "Striker's Battlegear",
+        "Striker"
+      ],
+      "set_bonus": 15,
+      "attributes": {
+        "weapon_damage": {
+          "weight": 3.0,
+          "good_at": 10
+        },
+        "crit_chance": {
+          "weight": 2.5,
+          "good_at": 5
+        },
+        "crit_damage": {
+          "weight": 2.5,
+          "good_at": 9
+        },
+        "headshot_damage": {
+          "weight": 1.5,
+          "good_at": 9
+        },
+        "rate_of_fire": {
+          "weight": 1.5,
+          "good_at": 5
+        },
+        "weapon_handling": {
+          "weight": 1.0,
+          "good_at": 10
+        }
+      },
+      "talents": {
+        "Perfect Optimized": 4,
+        "Perfect Fast Hands": 2,
+        "Perfect Ranger": 2,
+        "Perfect Killer": 2,
+        "Optimized": 2
+      }
+    },
+    {
+      "name": "Heartbreaker AR (Solo / Legendary)",
+      "sets_or_brands": [
+        "Heartbreaker"
+      ],
+      "set_bonus": 15,
+      "attributes": {
+        "weapon_damage": {
+          "weight": 3.0,
+          "good_at": 10
+        },
+        "crit_chance": {
+          "weight": 2.0,
+          "good_at": 5
+        },
+        "crit_damage": {
+          "weight": 2.0,
+          "good_at": 9
+        },
+        "headshot_damage": {
+          "weight": 1.5,
+          "good_at": 9
+        },
+        "armor": {
+          "weight": 1.0,
+          "good_at": 5
+        }
+      },
+      "talents": {
+        "Perfect Optimized": 3,
+        "Perfect Unhinged": 2,
+        "Perfect Ranger": 2,
+        "Optimized": 1.5
+      }
+    },
+    {
+      "name": "Hunter's Fury Close Range",
+      "sets_or_brands": [
+        "Hunter's Fury"
+      ],
+      "set_bonus": 15,
+      "attributes": {
+        "weapon_damage": {
+          "weight": 3.0,
+          "good_at": 10
+        },
+        "crit_damage": {
+          "weight": 2.0,
+          "good_at": 9
+        },
+        "crit_chance": {
+          "weight": 2.0,
+          "good_at": 5
+        },
+        "weapon_handling": {
+          "weight": 1.5,
+          "good_at": 10
+        },
+        "armor": {
+          "weight": 1.0,
+          "good_at": 5
+        }
+      },
+      "talents": {
+        "Perfect Close & Personal": 4,
+        "Perfect Fast Hands": 2,
+        "Close & Personal": 2
+      }
+    },
+    {
+      "name": "Tank / Hybrid (Raid / Heroic)",
+      "sets_or_brands": [
+        "Core Strength"
+      ],
+      "set_bonus": 10,
+      "attributes": {
+        "armor": {
+          "weight": 3.0,
+          "good_at": 5
+        },
+        "health": {
+          "weight": 2.0,
+          "good_at": 5
+        },
+        "armor_regen": {
+          "weight": 2.0,
+          "good_at": 5
+        },
+        "hazard_protection": {
+          "weight": 1.5,
+          "good_at": 5
+        },
+        "explosive_resist": {
+          "weight": 1.0,
+          "good_at": 5
+        },
+        "weapon_damage": {
+          "weight": 1.5,
+          "good_at": 10
+        }
+      },
+      "talents": {
+        "Perfect Glass Cannon": 1,
+        "Spark": 2,
+        "Obliterate": 2
+      }
+    },
+    {
+      "name": "Skill Build",
+      "sets_or_brands": [],
+      "set_bonus": 0,
+      "attributes": {
+        "skill_haste": {
+          "weight": 3.0,
+          "good_at": 8
+        },
+        "skill_damage": {
+          "weight": 2.5,
+          "good_at": 8
+        },
+        "repair_skills": {
+          "weight": 2.0,
+          "good_at": 8
+        },
+        "skill_duration": {
+          "weight": 1.5,
+          "good_at": 8
+        },
+        "skill_health": {
+          "weight": 1.5,
+          "good_at": 8
+        },
+        "status_effects": {
+          "weight": 1.0,
+          "good_at": 8
+        },
+        "skill_tier": {
+          "weight": 3.0,
+          "good_at": 1
+        }
+      },
+      "talents": {}
+    },
+    {
+      "meta_id": "st-elmos-striker",
+      "name": "St. Elmo's Striker (PvE)",
+      "sets_or_brands": [
+        "Striker's Battlegear",
+        "Striker"
+      ],
+      "set_bonus": 15.0,
+      "attributes": {
+        "weapon_damage": {
+          "weight": 3.0,
+          "good_at": 10.0
+        },
+        "crit_chance": {
+          "weight": 2.5,
+          "good_at": 5.0
+        },
+        "crit_damage": {
+          "weight": 2.5,
+          "good_at": 9.0
+        },
+        "headshot_damage": {
+          "weight": 1.0,
+          "good_at": 9.0
+        },
+        "rate_of_fire": {
+          "weight": 1.5,
+          "good_at": 5.0
+        }
+      },
+      "talents": {
+        "Obliterate": 4.0,
+        "Perfect Obliterate": 4.0,
+        "Perfect Fast Hands": 2.0
+      },
+      "items": [
+        "Equalizer"
+      ],
+      "meta": {
+        "mode": "PvE / Legendary",
+        "role": "dps",
+        "popularity": 95,
+        "summary": {
+          "tr": "St. Elmo's Engine + Striker seti; kritik şansını ~%60'a kadar doldur, sonra kritik hasar. Göğüs: Obliterate, sırt: Memento.",
+          "en": "St. Elmo's Engine + Striker set; cap crit chance around 60%, then crit damage. Chest Obliterate, backpack Memento."
+        },
+        "sources": [
+          {
+            "title": "Overgear – Division 2 builds (Red Horizon)",
+            "url": "https://overgear.com/guides/division-2/best-builds-for-any-activities/"
+          },
+          {
+            "title": "LFCarry – Division 2 builds Y8S3",
+            "url": "https://lfcarry.com/guides/division-2-builds"
+          },
+          {
+            "title": "The Division Dispatch – build guides",
+            "url": "https://thedivisiondispatch.com/build-guides/"
+          }
+        ]
+      }
+    },
+    {
+      "meta_id": "striker-equalizer-raid",
+      "name": "Striker Equalizer (Raid)",
+      "sets_or_brands": [
+        "Striker's Battlegear",
+        "Striker"
+      ],
+      "set_bonus": 15.0,
+      "attributes": {
+        "weapon_damage": {
+          "weight": 3.0,
+          "good_at": 10.0
+        },
+        "crit_chance": {
+          "weight": 2.5,
+          "good_at": 5.0
+        },
+        "crit_damage": {
+          "weight": 2.5,
+          "good_at": 9.0
+        },
+        "headshot_damage": {
+          "weight": 1.0,
+          "good_at": 9.0
+        },
+        "damage_to_elites": {
+          "weight": 1.0,
+          "good_at": 8.0
+        }
+      },
+      "talents": {
+        "Obliterate": 2.0,
+        "Perfect Fast Hands": 2.0
+      },
+      "items": [
+        "Equalizer"
+      ],
+      "meta": {
+        "mode": "Raid / Boss",
+        "role": "dps",
+        "popularity": 85,
+        "summary": {
+          "tr": "Boss hasarı ve yük (stack) sürekliliği için Striker + Equalizer göğüs.",
+          "en": "Striker with Equalizer chest for boss damage and stack uptime."
+        },
+        "sources": [
+          {
+            "title": "Overgear – Division 2 builds (Red Horizon)",
+            "url": "https://overgear.com/guides/division-2/best-builds-for-any-activities/"
+          },
+          {
+            "title": "The Division Dispatch – build guides",
+            "url": "https://thedivisiondispatch.com/build-guides/"
+          },
+          {
+            "title": "GrindOut – Division 2 builds (Red Horizon, updated Oct 23 2026)",
+            "url": "https://grindout.com/division-2/guides/builds"
+          }
+        ]
+      }
+    },
+    {
+      "meta_id": "heartbreaker-ar-pve",
+      "name": "Heartbreaker AR (PvE)",
+      "sets_or_brands": [
+        "Heartbreaker"
+      ],
+      "set_bonus": 15.0,
+      "attributes": {
+        "weapon_damage": {
+          "weight": 3.0,
+          "good_at": 10.0
+        },
+        "crit_damage": {
+          "weight": 2.5,
+          "good_at": 9.0
+        },
+        "crit_chance": {
+          "weight": 2.0,
+          "good_at": 5.0
+        },
+        "armor": {
+          "weight": 1.0,
+          "good_at": 5.0
+        }
+      },
+      "talents": {
+        "Perfect Optimized": 2.0,
+        "Flatline": 3.0
+      },
+      "items": [
+        "Kingbreaker"
+      ],
+      "meta": {
+        "mode": "PvE / Solo",
+        "role": "dps",
+        "popularity": 69,
+        "summary": {
+          "tr": "Police M4/Carbine 7/FAMAS (Flatline) + ACS-12; Heartbreaker seti, işaretli hedeflere bonus.",
+          "en": "Police M4/Carbine 7/FAMAS with Flatline + ACS-12; Heartbreaker set, bonus on pulsed targets."
+        },
+        "sources": [
+          {
+            "title": "Overgear – Division 2 builds (Red Horizon)",
+            "url": "https://overgear.com/guides/division-2/best-builds-for-any-activities/"
+          },
+          {
+            "title": "widdz (YouTube, Oct 17 2026) – 3 best builds for Red Moon Unleashed",
+            "url": "https://www.youtube.com/watch?v=zLuctuWy9Ok"
+          },
+          {
+            "title": "GrindOut – Division 2 builds (Red Horizon, updated Oct 23 2026)",
+            "url": "https://grindout.com/division-2/guides/builds"
+          }
+        ]
+      }
+    },
+    {
+      "meta_id": "hunters-fury-ouroboros",
+      "name": "Hunter's Fury Ouroboros (SMG)",
+      "sets_or_brands": [
+        "Hunter's Fury"
+      ],
+      "set_bonus": 15.0,
+      "attributes": {
+        "weapon_damage": {
+          "weight": 3.0,
+          "good_at": 10.0
+        },
+        "crit_chance": {
+          "weight": 2.5,
+          "good_at": 5.0
+        },
+        "crit_damage": {
+          "weight": 2.0,
+          "good_at": 9.0
+        },
+        "weapon_handling": {
+          "weight": 1.5,
+          "good_at": 10.0
+        },
+        "armor": {
+          "weight": 1.0,
+          "good_at": 5.0
+        }
+      },
+      "talents": {
+        "Intimidate": 4.0,
+        "Perfect Intimidate": 4.0,
+        "Perfect Close & Personal": 2.0
+      },
+      "items": [],
+      "meta": {
+        "mode": "PvE / Farm",
+        "role": "close",
+        "popularity": 70,
+        "summary": {
+          "tr": "Ouroboros SMG, Hunter's Fury seti, Intimidate göğüs; ~%50-55 kritik şansı. Yakın mesafe farm.",
+          "en": "Ouroboros SMG, Hunter's Fury set, Intimidate chest; ~50–55% crit chance. Close-range farming."
+        },
+        "sources": [
+          {
+            "title": "Overgear – Division 2 builds (Red Horizon)",
+            "url": "https://overgear.com/guides/division-2/best-builds-for-any-activities/"
+          },
+          {
+            "title": "LFCarry – Division 2 builds Y8S3",
+            "url": "https://lfcarry.com/guides/division-2-builds"
+          }
+        ]
+      }
+    },
+    {
+      "meta_id": "iron-will-hotshot",
+      "name": "Iron Will Hotshot (Sniper)",
+      "sets_or_brands": [
+        "Hotshot"
+      ],
+      "set_bonus": 15.0,
+      "attributes": {
+        "headshot_damage": {
+          "weight": 3.0,
+          "good_at": 9.0
+        },
+        "weapon_damage": {
+          "weight": 2.5,
+          "good_at": 10.0
+        },
+        "crit_damage": {
+          "weight": 2.0,
+          "good_at": 9.0
+        }
+      },
+      "talents": {
+        "Resolved": 4.0,
+        "Determined": 2.0
+      },
+      "items": [
+        "Chainkiller"
+      ],
+      "meta": {
+        "mode": "Legendary / Farm",
+        "role": "precision",
+        "popularity": 73,
+        "summary": {
+          "tr": "Hotshot seti (varsa Aces & Eights) + Iron Will göğüs (Resolved); keskin nişancı, kafa vuruşu hasarı modları. Y8S3.2'de MMR'lerin kafa vuruşu bonusu arttı.",
+          "en": "Hotshot set (or Aces & Eights if owned) + Iron Will chest (Resolved); sniper with headshot damage mods. Y8S3.2 raised marksman rifle headshot bonus."
+        },
+        "sources": [
+          {
+            "title": "Overgear – Division 2 builds (Red Horizon)",
+            "url": "https://overgear.com/guides/division-2/best-builds-for-any-activities/"
+          },
+          {
+            "title": "Item Level Gaming – Red Moon Unleashed builds (Oct 17, 2026)",
+            "url": "https://itemlevel.net/best-build-for-red-moon-unleashed-in-the-division-2/"
+          },
+          {
+            "title": "KeenGamer – Y8S3 Red Horizon full update guide",
+            "url": "https://www.keengamer.com/articles/guides/the-division-2-y8s3-red-horizon-full-update-guide/"
+          },
+          {
+            "title": "GrindOut – Division 2 builds (Red Horizon, updated Oct 23 2026)",
+            "url": "https://grindout.com/division-2/guides/builds"
+          }
+        ]
+      }
+    },
+    {
+      "meta_id": "tipping-scales-lmg",
+      "name": "Tipping Scales LMG",
+      "sets_or_brands": [
+        "Tipping Scales"
+      ],
+      "set_bonus": 15.0,
+      "attributes": {
+        "weapon_damage": {
+          "weight": 3.0,
+          "good_at": 10.0
+        },
+        "crit_chance": {
+          "weight": 2.5,
+          "good_at": 5.0
+        },
+        "crit_damage": {
+          "weight": 2.5,
+          "good_at": 9.0
+        },
+        "headshot_damage": {
+          "weight": 1.0,
+          "good_at": 9.0
+        },
+        "magazine_size": {
+          "weight": 1.0,
+          "good_at": 10.0
+        }
+      },
+      "talents": {
+        "Perfect Obliterate": 2.0
+      },
+      "items": [],
+      "meta": {
+        "mode": "PvE",
+        "role": "dps",
+        "popularity": 75,
+        "summary": {
+          "tr": "Big Alejandro, Tipping Scales seti, Coyote's Mask, Contractor's Gloves.",
+          "en": "Big Alejandro, Tipping Scales set, Coyote's Mask, Contractor's Gloves."
+        },
+        "sources": [
+          {
+            "title": "Overgear – Division 2 builds (Red Horizon)",
+            "url": "https://overgear.com/guides/division-2/best-builds-for-any-activities/"
+          },
+          {
+            "title": "The Division Dispatch – build guides",
+            "url": "https://thedivisiondispatch.com/build-guides/"
+          },
+          {
+            "title": "GrindOut – Division 2 builds (Red Horizon, updated Oct 23 2026)",
+            "url": "https://grindout.com/division-2/guides/builds"
+          }
+        ]
+      }
+    },
+    {
+      "meta_id": "negotiators-pestilence",
+      "name": "Negotiator's Dilemma Pestilence",
+      "sets_or_brands": [
+        "Negotiator's Dilemma"
+      ],
+      "set_bonus": 15.0,
+      "attributes": {
+        "crit_chance": {
+          "weight": 3.0,
+          "good_at": 5.0
+        },
+        "crit_damage": {
+          "weight": 2.5,
+          "good_at": 9.0
+        },
+        "weapon_damage": {
+          "weight": 2.5,
+          "good_at": 10.0
+        }
+      },
+      "talents": {
+        "Obliterate": 4.0,
+        "Perfect Focus": 3.0
+      },
+      "items": [],
+      "meta": {
+        "mode": "Legendary",
+        "role": "dps",
+        "popularity": 62,
+        "summary": {
+          "tr": "Pestilence LMG + Negotiator's Dilemma; Obliterate göğüs, kritik odaklı.",
+          "en": "Pestilence LMG + Negotiator's Dilemma; Obliterate chest, crit focused."
+        },
+        "sources": [
+          {
+            "title": "Overgear – Division 2 builds (Red Horizon)",
+            "url": "https://overgear.com/guides/division-2/best-builds-for-any-activities/"
+          },
+          {
+            "title": "GrindOut – Division 2 builds (Red Horizon, updated Oct 23 2026)",
+            "url": "https://grindout.com/division-2/guides/builds"
+          }
+        ]
+      }
+    },
+    {
+      "meta_id": "refactor-drone-turret",
+      "name": "Refactor Drone & Turret (Skill)",
+      "sets_or_brands": [
+        "Refactor"
+      ],
+      "set_bonus": 15.0,
+      "attributes": {
+        "skill_damage": {
+          "weight": 3.0,
+          "good_at": 8.0
+        },
+        "skill_haste": {
+          "weight": 2.5,
+          "good_at": 8.0
+        },
+        "skill_tier": {
+          "weight": 3.0,
+          "good_at": 1.0
+        },
+        "skill_duration": {
+          "weight": 1.0,
+          "good_at": 8.0
+        }
+      },
+      "talents": {
+        "Perfect Spark": 2.0
+      },
+      "items": [
+        "Force Multiplier"
+      ],
+      "meta": {
+        "mode": "Legendary",
+        "role": "skill",
+        "popularity": 66,
+        "summary": {
+          "tr": "Capacitor + Refactor seti, Force Multiplier sırt; Striker Drone ve Assault Turret.",
+          "en": "Capacitor + Refactor set, Force Multiplier backpack; Striker Drone and Assault Turret."
+        },
+        "sources": [
+          {
+            "title": "Overgear – Division 2 builds (Red Horizon)",
+            "url": "https://overgear.com/guides/division-2/best-builds-for-any-activities/"
+          },
+          {
+            "title": "LFCarry – Division 2 builds Y8S3",
+            "url": "https://lfcarry.com/guides/division-2-builds"
+          },
+          {
+            "title": "GrindOut – Division 2 builds (Red Horizon, updated Oct 23 2026)",
+            "url": "https://grindout.com/division-2/guides/builds"
+          }
+        ]
+      }
+    },
+    {
+      "meta_id": "future-initiative-healer",
+      "name": "Future Initiative Healer",
+      "sets_or_brands": [
+        "Future Initiative"
+      ],
+      "set_bonus": 15.0,
+      "attributes": {
+        "repair_skills": {
+          "weight": 3.0,
+          "good_at": 8.0
+        },
+        "skill_haste": {
+          "weight": 2.5,
+          "good_at": 8.0
+        },
+        "skill_tier": {
+          "weight": 3.0,
+          "good_at": 1.0
+        },
+        "skill_health": {
+          "weight": 1.0,
+          "good_at": 8.0
+        }
+      },
+      "talents": {
+        "Perfect Protector": 2.0
+      },
+      "items": [],
+      "meta": {
+        "mode": "Raid / Legendary",
+        "role": "pulse",
+        "popularity": 50,
+        "summary": {
+          "tr": "Destek/şifacı; Future Initiative seti, Alps Summit sırt, onarım becerileri.",
+          "en": "Support healer; Future Initiative set, Alps Summit backpack, repair skills."
+        },
+        "sources": [
+          {
+            "title": "Overgear – Division 2 builds (Red Horizon)",
+            "url": "https://overgear.com/guides/division-2/best-builds-for-any-activities/"
+          }
+        ]
+      }
+    },
+    {
+      "meta_id": "foundry-bulwark-hybrid",
+      "name": "Foundry Bulwark Hybrid Tank",
+      "sets_or_brands": [
+        "Foundry Bulwark"
+      ],
+      "set_bonus": 15.0,
+      "attributes": {
+        "armor": {
+          "weight": 3.0,
+          "good_at": 5.0
+        },
+        "armor_regen": {
+          "weight": 2.5,
+          "good_at": 5.0
+        },
+        "weapon_damage": {
+          "weight": 1.5,
+          "good_at": 10.0
+        },
+        "health": {
+          "weight": 1.0,
+          "good_at": 5.0
+        }
+      },
+      "talents": {
+        "Perfect Vanguard": 2.0
+      },
+      "items": [
+        "Catharsis"
+      ],
+      "meta": {
+        "mode": "PvE / Raid",
+        "role": "tank",
+        "popularity": 60,
+        "summary": {
+          "tr": "Foundry Bulwark tank/hibrit; Catharsis maske, zırh yenilenmesi. Topluluk rehberlerinde 2025-2026'da sık güncellendi.",
+          "en": "Foundry Bulwark tank/hybrid; Catharsis mask, armor regen. Frequently updated community guides in 2025–2026."
+        },
+        "sources": [
+          {
+            "title": "The Division Dispatch – build guides",
+            "url": "https://thedivisiondispatch.com/build-guides/"
+          }
+        ]
+      }
+    },
+    {
+      "meta_id": "system-corruption-pvp",
+      "name": "System Corruption AR (PvP)",
+      "sets_or_brands": [
+        "System Corruption"
+      ],
+      "set_bonus": 15.0,
+      "attributes": {
+        "armor": {
+          "weight": 2.5,
+          "good_at": 5.0
+        },
+        "crit_chance": {
+          "weight": 2.0,
+          "good_at": 5.0
+        },
+        "weapon_damage": {
+          "weight": 2.0,
+          "good_at": 10.0
+        }
+      },
+      "talents": {
+        "Unbreakable": 4.0,
+        "Perfect Unbreakable": 4.0
+      },
+      "items": [],
+      "meta": {
+        "mode": "PvP / Dark Zone",
+        "role": "tank",
+        "popularity": 61,
+        "summary": {
+          "tr": "St. Elmo's Engine + System Corruption; Unbreakable göğüs, Hackstep Protocol ile anlık zırh.",
+          "en": "St. Elmo's Engine + System Corruption; Unbreakable chest, instant armor via Hackstep Protocol."
+        },
+        "sources": [
+          {
+            "title": "Overgear – Division 2 builds (Red Horizon)",
+            "url": "https://overgear.com/guides/division-2/best-builds-for-any-activities/"
+          },
+          {
+            "title": "The Division Dispatch – build guides",
+            "url": "https://thedivisiondispatch.com/build-guides/"
+          },
+          {
+            "title": "GrindOut – Division 2 builds (Red Horizon, updated Oct 23 2026)",
+            "url": "https://grindout.com/division-2/guides/builds"
+          }
+        ]
+      }
+    },
+    {
+      "meta_id": "ember-engine-fafnir",
+      "name": "Ember Engine Fafnir (Burn)",
+      "sets_or_brands": [
+        "Ember Engine"
+      ],
+      "set_bonus": 15.0,
+      "attributes": {
+        "status_effects": {
+          "weight": 3.0,
+          "good_at": 8.0
+        },
+        "skill_haste": {
+          "weight": 2.0,
+          "good_at": 8.0
+        },
+        "skill_damage": {
+          "weight": 1.5,
+          "good_at": 8.0
+        },
+        "skill_tier": {
+          "weight": 3.0,
+          "good_at": 1.0
+        }
+      },
+      "talents": {},
+      "items": [
+        "Fafnir",
+        "Vile"
+      ],
+      "meta": {
+        "mode": "PvE / Status",
+        "role": "skill",
+        "popularity": 60,
+        "summary": {
+          "tr": "Fafnir pompalı + 4 parça Ember Engine + Vile egzotik maske; çekirdekler Skill Tier, ikincil özellikler Status Effects. Yanma şansı %40 (göğüsle %60), Firestarter + Incinerator Turret. PvP'de zayıf.",
+          "en": "Fafnir shotgun + 4-piece Ember Engine + Vile exotic mask; Skill Tier cores, Status Effects secondaries. Burn chance 40% (60% with chest), Firestarter + Incinerator Turret. Weaker in PvP."
+        },
+        "sources": [
+          {
+            "title": "Overgear – Division 2 builds (Red Horizon)",
+            "url": "https://overgear.com/guides/division-2/best-builds-for-any-activities/"
+          },
+          {
+            "title": "LFCarry – Division 2 builds Y8S3",
+            "url": "https://lfcarry.com/guides/division-2-builds"
+          },
+          {
+            "title": "KeenGamer – Fire & Status Effect build Y8S3 (Sep 12, 2026)",
+            "url": "https://www.keengamer.com/articles/guides/the-division-2-best-fire-and-status-effect-build-for-y8s3-red-horizon/"
+          }
+        ]
+      }
+    },
+    {
+      "meta_id": "aces-eights-palisade-rifle",
+      "name": "Aces & Eights Palisade Rifle (Red Moon solo)",
+      "sets_or_brands": [
+        "Aces & Eights",
+        "Palisade Steelworks"
+      ],
+      "set_bonus": 15.0,
+      "attributes": {
+        "headshot_damage": {
+          "weight": 3.0,
+          "good_at": 9.0
+        },
+        "weapon_damage": {
+          "weight": 2.5,
+          "good_at": 10.0
+        },
+        "crit_damage": {
+          "weight": 2.0,
+          "good_at": 9.0
+        },
+        "armor": {
+          "weight": 1.0,
+          "good_at": 5.0
+        }
+      },
+      "talents": {
+        "Vigilance": 4.0,
+        "Boomerang": 3.0
+      },
+      "items": [],
+      "meta": {
+        "mode": "PvE / Solo event",
+        "role": "dps",
+        "popularity": 52,
+        "summary": {
+          "en": "4x Aces & Eights + 2x Palisade (backpack with Vigilance), rifle like UIC15 MOD2 with Boomerang; stack Protection from Elites mods. Benefits from the Y8S3.2 rifle buff.",
+          "tr": "4 Aces & Eights + 2 Palisade (sırt çantası Vigilance), Boomerang'lı tüfek (ör. UIC15 MOD2); modlarda Protection from Elites topla. Y8S3.2 tüfek güçlendirmesinden faydalanır."
+        },
+        "sources": [
+          {
+            "title": "allthings.how – Red Moon Unleashed rewards, bounties and best build",
+            "url": "https://allthings.how/red-moon-unleashed-in-the-division-2-event-rewards-bounties-and-best-build/"
+          },
+          {
+            "title": "widdz (YouTube, Oct 17 2026) – 3 best builds for Red Moon Unleashed",
+            "url": "https://www.youtube.com/watch?v=zLuctuWy9Ok"
+          }
+        ]
+      }
+    }
+  ],
+  "notes": "Talent/set names and good_at values are EXAMPLES. Edit them to match your game language and the current meta. Matching is case-insensitive and tolerates small OCR errors."
+}

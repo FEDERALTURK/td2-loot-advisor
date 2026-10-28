@@ -1,0 +1,3 @@
+Ses motoru: Microsoft SAPI / Microsoft Tolga (tr-TR), yerel
+Ses uzunluğu: 144.26 saniye
+Okuma ayarı: Windows SAPI, rate -1

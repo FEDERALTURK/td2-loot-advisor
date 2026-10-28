@@ -1,0 +1,31 @@
+# TD2 Loot Advisor — topluluk istatistik sunucusu (Cloudflare Workers + D1)
+# Kurulum adımları: server/README.md
+name = "td2-stats"
+main = "worker.js"
+compatibility_date = "2026-09-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "td2stats"
+database_id = "ff1ea665-e911-4048-9066-0e72de9589c8"   # td2stats (kendi hesabında: npx wrangler d1 create td2stats)
+
+[vars]
+PUBLIC_URL = "https://td2-stats.td2loot.workers.dev"
+DISCORD_CLIENT_ID = "1564066001363148920"
+ENT_PUBLIC_KEY = "06da3593d93eebb1a2df46d28577eca8b5c96364973194c900b337c1d74288a0"
+# Lisans anahtarlarını doğrulayan açık anahtar (features.py PUBLIC_KEY_HEX ile aynı)
+LICENSE_PUBKEY = "d70b17497241261ca45bcd05bbaedcd0fdeb3d866de4993d23db3c25274f633a"
+MAX_BATCH = "50"
+MAX_PER_HOUR = "600"
+
+# Hata rapor sistemi (worker.js /v1/reports endpoints)
+# Secrets: npx wrangler secret put GITHUB_TOKEN (ayrı olarak)
+# Variables: Cloudflare dashboard'da set et veya npx wrangler secret put ile
+REPORTS_REPO = "FEDERALTURK/td2-loot-advisor-reports"
+ADMIN_LOGIN = "FEDERALTURK"
+
+# Saatlik temizlik: eski oran kayıtları silinir
+[triggers]
+crons = ["17 * * * *"]
+
+# HASH_SALT gizli değişkendir, dosyaya yazılmaz:  npx wrangler secret put HASH_SALT

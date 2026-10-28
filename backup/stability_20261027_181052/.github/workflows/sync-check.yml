@@ -1,0 +1,118 @@
+# Ekran senkron testi: sahte oyun penceresi açılır, program onu bulup yalnız onun alanını okumalı.
+name: Sync check (Windows)
+
+on:
+  workflow_dispatch:
+
+env:
+  TD2_NO_WELCOME: "1"      # hesap karşılama penceresi diğer arayüz testlerini örtmesin
+jobs:
+  sync:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Install
+        shell: cmd
+        run: |
+          python -m pip install -r requirements.txt
+          python -m pip install onnxruntime rapidocr
+      - name: Window / DPI / profile sync test
+        shell: cmd
+        run: python tests/test_windows_sync.py
+      - name: Sync tool UI (fake game + screenshots)
+        shell: pwsh
+        run: |
+          Add-Type -AssemblyName System.Windows.Forms, System.Drawing
+          function Shot($name) {
+            $b = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+            $bmp = New-Object System.Drawing.Bitmap $b.Width, $b.Height
+            $g = [System.Drawing.Graphics]::FromImage($bmp)
+            $g.CopyFromScreen($b.Location, [System.Drawing.Point]::Empty, $b.Size)
+            $bmp.Save("shots\$name.png"); $g.Dispose(); $bmp.Dispose()
+          }
+          New-Item -ItemType Directory shots | Out-Null
+          $code = "import sys,tkinter as tk`nfrom PIL import Image,ImageTk`nr=tk.Tk();r.title(""Tom Clancy's The Division 2"");r.geometry('900x640+20+20')`ns=Image.open('meta/bench_card.jpg');k=640/s.height`np=Image.new('RGB',(900,640),(12,14,18));p.paste(s.resize((int(s.width*k),640)),(60,0))`nph=ImageTk.PhotoImage(p);tk.Label(r,image=ph).pack();r.after(80000,r.destroy);r.mainloop()"
+          Set-Content -Path fake_game.py -Value $code
+          $g = Start-Process python -ArgumentList "fake_game.py" -PassThru
+          Start-Sleep 3
+          $p = Start-Process python -ArgumentList "tests/ui_sync_shot.py" -PassThru
+          Start-Sleep 6;  Shot "sync_00_header"
+          Start-Sleep 19; Shot "sync_01"
+          Start-Sleep 12; Shot "sync_02"
+          Start-Sleep 10; Shot "sync_03_after_apply"
+          if (Test-Path logs\app.log) { Get-Content logs\app.log | Select-String -Pattern "Sync|Capture|profile|Traceback|Error" }
+          if (Test-Path logs\sync_report.txt) { Get-Content logs\sync_report.txt }
+          if (-not $p.HasExited) { Stop-Process -Id $p.Id -Force }
+          if (-not $g.HasExited) { Stop-Process -Id $g.Id -Force }
+          if (Select-String -Path logs\app.log -Pattern "Traceback" -Quiet) { throw "traceback in app.log" }
+          if (-not (Test-Path logs\sync_report.txt)) { throw "no sync report" }
+          if (-not (Select-String -Path logs\app.log -Pattern "Sync applied" -Quiet)) { throw "apply did not run" }
+      - name: Update center UI (old library + old program + updated game)
+        shell: pwsh
+        run: |
+          Add-Type -AssemblyName System.Windows.Forms, System.Drawing
+          function Shot($name) {
+            $b = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+            $bmp = New-Object System.Drawing.Bitmap $b.Width, $b.Height
+            $g = [System.Drawing.Graphics]::FromImage($bmp)
+            $g.CopyFromScreen($b.Location, [System.Drawing.Point]::Empty, $b.Size)
+            $bmp.Save("shots\$name.png"); $g.Dispose(); $bmp.Dispose()
+          }
+          if (Test-Path logs\app.log) { Remove-Item logs\app.log }
+          if (Test-Path game_data_cache.json) { Remove-Item game_data_cache.json }
+          $p = Start-Process python -ArgumentList "tests/ui_update_shot.py" -PassThru
+          Start-Sleep 20; Shot "update_01_dialog"
+          Start-Sleep 12; Shot "update_02_after_install"
+          Start-Sleep 12
+          Get-Content logs\app.log | Select-String -Pattern "Update center|Library updated|DO_UPDATE|Traceback|Error"
+          if (-not $p.HasExited) { Stop-Process -Id $p.Id -Force }
+          if (Select-String -Path logs\app.log -Pattern "Traceback" -Quiet) { throw "traceback in app.log" }
+          if (-not (Select-String -Path logs\app.log -Pattern "Library updated" -Quiet)) { throw "library not updated" }
+          if (-not (Select-String -Path logs\app.log -Pattern "DO_UPDATE CALLED" -Quiet)) { if (Select-String -Path logs\app.log -Pattern "rate limit" -Quiet) { Write-Host "GitHub API rate limit on CI runner: program-update check skipped" } else { throw "program update not started" } }
+          if (-not (Test-Path game_data_cache.json)) { throw "no library cache written" }
+      - name: Click-through, cursor and smoothness (agent watch background on)
+        shell: pwsh
+        run: |
+          python tests/ui_click_test.py
+          $r = Get-Content tests\.click_result.json | ConvertFrom-Json
+          $r | Format-List
+          if (-not $r.watch) { throw "watch background not running" }
+          if ($r.gap -and -not $r.click_ok) { throw "click on transparent tab area was lost" }
+          if ($r.watch_cursor -ne $r.root_cursor) { throw "background cursor differs" }
+          if ($r.lag_ms_p95 -gt 60) { throw "UI lag too high: p95 $($r.lag_ms_p95) ms" }
+          if ($r.fx_frames -lt 10) { throw "tab transition effect did not animate ($($r.fx_frames) frames)" }
+          if (($r.alpha_values | Where-Object { $_ -ne 1.0 }).Count -gt 0) { throw "window alpha changed during transition" }
+      - name: Tab indicator animation
+        shell: pwsh
+        run: |
+          Add-Type -AssemblyName System.Windows.Forms, System.Drawing
+          function Shot($name) {
+            $b = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+            $bmp = New-Object System.Drawing.Bitmap $b.Width, $b.Height
+            $g = [System.Drawing.Graphics]::FromImage($bmp)
+            $g.CopyFromScreen($b.Location, [System.Drawing.Point]::Empty, $b.Size)
+            $bmp.Save("shots\$name.png"); $g.Dispose(); $bmp.Dispose()
+          }
+          $p = Start-Process python -ArgumentList "tests/ui_tab_test.py" -PassThru
+          Start-Sleep 9.15; Shot "tab_01_mid"
+          Start-Sleep 0.6; Shot "tab_02_settings"
+          Start-Sleep 1.1; Shot "tab_03_stash"
+          $p.WaitForExit(60000) | Out-Null
+          $r = Get-Content tests\.tab_result.json | ConvertFrom-Json
+          $r.switches | Format-Table
+          foreach ($s in $r.switches) {
+            if (-not $s.on_tab) { throw "indicator not under tab $($s.tab) ($($s.why))" }
+            if ($s.frames -lt 8) { throw "too few frames for $($s.tab): $($s.frames)" }
+          }
+      - name: Inventory - name/set from the selected list row (scrolled card)
+        shell: cmd
+        run: set PYTHONIOENCODING=utf-8&& python tests/test_inventory.py
+      - uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: sync-shots
+          path: shots/*

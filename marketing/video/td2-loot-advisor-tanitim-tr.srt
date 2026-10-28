@@ -1,0 +1,31 @@
+﻿1
+00:00:00,000 --> 00:00:16,400
+Washington sokaklarında her görev yeni ekipman getirir. Ama sandık doldukça aynı soru büyür: Bu eşya build’im için gerçekten daha iyi mi? TD2 Loot Advisor, karar verirken ihtiyaç duyduğun bilgiyi tek yerde toplar.
+
+2
+00:00:16,400 --> 00:00:35,250
+Oyunda eşya kartını göster ve varsayılan kısayol olan F8’e bas. Program ekran görüntüsünü OCR ile okur; eşya adını, yuvasını, attribute’larını ve yeteneklerini oyun kütüphanesindeki bilgilerle eşleştirir. Otomatik tarama seçeneği de kullanılabilir.
+
+3
+00:00:35,250 --> 00:00:52,890
+Tanıdığı eşyayı aktif build’inle karşılaştırır. Rulo kalitesini, uyan özellikleri ve eksikleri gösterir; sonucu Sakla, Düşün, Kır veya Kontrol Et olarak sunar. Build koşullarını sen belirlersin, son kararı sen verirsin.
+
+4
+00:00:52,890 --> 00:01:10,020
+Taranan eşyalar sandık envanterinde birikir. Build optimize edici, elindeki parçaları yuvalara göre kıyaslar ve sıradaki değerli yükseltmeleri öne çıkarır. Eksik parça görünümü, tamamlamaya çalıştığın build’i takip etmene yardım eder.
+
+5
+00:01:10,020 --> 00:01:26,790
+Günlük ve haftalık görevleri, sezon hedeflerini ve ilerlemeni takip et. Build’lerini düzenle; meta build’lere, eşya ansiklopedisine ve haber akışına göz at. Görev ayrıntılarında yapılış adımları ile kaynak bağlantıları bulunur.
+
+6
+00:01:26,790 --> 00:01:45,200
+İsteğe bağlı Companion uygulaması, masaüstündeki son eşya kararını ve build durumunu aynı özel Wi-Fi ağında salt okunur gösterir. QR kodla eşleştir; telefon masaüstüne tarama veya ayar komutu göndermez. Android uygulaması beta durumundadır.
+
+7
+00:01:45,200 --> 00:02:04,260
+TD2 Loot Advisor yalnızca ekrandaki görüntüyü ve oyun ayar dosyasını okur. Oyun belleğini okumaz veya değiştirmez; oyuna tuş göndermez. OCR hata yapabilir. Özellikle nadir eşyaları parçalamadan önce oyun içindeki kartı mutlaka kontrol et.
+
+8
+00:02:04,260 --> 00:02:24,260
+Eşyanı tara, build’ini takip et, kararını kendin ver. TD2 Loot Advisor’ın en son masaüstü sürümünü GitHub Releases sayfasında bulabilirsin. Bu, topluluk tarafından geliştirilen bağımsız bir projedir; Ubisoft veya Massive Entertainment ile bağlantılı değildir.

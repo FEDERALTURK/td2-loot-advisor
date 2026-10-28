@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10100e">
+  <meta name="description" content="TD2 Loot Advisor; The Division 2 envanterini ekran görüntüsünden okur, build hedeflerinle karşılaştırır ve kararını destekler.">
+  <title>TD2 Loot Advisor — Her düşüşte daha net karar</title>
+  <link rel="icon" type="image/png" href="../mobile/store-assets/play-icon-512.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="site-shell">
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="TD2 Loot Advisor ana sayfa">
+        <img src="../mobile/store-assets/play-icon-512.png" alt="" width="42" height="42">
+        <span><b>TD2</b> LOOT ADVISOR</span>
+      </a>
+      <button class="menu-toggle" aria-expanded="false" aria-controls="site-nav" aria-label="Menüyü aç">☰</button>
+      <nav id="site-nav" class="site-nav" aria-label="Ana menü">
+        <a href="#features">Özellikler</a>
+        <a href="#workflow">Nasıl çalışır?</a>
+        <a href="#mobile">Telefon arkadaşı</a>
+        <a href="https://github.com/FEDERALTURK/td2-loot-advisor" target="_blank" rel="noreferrer">GitHub ↗</a>
+        <a class="nav-cta" href="https://github.com/FEDERALTURK/td2-loot-advisor/releases/latest" target="_blank" rel="noreferrer">İndir <span>↗</span></a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div class="hero-grid"></div>
+        <div class="hero-copy">
+          <p class="eyebrow"><i></i> BAĞIMSIZ TOPLULUK PROJESİ <span>·</span> WINDOWS + ANDROID</p>
+          <h1>Her düşüşte<br><em>daha net karar.</em></h1>
+          <p class="hero-lede">Envanterini tara. Eşyanı build’inle karşılaştır. Ne saklayacağına, neyi yeniden inceleyeceğine daha hızlı karar ver.</p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="https://github.com/FEDERALTURK/td2-loot-advisor/releases/latest" target="_blank" rel="noreferrer">Son sürümü indir <span>↗</span></a>
+            <a class="button button-quiet" href="#workflow"><span class="play-icon">▶</span> Nasıl çalıştığını gör</a>
+          </div>
+          <div class="hero-meta"><span class="pulse"></span> Ekran üzerinden okur <b>·</b> Oyun belleğine erişmez</div>
+        </div>
+
+        <div class="hero-visual" aria-label="Örnek eşya analiz paneli">
+          <div class="visual-orbit orbit-one"></div><div class="visual-orbit orbit-two"></div>
+          <div class="visual-cross cross-a">+</div><div class="visual-cross cross-b">+</div>
+          <div class="hud-card item-card">
+            <div class="card-top"><span class="rarity"><i></i> HIGH-END · KNEEPADS</span><span class="dots">•••</span></div>
+            <div class="item-title">Fox’s Prayer <small>NAMED KNEEPADS</small></div>
+            <div class="item-rule"></div>
+            <div class="roll"><span>Weapon Damage</span><strong>15.0%</strong><b class="bar"><i style="width:94%"></i></b></div>
+            <div class="roll"><span>Critical Hit Damage</span><strong>8.0%</strong><b class="bar"><i style="width:76%"></i></b></div>
+            <div class="roll"><span>Critical Hit Chance</span><strong>6.0%</strong><b class="bar"><i style="width:58%"></i></b></div>
+            <div class="item-footer"><span>BUILD UYUMU <b>82%</b></span><span class="decision">◆ BUILD’DE KULLAN</span></div>
+          </div>
+          <div class="hud-card scan-chip"><span class="scan-symbol">⌗</span><span><small>EKRAN TARAMASI</small><b>ANALİZ TAMAMLANDI</b></span><i class="status-dot"></i></div>
+          <div class="visual-caption">TARAMA SONUCU <span>ÖRNEK ARAYÜZ</span></div>
+          <div class="hero-index">01 <span>/</span> 04</div>
+        </div>
+        <div class="hero-bottom"><span>AGENT, EQUIP YOURSELF.</span><span>BUILD SMARTER <b>—</b> LOOT BETTER</span></div>
+      </section>
+
+      <section class="proof-strip" aria-label="Proje bilgileri">
+        <div><strong>F8</strong><span>Tek tuşla tara</span></div>
+        <div><strong>10</strong><span>Arayüz dili</span></div>
+        <div><strong>0</strong><span>Oyun belleği erişimi</span></div>
+        <div class="proof-version"><span class="live-dot"></span><span>MASAÜSTÜ SÜRÜMÜ</span><strong>v9.0.9</strong></div>
+      </section>
+
+      <section class="section features-section" id="features">
+        <div class="section-heading"><div><p class="eyebrow">SAHADA İHTİYACIN OLAN BİLGİ</p><h2>Loot’u anlamak,<br><em>oyuna odaklanmak.</em></h2></div><p class="section-intro">Eşya kararlarından build planına, görev takibinden telefon eşleşmesine kadar yardımcı araçlar tek yerde.</p></div>
+        <div class="feature-grid">
+          <article class="feature-card feature-large"><div class="feature-number">01 / ANALİZ</div><div class="feature-icon icon-target">◎</div><h3>Eşyayı tanı.<br>Build’inle karşılaştır.</h3><p>Ekrandaki eşya kartını OCR ile oku. Attribute ve talent’leri kütüphane verisiyle karşılaştır; sonuçları aktif build’in yanında gör.</p><a href="#workflow">Tarama akışını incele <span>↗</span></a><div class="card-decoration deco-rings"></div></article>
+          <article class="feature-card"><div class="feature-number">02 / BUILD’LER</div><div class="feature-icon">◈</div><h3>Hedefini<br>takip et.</h3><p>Build parçalarını düzenle, eksikleri gör ve sandığındaki eşyaları hedeflerinle kıyasla.</p><div class="mini-slots"><i>MASK</i><i>PACK</i><i>GLOVES</i><i>HOLSTER</i><i>KNEES</i></div></article>
+          <article class="feature-card"><div class="feature-number">03 / GÖREVLER</div><div class="feature-icon icon-crosshair">⌖</div><h3>Görevleri<br>kaçırma.</h3><p>Günlük ve haftalık hedefleri, sezon içeriklerini ve ilerlemeni tek listede takip et.</p><div class="task-progress"><span><i></i></span><b>İLERLEME KAYDI</b><strong>03 / 05</strong></div></article>
+          <article class="feature-card feature-mobile" id="mobile"><div class="feature-number">04 / TELEFON ARKADAŞI</div><div class="feature-icon">▣</div><h3>Masaüstündeki durumu<br>telefonundan gör.</h3><p>Aynı özel Wi-Fi ağında QR ile eşleştir. Son eşya kararı ve build bilgisi telefonda salt okunur görüntülenir.</p><div class="phone-preview"><div class="phone-notch"></div><div class="phone-status">TD2 COMPANION <span>● CONNECTED</span></div><div class="phone-item"><small>SON TARAMA</small><b>Ceska Vyroba s.r.o.</b><span>Göğüslük · HIGH-END</span></div><div class="phone-decision">BUILD’DE KULLAN <b>82%</b></div></div></article>
+        </div>
+      </section>
+
+      <section class="workflow-section" id="workflow">
+        <div class="section-heading"><div><p class="eyebrow">ÜÇ ADIMDA</p><h2>Tarama. Karşılaştırma.<br><em>Karar senin.</em></h2></div><p class="section-intro">TD2 Loot Advisor oyun ekranını okur ve eşya bilgilerini hedeflerinle eşleştirir. Önemli kararların son kontrolü sende kalır.</p></div>
+        <div class="steps">
+          <article><span class="step-count">01</span><div class="step-line"></div><h3>Oyunda eşyayı aç</h3><p>Envanterinde incelemek istediğin eşyanın kartını göster.</p></article>
+          <article><span class="step-count">02</span><div class="step-line"></div><h3>F8’e bas</h3><p>Ekran görüntüsü OCR ile okunur; oyun belleğine dokunulmaz.</p></article>
+          <article><span class="step-count">03</span><div class="step-line"></div><h3>Build’e göre incele</h3><p>Tanıma, attribute ve uyum bilgilerini kontrol edip kararını ver.</p></article>
+        </div>
+        <div class="safety-note"><span>ⓘ</span><p><b>Kontrol sende.</b> OCR sonuçları ekrandan okunur ve hata yapabilir. Kritik ya da nadir bir eşyayı parçalamadan önce oyun kartını mutlaka doğrula. Egzotikler parçalama önerisi almaz.</p></div>
+      </section>
+
+      <section class="cta-section">
+        <div class="cta-mark">TD2 <span>LOOT ADVISOR</span></div>
+        <div><p class="eyebrow">KENDİ EKİPMANINI DAHA İYİ TANI</p><h2>Bir sonraki düşüşe<br><em>hazır ol.</em></h2></div>
+        <div class="cta-action"><a class="button button-primary" href="https://github.com/FEDERALTURK/td2-loot-advisor/releases/latest" target="_blank" rel="noreferrer">GitHub’dan indir <span>↗</span></a><small>Windows sürümleri ve güncellemeler<br>GitHub Releases üzerinden sunulur.</small></div>
+        <div class="cta-grid"></div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <a class="brand footer-brand" href="#top"><img src="../mobile/store-assets/play-icon-512.png" alt="" width="34" height="34"><span><b>TD2</b> LOOT ADVISOR</span></a>
+      <p>Topluluk tarafından geliştirilen bağımsız bir yardımcı araçtır. Ubisoft veya Massive Entertainment ile bağlantılı değildir.</p>
+      <div><a href="https://github.com/FEDERALTURK/td2-loot-advisor" target="_blank" rel="noreferrer">GitHub ↗</a><a href="https://github.com/FEDERALTURK/td2-loot-advisor/releases/latest" target="_blank" rel="noreferrer">Sürümler ↗</a><a href="https://github.com/FEDERALTURK/td2-loot-advisor/blob/main/LICENSE" target="_blank" rel="noreferrer">Lisans</a></div>
+      <small>THE DIVISION 2 VE İLGİLİ İSİMLER SAHİPLERİNİN TİCARİ MARKALARIDIR.</small>
+    </footer>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>

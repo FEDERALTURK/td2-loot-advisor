@@ -1,0 +1,210 @@
+# TD2 Loot Advisor
+
+**EN** — A screen-reading (OCR) helper for *Tom Clancy's The Division 2*. Hover an item, press **F8**: the app reads
+the tooltip, checks it against a full game library, compares it with your **active build** and says
+**keep / consider / dismantle / check it** in seconds. It tracks missing build pieces and shows the current game
+tasks in your language. It never touches game memory. 10 interface languages; anyone can add their own.
+
+**TR** — *The Division 2* için ekran okuyan yardımcı: eşyayı okur, aktif build'inle karşılaştırır, saniyeler içinde
+**sakla / düşün / kır** der; eksik parçaları ve görevleri takip eder. Oyunun belleğine dokunmaz.
+Türkçe tam kılavuz: [`README.tr.md`](README.tr.md).
+
+## Download
+
+**[Latest release → Releases](https://github.com/FEDERALTURK/td2-loot-advisor/releases/latest)**:
+`TD2LootAdvisor_Setup_<version>.exe` (installer, recommended), `TD2LootAdvisor_<version>_portable.zip`, and the Android `TD2LootAdvisor_Companion_0.1.2-beta.apk`.
+Phone pairing steps: [Turkish connection guide](docs/mobile_companion_connection_tr.md).
+
+## Updating
+
+The app checks GitHub for the latest release at start (every 12 h) and asks; Settings → General → **Updates** checks on demand.
+Installed copies download the new installer, verify SHA-256, install silently and restart; source copies replace only program
+files (old ones go to `backup/`). Settings, builds, stash and `private/` are never touched.
+
+## Install from source (Windows)
+
+1. Install **Python 3.13** (3.12 works). The OCR engine (RapidOCR) is installed automatically by `run.bat`.
+   **Tesseract OCR** is optional — only a fallback (UB Mannheim build, `C:\Program Files\Tesseract-OCR`).
+2. **Code → Download ZIP**, extract.
+3. Start with **`scripts\run.bat`** — it picks the right Python, installs the required packages and tries the optional
+   ones (OCR: rapidocr, onnxruntime; voice: pyttsx3, sounddevice, faster-whisper; video: av).
+4. **Installer:** double-click `scripts\build_installer.bat` → `installer\TD2LootAdvisor_Setup_<version>.exe` (no admin
+   rights needed; your personal settings and license are never packaged). Optional: `scripts\build_exe.bat` builds a single `.exe`; `scripts\install_claude_code.bat` sets up Claude Code for
+   the assistant and *Fetch with Claude* (uses a Claude subscription, no API key).
+
+Recommended game settings: English game language, borderless window, HDR off, game resolution = monitor resolution
+(Settings → Display & game checks this by reading the game's own settings file).
+
+## Features
+
+**Scanning & decisions**
+- **RapidOCR (PP-OCR) engine**: reads the colour card directly, no threshold tuning. Measured on real cards
+  (`tests/test_ocr.py`): all attributes right at 1440p, 1080p, 720p and 480p (8/8) versus 3/8 for Tesseract.
+  Tesseract stays as a fallback and can be chosen in Settings → OCR.
+- Colour hints: attribute icon colour (red = offensive, blue = defensive, yellow = skill) and the card's rarity stripe;
+  if the card colour looks exotic the app never says "dismantle".
+- Finds the item card anywhere on screen (21:9 and 32:9 included); multi-pass OCR; long scrolled cards are merged.
+- Section-aware reading: core/attributes/mods only — expertise bonuses and set descriptions are ignored.
+- Item kinds: gear, weapon, gear mod, weapon mod, skill mod, cosmetic, material, specialization weapon; exotics are never "dismantle".
+- Slot-aware scoring: a gear-set piece is judged on 1 minor attribute, brand/named pieces on 2, talents only on chest/backpack.
+- Overlay next to the item card with roll-quality bars and the best build.
+
+**Builds**
+- Active build shared by Panel, Builds and Missing pieces.
+- Build sheet: per slot what to farm (set piece / brand / named or exotic item, core, attributes, talent, weapon type)
+  and the piece you have, with ✔/✖ per requirement. Completed builds are announced.
+- 3D agent and 3D build × slot score bars. Daily meta-build sync (`meta/meta_builds.json`).
+
+**Stash** (new)
+- Every scanned item is saved to your stash (`stash.json`); mark the ones you dismantle.
+- **Optimize**: the best pieces you own for a build — gear-set pieces may sit in any slot, the 4-piece bonus is kept,
+  named/exotic items stay in their slot — with fit % per slot, ✔/✖ requirements and the most valuable next drop.
+- **Audit report**: what can be dismantled (verdict, better copy; never pieces your 5 closest builds use, never exotics),
+  duplicates and items to add to the recalibration library first.
+- Premium: recalibration advisor (which attribute from which item; gear and weapon libraries kept apart, exotics never
+  donors), every build ranked against your stash, CSV export.
+
+**Vendors, phone, sharing** (new)
+- Weekly vendors and today's targeted loot matched against your builds and stash: "Cassie sells a Future Initiative
+  glove that fits your healer build at 95%". Two sources: your own scans (Vendor mode: F8 on the vendor screen) and the
+  community [hi-dep Division 2 Database](https://hidep-division2.pages.dev/?view=vendor), read directly from its public
+  page on your computer (not copied into this repository). Refreshed once after the Tuesday reset. Premium.
+- Phone companion: a read-only page on your home Wi-Fi (secret-key address + QR) with the last verdict, the active
+  build and vendor matches. Premium.
+- Build sharing: a build becomes a short code (`TD2B-…`) and QR; Builds → Paste code adds it. Free.
+
+**Community and AI** (new)
+- Anonymous drop statistics (opt-in, asked once): pick the activity you are playing on the Panel and every NEW item
+  counts for it. Sent: item, slot, rarity, attribute types, best roll %, activity, random ID — never values, name, e-mail,
+  license key or computer details; the server stores no IP. Premium: what drops most in each activity, where an item
+  drops (per 1000 drops). Server: Cloudflare Workers + D1, see [`server/README.md`](server/README.md).
+- Version counter (6.0.1+): when the app loads the community task list it sends only its version number and whether
+  this is the first request since start. The server keeps daily totals per version (no ID, no IP, no account), so the
+  maintainer can see which versions are still in use. Turning off community tasks turns this off too.
+- Ask the assistant about the scanned item (with your active build's requirements for that slot).
+- Read with Claude: when OCR fails, Claude Code reads the card picture (opt-in; tested on a real card: 5 s, all values right).
+- Read wrong: saves the card and opens a prefilled GitHub issue so it can become a test case.
+
+**Tasks**
+- Interface-language only, grouped, duplicates merged; double-click for steps and The Division Wiki pictures.
+- *Fetch with Claude* (Claude Code + web search), shared task feed (`meta/tasks_feed.json`) and a live wiki reader (`wiki_sync.py`).
+
+**Display, OCR & effects**
+- Resolution profiles 240p–4K (window and text scale; DPI-aware), game-settings check (read only).
+- OCR engine choice, scale/passes (and threshold/PSM for Tesseract), auto calibration, live preview with detected lines.
+  240p cards are physically too small to read (≈3 px letters); 480p is the practical minimum.
+- Optional effects: custom cursor (generic sights/weapon silhouettes or your own image), mouse trail, menu transitions,
+  full-window **agent-watch background** whose orange light follows the mouse (Windows, dark themes),
+  original procedural header videos (`bgvideo.py`; animated WebP when `av` is not installed).
+
+**Knowledge tab (new)**
+- Encyclopedia (exotics, named items, gear sets, brands, talents; add to build), meta build gallery (tags,
+  popularity, trending, favourites), news & season (reset countdowns, events, patch notes; daily feed
+  `meta/news_feed.json`) and a quiz generated from the game library (XP and levels).
+- Agent voice: original tactical voice lines, 3 packs, 10 languages, optional radio effect (`meta/voice_lines.json`).
+
+**Account & service (new)**
+- Optional account: sign in with Discord (no password; the session is stored encrypted with Windows DPAPI). Redeem a
+  license key (`TD2K-…`), invite / gift code (`TD2I-…`) or purchase key; one license = one computer, 7 days offline.
+- Settings → Service: starts/stops scanning with the game and logs sessions, tray icon, start with Windows,
+  smart scanning (learns menu / field / loading screens from your own screen), optional Discord Rich Presence.
+  Premium: local API (OBS overlay, Stream Deck, WebSocket) and phone notifications (ntfy or Discord webhook).
+
+**Assistant**
+- Chat and voice commands (F9) via Ollama, Claude Code, Claude API or OpenAI; voice diagnostics; Windows speech fallback.
+
+## Free and premium
+
+Scanning, builds, tasks, stash and the active-build optimizer are free. Premium features are listed in
+Settings → Premium and in `features.py`. A license key is a small Ed25519-signed token checked on the computer
+(no internet). Keys are issued with `scripts/license_tool.py` by the publisher; the private key is kept in `private/`,
+which never goes to git. Account premium uses a server-signed, device-bound entitlement (setup: `server/README.md`).
+Because the app is open source, server-side features (community drop statistics,
+cloud sync, vendor alerts) are where premium is really enforced.
+
+## Game library
+
+`meta/game_data.json` — gear sets, brands, named/exotic items with slots, weapons with types, weapon and gear talents
+(chest/backpack), gear and weapon mods, skills, specialization weapons, attribute max values.
+Sources: [The Division Wiki](https://thedivision.fandom.com) (CC BY-SA) and
+[mx-division-builds](https://github.com/mxswat/mx-division-builds) by mxswat (data under CC BY-NC-SA 4.0 — non-commercial use with attribution).
+
+## Daily feeds
+
+- Raw: `https://raw.githubusercontent.com/FEDERALTURK/td2-loot-advisor/main/meta/meta_builds.json`
+- CDN fallback: `https://cdn.jsdelivr.net/gh/FEDERALTURK/td2-loot-advisor@main/meta/meta_builds.json`
+- How the feeds are researched and validated: [`meta/UPDATER.md`](meta/UPDATER.md).
+
+## Project layout
+
+| File | Purpose |
+|---|---|
+| `app.py` | UI and application |
+| `engine.py` | Decision engine, build plan, card finder |
+| `gamedata.py` | Item recognition against the game library |
+| `ocr_backend.py` | OCR engines (RapidOCR / Tesseract), icon and rarity colour hints |
+| `stash.py` | Stash, audit report, build optimizer, recalibration advisor |
+| `vendor.py` | Weekly vendors, targeted loot, matching against builds |
+| `companion.py` | Phone companion (local read-only web page + QR) |
+| `share.py` | Build share codes |
+| `dropstats.py` | Anonymous drop statistics client |
+| `server/` | Community stats server (Cloudflare Worker + D1) |
+| `features.py` | Free/premium features, license key check (Ed25519) |
+| `tests/` | OCR test with real game cards (`tests/test_ocr.py`), license and optimizer tests (`tests/test_core.py`) |
+| `display.py` | Resolution profiles, game settings reader |
+| `fx.py`, `bgvideo.py`, `view3d.py`, `ui_art.py`, `ui_theme.py` | Effects, background videos, 3D, art, theme |
+| `meta_sync.py`, `wiki_sync.py` | Daily feeds, live wiki reader |
+| `i18n.py`, `lang/*.json` | Languages |
+
+## Safety
+
+Reads only the screen and the game's own settings file. Never reads or writes game memory or files and sends no input
+to the game.
+
+## License
+
+MIT (`LICENSE`). Parts of the game data: CC BY-NC-SA 4.0 (mx-division-builds) and CC BY-SA (The Division Wiki).
+The Division is a trademark of Ubisoft; this project is not affiliated with Ubisoft.
+
+
+### Stability and performance changes (local source build)
+
+Balanced is the default profile. The performance button switches to Game priority, which reduces automatic OCR retries and scan frequency while preserving manual scan settings. Background animation pauses while the game is foreground or the window is minimized. GPU selection is unchanged and requires measurement with the game running.
+
+Invalid or incomplete OCR is routed to review. Exotic, Named and Prototype items cannot receive DISMANTLE through evaluation, progress tracking or stash auditing. Translation uses one active job and at most one latest pending job; stale results are discarded. Number and game-term preservation is checked before results enter the cache.
+
+Fresh settings use local translation, with translation text logging and debug crop saving disabled. Existing settings are preserved. Selecting online AI explains text routing and requests consent. Speech recognition is local, while the selected translation provider may receive the transcript online. The timing button shows bounded recent timing samples and queue status.
+
+Start source builds with `scripts\run.bat`. Normal startup skips pip when installed requirements have not changed. `--check` only checks required modules, `--repair` reinstalls requirements, and `--extras` installs optional voice/video dependencies. Test dependencies are in `requirements-dev.txt`.
+
+These changes are included in release 6.0.2. See [local validation results](docs/stability-6.0.2.md). In-game FPS/GPU behavior and operation on a real 8 GB computer remain unverified.
+
+
+### 6.0.3: in-place translation and natural voice
+
+Source-anchored overlay fixes, two recorded Turkish/English Neural notification packs and optional online natural speech are available in the local source build. These changes are included in release 6.0.3. See [usage, data routing and validation](docs/overlay_voice_local.md).
+
+
+### 9.0.9: Android companion launch fix
+
+The Android Companion startup crash caused by a mismatch between the manifest launcher activity and the Kotlin package name is fixed. Companion 0.1.2 includes this fix. Google Play preparation documents are included; a Play-signed AAB still requires the developer's upload key and Play Console setup.
+
+### 9.0.8: Android companion and QR pairing
+
+The Android beta APK adds QR pairing with the Windows app's read-only Phone Companion service over the same trusted Wi-Fi. It shows the latest item verdict and build state; the phone cannot send scan or settings commands. This release also includes the Agent watch startup animation. The APK, Windows installer/portable archive and SHA-256 sums are published in the GitHub Release. See the [pairing guide](docs/mobile_companion_connection_tr.md).
+
+### 9.0.7: proper names and pronoun context in live translation
+
+Story and world names are preserved during live translation, with their verified sources recorded in the glossary. Pronouns are translated in context instead of being masked, while preserving their referent and singular/plural meaning. Pronoun-bearing multi-sentence lines stay together for local translation, and the translation cache is refreshed so prior output is regenerated with the updated rules. The inventory OCR regression now clearly skips when RapidOCR/ONNX Runtime are absent; CI installs them and runs the image checks.
+
+### 9.0.6: broader game library and more accurate item recognition
+
+This release publishes the item-library and OCR recognition fixes accumulated after 9.0.5. A pinned Div2Hub community-data snapshot was merged with the existing sources, bringing the catalog to 898 gear/item records, 379 weapon index records, detailed talent/mod data, 43 skill variants and 9 Prototype Augments. Health Damage no longer collides with Health; numeric parsing, accented-name normalization and Perfect talent matching were corrected. Fixed talents on Named/Exotic weapons and Prototype Augments now flow through scan/build matching, and build scoring compares talents only with eligible item types. The encyclopedia uses the expanded talent descriptions and lists one gear-set item per slot. The Excel library was regenerated from the same details. Source attribution is included. A complete verified Skill Mod catalog is not available, so missing records are not fabricated.
+
+### 9.0.5: organized navigation, shortcuts and Division 3 news
+
+The 14 app pages are grouped into six top-level sections. Settings are organized into four groups. All global shortcuts are editable together under Settings → Basics → Shortcuts, with key capture and conflict checks. A new Division 3 page shows verified Ubisoft information and follows the existing official-news feed for future coverage. The task sync page now includes direct official and community guide sources.
+
+### 9.0.4: in-game voice assistant
+
+F6 stops/resumes live translation. Press F9 to open the microphone, then press it again to send your question and receive a spoken answer. F12 cancels the request and speech. Shortcuts work independently of item scanning. Prepare the speech model in Assistant before first use and configure an AI provider. Audio is transcribed locally; question text and item/build context go to the selected provider. [Setup, data routing and validation limits](docs/game_assistant_9.0.4.md).

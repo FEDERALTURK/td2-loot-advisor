@@ -1,0 +1,84 @@
+{
+ "_source": "Ubisoft sezon notları: Rise Up (Y8S1), Into the Dark (Y8S2), Red Horizon (Y8S3, Patch 2.34, 27 Ağustos 2026); keengamer.com, mp1st.com, skycoach.gg (silah türleri). Unit Alloys: The Division Wiki (Y7S3 Mutiny).",
+ "items": [
+  {"season": "Y7S3 Mutiny", "name": "Equalizer", "category": "Named", "kind": "gear", "slot": "Chest", "brand": "Unit Alloys", "talent": ""},
+  {"season": "Y7S3 Mutiny", "name": "Salvo", "category": "Named", "kind": "gear", "slot": "Holster", "brand": "Unit Alloys", "talent": ""},
+
+  {"season": "Y8S1 Rise Up", "name": "Agitator", "category": "Exotic", "kind": "weapon", "type": "Assault Rifle", "talent": "Perturb", "desc": "Mods: Optics, Muzzle, Magazine."},
+  {"season": "Y8S1 Rise Up", "name": "Investor", "category": "Exotic", "kind": "gear", "slot": "Mask", "talent": "Slotted", "desc": "Core dışı her attribute için rengine göre bonus verir. Gear mod yuvası yerine üçüncü rastgele attribute taşır."},
+  {"season": "Y8S1 Rise Up", "name": "Whiplash", "category": "Exotic", "kind": "weapon", "type": "Pistol", "talent": "Faster Than Reloading", "desc": "Master Climax ödülü. Mods: Optics, Underbarrel, Magazine."},
+  {"season": "Y8S1 Rise Up", "name": "Robin", "category": "Named", "kind": "gear", "slot": "Chest", "brand": "Royal Works", "talent": "Perfect Gunslinger"},
+  {"season": "Y8S1 Rise Up", "name": "Bulldog", "category": "Named", "kind": "gear", "slot": "Holster", "brand": "Royal Works", "talent": "Perfect Composure"},
+  {"season": "Y8S1 Rise Up", "name": "Interchange", "category": "Named", "kind": "weapon", "type": "Assault Rifle", "base": "Enhanced AUG A3P", "talent": "Perfect Back and Forth"},
+  {"season": "Y8S1 Rise Up", "name": "Trader", "category": "Named", "kind": "weapon", "type": "Assault Rifle", "base": "ACR SS", "talent": "Perfect Back and Forth"},
+
+  {"season": "Y8S2 Into the Dark", "name": "Caduceus", "category": "Exotic", "kind": "weapon", "type": "Assault Rifle", "talent": "Caduceus", "desc": "Kritik vuruşlar verilen hasarın bir kısmı kadar seni ve yakındaki müttefikleri onarır. Mods: Optics %10 CHC, Magazine 40, Underbarrel %5 CHC, Muzzle %5 CHD."},
+  {"season": "Y8S2 Into the Dark", "name": "Nurse's Kneepads", "category": "Exotic", "kind": "gear", "slot": "Kneepads", "talent": "Impervious", "desc": "Sen ve 10 m içindeki müttefikler +%40 Hazard Protection alır."},
+  {"season": "Y8S2 Into the Dark", "name": "Underboss", "category": "Exotic", "kind": "weapon", "type": "Submachine Gun", "talent": "Gangland Hit", "desc": "Vurulan düşmana işaret konur, yeni hedeflere geçer; işaretli düşmanlar işaret sayısına göre (en çok 4) ek hasar alır. Master Climax ödülü."},
+  {"season": "Y8S2 Into the Dark", "name": "Benefactor", "category": "Named", "kind": "gear", "slot": "Chest", "brand": "Edelweiss GPz", "talent": "Perfect Empathic Resolve"},
+  {"season": "Y8S2 Into the Dark", "name": "Momma Badger", "category": "Named", "kind": "gear", "slot": "Backpack", "brand": "Edelweiss GPz", "talent": "Perfect Safeguard"},
+  {"season": "Y8S2 Into the Dark", "name": "Insult to Injury", "category": "Named", "kind": "weapon", "type": "Light Machine Gun", "talent": "Perfect Head Scratcher", "desc": "Confuse olmuş düşmanlara ek hasar; 3 öldürmede Confuse uygular."},
+  {"season": "Y8S2 Into the Dark", "name": "Brain Break", "category": "Named", "kind": "weapon", "type": "Rifle", "talent": "Perfect Head Scratcher"},
+
+  {"season": "Y8S3 Red Horizon", "name": "Fafnir", "category": "Exotic", "kind": "weapon", "type": "Shotgun", "talent": "Dragon's Breath", "desc": "Dragon's Breath mermisi; atış başına %40 Burn şansı. Silah hasarı Status Effect bonusunun %50'si kadar artar. Mods: Optics +%15 CHC, Magazine +5, Underbarrel +%10 Weapon Handling."},
+  {"season": "Y8S3 Red Horizon", "name": "Iron Will", "category": "Exotic", "kind": "gear", "slot": "Chest", "talent": "Resolved", "desc": "Sonraki gövde atışın headshot sayılır. Bekleme: PvE 2 sn, PvP 3 sn. MMR, Rifle ya da Pistol gerektirir."},
+  {"season": "Y8S3 Red Horizon", "name": "Loaded for Bear", "category": "Exotic", "kind": "gear", "slot": "Gloves", "talent": "Afterburn", "desc": "Manhunt climax ödülü."},
+  {"season": "Y8S3 Red Horizon", "name": "Trick Shot", "category": "Named", "kind": "gear", "slot": "Chest", "brand": "Imminence Armaments", "talent": "Perfect Reassigned", "desc": "Öldürme, tabancana 1 rastgele özel mermi ekler. Bekleme 8 sn."},
+  {"season": "Y8S3 Red Horizon", "name": "Rushdown", "category": "Named", "kind": "gear", "slot": "Chest", "brand": "Richter & Kaiser GmbH", "talent": "Tag Team", "desc": "Skill ile hasar verdiğin son düşman işaretlenir; ona silah hasarı işareti tüketip aktif beklemeleri 12 sn azaltır. Bekleme 4 sn."},
+  {"season": "Y8S3 Red Horizon", "name": "Melon Baller", "category": "Named", "kind": "gear", "slot": "Backpack", "brand": "Airaldi Holdings", "talent": "Perfect Concussion", "desc": "Headshot toplam silah hasarını 1,5 sn (MMR ile 5 sn) %20 artırır; headshot öldürme 10 sn %15."},
+  {"season": "Y8S3 Red Horizon", "name": "Keeper", "category": "Named", "kind": "gear", "slot": "Backpack", "brand": "5.11 Tactical", "talent": "Perfect Protector", "desc": "Kalkanın hasar alınca +%25 bonus zırh, müttefiklere zırhının %35'i kadar bonus zırh (3 sn). Bekleme 3 sn."},
+  {"season": "Y8S3 Red Horizon", "name": "Teapot", "category": "Named", "kind": "weapon", "type": "", "talent": "Perfect Boiling Point", "desc": "Şarjörün ilk %48'i -%100 CHC, kalanı %100 CHC. Silah türü kaynaklarda belirtilmemiş."},
+  {"season": "Y8S3 Red Horizon", "name": "Steamer", "category": "Named", "kind": "weapon", "type": "", "talent": "Perfect Boiling Point", "desc": "Teapot ile aynı talent. Silah türü kaynaklarda belirtilmemiş."}
+ ],
+ "gear_sets": {
+  "Core Strength": {"season": "Y8S1 Rise Up", "bonuses": ["2: +10% Weapon Handling", "3: +5% Weapon Damage, +5% Armor, +5% Skill Efficiency", "4: Talent: Core Exercise"], "chest": "Inner Core", "backpack": "Outer Core"},
+  "Ortiz: Reficere": {"season": "Y8S2 Into the Dark", "bonuses": ["2: +8% Skill Efficiency", "3: +60% Repair Skills", "4: Talent: Ortiz Rapid Application Nanite Prototype"], "chest": "Overcharged Nanites", "backpack": "Improved Dampeners"},
+  "Ember Engine": {"season": "Y8S3 Red Horizon", "bonuses": ["2: +8% Skill Efficiency", "3: +30% Status Effect", "4: Talent: Spontaneous Combustion"], "chest": "Flashpoint", "backpack": "White Hot"}
+ },
+ "brands": {
+  "Royal Works": {"season": "Y8S1 Rise Up", "bonuses": ["5% Weapon Handling", "32.5% Magazine Size", "15% Critical Hit Damage"]},
+  "Edelweiss GPz": {"season": "Y8S2 Into the Dark", "bonuses": ["18% Repair Skills", "20% Skill Haste", "8% Skill Efficiency"]},
+  "Unit Alloys": {"season": "Y7S3 Mutiny", "bonuses": ["5% Rate of Fire", "24% Assault Rifle Damage", "50% Magazine Size"]}
+ },
+ "talents": {
+  "gear": {
+   "Resolved": "Iron Will: sonraki gövde atışı headshot sayılır (PvE 2 sn / PvP 3 sn bekleme).",
+   "Afterburn": "Loaded for Bear exotic talent'i.",
+   "Slotted": "Investor: core dışı attribute'ların rengine göre bonus.",
+   "Impervious": "Nurse's Kneepads: sen ve 10 m içindeki müttefikler +%40 Hazard Protection.",
+   "Spontaneous Combustion": "Ember Engine 4 parça: uyguladığın her status effect %40 şansla Burn da uygular; ilk etki Burn ise düşman süre boyunca +%25 Burn hasarı alır.",
+   "Flashpoint": "Ember Engine göğüslük: Spontaneous Combustion Burn şansı %60.",
+   "White Hot": "Ember Engine sırt çantası: Burn süresi +%50.",
+   "Core Exercise": "Core Strength 4 parça talent'i.",
+   "Inner Core": "Core Strength göğüslük talent'i.",
+   "Outer Core": "Core Strength sırt çantası talent'i.",
+   "Ortiz Rapid Application Nanite Prototype": "Ortiz: Reficere 4 parça: iyileştirme skill süresi ve menzili %90 azalır, iyileştirme verimi +%150, iyileşen müttefikler 10 sn %30 Hazard Protection alır.",
+   "Overcharged Nanites": "Ortiz: Reficere göğüslük: iyileştirme verimi bonusu %225.",
+   "Improved Dampeners": "Ortiz: Reficere sırt çantası: süre ve menzil cezası %25'e iner.",
+   "Reassigned": "Öldürme tabancaya 1 rastgele özel mermi ekler (Trick Shot'ta Perfect).",
+   "Tag Team": "Skill ile hasar verilen son düşman işaretlenir; silah hasarı işareti tüketip aktif beklemeleri 12 sn azaltır.",
+   "Protector": "Kalkan hasar alınca bonus zırh; müttefiklere zırhının bir kısmı kadar bonus zırh.",
+   "Gunslinger": "Robin (Royal Works) talent'i (Perfect).",
+   "Composure": "Bulldog (Royal Works) talent'i (Perfect).",
+   "Empathic Resolve": "Benefactor (Edelweiss) talent'i (Perfect).",
+   "Safeguard": "Momma Badger (Edelweiss) talent'i (Perfect)."
+  },
+  "weapon": {
+   "Dragon's Breath": "Fafnir: Dragon's Breath mermisi, %40 Burn şansı; silah hasarı Status Effect bonusunun %50'si kadar artar.",
+   "Perturb": "Agitator exotic talent'i.",
+   "Faster Than Reloading": "Whiplash exotic talent'i.",
+   "Caduceus": "Caduceus: kritik vuruşlar seni ve müttefikleri onarır.",
+   "Gangland Hit": "Underboss: işaret yeni hedeflere geçer; işaretli düşmanlar en çok 4 işarete kadar ek hasar alır.",
+   "Boiling Point": "Şarjörün ilk %53'ü -%100 CHC, kalanı %100 CHC (Perfect: %48).",
+   "Head Scratcher": "Confuse olmuş düşmanlara ek hasar; 4 öldürmede Confuse (Perfect: 3).",
+   "Back and Forth": "Interchange / Trader talent'i (Perfect)."
+  }
+ },
+ "brand_bonus_changes": "Red Horizon: Shock Resistance, Health, Incoming Repairs ve Swap Speed marka bonusları kaldırıldı; Protection from Elites eklendi. Yeni marka eklenmeyecek, mevcut markalara named parçalar gelecek.",
+ "talent_changes": "Red Horizon: Determined artık Perfect Determined gibi çalışıyor; zincirleme gövde→headshot davranışı Iron Will'e taşındı. Steel & Sons ACR: stabilite arttı, en çok yığın 3→4, zayıf nokta yok etme +%30 Amplified Damage (5 sn).",
+ "modifiers": {
+  "Y8S1 Rise Up": {"Global": ["Recombinant (Offense, Defense, Utility modülleri)"], "Active": ["Blackout Pulse", "Cloud Armor", "Optimize / Overload"], "Hostile": ["System Drain", "Inversion Field", "Obstructor Virus"], "Prototype Augments": ["Quantum", "Echo", "Atomize", "Amalgam", "Trapper", "Entropy", "Anomaly", "Paradox", "Synesthesia"], "Escalation Mutators": ["Harvester", "Suppressor", "Aid Specialist", "Anchor", "Hot Foot", "Unyielding"]},
+  "Y8S2 Into the Dark": {"Active": ["Invincible", "Pneuma", "Vicarious"], "Hostile": ["Folie à Deux", "Plague Doctor", "Soporific"]},
+  "Y8S3 Red Horizon": {"Global": ["Under Pressure (Pressure Gauge)"], "Active": ["Fiery Aura", "Vicarious Combustion", "Signed, Shield, Delivered"], "Passive": ["Flow Regulator", "Throttle Valve", "Flux Stabilizer", "Pressure Control", "Quality Seals", "Delayed Venting", "Leaky Valve", "Vacuum Seal", "Reserve Tank", "All or Nothing", "Kickstart", "Microwave Coils", "New Model", "Afterburner", "Flint and Steel", "Fire with Fire", "Firestarter", "New Formula: Beta", "New Formula: Gamma", "Modular Plates"], "Hostile": ["Draining Presence", "Achilles' Heal", "Thousand Cuts"]}
+ }
+}

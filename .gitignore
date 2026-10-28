@@ -1,0 +1,57 @@
+# Kullanıcıya özel / çalışırken oluşanlar — depoya girmez
+logs/
+sounds/
+art/
+meta_cache.json
+tasks_cache.json
+progress.json
+tasks.json
+loot_log.csv
+last_crop.png
+optional_skip.txt
+debug_log.txt
+__pycache__/
+*.pyc
+build/
+dist/
+*.spec
+.venv/
+last_card.png
+game_data_cache.json
+
+# kullanıcıya özel / üretilen arka plan videoları
+art/videos/
+tests/.game_cache.json
+private/
+tests/.stash_test.json
+vendor_cache.json
+stash.json
+drop_queue.json
+reports/
+server/.wrangler/
+server/node_modules/
+installer/
+learned_library.json
+learned_library.json.tmp
+tests/.click_result.json
+tests/.tab_result.json
+
+# Panel ayarları (token, config)
+td2_admin_panel.json
+~/.td2_admin_panel.json
+reports_sent.json
+reports_queue.json
+
+# Test ekran görüntüleri / videoları
+shots/
+tests/.bench_card.png
+
+# Hesap oturumu (DPAPI ile şifreli, kişisel)
+account.dat
+account.dat.tmp
+news_cache.json
+quiz_state.json
+translate_cache.json
+descriptions_cache.json
+models/
+cache/

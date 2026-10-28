@@ -1,0 +1,14 @@
+# Opsiyonel ses paketleri / optional voice packages
+# Kurulamazsa uygulama yine calisir, sadece ses ozellikleri kapanir.
+# If one fails to install, the app still runs; only voice features are disabled.
+pyttsx3
+sounddevice
+numpy
+faster-whisper
+# Arka plan videosu / background video (optional)
+av>=14,<19
+# Yeni OCR motoru (onerilen) / new OCR engine (recommended)
+onnxruntime
+rapidocr
+# QR kodu / QR codes (optional)
+qrcode

@@ -1,0 +1,48 @@
+name: retire-releases
+# Maintainer-only cleanup: removes old releases (their downloads) from this public repo after they were archived
+# privately. Git tags are kept. The latest release, v5.1.9 (rollback) and mt-models (translation models) are protected.
+# Optionally deletes branches that are already fully merged into main.
+on:
+  workflow_dispatch:
+    inputs:
+      tags:
+        description: "Space-separated release tags to remove"
+        required: false
+        default: ""
+      branches:
+        description: "Space-separated merged branches to delete"
+        required: false
+        default: ""
+permissions:
+  contents: write
+jobs:
+  retire:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      R: ${{ github.repository }}
+      TAGS: ${{ inputs.tags }}
+      BRANCHES: ${{ inputs.branches }}
+    steps:
+      - name: Remove releases (tags kept)
+        shell: bash
+        run: |
+          set -euo pipefail
+          latest=$(gh api "repos/$R/releases/latest" -q .tag_name)
+          for T in $TAGS; do
+            case "$T" in "$latest"|v5.1.9|mt-models) echo "protected: $T"; continue;; esac
+            [[ "$T" =~ ^v[0-9][0-9.]*$ ]] || { echo "skip: $T"; continue; }
+            id=$(gh api "repos/$R/releases/tags/$T" -q .id 2>/dev/null || true)
+            [[ "$id" =~ ^[0-9]+$ ]] || { echo "not found: $T"; continue; }
+            gh api -X DELETE "repos/$R/releases/$id" && echo "removed release $T"
+          done
+      - name: Delete merged branches
+        shell: bash
+        run: |
+          set -euo pipefail
+          for B in $BRANCHES; do
+            [ "$B" = main ] && continue
+            ahead=$(gh api "repos/$R/compare/main...$B" -q .ahead_by 2>/dev/null || echo x)
+            if [ "$ahead" = "0" ]; then gh api -X DELETE "repos/$R/git/refs/heads/$B" && echo "deleted branch $B"
+            else echo "kept $B (not merged or missing: $ahead)"; fi
+          done

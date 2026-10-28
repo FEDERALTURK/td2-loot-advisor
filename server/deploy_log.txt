@@ -1,0 +1,25 @@
+Pzt 26.10.2026 14:09:18,66 
+
+ ⛅️ wrangler 4.152.0
+────────────────────
+Total Upload: 66.45 KiB / gzip: 17.88 KiB
+Worker Startup Time: 1 ms
+Your Worker has access to the following bindings:
+Binding                                                                  Resource                  
+env.DB (td2stats)                                                        D1 Database               
+env.GUMROAD_PRODUCT_ID ("gV3wthB8oJYzKQLjlKVo-9DEQ02A4__2")              Environment Variable      
+env.PUBLIC_URL ("https://td2-stats.td2loot.workers.dev")                 Environment Variable      
+env.DISCORD_CLIENT_ID ("1564066001363148920")                            Environment Variable      
+env.ENT_PUBLIC_KEY ("06da3593d93eebb1a2df46d28577eca8b5c96...")          Environment Variable      
+env.LICENSE_PUBKEY ("d70b17497241261ca45bcd05bbaedcd0fdeb3...")          Environment Variable      
+env.MAX_BATCH ("50")                                                     Environment Variable      
+env.MAX_PER_HOUR ("600")                                                 Environment Variable      
+env.REPORTS_REPO ("FEDERALTURK/td2-loot-advisor-reports")                Environment Variable      
+env.ADMIN_LOGIN ("FEDERALTURK")                                          Environment Variable      
+
+Uploaded td2-stats (6.16 sec)
+Deployed td2-stats triggers (3.15 sec)
+  https://td2-stats.td2loot.workers.dev
+  schedule: 17 * * * *
+Current Version ID: e6da1244-63f4-4393-9cfc-82a227f580f1
+EXIT 0 

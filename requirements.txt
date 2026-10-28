@@ -1,0 +1,15 @@
+mss
+pillow
+pytesseract
+pynput
+pystray
+ctranslate2
+sentencepiece
+soundcard
+edge-tts>=7.3.1,<8
+sounddevice
+faster-whisper>=1.2,<2
+# faster-whisper 1.2.x audio decoding uses metadata_errors, removed by PyAV 19.
+av>=14,<19
+pyttsx3
+qrcode
