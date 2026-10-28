@@ -103,6 +103,7 @@ from PIL import Image, ImageDraw, ImageOps, ImageTk
 
 import i18n
 import ui_theme
+import ui_hud
 import ui_art
 import meta_sync
 import wiki_sync
@@ -156,8 +157,11 @@ META_CACHE = BASE / "meta_cache.json"
 NEWS_CACHE = BASE / "news_cache.json"
 DESC_CACHE = BASE / "descriptions_cache.json"
 NEWS_POLL_MS = 30 * 60 * 1000          # program açıkken haber akışına bakma aralığı (canlı akış)   # son indirilen meta listesi (çevrimdışı kullanım)
-ART_DIR = BASE / "art"   # arka planlar / amblemler / bayraklar (kullanıcı kendi görsellerini ekleyebilir)
 BUNDLE = Path(getattr(sys, "_MEIPASS", BASE))
+# Paketli sürümde PyInstaller görselleri _internal/art içine koyar. Geliştirme
+# ortamında ve kullanıcının kendi paketlerinde ise proje kökündeki art/ tercih
+# edilir; bu yüzden iki konumu da destekliyoruz.
+ART_DIR = (BASE / "art") if (BASE / "art").exists() else (BUNDLE / "art")
 CFG_PATH, LOG_PATH, DEBUG_PATH, PROG_PATH = (BASE / n for n in ("builds.json", "loot_log.csv", "last_crop.png", "progress.json"))
 STASH_PATH = BASE / "stash.json"
 VENDOR_CACHE = BASE / "vendor_cache.json"
@@ -200,10 +204,10 @@ DEFAULTS = {"scan_mode": "hotkey", "auto_interval_ms": 700, "auto_record": True,
             "daily_reset_hour": 2, "weekly_reset_day": 1, "weekly_reset_hour": 2,  # weekly_reset_day: 0=Monday
             "tasks_hotkey": "<f10>",
             "language": "", "log_level": "INFO", "log_max_kb": 1024, "log_backups": 3,
-            "ui_theme": "dark", "ui_sounds": True, "bg_interval": 15,
+            "ui_theme": "isac", "ui_sounds": True, "bg_interval": 15,
             "fx_cursor": True, "fx_cursor_style": "crosshair", "fx_cursor_color": "#ff6d10", "fx_cursor_custom": "",
             "fx_trail": True, "fx_trail_color": "#ff6d10", "fx_trail_len": 18, "fx_transitions": True,
-            "fx_video": True, "fx_video_dim": 0.35, "fx_transition_ms": 260, "fx_bgwatch": True, "fx_bgwatch_dim": 0.0,
+            "fx_video": True, "fx_video_dim": 0.35, "fx_transition_ms": 260, "fx_bgwatch": True, "fx_bgwatch_dim": 0.0, "event_fx": "standard",
             "res_profile": "auto", "ocr_engine": "auto", "ocr_gpu": "auto", "license_key": "", "update_check": True, "update_last": 0, "update_skip": "", "stash_record": True, "vendor_mode": False, "vendor_auto": True, "drop_share": False, "drop_asked": False, "drop_activity": "none", "drop_server": "", "drop_client": "", "vision_ok": False, "vendor_notified": "", "companion_port": 8765, "svc_tray": True, "svc_close_to_tray": False, "svc_auto_run": True, "smart_scan": True, "api_on": False, "api_port": 8766, "api_lan": False, "api_control": True, "api_token": "", "rpc_on": False, "rpc_client_id": "", "push_on": False, "push_topic": "", "push_webhook": "", "push_drop": True, "push_build": True, "push_vendor": True, "push_session": True, "agent_model": "operator", "agent_outfit": "night", "agent_skin": 1, "ocr_threshold": 170, "ocr_scale": "auto", "ocr_psm": 6, "ocr_passes": 3,
             "overlay_mode": "card", "overlay_alpha": 0.94, "overlay_size": 1.0, "ui_depth": True,
             "meta_sync": True, "meta_feed_url": "", "meta_last_try": 0, "meta_last_sync": "", "meta_version": "",
@@ -822,9 +826,17 @@ def click_through(win):
     if os.name != "nt":
         return
     try:
-        hwnd = ctypes.windll.user32.GetParent(win.winfo_id())
-        st = ctypes.windll.user32.GetWindowLongW(hwnd, -20)
-        ctypes.windll.user32.SetWindowLongW(hwnd, -20, st | 0x80000 | 0x20)
+        # Tk Toplevel'larda winfo_id() bazı Windows sürümlerinde gerçek
+        # pencereyi, bazılarında ise ara pencereyi döndürebilir. Önceden
+        # yalnızca GetParent() sonucu biçimlendirildiği için fare izi
+        # penceresi menülerin üzerine tıklama yakalayabiliyordu.
+        wid = int(win.winfo_id())
+        parent = int(ctypes.windll.user32.GetParent(wid) or 0)
+        handles = [wid] + ([parent] if parent and parent != wid else [])
+        for hwnd in handles:
+            st = ctypes.windll.user32.GetWindowLongW(hwnd, -20)
+            # WS_EX_LAYERED + WS_EX_TRANSPARENT + WS_EX_NOACTIVATE
+            ctypes.windll.user32.SetWindowLongW(hwnd, -20, st | 0x00080000 | 0x00000020 | 0x08000000)
     except Exception:
         pass
 
@@ -1596,6 +1608,7 @@ class App:
         self.overlay = self.overlay_job = self.cur = self.last_scan = None
         self.root_after_resets = None
         self.last_sig, self.last_time, self.last_err = None, 0, ""
+        self._diag_errors = []
         self.speaker, self.rec, self.voice_busy, self.chat_hist = Speaker(), Recorder(), False, []
         self._voice_session = game_assistant.VoiceSession(
             self.rec, lambda audio: transcribe(audio, self.cfg),
@@ -4043,22 +4056,28 @@ class App:
                                   st.get("fx_cursor_color", "#ff6d10"), st.get("fx_cursor_custom", ""), getattr(self, "ui_factor", 1.0))
         if not ok: log.warning("Custom cursor could not be applied")
         tr = getattr(self, "trail_fx", None)
-        if st.get("fx_trail", True):
-            if tr and (tr.color != st.get("fx_trail_color") or tr.length != int(st.get("fx_trail_len", 18))):
-                tr.stop(); tr = None
-            if not tr or not tr.alive:
-                self.trail_fx = fx.TrailFX(self.root, st.get("fx_trail_color", "#ff6d10"), st.get("fx_trail_len", 18), click_through)
-                self.trail_fx.start()
-        elif tr:
-            tr.stop(); self.trail_fx = None
+        # Eski TrailFX ayrı bir saydam Toplevel oluşturuyordu. Bazı Windows
+        # masaüstü bileşimlerinde transparent-color anahtarı uygulanmayınca
+        # siyah dikdörtgen bırakıyor ve menü tıklamalarını üstüne alıyordu.
+        # Yeni güvenli yöntemde hiçbir üst pencere oluşturulmuyor; özel imleç
+        # CursorFX tarafından yönetiliyor, menü yüzeyi tamamen serbest kalıyor.
+        if tr:
+            tr.stop()
+            self.trail_fx = None
         if float(st.get("fx_video_dim", 0.35)) > 0.7: st["fx_video_dim"] = 0.35     # eski sürümden kalan çok koyu ayar
         # tüm pencere arka planı: ajan saati (Windows, koyu temalar)
         wb = getattr(self, "watch_bg", None)
-        want = bool(st.get("fx_bgwatch", True)) and os.name == "nt" and PAL.get("mode") != "light"
-        if wb and (not want or wb.bgc != PAL["bg"] or wb.color != PAL["accent"] or wb.dim != float(st.get("fx_bgwatch_dim", 0.0))):
+        # Küçük pencerede saydam arka plan katmanı ttk düğmelerinin olayını
+        # yanlış alt çerçeveye yönlendirebildiği için dekoratif saati kapat.
+        # Büyük görünümde efekt aynen korunur; küçük görünümde tıklama yüzeyi
+        # doğrudan ana pencereye ait olur.
+        want = (bool(st.get("fx_bgwatch", True)) and os.name == "nt"
+                and PAL.get("mode") != "light" and not getattr(self, "compact", False))
+        variant = st.get("event_fx", "standard")
+        if wb and (not want or wb.bgc != PAL["bg"] or wb.color != PAL["accent"] or wb.dim != float(st.get("fx_bgwatch_dim", 0.0)) or wb.variant != variant):
             wb.stop(); self.watch_bg = wb = None
         if want and not wb:
-            self.watch_bg = fx.WatchBackground(self.root, PAL["bg"], PAL["accent"], float(st.get("fx_bgwatch_dim", 0.0)))
+            self.watch_bg = fx.WatchBackground(self.root, PAL["bg"], PAL["accent"], float(st.get("fx_bgwatch_dim", 0.0)), variant=variant)
             if not self.watch_bg.start():
                 log.info("Agent watch background unavailable"); self.watch_bg = None
         watch_on = bool(getattr(self, "watch_bg", None))
@@ -4093,13 +4112,10 @@ class App:
             save_cfg(self.cfg); log.info("Builds normalized against game library")
 
     def build_ui(self):
-        """Tema + başlık bandı + tüm sekmeler. Tema/dil değişince rebuild_ui() ile yeniden kurulur."""
-        set_palette(ui_theme.apply(self.root, self.cfg["settings"].get("ui_theme", "dark")))
+        """ISAC kabuk + sabit ana gezinme + özellik gruplarının alt sekmeleri."""
+        set_palette(ui_theme.apply(self.root, self.cfg["settings"].get("ui_theme", "isac")))
         self.build_header()
-        self.fxbar = fx.Transition(self.root, self.root, color=PAL["accent"], bg=PAL["bg"],
-                                   duration_ms=int(self.cfg["settings"].get("fx_transition_ms", 260)))
-        nb = self.nb = ttk.Notebook(self.root); nb.pack(fill="both", expand=True, padx=10, pady=(6, 10))
-        # Ana menüyü altı anlaşılır grupta topluyoruz; içerik kimlikleri değişmeden kalır.
+
         self.tab_keys = ("dash", "builds", "progress", "stash", "stats", "info", "tasks", "division3", "translate", "assistant", "settings", "history", "log", "help")
         self.tab_groups = {
             "dash": "home", "builds": "gear", "progress": "gear", "stash": "gear", "stats": "gear",
@@ -4109,33 +4125,109 @@ class App:
         }
         self.group_keys = ("home", "gear", "intel", "tools", "settings", "system")
         tr_ui = i18n.current_language() == "tr"
-        self.group_labels = {"home": "⌂  " + t("tab.dash"), "gear": "🎒  Ekipman" if tr_ui else "🎒  Gear",
-                             "intel": "🛰  İstihbarat" if tr_ui else "🛰  Intel",
-                             "tools": "🧰  Araçlar" if tr_ui else "🧰  Tools",
-                             "settings": "⚙  Ayarlar" if tr_ui else "⚙  Settings",
-                             "system": "☰  Diğer" if tr_ui else "☰  More"}
+        self.group_labels = {"home": "⌂  " + t("tab.dash"), "gear": "🎒  " + t("nav.gear"),
+                             "intel": "🛰  " + t("nav.intel"), "tools": "🧰  " + t("nav.tools"),
+                             "settings": "⚙  " + t("nav.settings"), "system": "☰  " + t("nav.system")}
+
+        # ISAC ana kabuğu: sol navigasyon sabit, içerik alanı kendi alt sekmelerini korur.
+        self.workspace = ttk.Frame(self.root)
+        self.workspace.pack(fill="both", expand=True, padx=10, pady=(4, 10))
+        self.sidebar = ttk.Frame(self.workspace, style="Sidebar.TFrame", width=max(164, int(188 * getattr(self, "ui_factor", 1.0))))
+        self.sidebar.pack(side="left", fill="y", padx=(0, 8))
+        self.sidebar.pack_propagate(False)
+        self.main_area = ttk.Frame(self.workspace)
+        self.main_area.pack(side="left", fill="both", expand=True)
+        # Pencere elle küçültüldüğünde de kompakt menü davranışını uygula;
+        # yalnızca açılış ekran profiline güvenme.
+        self._responsive_job = None
+        self.root.bind("<Configure>", self._responsive_configure, add="+")
+        self.fxbar = fx.Transition(self.root, self.root, color=PAL["accent"], bg=PAL["bg"],
+                                   duration_ms=int(self.cfg["settings"].get("fx_transition_ms", 260)))
+        nb = self.nb = ttk.Notebook(self.main_area, style="NoTabs.TNotebook")
+        nb.pack(fill="both", expand=True, padx=2, pady=2)
+
+        ttk.Label(self.sidebar, text="◆ ISAC", style="Brand.TLabel").pack(anchor="w", padx=14, pady=(18, 2))
+        ttk.Label(self.sidebar, text=t("nav.ops_center"),
+                  style="Muted.TLabel", font=(ui_theme.FONT_SEMI, 8)).pack(anchor="w", padx=14, pady=(0, 14))
+        ttk.Separator(self.sidebar).pack(fill="x", padx=12, pady=(0, 10))
+        self._sidebar_buttons = {}
+        for group in self.group_keys:
+            btn = ttk.Button(self.sidebar, text=self.group_labels[group], style="Nav.TButton",
+                             command=lambda g=group: self._sidebar_select_group(g))
+            btn.pack(fill="x", padx=8, pady=2)
+            self._sidebar_buttons[group] = btn
+        ttk.Separator(self.sidebar).pack(fill="x", padx=12, pady=(12, 8))
+        ttk.Label(self.sidebar, text=("SÜRÜM " if tr_ui else "VERSION ") + APP_VERSION,
+                  style="Muted.TLabel", font=(ui_theme.FONT, 8)).pack(side="bottom", anchor="w", padx=14, pady=12)
+
         self.group_nbs = {}
         for group in self.group_keys:
-            holder = ttk.Frame(nb); nb.add(holder, text=self.group_labels[group])
-            self.group_nbs[group] = ttk.Notebook(holder); self.group_nbs[group].pack(fill="both", expand=True, padx=3, pady=3)
+            holder = ttk.Frame(nb)
+            nb.add(holder, text=self.group_labels[group])
+            self.group_nbs[group] = ttk.Notebook(holder)
+            self.group_nbs[group].pack(fill="both", expand=True, padx=3, pady=3)
         self.tabs = {}
         for k in self.tab_keys:
-            group = self.tab_groups[k]; parent = self.group_nbs[group]
+            group = self.tab_groups[k]
+            parent = self.group_nbs[group]
             self.tabs[k] = ttk.Frame(parent)
             title = "The Division 3" if k == "division3" else t(f"tab.{k}")
             parent.add(self.tabs[k], text=ui_theme.with_icon(title, ui_theme.TAB_ICONS.get(k, "")))
+
         self.build_dash(); self.build_builds(); self.build_prog(); self.build_stash(); self.build_stats(); self.build_info(); self.build_division3(); self.build_translate(); self.build_gorevler(); self.build_asistan()
         self.build_settings(); self.build_hist(); self.build_logtab(); self.build_help()
         nb.bind("<<NotebookTabChanged>>", self.on_tab)
         for inner in self.group_nbs.values(): inner.bind("<<NotebookTabChanged>>", self.on_tab)
+        self._sidebar_activate("home")
         self.root.after(300, self.apply_fx)
         self.root.after(400, lambda: self.cfg["settings"].get("fx_transitions", True) and self.fxbar.snap(self.nb))
         st = self.cfg["settings"]
-        if st.get("_start_tab") in self.tab_keys:                       # yeniden açılıştan sonra kaldığı yere dön
+        if st.get("_start_tab") in self.tab_keys:
             self.select_page(st["_start_tab"])
             if st.get("_start_page") in getattr(self, "_set_keys", []):
                 self.select_settings_page(st["_start_page"])
-            st["_start_tab"] = st["_start_page"] = ""; save_cfg(self.cfg)
+            st["_start_tab"] = st["_start_page"] = ""
+            save_cfg(self.cfg)
+
+    def _responsive_configure(self, _event=None):
+        """Boyut değişikliklerini gecikmeli uygula; her piksel hareketinde UI kurma."""
+        if getattr(self, "_responsive_job", None):
+            try: self.root.after_cancel(self._responsive_job)
+            except tk.TclError: pass
+        self._responsive_job = self.root.after(180, self._sync_responsive_layout)
+
+    def _sync_responsive_layout(self):
+        self._responsive_job = None
+        try:
+            width = self.root.winfo_width()
+            compact_now = width < 1100
+            if compact_now == getattr(self, "_responsive_compact", None):
+                return
+            self._responsive_compact = compact_now
+            self.compact = compact_now
+            if hasattr(self, "sidebar"):
+                sidebar_w = 76 if compact_now else max(164, int(188 * getattr(self, "ui_factor", 1.0)))
+                self.sidebar.configure(width=sidebar_w)
+            icons = {"home": "⌂", "gear": "🎒", "intel": "🛰", "tools": "🧰", "settings": "⚙", "system": "☰"}
+            for key, button in getattr(self, "_sidebar_buttons", {}).items():
+                button.configure(text=icons[key] if compact_now else self.group_labels[key])
+            # Küçük modda saydam üst efektleri kapatıp menü yüzeyini güvenilir
+            # bırak; büyük modda seçili görsel paketi aynen kullan.
+            self.apply_fx()
+        except (tk.TclError, AttributeError):
+            return
+
+    def _sidebar_activate(self, group):
+        for key, button in getattr(self, "_sidebar_buttons", {}).items():
+            try:
+                button.configure(style="NavActive.TButton" if key == group else "Nav.TButton")
+            except tk.TclError:
+                pass
+
+    def _sidebar_select_group(self, group):
+        page = next((key for key in self.tab_keys if self.tab_groups.get(key) == group), None)
+        if page:
+            self.select_page(page)
 
     def rebuild_ui(self, tab=None):
         """Yeniden başlatmadan arayüzü yeni tema/dille kurar.
@@ -4156,7 +4248,8 @@ class App:
         except Exception: pass
         try: self.fxbar.destroy()
         except Exception: pass
-        self.nb.destroy()
+        if getattr(self, "workspace", None):
+            self.workspace.destroy()
         # Yok edilen eski widget referanslarını temizle (hasattr kontrolleri yeni widget'ı beklesin)
         for k, v in list(vars(self).items()):
             if isinstance(v, tk.Misc) and v is not self.root:
@@ -4182,6 +4275,7 @@ class App:
         if key not in self.tabs: return
         group = self.tab_groups[key]; self.nb.select(self.group_keys.index(group))
         inner = self.group_nbs[group]; inner.select(self.tabs[key])
+        self._sidebar_activate(group)
 
     def select_settings_page(self, key):
         if key not in getattr(self, "set_pages", {}): return
@@ -4233,11 +4327,14 @@ class App:
                                 "on" if self.running else "off"),
                                ("🤖 " + provider_label(prov if prov in PROVIDER_KEYS else "builtin"), "off")])
 
-    def on_tab(self, _=None):
+    def on_tab(self, event=None):
         if hasattr(self, "sounds"): self.sounds.play("tab")
         cur = (self.nb.index(self.nb.select()), self.current_tab()) if hasattr(self, "nb") else None
         prev, self._tab_prev = getattr(self, "_tab_prev", cur), cur
-        anim = self.cfg["settings"].get("fx_transitions", True) and hasattr(self, "fxbar")
+        # İç sekme değişimlerinde dış notebook aynı kalır; ana sekme animasyonunu yeniden oynatma.
+        outer_changed = event is None or getattr(event, "widget", None) is self.nb
+        anim = (outer_changed and self.cfg["settings"].get("fx_transitions", True)
+                and hasattr(self, "fxbar"))
         if anim:
             self.fxbar.play(self.nb, prev[0] if isinstance(prev, tuple) else prev, cur[0])
         k = self.current_tab()
@@ -4250,12 +4347,22 @@ class App:
             elif k == "stash": self.refresh_stash()
             elif k == "log": self.refresh_logtab()
         self.root.after((self.fxbar.duration + 30) if anim else 20, refresh)
+        self._sidebar_activate(self.tab_groups.get(k, "home"))
 
     # ---------- Panel ----------
     def build_dash(self):
         """Panel v2 — geniş ekran (21:9) için iki sütun: solda kontrol + karar, sağda eşya kartı ve build eşleşmeleri."""
         f = self.tabs["dash"]
         st = self.cfg["settings"]
+        # Ana ekranın üstündeki sahne mevcut OCR/çeviri verisinin görsel özeti; kartlar aşağıda ayrıntılı kalır.
+        self.dash_scene = ui_hud.DashboardScene(
+            # HUD sahnesi, kullanıcı eklediği dönen arka planlardan ayrı olarak
+            # paketle gelen seçili ISAC/Rogue kompozisyonunu kullanır. Böylece
+            # eski bir kullanici art/ klasörü yeni tasarım katmanını gölgeleyemez.
+            f, PAL, (BUNDLE / "art") if (BUNDLE / "art").exists() else ART_DIR,
+            mode="rogue" if st.get("event_fx") == "rogue" else "isac",
+            on_scan=self.trigger, on_translate=lambda: self.select_page("translate"))
+        self.dash_scene.pack(fill="x", padx=10, pady=(10, 2))
         paned = ttk.Panedwindow(f, orient="horizontal"); paned.pack(fill="both", expand=True, padx=10, pady=10)
         left, right = ttk.Frame(paned), ttk.Frame(paned)
         paned.add(left, weight=2); paned.add(right, weight=3)
@@ -4369,6 +4476,9 @@ class App:
         notes = [n for n in (item.get("_note"), note) if n and "  ·  " not in n]
         notes += [n.split("  ·  ")[0] for n in (note,) if n and "  ·  " in n]
         self.note_lbl.config(text="\n".join("» " + n for n in notes))
+        if hasattr(self, "dash_scene"):
+            best = f"{res[0][0]}%" if res else "—"
+            self.dash_scene.set_snapshot(name=item.get("name") or "—", verdict=verdict_label(verdict), score=best)
         self.show_fit(item)
         self.item_tv.delete(*self.item_tv.get_children())
         proto = "PROTOTYPE" in item.get("rarity", [])
@@ -4409,6 +4519,8 @@ class App:
                                   mode=mode,
                                   region=(t("panel.src_screen_short") if st.get("scan_source", "screen") == "screen"
                                           else (f"{r['width']}x{r['height']}" if r else t("state.not_set")))))
+        if hasattr(self, "dash_scene"):
+            self.dash_scene.set_snapshot(status=(t("state.running") if self.running else t("state.stopped")))
         self.refresh_header()
 
     def refresh_counts(self):
@@ -5147,9 +5259,15 @@ class App:
             stop.wait(policy.scan_poll_s)
 
     def poll(self):
+        # Arka plan işlerinden çok sayıda sonuç aynı anda gelirse Tk ana
+        # döngüsünü sınırsız süre işgal etme. Kalan sonuçlar bir sonraki turda
+        # işlenir; böylece menü tıklamaları ve pencere boyama önceliğini korur.
+        poll_deadline = time.perf_counter() + 0.012
+        poll_count = 0
         try:
-            while True:
+            while poll_count < 32 and time.perf_counter() < poll_deadline:
                 r = self.results.get_nowait()
+                poll_count += 1
                 if r[0] == "hotkey":
                     self._hotkey_action(r[1]); continue
                 if r[0] == "translate_pad":
@@ -5172,6 +5290,8 @@ class App:
                         except Exception: log.exception("Translation UI update failed")
                     continue
                 if r[0] == "err":
+                    self._diag_errors.append({"time": datetime.now().strftime("%H:%M:%S"), "message": str(r[1])[:240]})
+                    del self._diag_errors[:-100]
                     it = {"name": r[1][:60], "rarity": [], "attrs": {}, "talents": [], "slot": None}
                     self.show_result("", it, "ERROR", []); self.popup("ERROR", it, [], None)
                     continue
@@ -7325,6 +7445,58 @@ class App:
             self.root.unbind("<Key>")
         self.root.bind("<Key>", on_key)
 
+    def build_diagnostics(self, parent):
+        """Yerel, kullanıcı kontrollü performans ve hata tanılama merkezi."""
+        top = ttk.Frame(parent); top.pack(fill="x", padx=10, pady=(10, 6))
+        ttk.Label(top, text="Sistem Tanılama Merkezi", font=(ui_theme.FONT_SEMI, 14), foreground=PAL["accent"]).pack(side="left")
+        self.diag_advanced = tk.BooleanVar(value=False)
+        ttk.Checkbutton(top, text="Gelişmiş görünüm", variable=self.diag_advanced,
+                        command=self.refresh_diagnostics).pack(side="right", padx=6)
+        ttk.Button(top, text="⟳ Yenile", command=self.refresh_diagnostics).pack(side="right")
+        ttk.Button(top, text="Raporu dışa aktar", command=self.export_diagnostics).pack(side="right", padx=6)
+        ttk.Label(parent, text="Tanılama verileri varsayılan olarak yalnızca bu bilgisayarda tutulur. Rapor oluşturma işlemi kullanıcı tıklamasıyla yapılır.",
+                  foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=10, pady=(0, 8))
+        self.diag_text = tk.Text(parent, height=24, bg=PAL["surface"], fg=PAL["fg"], insertbackground=PAL["fg"],
+                                 relief="flat", wrap="word", state="disabled")
+        self.diag_text.pack(fill="both", expand=True, padx=10, pady=(0, 10))
+        self.refresh_diagnostics()
+
+    def _diagnostic_snapshot(self):
+        timings = getattr(self, "timings", None).snapshot() if getattr(self, "timings", None) else {}
+        def stat(name):
+            x = timings.get(name, {})
+            return f"{x.get('median_ms', 0):.0f} ms medyan / {x.get('p95_ms', 0):.0f} ms p95" if x else "veri yok"
+        st = self.cfg.get("settings", {})
+        trans = self._translation_jobs.stats() if getattr(self, "_translation_jobs", None) else {}
+        assistant = self._assistant_jobs.stats() if getattr(self, "_assistant_jobs", None) else {}
+        return {
+            "sistem": [f"Python: {sys.version.split()[0]}", f"Platform: {sys.platform}", f"Çözünürlük: {self.root.winfo_screenwidth()}x{self.root.winfo_screenheight()}", f"Pencere: {self.root.winfo_width()}x{self.root.winfo_height()}", f"Mod: {'kompakt' if getattr(self, 'compact', False) else 'normal'}"],
+            "ocr": [f"Motor: {getattr(OCR, 'name', 'yok')}", f"Son OCR: {stat('ocr_total')}", f"Son tarama: {stat('scan_total')}", f"OCR geçişi: {getattr(self, 'auto_passes', lambda: '?')()}", f"Durum: {'çalışıyor' if getattr(self, 'running', False) else 'durduruldu'}"],
+            "ceviri": [f"Çeviri kuyruğu: active={trans.get('active', 0)} pending={trans.get('pending', 0)}", f"Çeviri ölçümü: {stat('translate_model')}", f"Canlı çeviri: {'açık' if st.get('tr_on') else 'kapalı'}"],
+            "asistan": [f"Asistan kuyruğu: active={assistant.get('active', 0)} pending={assistant.get('pending', 0)}", f"AI sağlayıcı: {st.get('ai_provider', 'builtin')}"],
+            "arayuz": [f"Tema: {st.get('ui_theme', 'isac')}", f"Animasyonlar: {'askıda' if getattr(self.root, '_td2_suspend_animations', False) else 'aktif'}", f"Fare izi overlay: {'aktif' if getattr(self, 'trail_fx', None) else 'kapalı/güvenli'}", f"Son hata: {self.last_err or 'yok'}"],
+            "hatalar": [f"Kayıt sayısı: {len(getattr(self, '_diag_errors', []))}"] + [f"{x['time']}  {x['message']}" for x in getattr(self, '_diag_errors', [])[-10:]],
+        }
+
+    def refresh_diagnostics(self):
+        if not getattr(self, "diag_text", None): return
+        data = self._diagnostic_snapshot()
+        lines = []
+        for title, values in data.items():
+            if title == "hatalar" and not self.diag_advanced.get():
+                values = values[:1]
+            lines += [f"[{title.upper()}]"] + [f"  {v}" for v in values] + [""]
+        self.diag_text.configure(state="normal"); self.diag_text.delete("1.0", "end"); self.diag_text.insert("end", "\n".join(lines)); self.diag_text.configure(state="disabled")
+
+    def export_diagnostics(self):
+        path = filedialog.asksaveasfilename(defaultextension=".json", initialfile="td2_diagnostics.json", filetypes=[("JSON", "*.json")])
+        if not path: return
+        try:
+            Path(path).write_text(json.dumps(self._diagnostic_snapshot(), ensure_ascii=False, indent=2), encoding="utf-8")
+            self.toast("Tanılama raporu kaydedildi")
+        except Exception as e:
+            messagebox.showerror(APP_NAME, f"Rapor yazılamadı: {e}")
+
     # ---------- Ayarlar ----------
     def build_settings(self):
         st = self.cfg["settings"]
@@ -7344,21 +7516,22 @@ class App:
             self.set_group_nbs[group] = ttk.Notebook(holder); self.set_group_nbs[group].pack(fill="both", expand=True)
         set_group_for = {"general": "basic", "shortcuts": "basic", "scan": "capture", "display": "capture", "ocr": "capture",
                          "fx": "display", "overlay": "display", "sync": "service", "service": "service",
-                         "premium": "service", "logs": "service"}
+                         "premium": "service", "logs": "service", "diagnostics": "service"}
         P = {}
         for key, icon in (("general", "⚙"), ("shortcuts", "⌨"), ("fx", "✨"), ("scan", "🎯"), ("display", "🖥"), ("ocr", "🔍"), ("overlay", "🪟"),
-                          ("sync", "🔄"), ("service", "🛰"), ("premium", "⭐"), ("logs", "📝")):
+                          ("sync", "🔄"), ("service", "🛰"), ("premium", "⭐"), ("logs", "📝"), ("diagnostics", "🩺")):
             group = set_group_for[key]
             holder = ttk.Frame(self.set_group_nbs[group])
             label = ("Kısayollar" if i18n.current_language() == "tr" else "Shortcuts") if key == "shortcuts" else t("setpage." + key)
             self.set_group_nbs[group].add(holder, text=f" {icon} {label} ")
             P[key] = ui_theme.scrollable(holder, PAL["bg"])
-        self._set_keys = ["general", "shortcuts", "fx", "scan", "display", "ocr", "overlay", "sync", "service", "premium", "logs"]
+        self._set_keys = ["general", "shortcuts", "fx", "scan", "display", "ocr", "overlay", "sync", "service", "premium", "logs", "diagnostics"]
         self.set_pages = {key: (set_group_for[key], self.set_group_nbs[set_group_for[key]].tabs()[-1]) for key in self._set_keys}
         self.build_shortcuts(P["shortcuts"])
         self.build_fx_box(P["fx"], st)
         self.build_service_page(P["service"], st)
         self.build_premium_box(P["premium"], st)
+        self.build_diagnostics(P["diagnostics"])
         if getattr(self, "_set_page", None) in self._set_keys:
             self.select_settings_page(self._set_page)
         f = P["general"]
@@ -7438,7 +7611,9 @@ class App:
                      width=18, state="readonly").pack(side="left", padx=6)
         self.bv["ui_sounds"] = tk.BooleanVar(value=bool(st.get("ui_sounds", True)))
         ttk.Checkbutton(ra, text=t("set.ui_sounds"), variable=self.bv["ui_sounds"]).pack(side="left", padx=(18, 0))
-        # oyun atmosferi paketleri: renk örneği kartları (tıkla → anında uygula)
+        ttk.Label(ap, text=t("theme.pack_hint"), foreground=PAL["muted"], wraplength=820,
+                  justify="left").pack(anchor="w", padx=10, pady=(0, 4))
+        # Her karta basmak arayüz paletini, bindirme renklerini ve vurgu efektlerini birlikte uygular.
         gal = ttk.Frame(ap); gal.pack(fill="x", padx=8, pady=(0, 8))
         cur = st.get("ui_theme", "dark")
         for i, m in enumerate(ui_theme.PACKS):
@@ -7451,6 +7626,7 @@ class App:
                 tk.Frame(sw, bg=c, width=18, height=12).pack(side="left", padx=1)
             tk.Label(card, text=("◆ " if m == cur else "") + t("theme." + m), bg=pp["surface"], fg=pp["fg"], font=(ui_theme.FONT_SEMI, 9)).pack(anchor="w", padx=6)
             tk.Label(card, text=t("themedesc." + m), bg=pp["surface"], fg=pp["muted"], font=(ui_theme.FONT, 8), wraplength=190, justify="left").pack(anchor="w", padx=6, pady=(0, 6))
+            tk.Label(card, text=t("theme.pack_includes"), bg=pp["surface"], fg=pp["accent"], font=(ui_theme.FONT_SEMI, 8), wraplength=190, justify="left").pack(anchor="w", padx=6, pady=(0, 7))
             for w_ in [card] + list(card.winfo_children()) + list(sw.winfo_children()):
                 w_.bind("<Button-1>", lambda e, m=m: self.apply_theme_pack(m))
         for c in range(4): gal.columnconfigure(c, weight=1)
@@ -7958,7 +8134,8 @@ class App:
         st["overlay_mode"] = "card" if self.ov_mode.get() == t("overlay.mode_card") else "corner"
         apply_ocr_settings(st); self.card_box = None
         old_theme = st.get("ui_theme", "dark")
-        st["ui_theme"] = next((m for m in ui_theme.THEME_MODES if t("theme." + m) == self.theme_var.get()), old_theme)
+        new_theme = next((m for m in ui_theme.THEME_MODES if t("theme." + m) == self.theme_var.get()), old_theme)
+        if new_theme != old_theme: ui_theme.apply_pack(st, new_theme)
         self.sounds.enabled = bool(st.get("ui_sounds", True))
         save_cfg(self.cfg); self.tess = find_tesseract(self.cfg)
         self._bind_global_hotkeys()
@@ -7975,8 +8152,11 @@ class App:
 
     def apply_theme_pack(self, mode):
         st = self.cfg["settings"]
-        if mode not in ui_theme.THEME_MODES or st.get("ui_theme") == mode: return
-        st["ui_theme"] = mode; save_cfg(self.cfg)
+        if mode not in ui_theme.THEME_MODES: return
+        accent = ui_theme.PALETTES[mode]["accent"]
+        if (st.get("ui_theme") == mode and st.get("fx_cursor_color") == accent
+                and st.get("fx_trail_color") == accent): return
+        ui_theme.apply_pack(st, mode); save_cfg(self.cfg)
         log.info("Theme pack: %s", mode)
         self.rebuild_ui(tab="settings")
         try:
