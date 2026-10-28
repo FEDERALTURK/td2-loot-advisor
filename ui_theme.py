@@ -95,6 +95,23 @@ _PACKS = {
     "kenly": {"bg": "#0b110d", "surface": "#121a15", "surface2": "#1a251e", "border": "#2a3a2f", "fg": "#e7f2ea",
               "muted": "#8fa597", "accent": "#4ade80", "accent_hover": "#86efac", "accent_fg": "#06140b", "select": "#173d26",
               "entry": "#080d0a", "ov_bg": "#101812", "ov_fg": "#f0fbf3", "ov_border": "#2f6b45"},
+    # Yeni görsel yönler / new visual identities.
+    "isac": {"bg": "#07131f", "surface": "#0e2232", "surface2": "#142d40", "border": "#1d4659", "fg": "#e4f5fa",
+             "muted": "#80a1ad", "accent": "#36d9e8", "accent_hover": "#76eef6", "accent_fg": "#04131a", "select": "#123c4b",
+             "entry": "#06101a", "ov_bg": "#081a27", "ov_fg": "#effdff", "ov_border": "#25869b"},
+    "tactical": {"bg": "#111619", "surface": "#1a2225", "surface2": "#263135", "border": "#354348", "fg": "#edf2ef",
+                 "muted": "#9baaaa", "accent": "#b5c6aa", "accent_hover": "#d1dfc9", "accent_fg": "#101714", "select": "#39483c",
+                 "entry": "#0c1113", "ov_bg": "#11191c", "ov_fg": "#f3f7f3", "ov_border": "#899d7d"},
+    "rogue_signal": {"bg": "#120b15", "surface": "#211421", "surface2": "#30192c", "border": "#56304f", "fg": "#f6eaf5",
+                      "muted": "#b99ab5", "accent": "#f04b9c", "accent_hover": "#ff86c4", "accent_fg": "#190b14", "select": "#512344",
+                      "entry": "#0c0710", "ov_bg": "#180d1c", "ov_fg": "#fff2fa", "ov_border": "#a33d80"},
+    # Etkinlik paketleri: palet ile birlikte arka plan radar varyantını da değiştirir.
+    "isac_operations": {"bg": "#071722", "surface": "#0b2130", "surface2": "#123247", "border": "#1b5d72", "fg": "#e5fbff",
+                        "muted": "#8eb6c0", "accent": "#39d7ef", "accent_hover": "#8df4ff", "accent_fg": "#04131a", "select": "#113d4e",
+                        "entry": "#06131d", "ov_bg": "#071d2a", "ov_fg": "#eaffff", "ov_border": "#25a4bb"},
+    "darkzone_rogue": {"bg": "#170b0d", "surface": "#241215", "surface2": "#35191d", "border": "#713333", "fg": "#fff0ed",
+                        "muted": "#d0a29c", "accent": "#ff4d3d", "accent_hover": "#ff897d", "accent_fg": "#240806", "select": "#572120",
+                        "entry": "#100708", "ov_bg": "#210d10", "ov_fg": "#fff4f1", "ov_border": "#bf3b32"},
 }
 for _k, _v in _PACKS.items():
     PALETTES[_k] = {**PALETTES["dark"], **_v}
@@ -104,6 +121,27 @@ PALETTES["light"].update({"ov_bg": "#14161b", "ov_fg": "#ffffff", "ov_border": "
 PALETTES["classic"].update({"ov_bg": "#101010", "ov_fg": "#ffffff", "ov_border": "#1f6fb2"})
 PACKS = ("dark",) + tuple(_PACKS)                                     # oyun atmosferi paketleri (sırası menüde)
 THEME_MODES = PACKS + ("light", "classic")
+
+
+def apply_pack(settings, mode):
+    """Apply a complete appearance preset to persisted UI/effect settings."""
+    if mode not in THEME_MODES:
+        return False
+    accent = PALETTES[mode]["accent"]
+    settings["ui_theme"] = mode
+    # Keep the pointer and trail coordinated with the chosen UI and overlay palette.
+    settings["fx_cursor_color"] = accent
+    settings["fx_trail_color"] = accent
+    # Bu iki pakette renkten fazlası değişir: saatin çizim varyantı ve animasyon temposu da birlikte gelir.
+    if mode == "isac_operations":
+        settings.update({"event_fx": "isac", "fx_bgwatch": True, "fx_bgwatch_dim": 0.08,
+                         "fx_transition_ms": 320, "fx_trail_len": 22})
+    elif mode == "darkzone_rogue":
+        settings.update({"event_fx": "rogue", "fx_bgwatch": True, "fx_bgwatch_dim": 0.12,
+                         "fx_transition_ms": 340, "fx_trail_len": 24})
+    else:
+        settings["event_fx"] = "standard"
+    return True
 
 FONT = "Segoe UI"
 FONT_SEMI = "Segoe UI Semibold"
@@ -129,12 +167,21 @@ def apply(root, mode="dark"):
     if mode == "classic":
         s.theme_use("clam")                # saf clam = eski görünüm
         root.configure(bg=p["bg"])
+        s.layout("NoTabs.TNotebook", [("Notebook.client", {"sticky": "nswe"})])
+        s.configure("Sidebar.TFrame", background=p["bg"])
+        s.configure("Nav.TButton", background=p["bg"], foreground=p["muted"], borderwidth=0,
+                    anchor="w", padding=(10, 9), relief="flat", font=(FONT_SEMI, 10))
+        s.configure("NavActive.TButton", background=p["surface2"], foreground=p["accent"], borderwidth=0,
+                    anchor="w", padding=(10, 9), relief="flat", font=(FONT_SEMI, 10))
+        s.configure("Brand.TLabel", background=p["bg"], foreground=p["accent"], font=(FONT_SEMI, 15))
+        s.configure("Muted.TLabel", background=p["bg"], foreground=p["muted"])
         return p
     # Her mod kendi ttk temasında tutulur; böylece temalar arasında geçiş temiz olur.
     name = f"td2-{mode}"
     if name not in s.theme_names():
         s.theme_create(name, parent="clam")
     s.theme_use(name)
+    s.layout("NoTabs.TNotebook", [("Notebook.client", {"sticky": "nswe"})])
 
     bg, sf, sf2, bd, fg, mu = p["bg"], p["surface"], p["surface2"], p["border"], p["fg"], p["muted"]
     ac, ach, ent = p["accent"], p["accent_hover"], p["entry"]
@@ -148,6 +195,13 @@ def apply(root, mode="dark"):
 
     # çerçeveler ve yazılar
     s.configure("TFrame", background=bg)
+    s.configure("Sidebar.TFrame", background=bg)
+    s.configure("Nav.TButton", background=bg, foreground=mu, borderwidth=0, anchor="w",
+                padding=(10, 9), relief="flat", font=(FONT_SEMI, 10))
+    s.map("Nav.TButton", background=[("active", sf2), ("pressed", sf2)], foreground=[("active", fg), ("pressed", ac)])
+    s.configure("NavActive.TButton", background=sf2, foreground=ac, borderwidth=0, anchor="w",
+                padding=(10, 9), relief="flat", font=(FONT_SEMI, 10))
+    s.map("NavActive.TButton", background=[("active", sf2), ("pressed", bd)], foreground=[("active", ac), ("pressed", fg)])
     s.configure("Card.TFrame", background=sf)
     s.configure("Header.TFrame", background=sf)
     s.configure("TLabel", background=bg, foreground=fg)

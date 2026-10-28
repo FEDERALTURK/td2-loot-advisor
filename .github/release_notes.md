@@ -1,3 +1,10 @@
+**9.1.0 — Tanılama Merkezi ve daha kararlı arayüz**
+
+- Yeni Sistem Tanılama Merkezi; uygulama durumu, performans ve destek için gerekli bilgileri tek yerde toplar ve paylaşılabilir rapor oluşturur.
+- Küçük pencere boyutlarında menü ve panel yerleşimi iyileştirildi; gezinme ve tıklama sorunlarına yönelik kararlılık düzenlemeleri yapıldı.
+- Arka plan efektleri ve HUD çizimi hafifletildi; fare izi efektinin ayrı pencere kaynaklı siyah alan/etkileşim sorunları giderildi.
+- Canlı operasyon/Dark Zone arka plan görselleri ve arayüz düzenlemeleri eklendi.
+- Yayın paketi Windows kurulum dosyasını, taşınabilir ZIP'i, Android Companion beta APK'sını ve SHA-256 özetlerini içerir.
 ## TD2 Loot Advisor — Windows
 
 | Dosya | Ne |
@@ -248,3 +255,4 @@ denetim raporu, satıcı eşleştirme · telefon arkadaşı · build paylaşım 
 Asistana sor / Claude ile oku · 10 dil. Oyunun belleğine dokunmaz, yalnızca ekranı okur.
 
 Bu dosyalar GitHub Actions'ta otomatik derlendi; kurulum dosyası Windows'ta sessizce kurulup program açılarak test edildi.
+

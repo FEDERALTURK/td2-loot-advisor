@@ -9,6 +9,7 @@
 Hiçbiri oyuna dokunmaz; yalnızca bu programın penceresini etkiler.
 """
 import math
+import logging
 import os
 import random
 import struct
@@ -144,13 +145,124 @@ class CursorFX:
     def __init__(self, root, folder):
         self.root, self.folder = root, Path(folder)
         self.current = None
+        self.spec = ""
+        self.enabled = False
+        self._enter_bound = False
+        self._native_cursor = None
+        self._native_cursors = []
+        self._native_path = None
+        self._native_windows = set()
+        self._native_proc = None
+        self._user32 = None
+        self._comctl32 = None
+
+    def _install_native_cursor(self, widget):
+        """Make Windows use our .cur for this HWND's WM_SETCURSOR messages."""
+        if os.name != "nt" or not self.enabled or not self.current:
+            return
+        try:
+            import ctypes
+            if self._user32 is None:
+                self._user32 = ctypes.WinDLL("user32", use_last_error=True)
+                self._comctl32 = ctypes.WinDLL("comctl32", use_last_error=True)
+                self._user32.LoadCursorFromFileW.argtypes = [ctypes.c_wchar_p]
+                self._user32.LoadCursorFromFileW.restype = ctypes.c_void_p
+                self._user32.SetCursor.argtypes = [ctypes.c_void_p]
+                self._user32.SetCursor.restype = ctypes.c_void_p
+                self._user32.DestroyCursor.argtypes = [ctypes.c_void_p]
+                self._user32.DestroyCursor.restype = ctypes.c_bool
+                self._comctl32.DefSubclassProc.argtypes = [ctypes.c_void_p, ctypes.c_uint, ctypes.c_size_t, ctypes.c_ssize_t]
+                self._comctl32.DefSubclassProc.restype = ctypes.c_ssize_t
+
+                callback_type = ctypes.WINFUNCTYPE(
+                    ctypes.c_ssize_t, ctypes.c_void_p, ctypes.c_uint,
+                    ctypes.c_size_t, ctypes.c_ssize_t, ctypes.c_size_t, ctypes.c_size_t)
+
+                def wndproc(hwnd, message, wparam, lparam, subclass_id, ref_data):
+                    # WM_SETCURSOR over client area: Tk's default class cursor
+                    # otherwise restores the Windows arrow after each mouse move.
+                    if message == 0x0020 and (lparam & 0xFFFF) == 1 and self.enabled and self._native_cursor:
+                        self._user32.SetCursor(self._native_cursor)
+                        return 1
+                    return self._comctl32.DefSubclassProc(hwnd, message, wparam, lparam)
+
+                self._native_proc = callback_type(wndproc)
+                self._comctl32.SetWindowSubclass.argtypes = [
+                    ctypes.c_void_p, callback_type, ctypes.c_size_t, ctypes.c_size_t]
+                self._comctl32.SetWindowSubclass.restype = ctypes.c_bool
+
+            native_path = str(Path(self.current).resolve())
+            if self._native_path != native_path:
+                new_cursor = self._user32.LoadCursorFromFileW(native_path)
+                if new_cursor:
+                    self._native_cursor = new_cursor
+                    self._native_path = native_path
+                    self._native_cursors.append(new_cursor)
+                    logging.getLogger("td2.fx").info("Loaded native cursor: %s", native_path)
+                else:
+                    logging.getLogger("td2.fx").error("LoadCursorFromFileW failed (%s): %s", ctypes.get_last_error(), native_path)
+
+            if not self._native_cursor:
+                return
+            hwnd = int(widget.winfo_id())
+            if hwnd not in self._native_windows:
+                if self._comctl32.SetWindowSubclass(hwnd, self._native_proc, id(self), 0):
+                    self._native_windows.add(hwnd)
+                    logging.getLogger("td2.fx").debug("Installed native cursor hook for HWND %s", hwnd)
+                else:
+                    logging.getLogger("td2.fx").error("SetWindowSubclass failed (%s) for HWND %s", ctypes.get_last_error(), hwnd)
+        except Exception:
+            # Tk's configured cursor remains the fallback on other Tk builds.
+            logging.getLogger("td2.fx").exception("Native cursor hook failed")
+            return
+
+    def _apply_tree(self, widget, spec):
+        """Tk cursors belong to individual widgets; update the visible tree too."""
+        try:
+            widget.configure(cursor=spec)
+        except Exception:
+            pass
+        self._install_native_cursor(widget)
+        try:
+            children = widget.winfo_children()
+        except Exception:
+            children = ()
+        for child in children:
+            self._apply_tree(child, spec)
+
+    def _on_enter(self, event):
+        # Some screens set hand2/arrow on hover. Apply the selected app cursor
+        # after those widget-level bindings have run.
+        if not self.enabled or not self.spec:
+            return
+        widget = getattr(event, "widget", None)
+        if widget is not None:
+            try:
+                widget.configure(cursor=self.spec)
+            except Exception:
+                pass
+            self._install_native_cursor(widget)
+
+    def refresh(self):
+        """Reapply the app cursor after tabs or dynamic screen content change."""
+        if self.enabled:
+            self._apply_tree(self.root, self.spec)
 
     def apply(self, enabled, style="crosshair", color="#ff6d10", custom="", scale=1.0):
         try:
             if not enabled or style == "system":
-                self.root.config(cursor=""); self.current = None; return True
+                self.enabled = False; self.spec = ""
+                self._apply_tree(self.root, "")
+                self.current = None
+                return True
             if os.name != "nt":                                   # Tk'nın renkli imleç dosyası desteği Windows'ta
-                self.root.config(cursor="crosshair" if style in ("crosshair", "ring") else "tcross"); return True
+                self.enabled = True
+                self.spec = "crosshair" if style in ("crosshair", "ring") else "tcross"
+                self._apply_tree(self.root, self.spec)
+                if not self._enter_bound:
+                    self.root.bind_all("<Enter>", self._on_enter, add="+")
+                    self._enter_bound = True
+                return True
             self.folder.mkdir(parents=True, exist_ok=True)
             size = 48 if scale >= 1.2 else 32
             if style == "custom" and custom and Path(custom).exists():
@@ -164,11 +276,18 @@ class CursorFX:
                 img, hot = draw_cursor(style if style != "custom" else "crosshair", color, size)
                 path = self.folder / f"{style}_{color.lstrip('#')}_{size}.cur"
                 if not path.exists(): write_cur(img, path, hot)
-            self.root.config(cursor="@" + _short(path))
+            self.spec = "@" + _short(path)
+            self.root.config(cursor=self.spec)
             self.current = path
+            self.enabled = True
+            self._apply_tree(self.root, self.spec)
+            if not self._enter_bound:
+                self.root.bind_all("<Enter>", self._on_enter, add="+")
+                self._enter_bound = True
             return True
         except Exception:
-            try: self.root.config(cursor="")
+            self.enabled = False; self.spec = ""
+            try: self._apply_tree(self.root, "")
             except Exception: pass
             return False
 
@@ -181,6 +300,8 @@ class TrailFX:
         self.root, self.color, self.length = root, color, max(4, int(length))
         self.pts, self.win, self.cv, self.alive = [], None, None, False
         self.click_through = click_through
+        self._line_ids = []
+        self._dot_id = None
 
     def start(self):
         if self.alive or os.name != "nt": return False
@@ -207,6 +328,7 @@ class TrailFX:
         except Exception:
             pass
         self.win = self.cv = None; self.pts = []
+        self._line_ids = []; self._dot_id = None
 
     def _shade(self, k):
         r, g, b = _hex(self.color)
@@ -237,18 +359,30 @@ class TrailFX:
             if not self.pts and getattr(self, "_empty", False):
                 self.root.after(60, self._tick); return          # iz yok: çizme
             self._empty = not self.pts
-            self.cv.delete("all")
             n = len(self.pts)
             for i in range(1, n):
                 k = i / n
                 (x0, y0, _), (x1, y1, _) = self.pts[i - 1], self.pts[i]
-                self.cv.create_line(x0, y0, x1, y1, fill=self._shade(k), width=max(1, int(1 + 5 * k)), capstyle="round")
+                opts = {"fill": self._shade(k), "width": max(1, int(1 + 5 * k)), "capstyle": "round", "state": "normal"}
+                if i - 1 < len(self._line_ids):
+                    item = self._line_ids[i - 1]
+                    self.cv.coords(item, x0, y0, x1, y1); self.cv.itemconfigure(item, **opts)
+                else:
+                    self._line_ids.append(self.cv.create_line(x0, y0, x1, y1, **opts))
+            for item in self._line_ids[max(0, n - 1):]:
+                self.cv.itemconfigure(item, state="hidden")
             if n:
                 hx, hy, _ = self.pts[-1]
-                self.cv.create_oval(hx - 3, hy - 3, hx + 3, hy + 3, fill=self.color, outline="")
+                if self._dot_id is None:
+                    self._dot_id = self.cv.create_oval(hx - 3, hy - 3, hx + 3, hy + 3, fill=self.color, outline="")
+                else:
+                    self.cv.coords(self._dot_id, hx - 3, hy - 3, hx + 3, hy + 3)
+                    self.cv.itemconfigure(self._dot_id, fill=self.color, state="normal")
+            elif self._dot_id is not None:
+                self.cv.itemconfigure(self._dot_id, state="hidden")
         except Exception:
             pass
-        self.root.after(_animation_budget(self.root, 33)[1], self._tick)
+        self.root.after(_animation_budget(self.root, 40)[1], self._tick)
 
 
 # ---------------------------------------------------------------- sekme geçişi
@@ -355,7 +489,7 @@ class Transition:
         self._draw(l, r, glow=(1 - k) * 1.0)
         self.frames += 1
         if k < 1.0:
-            self.root.after(12, lambda: self._tick(g, t0, a0, a1))
+            self.root.after(16, lambda: self._tick(g, t0, a0, a1))
         else:
             self.debug["end"] = self._pos
 
@@ -530,9 +664,10 @@ class AgentWatch:
     Halkalar, saniye çizgileri, dönen kesikli yaylar, saat/dakika/saniye yayları, ortada saat;
     dış halkadaki turuncu ışık (kuyruklu) fare hangi yöndeyse oraya döner."""
 
-    def __init__(self, canvas, pointer_fn, color="#ff6d10", bg="#0f1116", dim=0.0):
+    def __init__(self, canvas, pointer_fn, color="#ff6d10", bg="#0f1116", dim=0.0, variant="standard"):
         self.cv, self.pointer_fn, self.c, self.bgc = canvas, pointer_fn, color, bg
         self.dim = dim
+        self.variant = variant
         self.angle = -90.0                  # ışığın açısı (derece, Tk: 0 = doğu, saat yönünün tersi pozitif)
         self.alive, self._size, self._img = True, (0, 0), None
         self.t0 = time.time()
@@ -637,6 +772,36 @@ class AgentWatch:
         p = (tt % 4) / 4
         rr = R * (0.4 + 0.75 * p)
         P.put("oval", cx - rr, cy - rr, cx + rr, cy + rr, outline=self._col(0.5 * (1 - p)), width=2, tags="dyn")
+        # Etkinlik katmanları boş alanları doldurur; yalnızca arka planda çizilir ve 12 FPS sınırını korur.
+        scan_angle = (tt * (18 if self.variant == "isac" else 11)) % 360
+        if self.variant == "isac":
+            # ISAC: tarama ışını, veri düğümleri ve koordinat çizgileri.
+            a = math.radians(scan_angle)
+            ex, ey = cx + R * 1.04 * math.cos(a), cy - R * 1.04 * math.sin(a)
+            P.put("line", cx, cy, ex, ey, fill=self._col(0.42), width=2, tags="dyn")
+            for j in range(5):
+                aa = math.radians(scan_angle + j * 47)
+                nr = R * (0.38 + (j % 3) * 0.19)
+                nx, ny = cx + nr * math.cos(aa), cy - nr * math.sin(aa)
+                pulse = 0.35 + 0.35 * (0.5 + 0.5 * math.sin(tt * 2.4 + j))
+                P.put("oval", nx - 4, ny - 4, nx + 4, ny + 4, fill=self._col(pulse), outline="", tags="dyn")
+                P.put("line", nx, ny, cx + (nx - cx) * 0.78, cy + (ny - cy) * 0.78,
+                           fill=self._col(0.18), width=1, dash=(3, 4), tags="dyn")
+            P.put("text", cx, cy + R * 0.34, text="ISAC // LIVE SCAN", fill=self._col(0.44),
+                       font=("Segoe UI Semibold", max(8, int(R * 0.22) // 5)), tags="dyn")
+        elif self.variant == "rogue":
+            # Rogue: kırmızı risk dilimleri, bozulan sinyal parçaları ve uyarı nabzı.
+            for j in range(7):
+                start = (scan_angle + j * 51) % 360
+                self._arc(cx, cy, R * (0.52 + (j % 2) * 0.22), start, 18,
+                          self._col(0.22 + 0.11 * (j % 3)), 3)
+            for j in range(6):
+                xx = cx - R * 0.82 + j * R * 0.32
+                yy = cy + R * (0.46 + 0.08 * math.sin(tt * 1.8 + j))
+                P.put("line", xx, yy, xx + R * 0.16, yy, fill=self._col(0.26 + 0.12 * (j % 2)), width=2, tags="dyn")
+            warn = 0.45 + 0.35 * (0.5 + 0.5 * math.sin(tt * 3.0))
+            P.put("text", cx, cy + R * 0.34, text="ROGUE SIGNAL // UNSTABLE", fill=self._col(warn),
+                       font=("Segoe UI Semibold", max(8, int(R * 0.22) // 5)), tags="dyn")
         # fareyi takip eden turuncu ışık + kuyruk + parıltı katmanları
         A = self.angle
         for k in range(6, 0, -1):                                   # kuyruk (ters yönde, solarak)
@@ -666,8 +831,9 @@ class WatchBackground:
     zemin rengi (-transparentcolor) şeffaf yapılır → kartlar ve listeler okunur kalır, boşluklarda saat görünür.
     Diğer sistemlerde (şeffaflık yok) kapalı kalır."""
 
-    def __init__(self, root, bg="#0f1116", color="#ff6d10", dim=0.0, fps=20):
+    def __init__(self, root, bg="#0f1116", color="#ff6d10", dim=0.0, fps=12, variant="standard"):
         self.root, self.bgc, self.color, self.dim, self.fps = root, bg, color, dim, fps
+        self.variant = variant
         self.win = self.cv = self.watch = None
         self.alive = False
         self._geo = None
@@ -680,7 +846,7 @@ class WatchBackground:
             w.configure(bg=self.bgc)
             self.cv = tk.Canvas(w, bg=self.bgc, highlightthickness=0, bd=0)
             self.cv.pack(fill="both", expand=True)
-            self.watch = AgentWatch(self.cv, self._pointer, self.color, self.bgc, self.dim)
+            self.watch = AgentWatch(self.cv, self._pointer, self.color, self.bgc, self.dim, self.variant)
             # Şeffaf zemin piksellerine yapılan tıklamaları Windows bu pencereye verir: programdaki karşılığına ilet
             # (menü sekmesi, düğme, liste) — yoksa harflerin arası / kenarlar tıklanmıyormuş gibi olur.
             for seq in ("<ButtonPress-1>", "<ButtonRelease-1>", "<Double-Button-1>", "<ButtonPress-3>", "<ButtonRelease-3>",
