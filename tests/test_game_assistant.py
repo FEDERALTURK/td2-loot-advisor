@@ -166,6 +166,16 @@ class IntegrationTests(unittest.TestCase):
         obj._hotkey_action("voice")
         obj.toggle_voice.assert_called_once()
 
+    def test_live_translation_requests_cancellable_system_speech(self):
+        obj = self.obj(); obj.cfg["settings"].update(tr_speak="all", tr_mode="inplace", voice_online=False)
+        obj._lt_speak([("Hello", "Merhaba", (0, 0, 100, 20))])
+        self.assertTrue(obj.speaker.say.call_args.kwargs["cancellable"])
+
+    def test_regular_assistant_speech_is_cancellable_by_default(self):
+        obj = self.obj()
+        app.App.speak(obj, "Merhaba")
+        self.assertTrue(obj.speaker.say.call_args.kwargs["cancellable"])
+
     def test_translation_pause_keeps_global_shortcuts_and_resumes(self):
         obj = self.obj(); obj.lt_stop_ev = object(); obj.sp = None
         obj.lt_stop = Mock(side_effect=lambda: setattr(obj, "lt_stop_ev", None))

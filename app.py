@@ -2361,7 +2361,7 @@ class App:
                 try: rate = int(float(st.get("tts_rate", 185)))
                 except ValueError: rate = 185
                 self.speaker.say(text, rate, "tr-tr", fx=False, pack="natural_tr",
-                                 online=bool(st.get("voice_online", False)))
+                                 online=bool(st.get("voice_online", False)), cancellable=True)
 
     def term_finder(self):
         lang = i18n.current_language()
@@ -6195,7 +6195,7 @@ class App:
         if txt:
             self.chat_in.delete(0, "end"); self.ask(txt)
 
-    def speak(self, text, fx=None, cancellable=False):
+    def speak(self, text, fx=None, cancellable=True):
         if self._microphone_busy(): return
         st = self.cfg["settings"]
         try: rate = int(float(st.get("tts_rate", 185)))
