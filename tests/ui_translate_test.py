@@ -48,7 +48,7 @@ def shot(name, full=False, w=None):
     except Exception as e: print("shot", e)
 
 def s1():
-    a.nb.select(a.tab_keys.index("translate")); a.root.update()
+    a.select_page("translate"); a.root.update()
     step("model yüklü görünüyor", "✔" in a.lt_model_lbl.cget("text"), lbl=a.lt_model_lbl.cget("text"))
     a.lt_try(); a.root.after(6000, s2)
 def s2():
@@ -106,7 +106,7 @@ def s5():
     except Exception as e:
         step("telefon sayfası", False, e=repr(e))
     a._ts_ui()
-    a.nb.select(a.tab_keys.index("translate")); shot("06_tab_new")
+    a.select_page("translate"); shot("06_tab_new")
     a.lt_suggest("Agent, the Black Tusk have taken control of the Capitol Building.", "Ajan, Black Tusk Capitol Binası'nın kontrolünü ele geçirdi.")
     a.root.after(1200, s6)
 def s6():
@@ -119,7 +119,7 @@ def s7():
     shot("08_theme_nightops")
     a.apply_theme_pack("blacktusk"); a.root.after(2500, s8)
 def s8():
-    a.nb.select(a.tab_keys.index("translate")); shot("09_theme_blacktusk")
+    a.select_page("translate"); shot("09_theme_blacktusk")
     a.apply_theme_pack("dark")
     finish()
 def finish():

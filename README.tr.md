@@ -225,6 +225,10 @@ Bu geliştirmeler 6.0.2 sürümüne dahildir. Test kapsamı ve sınırlar: [yere
 Yerinde çevirinin satır konumlarını koruyan düzeltmeler, iki hazır Türkçe/İngilizce Neural bildirim paketi ve isteğe bağlı çevrimiçi doğal ses eklendi. Bu değişiklikler 6.0.3 sürümüne dahildir. Kullanım, veri aktarımı ve doğrulama: [6.0.3 notları](docs/overlay_voice_local.md).
 
 
+### 9.0.5: düzenli menüler, kısayollar ve Division 3 haberleri
+
+Uygulamanın 14 sayfası altı ana grupta toplandı. Ayarlar dört başlık altında düzenlendi. Tüm uygulama kısayolları tuş yakalama ve çakışma kontrolüyle Ayarlar → Temel → Kısayollar alanından değiştirilebilir. Yeni Division 3 sayfası doğrulanmış Ubisoft bilgilerini gösterir ve mevcut resmî haber akışından yeni gelişmeleri izler. Görev eşitleme sayfasına resmî ve topluluk rehberi kaynakları eklendi.
+
 ### 9.0.4: oyun içi sesli asistan
 
 F6 canlı çeviriyi durdurur/devam ettirir. F9 mikrofonu açar, tekrar basış soruyu gönderir; yanıt sesli okunur. F12 isteği ve sesi iptal eder. Kısayollar eşya taramasından bağımsızdır. İlk kullanımdan önce Asistan sekmesinden konuşma modelini hazırla ve AI sağlayıcısını yapılandır. Mikrofon sesi yerelde metne dönüşür; soru ve eşya/build bağlamı seçili sağlayıcıya iletilir. [Kurulum, veri aktarımı ve test kapsamı](docs/game_assistant_9.0.4.md).

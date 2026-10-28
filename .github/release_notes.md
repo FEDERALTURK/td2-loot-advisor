@@ -8,6 +8,15 @@
 
 Windows "kişisel bilgisayarınızı korudu" derse: **Ek bilgi → Yine de çalıştır** (dosya henüz kod imzalı değil).
 
+**9.0.5 — Daha düzenli menüler, merkezi kısayollar ve Division 3 haber alanı**
+
+- Ana menüdeki 14 sayfa altı ana grupta toplandı; Ayarlar sayfaları Temel, Tarama, Görünüm ve Hizmetler olarak düzenlendi.
+- Eşya tarama, tek seferlik çeviri, canlı çeviriyi durdurma/sürdürme, görev önerisi, sesli asistan ve iptal kısayolları Ayarlar → Temel → Kısayollar alanında birleştirildi. Klavye ile tuş yakalama ve çakışma denetimi eklendi.
+- The Division 3 için yeni İstihbarat sayfası eklendi. Ubisoft’un doğrulanmış duyuruları ve kaynakları gösterilir; son resmî haber akışı Division 3 haberlerini buldukça sayfayı günceller. Ubisoft’un açıklamadığı çıkış tarihi veya oynanış bilgisi iddia edilmez.
+- Görev eşitleme alanına Ubisoft’un resmî haberleri ve topluluk görev rehberleri için kaynak bağlantıları eklendi. Mevcut görev akışı, Wiki rehberleri ve doğrulanmış topluluk bildirimleri korunur.
+- Kaynak ağacı ve varlık klasörleri denetlendi; uygulama/kurulum yolları sabit tutularak proje yerleşimi belgelendi.
+- Yayın iş akışına yeni menü yapısını oluşturan Windows widget kontrolü eklendi.
+
 **9.0.4 — Oyun içi sesli AI asistanı ve çeviri kontrolü**
 
 - **F6: çeviriyi durdur / devam et.** Canlı ekran ve konuşma çevirisi tek tuşla durdurulup önceki kaynaklarla yeniden başlatılır. Durdurma, kısayol dinleyicisini kapatmaz. Eski kaynak ve gecikmiş ekran yakalama işleri iptal sonrasında kaplamayı yeniden açamaz.
@@ -19,7 +28,7 @@ Windows "kişisel bilgisayarınızı korudu" derse: **Ek bilgi → Yine de çal�
 - **Veri aktarımı açık.** Mikrofon sesi yerelde metne dönüşür. Soru ve build/eşya bağlamı seçili AI sağlayıcısına gider; çevrimiçi doğal ses açıksa yanıt metni Microsoft ses hizmetine de gönderilir. Sağlayıcı hatasında yerleşik yardımcıya dönülmesi sesli olarak açıklanır.
 - **Yayın öncesi kontroller.** Kısayol, kayıt, iptal, eski zamanlayıcı/yanıt korumaları ve yerel HTTP sağlayıcı akışı test edilir; kurulan EXE'de asistan çalışma zamanı ve gerçek Türkçe ses tanıma ayrıca sınanır. Gerçek oyun + kullanıcı mikrofonu + bulut hesabıyla uçtan uca kullanım henüz doğrulanmadı.
 
-Sürüm numarası kullanıcı isteği doğrultusunda **9.0.4** olarak belirlenmiştir. Önceki kararlı sürüm 6.0.3'tür.
+Sürüm numarası kullanıcı isteği doğrultusunda **9.0.5** olarak belirlenmiştir. Önceki kararlı sürüm 9.0.4'tür.
 
 **6.0.3 — Daha hızlı eşya okuma, yerinde çeviri ve doğal ses**
 

@@ -79,8 +79,13 @@ def main():
         try:
             init=time.perf_counter();obj=app.App();obj.root.update_idletasks()
             result["widgets_ms"]=round((time.perf_counter()-init)*1000,1)
-            result["tabs"]=len(obj.tab_keys)
-            assert result["tabs"]==13
+            result["pages"]=len(obj.tab_keys)
+            result["tabs"]=len(obj.nb.tabs())
+            assert result["pages"]==14 and result["tabs"]==6
+            assert len(obj.set_nb.tabs())==4 and "shortcuts" in obj.set_pages
+            obj.select_page("settings"); obj.select_settings_page("shortcuts"); obj.root.update_idletasks()
+            assert obj.current_tab()=="settings"
+            assert obj.shortcut_vars["voice_hotkey"].get()==obj.cfg["settings"]["voice_hotkey"]
             if hasattr(obj,"toggle_performance"):
                 assert obj.lt_eng.get()=="local"
                 assert "bilgisayarda" in obj.lt_privacy_lbl.cget("text")
@@ -91,7 +96,7 @@ def main():
                 obj._performance_tick();assert obj.root._td2_suspend_animations
                 with patch.object(obj.root,"state",return_value="normal"),patch.object(app,"game_active",return_value=False):
                     obj._performance_tick();assert not obj.root._td2_suspend_animations
-            obj.nb.select(obj.tabs["translate"]);obj.root.update()
+            obj.select_page("translate");obj.root.update()
             assert obj.vp_var.get() == app.t("vp.p_natural_tr")
             obj.set_online_voice(True)
             assert obj.vp_online.get() and obj.ts_online_voice.get()

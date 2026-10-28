@@ -10,7 +10,7 @@ app.messagebox.askyesno = lambda *a, **k: False
 OUT = ROOT / "tests" / ".tab_result.json"
 a = app.App()
 res = {"switches": []}
-seq = ["settings", "stash", "builds", "dash", "stats", "history", "dash"]
+seq = ["settings", "tasks", "assistant", "dash", "history", "builds", "dash"]
 
 
 def switch(i=0):
@@ -19,7 +19,7 @@ def switch(i=0):
         a.root.after(800, a.root.destroy); return
     fx = a.fxbar
     f0, t0 = fx.frames, time.perf_counter()
-    a.nb.select(a.tab_keys.index(seq[i]))
+    a.select_page(seq[i])
     gaps, last = [], [time.perf_counter()]
     def probe(n=0):
         now = time.perf_counter(); gaps.append((now - last[0]) * 1000); last[0] = now

@@ -25,7 +25,7 @@ def shot(name, w=None):
     except Exception as e: print("shot failed", e)
 
 def s1():
-    a.nb.select(a.tab_keys.index("info")); a.info_nb.select(0)
+    a.select_page("info"); a.info_nb.select(0)
     a.enc_q.set("striker")
     a.root.after(800, s2)
 def s2():

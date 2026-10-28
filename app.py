@@ -147,7 +147,7 @@ import game_assistant
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.0.4"
+APP_VERSION = "9.0.5"
 FROZEN = getattr(sys, "frozen", False)
 BASE = Path(sys.executable).parent if FROZEN else Path(__file__).resolve().parent
 TASKS_CACHE = BASE / "tasks_cache.json"  # son indirilen görev listesi
@@ -2484,7 +2484,7 @@ class App:
                         command=lambda: (st.__setitem__("tr_log", bool(self.lt_log_var.get())), save_cfg(self.cfg))).pack(anchor="w", padx=8, pady=2)
         g = ttk.Frame(ob); g.pack(fill="x", padx=8, pady=(2, 8))
         self.lt_vars = {}
-        for i, (k, lab, default, w) in enumerate((("tr_hotkey", t("lt.hotkey"), "<f7>", 10), ("tr_toggle_hotkey", t("ga.pause_key"), "<f6>", 10), ("tr_font", t("lt.font"), 15, 5),
+        for i, (k, lab, default, w) in enumerate((("tr_font", t("lt.font"), 15, 5),
                                                   ("tr_hide", t("lt.hide"), 10, 5), ("tr_alpha", t("lt.alpha"), 0.9, 5))):
             ttk.Label(g, text=lab).grid(row=i // 3, column=(i % 3) * 2, sticky="w", padx=(0, 4))
             v = self.lt_vars[k] = tk.StringVar(value=str(st.get(k, default)))
@@ -2596,20 +2596,15 @@ class App:
 
     def _lt_save_opts(self):
         st = self.cfg["settings"]
-        candidate = dict(st)
-        for key in ("tr_hotkey", "tr_toggle_hotkey"): candidate[key] = self.lt_vars[key].get().strip()
-        try: game_assistant.bindings(candidate, check_hotkey)
+        try: game_assistant.bindings(st, check_hotkey)
         except Exception as error:
             self._lt_status(t("ga.hotkey_error", e=error), "danger"); return False
         for k, v in self.lt_vars.items():
             val = v.get().strip()
-            if k in ("tr_hotkey", "tr_toggle_hotkey"): st[k] = val
-            else:
-                try: st[k] = float(val) if k == "tr_alpha" else int(float(val))
-                except ValueError: pass
+            try: st[k] = float(val) if k == "tr_alpha" else int(float(val))
+            except ValueError: pass
         st["tr_alpha"] = max(0.4, min(1.0, float(st.get("tr_alpha", 0.9))))
         save_cfg(self.cfg)
-        self._bind_global_hotkeys()
 
     def _lt_status(self, text, kind="muted"):
         if getattr(self, "lt_stat", None) and self.lt_stat.winfo_exists():
@@ -2698,7 +2693,7 @@ class App:
 
     def _open_enc(self, name):
         try:
-            self.nb.select(self.tabs["info"])
+            self.select_page("info")
             if hasattr(self, "enc_q"): self.enc_q.set(name)
             if hasattr(self, "refresh_enc"): self.refresh_enc()
         except Exception:
@@ -2790,6 +2785,67 @@ class App:
         if k == "news": self._news_mark_seen()
         if k == "quiz" and not getattr(self, "_quiz_q", None): self.quiz_next()
 
+    def build_division3(self):
+        """Division 3 için kaynaklı gelişme özeti; yalnızca doğrulanmış bilgileri gösterir."""
+        page = self.tabs["division3"]
+        feed = {}
+        for path in (BASE / "meta" / "division3_feed.json", BUNDLE / "meta" / "division3_feed.json"):
+            try:
+                feed = json.loads(path.read_text(encoding="utf-8")); break
+            except (OSError, ValueError):
+                continue
+        wrap = ui_theme.scrollable(page, PAL["bg"])
+        ttk.Label(wrap, text="The Division 3 — doğrulanmış gelişmeler", style="Section.TLabel").pack(anchor="w", padx=12, pady=(12, 4))
+        ttk.Label(wrap, text=(feed.get("status_tr") or "Ubisoft oyunun geliştirme aşamasında olduğunu doğruluyor; çıkış tarihi ve oyun ayrıntıları açıklanmadı."),
+                  foreground=PAL["muted"], wraplength=920, justify="left").pack(anchor="w", padx=12, pady=(0, 10))
+        live = ttk.LabelFrame(wrap, text="Son resmî haber akışından")
+        live.pack(fill="x", padx=10, pady=5)
+        self.div3_news_area = ttk.Frame(live); self.div3_news_area.pack(fill="x", padx=8, pady=5)
+        self.refresh_division3_news()
+        for item in feed.get("updates", []):
+            card = ttk.LabelFrame(wrap, text=f'{item.get("date", "")}  ·  {item.get("title", "")}')
+            card.pack(fill="x", padx=10, pady=5)
+            ttk.Label(card, text=item.get("summary_tr", ""), wraplength=900, justify="left").pack(anchor="w", padx=10, pady=7)
+            url = item.get("url", "")
+            if url.startswith("https://"):
+                ttk.Button(card, text="🔗 Kaynağı aç", command=lambda u=url: webbrowser.open(u)).pack(anchor="w", padx=10, pady=(0, 8))
+        sources = ttk.LabelFrame(wrap, text="Güvenilir kaynaklar")
+        sources.pack(fill="x", padx=10, pady=10)
+        for source in feed.get("sources", []):
+            url = source.get("url", "")
+            if not url.startswith("https://"): continue
+            row = ttk.Frame(sources); row.pack(fill="x", padx=8, pady=4)
+            ttk.Label(row, text=source.get("name", "Ubisoft"), width=34).pack(side="left", anchor="n")
+            ttk.Label(row, text=source.get("note_tr", ""), foreground=PAL["muted"], wraplength=570, justify="left").pack(side="left", fill="x", expand=True, padx=8)
+            ttk.Button(row, text="Aç", command=lambda u=url: webbrowser.open(u)).pack(side="right")
+        ttk.Label(wrap, text=f'Kaynak kontrol tarihi: {feed.get("checked", "—")}. Yeni bilgiler doğrulanana kadar burada söylenti değil, resmî durum gösterilir.',
+                  foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=12, pady=(4, 12))
+
+    def refresh_division3_news(self):
+        area = getattr(self, "div3_news_area", None)
+        if not area or not area.winfo_exists(): return
+        for child in area.winfo_children(): child.destroy()
+        hits = []
+        for item in (self.news or {}).get("items", []):
+            title = item.get("title") or {}
+            body = item.get("text") or {}
+            text = " ".join(title.values()) + " " + " ".join(body.values())
+            if any(term in text.casefold() for term in ("division 3", "division iii", "division three")):
+                hits.append(item)
+        if not hits:
+            ttk.Label(area, text="İndirilen Ubisoft haber akışında henüz doğrudan The Division 3'ü konu alan yeni bir yazı yok.",
+                      foreground=PAL["muted"], wraplength=850, justify="left").pack(anchor="w", padx=4, pady=4)
+            return
+        for item in hits[:8]:
+            title = next(iter((item.get("title") or {}).values()), "The Division 3")
+            date = item.get("date")
+            row = ttk.Frame(area); row.pack(fill="x", pady=3)
+            ttk.Label(row, text=f'{date.date().isoformat() if date else ""}  {title}',
+                      wraplength=750, justify="left").pack(side="left", fill="x", expand=True)
+            url = item.get("url", "")
+            if url.startswith("https://"):
+                ttk.Button(row, text="Aç", command=lambda u=url: webbrowser.open(u)).pack(side="right")
+
     # --- canlı haber akışı
     def _news_poll(self):
         """Program açıkken 30 dakikada bir haber akışına bakar; yeni haber gelirse sayfayı yeniden başlatmadan günceller."""
@@ -2811,6 +2867,8 @@ class App:
         self.news = feed
         try: self.refresh_info_news()
         except Exception: pass
+        try: self.refresh_division3_news()
+        except Exception: pass
         self._info_badge()
         if new and old:
             lang = i18n.current_language()
@@ -2829,7 +2887,8 @@ class App:
         seen = set(self.cfg["settings"].get("news_seen", []))
         n = sum(1 for it, stt in knowledge.news_sorted((self.news or {}).get("items", [])) if it["id"] not in seen and stt != "ended")
         try:
-            self.nb.tab(self.tab_keys.index("info"), text=ui_theme.with_icon(t("tab.info"), "📚") + (f"  ●{n}" if n else ""))
+            intel = self.group_nbs["intel"]
+            intel.tab(self.tabs["info"], text=ui_theme.with_icon(t("tab.info"), "📚") + (f"  ●{n}" if n else ""))
         except Exception:
             pass
 
@@ -3006,7 +3065,7 @@ class App:
 
     def enc_open(self, name):
         """Başka bir yerden (yarışma, haber) bir girişi aç."""
-        self.nb.select(self.tab_keys.index("info")); self.info_nb.select(0)
+        self.select_page("info"); self.info_nb.select(0)
         e = next((x for x in self.encyclopedia().entries if x["name"] == name), None)
         if e: self._enc_show(e)
 
@@ -4027,20 +4086,42 @@ class App:
         self.fxbar = fx.Transition(self.root, self.root, color=PAL["accent"], bg=PAL["bg"],
                                    duration_ms=int(self.cfg["settings"].get("fx_transition_ms", 260)))
         nb = self.nb = ttk.Notebook(self.root); nb.pack(fill="both", expand=True, padx=10, pady=(6, 10))
-        # Sekmeler sabit kimliklerle tutulur, başlıkları t() ile çevrilir.
-        self.tab_keys = ("dash", "builds", "progress", "stash", "stats", "info", "translate", "tasks", "assistant", "settings", "history", "log", "help")
-        self.tabs = {k: ttk.Frame(nb) for k in self.tab_keys}
-        for k in self.tab_keys: nb.add(self.tabs[k], text=ui_theme.with_icon(t(f"tab.{k}"), ui_theme.TAB_ICONS.get(k, "")))
-        self.build_dash(); self.build_builds(); self.build_prog(); self.build_stash(); self.build_stats(); self.build_info(); self.build_translate(); self.build_gorevler(); self.build_asistan()
+        # Ana menüyü altı anlaşılır grupta topluyoruz; içerik kimlikleri değişmeden kalır.
+        self.tab_keys = ("dash", "builds", "progress", "stash", "stats", "info", "tasks", "division3", "translate", "assistant", "settings", "history", "log", "help")
+        self.tab_groups = {
+            "dash": "home", "builds": "gear", "progress": "gear", "stash": "gear", "stats": "gear",
+            "info": "intel", "tasks": "intel", "division3": "intel",
+            "translate": "tools", "assistant": "tools", "settings": "settings",
+            "history": "system", "log": "system", "help": "system",
+        }
+        self.group_keys = ("home", "gear", "intel", "tools", "settings", "system")
+        tr_ui = i18n.current_language() == "tr"
+        self.group_labels = {"home": "⌂  " + t("tab.dash"), "gear": "🎒  Ekipman" if tr_ui else "🎒  Gear",
+                             "intel": "🛰  İstihbarat" if tr_ui else "🛰  Intel",
+                             "tools": "🧰  Araçlar" if tr_ui else "🧰  Tools",
+                             "settings": "⚙  Ayarlar" if tr_ui else "⚙  Settings",
+                             "system": "☰  Diğer" if tr_ui else "☰  More"}
+        self.group_nbs = {}
+        for group in self.group_keys:
+            holder = ttk.Frame(nb); nb.add(holder, text=self.group_labels[group])
+            self.group_nbs[group] = ttk.Notebook(holder); self.group_nbs[group].pack(fill="both", expand=True, padx=3, pady=3)
+        self.tabs = {}
+        for k in self.tab_keys:
+            group = self.tab_groups[k]; parent = self.group_nbs[group]
+            self.tabs[k] = ttk.Frame(parent)
+            title = "The Division 3" if k == "division3" else t(f"tab.{k}")
+            parent.add(self.tabs[k], text=ui_theme.with_icon(title, ui_theme.TAB_ICONS.get(k, "")))
+        self.build_dash(); self.build_builds(); self.build_prog(); self.build_stash(); self.build_stats(); self.build_info(); self.build_division3(); self.build_translate(); self.build_gorevler(); self.build_asistan()
         self.build_settings(); self.build_hist(); self.build_logtab(); self.build_help()
         nb.bind("<<NotebookTabChanged>>", self.on_tab)
+        for inner in self.group_nbs.values(): inner.bind("<<NotebookTabChanged>>", self.on_tab)
         self.root.after(300, self.apply_fx)
         self.root.after(400, lambda: self.cfg["settings"].get("fx_transitions", True) and self.fxbar.snap(self.nb))
         st = self.cfg["settings"]
         if st.get("_start_tab") in self.tab_keys:                       # yeniden açılıştan sonra kaldığı yere dön
-            self.nb.select(self.tab_keys.index(st["_start_tab"]))
+            self.select_page(st["_start_tab"])
             if st.get("_start_page") in getattr(self, "_set_keys", []):
-                self.set_nb.select(self._set_keys.index(st["_start_page"]))
+                self.select_settings_page(st["_start_page"])
             st["_start_tab"] = st["_start_page"] = ""; save_cfg(self.cfg)
 
     def rebuild_ui(self, tab=None):
@@ -4069,16 +4150,31 @@ class App:
                 delattr(self, k)
         self.build_ui()
         if tab in self.tab_keys:
-            self.nb.select(self.tab_keys.index(tab))
+            self.select_page(tab)
         if was_running: self.start(quiet=True)
         log.info("UI rebuilt (theme=%s, language=%s)", self.cfg["settings"].get("ui_theme"), i18n.current_language())
 
     def current_tab(self):
         """Seçili sekmenin kimliği (görünen adı değil)."""
         try:
-            return self.tab_keys[self.nb.index(self.nb.select())]
+            group = self.group_keys[self.nb.index(self.nb.select())]
+            inner = self.group_nbs[group]
+            selected = inner.select()
+            return next(key for key in self.tab_keys if self.tab_groups[key] == group and str(self.tabs[key]) == selected)
         except Exception:
             return ""
+
+    def select_page(self, key):
+        """Belirtilen içerik sayfasını kendi üst menü grubu ve alt sekmesiyle aç."""
+        if key not in self.tabs: return
+        group = self.tab_groups[key]; self.nb.select(self.group_keys.index(group))
+        inner = self.group_nbs[group]; inner.select(self.tabs[key])
+
+    def select_settings_page(self, key):
+        if key not in getattr(self, "set_pages", {}): return
+        group, page = self.set_pages[key]
+        self.set_nb.select(self.set_groups.index(group))
+        self.set_group_nbs[group].select(page)
 
     def build_header(self):
         """Üst bant: dönen arka planlar, marka ve durum rozetleri (ui_art.Banner)."""
@@ -4126,11 +4222,11 @@ class App:
 
     def on_tab(self, _=None):
         if hasattr(self, "sounds"): self.sounds.play("tab")
-        cur = self.nb.index(self.nb.select()) if hasattr(self, "nb") else None
+        cur = (self.nb.index(self.nb.select()), self.current_tab()) if hasattr(self, "nb") else None
         prev, self._tab_prev = getattr(self, "_tab_prev", cur), cur
         anim = self.cfg["settings"].get("fx_transitions", True) and hasattr(self, "fxbar")
         if anim:
-            self.fxbar.play(self.nb, prev, cur)
+            self.fxbar.play(self.nb, prev[0] if isinstance(prev, tuple) else prev, cur[0])
         k = self.current_tab()
         # sekmenin verisini yenilemek zaman alabilir: kayma animasyonu donmasın diye bittikten sonra
         def refresh(k=k):
@@ -5149,7 +5245,7 @@ class App:
         q = t("ai.item_prompt", name=it.get("name"), slot=slot_name(it.get("slot") or "") if it.get("slot") else "?",
               src=it.get("gear_set") or it.get("brand") or "-", attrs=attrs or "-", talents=", ".join(it.get("talents") or []) or "-",
               build=(b or {}).get("name", "-"), req=req_lines_short(req) or "-")
-        self.nb.select(self.tab_keys.index("assistant"))
+        self.select_page("assistant")
         self.ask(q)
 
     def vision_read(self):
@@ -5639,7 +5735,7 @@ class App:
             ttk.Button(head, text="⭐ " + t("plan.make_active"), style="Accent.TButton",
                        command=lambda: (self.set_active_build(b["name"]), self.refresh_builds(keep=True))).pack(side="left", padx=10)
         ttk.Button(head, text="🧍 " + t("plan.open_progress"), command=lambda: (self.pb.set(b["name"]), self.refresh_prog(),
-                                                                              self.nb.select(self.tab_keys.index("progress")))).pack(side="right")
+                                                                              self.select_page("progress"))).pack(side="right")
         stt = self.build_status(b)
         have = sum(1 for v in stt.values() if v[0] in ("done", "partial")); full = sum(1 for v in stt.values() if v[0] == "done")
         tot = sum(1 for v in stt.values() if v[0] != "off")
@@ -6139,7 +6235,7 @@ class App:
         box = ttk.LabelFrame(f, text=t("ai.settings")); box.pack(fill="x", padx=10, pady=8)
         self.av = {k: tk.StringVar(value=str(st.get(k, ""))) for k in
                    ("ollama_url", "ollama_model", "claude_code_model", "claude_model", "claude_api_key", "openai_model", "openai_api_key",
-                    "stt_model", "stt_device", "tts_rate", "tts_voice", "voice_hotkey", "assistant_cancel_hotkey")}
+                    "stt_model", "stt_device", "tts_rate", "tts_voice")}
         self.av["ai_provider"] = tk.StringVar(value=provider_label(st["ai_provider"] if st["ai_provider"] in PROVIDER_KEYS else "ollama"))
         self.abv = {k: tk.BooleanVar(value=bool(st.get(k, True))) for k in ("speak_verdict", "speak_chat")}
         ttk.Label(box, text=t("ai.provider")).grid(row=0, column=0, sticky="w", padx=8, pady=3)
@@ -6148,8 +6244,7 @@ class App:
                   (t("ai.cc_model"), "claude_code_model", 30), (t("ai.claude_model"), "claude_model", 30),
                   (t("ai.claude_key"), "claude_api_key", 30), (t("ai.openai_model"), "openai_model", 30), (t("ai.openai_key"), "openai_api_key", 30),
                   (t("ai.stt_model"), "stt_model", 12), (t("ai.stt_device"), "stt_device", 12),
-                  (t("ai.tts_rate"), "tts_rate", 12), (t("ai.tts_voice"), "tts_voice", 12), (t("ai.voice_hotkey"), "voice_hotkey", 12),
-                  (t("ga.cancel_key"), "assistant_cancel_hotkey", 12)]
+                  (t("ai.tts_rate"), "tts_rate", 12), (t("ai.tts_voice"), "tts_voice", 12)]
         for i, (lab, k, w) in enumerate(fields, start=1):
             ttk.Label(box, text=lab).grid(row=i, column=0, sticky="w", padx=8, pady=2)
             ttk.Entry(box, textvariable=self.av[k], width=w, show="*" if k in ("claude_api_key", "openai_api_key") else "").grid(row=i, column=1, sticky="w")
@@ -6368,15 +6463,12 @@ class App:
     def save_ai_settings(self):
         st = self.cfg["settings"]
         try:
-            check_hotkey(self.av["voice_hotkey"].get())
-            candidate = dict(st, voice_hotkey=self.av["voice_hotkey"].get(), assistant_cancel_hotkey=self.av["assistant_cancel_hotkey"].get())
-            game_assistant.bindings(candidate, check_hotkey)
             st["tts_rate"] = int(float(self.av["tts_rate"].get()))
         except Exception as e:
             return messagebox.showerror(APP_NAME, t("err.bad_setting", e=e))
         st["ai_provider"] = next((k for k in PROVIDER_KEYS if provider_label(k) == self.av["ai_provider"].get()), "ollama")
         for k in ("ollama_url", "ollama_model", "claude_code_model", "claude_model", "claude_api_key", "openai_model", "openai_api_key",
-                  "stt_model", "stt_device", "tts_voice", "voice_hotkey", "assistant_cancel_hotkey"):
+                  "stt_model", "stt_device", "tts_voice"):
             st[k] = self.av[k].get().strip()
         for k, v in self.abv.items(): st[k] = v.get()
         save_cfg(self.cfg)
@@ -6479,11 +6571,9 @@ class App:
         cr = ttk.Frame(cb); cr.pack(fill="x", padx=8, pady=6)
         ttk.Button(cr, text=ui_theme.with_icon(t("cl.run"), "🌐"), style="Accent.TButton", command=self.run_claude_fetch).pack(side="left")
         self.cl_replace = tk.BooleanVar(value=bool(st.get("claude_tasks_replace", True)))
-        ttk.Checkbutton(cr, text=t("cl.replace"), variable=self.cl_replace).pack(side="left", padx=12)
-        ttk.Label(cr, text=t("cl.hotkey")).pack(side="left", padx=(12, 2))
-        self.gv = {"tasks_hotkey": tk.StringVar(value=str(st.get("tasks_hotkey", "<f10>")))}
-        ttk.Entry(cr, textvariable=self.gv["tasks_hotkey"], width=8).pack(side="left")
-        ttk.Button(cr, text=t("btn.save_short"), command=self.save_task_fetch_settings).pack(side="left", padx=6)
+        ttk.Checkbutton(cr, text=t("cl.replace"), variable=self.cl_replace,
+                        command=lambda: (st.__setitem__("claude_tasks_replace", bool(self.cl_replace.get())), save_cfg(self.cfg))).pack(side="left", padx=12)
+        self.gv = {}
         self.cl_status = ttk.Label(cb, text=self.claude_cli_state(), foreground=PAL["muted"], wraplength=900, justify="left")
         self.cl_status.pack(anchor="w", padx=8)
         ttk.Label(cb, text=t("cl.raw"), foreground=PAL["muted"]).pack(anchor="w", padx=8, pady=(8, 0))
@@ -6524,6 +6614,17 @@ class App:
         self.wiki_lbl.pack(anchor="w", padx=8)
         ttk.Label(fb, text=t("wiki.note") + "\n" + t("tasks.feed_note"), foreground=PAL["muted"], wraplength=900,
                   justify="left").pack(anchor="w", padx=8, pady=(4, 8))
+        sr = ttk.LabelFrame(S, text="Görev ve sezon verileri için güvenilir kaynaklar")
+        sr.pack(fill="x", padx=10, pady=(0, 10))
+        task_sources = (
+            ("Ubisoft — The Division resmî haberleri", "https://www.ubisoft.com/en-gb/game/the-division/news-updates"),
+            ("Ubisoft News — oyun duyuruları", "https://news.ubisoft.com/en-us/"),
+            ("The Division Wiki — görev ve proje rehberleri", "https://thedivision.fandom.com/wiki/Projects_in_The_Division_2"),
+        )
+        for title, url in task_sources:
+            ttk.Button(sr, text="🔗 " + title, command=lambda u=url: webbrowser.open(u)).pack(anchor="w", padx=8, pady=3)
+        ttk.Label(sr, text="Uygulamadaki görev listesi resmî akış, wiki eşlemesi ve (en az iki ayrı oyuncu bildirimiyle doğrulanan) topluluk akışını birleştirir. Süresi geçen sezon görevleri otomatik düşer; güncelleme için üstteki eşitleme düğmesini kullan.",
+                  foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=8, pady=(4, 8))
         self.refresh_tasks(); self.update_reset_label()
         self.root.after(1500, self.translate_wiki_tasks)
 
@@ -6532,16 +6633,8 @@ class App:
 
     def save_task_fetch_settings(self):
         st = self.cfg["settings"]
-        try:
-            check_hotkey(self.gv["tasks_hotkey"].get())
-            game_assistant.bindings(dict(st, tasks_hotkey=self.gv["tasks_hotkey"].get()), check_hotkey)
-        except Exception as e:
-            return messagebox.showerror(APP_NAME, t("err.bad_setting", e=e))
-        st["tasks_hotkey"] = self.gv["tasks_hotkey"].get().strip()
         st["claude_tasks_replace"] = bool(self.cl_replace.get())
         save_cfg(self.cfg)
-        self._bind_global_hotkeys()
-        if self.running: self.stop(); self.start()
         self.toast(t("msg.settings_saved"))
 
     def run_claude_fetch(self):  # pynput thread'inden de çağrılır: tk'ya dokunma
@@ -7156,6 +7249,63 @@ class App:
         if messagebox.askyesno(APP_NAME, t("task.clear_cat_confirm", cat=cat_name(cat))):
             self.tasks["items"][cat] = []; save_tasks(self.tasks); self.refresh_tasks()
 
+    def build_shortcuts(self, parent):
+        st = self.cfg["settings"]
+        box = ttk.LabelFrame(parent, text="⌨ Kısayol tuşları")
+        box.pack(fill="x", padx=10, pady=10)
+        ttk.Label(box, text="Kısayollar uygulama açıkken genel olarak çalışır. Aynı tuş iki işlemde kullanılamaz.",
+                  foreground=PAL["muted"], wraplength=850, justify="left").grid(row=0, column=0, columnspan=3, sticky="w", padx=10, pady=8)
+        self.shortcut_vars = {
+            k: tk.StringVar(value=str(st.get(k, default)))
+            for k, default in (("hotkey", "<f8>"), ("tr_hotkey", "<f7>"), ("tr_toggle_hotkey", "<f6>"),
+                               ("tasks_hotkey", "<f10>"), ("voice_hotkey", "<f9>"),
+                               ("assistant_cancel_hotkey", "<f12>"))
+        }
+        labels = (("hotkey", "Eşya tara"), ("tr_hotkey", "Ekranı bir kez çevir"),
+                  ("tr_toggle_hotkey", "Canlı çeviriyi durdur / sürdür"),
+                  ("tasks_hotkey", "Görev verilerini güncelle"),
+                  ("voice_hotkey", "Oyun içi AI asistana sesli soru"),
+                  ("assistant_cancel_hotkey", "Ses kaydını / yanıtı iptal et"))
+        for i, (key, label) in enumerate(labels, start=1):
+            ttk.Label(box, text=label).grid(row=i, column=0, sticky="w", padx=10, pady=4)
+            ttk.Entry(box, textvariable=self.shortcut_vars[key], width=18).grid(row=i, column=1, sticky="w", padx=8, pady=4)
+            ttk.Button(box, text="⌨", command=lambda k=key: self.capture_shortcut(k)).grid(row=i, column=2, padx=4)
+        ttk.Button(box, text=ui_theme.with_icon(t("set.save"), "💾"), command=self.save_shortcuts,
+                   style="Accent.TButton").grid(row=7, column=0, sticky="w", padx=10, pady=10)
+        ttk.Label(parent, text="Örnek: <ctrl>+<shift>+t. Bir değişiklik kaydedildiğinde global kısayol dinleyicisi yenilenir.",
+                  foreground=PAL["muted"], wraplength=850, justify="left").pack(anchor="w", padx=12, pady=(0, 10))
+
+    def save_shortcuts(self):
+        st = self.cfg["settings"]
+        candidate = dict(st)
+        candidate.update({k: v.get().strip() for k, v in self.shortcut_vars.items()})
+        try:
+            for key in self.shortcut_vars: check_hotkey(candidate[key])
+            game_assistant.bindings(candidate, check_hotkey)
+            normalized = [candidate[k].lower().replace(" ", "") for k in self.shortcut_vars]
+            if len(set(normalized)) != len(normalized): raise ValueError("Her işlem için farklı bir kısayol seçin.")
+        except Exception as e:
+            return messagebox.showerror(APP_NAME, t("err.bad_setting", e=e))
+        st.update({k: v.get().strip() for k, v in self.shortcut_vars.items()})
+        save_cfg(self.cfg)
+        self._bind_global_hotkeys()
+        if self.running:
+            self.stop(quiet=True); self.start(quiet=True)
+        if getattr(self, "ga_help", None):
+            self.ga_help.config(text=t("ga.help", voice=st["voice_hotkey"], pause=st["tr_toggle_hotkey"],
+                                       cancel=st["assistant_cancel_hotkey"]))
+        self.toast(t("msg.settings_saved"))
+
+    def capture_shortcut(self, key):
+        self.shortcut_vars[key].set("Tuşa basın…")
+        def on_key(event):
+            if event.keysym in ("Shift_L", "Shift_R", "Control_L", "Control_R", "Alt_L", "Alt_R"): return
+            mods = (["<ctrl>"] if event.state & 0x4 else []) + (["<shift>"] if event.state & 0x1 else []) + (["<alt>"] if event.state & 0x20000 else [])
+            name = event.keysym.lower()
+            self.shortcut_vars[key].set("+".join(mods + [name if len(name) == 1 else f"<{name}>"]))
+            self.root.unbind("<Key>")
+        self.root.bind("<Key>", on_key)
+
     # ---------- Ayarlar ----------
     def build_settings(self):
         st = self.cfg["settings"]
@@ -7165,19 +7315,35 @@ class App:
         ttk.Button(bar, text=ui_theme.with_icon(t("set.save"), "💾"), command=self.save_settings, style="Accent.TButton").pack(side="left")
         ttk.Label(bar, text=t("set.save_hint"), foreground=PAL["muted"]).pack(side="left", padx=12)
         self.set_nb = ttk.Notebook(outer); self.set_nb.pack(fill="both", expand=True, padx=8, pady=(8, 0))
+        tr_ui = i18n.current_language() == "tr"
+        self.set_groups = ["basic", "capture", "display", "service"]
+        set_group_labels = {"basic": "Temel" if tr_ui else "Basics", "capture": "Tarama" if tr_ui else "Capture",
+                            "display": "Görünüm" if tr_ui else "Display", "service": "Hizmetler" if tr_ui else "Services"}
+        self.set_group_nbs = {}
+        for group in self.set_groups:
+            holder = ttk.Frame(self.set_nb); self.set_nb.add(holder, text=set_group_labels[group])
+            self.set_group_nbs[group] = ttk.Notebook(holder); self.set_group_nbs[group].pack(fill="both", expand=True)
+        set_group_for = {"general": "basic", "shortcuts": "basic", "scan": "capture", "display": "capture", "ocr": "capture",
+                         "fx": "display", "overlay": "display", "sync": "service", "service": "service",
+                         "premium": "service", "logs": "service"}
         P = {}
-        for key, icon in (("general", "⚙"), ("fx", "✨"), ("scan", "🎯"), ("display", "🖥"), ("ocr", "🔍"), ("overlay", "🪟"),
+        for key, icon in (("general", "⚙"), ("shortcuts", "⌨"), ("fx", "✨"), ("scan", "🎯"), ("display", "🖥"), ("ocr", "🔍"), ("overlay", "🪟"),
                           ("sync", "🔄"), ("service", "🛰"), ("premium", "⭐"), ("logs", "📝")):
-            holder = ttk.Frame(self.set_nb); self.set_nb.add(holder, text=f" {icon} {t('setpage.' + key)} ")
+            group = set_group_for[key]
+            holder = ttk.Frame(self.set_group_nbs[group])
+            label = ("Kısayollar" if i18n.current_language() == "tr" else "Shortcuts") if key == "shortcuts" else t("setpage." + key)
+            self.set_group_nbs[group].add(holder, text=f" {icon} {label} ")
             P[key] = ui_theme.scrollable(holder, PAL["bg"])
-        self._set_keys = ["general", "fx", "scan", "display", "ocr", "overlay", "sync", "service", "premium", "logs"]
+        self._set_keys = ["general", "shortcuts", "fx", "scan", "display", "ocr", "overlay", "sync", "service", "premium", "logs"]
+        self.set_pages = {key: (set_group_for[key], self.set_group_nbs[set_group_for[key]].tabs()[-1]) for key in self._set_keys}
+        self.build_shortcuts(P["shortcuts"])
         self.build_fx_box(P["fx"], st)
         self.build_service_page(P["service"], st)
         self.build_premium_box(P["premium"], st)
         if getattr(self, "_set_page", None) in self._set_keys:
-            self.set_nb.select(self._set_keys.index(self._set_page))
+            self.select_settings_page(self._set_page)
         f = P["general"]
-        keys = ("hotkey", "keep_threshold", "consider_threshold", "overlay_seconds", "auto_interval_ms",
+        keys = ("keep_threshold", "consider_threshold", "overlay_seconds", "auto_interval_ms",
                 "ocr_lang", "tesseract_cmd", "log_max_kb", "log_backups")
         self.sv = {k: tk.StringVar(value=str(st.get(k, ""))) for k in keys + ("overlay_corner", "log_level")}
         self.bv = {k: tk.BooleanVar(value=bool(st.get(k, True)))
@@ -7281,25 +7447,24 @@ class App:
 
         # ---- Tarama / scanning ----
         gb = ttk.LabelFrame(P["scan"], text=t("set.scan_box")); gb.pack(fill="x", padx=10, pady=6)
-        rows = [(t("mode.hotkey"), "hotkey"), (t("set.keep_threshold"), "keep_threshold"),
+        rows = [(t("set.keep_threshold"), "keep_threshold"),
                 (t("set.consider_threshold"), "consider_threshold"), (t("set.overlay_seconds"), "overlay_seconds"),
                 (t("set.auto_interval"), "auto_interval_ms"), (t("set.ocr_lang"), "ocr_lang"),
                 (t("set.tesseract_path"), "tesseract_cmd")]
         for i, (lab, k) in enumerate(rows):
             ttk.Label(gb, text=lab).grid(row=i, column=0, sticky="w", padx=10, pady=4)
             ttk.Entry(gb, textvariable=self.sv[k], width=46).grid(row=i, column=1, sticky="w")
-        ttk.Button(gb, text=ui_theme.with_icon(t("set.capture_key"), "⌨"), command=self.capture_key).grid(row=0, column=2, padx=6)
         ttk.Button(gb, text=t("btn.browse"),
                    command=lambda: self.sv["tesseract_cmd"].set(filedialog.askopenfilename() or self.sv["tesseract_cmd"].get())
-                   ).grid(row=6, column=2, padx=6)
-        ttk.Label(gb, text=t("set.overlay_corner")).grid(row=7, column=0, sticky="w", padx=10, pady=4)
+                   ).grid(row=5, column=2, padx=6)
+        ttk.Label(gb, text=t("set.overlay_corner")).grid(row=6, column=0, sticky="w", padx=10, pady=4)
         ttk.Combobox(gb, textvariable=self.sv["overlay_corner"],
                      values=["top_right", "top_left", "bottom_right", "bottom_left"],
-                     width=20, state="readonly").grid(row=7, column=1, sticky="w")
+                     width=20, state="readonly").grid(row=6, column=1, sticky="w")
         for i, (lab, k) in enumerate(((t("set.sound"), "sound"), (t("set.track_progress"), "track_progress"),
                                       (t("set.auto_record"), "auto_record"),
                                       (t("set.save_crop"), "save_debug_crop"), (t("set.log_csv"), "log_csv"))):
-            ttk.Checkbutton(gb, text=lab, variable=self.bv[k]).grid(row=8 + i, column=0, columnspan=2, sticky="w", padx=10)
+            ttk.Checkbutton(gb, text=lab, variable=self.bv[k]).grid(row=7 + i, column=0, columnspan=2, sticky="w", padx=10)
 
         # ---- Günlük kayıt / logging ----
         lg = ttk.LabelFrame(P["logs"], text=t("set.log_box")); lg.pack(fill="x", padx=10, pady=6)
@@ -7732,20 +7897,9 @@ class App:
         self.toast(t("set.language_changed", lang=i18n.language_name(code)))
         self.translate_wiki_tasks()
 
-    def capture_key(self):
-        self.sv["hotkey"].set(t("set.press_key"))
-        def on_key(e):
-            if e.keysym in ("Shift_L", "Shift_R", "Control_L", "Control_R", "Alt_L", "Alt_R"): return
-            mods = (["<ctrl>"] if e.state & 0x4 else []) + (["<shift>"] if e.state & 0x1 else []) + (["<alt>"] if e.state & 0x20000 else [])
-            k = e.keysym.lower()
-            self.sv["hotkey"].set("+".join(mods + [k if len(k) == 1 else f"<{k}>"])); self.root.unbind("<Key>")
-        self.root.bind("<Key>", on_key)
-
     def save_settings(self):
         st = dict(self.cfg["settings"])
         try:
-            check_hotkey(self.sv["hotkey"].get())
-            game_assistant.bindings(dict(st, hotkey=self.sv["hotkey"].get()), check_hotkey)
             st["keep_threshold"], st["consider_threshold"] = itempolicy.validate_thresholds(
                 self.sv["keep_threshold"].get(), self.sv["consider_threshold"].get())
             for k in ("overlay_seconds", "auto_interval_ms"):
@@ -7778,7 +7932,7 @@ class App:
         current_settings = self.cfg["settings"]
         current_settings.update(st)
         st = current_settings
-        for k in ("hotkey", "overlay_corner", "ocr_lang", "tesseract_cmd", "log_level", "meta_feed_url"): st[k] = self.sv[k].get().strip()
+        for k in ("overlay_corner", "ocr_lang", "tesseract_cmd", "log_level", "meta_feed_url"): st[k] = self.sv[k].get().strip()
         for k, v in self.bv.items(): st[k] = v.get()
         if hasattr(self, "fxv"): self._fx_from_ui()
         st["res_profile"] = self._profile_key()
@@ -8024,8 +8178,8 @@ class App:
         return False
 
     def open_premium_page(self):
-        self.nb.select(self.tab_keys.index("settings"))
-        if "premium" in getattr(self, "_set_keys", []): self.set_nb.select(self._set_keys.index("premium"))
+        self.select_page("settings")
+        if "premium" in getattr(self, "_set_keys", []): self.select_settings_page("premium")
 
     def build_premium_box(self, f, st):
         ab = ttk.LabelFrame(f, text="👤 " + t("acc.title")); ab.pack(fill="x", padx=10, pady=(10, 6))

@@ -100,7 +100,7 @@ def s2():
     kinds = [e.get("type") for e in events]
     step("WebSocket: hello + game + scan olayları", "hello" in kinds and "game" in kinds and "scan" in kinds, kinds=kinds[:12])
     shot("svc_01_running")
-    a.nb.select(a.tab_keys.index("settings")); a.set_nb.select(a._set_keys.index("service"))
+    a.select_page("settings"); a.select_settings_page("service")
     a.root.after(1500, s3)
 
 def s3():

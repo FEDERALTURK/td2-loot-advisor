@@ -55,7 +55,7 @@ def start():
     SPRITE = getattr(a.agent3d, "sprite", False)
     print("görünüm:", "gerçekçi kareler" if SPRITE else "çokgen", flush=True)
     a.root.deiconify(); a.root.lift()
-    a.nb.select(a.tab_keys.index("progress"))
+    a.select_page("progress")
     a.root.after(2500, lambda: models(0))
 
 

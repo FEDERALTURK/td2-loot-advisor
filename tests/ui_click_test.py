@@ -59,7 +59,7 @@ def step_click():
     res["root_cursor"] = str(a.root.cget("cursor"))
     if wb:
         res["watch_cursor"] = str(wb.cv.cget("cursor"))
-    target = a.tab_keys.index("settings")
+    target = a.group_keys.index("settings")
     g = find_gap_in_tab(target)
     res["gap"] = g
     if g:
@@ -108,8 +108,8 @@ def step_transition(i=[0], alphas=[]):
         OUT.write_text(json.dumps(res, indent=1), encoding="utf-8")
         print("RESULT", json.dumps(res), flush=True)
         a.root.after(500, a.root.destroy); return
-    tabs = ["builds", "stash", "settings", "dash"]
-    a.nb.select(a.tab_keys.index(tabs[i[0]]))
+    tabs = ["builds", "assistant", "settings", "dash"]
+    a.select_page(tabs[i[0]])
     shots = (ROOT / "shots"); shots.mkdir(exist_ok=True)
     def grab(tag):
         nb = a.nb
