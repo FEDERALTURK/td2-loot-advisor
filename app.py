@@ -21,6 +21,7 @@ from datetime import datetime, timedelta, timezone
 from difflib import SequenceMatcher, get_close_matches
 from pathlib import Path
 from tkinter import ttk, filedialog, messagebox
+import splash
 
 if "--dml-probe" in sys.argv:          # ekran kartı (DirectML) denemesi: ayrı süreçte, programın geri kalanı yüklenmeden
     import ocr_backend as _ob                # sonuç dosyaya yazılır (pencere modundaki .exe'de konsol çıktısı yoktur)
@@ -147,7 +148,7 @@ import game_assistant
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.0.7"
+APP_VERSION = "9.0.8"
 FROZEN = getattr(sys, "frozen", False)
 BASE = Path(sys.executable).parent if FROZEN else Path(__file__).resolve().parent
 TASKS_CACHE = BASE / "tasks_cache.json"  # son indirilen görev listesi
@@ -1525,6 +1526,18 @@ def translate_task_text(app, text):
 class App:
     def __init__(self):
         startup = time.perf_counter()
+        # Show the lightweight intro while the rest of the app prepares.
+        display.set_dpi_aware()
+        self.root = tk.Tk()
+        self._intro = None
+        if not os.environ.get("TD2_NO_SPLASH"):
+            self.root.withdraw()
+            try:
+                self._intro = splash.IntroSplash(self.root, APP_VERSION, lambda: None)
+            except Exception:
+                log.debug("Intro animation could not be started", exc_info=True)
+                try: self.root.deiconify()
+                except tk.TclError: pass
         self.cfg = load_cfg()
         self.timings = performance.TimingStats()
         self._translation_jobs = workqueue.LatestWorker("translation")
@@ -1594,8 +1607,6 @@ class App:
             try: self.news = knowledge.validate_news(json.loads(np_.read_text(encoding="utf-8"))); break
             except Exception: continue
 
-        display.set_dpi_aware()                         # %125/%150 Windows ölçeğinde koordinatlar kaymasın
-        self.root = tk.Tk()
         self._perf_policy = performance.get_policy(stg)
         self.root._td2_suspend_animations = False
         self.root._td2_animation_multiplier = 1.0

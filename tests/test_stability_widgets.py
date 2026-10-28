@@ -36,7 +36,7 @@ def memory_mb():
 
 def main():
     source=Path(sys.argv[1]).resolve() if len(sys.argv)>1 else Path(__file__).resolve().parents[1]
-    sys.path.insert(0,str(source)); os.environ["TD2_NO_WELCOME"]="1"
+    sys.path.insert(0,str(source)); os.environ["TD2_NO_WELCOME"]="1"; os.environ["TD2_NO_SPLASH"]="1"
     started=time.perf_counter(); app=importlib.import_module("app")
     imported=time.perf_counter()
     errors=[]; result={"source":str(source),"import_ms":round((imported-started)*1000,1)}

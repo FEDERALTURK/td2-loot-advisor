@@ -1,0 +1,260 @@
+{
+ "schema": 1,
+ "version": "2026-10-26.2",
+ "updated": "2026-10-26T13:43:21Z",
+ "season": "Year 8 Season 3 – Red Horizon",
+ "items": [
+  {
+   "id": "y8s3-red-moon-unleashed",
+   "kind": "event",
+   "start": "2026-10-15T08:00:00Z",
+   "end": "2026-11-03T08:00:00Z",
+   "url": "https://www.ubisoft.com/en-gb/game/the-division/the-division-2/news-updates/7uzKuy4iB0MtOJfsXAr3TO/tuy8s32-red-moon-unleashed-creator-collaboration-escalation-updates-more",
+   "source": "Ubisoft",
+   "title": {
+    "en": "Red Moon Unleashed",
+    "tr": "Kızıl Ay Serbest",
+    "de": "Red Moon Unleashed",
+    "fr": "Red Moon Unleashed",
+    "es": "Red Moon Unleashed",
+    "it": "Red Moon Unleashed",
+    "pt": "Red Moon Unleashed",
+    "pl": "Red Moon Unleashed",
+    "ru": "Red Moon Unleashed",
+    "nl": "Red Moon Unleashed"
+   },
+   "text": {
+    "en": "Seasonal event: Lunatic enemies, Moon Cultists, Revenant Bounties, Event Keys and event caches. Log in during the event to get the Bound Slasher Mask. Unused Event Keys are removed when it ends.",
+    "tr": "Sezon etkinliği: Lunatic düşmanlar, Moon Cultist'ler, Revenant Bounty'leri, Event Key'ler ve etkinlik sandıkları. Etkinlik süresince giriş yapan herkes Bound Slasher Mask alır. Bitince kullanılmayan Event Key'ler silinir.",
+    "de": "Saison-Event: Lunatic-Gegner, Moon Cultists, Revenant-Kopfgelder, Event-Schlüssel und Event-Caches. Wer sich während des Events einloggt, erhält die Bound Slasher Mask. Unbenutzte Event-Schlüssel verfallen am Ende.",
+    "fr": "Événement saisonnier : ennemis Lunatic, Moon Cultists, primes Revenant, clés d'événement et caches. Connectez-vous pendant l'événement pour obtenir le Bound Slasher Mask. Les clés non utilisées disparaissent à la fin.",
+    "es": "Evento de temporada: enemigos Lunatic, Moon Cultists, recompensas Revenant, llaves y alijos del evento. Conéctate durante el evento para recibir la Bound Slasher Mask. Las llaves sin usar se eliminan al terminar.",
+    "it": "Evento stagionale: nemici Lunatic, Moon Cultist, taglie Revenant, chiavi e casse evento. Accedi durante l'evento per ottenere la Bound Slasher Mask. Le chiavi non usate vengono rimosse alla fine.",
+    "pt": "Evento sazonal: inimigos Lunatic, Moon Cultists, recompensas Revenant, chaves e caixas do evento. Entre durante o evento para ganhar a Bound Slasher Mask. Chaves não usadas são removidas ao final.",
+    "pl": "Wydarzenie sezonowe: wrogowie Lunatic, Moon Cultists, zlecenia Revenant, klucze i skrzynie wydarzenia. Zaloguj się w trakcie, aby dostać Bound Slasher Mask. Niewykorzystane klucze znikają po zakończeniu.",
+    "ru": "Сезонное событие: враги Lunatic, Moon Cultists, награды Revenant, ключи и тайники события. Войдите в игру во время события, чтобы получить Bound Slasher Mask. Неиспользованные ключи удаляются в конце.",
+    "nl": "Seizoensevent: Lunatic-vijanden, Moon Cultists, Revenant-premies, eventsleutels en eventcaches. Log in tijdens het event voor het Bound Slasher Mask. Ongebruikte sleutels verdwijnen aan het einde."
+   }
+  },
+  {
+   "id": "y8s3-creator-collab",
+   "kind": "event",
+   "start": "2026-10-15T08:00:00Z",
+   "end": "2026-11-03T08:00:00Z",
+   "url": "https://www.ubisoft.com/en-gb/game/the-division/the-division-2/news-updates/7uzKuy4iB0MtOJfsXAr3TO/tuy8s32-red-moon-unleashed-creator-collaboration-escalation-updates-more",
+   "source": "Ubisoft",
+   "title": {
+    "en": "Creator Collaboration: PurePrime, SOLIDFPS, Widdz",
+    "tr": "İçerik üreticisi iş birliği: PurePrime, SOLIDFPS, Widdz",
+    "de": "Creator-Kollaboration: PurePrime, SOLIDFPS, Widdz",
+    "fr": "Collaboration créateurs : PurePrime, SOLIDFPS, Widdz",
+    "es": "Colaboración con creadores: PurePrime, SOLIDFPS, Widdz",
+    "it": "Collaborazione creator: PurePrime, SOLIDFPS, Widdz",
+    "pt": "Colaboração com criadores: PurePrime, SOLIDFPS, Widdz",
+    "pl": "Współpraca z twórcami: PurePrime, SOLIDFPS, Widdz",
+    "ru": "Коллаборация с авторами: PurePrime, SOLIDFPS, Widdz",
+    "nl": "Creator-samenwerking: PurePrime, SOLIDFPS, Widdz"
+   },
+   "text": {
+    "en": "Six-project chains per creator; one new project unlocks every day.",
+    "tr": "Her üretici için altı projelik zincir; her gün yeni bir proje açılır.",
+    "de": "Sechsteilige Projektketten pro Creator; jeden Tag wird ein neues Projekt freigeschaltet.",
+    "fr": "Chaînes de six projets par créateur ; un nouveau projet chaque jour.",
+    "es": "Cadenas de seis proyectos por creador; cada día se desbloquea uno nuevo.",
+    "it": "Catene di sei progetti per creator; ogni giorno se ne sblocca uno nuovo.",
+    "pt": "Cadeias de seis projetos por criador; um novo projeto libera a cada dia.",
+    "pl": "Łańcuchy sześciu projektów na twórcę; codziennie odblokowuje się nowy.",
+    "ru": "Цепочки из шести проектов для каждого автора; каждый день открывается новый.",
+    "nl": "Ketens van zes projecten per creator; elke dag komt er een nieuw project bij."
+   }
+  },
+  {
+   "id": "y8s3-vanguard-overdrive",
+   "kind": "event",
+   "start": "2026-10-27T08:00:00Z",
+   "end": "2026-11-03T08:00:00Z",
+   "url": "https://www.ubisoft.com/en-gb/game/the-division/the-division-2/news-updates/7uzKuy4iB0MtOJfsXAr3TO/tuy8s32-red-moon-unleashed-creator-collaboration-escalation-updates-more",
+   "source": "Ubisoft",
+   "title": {
+    "en": "Vanguard Overdrive",
+    "tr": "Vanguard Overdrive",
+    "de": "Vanguard Overdrive",
+    "fr": "Vanguard Overdrive",
+    "es": "Vanguard Overdrive",
+    "it": "Vanguard Overdrive",
+    "pt": "Vanguard Overdrive",
+    "pl": "Vanguard Overdrive",
+    "ru": "Vanguard Overdrive",
+    "nl": "Vanguard Overdrive"
+   },
+   "text": {
+    "en": "Global bonuses to reload speed, weapon swap, hazard protection, movement and armor.",
+    "tr": "Şarjör değiştirme, silah değiştirme, tehlike koruması, hareket ve zırhta genel bonuslar.",
+    "de": "Globale Boni auf Nachladen, Waffenwechsel, Gefahrenschutz, Bewegung und Panzerung.",
+    "fr": "Bonus globaux au rechargement, changement d'arme, protection contre les dangers, mouvement et armure.",
+    "es": "Bonificaciones globales a recarga, cambio de arma, protección contra peligros, movimiento y blindaje.",
+    "it": "Bonus globali a ricarica, cambio arma, protezione dai pericoli, movimento e armatura.",
+    "pt": "Bônus globais de recarga, troca de arma, proteção contra perigos, movimento e blindagem.",
+    "pl": "Globalne premie do przeładowania, zmiany broni, ochrony przed zagrożeniami, ruchu i pancerza.",
+    "ru": "Глобальные бонусы к перезарядке, смене оружия, защите от угроз, передвижению и броне.",
+    "nl": "Wereldwijde bonussen op herladen, wapenwissel, gevarenbescherming, beweging en pantser."
+   }
+  },
+  {
+   "id": "y8s3-expertise-surge",
+   "kind": "event",
+   "start": "2026-10-20T08:00:00Z",
+   "end": "2026-10-27T08:00:00Z",
+   "url": "https://www.ubisoft.com/en-gb/game/the-division/the-division-2/news-updates/7uzKuy4iB0MtOJfsXAr3TO/tuy8s32-red-moon-unleashed-creator-collaboration-escalation-updates-more",
+   "source": "Ubisoft",
+   "title": {
+    "en": "Expertise Surge",
+    "tr": "Expertise Surge",
+    "de": "Expertise Surge",
+    "fr": "Expertise Surge",
+    "es": "Expertise Surge",
+    "it": "Expertise Surge",
+    "pt": "Expertise Surge",
+    "pl": "Expertise Surge",
+    "ru": "Expertise Surge",
+    "nl": "Expertise Surge"
+   },
+   "text": {
+    "en": "Double upgrade materials for Expertise.",
+    "tr": "Expertise yükseltmesi için iki kat malzeme.",
+    "de": "Doppelte Upgrade-Materialien für Expertise.",
+    "fr": "Matériaux d'amélioration d'expertise doublés.",
+    "es": "Materiales de mejora de Pericia dobles.",
+    "it": "Materiali di potenziamento dell'esperienza raddoppiati.",
+    "pt": "Materiais de aprimoramento de Expertise em dobro.",
+    "pl": "Podwójne materiały do ulepszania biegłości.",
+    "ru": "Двойные материалы для улучшения мастерства.",
+    "nl": "Dubbele upgrade-materialen voor Expertise."
+   }
+  },
+  {
+   "id": "tu-y8s3-2",
+   "kind": "patch",
+   "date": "2026-10-13T08:00:00Z",
+   "url": "https://www.ubisoft.com/en-gb/game/the-division/the-division-2/news-updates/7uzKuy4iB0MtOJfsXAr3TO/tuy8s32-red-moon-unleashed-creator-collaboration-escalation-updates-more",
+   "source": "Ubisoft",
+   "title": {
+    "en": "Title Update Y8S3.2",
+    "tr": "Güncelleme Y8S3.2",
+    "de": "Title Update Y8S3.2",
+    "fr": "Mise à jour Y8S3.2",
+    "es": "Actualización Y8S3.2",
+    "it": "Aggiornamento Y8S3.2",
+    "pt": "Atualização Y8S3.2",
+    "pl": "Aktualizacja Y8S3.2",
+    "ru": "Обновление Y8S3.2",
+    "nl": "Title Update Y8S3.2"
+   },
+   "text": {
+    "en": "Escalation no longer consumes tokens to start (you need the tier's minimum balance). Conflict: new Prometheus Terminal with CCC currency, rank cap 200. Rifles and Marksman Rifles get 20% more ammo. Movement speed bonuses capped at 20%. New named Classic M1A: Lichtenberg.",
+    "tr": "Escalation başlatmak artık token harcamıyor (kademenin en az bakiyesi gerekiyor). Conflict: CCC para birimiyle yeni Prometheus Terminal, rütbe sınırı 200. Rifle ve Marksman Rifle'lara %20 fazla mermi. Hareket hızı bonusları %20 ile sınırlandı. Yeni adlı Classic M1A: Lichtenberg.",
+    "de": "Escalation verbraucht beim Start keine Token mehr (Mindeststand der Stufe nötig). Conflict: neues Prometheus-Terminal mit CCC-Währung, Rangobergrenze 200. Gewehre und Präzisionsgewehre erhalten 20 % mehr Munition. Bewegungsboni auf 20 % begrenzt. Neues benanntes Classic M1A: Lichtenberg.",
+    "fr": "L'Escalade ne consomme plus de jetons au lancement (solde minimum du palier requis). Conflict : nouveau Terminal Prometheus avec la monnaie CCC, rang max 200. Fusils et fusils de précision : +20 % de munitions. Bonus de vitesse plafonnés à 20 %. Nouveau Classic M1A nommé : Lichtenberg.",
+    "es": "Escalada ya no gasta fichas al empezar (se necesita el saldo mínimo del nivel). Conflict: nueva Terminal Prometheus con moneda CCC, rango máximo 200. Rifles y rifles de tirador: 20 % más de munición. Bonificaciones de velocidad limitadas al 20 %. Nuevo Classic M1A con nombre: Lichtenberg.",
+    "it": "L'Escalation non consuma più gettoni all'avvio (serve il saldo minimo del livello). Conflict: nuovo Terminale Prometheus con valuta CCC, grado massimo 200. Fucili e fucili di precisione: +20% munizioni. Bonus velocità limitati al 20%. Nuovo Classic M1A con nome: Lichtenberg.",
+    "pt": "Escalation não gasta mais tokens para começar (é preciso o saldo mínimo do nível). Conflict: novo Terminal Prometheus com moeda CCC, patente máxima 200. Rifles e rifles de precisão: 20% mais munição. Bônus de velocidade limitados a 20%. Novo Classic M1A nomeado: Lichtenberg.",
+    "pl": "Escalation nie zużywa już żetonów przy starcie (wymagane minimalne saldo poziomu). Conflict: nowy Terminal Prometheus z walutą CCC, limit rangi 200. Karabiny i karabiny wyborowe: +20% amunicji. Premie do szybkości ruchu ograniczone do 20%. Nowy nazwany Classic M1A: Lichtenberg.",
+    "ru": "Эскалация больше не тратит жетоны при запуске (нужен минимальный баланс уровня). Conflict: новый терминал Prometheus с валютой CCC, предел ранга 200. Винтовки и марксманские винтовки: +20% патронов. Бонусы скорости ограничены 20%. Новый именной Classic M1A: Lichtenberg.",
+    "nl": "Escalation verbruikt geen tokens meer bij de start (minimumsaldo van de tier nodig). Conflict: nieuwe Prometheus Terminal met CCC-valuta, rangplafond 200. Geweren en precisiegeweren: 20% meer munitie. Bewegingsbonussen beperkt tot 20%. Nieuwe benoemde Classic M1A: Lichtenberg."
+   }
+  },
+  {
+   "id": "y8s3-georgetown-dz-ca",
+   "kind": "season",
+   "date": "2026-10-15T08:00:00Z",
+   "url": "https://www.ubisoft.com/en-gb/game/the-division/the-division-2/news-updates/7uzKuy4iB0MtOJfsXAr3TO/tuy8s32-red-moon-unleashed-creator-collaboration-escalation-updates-more",
+   "source": "Ubisoft",
+   "title": {
+    "en": "Georgetown Dark Zone Classified Assignment is open",
+    "tr": "Georgetown Dark Zone Classified Assignment açıldı",
+    "de": "Georgetown-Dark-Zone-Geheimauftrag ist verfügbar",
+    "fr": "La mission classifiée Dark Zone de Georgetown est ouverte",
+    "es": "La misión clasificada de la Zona Oscura de Georgetown está abierta",
+    "it": "L'incarico classificato Dark Zone di Georgetown è aperto",
+    "pt": "A missão confidencial da Dark Zone de Georgetown está aberta",
+    "pl": "Tajne zadanie Dark Zone w Georgetown jest dostępne",
+    "ru": "Секретное задание Тёмной зоны Джорджтауна открыто",
+    "nl": "Georgetown Dark Zone Classified Assignment is beschikbaar"
+   },
+   "text": {
+    "en": "The second part of Red Horizon.",
+    "tr": "Red Horizon'ın ikinci bölümü.",
+    "de": "Der zweite Teil von Red Horizon.",
+    "fr": "La deuxième partie de Red Horizon.",
+    "es": "La segunda parte de Red Horizon.",
+    "it": "La seconda parte di Red Horizon.",
+    "pt": "A segunda parte de Red Horizon.",
+    "pl": "Druga część Red Horizon.",
+    "ru": "Вторая часть Red Horizon.",
+    "nl": "Het tweede deel van Red Horizon."
+   }
+  },
+  {
+   "id": "echoes-of-central-park",
+   "kind": "dlc",
+   "start": "2026-11-03T08:00:00Z",
+   "url": "https://www.ubisoft.com/en-us/game/the-division/the-division-2/news-updates/23q5ICm6Mf4PUPuPUUS0uP/the-division-2-echoes-of-central-park-coming-on-november-3",
+   "source": "Ubisoft",
+   "title": {
+    "en": "Echoes of Central Park",
+    "tr": "Echoes of Central Park",
+    "de": "Echoes of Central Park",
+    "fr": "Echoes of Central Park",
+    "es": "Echoes of Central Park",
+    "it": "Echoes of Central Park",
+    "pt": "Echoes of Central Park",
+    "pl": "Echoes of Central Park",
+    "ru": "Echoes of Central Park",
+    "nl": "Echoes of Central Park"
+   },
+   "text": {
+    "en": "New content: Central Park and the Upper West Side, three companions, six new skill variants, the Ratel exotic and a new gear set.",
+    "tr": "Yeni içerik: Central Park ve Upper West Side, üç yoldaş, altı yeni yetenek çeşidi, Ratel egzotiği ve yeni bir gear set.",
+    "de": "Neue Inhalte: Central Park und Upper West Side, drei Begleiter, sechs neue Skill-Varianten, das Exotic Ratel und ein neues Gear-Set.",
+    "fr": "Nouveau contenu : Central Park et l'Upper West Side, trois compagnons, six nouvelles variantes de compétences, l'exotique Ratel et un nouvel ensemble.",
+    "es": "Contenido nuevo: Central Park y el Upper West Side, tres compañeros, seis variantes de habilidad, el exótico Ratel y un nuevo conjunto.",
+    "it": "Nuovi contenuti: Central Park e l'Upper West Side, tre compagni, sei nuove varianti di abilità, l'esotico Ratel e un nuovo set.",
+    "pt": "Novo conteúdo: Central Park e Upper West Side, três companheiros, seis novas variantes de habilidade, o exótico Ratel e um novo conjunto.",
+    "pl": "Nowa zawartość: Central Park i Upper West Side, trzech towarzyszy, sześć nowych wariantów umiejętności, egzotyk Ratel i nowy zestaw.",
+    "ru": "Новый контент: Central Park и Upper West Side, три компаньона, шесть новых вариантов навыков, экзотик Ratel и новый комплект.",
+    "nl": "Nieuwe content: Central Park en de Upper West Side, drie metgezellen, zes nieuwe skillvarianten, de exotic Ratel en een nieuwe gearset."
+   }
+  },
+  {
+   "id": "crossplay-rollout-2026",
+   "kind": "season",
+   "start": "2026-11-03T08:00:00Z",
+   "url": "https://www.ubisoft.com/en-us/game/the-division/the-division-2/news-updates/2o0p19fLQGze5j7h3iEXTN/the-division-2-echoes-of-central-park-showcase-everything-you-need-to-know",
+   "source": "Ubisoft",
+   "title": {
+    "en": "Crossplay rollout begins",
+    "tr": "Crossplay kademeli olarak geliyor",
+    "de": "Crossplay-Einführung beginnt",
+    "fr": "Début du déploiement du crossplay",
+    "es": "Comienza el despliegue del juego cruzado",
+    "it": "Inizia il rilascio del crossplay",
+    "pt": "Começa a implementação do crossplay",
+    "ru": "Начинается внедрение кроссплея",
+    "pl": "Rusza wdrażanie crossplay",
+    "nl": "Uitrol van crossplay begint"
+   },
+   "text": {
+    "en": "Massive is rolling out crossplay in stages through November, starting after the Echoes of Central Park launch; platform migration follows, and full crossplay is planned by the start of Season 4.",
+    "tr": "Massive, crossplay'i Kasım boyunca aşamalı olarak açıyor; Echoes of Central Park çıkışından sonra başlıyor, ardından platform geçişi geliyor. Tam crossplay Season 4 başlangıcına kadar planlanıyor.",
+    "de": "Massive führt Crossplay im November schrittweise ein, beginnend nach dem Start von Echoes of Central Park; danach folgt die Plattform-Migration. Volles Crossplay ist bis zum Start von Season 4 geplant.",
+    "fr": "Massive déploie le crossplay par étapes tout au long de novembre, après la sortie d'Echoes of Central Park ; la migration des plateformes suit et le crossplay complet est prévu pour le début de la Season 4.",
+    "es": "Massive activa el juego cruzado por fases durante noviembre, tras el lanzamiento de Echoes of Central Park; después llega la migración de plataformas y el juego cruzado completo está previsto para el inicio de la Season 4.",
+    "it": "Massive introduce il crossplay a fasi durante novembre, dopo l'uscita di Echoes of Central Park; segue la migrazione delle piattaforme e il crossplay completo è previsto per l'inizio della Season 4.",
+    "pt": "A Massive está a lançar o crossplay por fases ao longo de novembro, após o lançamento de Echoes of Central Park; segue-se a migração de plataformas e o crossplay completo está previsto para o início da Season 4.",
+    "ru": "Massive поэтапно вводит кроссплей в течение ноября, начиная после выхода Echoes of Central Park; затем пройдёт миграция платформ, а полный кроссплей планируется к началу Season 4.",
+    "pl": "Massive wprowadza crossplay etapami w listopadzie, po premierze Echoes of Central Park; potem nastąpi migracja platform, a pełny crossplay zaplanowano na start Season 4.",
+    "nl": "Massive rolt crossplay in november gefaseerd uit, te beginnen na de lancering van Echoes of Central Park; daarna volgt de platformmigratie en volledige crossplay staat gepland voor de start van Season 4."
+   }
+  }
+ ]
+}

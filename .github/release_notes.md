@@ -4,9 +4,20 @@
 |---|---|
 | `TD2LootAdvisor_Setup_<sürüm>.exe` | **Kurulum dosyası** (önerilen). Yönetici izni gerekmez; kullanıcı klasörüne kurulur, Başlat menüsü ve masaüstü kısayolu, Programlar'dan kaldırma. |
 | `TD2LootAdvisor_<sürüm>_portable.zip` | Kurulumsuz sürüm: bir klasöre çıkar, `TD2LootAdvisor.exe`'yi çalıştır. |
+| `TD2LootAdvisor_Companion_0.1.1-beta.apk` | Android telefon beta uygulaması. Kurulum ve QR eşleştirme: `TD2LootAdvisor_9.0.8_Telefon_Baglanti_TR.md`. |
 | Source code (zip / tar.gz) | Kaynak kod (Python). |
 
 Windows "kişisel bilgisayarınızı korudu" derse: **Ek bilgi → Yine de çalıştır** (dosya henüz kod imzalı değil).
+
+**9.0.8 — Telefon uygulaması ve QR eşleştirme betası**
+
+- Android Companion APK'sı bu sürümün GitHub Release dosyalarına eklendi. Görev, haber, build ve cihazda saklanan görev ilerlemesine ek olarak telefondan Windows programındaki Telefon Arkadaşı QR kodu okutulabilir.
+- Telefon ile PC aynı güvenilir Wi-Fi ağına bağlandığında son eşya kararı ve build durumu telefonda salt okunur biçimde güncellenir. Telefon bağlantıyı kesebilir; masaüstü sunucusu kapatılınca QR anahtarı geçersiz olur.
+- Ayrıntılı Türkçe kurulum, eşleştirme, güvenlik duvarı ve sorun giderme kılavuzu release dosyalarında ve `docs/mobile_companion_connection_tr.md` konumunda bulunur.
+- Masaüstü açılışında 5 saniyelik Agent saati/hologram animasyonu gösterilir.
+- Masaüstü ve Android paketleri bu commit için GitHub Actions üzerinde derlenir; Android statik analizi ve mevcut Windows kararlılık/kurulum kontrolleri release adımından önce çalışır.
+
+Telefon bağlantısı internet üzerinden uzaktan erişim sağlamaz. HTTP yerel ağda kullanıldığı için ortak Wi-Fi, modem port yönlendirme ve internete açık sunucu kullanmayın.
 
 **9.0.7 — Canlı çeviride özel ad ve zamir doğruluğu**
 

@@ -12,7 +12,8 @@ Türkçe tam kılavuz: [`README.tr.md`](README.tr.md).
 ## Download
 
 **[Latest release → Releases](https://github.com/FEDERALTURK/td2-loot-advisor/releases/latest)**:
-`TD2LootAdvisor_Setup_<version>.exe` (installer, recommended) or `TD2LootAdvisor_<version>_portable.zip`.
+`TD2LootAdvisor_Setup_<version>.exe` (installer, recommended), `TD2LootAdvisor_<version>_portable.zip`, and the Android `TD2LootAdvisor_Companion_0.1.1-beta.apk`.
+Phone pairing steps: [Turkish connection guide](docs/mobile_companion_connection_tr.md).
 
 ## Updating
 
@@ -183,6 +184,10 @@ These changes are included in release 6.0.2. See [local validation results](docs
 
 Source-anchored overlay fixes, two recorded Turkish/English Neural notification packs and optional online natural speech are available in the local source build. These changes are included in release 6.0.3. See [usage, data routing and validation](docs/overlay_voice_local.md).
 
+
+### 9.0.8: Android companion and QR pairing
+
+The Android beta APK adds QR pairing with the Windows app's read-only Phone Companion service over the same trusted Wi-Fi. It shows the latest item verdict and build state; the phone cannot send scan or settings commands. This release also includes the Agent watch startup animation. The APK, Windows installer/portable archive and SHA-256 sums are published in the GitHub Release. See the [pairing guide](docs/mobile_companion_connection_tr.md).
 
 ### 9.0.7: proper names and pronoun context in live translation
 
