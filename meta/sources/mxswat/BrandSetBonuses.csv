@@ -5,15 +5,15 @@ Brand,stat,val
 Airaldi Holdings0,Marksman Rifle Damage,10
 Airaldi Holdings1,Headshot Damage,10
 Airaldi Holdings2,Damage to Armor,5
-Alps Summit Armaments0,Repair Skills,15
-Alps Summit Armaments1,Skill Duration,20
-Alps Summit Armaments2,Cooldown Reduction,10
+Alps Summit Armament0,Repair Skills,15
+Alps Summit Armament1,Skill Duration,20
+Alps Summit Armament2,Cooldown Reduction,10
 Badger Tuff0,Shotgun Damage,10
 Badger Tuff1,% Armor,5
 Badger Tuff2,Armor on Kill,10
-Ceska Vyroba s.r.o.0,Critical Hit Chance,10
-Ceska Vyroba s.r.o.1,Hazard Protection,10
-Ceska Vyroba s.r.o.2,Health,10
+Ceska Vyroba0,Critical Hit Chance,10
+Ceska Vyroba1,Hazard Protection,10
+Ceska Vyroba2,Health,10
 China Light Industries Corporation0,Explosive Damage,15
 China Light Industries Corporation1,Cooldown Reduction,10
 China Light Industries Corporation2,Status Effects,10
@@ -66,14 +66,14 @@ Ongoing Directive1,Status Effects,15
 Ongoing Directive2,Reload Speed %,20
 True Patriot1,Ammo Capacity,30
 True Patriot2,Magazine Size %,30
-Aces and Eights1,Marksman Rifle Damage,15
-Aces and Eights2,Headshot Damage,20
+Aces & Eights1,Marksman Rifle Damage,15
+Aces & Eights2,Headshot Damage,20
 Negotiator's Dilemma1,Critical Hit Chance,15
 Negotiator's Dilemma2,Critical Hit Damage,20
 Tip of the Spear1,Signature Weapon Damage,10
 Tip of the Spear2,Weapon Damage,10
-Foundry Bullwark1,% Armor,10
-Foundry Bullwark2,Armor Regeneration %,3
+Foundry Bulwark1,% Armor,10
+Foundry Bulwark2,Armor Regeneration %,3
 Future Initiative1,Skill Repair,15
 Future Initiative2,Skill Duration,15
 Future Initiative3,Cooldown Reduction,15

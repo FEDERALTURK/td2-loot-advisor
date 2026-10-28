@@ -14,12 +14,12 @@ High End,Holster,5.11 Tactical,A,5.11 Tactical,Armor,A,A,,
 High End,Kneepads,5.11 Tactical,A,5.11 Tactical,Armor,A,A,,
 High End,Mask,5.11 Tactical,A,5.11 Tactical,Armor,A,A,D,
 Named,Gloves,Deathgrips,S,5.11 Tactical,Armor,Armor on Kill,A,,
-Gearset,Backpack,Aces and Eights,S,Aces and Eights,Weapon Damage,A,A,O,Poker Face
-Gearset,Chest,Aces and Eights,S,Aces and Eights,Weapon Damage,A,A,O,No Limit
-Gearset,Gloves,Aces and Eights,S,Aces and Eights,Weapon Damage,A,A,,
-Gearset,Holster,Aces and Eights,S,Aces and Eights,Weapon Damage,A,A,,
-Gearset,Kneepads,Aces and Eights,S,Aces and Eights,Weapon Damage,A,A,,
-Gearset,Mask,Aces and Eights,S,Aces and Eights,Weapon Damage,A,A,O,
+Gearset,Backpack,Aces & Eights,S,Aces & Eights,Weapon Damage,A,A,O,Poker Face
+Gearset,Chest,Aces & Eights,S,Aces & Eights,Weapon Damage,A,A,O,No Limit
+Gearset,Gloves,Aces & Eights,S,Aces & Eights,Weapon Damage,A,A,,
+Gearset,Holster,Aces & Eights,S,Aces & Eights,Weapon Damage,A,A,,
+Gearset,Kneepads,Aces & Eights,S,Aces & Eights,Weapon Damage,A,A,,
+Gearset,Mask,Aces & Eights,S,Aces & Eights,Weapon Damage,A,A,O,
 High End,Backpack,Airaldi Holdings,A,Airaldi Holdings,Weapon Damage,A,A,O,A
 High End,Chest,Airaldi Holdings,A,Airaldi Holdings,Weapon Damage,A,A,O,A
 High End,Gloves,Airaldi Holdings,A,Airaldi Holdings,Weapon Damage,A,A,,
@@ -27,14 +27,14 @@ High End,Holster,Airaldi Holdings,A,Airaldi Holdings,Weapon Damage,A,A,,
 High End,Kneepads,Airaldi Holdings,A,Airaldi Holdings,Weapon Damage,A,A,,
 High End,Mask,Airaldi Holdings,A,Airaldi Holdings,Weapon Damage,A,A,O,
 Named,Chest,Pristine Example,N,Airaldi Holdings,Weapon Damage,A,A,O,Perfect Focus
-High End,Backpack,Alps Summit Armaments,A,Alps Summit Armaments,Skill Tier,A,A,U,A
-High End,Chest,Alps Summit Armaments,A,Alps Summit Armaments,Skill Tier,A,A,U,A
-High End,Gloves,Alps Summit Armaments,A,Alps Summit Armaments,Skill Tier,A,A,,
-High End,Holster,Alps Summit Armaments,A,Alps Summit Armaments,Skill Tier,A,A,,
-High End,Kneepads,Alps Summit Armaments,A,Alps Summit Armaments,Skill Tier,A,A,,
-High End,Mask,Alps Summit Armaments,A,Alps Summit Armaments,Skill Tier,A,A,U,
-Named,Gloves,Motherly Love,N,Alps Summit Armaments,Skill Tier,Skill Health,A,,
-Named,Backpack,Percussive Maintenance,N,Alps Summit Armaments,Skill Tier,A,A,U,Perfect Tech Support
+High End,Backpack,Alps Summit Armament,A,Alps Summit Armament,Skill Tier,A,A,U,A
+High End,Chest,Alps Summit Armament,A,Alps Summit Armament,Skill Tier,A,A,U,A
+High End,Gloves,Alps Summit Armament,A,Alps Summit Armament,Skill Tier,A,A,,
+High End,Holster,Alps Summit Armament,A,Alps Summit Armament,Skill Tier,A,A,,
+High End,Kneepads,Alps Summit Armament,A,Alps Summit Armament,Skill Tier,A,A,,
+High End,Mask,Alps Summit Armament,A,Alps Summit Armament,Skill Tier,A,A,U,
+Named,Gloves,Motherly Love,N,Alps Summit Armament,Skill Tier,Skill Health,A,,
+Named,Backpack,Percussive Maintenance,N,Alps Summit Armament,Skill Tier,A,A,U,Perfect Tech Support
 High End,Backpack,Badger Tuff,A,Badger Tuff,Armor,A,A,O,A
 High End,Chest,Badger Tuff,A,Badger Tuff,Armor,A,A,O,A
 High End,Gloves,Badger Tuff,A,Badger Tuff,Armor,A,A,,
@@ -43,13 +43,13 @@ High End,Kneepads,Badger Tuff,A,Badger Tuff,Armor,A,A,,
 High End,Mask,Badger Tuff,A,Badger Tuff,Armor,A,A,O,
 Named,Holster,Ammo Dump,N,Badger Tuff,Armor,Ammo Capacity,A,,
 Named,Chest,Zero F's,N,Badger Tuff,Armor,A,A,O,Perfectly Unbreakable
-High End,Backpack,Ceska Vyroba s.r.o.,A,Ceska Vyroba s.r.o.,Weapon Damage,A,A,D,A
-High End,Chest,Ceska Vyroba s.r.o.,A,Ceska Vyroba s.r.o.,Weapon Damage,A,A,D,A
-High End,Gloves,Ceska Vyroba s.r.o.,A,Ceska Vyroba s.r.o.,Weapon Damage,A,A,,
-High End,Holster,Ceska Vyroba s.r.o.,A,Ceska Vyroba s.r.o.,Weapon Damage,A,A,,
-High End,Kneepads,Ceska Vyroba s.r.o.,A,Ceska Vyroba s.r.o.,Weapon Damage,A,A,,
-High End,Mask,Ceska Vyroba s.r.o.,A,Ceska Vyroba s.r.o.,Weapon Damage,A,A,D,
-Named,Backpack,Devil's Due,N,Ceska Vyroba s.r.o.,Weapon Damage,A,A,D,Perfect Clutch
+High End,Backpack,Ceska Vyroba,A,Ceska Vyroba,Weapon Damage,A,A,D,A
+High End,Chest,Ceska Vyroba,A,Ceska Vyroba,Weapon Damage,A,A,D,A
+High End,Gloves,Ceska Vyroba,A,Ceska Vyroba,Weapon Damage,A,A,,
+High End,Holster,Ceska Vyroba,A,Ceska Vyroba,Weapon Damage,A,A,,
+High End,Kneepads,Ceska Vyroba,A,Ceska Vyroba,Weapon Damage,A,A,,
+High End,Mask,Ceska Vyroba,A,Ceska Vyroba,Weapon Damage,A,A,D,
+Named,Backpack,Devil's Due,N,Ceska Vyroba,Weapon Damage,A,A,D,Perfect Clutch
 High End,Backpack,China Light Industries Corporation,A,China Light Industries Corporation,Skill Tier,A,A,U,A
 High End,Chest,China Light Industries Corporation,A,China Light Industries Corporation,Skill Tier,A,A,U,A
 High End,Gloves,China Light Industries Corporation,A,China Light Industries Corporation,Skill Tier,A,A,,
@@ -71,12 +71,12 @@ High End,Holster,Fenris Group AB,A,Fenris Group AB,Weapon Damage,A,A,,
 High End,Kneepads,Fenris Group AB,A,Fenris Group AB,Weapon Damage,A,A,,
 High End,Mask,Fenris Group AB,A,Fenris Group AB,Weapon Damage,A,A,O,
 Named,Chest,Ferocious Calm,N,Fenris Group AB,Weapon Damage,A,A,O,Perfect Overwatch
-Gearset,Backpack,Foundry Bullwark,S,Foundry Bullwark,N/A,A,A,,A
-Gearset,Chest,Foundry Bullwark,S,Foundry Bullwark,N/A,A,A,,A
-Gearset,Gloves,Foundry Bullwark,S,Foundry Bullwark,N/A,A,A,,
-Gearset,Holster,Foundry Bullwark,S,Foundry Bullwark,N/A,A,A,,
-Gearset,Kneepads,Foundry Bullwark,S,Foundry Bullwark,N/A,A,A,,
-Gearset,Mask,Foundry Bullwark,S,Foundry Bullwark,N/A,A,A,,
+Gearset,Backpack,Foundry Bulwark,S,Foundry Bulwark,N/A,A,A,,A
+Gearset,Chest,Foundry Bulwark,S,Foundry Bulwark,N/A,A,A,,A
+Gearset,Gloves,Foundry Bulwark,S,Foundry Bulwark,N/A,A,A,,
+Gearset,Holster,Foundry Bulwark,S,Foundry Bulwark,N/A,A,A,,
+Gearset,Kneepads,Foundry Bulwark,S,Foundry Bulwark,N/A,A,A,,
+Gearset,Mask,Foundry Bulwark,S,Foundry Bulwark,N/A,A,A,,
 Gearset,Backpack,Future Initiative,S,Future Initiative,N/A,A,A,,A
 Gearset,Chest,Future Initiative,S,Future Initiative,N/A,A,A,,A
 Gearset,Gloves,Future Initiative,S,Future Initiative,N/A,A,A,,

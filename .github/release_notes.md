@@ -8,6 +8,15 @@
 
 Windows "kişisel bilgisayarınızı korudu" derse: **Ek bilgi → Yine de çalıştır** (dosya henüz kod imzalı değil).
 
+**9.0.6 — Daha kapsamlı oyun kütüphanesi ve doğru eşya tanıma**
+
+- Div2Hub'ın sabitlenmiş CC BY 4.0 veri anlık görüntüsü mevcut kaynaklarla birleştirildi. Katalogda 898 ekipman/eşya kaydı, 380 silah indeksi kaydı, 224 ekipman yeteneği, 181 silah yeteneği, 255 silah modu, 17 ekipman modu, 43 skill varyantı ve 9 Prototype Augment bulunur.
+- Health Damage eşleştirmesi artık Health ile çakışmaz. Beş ve daha fazla basamaklı sayılar, aksanlı ad normalizasyonu ve Perfect yetenek adlarının eşleştirilmesi düzeltildi.
+- Named/Exotic silahların sabit yetenekleri tarama sonucuna eklenir. Prototype Augment'ler kütüphanede ve build hedeflerinde görünür; eşya puanlaması yeteneği yalnız uyumlu slot/tür ve Prototype eşyalarla karşılaştırır.
+- Kütüphane Excel dosyası yetenek ilişkileri, mod uyumluluğu/etkileri ve skill varyantlarıyla yeniden üretildi. Div2Hub lisans/atıf ve senkronizasyon yönergesi eklendi.
+- Ansiklopedi, yeni yetenek açıklamalarını kullanır ve her gear set için fiziksel yuva başına tek parça gösterir; kaynaklardaki eş adlar listeyi çoğaltmaz.
+- **Kapsam sınırı:** kaynak anlık görüntüsü tam bir Skill Mod kataloğu içermiyor. Doğrulanamayan Skill Mod adları ve değerleri uydurulmadı.
+
 **9.0.5 — Daha düzenli menüler, merkezi kısayollar ve Division 3 haber alanı**
 
 - Ana menüdeki 14 sayfa altı ana grupta toplandı; Ayarlar sayfaları Temel, Tarama, Görünüm ve Hizmetler olarak düzenlendi.
@@ -27,8 +36,6 @@ Windows "kişisel bilgisayarınızı korudu" derse: **Ek bilgi → Yine de çal�
 - **Paketlenmiş konuşma altyapısı.** Mikrofon ve yerel Whisper çalışma zamanı pakette; model ilk hazırlamada indirilir. Yeni ayarlarda base/CPU/int8, iki CPU iş parçacığı; mevcut model ve sağlayıcı seçimi korunur. Boştaki konuşma modeli bellekten bırakılabilir. PyAV uyumluluğu sabitlendi.
 - **Veri aktarımı açık.** Mikrofon sesi yerelde metne dönüşür. Soru ve build/eşya bağlamı seçili AI sağlayıcısına gider; çevrimiçi doğal ses açıksa yanıt metni Microsoft ses hizmetine de gönderilir. Sağlayıcı hatasında yerleşik yardımcıya dönülmesi sesli olarak açıklanır.
 - **Yayın öncesi kontroller.** Kısayol, kayıt, iptal, eski zamanlayıcı/yanıt korumaları ve yerel HTTP sağlayıcı akışı test edilir; kurulan EXE'de asistan çalışma zamanı ve gerçek Türkçe ses tanıma ayrıca sınanır. Gerçek oyun + kullanıcı mikrofonu + bulut hesabıyla uçtan uca kullanım henüz doğrulanmadı.
-
-Sürüm numarası kullanıcı isteği doğrultusunda **9.0.5** olarak belirlenmiştir. Önceki kararlı sürüm 9.0.4'tür.
 
 **6.0.3 — Daha hızlı eşya okuma, yerinde çeviri ve doğal ses**
 

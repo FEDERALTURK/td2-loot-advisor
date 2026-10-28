@@ -68,6 +68,57 @@ def test_decimal_repair():
     assert G.parse_attr_line("170,370 Armor", suspects=sus) == ("armor", 170370.0) and sus == []
     assert G.parse_attr_line("+13.5% Critical Hit Chance", suspects=sus) is None                  # ondalıklı ve imkânsız: yine reddedilir
 
+def test_health_damage_and_large_health_values():
+    """Tam phrase eşleşmesi Health Damage'ı Health'ten ayırır; uzun sayılar kesilmez."""
+    G = _game()
+    assert G.parse_attr_line("+10% Health Damage", weapon=True) == ("damage_to_health", 10.0)
+    assert G.parse_attr_line("+10% Damage to Health", weapon=True) == ("damage_to_health", 10.0)
+    assert G.parse_attr_line("+18,935 Health") == ("health", 18935.0)
+    assert G.parse_attr_line("170,370 Armor") == ("armor", 170370.0)
+    card = """St. Elmo's Engine
+Exotic
+Assault Rifle
+Core Attributes
++15% Assault Rifle Damage
++10% Health Damage
+Attributes
++10% Damage to Targets Out of Cover
+Talents
+Actum Est"""
+    item = G.recognize(card)
+    assert item["name"] == "St. Elmo's Engine", item
+    assert item["attrs"]["damage_to_health"] == 10.0 and "health" not in item["attrs"], item
+
+def test_prototype_quality_limits():
+    """Prototype kartları tanınır ve Prototype rulo üst sınırı uygulanır."""
+    G = _game()
+    item = G.recognize("Striker's Kneepads\nPrototype\nGear Set\nArmor\nCore Attributes\n+22.5% Weapon Damage\nAugments\nEntropy")
+    assert "PROTOTYPE" in item["rarity"] and item["attrs"].get("weapon_damage") == 22.5, item
+    assert item["quality"].get("weapon_damage") == 100, item
+    assert "Entropy" in item["talents"], item
+    proto_build = {"talents": {"Entropy": 2}, "attributes": {}, "sets_or_brands": []}
+    assert engine.score_gear({"name": "Striker's Kneepads", "kind": "gear", "slot": "Gloves",
+                              "rarity": ["PROTOTYPE"], "attrs": {}, "talents": ["Entropy"]},
+                             proto_build, "", G)[0] == 100
+    assert engine.score_gear({"name": "Gloves", "kind": "gear", "slot": "Gloves", "rarity": [],
+                              "attrs": {}, "talents": ["Entropy"]}, proto_build, "", G)[0] == 0
+
+def test_catalog_key_integrity_and_unicode_normalization():
+    """Marka bonusları marka tablosunda, gear set bonusları kendi tablosunda kalır."""
+    G = _game()
+    assert gamedata.nrm("Česká Výroba s.r.o.") == "ceska vyroba s r o"
+    assert G.data["prototype_augments"] == ["Quantum", "Echo", "Atomize", "Amalgam", "Trapper",
+                                               "Entropy", "Anomaly", "Paradox", "Synesthesia"]
+    brand_keys = {gamedata.nrm(x) for x in G.data["brands"]}
+    set_keys = {gamedata.nrm(x) for x in G.data["gear_sets"]}
+    assert all(gamedata.nrm(x) in brand_keys for x in G.data["brand_bonuses"])
+    assert all(gamedata.nrm(x) in set_keys for x in G.data["gear_set_bonuses"])
+    assert all(not v.get("brand") or gamedata.nrm(v["brand"]) in brand_keys for v in G.data["items"].values())
+    assert all(not v.get("gear_set") or gamedata.nrm(v["gear_set"]) in set_keys for v in G.data["items"].values())
+    assert not ({gamedata.nrm(x) for x in G.data["gear_talents"]} &
+                {gamedata.nrm(x) for x in G.data["weapon_talents"]})
+    assert "Galvanize" in G.data["gear_talents"] and "Galvanize" not in G.data["weapon_talents"]
+
 def test_share_roundtrip():
     import share
     b = {"name": "Striker", "sets_or_brands": ["Striker's Battlegear"], "attributes": {"crit_chance": {"weight": 2}},

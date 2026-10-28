@@ -66,6 +66,9 @@ def apply_corrections(d, corr):
     for k, q in corr.get("weapon_quality", {}).items():
         for wk in d["weapon_index"]:
             if N(wk) == N(k): d["weapon_index"][wk]["quality"] = q
+    for k, weapon_type in corr.get("weapon_type", {}).items():
+        for wk in d["weapon_index"]:
+            if N(wk) == N(k): d["weapon_index"][wk]["type"] = weapon_type
     for a, b in corr.get("exotic_alias", {}).items():
         if N(b) not in {N(x) for x in d["exotics"]} and d["weapon_index"].get(b, {}).get("quality") == "exotic":
             d["exotics"].append(b)
@@ -129,6 +132,10 @@ def build(d, season, wiki, mx):
         if r.get("Talent") and r["Quality"] in ("Named", "Exotic"): talent_of.setdefault(N(r["Name"]), r["Talent"])
     for k, t in mx.get("_wiki_talents", {}).items():
         talent_of.setdefault(N(k), t)
+    for collection in (items, windex):
+        for name, record in collection.items():
+            if record.get("talent"):
+                talent_of.setdefault(N(name), record["talent"])
 
     # ---- Eşyalar (ekipman; uzun liste — içe aktarıcının ana kaynağı)
     eq = []
@@ -136,9 +143,14 @@ def build(d, season, wiki, mx):
                                                          if kv[1].get("quality") in ("exotic", "named", "gear set", "high-end") else 9,
                                                          kv[1].get("brand") or kv[1].get("gear_set") or "", kv[0])):
         s = season_by.get(N(name), {})
+        roll_note = ""
+        if v.get("roll_slots"):
+            roll_note = "; ".join(f"{k}={val}" for k, val in v["roll_slots"].items() if val not in ("N/A", "type:gear-core", "type:gear-minor"))
+        if v.get("mod_slots"):
+            roll_note = (roll_note + "; " if roll_note else "") + "Mod yuvaları: " + ", ".join(v["mod_slots"])
         eq.append([name, QUAL.get(v.get("quality"), v.get("quality") or ""), v.get("slot") or "",
                    v.get("brand") or v.get("gear_set") or "", talent_of.get(N(name), v.get("talent") or ""),
-                   s.get("season", ""), s.get("desc", "")])
+                   s.get("season", ""), s.get("desc", "") or roll_note])
 
     # ---- Markalar
     brands = []
@@ -221,9 +233,11 @@ def build(d, season, wiki, mx):
     weap = []
     for k, v in sorted(windex.items(), key=lambda kv: (kv[1].get("type", ""), kv[0])):
         m = mx_weap.get(N(k), {})
+        bs = v.get("base_stats", {})
         weap.append([k, v.get("type", ""), QUAL.get(v.get("quality"), (v.get("quality") or "").title()),
-                     m.get("Variant", ""), _num(m.get("Base Damage")), _num(m.get("RPM")), _num(m.get("Mag Size")),
-                     _num(m.get("Reload Speed (ms)")), _num(m.get("Optimal Range")),
+                     m.get("Variant", "") or v.get("family", ""), _num(m.get("Base Damage")) or bs.get("base_damage"),
+                     _num(m.get("RPM")) or bs.get("base_rpm"), _num(m.get("Mag Size")) or bs.get("base_mag_size"),
+                     _num(m.get("Reload Speed (ms)")) or bs.get("base_reload_time"), _num(m.get("Optimal Range")) or bs.get("optimal_range"),
                      " ".join(x for x in (m.get("Core 1", ""), f"(max {m['Core 1 Max']})" if m.get("Core 1 Max") else "") if x),
                      " ".join(x for x in (m.get("Core 2", ""), f"(max {m['Core 2 Max']})" if m.get("Core 2 Max") else "") if x),
                      m.get("Attribute 1", ""), talent_of.get(N(k), m.get("Talent", "") if v.get("quality") in ("named", "exotic") else "")])
@@ -231,32 +245,42 @@ def build(d, season, wiki, mx):
     # ---- Talentler
     gts = d.get("gear_talent_slots", {})
     mxg = {N(r["Talent"]): r for r in mx.get("GearTalents", [])}
+    div2hub_g = {N(r["name"]): r for r in d.get("gear_talent_details", [])}
     st = season.get("talents", {})
     gtal = []
     for t in sorted(set(d["gear_talents"]) | {r["Talent"] for r in mx.get("GearTalents", [])} | set(st.get("gear", {})), key=str.lower):
-        r = mxg.get(N(t), {}); info = gts.get(t, {})
+        r = mxg.get(N(t), {}); info = gts.get(t, {}); dh = div2hub_g.get(N(t), {})
         gtal.append([t, SLOT_TR.get(info.get("slot") or r.get("Slot", ""), info.get("slot") or r.get("Slot", "")),
                      {"normal": "Normal", "perfect": "Perfect", "set": "Set", "exotic": "Exotic"}.get(info.get("kind", ""), info.get("kind", "")),
-                     st.get("gear", {}).get(t) or r.get("Desc", "") or mx.get("_talent_desc", {}).get(t, "")])
+                     st.get("gear", {}).get(t) or r.get("Desc", "") or dh.get("description", "") or mx.get("_talent_desc", {}).get(t, "")])
     mxw = {N(r["Name"]): r for r in mx.get("WeaponTalents", [])}
+    div2hub_w = {N(r["name"]): r for r in d.get("weapon_talent_details", [])}
     cols = ["Assault Rifle", "Rifle", "Marksman Rifle", "SMG", "LMG", "Pistol", "Shotgun"]
     wtal = []
     for t in sorted(set(d["weapon_talents"]) | {r["Name"] for r in mx.get("WeaponTalents", [])} | set(st.get("weapon", {})), key=str.lower):
-        r = mxw.get(N(t), {})
-        types = ", ".join(c for c in cols if (r.get(c) or "").strip().lower() == "x")
-        wtal.append([t, types, st.get("weapon", {}).get(t) or r.get("Desc", "") or mx.get("_talent_desc", {}).get(t, "")])
+        r = mxw.get(N(t), {}); dh = div2hub_w.get(N(t), {})
+        types = ", ".join(c for c in cols if (r.get(c) or "").strip().lower() == "x") or dh.get("compatibility", "")
+        wtal.append([t, types, st.get("weapon", {}).get(t) or r.get("Desc", "") or dh.get("description", "") or mx.get("_talent_desc", {}).get(t, "")])
 
     # ---- Modlar
-    gmods = [[m["stat"], {"offensive": "Saldırı", "defensive": "Savunma", "utility": "Yardımcı"}.get(m.get("type"), m.get("type", "")), m.get("max")]
+    gmods = [[m["stat"], {"offensive": "Saldırı", "defensive": "Savunma", "utility": "Yardımcı"}.get(m.get("type"), m.get("type", "")), m.get("min"), m.get("max"), m.get("fidelity", "")]
              for m in d.get("gear_mods", [])]
-    wm_mx = {N(r["Name"]): r for r in mx.get("WeaponMods", [])}
-    wmods = []
-    for n in d.get("weapon_mods", []):
-        r = wm_mx.get(N(n), {})
-        wmods.append([r.get("Slot", ""), r.get("Type", ""), n, _num(r.get("valPos")), r.get("pos", ""), _num(r.get("valNeg")), r.get("neg", "")])
-    for r in mx.get("WeaponMods", []):
-        if N(r["Name"]) not in {N(x) for x in d.get("weapon_mods", [])}:
-            wmods.append([r["Slot"], r["Type"], r["Name"], _num(r.get("valPos")), r.get("pos", ""), _num(r.get("valNeg")), r.get("neg", "")])
+    if d.get("weapon_mod_details"):
+        wmods = [[r.get("category", ""), r.get("compatibility", ""), r.get("name", ""), r.get("stats", ""), "Div2Hub"]
+                 for r in d["weapon_mod_details"]]
+        source_mod_names = {N(r.get("name", "")) for r in d["weapon_mod_details"]}
+        for name in d.get("weapon_mods", []):
+            if N(name) not in source_mod_names:
+                wmods.append(["legacy", "", name, "Etki ve uyumluluk doğrulanmamış", "Önceki yerel katalog"])
+    else:
+        wm_mx = {N(r["Name"]): r for r in mx.get("WeaponMods", [])}
+        wmods = []
+        for n in d.get("weapon_mods", []):
+            r = wm_mx.get(N(n), {})
+            wmods.append([r.get("Slot", ""), r.get("Type", ""), n, _num(r.get("valPos")), r.get("pos", ""), _num(r.get("valNeg")), r.get("neg", "")])
+        for r in mx.get("WeaponMods", []):
+            if N(r["Name"]) not in {N(x) for x in d.get("weapon_mods", [])}:
+                wmods.append([r["Slot"], r["Type"], r["Name"], _num(r.get("valPos")), r.get("pos", ""), _num(r.get("valNeg")), r.get("neg", "")])
 
     # ---- Attribute'lar
     attrs = [[k, ", ".join(a.get("aliases", [])), a.get("max"), a.get("weapon_max"), "Evet" if a.get("core") else "", a.get("unit", "")]
@@ -266,10 +290,12 @@ def build(d, season, wiki, mx):
     base_sk = ["Pulse", "Seeker Mine", "Turret", "Sticky Bomb", "Ballistic Shield", "Crusader Shield", "Deflector Shield",
                "Bulwark Shield", "Striker Shield", "Chem Launcher", "Drone", "Hive", "Firefly", "Decoy", "Trap"]
     skills = []
+    skill_parents = {N(x["name"]): x["skill"] for x in d.get("skill_variants", [])}
     for s in d.get("skills", []):
         fam = next((b for b in ["Shield", "Hive", "Drone", "Turret", "Seeker", "Firefly", "Trap", "Chem Launcher", "Pulse", "Sticky Bomb", "Decoy"]
                     if b.lower() in s.lower()), "")
-        skills.append([s, {"Seeker": "Seeker Mine"}.get(fam, fam), "Ana skill" if s in base_sk else "Varyant"])
+        parent = skill_parents.get(N(s), {"Seeker": "Seeker Mine"}.get(fam, fam))
+        skills.append([s, parent, "Ana skill" if s in base_sk else "Varyant"])
     skills += [["Riot Foam", "Chem Launcher", "Varyant"]] if not any(x[0] == "Riot Foam" for x in skills) else []
 
     # ---- Uzmanlıklar
@@ -317,8 +343,8 @@ SHEETS = [
                           "Core 1", "Core 2", "Attribute", "Talent"], [30, 18, 12, 14, 12, 8, 8, 12, 12, 30, 26, 22, 26]),
     ("Ekipman Talentleri", "gtal", ["Talent", "Yuva", "Tür", "Açıklama"], [28, 14, 10, 100]),
     ("Silah Talentleri", "wtal", ["Talent", "Silah türleri", "Açıklama"], [28, 44, 100]),
-    ("Ekipman Modları", "gmods", ["Stat", "Tür", "En yüksek"], [30, 12, 12]),
-    ("Silah Modları", "wmods", ["Yuva", "Tür", "Mod", "+ değer", "+ stat", "- değer", "- stat"], [14, 16, 32, 10, 26, 10, 26]),
+    ("Ekipman Modları", "gmods", ["Stat", "Tür", "En düşük", "En yüksek", "Adım"], [30, 12, 12, 12, 12]),
+    ("Silah Modları", "wmods", ["Kategori", "Uyumluluk", "Mod", "Etkiler", "Kaynak"], [16, 36, 34, 56, 14]),
     ("Attributelar", "attrs", ["Anahtar", "Oyundaki ad(lar)", "En yüksek", "Silahta en yüksek", "Core", "Birim"], [22, 40, 12, 16, 8, 8]),
     ("Skilller", "skills", ["Skill", "Aile", "Tür"], [26, 16, 12]),
     ("Uzmanlıklar", "spec", ["Uzmanlık", "Bonus", "Değer"], [18, 30, 10]),

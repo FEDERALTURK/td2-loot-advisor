@@ -333,6 +333,7 @@
   "build.talent_kind": "Type",
   "build.kind_weapon": "Weapon",
   "build.kind_gear": "Gear",
+  "build.kind_augment": "Prototype Augment",
   "build.weapons": "Weapon types",
   "build.wtype_guess": "Not set; guessed from the name: {types}",
   "build.test_last": "Test with last scanned item",

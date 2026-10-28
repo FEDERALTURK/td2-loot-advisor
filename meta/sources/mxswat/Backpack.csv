@@ -1,18 +1,18 @@
 Quality,Slot,Item Name,Type,Brand,Core,Attribute 1,Attribute 2,Mod,Talent
 Exotic,Backpack,Acosta's Go-Bag,E,Exotic,Skill Tier,Skill Haste,Skill Damage,U,One in Hand...
 High End,Backpack,5.11 Tactical,A,5.11 Tactical,Armor,A,A,D,A
-Gearset,Backpack,Aces and Eights,S,Aces and Eights,Weapon Damage,A,,O,Poker Face
+Gearset,Backpack,Aces & Eights,S,Aces & Eights,Weapon Damage,A,,O,Poker Face
 High End,Backpack,Airaldi Holdings,A,Airaldi Holdings,Weapon Damage,A,A,O,A
-High End,Backpack,Alps Summit Armaments,A,Alps Summit Armaments,Skill Tier,A,A,U,A
-Named,Backpack,Percussive Maintenance,N,Alps Summit Armaments,Skill Tier,A,A,U,Perfect Tech Support
+High End,Backpack,Alps Summit Armament,A,Alps Summit Armament,Skill Tier,A,A,U,A
+Named,Backpack,Percussive Maintenance,N,Alps Summit Armament,Skill Tier,A,A,U,Perfect Tech Support
 High End,Backpack,Badger Tuff,A,Badger Tuff,Armor,A,A,O,A
-High End,Backpack,Ceska Vyroba s.r.o.,A,Ceska Vyroba s.r.o.,Weapon Damage,A,A,D,A
-Named,Backpack,Devil's Due,N,Ceska Vyroba s.r.o.,Weapon Damage,A,A,D,Perfect Clutch
+High End,Backpack,Ceska Vyroba,A,Ceska Vyroba,Weapon Damage,A,A,D,A
+Named,Backpack,Devil's Due,N,Ceska Vyroba,Weapon Damage,A,A,D,Perfect Clutch
 High End,Backpack,China Light Industries Corporation,A,China Light Industries Corporation,Skill Tier,A,A,U,A
 Named,Backpack,Strategic Alignment,N,China Light Industries Corporation,Skill Tier,A,A,U,Perfect Shock and Awe
 High End,Backpack,Douglas & Harding,A,Douglas & Harding,Weapon Damage,A,A,O,A
 High End,Backpack,Fenris Group AB,A,Fenris Group AB,Weapon Damage,A,A,O,A
-Gearset,Backpack,Foundry Bullwark,S,Foundry Bullwark,N/A,A,,,A
+Gearset,Backpack,Foundry Bulwark,S,Foundry Bulwark,N/A,A,,,A
 Gearset,Backpack,Future Initiative,S,Future Initiative,N/A,A,,,A
 High End,Backpack,Gila Guard,A,Gila Guard,Armor,A,A,D,A
 High End,Backpack,Golan Gear Ltd,A,Golan Gear Ltd,Armor,A,A,U,A

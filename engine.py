@@ -206,18 +206,26 @@ def score_gear(item, build, low, game):
             q, v = _q(item, k, r, game)
             got += float(r.get("weight", 1)) * q; why.append(f"{k} {v:g} ({round(q * 100)}%)")
         parts.append((35, min(1.0, got / ideal)))
-    # talent
+    # gear talents require a Chest/Backpack; Prototype Augments can roll on any
+    # eligible Prototype gear slot and are selected from the same build target list.
     tals = build.get("talents", {})
     slot = item.get("slot")
-    if tals and (slot in TALENT_SLOTS or (not slot and item.get("talents"))):
-        top = max(tals.values())
-        have_t = {gamedata.nrm(x) for x in item.get("talents", [])}
-        hits = [(n, w) for n, w in tals.items() if gamedata.nrm(n) in have_t]
-        if listed and not hits: hits = [(item["name"], top)]
-        if hits:
-            n, w = max(hits, key=lambda h: h[1]); parts.append((15, w / top)); why.append(f"talent {n}")
-        else:
-            parts.append((15, 0.0))
+    if tals:
+        proto = "PROTOTYPE" in (item.get("rarity") or []) and "EXOTIC" not in (item.get("rarity") or [])
+        augments = {gamedata.nrm(n) for n in game.data.get("prototype_augments", [])}
+        gear_talents = {gamedata.nrm(n) for n in game.data.get("gear_talents", [])}
+        eligible = [(n, w) for n, w in tals.items()
+                    if (slot in TALENT_SLOTS and gamedata.nrm(n).replace("perfect ", "") in gear_talents)
+                    or (proto and gamedata.nrm(n) in augments)]
+        if eligible:
+            top = max(w for _, w in eligible)
+            have_t = {gamedata.nrm(x) for x in item.get("talents", [])}
+            hits = [(n, w) for n, w in eligible if gamedata.nrm(n) in have_t]
+            if listed and not hits: hits = [(item["name"], top)]
+            if hits:
+                n, w = max(hits, key=lambda h: h[1]); parts.append((15, w / top)); why.append(f"talent {n}")
+            else:
+                parts.append((15, 0.0))
     tot = sum(w for w, _ in parts)
     pct = round(100 * sum(w * v for w, v in parts) / tot) if tot else 0
     return pct, why

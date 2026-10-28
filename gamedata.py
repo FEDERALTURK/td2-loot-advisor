@@ -19,14 +19,19 @@ import re
 from difflib import SequenceMatcher
 from pathlib import Path
 import threading
+import unicodedata
 from collections import Counter
 from functools import lru_cache
 
-NUMBER = re.compile(r"([+-]?\d{1,3}(?:[.,]\d{3})*(?:[.,]\d+)?|\d+(?:[.,]\d+)?)\s*(k|%)?", re.I)
+# Prefer grouped thousands, then arbitrary-length integers, then decimals. The
+# trailing boundary prevents a five-digit value such as 18935 from being read
+# as the three-digit prefix 189.
+NUMBER = re.compile(r"([+-]?(?:\d{1,3}(?:[.,]\d{3})+|\d+)(?:[.,]\d+)?|\d+(?:[.,]\d+)?)\s*(k|%)?(?![\d.,])", re.I)
 
 
 def nrm(s):
-    s = (s or "").lower().replace("’", "'").replace("č", "c").replace("ý", "y").replace("é", "e")
+    s = unicodedata.normalize("NFKD", (s or "").lower().replace("’", "'"))
+    s = "".join(ch for ch in s if not unicodedata.combining(ch))
     return re.sub(r"\s+", " ", re.sub(r"[^a-z0-9&' ]+", " ", s)).strip()
 
 
@@ -101,7 +106,8 @@ class GameData:
             for n in d.get(key, []):
                 self.names.append((nrm(n), n, kind))
         self.talents = [(nrm(n), n, "gear") for n in d.get("gear_talents", [])] + \
-                       [(nrm(n), n, "weapon") for n in d.get("weapon_talents", [])]
+                       [(nrm(n), n, "weapon") for n in d.get("weapon_talents", [])] + \
+                       [(nrm(n), n, "augment") for n in d.get("prototype_augments", [])]
         self.attr_alias = {}
         for k, a in d.get("attributes", {}).items():
             for al in a.get("aliases", []):
@@ -119,6 +125,7 @@ class GameData:
         self.ui_words = {nrm(w) for w in d.get("ui_words", [])}
         self.item_kinds = {k: [nrm(x) for x in v] for k, v in d.get("item_kinds", {}).items()}
         self.weapon_mod_names = [nrm(x) for x in d.get("weapon_mods", []) if len(x) > 8]
+        self.weapon_mod_names.extend(nrm(x) for x in d.get("weapon_mod_aliases", {}) if len(x) > 8)
         sw = d.get("specialization_weapons", {})
         self.spec_sidearms = {nrm(k): v for k, v in sw.get("sidearms", {}).items()}
         self.spec_signature = [nrm(x) for x in sw.get("signature", [])]
@@ -217,6 +224,7 @@ class GameData:
         ("attributes", r"attributes?|minor attributes?"),
         ("expertise", r"expertise|proficient|proficiency|no upgrades active"),
         ("talents", r"talents?|weapon talents?"),
+        ("augments", r"augments?|prototype augments?"),
         ("mods", r"mods|gear mods|weapon mods|modifications|mod slots?|gear modding|weapon modding"),
         ("bonus", r"brand set bonus(es)?|gear set bonus(es)?|set bonus(es)?|brand bonus(es)?|\d ?pieces?"),
         ("misc", r"dye|appearance|owned.*|source.*|description|skin|vanity|appearance slot|dye slot"),
@@ -282,7 +290,9 @@ class GameData:
 
     def match_talents(self, lines, cutoff=0.86):
         found = []
-        idx = next((i for i, l in enumerate(lines) if re.match(r"^\W*talents?\b", nrm(l))), None)
+        detail_names = {nrm(x.get("name", "")) for x in self.data.get("gear_talent_details", []) +
+                        self.data.get("weapon_talent_details", [])}
+        idx = next((i for i, l in enumerate(lines) if re.match(r"^\W*(?:talents?|augments?)\b", nrm(l))), None)
         if idx is not None:
             lines = lines[idx + 1:]
         else:
@@ -295,12 +305,21 @@ class GameData:
             best = (None, 0, None)
             for n, canon, kind in self.talents:
                 if len(n) < 4: continue
+                canon_n = nrm(canon)
+                is_perfect_name = bool(re.match(r"^perfect(?:ly|ed)?\s+", canon_n))
+                if is_perfect_name and not perfect:
+                    continue
+                base_n = re.sub(r"^perfect(?:ly|ed)?\s+", "", canon_n)
                 # talent adı satırın başında yazar ("Obliterate", "Perfect Fast Hands …")
-                head = " ".join(core.split()[:len(n.split()) + 1])
-                r = max(ratio(head, n), best_window(" ".join(core.split()[:4]), n))
+                head = " ".join(core.split()[:len(base_n.split()) + 1])
+                r = max(ratio(head, base_n), best_window(" ".join(core.split()[:4]), base_n))
+                if is_perfect_name and canon_n in detail_names:
+                    r += 0.0001                    # güncel kaynağın resmi yazımı eski alias'a üstün gelir
                 if r > best[1]: best = (canon, r, kind)
             if best[0] and best[1] >= cutoff:
-                name = ("Perfect " if perfect else "") + best[0]
+                canon = best[0]
+                canon_is_perfect = bool(re.match(r"(?i)^perfect(?:ly|ed)?\s+", canon))
+                name = canon if canon_is_perfect else (("Perfect " if perfect else "") + canon)
                 if name not in [f[0] for f in found]:
                     found.append((name, best[2]))
         return found
@@ -327,9 +346,17 @@ class GameData:
         label = nrm(NUMBER.sub(" ", line))
         if len(label.split()) > 7: return None
         key, br = None, 0.0
-        for al, k in self.attr_alias.items():
-            r = best_window(label, al)
-            if r > br: key, br = k, r
+        # Exact phrases must win over shorter aliases contained inside them:
+        # "health damage" contains "health", but is damage_to_health.
+        exact = [(len(al), k) for al, k in self.attr_alias.items()
+                 if re.search(r"(?<![a-z0-9])" + re.escape(al) + r"(?![a-z0-9])", label)]
+        if exact:
+            _, key = max(exact)
+            br = 1.0
+        else:
+            for al, k in self.attr_alias.items():
+                r = best_window(label, al)
+                if r > br: key, br = k, r
         if not key or br < 0.8: return None
         val = abs(val)
         mx0 = self.limit_of(key, prototype, weapon, named)
@@ -468,6 +495,11 @@ class GameData:
                                                      weapon=bool(is_weapon), named=bool({"NAMED", "EXOTIC"} & set(rarity)),
                                                      suspects=suspect)
         talents = self.match_talents(lines)
+        fixed_talent = (info.get("talent") if info else None) or (winfo.get("talent") if winfo else None)
+        if fixed_talent and {"NAMED", "EXOTIC"} & set(rarity):
+            fixed_kind = "weapon" if winfo else "gear"
+            if not any(nrm(x[0]) == nrm(fixed_talent) for x in talents):
+                talents.append((fixed_talent, fixed_kind))
         if not name:                                      # bilinen ad yoksa: marka/set + yuva ("Grupo Sombra Mask")
             base = sets.get("gear_set") or sets.get("brand")
             if base and title and slot and any(re.search(r"\b" + re.escape(w) + r"\b", nrm(title)) for w, sl in self.slots.items() if sl == slot):
@@ -488,6 +520,7 @@ class GameData:
                 "gear_set": sets.get("gear_set") or info.get("gear_set") or (name if kind == "gear_set" else None),
                 "rarity": rarity, "slot": slot if item_kind in ("weapon", "gear") else None,
                 "weapon_type": wtype, "spec": spec, "partial": partial, "sections": has_sections, "suspect": sorted(set(suspect)),
+                "fixed_talent": fixed_talent,
                 "attrs": attrs, "quality": quality, "mod_attrs": mod_attrs,
                 "talents": [t for t, _ in talents], "confidence": confidence,
                 "_learn": {"set_name": set_name, "set_kind": set_kind, "bonuses": bonuses, "title": title}}

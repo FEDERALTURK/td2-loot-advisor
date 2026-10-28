@@ -147,7 +147,7 @@ import game_assistant
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.0.5"
+APP_VERSION = "9.0.6"
 FROZEN = getattr(sys, "frozen", False)
 BASE = Path(sys.executable).parent if FROZEN else Path(__file__).resolve().parent
 TASKS_CACHE = BASE / "tasks_cache.json"  # son indirilen görev listesi
@@ -349,7 +349,7 @@ RARITY_WORDS = {"exotic": "EXOTIC", "named": "NAMED", "prototype": "PROTOTYPE",
 NUM = re.compile(r"(\d+(?:[.,]\d+)?)")
 
 def norm(s):
-    return re.sub(r"[^a-z0-9&' ]+", " ", s.lower()).strip()
+    return gamedata.nrm(s)
 
 GAME_DATA_CACHE = BASE / "game_data_cache.json"
 LEARNED_LIB = BASE / "learned_library.json"      # kartlardan öğrenilen markalar / setler / parça adları
@@ -5624,6 +5624,7 @@ class App:
         if GAME.ok:
             for n in GAME.data.get("gear_talents", []) + GAME.data.get("weapon_talents", []):
                 tal_names += [n, "Perfect " + n]
+        if GAME.ok: tal_names += list(GAME.data.get("prototype_augments", []))
         self.v_tn, self.v_tw = tk.StringVar(), tk.StringVar(value="2")
         ttk.Combobox(tf, textvariable=self.v_tn, width=32, values=sorted(set(tal_names))).pack(side="left")
         ttk.Label(tf, text=t("build.weight")).pack(side="left", padx=(10, 2))
@@ -5750,9 +5751,11 @@ class App:
         sets = b.get("sets_or_brands", [])
         if sets: info.append(t("plan.sets_line", s=", ".join(sets)))
         for br in sets:
-            bon = GAME.data.get("brand_bonuses", {}).get(br) if GAME.ok else None
+            is_set = GAME.ok and br in GAME.data.get("gear_sets", [])
+            bonus_table = GAME.data.get("gear_set_bonuses", {}) if is_set else GAME.data.get("brand_bonuses", {})
+            bon = bonus_table.get(br) if GAME.ok else None
             if bon:
-                start = 2 if GAME.ok and br in GAME.data.get("gear_sets", []) else 1
+                start = 2 if is_set else 1
                 info.append(f"   {br}: " + " · ".join(f"{i + start}pc {x}" for i, x in enumerate(bon)))
         if b.get("items"): info.append(t("plan.items_line", s=", ".join(b["items"])))
         if b.get("talents"): info.append(t("plan.talents_line", s=", ".join(f"{n} ({w:g})" for n, w in sorted(b["talents"].items(), key=lambda kv: -kv[1]))))
@@ -5806,8 +5809,11 @@ class App:
             mx = GAME.max_of(k) if GAME.ok else None
             self.ta.insert("", "end", iid=k, values=(attr_name(k), r["weight"], r.get("good_at", ""), f"{mx:g}" if mx else "—"))
         wnames = {gamedata.nrm(n) for n in GAME.data.get("weapon_talents", [])} if GAME.ok else set()
+        augments = {gamedata.nrm(n) for n in GAME.data.get("prototype_augments", [])} if GAME.ok else set()
         for n, w in self.cur["talents"].items():
-            kind = t("build.kind_weapon") if gamedata.nrm(n).replace("perfect ", "") in wnames else t("build.kind_gear")
+            nn = gamedata.nrm(n)
+            kind = t("build.kind_augment") if nn in augments else (
+                t("build.kind_weapon") if nn.replace("perfect ", "") in wnames else t("build.kind_gear"))
             self.tt.insert("", "end", iid=n, values=(n, kind, w))
 
     def add_set(self):

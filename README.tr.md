@@ -225,6 +225,10 @@ Bu geliştirmeler 6.0.2 sürümüne dahildir. Test kapsamı ve sınırlar: [yere
 Yerinde çevirinin satır konumlarını koruyan düzeltmeler, iki hazır Türkçe/İngilizce Neural bildirim paketi ve isteğe bağlı çevrimiçi doğal ses eklendi. Bu değişiklikler 6.0.3 sürümüne dahildir. Kullanım, veri aktarımı ve doğrulama: [6.0.3 notları](docs/overlay_voice_local.md).
 
 
+### 9.0.6: genişletilmiş oyun kütüphanesi ve daha doğru eşya tanıma
+
+9.0.5 sonrasında biriken eşya kütüphanesi ve OCR tanıma düzeltmeleri bu sürümde yayımlanıyor. Sabitlenmiş Div2Hub topluluk veri anlık görüntüsü ve mevcut kaynaklar birleştirilerek 898 ekipman kaydı, 380 silah indeksi kaydı, yetenek/mod ayrıntıları, 43 skill varyantı ve 9 Prototype Augment eklendi veya doğrulandı. Health Damage artık Health ile karıştırılmaz; sayı okuma, aksanlı ad normalizasyonu ve Perfect yetenek eşleştirmesi düzeltildi. Named/Exotic silahların sabit yetenekleri ve Prototype Augment'ler tarama/build akışında tanınır; build puanlaması yetenekleri yalnız uygun eşya türünde karşılaştırır. Ansiklopedi yetenek açıklamalarını gösterir ve gear set parçalarını yuva başına tekilleştirir. Excel kütüphanesi de bu ayrıntılarla yeniden üretildi. Kaynak atıfları depoda bulunur. Skill Modları için doğrulanmış tam katalog mevcut olmadığından bu sürüm eksik değer uydurmaz.
+
 ### 9.0.5: düzenli menüler, kısayollar ve Division 3 haberleri
 
 Uygulamanın 14 sayfası altı ana grupta toplandı. Ayarlar dört başlık altında düzenlendi. Tüm uygulama kısayolları tuş yakalama ve çakışma kontrolüyle Ayarlar → Temel → Kısayollar alanından değiştirilebilir. Yeni Division 3 sayfası doğrulanmış Ubisoft bilgilerini gösterir ve mevcut resmî haber akışından yeni gelişmeleri izler. Görev eşitleme sayfasına resmî ve topluluk rehberi kaynakları eklendi.

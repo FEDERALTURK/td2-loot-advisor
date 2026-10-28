@@ -129,7 +129,16 @@ Kategoriler oyundaki menülerle birebir aynıdır (başka kategori kullanma):
 
 # Oyun verisi — `meta/game_data.json`
 - Eşya tanıma sözlüğü: `gear_sets`, `brands`, `exotics`, `named`, `gear_talents`, `weapon_talents`,
+  `prototype_augments` (Y8 sezon kaynağındaki Prototype Augment adları; build eşleştirmesinde yalnız Prototype eşyada aranır),
   `attributes` (`aliases`, `max`, `core`, `unit`), `weapon_types`, `slots`, `prototype_multiplier`.
+- Güncel kütüphane veri kaynağı: `meta/sources/div2hub/` (CC BY 4.0; atıf ve snapshot bilgisi
+  `meta/sources/DIV2HUB_ATTRIBUTION.md`). `scripts/sync_div2hub_data.py` bu sabit snapshot'tan eşya,
+  silah-yetenek eşleşmesi, mod etkisi/uyumluluğu, talent açıklaması ve skill varyantlarını `game_data.json`'a aktarır.
+- `weapon_index` named/exotic silahlarında varsa sabit `talent`, `family`, `base_stats` ve `mod_slots` taşır;
+  `items` içinde ekipman `roll_slots` ve `mod_slots` saklanır. `weapon_mod_details`, `gear_talent_details`,
+  `weapon_talent_details` ve `skill_variants` ayrıntılı kaynak kayıtlarıdır.
+- Skill Modları loot ile değişken değer aldığı ve snapshot'ta tam bir mod listesi bulunmadığı için ayrı bir
+  tamamlanmış Skill Mod kataloğu yoktur; doğrulanmış kaynak olmadan isim/değer uydurulmaz.
 - Yeni sezonda gelen egzotik/named/set/talent'i ekle (wiki "Red Horizon" sayfasındaki *New Weapons, Gear,
   and Talents* bölümü iyi bir kaynak). Mevcut adları silme; `version`'ı artır.
 - `max` değerlerini yalnızca resmî yama notu bir değişiklik söylerse güncelle.
@@ -137,7 +146,8 @@ Kategoriler oyundaki menülerle birebir aynıdır (başka kategori kullanma):
   `weapon_index` (silah adı → `type`, `quality`; uzmanlık tabancaları `quality: specialization`, `spec`),
   `specialization_weapons`, `weapon_mods`, `gear_mods`, `skills`, `item_kinds`, `ui_words`.
   Yeni named/egzotik eklerken `items` / `weapon_index` içine de yuva/tür ile ekle. Dosyayı baştan YAZMA:
-  mevcut JSON'u oku, yalnızca ekle, `version`'ı artır (ör. 2026-10-25.1). Hiçbir listeden kayıt silme.
+  mevcut JSON'u oku, `version`'ı artır. Kayıt yalnız güncel kaynakla yanlış olduğu doğrulanırsa silinir;
+  örneğin The Division 1'e ait AlphaBridge Division 2 listesinden çıkarılmıştır.
 
 ## Haber akışı — meta/news_feed.json (Bilgi → Haberler ve sezon)
 

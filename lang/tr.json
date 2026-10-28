@@ -635,6 +635,7 @@
   "build.talent_kind": "Tür",
   "build.kind_weapon": "Silah",
   "build.kind_gear": "Ekipman",
+  "build.kind_augment": "Prototype Güçlendirmesi",
   "build.weapons": "Silah türleri",
   "build.wtype_guess": "Belirtilmemiş; adından tahmin: {types}",
   "build.test_last": "Son taranan eşyayla test et",

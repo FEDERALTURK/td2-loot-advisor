@@ -40,6 +40,10 @@
   "Thompson M1928": "high-end",
   "The Grudge": "named"
  },
+  "weapon_type": {
+    "Interchange": "Assault Rifle",
+    "Trader": "Assault Rifle"
+  },
  "exotic_alias": {
   "Ravenous": "The Ravenous"
  },

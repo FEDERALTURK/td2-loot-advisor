@@ -59,6 +59,14 @@ class Encyclopedia:
                     pass
             talent_desc.update(_load([Path(d) / "wiki_talent_desc.json"]) or {})
             exotic_info.update(_load([Path(d) / "wiki_exotics.json"]) or {})
+        # The versioned community catalog also carries full talent descriptions;
+        # use them when the existing Wiki/MX sources have no description.
+        for key in ("gear_talent_details", "weapon_talent_details"):
+            for row in (self.data.get(key) or []):
+                name = row.get("name")
+                desc = row.get("description") or row.get("desc")
+                if name and desc:
+                    talent_desc.setdefault(name, desc)
         self.talent_desc, self.exotic_info = talent_desc, exotic_info
         self.entries = self._build()
         self.by_key = {(e["cat"], e["name"]): e for e in self.entries}
@@ -83,7 +91,17 @@ class Encyclopedia:
                             "talent": talent, "desc": desc})
         for n in d.get("gear_sets", []):
             b = d.get("gear_set_bonuses", {}).get(n, [])
-            pieces = sorted((k for k, v in items.items() if v.get("gear_set") == n), key=lambda k: SLOT_ORDER.index(items[k]["slot"]) if items[k].get("slot") in SLOT_ORDER else 9)
+            # Some upstream catalogs use two display-name variants for the
+            # same physical set piece. Show one representative per slot.
+            pieces_by_slot = {}
+            for k, v in items.items():
+                slot = v.get("slot")
+                if v.get("gear_set") != n or not slot:
+                    continue
+                prior = pieces_by_slot.get(slot)
+                if prior is None or (len(k), k.casefold()) < (len(prior), prior.casefold()):
+                    pieces_by_slot[slot] = k
+            pieces = sorted(pieces_by_slot.values(), key=lambda k: SLOT_ORDER.index(items[k]["slot"]) if items[k].get("slot") in SLOT_ORDER else 9)
             out.append({"cat": "gear_set", "name": n, "bonuses": b, "pieces": [(p, items[p].get("slot")) for p in pieces],
                         "talent": next((x.split(":", 1)[1].strip() for x in b if x.lower().startswith("talent:")), None)})
         for n in d.get("brands", []):
@@ -93,7 +111,10 @@ class Encyclopedia:
         for kind, key in (("gear", "gear_talents"), ("weapon", "weapon_talents")):
             for n in d.get(key, []):
                 slot = (gtal_slot.get(n) or {}).get("slot") if kind == "gear" else None
-                out.append({"cat": "talent", "name": n, "kind": kind, "slot": slot, "desc": self.talent_desc.get(n, "")})
+                detail_key = "gear_talent_details" if kind == "gear" else "weapon_talent_details"
+                detail = next((x for x in d.get(detail_key, []) if x.get("name") == n), {})
+                desc = self.talent_desc.get(n, "") or detail.get("description", "") or detail.get("desc", "")
+                out.append({"cat": "talent", "name": n, "kind": kind, "slot": slot, "desc": desc})
         return out
 
     def counts(self):
