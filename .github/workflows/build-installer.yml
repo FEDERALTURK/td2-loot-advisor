@@ -23,7 +23,7 @@ env:
 jobs:
   build:
     runs-on: windows-latest
-    timeout-minutes: 60
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v5
 
@@ -42,6 +42,15 @@ jobs:
           }
 
       - name: Build installer
+        # Release-specific data-integrity checks run before any binary is built.
+        shell: pwsh
+        run: |
+          python -B tests/test_release_914.py
+          if ($LASTEXITCODE -ne 0) { throw "backup/update regressions failed" }
+          python -B tests/test_intelligence.py
+          if ($LASTEXITCODE -ne 0) { throw "command center regressions failed" }
+
+      - name: Package Windows installer
         shell: cmd
         env:
           CI: "1"
@@ -132,32 +141,8 @@ jobs:
         run: |
           $ver = (python scripts/version.py).Trim()
           Compress-Archive -Path dist\TD2LootAdvisor\* -DestinationPath "installer\TD2LootAdvisor_${ver}_portable.zip" -Force
-          Copy-Item docs\mobile_companion_connection_tr.md "installer\TD2LootAdvisor_${ver}_Telefon_Baglanti_TR.md"
-          Copy-Item mobile\BETA_README_TR.md "installer\TD2LootAdvisor_Companion_BETA_README_TR.md"
-
-      - name: Build Android companion APK
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.47.8'
-          channel: stable
-
-      - name: Analyze and package Android beta
-        shell: pwsh
-        run: |
-          Push-Location mobile
-          try {
-            flutter analyze
-            if ($LASTEXITCODE -ne 0) { throw "Flutter analysis failed" }
-            flutter build apk --release --build-name=0.1.2 --build-number=3
-            if ($LASTEXITCODE -ne 0) { throw "Android APK build failed" }
-          } finally { Pop-Location }
-          Copy-Item mobile\build\app\outputs\flutter-apk\app-release.apk installer\TD2LootAdvisor_Companion_0.1.2-beta.apk
-
-      - name: Checksums
-        shell: pwsh
-        run: |
           # uygulama içi güncelleyici indirdiği dosyayı bununla doğrular
-          Get-ChildItem installer -File | Where-Object { $_.Extension -in ".exe", ".zip", ".apk" } | ForEach-Object {
+          Get-ChildItem installer -File | Where-Object { $_.Extension -in ".exe", ".zip" } | ForEach-Object {
             "{0}  {1}" -f (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower(), $_.Name
           } | Set-Content -Encoding ascii "installer\SHA256SUMS.sha256"
           Get-Content installer\SHA256SUMS.sha256

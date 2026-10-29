@@ -32,6 +32,7 @@ copy /Y scripts\default_builds.json build\pkg\builds.json >nul
   --add-data "meta;meta" ^
   --collect-all edge_tts --collect-all aiohttp --copy-metadata edge-tts ^
   --add-data "icon;icon" ^
+  --add-data "art/agents;art/agents" --add-data "art/branding;art/branding" --add-data "art/backgrounds;art/backgrounds" ^
   --hidden-import PIL._tkinter_finder ^
   --hidden-import pyttsx3.drivers --hidden-import pyttsx3.drivers.sapi5 ^
   --hidden-import ocr_backend --hidden-import features --hidden-import stash --hidden-import vendor --hidden-import companion --hidden-import share --hidden-import dropstats --hidden-import fx --hidden-import bgvideo --hidden-import view3d --hidden-import display --hidden-import updater --hidden-import syncer --hidden-import gameinfo --hidden-import updates --hidden-import reports --hidden-import account --hidden-import service --hidden-import screenstate --hidden-import localapi --hidden-import presence --hidden-import notify --hidden-import knowledge --hidden-import voicepack --hidden-import livetranslate --hidden-import pystray._win32 ^

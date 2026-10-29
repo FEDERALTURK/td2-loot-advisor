@@ -30,6 +30,7 @@ UA = {"User-Agent": "TD2-Loot-Advisor-updater", "Accept": "application/vnd.githu
 
 # Kaynak güncellemesinde yenilenebilecek yollar (beyaz liste). Bunların dışındaki hiçbir dosyaya dokunulmaz.
 SOURCE_ALLOW = [r"[^/]+\.py", r"lang/[^/]+\.json", r"meta/(game_data|meta_builds|tasks_feed)\.json", r"meta/[^/]+\.md",
+                r"art/(agents|backgrounds|branding)/[^/]+\.(png|jpg|webp)",
                 r"scripts/[^/]+", r"icon/[^/]+", r"server/[^/]+", r"tests/[^/]+(/[^/]+)?",
                 r"requirements[^/]*\.txt", r"README[^/]*\.md", r"LICENSE"]
 # Hiçbir koşulda yazılmaz (beyaz listeye uysa bile)
@@ -114,7 +115,7 @@ def install_frozen(info, progress=None):
 
 
 def _allowed(rel):
-    if rel in NEVER or rel.split("/", 1)[0] in ("private", "logs", "reports", "cache", "art", "build", "dist", "installer"):
+    if rel in NEVER or rel.split("/", 1)[0] in ("private", "logs", "reports", "cache", "build", "dist", "installer"):
         return False
     return any(re.fullmatch(p, rel) for p in SOURCE_ALLOW)
 

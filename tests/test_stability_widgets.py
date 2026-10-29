@@ -86,6 +86,14 @@ def main():
             obj.select_page("settings"); obj.select_settings_page("shortcuts"); obj.root.update_idletasks()
             assert obj.current_tab()=="settings"
             assert obj.shortcut_vars["voice_hotkey"].get()==obj.cfg["settings"]["voice_hotkey"]
+            obj.fx_watch_style.current(1)
+            obj._fx_from_ui()
+            assert obj.cfg['settings']['event_fx'] == 'isac'
+            obj.select_page('stash'); obj.st_nb.select(4); obj.refresh_stash(); obj.root.update_idletasks()
+            assert app.t('stash.page_command') in obj.st_nb.tab(4, 'text')
+            assert 'command.' not in obj.command_txt.get('1.0', 'end')
+            obj._universal_search_window()
+            obj._library_report_window()
             if hasattr(obj,"toggle_performance"):
                 assert obj.lt_eng.get()=="local"
                 assert "bilgisayarda" in obj.lt_privacy_lbl.cget("text")

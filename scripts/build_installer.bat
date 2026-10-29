@@ -75,6 +75,7 @@ if exist dist\TD2LootAdvisor rmdir /s /q dist\TD2LootAdvisor
   --add-data "meta;meta" ^
   --collect-all edge_tts --collect-all aiohttp --copy-metadata edge-tts ^
   --add-data "icon;icon" ^
+  --add-data "art/agents;art/agents" --add-data "art/branding;art/branding" --add-data "art/backgrounds;art/backgrounds" ^
   --hidden-import PIL._tkinter_finder --hidden-import PIL.ImageTk ^
   --hidden-import pynput.keyboard._win32 --hidden-import pynput.mouse._win32 ^
   --hidden-import pyttsx3.drivers --hidden-import pyttsx3.drivers.sapi5 ^

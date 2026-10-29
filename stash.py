@@ -11,6 +11,7 @@ Kırılan eşyalar "dismantled" işaretlenir ve hesaplara girmez.
 import itertools
 import json
 import os
+import shutil
 import time
 import uuid
 
@@ -57,7 +58,7 @@ def sanitize(rec, game):
 class Stash:
     def __init__(self, path):
         self.path = path
-        self.data = {"version": 1, "items": []}
+        self.data = {"version": 2, "items": []}
         try:
             with open(path, encoding="utf-8") as f:
                 d = json.load(f)
@@ -97,13 +98,36 @@ class Stash:
                        score=score if score is not None else old.get("score"), seen=stamp)
             return old, False
         rec.update(id=uuid.uuid4().hex[:10], sig=sig, verdict=verdict, best=best, score=score, time=stamp, seen=stamp,
-                   status="owned", source=source)
+                   status="owned", source=source, location="stash", locked=False, expertise="none")
         self.items.append(rec)
         return rec, True
 
     def mark(self, rid, status):
         r = self.find(rid)
+        if r and r.get("locked") and status == "dismantled":
+            return None
         if r: r["status"] = status; r["seen"] = time.strftime("%Y-%m-%dT%H:%M:%S")
+        return r
+
+    def set_locked(self, rid, locked=True):
+        r = self.find(rid)
+        if r is not None:
+            r["locked"] = bool(locked)
+            r["seen"] = time.strftime("%Y-%m-%dT%H:%M:%S")
+        return r
+
+    def set_location(self, rid, location):
+        r = self.find(rid)
+        if r is not None:
+            r["location"] = str(location or "stash")[:40]
+            r["seen"] = time.strftime("%Y-%m-%dT%H:%M:%S")
+        return r
+
+    def set_expertise(self, rid, expertise):
+        r = self.find(rid)
+        if r is not None:
+            r["expertise"] = str(expertise or "none")[:40]
+            r["seen"] = time.strftime("%Y-%m-%dT%H:%M:%S")
         return r
 
     def remove(self, rid):
@@ -111,6 +135,33 @@ class Stash:
 
     def clear(self):
         self.data["items"] = []
+
+    def backup_to(self, target):
+        """Create a recoverable copy of the stash file."""
+        self.save()
+        target = os.fspath(target)
+        os.makedirs(os.path.dirname(target) or ".", exist_ok=True)
+        shutil.copy2(self.path, target)
+        return target
+
+    def restore_from(self, source):
+        """Restore a stash backup after validating its JSON shape."""
+        with open(source, encoding="utf-8") as fh:
+            data = json.load(fh)
+        if not isinstance(data, dict) or not isinstance(data.get("items"), list):
+            raise ValueError("invalid stash backup")
+        ids = set()
+        for item in data["items"]:
+            if not isinstance(item, dict) or not isinstance(item.get("id"), str) or not item.get("id") or item["id"] in ids:
+                raise ValueError("invalid or duplicate item id")
+            if item.get("kind") not in ITEM_KINDS or item.get("slot") not in engine.ALL_SLOTS or not isinstance(item.get("attrs"), dict):
+                raise ValueError("invalid item record")
+            ids.add(item["id"])
+        if os.path.exists(self.path):
+            shutil.copy2(self.path, str(self.path) + ".pre-restore.bak")
+        self.data = data
+        self.save()
+        return len(self.items)
 
     def import_progress(self, progress, game):
         """Eski sürümlerin progress.json kayıtlarını (build'e uyan eşyalar) sandığa aktar. Dönüş: eklenen sayısı."""
@@ -188,7 +239,7 @@ def optimize(build, plan, items, game=None):
     chosen = {}
     set_req, any_req, flex, need = _variants(plan)
     if need and len(flex) >= need:
-        best_total, best_combo = -1, None
+        best_total, best_combo = float('-inf'), ()
         cache = {}
         for s in flex:
             for tag, rq in (("set", set_req), ("any", any_req)):

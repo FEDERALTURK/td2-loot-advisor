@@ -116,6 +116,8 @@ import bgvideo
 import ocr_backend
 import features
 import stash
+import intelligence
+import backup_bundle
 import vendor
 import companion
 import share
@@ -149,7 +151,7 @@ import game_assistant
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.1.0"
+APP_VERSION = "9.1.4"
 FROZEN = getattr(sys, "frozen", False)
 BASE = Path(sys.executable).parent if FROZEN else Path(__file__).resolve().parent
 TASKS_CACHE = BASE / "tasks_cache.json"  # son indirilen görev listesi
@@ -1763,7 +1765,17 @@ class App:
         for phase, values in sorted(stats.items()):
             rows.append(f"{phase}: n={values['count']}  median={values['median_ms']:.0f} ms  p95={values['p95_ms']:.0f} ms")
         rows.append(t("perf.queue", **self._translation_jobs.stats()))
-        messagebox.showinfo(t("perf.measure"), "\n\n".join(rows), parent=self.root)
+        w = tk.Toplevel(self.root); w.title(t("perf.measure"))
+        ttk.Label(w, text="\n".join(rows), justify="left").pack(padx=16, pady=12)
+        chart = tk.Canvas(w, width=620, height=max(100, len(stats)*48), bg=PAL["surface"], highlightthickness=0)
+        chart.pack(fill="both", expand=True, padx=16, pady=12)
+        maximum = max([v['p95_ms'] for v in stats.values()] + [1])
+        for i, (phase, values) in enumerate(sorted(stats.items())):
+            y = i*48+20
+            chart.create_text(8,y,text=phase,fill=PAL['fg'],anchor='w')
+            chart.create_rectangle(120,y-9,120+380*values['p95_ms']/maximum,y+9,fill=PAL['muted'],outline='')
+            chart.create_rectangle(120,y-9,120+380*values['median_ms']/maximum,y+9,fill=PAL['accent'],outline='')
+            chart.create_text(510,y,text=f"{values['median_ms']:.0f} ms",fill=PAL['fg'],anchor='w')
 
     def _post_translation(self, token, callback):
         if not getattr(self, "_closing", False) and self._translation_jobs.is_current(token):
@@ -7741,6 +7753,11 @@ class App:
         ttk.Checkbutton(wr_, text=t("fx.enable"), variable=self.fxv["fx_bgwatch"]).pack(side="left")
         ttk.Label(wr_, text=t("fx.dim")).pack(side="left", padx=(16, 4))
         ttk.Scale(wr_, from_=0.0, to=0.7, variable=self.fx_wdim, length=160).pack(side="left")
+        modes = ("standard", "isac", "rogue")
+        ttk.Label(wr_, text=t("fx.watch_style")).pack(side="left", padx=(12, 4))
+        self.fx_watch_style = ttk.Combobox(wr_, state="readonly", width=18, values=[t("fx.watch_" + m) for m in modes])
+        self.fx_watch_style.current(modes.index(st.get("event_fx")) if st.get("event_fx") in modes else 0)
+        self.fx_watch_style.pack(side="left")
         ttk.Label(wbx, text=t("fx.watch_note"), foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=12, pady=(0, 8))
         vd = ttk.LabelFrame(f, text="🎬 " + t("fx.video_box")); vd.pack(fill="x", padx=10, pady=6)
         r4 = ttk.Frame(vd); r4.pack(fill="x", padx=8, pady=6)
@@ -7770,6 +7787,7 @@ class App:
         st["fx_video_dim"] = round(float(self.fx_dim.get()), 2)
         st["fx_transition_ms"] = int(self.fx_tms.get())
         st["fx_bgwatch_dim"] = round(float(self.fx_wdim.get()), 2)
+        st["event_fx"] = ("standard", "isac", "rogue")[max(0, self.fx_watch_style.current())]
         if hasattr(self, "fxbar"): self.fxbar.duration = max(120, min(450, int(st["fx_transition_ms"])))
 
     def save_fx(self):
@@ -8642,7 +8660,7 @@ class App:
         f = self.tabs["stash"]
         self.st_nb = ttk.Notebook(f); self.st_nb.pack(fill="both", expand=True, padx=8, pady=8)
         pages = {}
-        for key, icon in (("inv", "🗄"), ("opt", "🧮"), ("audit", "🧾"), ("vendor", "🏪")):
+        for key, icon in (("inv", "🗄"), ("opt", "🧮"), ("audit", "🧾"), ("vendor", "🏪"), ("command", "⌘")):
             holder = ttk.Frame(self.st_nb); self.st_nb.add(holder, text=f" {icon} {t('stash.page_' + key)} ")
             pages[key] = holder
         self.st_nb.bind("<<NotebookTabChanged>>", lambda e=None: self.refresh_stash())
@@ -8661,6 +8679,8 @@ class App:
         ttk.Button(bar2, text="🔨 " + t("stash.dismantled"), command=lambda: self._stash_mark("dismantled")).pack(side="left")
         ttk.Button(bar2, text="✖ " + t("stash.delete"), command=self._stash_delete).pack(side="left", padx=6)
         ttk.Button(bar2, text="⇩ " + t("stash.import"), command=self._stash_import).pack(side="left")
+        ttk.Button(bar2, text="💾 Yedekle", command=self._stash_backup).pack(side="left", padx=6)
+        ttk.Button(bar2, text="↩ Geri yükle", command=self._stash_restore).pack(side="left")
         ttk.Button(bar2, text="📤 " + t("stash.export") + ("" if self.ent.has("stash_export") else " ⭐"),
                    command=self._stash_export).pack(side="left", padx=6)
         ttk.Button(bar2, text="🧹 " + t("stash.clear"), command=self._stash_clear).pack(side="right")
@@ -8712,7 +8732,73 @@ class App:
         self.audit_txt.pack(fill="both", expand=True, padx=8, pady=(0, 8))
         self._audit = None
         self._build_vendor_page(pages["vendor"])
+        self._build_command_page(pages["command"])
         self.refresh_stash()
+
+    def _build_command_page(self, parent):
+        tools = ttk.Frame(parent); tools.pack(fill="x", padx=10, pady=6)
+        ttk.Button(tools, text=t("command.search"), command=self._universal_search_window).pack(side="left")
+        ttk.Button(tools, text=t("command.audit"), command=self._library_report_window).pack(side="left", padx=6)
+        self.command_txt = tk.Text(parent, bg=PAL["surface"], fg=PAL["fg"], relief="flat", wrap="word", font=(ui_theme.FONT, 11))
+        self.command_txt.pack(fill="both", expand=True, padx=10, pady=10)
+        ttk.Button(parent, text=t("command.refresh"), command=self.refresh_stash).pack(anchor="e", padx=10, pady=(0, 8))
+
+    def _universal_search_window(self):
+        w = tk.Toplevel(self.root); w.title(t("command.search")); w.geometry("760x500")
+        q = tk.StringVar(); ttk.Entry(w, textvariable=q).pack(fill="x", padx=10, pady=10)
+        output = tk.Text(w, wrap="word"); output.pack(fill="both", expand=True, padx=10, pady=10)
+        def search(*_):
+            result = intelligence.universal_search(q.get(), self.stash.owned(), self.cfg['builds'])
+            output.config(state='normal'); output.delete('1.0','end')
+            for kind, records in result.items():
+                output.insert('end', t('command.' + kind)+'\n')
+                for record in records[:200]: output.insert('end', str(record.get('name','?'))+'\n')
+            output.config(state='disabled')
+        pending = [None]
+        def schedule(*_):
+            if pending[0]: w.after_cancel(pending[0])
+            pending[0] = w.after(180, search)
+        q.trace_add('write', schedule); search()
+
+    def _library_report_window(self):
+        known = set(GAME.data.get('attributes', {})); rows = []
+        for build in self.cfg['builds']:
+            for key in build.get('attributes', {}):
+                if key not in known: rows.append(t("command.unknown_attr", name=build.get('name'), key=key))
+        for item in self.stash.owned():
+            for key in item.get('attrs', {}):
+                if key not in known: rows.append(t("command.unknown_attr", name=item.get('name'), key=key))
+        messagebox.showinfo(t("command.audit"), '\n'.join(rows) or t("command.audit_ok"), parent=self.root)
+
+    def _refresh_command(self, items):
+        if not getattr(self, "command_txt", None): return
+        b = active_build(self.cfg)
+        self.command_txt.config(state="normal"); self.command_txt.delete("1.0", "end")
+        if not b:
+            self.command_txt.insert("end", t("command.no_build") + "\n")
+        else:
+            plan = plan_of(b)
+            routes = vendor.target_loot_today(self.vendor_week)
+            today = time.strftime("%Y-%m-%d", time.gmtime())
+            current_routes = [row for row in routes if row[3] == today]
+            snap = intelligence.command_snapshot(b, plan, items, GAME, current_routes)
+            age = intelligence.cache_age(VENDOR_CACHE)
+            if age is None or age > 86400 or not current_routes or len(current_routes) != len(routes):
+                self.command_txt.insert("end", t("command.stale_loot") + "\n")
+            if age is None or age > 7 * 86400:
+                self.command_txt.insert("end", t("command.stale_vendor") + "\n")
+            self.command_txt.insert("end", t("stash.page_command") + " — " + b.get('name','') + "\n\n")
+            farm = snap["farm"]
+            self.command_txt.insert("end", t("command.completion", percent=farm['completion'], done=farm['done'], total=farm['total']) + "\n\n")
+            self.command_txt.insert("end", t("command.priorities") + "\n")
+            for row in farm["missing"]:
+                self.command_txt.insert("end", f"• {slot_name(row['slot'])}: {', '.join(row['wanted'])}\n")
+                for route in row['routes']:
+                    self.command_txt.insert("end", f"    → {', '.join(map(str, route['missions'])) or route['event']} · {route['day']}\n")
+                if not row['routes']:
+                    self.command_txt.insert("end", "    " + t("command.no_route") + "\n")
+            self.command_txt.insert("end", "\n" + t("command.summary", protected=snap['protected'], duplicates=snap['duplicates'], library=len(snap['library'])) + "\n")
+        self.command_txt.config(state="disabled")
 
     def _stash_rec_toggle(self):
         self.cfg["settings"]["stash_record"] = bool(self.st_rec.get()); save_cfg(self.cfg)
@@ -8745,6 +8831,7 @@ class App:
         if page == 1: self._refresh_opt(items)
         elif page == 2: self._refresh_audit(items)
         elif page == 3: self._refresh_vendor()
+        elif page == 4: self._refresh_command(items)
 
     def _refresh_opt(self, items):
         b = build_by_name(self.cfg, self.opt_b.get()) or active_build(self.cfg)
@@ -8817,6 +8904,26 @@ class App:
         n = self.stash.import_progress(self.progress, GAME) if GAME.ok else 0
         self.stash.save(); self.refresh_stash()
         messagebox.showinfo(APP_NAME, t("stash.imported", n=n))
+
+    def _stash_backup(self):
+        path = filedialog.asksaveasfilename(defaultextension=".json", initialfile="td2_stash_backup.json", filetypes=[("JSON", "*.json")])
+        if path:
+            try: backup_bundle.save(path, self.cfg['builds'], self.stash.items); self.toast(t("command.backup_ok"))
+            except Exception as e: messagebox.showerror(APP_NAME, t("command.backup_error", error=e))
+
+    def _stash_restore(self):
+        path = filedialog.askopenfilename(filetypes=[("JSON", "*.json")])
+        if path:
+            try:
+                data = backup_bundle.load(path)
+                if not messagebox.askyesno(APP_NAME, t("command.restore_confirm", items=len(data['items']), builds=len(data['builds']))): return
+                backup_bundle.save(BASE / 'pre_restore_backup.json', self.cfg['builds'], self.stash.items)
+                backup_bundle.restore(data, self.cfg, self.stash, save_cfg)
+                self._audit = None
+                self.refresh_builds(0)
+                self.refresh_stash()
+                self.toast(t("command.restore_ok"))
+            except Exception as e: messagebox.showerror(APP_NAME, t("command.restore_error", error=e))
 
     def _stash_clear(self):
         if not messagebox.askyesno(APP_NAME, t("stash.clear_q")): return

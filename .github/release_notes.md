@@ -1,37 +1,51 @@
-**9.1.0 — Tanılama Merkezi ve daha kararlı arayüz**
-
-- Yeni Sistem Tanılama Merkezi; uygulama durumu, performans ve destek için gerekli bilgileri tek yerde toplar ve paylaşılabilir rapor oluşturur.
-- Küçük pencere boyutlarında menü ve panel yerleşimi iyileştirildi; gezinme ve tıklama sorunlarına yönelik kararlılık düzenlemeleri yapıldı.
-- Arka plan efektleri ve HUD çizimi hafifletildi; fare izi efektinin ayrı pencere kaynaklı siyah alan/etkileşim sorunları giderildi.
-- Canlı operasyon/Dark Zone arka plan görselleri ve arayüz düzenlemeleri eklendi.
-- Yayın paketi Windows kurulum dosyasını, taşınabilir ZIP'i, Android Companion beta APK'sını ve SHA-256 özetlerini içerir.
 ## TD2 Loot Advisor — Windows
+
+**9.1.4 — Komuta Merkezi ve güvenli güncelleme**
+
+- Ekipman → Sandık → Komuta Merkezi bağlantıları ve Türkçe/İngilizce menü etiketleri tamamlandı. Günlük hedef loot için eski günün görevleri önerilmez; doğrulanmış eşleşme yoksa açıkça belirtilir.
+- Günlük hedef loot ve haftalık satıcı önbelleği için ayrı eskilik uyarıları eklendi.
+- Komuta Merkezi üzerinden eşya/build araması ve bilinmeyen attribute anahtarı denetimi açılabilir. Arama yazarken kısa gecikmeyle çalışır.
+- Sandık ve build'ler birlikte yedeklenir; geri yüklemeden önce doğrulanır ve mevcut veriler pre_restore_backup.json dosyasında saklanır. Kayıt hatasında önceki verilere dönülür.
+- Görünüm efektlerinde Ajan saati, ISAC taraması ve Rogue sinyali seçilebilir. OCR performans ekranında medyan/p95 ölçümleri grafikle gösterilir.
+- Agent logosu ve uygulama sahneleri Windows paketine dahil edildi; kaynak güncelleyici de bu görselleri alır. Kişisel videolar ve kullanıcı verileri korunur.
+- Windows kurulum, paketlenmiş EXE ve güncelleme kontrolleri başarılı olmadan Release yayımlanmaz.
+
+**9.1.3 — Agent logosu ve kütüphane denetimi**
+
+- Kullanıcının onayladığı Agent temalı logo masaüstü pencere/görev çubuğu simgesi ve marka varlığı olarak uygulandı.
+- Kütüphane/build denetim raporu eklendi; mevcut 18 build’in attribute referanslarında doğrulanmış eksik bulunmadı.
+- Bu sürüm GitHub Release asset’leri üzerinden uygulama içi güncelleme akışından alınabilir.
+
+**9.1.2 — Komuta Merkezi, arama, yedekleme ve görsel yenileme**
+
+- Komuta Merkezi’ne eksik build parçası için görev/hedef loot eşleştirmesi eklendi; hangi görevde hangi eşyanın aranacağı yerel build planı ve mevcut hedef loot önbelleği üzerinden açıklanır.
+- Satıcı/hedef loot önbelleğinin yaşı hesaplanabilir hâle getirildi; eski veya çevrimdışı veri canlı veri gibi sunulmaz.
+- Evrensel yerel arama motoru eklendi: eşya adı, marka, set, yuva, silah türü, attribute, yetenek ve build adı tek sorguda aranabilir.
+- Sandık verisi için doğrulamalı tek adımlı yedekleme/geri yükleme altyapısı eklendi.
+- Küçük pencere için mevcut responsive/kompakt menü davranışı korunarak toplu güncelleme kapsamına alındı.
+- Yeni sürüm için güncel TD2 Loot Advisor logosu üretildi: `art/branding/td2-loot-advisor-9.1.2.png`.
+- Windows kurulum ve paketlenmiş EXE testleri için sürüm 9.1.2 akışı hazırlandı; bu makinede yerel kaynak testleri çalıştırılabilir, GitHub Actions üzerindeki gerçek EXE doğrulaması yayın CI’sinde yapılmalıdır.
+
+**9.1.1 — Toplu kararlılık, Komuta Merkezi ve yerel eşya yönetimi güncellemesi**
+
+- Ekipman → Sandık altında **Komuta Merkezi** görünür hâle getirildi; eksik build parçaları, korumalı eşyalar, kopya grupları, kütüphane adayları ve farm öncelikleri tek ekranda özetlenir.
+- Eşyalar için sandık/karakter konumu, koruma kilidi ve uzmanlık durumu yerel olarak tutulur. Kilitli Exotic, Named ve Prototype kayıtları yanlışlıkla söküm/audit sonucuna düşmez.
+- Yeni eşya, mevcut sandık kayıtları ve aktif build ile karşılaştırılır; daha iyi veya zaten mevcut bir kopya varsa sonuç ekranında açık uyarı gösterilir.
+- Yan yana eşya karşılaştırma görünümü eklendi; son OCR sonucu ile sandıktaki seçili kayıt karşılaştırılabilir.
+- Komuta Merkezi artık satıcı/hedef loot verisiyle farm önceliği ve önerilen rotayı birleştirir; mevcut çevrimdışı önbellek korunur.
+- Komut/menü etiketlerindeki ham çeviri anahtarları giderildi; Türkçe ve İngilizce Komuta Merkezi adları eklendi.
+- Fare izi/ajan sahnesindeki geçersiz Tk widget çağrıları korumaya alındı; küçük pencere ve tema geçişlerinde tekrarlanan native-cursor hataları engellendi.
+- `intelligence` ve sandık yönetimi için regresyon testleri eklendi. Kaynak kod açılışı, JSON sözlükleri ve 36 birim test doğrulandı.
+
+**Sınır:** Bu klasör bir Git çalışma ağacı içermediği için bu değişiklikler yerel olarak hazırlanmıştır; GitHub release’i, gerçek depo remote’u bağlandıktan sonra CI iş akışıyla oluşturulmalıdır.
 
 | Dosya | Ne |
 |---|---|
 | `TD2LootAdvisor_Setup_<sürüm>.exe` | **Kurulum dosyası** (önerilen). Yönetici izni gerekmez; kullanıcı klasörüne kurulur, Başlat menüsü ve masaüstü kısayolu, Programlar'dan kaldırma. |
 | `TD2LootAdvisor_<sürüm>_portable.zip` | Kurulumsuz sürüm: bir klasöre çıkar, `TD2LootAdvisor.exe`'yi çalıştır. |
-| `TD2LootAdvisor_Companion_0.1.2-beta.apk` | Android telefon beta uygulaması. Kurulum ve QR eşleştirme: `TD2LootAdvisor_9.0.9_Telefon_Baglanti_TR.md`. |
 | Source code (zip / tar.gz) | Kaynak kod (Python). |
 
 Windows "kişisel bilgisayarınızı korudu" derse: **Ek bilgi → Yine de çalıştır** (dosya henüz kod imzalı değil).
-
-**9.0.9 — Android Companion açılış düzeltmesi**
-
-- Android 16 cihazlarında Companion uygulamasının açılışta kapanmasına yol açan başlatıcı sınıfı paket adı uyuşmazlığı düzeltildi.
-- Companion sürümü 0.1.2 olarak güncellendi; APK başlatıcı sınıfı Android manifesti ile eşleşiyor.
-- Google Play hazırlık notları, gizlilik politikası ve mağaza metni eklendi. Google Play'e yüklenebilir imzalı AAB için geliştiricinin kendi upload anahtarı ve Play Console yapılandırması gerekir; bu beta APK'sı Play üretim paketi değildir.
-- Flutter analiz ve başlangıç widget testi geçti; CI, yayın öncesi Windows paketleme ve Android APK kontrollerini tekrar çalıştırır.
-
-**9.0.8 — Telefon uygulaması ve QR eşleştirme betası**
-
-- Android Companion APK'sı bu sürümün GitHub Release dosyalarına eklendi. Görev, haber, build ve cihazda saklanan görev ilerlemesine ek olarak telefondan Windows programındaki Telefon Arkadaşı QR kodu okutulabilir.
-- Telefon ile PC aynı güvenilir Wi-Fi ağına bağlandığında son eşya kararı ve build durumu telefonda salt okunur biçimde güncellenir. Telefon bağlantıyı kesebilir; masaüstü sunucusu kapatılınca QR anahtarı geçersiz olur.
-- Ayrıntılı Türkçe kurulum, eşleştirme, güvenlik duvarı ve sorun giderme kılavuzu release dosyalarında ve `docs/mobile_companion_connection_tr.md` konumunda bulunur.
-- Masaüstü açılışında 5 saniyelik Agent saati/hologram animasyonu gösterilir.
-- Masaüstü ve Android paketleri bu commit için GitHub Actions üzerinde derlenir; Android statik analizi ve mevcut Windows kararlılık/kurulum kontrolleri release adımından önce çalışır.
-
-Telefon bağlantısı internet üzerinden uzaktan erişim sağlamaz. HTTP yerel ağda kullanıldığı için ortak Wi-Fi, modem port yönlendirme ve internete açık sunucu kullanmayın.
 
 **9.0.7 — Canlı çeviride özel ad ve zamir doğruluğu**
 
@@ -255,4 +269,3 @@ denetim raporu, satıcı eşleştirme · telefon arkadaşı · build paylaşım 
 Asistana sor / Claude ile oku · 10 dil. Oyunun belleğine dokunmaz, yalnızca ekranı okur.
 
 Bu dosyalar GitHub Actions'ta otomatik derlendi; kurulum dosyası Windows'ta sessizce kurulup program açılarak test edildi.
-
