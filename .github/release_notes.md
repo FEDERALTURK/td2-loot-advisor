@@ -287,3 +287,8 @@ Bu dosyalar GitHub Actions'ta otomatik derlendi; kurulum dosyası Windows'ta ses
 - Geçmiş ekranı yüklenmeden geri yükleme düğmesi devre dışı kalır; çift tıklama ile eski sürüme dönme desteklenir.
 - Uygulama sürüm numarası ile yayın etiketi eşitlendi.
 
+## 9.1.5.3
+
+- Canlı çeviri modeli artık kullanıcı tarafından, Canlı Çeviri sekmesindeki “Modeli indir” düğmesiyle isteğe bağlı indirilir.
+- Başlatma ve `F6`/`F7` kısayolları model eksikliğini sessizce yutmak yerine kullanıcıya açık durum bildirir; otomatik indirme yapılmaz.
+

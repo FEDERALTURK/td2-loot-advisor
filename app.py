@@ -151,7 +151,7 @@ import game_assistant
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.1.5.2"
+APP_VERSION = "9.1.5.3"
 FROZEN = getattr(sys, "frozen", False)
 BASE = Path(sys.executable).parent if FROZEN else Path(__file__).resolve().parent
 TASKS_CACHE = BASE / "tasks_cache.json"  # son indirilen görev listesi
@@ -2110,7 +2110,14 @@ class App:
         st = self.cfg["settings"]
         try: self.lt_translator()
         except Exception as e:
-            if not quiet: messagebox.showwarning(APP_NAME, str(e))
+            if not quiet and st.get("tr_engine", "local") == "local" and livetranslate.LocalMT.available() and not livetranslate.LocalMT(self.lt_model_dir()).installed():
+                self._lt_status(t("lt.model_missing"), "warning")
+                try: self.select_page("translate")
+                except Exception: pass
+                # Model indirme kullanıcı onaylıdır; program kendiliğinden ağdan indirme yapmaz.
+                messagebox.showwarning(APP_NAME, t("lt.need_model") + "\n\n" + t("lt.download"), parent=self.root)
+            elif not quiet:
+                messagebox.showwarning(APP_NAME, str(e), parent=self.root)
             self._lt_status(str(e), "warning"); return False
         self.lt_stop(quiet=True)
         if not quiet: self.task_ask_share()
@@ -2202,8 +2209,16 @@ class App:
 
     def lt_once(self):
         """Kısayol / düğme: alanı hemen bir kez oku ve çevir."""
+        try:
+            self.lt_translator()
+        except Exception as e:
+            self._lt_status(str(e), "warning")
+            if self.cfg["settings"].get("tr_engine", "local") == "local" and not livetranslate.LocalMT(self.lt_model_dir()).installed():
+                try: self.select_page("translate")
+                except Exception: pass
+            return False
         area = self.lt_area()
-        if not area: return
+        if not area: return False
         try:                                                # kendi penceremizi okumayalım
             x, y = self.root.winfo_rootx(), self.root.winfo_rooty()
             if self.root.state() == "normal" and self.rects_overlap((x, y, x + self.root.winfo_width(), y + self.root.winfo_height()),
@@ -2211,10 +2226,11 @@ class App:
                 self.root.iconify()
                 revision = getattr(self, "_lt_revision", 0)
                 self.root.after(450, lambda: self._queue_translation(area, force=True, revision=revision))
-                return
+                return True
         except Exception:
             pass
         self._queue_translation(area, force=True)
+        return True
 
     def _queue_translation(self, area, force=False, revision=None):
         if getattr(self, "_closing", False): return
