@@ -26,7 +26,7 @@ log = logging.getLogger("td2.update")
 
 REPO = "FEDERALTURK/td2-loot-advisor"
 API = f"https://api.github.com/repos/{REPO}/releases/latest"
-RELEASES_API = f"https://api.github.com/repos/{REPO}/releases?per_page=20"
+RELEASES_API = f"https://api.github.com/repos/{REPO}/releases?per_page=100"
 UA = {"User-Agent": "TD2-Loot-Advisor-updater", "Accept": "application/vnd.github+json"}
 
 # Kaynak güncellemesinde yenilenebilecek yollar (beyaz liste). Bunların dışındaki hiçbir dosyaya dokunulmaz.
@@ -95,8 +95,11 @@ def releases(timeout=10, limit=30):
     if not isinstance(raw, list): return []
     out = []
     for d in raw[:max(1, int(limit))]:
-        if d.get("draft") or not d.get("tag_name"): continue
+        tag = str(d.get("tag_name", ""))
+        # Teknik/yardımcı release kayıtlarını (ör. mt-models) kullanıcı seçimine açma.
+        if d.get("draft") or not re.fullmatch(r"v?\d+(?:\.\d+)+(?:-beta\.\d+)?", tag, re.I): continue
         item = _release_info(d)
+        if not item.get("setup") and not item.get("zipball"): continue
         item["prerelease"] = bool(d.get("prerelease"))
         out.append(item)
     return out

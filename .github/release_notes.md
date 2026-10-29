@@ -278,4 +278,5 @@ Bu dosyalar GitHub Actions'ta otomatik derlendi; kurulum dosyası Windows'ta ses
 - Beta kanalı isteğe bağlıdır; kullanıcı onayı olmadan beta kurulmaz.
 - Python 3.14 uyumluluk betası ayrı `v9.1.5-beta.*` etiketlerinde tutulur.
 - Beta installer adındaki `-beta.N` etiketi uygulama içi SHA-256 güncelleme doğrulamasında kabul edilir.
+- Sürüm geçmişi artık installer/source arşivi olmayan teknik kayıtları gizler, 100 sürüme kadar listeler ve seçim yüklenmeden geri dönüş butonunu kapalı tutar.
 

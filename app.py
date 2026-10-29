@@ -8367,6 +8367,7 @@ class App:
         lb.pack(side="left", fill="both", expand=True); sb.pack(side="right", fill="y")
         status = ttk.Label(w, text=t("upd.history_loading"), foreground=PAL["muted"]); status.pack(anchor="w", padx=14, pady=4)
         releases = []
+        rollback_btn = None
         def load():
             nonlocal releases
             try:
@@ -8377,10 +8378,10 @@ class App:
                         mark = " [BETA]" if x.get("prerelease") else ""
                         lb.insert("end", f"{x['version']}{mark} — {x.get('name') or 'TD2 Loot Advisor'}")
                     status.config(text=t("upd.history_ready", n=len(releases)))
+                    rollback_btn.config(state="normal" if releases else "disabled")
                 self.root.after(0, fill)
             except Exception as e:
                 self.root.after(0, lambda: status.config(text=t("upd.history_failed", e=e)))
-        threading.Thread(target=load, daemon=True).start()
         bf = ttk.Frame(w); bf.pack(fill="x", padx=14, pady=10)
         def rollback():
             ix = lb.curselection()
@@ -8396,8 +8397,11 @@ class App:
             w.destroy()
             self._upd_show(info)
             self.do_update()
-        ttk.Button(bf, text=t("upd.rollback"), command=rollback, style="Accent.TButton").pack(side="left")
+        rollback_btn = ttk.Button(bf, text=t("upd.rollback"), command=rollback, style="Accent.TButton", state="disabled")
+        rollback_btn.pack(side="left")
+        lb.bind("<Double-Button-1>", lambda e: rollback())
         ttk.Button(bf, text=t("upd.close"), command=w.destroy).pack(side="right")
+        threading.Thread(target=load, daemon=True).start()
 
     def do_update(self):
         info = getattr(self, "upd_info", None)
