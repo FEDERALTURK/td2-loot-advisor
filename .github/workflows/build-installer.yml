@@ -103,8 +103,10 @@ jobs:
           $env:TD2_PROBE_MODEL = Join-Path $env:RUNNER_TEMP "translation-model"
           python -c "import os, livetranslate; livetranslate.download_model(os.environ['TD2_PROBE_MODEL'])"
           if ($LASTEXITCODE -ne 0) { throw "translation test model download failed" }
+          $probeModel = Join-Path $env:TD2_PROBE_MODEL "en-tr"
+          if (-not (Test-Path (Join-Path $probeModel "model.bin"))) { throw "translation test model missing" }
           $tj = Join-Path $env:RUNNER_TEMP "translation-functional.json"
-          $tp = Start-Process $exe -ArgumentList "--translation-probe", "`"$env:TD2_PROBE_MODEL`"", "`"$tj`"" -PassThru
+          $tp = Start-Process $exe -ArgumentList "--translation-probe", "`"$probeModel`"", "`"$tj`"" -PassThru
           if (-not $tp.WaitForExit(180000)) { Stop-Process -Id $tp.Id -Force; throw "translation functional test hung" }
           if (-not (Test-Path $tj)) { throw "translation test wrote no result" }
           Write-Host "Translation functional test:" (Get-Content $tj -Raw)
