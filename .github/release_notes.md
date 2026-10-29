@@ -269,11 +269,12 @@ denetim raporu, satıcı eşleştirme · telefon arkadaşı · build paylaşım 
 Asistana sor / Claude ile oku · 10 dil. Oyunun belleğine dokunmaz, yalnızca ekranı okur.
 
 Bu dosyalar GitHub Actions'ta otomatik derlendi; kurulum dosyası Windows'ta sessizce kurulup program açılarak test edildi.
-## 9.1.5-beta.2 — Python 3.14 OCR uyumluluk betası ve isteğe bağlı beta kanalı
+## 9.1.5-beta.3 — Python 3.14 OCR uyumluluk betası ve isteğe bağlı beta kanalı
 
 - Python 3.14.10 Windows x64 ortamında beta paketleme ve kurulum testi.
 - RapidOCR 3.10, ONNX Runtime 1.31 ve DirectML sağlayıcısı için doğrulama kapıları.
 - CTranslate2 4.8.4, faster-whisper 1.2.1 ve SentencePiece sürüm sınırları sabitlendi.
 - Bu sürüm üretim 9.1.4 yerine geçmez; OCR/DirectML sonuçları kullanıcı testine açıktır.
 - Kararlı kullanıcılar otomatik taşınmaz; güncelleme denetimi beta kanalını algıladığında onay bildirimi gösterir.
+- Beta CI derleme betikleri Python 3.14'ü açıkça seçer; yerel kararlı çalıştırmalarda Python 3.13 önceliği korunur.
 

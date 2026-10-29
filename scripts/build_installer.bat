@@ -10,8 +10,9 @@ REM ==========================================================================
 cd /d "%~dp0.."
 title TD2 Loot Advisor - kurulum dosyasi olusturuluyor
 
-REM ---- 1) Python secimi (3.13 > 3.12 > 3.11 > varsayilan)
+REM ---- 1) Python secimi (beta CI TD2_PYTHON ile 3.14'u sabitler)
 set "PY="
+if defined TD2_PYTHON py -%TD2_PYTHON% -c "import sys" >nul 2>&1 && set "PY=py -%TD2_PYTHON%"
 for %%V in (3.13 3.12 3.11) do (
   if not defined PY (
     py -%%V -c "import sys" >nul 2>&1 && set "PY=py -%%V"

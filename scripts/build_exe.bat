@@ -6,8 +6,9 @@ REM NOTE: the voice features make the .exe very large. If it fails, use run.bat.
 REM Proje kok klasorune gec / switch to project root
 cd /d "%~dp0.."
 
-REM Python secimi: once 3.13, sonra 3.12, yoksa varsayilan python.
+REM Python secimi: beta CI TD2_PYTHON ile 3.14'u sabitler; yerelde 3.13 tercih edilir.
 set "PY=python"
+if defined TD2_PYTHON py -%TD2_PYTHON% -c "import sys" >nul 2>&1 && set "PY=py -%TD2_PYTHON%" && goto :have_py
 py -3.13 -c "import sys" >nul 2>&1 && set "PY=py -3.13" && goto :have_py
 py -3.12 -c "import sys" >nul 2>&1 && set "PY=py -3.12" && goto :have_py
 :have_py
