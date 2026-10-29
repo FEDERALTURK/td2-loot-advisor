@@ -292,3 +292,9 @@ Bu dosyalar GitHub Actions'ta otomatik derlendi; kurulum dosyası Windows'ta ses
 - Canlı çeviri modeli artık kullanıcı tarafından, Canlı Çeviri sekmesindeki “Modeli indir” düğmesiyle isteğe bağlı indirilir.
 - Başlatma ve `F6`/`F7` kısayolları model eksikliğini sessizce yutmak yerine kullanıcıya açık durum bildirir; otomatik indirme yapılmaz.
 
+## 9.1.5.4
+
+- OCR sonucu geçerli bir eşya kartı değilse artık boş/siyah oyun üstü penceresi açılmaz.
+- Menü, harita veya okunamayan ekranlar için kullanıcıya açık “Bu bir eşya kartı değil” bildirimi verilir.
+- Eşya overlay’inin dış çerçevesi siyah dikdörtgen yerine kart arka planıyla uyumlu çizilir.
+

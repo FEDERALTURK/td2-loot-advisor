@@ -151,7 +151,7 @@ import game_assistant
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.1.5.3"
+APP_VERSION = "9.1.5.4"
 FROZEN = getattr(sys, "frozen", False)
 BASE = Path(sys.executable).parent if FROZEN else Path(__file__).resolve().parent
 TASKS_CACHE = BASE / "tasks_cache.json"  # son indirilen görev listesi
@@ -5578,6 +5578,12 @@ class App:
     # ---------- overlay ----------
     def popup(self, verdict, item, res, note):
         """Oyun üstü bilgi kartı: kartın hemen yanında (ya da seçilen köşede), rulo çubukları ve en iyi build ile."""
+        # OCR menü/harita/boş ekranı eşya sanmışsa boş siyah bir pencere açma.
+        # Sonuç paneli yine tanı bilgisi gösterebilir; oyun üstü overlay yalnızca
+        # doğrulanmış bir eşya için oluşturulmalıdır.
+        if not valid_item(item):
+            self.toast(t("note.no_item"))
+            return
         if self.overlay: self.overlay.destroy()
         st = self.cfg["settings"]
         w = self.overlay = tk.Toplevel(self.root)
@@ -5590,7 +5596,9 @@ class App:
         fz = lambda n: max(7, int(round(n * k)))
         col = COLORS[verdict]
         dark, dark2, fg, mu = "#14161b", "#1e2129", "#eceef2", "#9aa1ae"   # oyun üstünde hep koyu kart
-        w.configure(bg="#000000")
+        # Toplevel dış çerçevesi de kartla aynı renkte olsun; bazı Windows
+        # bileşimlerinde siyah bir dikdörtgen olarak kalmasını önler.
+        w.configure(bg=dark)
         shell = tk.Frame(w, bg=dark, highlightthickness=1, highlightbackground="#2c313d"); shell.pack(fill="both", expand=True)
         tk.Frame(shell, bg=col, width=max(5, int(7 * k))).pack(side="left", fill="y")      # renkli şerit
         body = tk.Frame(shell, bg=dark, padx=int(16 * k), pady=int(12 * k)); body.pack(side="left", fill="both")
