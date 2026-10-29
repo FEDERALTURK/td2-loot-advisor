@@ -113,7 +113,7 @@ def install_frozen(info, progress=None):
         if not str(info.get(k) or "").startswith(DOWNLOAD_PREFIX):
             raise RuntimeError("unexpected download location — not installing")
     name = info["setup"].rsplit("/", 1)[-1]
-    if not re.fullmatch(r"TD2LootAdvisor_Setup_[0-9.]+\.exe", name, re.I): raise RuntimeError("unexpected installer name")
+    if not re.fullmatch(r"TD2LootAdvisor_Setup_[0-9]+(?:\.[0-9]+)*(?:-beta\.[0-9]+)?\.exe", name, re.I): raise RuntimeError("unexpected installer name")
     want = _expected_sha(info, name)
     if not want: raise RuntimeError("no checksum published for the installer — not installing")
     data = _get(info["setup"], timeout=60, binary=True, progress=progress)
