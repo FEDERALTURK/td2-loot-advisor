@@ -298,3 +298,9 @@ Bu dosyalar GitHub Actions'ta otomatik derlendi; kurulum dosyası Windows'ta ses
 - Menü, harita veya okunamayan ekranlar için kullanıcıya açık “Bu bir eşya kartı değil” bildirimi verilir.
 - Eşya overlay’inin dış çerçevesi siyah dikdörtgen yerine kart arka planıyla uyumlu çizilir.
 
+## 9.1.5.5
+
+- Kurulu EXE’de yerel çeviri modeli artık yazma izni olmayan Program Files yerine kullanıcıya ait `LOCALAPPDATA\TD2LootAdvisor\models` klasöründe tutulur.
+- Kaynak/run.bat kullananlarda proje içindeki `models/en-tr` davranışı değişmez.
+- Model indirme ve sonraki açılışta model bulma yolu aynılaştırıldı.
+

@@ -151,7 +151,7 @@ import game_assistant
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.1.5.4"
+APP_VERSION = "9.1.5.5"
 FROZEN = getattr(sys, "frozen", False)
 BASE = Path(sys.executable).parent if FROZEN else Path(__file__).resolve().parent
 TASKS_CACHE = BASE / "tasks_cache.json"  # son indirilen görev listesi
@@ -1817,7 +1817,21 @@ class App:
         raise RuntimeError(t("lt.no_ai"))
 
     def lt_model_dir(self):
-        return BASE / "models" / "en-tr"
+        bundled = BASE / "models" / "en-tr"
+        # Kaynaktan çalışırken proje içindeki model klasörü korunur. Kurulu
+        # EXE ise çoğunlukla Program Files altındadır ve model indirirken
+        # yazma izni olmayabilir; kullanıcı verisini LOCALAPPDATA'ya al.
+        if not FROZEN:
+            return bundled
+        if bundled.exists():
+            try:
+                probe = bundled / ".td2_write_test"
+                probe.write_text("ok", encoding="ascii"); probe.unlink()
+                return bundled
+            except OSError:
+                pass
+        root = Path(os.environ.get("LOCALAPPDATA") or (Path.home() / "AppData" / "Local"))
+        return root / "TD2LootAdvisor" / "models" / "en-tr"
 
     def lt_glossary(self):
         v = GAME.data.get("version")
@@ -2771,7 +2785,7 @@ class App:
             if total: self.root.after(0, lambda: self.lt_pb.config(value=100 * got / total))
         def go():
             try:
-                livetranslate.download_model(BASE / "models", prog); err = None
+                livetranslate.download_model(self.lt_model_dir().parent, prog); err = None
             except Exception as e:
                 err = str(e)
             def done():
