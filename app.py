@@ -151,7 +151,7 @@ import game_assistant
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.1.5-beta.4"
+APP_VERSION = "9.1.5-beta.5"
 FROZEN = getattr(sys, "frozen", False)
 BASE = Path(sys.executable).parent if FROZEN else Path(__file__).resolve().parent
 TASKS_CACHE = BASE / "tasks_cache.json"  # son indirilen görev listesi
@@ -7574,6 +7574,7 @@ class App:
         ttk.Label(ur, text=t("upd.current", v=APP_VERSION, mode=t("upd.mode_exe") if FROZEN else t("upd.mode_src"))).pack(side="left")
         ttk.Button(ur, text="🔎 " + t("upd.check"), command=lambda: (self.upd_lbl.config(text=t("upd.checking")),
                                                                      self.update_center(reason="manual"))).pack(side="left", padx=10)
+        ttk.Button(ur, text="🕘 " + t("upd.history"), command=self.show_version_history).pack(side="left", padx=4)
         self.upd_now_btn = ttk.Button(ur, text="⬆ " + t("upd.now"), command=self.do_update, style="Accent.TButton")
         self.upd_auto = tk.BooleanVar(value=bool(st.get("update_check", True)))
         ttk.Checkbutton(ur, text=t("upd.auto"), variable=self.upd_auto,
@@ -8353,6 +8354,50 @@ class App:
             self.upd_lbl.config(text=t("upd.available", v=info["version"]))
             try: self.upd_now_btn.pack(side="left")
             except Exception: pass
+
+    def show_version_history(self):
+        """Kullanıcının açık onayıyla eski bir GitHub sürümüne dönmesini sağlar."""
+        w = tk.Toplevel(self.root); w.title(t("upd.history_title")); w.geometry("620x430"); w.transient(self.root)
+        w.configure(bg=PAL["bg"])
+        ttk.Label(w, text=t("upd.history_title"), style="Title.TLabel").pack(anchor="w", padx=14, pady=(12, 2))
+        ttk.Label(w, text=t("upd.history_note", v=APP_VERSION), wraplength=580, justify="left").pack(anchor="w", padx=14, pady=(0, 8))
+        body = ttk.Frame(w); body.pack(fill="both", expand=True, padx=14, pady=4)
+        lb = tk.Listbox(body, bg=PAL["panel"], fg=PAL["fg"], selectbackground=PAL["accent"], height=12)
+        sb = ttk.Scrollbar(body, orient="vertical", command=lb.yview); lb.configure(yscrollcommand=sb.set)
+        lb.pack(side="left", fill="both", expand=True); sb.pack(side="right", fill="y")
+        status = ttk.Label(w, text=t("upd.history_loading"), foreground=PAL["muted"]); status.pack(anchor="w", padx=14, pady=4)
+        releases = []
+        def load():
+            nonlocal releases
+            try:
+                releases = updater.releases()
+                def fill():
+                    lb.delete(0, "end")
+                    for x in releases:
+                        mark = " [BETA]" if x.get("prerelease") else ""
+                        lb.insert("end", f"{x['version']}{mark} — {x.get('name') or 'TD2 Loot Advisor'}")
+                    status.config(text=t("upd.history_ready", n=len(releases)))
+                self.root.after(0, fill)
+            except Exception as e:
+                self.root.after(0, lambda: status.config(text=t("upd.history_failed", e=e)))
+        threading.Thread(target=load, daemon=True).start()
+        bf = ttk.Frame(w); bf.pack(fill="x", padx=14, pady=10)
+        def rollback():
+            ix = lb.curselection()
+            if not ix or not releases: return
+            info = releases[ix[0]]
+            if not updater.newer(APP_VERSION, info["version"]):
+                return messagebox.showinfo(APP_NAME, t("upd.rollback_not_older"))
+            if FROZEN and not info.get("setup"):
+                return messagebox.showwarning(APP_NAME, t("upd.rollback_missing"))
+            if not messagebox.askyesno(APP_NAME, t("upd.rollback_ask", old=APP_VERSION, new=info["version"])):
+                return
+            self.upd_info = info
+            w.destroy()
+            self._upd_show(info)
+            self.do_update()
+        ttk.Button(bf, text=t("upd.rollback"), command=rollback, style="Accent.TButton").pack(side="left")
+        ttk.Button(bf, text=t("upd.close"), command=w.destroy).pack(side="right")
 
     def do_update(self):
         info = getattr(self, "upd_info", None)

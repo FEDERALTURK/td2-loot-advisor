@@ -269,7 +269,7 @@ denetim raporu, satıcı eşleştirme · telefon arkadaşı · build paylaşım 
 Asistana sor / Claude ile oku · 10 dil. Oyunun belleğine dokunmaz, yalnızca ekranı okur.
 
 Bu dosyalar GitHub Actions'ta otomatik derlendi; kurulum dosyası Windows'ta sessizce kurulup program açılarak test edildi.
-## 9.1.5-beta.4 — Python 3.14 OCR uyumluluk betası ve isteğe bağlı beta kanalı
+## 9.1.5-beta.5 — Python 3.14 OCR uyumluluk betası, beta kanalı ve geri dönüş
 
 - Python 3.14.10 Windows x64 ortamında beta paketleme ve kurulum testi.
 - RapidOCR 3.10, ONNX Runtime 1.31 ve DirectML sağlayıcısı için doğrulama kapıları.
@@ -278,4 +278,5 @@ Bu dosyalar GitHub Actions'ta otomatik derlendi; kurulum dosyası Windows'ta ses
 - Kararlı kullanıcılar otomatik taşınmaz; güncelleme denetimi beta kanalını algıladığında onay bildirimi gösterir.
 - Beta CI derleme betikleri Python 3.14'ü açıkça seçer; yerel kararlı çalıştırmalarda Python 3.13 önceliği korunur.
 - Beta installer adındaki `-beta.N` etiketi uygulama içi SHA-256 güncelleme doğrulamasında kabul edilir.
+- Ayarlar > Güncellemeler alanına sürüm geçmişi ve kullanıcı onaylı eski sürüme dönüş eklendi.
 

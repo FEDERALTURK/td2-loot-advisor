@@ -89,6 +89,19 @@ def latest_beta(timeout=10):
     return None
 
 
+def releases(timeout=10, limit=30):
+    """Yayın geçmişini döndürür; geri dönüş seçicisi için yalnızca GitHub Releases kullanılır."""
+    raw = _get(RELEASES_API, timeout)
+    if not isinstance(raw, list): return []
+    out = []
+    for d in raw[:max(1, int(limit))]:
+        if d.get("draft") or not d.get("tag_name"): continue
+        item = _release_info(d)
+        item["prerelease"] = bool(d.get("prerelease"))
+        out.append(item)
+    return out
+
+
 def _expected_sha(info, filename):
     if not info.get("sha_url"): return None
     try:
