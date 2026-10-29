@@ -751,6 +751,7 @@
   "upd.latest_ok": "You have the latest version ({v}).",
   "upd.available": "New version {v} is available on GitHub.",
   "upd.ask": "Version {new} is available (you have {old}). Update now?\n\nYour settings, builds and stash are kept.",
+  "upd.beta_ask": "Optional beta {new} is available (you have {old}). Switch to the beta channel?\n\nThe beta tests the new OCR/DirectML engines; it does not replace the stable release.",
   "upd.downloading": "Downloading version {v}…",
   "upd.progress": "Downloading… {p}%",
   "upd.installing": "Installing — the app restarts by itself",

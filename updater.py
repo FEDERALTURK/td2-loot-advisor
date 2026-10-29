@@ -26,6 +26,7 @@ log = logging.getLogger("td2.update")
 
 REPO = "FEDERALTURK/td2-loot-advisor"
 API = f"https://api.github.com/repos/{REPO}/releases/latest"
+RELEASES_API = f"https://api.github.com/repos/{REPO}/releases?per_page=20"
 UA = {"User-Agent": "TD2-Loot-Advisor-updater", "Accept": "application/vnd.github+json"}
 
 # Kaynak güncellemesinde yenilenebilecek yollar (beyaz liste). Bunların dışındaki hiçbir dosyaya dokunulmaz.
@@ -63,15 +64,29 @@ def _get(url, timeout=15, binary=False, progress=None):
         return buf.getvalue()
 
 
-def latest(timeout=10):
-    """En son yayınlanmış sürüm bilgisi (ağ gerektirir)."""
-    d = _get(API, timeout)
+def _release_info(d):
     assets = {a["name"]: a["browser_download_url"] for a in d.get("assets", [])}
     setup = next((u for n, u in assets.items() if n.lower().startswith("td2lootadvisor_setup") and n.lower().endswith(".exe")), None)
     sha_url = next((u for n, u in assets.items() if n.lower().endswith(".sha256")), None)
     return {"version": d.get("tag_name", "").lstrip("vV"), "tag": d.get("tag_name", ""), "name": d.get("name", ""),
             "notes": d.get("body", "") or "", "url": d.get("html_url", ""), "setup": setup, "sha_url": sha_url,
             "zipball": d.get("zipball_url"), "published": d.get("published_at", "")}
+
+
+def latest(timeout=10):
+    """En son kararlı yayın bilgisi (beta/önizleme sürümleri hariç)."""
+    return _release_info(_get(API, timeout))
+
+
+def latest_beta(timeout=10):
+    """Kullanıcı açıkça isterse sunulacak en yeni beta sürümü."""
+    releases = _get(RELEASES_API, timeout)
+    if not isinstance(releases, list): return None
+    for d in releases:
+        tag = str(d.get("tag_name", ""))
+        if d.get("prerelease") and "-beta" in tag.lower():
+            return _release_info(d)
+    return None
 
 
 def _expected_sha(info, filename):

@@ -151,7 +151,7 @@ import game_assistant
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.1.5-beta.1"
+APP_VERSION = "9.1.5-beta.2"
 FROZEN = getattr(sys, "frozen", False)
 BASE = Path(sys.executable).parent if FROZEN else Path(__file__).resolve().parent
 TASKS_CACHE = BASE / "tasks_cache.json"  # son indirilen görev listesi
@@ -8302,12 +8302,17 @@ class App:
         if not auto and hasattr(self, "upd_lbl"): self.upd_lbl.config(text=t("upd.checking"))
 
         def work():
-            try: info, err = updater.latest(), None
-            except Exception as e: info, err = None, e
-            self.root.after(0, lambda: self._upd_checked(info, err, auto))
+            try:
+                info, err = updater.latest(), None
+                beta = updater.latest_beta()
+            except Exception as e:
+                beta = None
+                try: info, err = updater.latest(), None
+                except Exception as e2: info, err = None, e2
+            self.root.after(0, lambda: self._upd_checked(info, err, auto, beta))
         threading.Thread(target=work, daemon=True).start()
 
-    def _upd_checked(self, info, err, auto):
+    def _upd_checked(self, info, err, auto, beta=None):
         self.upd_busy = False
         st = self.cfg["settings"]
         st["update_last"] = time.time(); save_cfg(self.cfg)
@@ -8320,6 +8325,17 @@ class App:
         if not updater.newer(info["version"], APP_VERSION):
             log.info("Update check: up to date (%s, latest %s)", APP_VERSION, info["version"])
             if hasattr(self, "upd_lbl"): self.upd_lbl.config(text=t("upd.latest_ok", v=APP_VERSION))
+            if beta and updater.newer(beta["version"], APP_VERSION) and st.get("beta_skip") != beta["version"]:
+                notes = re.sub(r"[#*`|>\-]+", " ", beta.get("notes", "")).strip()
+                notes = re.sub(r"\s+", " ", notes)[:500]
+                prompt = t("upd.beta_ask", new=beta["version"], old=APP_VERSION)
+                if notes: prompt += "\n\n" + notes
+                if messagebox.askyesno(APP_NAME, prompt):
+                    self.upd_info = beta
+                    self._upd_show(beta)
+                    self.do_update()
+                else:
+                    st["beta_skip"] = beta["version"]; save_cfg(self.cfg)
             return
         log.info("Update available: %s -> %s", APP_VERSION, info["version"])
         self._upd_show(info)
