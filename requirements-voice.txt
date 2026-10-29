@@ -4,11 +4,11 @@
 pyttsx3
 sounddevice
 numpy
-faster-whisper
+faster-whisper>=1.2.1,<2
 # Arka plan videosu / background video (optional)
 av>=14,<19
 # Yeni OCR motoru (onerilen) / new OCR engine (recommended)
-onnxruntime
-rapidocr
+onnxruntime>=1.31,<2
+rapidocr>=3.10,<4
 # QR kodu / QR codes (optional)
 qrcode
