@@ -151,7 +151,7 @@ import game_assistant
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.1.5"
+APP_VERSION = "9.1.5.2"
 FROZEN = getattr(sys, "frozen", False)
 BASE = Path(sys.executable).parent if FROZEN else Path(__file__).resolve().parent
 TASKS_CACHE = BASE / "tasks_cache.json"  # son indirilen görev listesi

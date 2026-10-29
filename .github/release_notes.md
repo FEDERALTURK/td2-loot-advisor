@@ -280,3 +280,10 @@ Bu dosyalar GitHub Actions'ta otomatik derlendi; kurulum dosyası Windows'ta ses
 - Beta installer adındaki `-beta.N` etiketi uygulama içi SHA-256 güncelleme doğrulamasında kabul edilir.
 - Sürüm geçmişi artık installer/source arşivi olmayan teknik kayıtları gizler, 100 sürüme kadar listeler ve seçim yüklenmeden geri dönüş butonunu kapalı tutar.
 
+## 9.1.5.2
+
+- Sürüm geçmişi artık GitHub Releases listesini 100 kayda kadar güvenli biçimde tarar.
+- Teknik/yardımcı sürümler geçmiş ekranından filtrelenir; yalnızca kurulabilir veya kaynak arşivi olan sürümler gösterilir.
+- Geçmiş ekranı yüklenmeden geri yükleme düğmesi devre dışı kalır; çift tıklama ile eski sürüme dönme desteklenir.
+- Uygulama sürüm numarası ile yayın etiketi eşitlendi.
+
