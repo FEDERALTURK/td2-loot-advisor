@@ -151,7 +151,7 @@ import game_assistant
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.1.5.5"
+APP_VERSION = "9.1.5.6"
 FROZEN = getattr(sys, "frozen", False)
 BASE = Path(sys.executable).parent if FROZEN else Path(__file__).resolve().parent
 TASKS_CACHE = BASE / "tasks_cache.json"  # son indirilen görev listesi
@@ -2039,6 +2039,7 @@ class App:
             self.sp = speech.WhisperSource(on_text, self.sp_model_dir(), on_state)
         try: self.lt_translator()
         except Exception as e:
+            log.exception("Live translation start failed")
             self.sp = None
             self._sp_status(str(e), "warning"); return False
         self.sp.start()
@@ -2210,8 +2211,8 @@ class App:
                         prev = h
                         retry = bool(getattr(self, "_lt_retry_at", 0) and time.monotonic() >= self._lt_retry_at)
                         busy = self._translation_jobs.stats()
-                        if stable >= 1 and (last is None or dist(h, last) >= AUTO_CHANGE or
-                                            (retry and not busy["active"] and not busy["pending"])):
+                        if (not busy["active"] and not busy["pending"] and stable >= 1 and
+                                (last is None or dist(h, last) >= AUTO_CHANGE or retry)):
                             if stop.is_set(): break
                             last = h
                             self._queue_translation(area, revision=revision)
@@ -2226,6 +2227,7 @@ class App:
         try:
             self.lt_translator()
         except Exception as e:
+            log.exception("Manual translation preflight failed")
             self._lt_status(str(e), "warning")
             if self.cfg["settings"].get("tr_engine", "local") == "local" and not livetranslate.LocalMT(self.lt_model_dir()).installed():
                 try: self.select_page("translate")
@@ -6282,8 +6284,8 @@ class App:
         f = self.tabs["stats"]
         bar = ttk.Frame(f); bar.pack(fill="x", padx=10, pady=10)
         ttk.Label(bar, text=t("label.period")).pack(side="left")
-        self.sp = ttk.Combobox(bar, state="readonly", width=14, values=[t("period.today"), t("period.7d"), t("period.30d"), t("period.all")]); self.sp.current(1)
-        self.sp.pack(side="left", padx=6); self.sp.bind("<<ComboboxSelected>>", lambda e: self.refresh_stats_tab())
+        self.stats_period = ttk.Combobox(bar, state="readonly", width=14, values=[t("period.today"), t("period.7d"), t("period.30d"), t("period.all")]); self.stats_period.current(1)
+        self.stats_period.pack(side="left", padx=6); self.stats_period.bind("<<ComboboxSelected>>", lambda e: self.refresh_stats_tab())
         ttk.Button(bar, text=ui_theme.with_icon(t("btn.refresh"), "⟳"), command=self.refresh_stats_tab).pack(side="left")
         self.sum_lbl = ttk.Label(f, style="Section.TLabel"); self.sum_lbl.pack(anchor="w", padx=12)
         self._build_community(f)
@@ -6369,7 +6371,7 @@ class App:
         T.config(state="disabled")
 
     def refresh_stats_tab(self):
-        rows, per = read_log(), self.sp.get()
+        rows, per = read_log(), self.stats_period.get()
         days = {t("period.today"): 0, t("period.7d"): 6, t("period.30d"): 29}.get(per)
         if days is not None:
             since = (datetime.now() - timedelta(days=days)).replace(hour=0, minute=0, second=0)
@@ -9108,6 +9110,10 @@ def _instance_poll(app, inst):
 
 
 if __name__ == "__main__":
+    if "--translation-probe" in sys.argv:
+        import translation_probe
+        _i = sys.argv.index("--translation-probe")
+        sys.exit(0 if translation_probe.run(sys.modules[__name__], sys.argv[_i + 1], sys.argv[_i + 2]) else 1)
     import single
     _INSTANCE = single.SingleInstance()
     if not _INSTANCE.acquire(wait=20 if "--restart" in sys.argv else 0):

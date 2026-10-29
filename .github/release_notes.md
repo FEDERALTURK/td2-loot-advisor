@@ -1,5 +1,14 @@
 ## TD2 Loot Advisor — Windows
 
+**9.1.5.6 — Canlı çeviri başlatma ve sonuç kararlılığı**
+
+- İstatistik tarih seçicisinin konuşma çevirisi motoruyla aynı değişkeni kullanması düzeltildi. Canlı çeviriyi başlat düğmesi ve F6 artık istatistik ekranını ses motoru sanarak durdurmaya çalışmaz.
+- Otomatik ekran taraması, devam eden veya sıradaki çeviriyi sürekli iptal etmez. Elle çevirme ve durdurma işlemleri önceliğini korur.
+- Başlatma ve elle çevirme ön denetimi hataları tanılama günlüğüne yazılır.
+- Beş regresyon testi eklendi. Yayın öncesi kurulu EXE üzerinde gerçek RapidOCR, OPUS-MT ve normal/yerinde kaplama testi zorunlu hale getirildi.
+- Yerel modelin kullanıcı tarafından indirilmesi korunur; bu güncelleme kullanıcıya otomatik model indirme başlatmaz.
+
+
 **9.1.4 — Komuta Merkezi ve güvenli güncelleme**
 
 - Ekipman → Sandık → Komuta Merkezi bağlantıları ve Türkçe/İngilizce menü etiketleri tamamlandı. Günlük hedef loot için eski günün görevleri önerilmez; doğrulanmış eşleşme yoksa açıkça belirtilir.
