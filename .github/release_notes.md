@@ -1,5 +1,11 @@
 ## TD2 Loot Advisor — Windows
 
+**9.1.3 — Agent logosu ve kütüphane denetimi**
+
+- Kullanıcının onayladığı Agent temalı logo masaüstü pencere/görev çubuğu simgesi ve marka varlığı olarak uygulandı.
+- Kütüphane/build denetim raporu eklendi; mevcut 18 build’in attribute referanslarında doğrulanmış eksik bulunmadı.
+- Bu sürüm GitHub Release asset’leri üzerinden uygulama içi güncelleme akışından alınabilir.
+
 **9.1.2 — Komuta Merkezi, arama, yedekleme ve görsel yenileme**
 
 - Komuta Merkezi’ne eksik build parçası için görev/hedef loot eşleştirmesi eklendi; hangi görevde hangi eşyanın aranacağı yerel build planı ve mevcut hedef loot önbelleği üzerinden açıklanır.
