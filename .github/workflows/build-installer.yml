@@ -18,7 +18,7 @@ permissions:
 env:
   PYTHONIOENCODING: utf-8
   PYTHONUTF8: "1"
-  TD2_PYTHON: "3.14"
+  TD2_PYTHON: "3.13"
   HF_HUB_DISABLE_XET: "1"
   TD2_NO_WELCOME: "1"      # hesap karşılama penceresi diğer arayüz testlerini örtmesin
 jobs:
@@ -30,7 +30,7 @@ jobs:
 
       - uses: actions/setup-python@v6
         with:
-          python-version: "3.14"
+          python-version: "3.13"
 
       - name: Stability regressions before packaging
         shell: pwsh
@@ -171,8 +171,8 @@ jobs:
           tag_name: ${{ steps.ver.outputs.tag }}
           target_commitish: ${{ github.sha }}
           name: TD2 Loot Advisor ${{ steps.ver.outputs.tag }}
-          prerelease: ${{ startsWith(github.ref_name, 'v9.1.5-beta') }}
-          make_latest: false
+          prerelease: false
+          make_latest: true
           files: installer/*
           body_path: .github/release_notes.md
           generate_release_notes: true

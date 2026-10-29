@@ -1,4 +1,4 @@
-# Python 3.14 OCR beta — 9.1.5-beta.5
+# Python 3.14 OCR beta — 9.1.5-beta.5 / stable 9.1.5 notes
 
 Bu beta, TD2 Loot Advisor'ın Python 3.14.10 ve Windows x64 OCR zincirini doğrulamak için hazırlanmıştır. Üretim sürümü olan 9.1.4'ün yerine geçmez.
 
