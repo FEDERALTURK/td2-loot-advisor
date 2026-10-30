@@ -20,6 +20,12 @@
 - Aynı alana fabrika ayarları düğmesi eklendi. Ayarlar sıfırlanmadan önce otomatik yedeklenir; build, sandık, geçmiş ve log dosyaları silinmez.
 - Log ekranına kullanıcı onaylı “Logu GitHub'a gönder” düğmesi eklendi. Son kayıtlar token, anahtar, e-posta, kullanıcı yolu, IP ve webhook bilgileri maskelenerek mevcut rapor paneline gönderilir; bağlantı yoksa güvenli kuyruğa alınır.
 
+**9.1.5.9 — Boş/siyah çeviri kaplaması düzeltmesi**
+
+- Yerinde çeviri kaplamasının ilk Tk çizimi zorlanıyor; metin çizilmeden siyah pencere kalmıyor.
+- OCR kutuları geçersiz veya ekran dışında kaldığında boş pencere yerine normal okunabilir çeviri kutusuna otomatik düşülüyor.
+- Kaplama modu, blok ve yerleşim sayıları tanılama günlüğüne yazılıyor.
+
 
 **9.1.4 — Komuta Merkezi ve güvenli güncelleme**
 

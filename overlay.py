@@ -167,6 +167,10 @@ class InPlace:
                         cv.create_text(x + PAD + 4 + dx, ty + dy, text=ln, anchor="nw", font=f, fill="#000000")
                 cv.create_text(x + PAD + 4, ty, text=ln, anchor="nw", font=f, fill=s["fg"])
                 ty += lh
+        # Tk, özellikle oyun üstü saydam pencerelerde, ilk çizimi geciktirebilir.
+        # İlk kareyi burada zorlayarak boş/siyah kaplama görülmesini önle.
+        cv.update_idletasks()
+        w.update_idletasks()
         if float(s.get("alpha", 1.0)) < 1.0:
             try: w.attributes("-alpha", float(s["alpha"]))
             except tk.TclError: pass

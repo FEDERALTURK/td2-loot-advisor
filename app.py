@@ -151,7 +151,7 @@ import game_assistant
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.1.5.8"
+APP_VERSION = "9.1.5.9"
 FROZEN = getattr(sys, "frozen", False)
 BASE = Path(sys.executable).parent if FROZEN else Path(__file__).resolve().parent
 TASKS_CACHE = BASE / "tasks_cache.json"  # son indirilen görev listesi
@@ -2353,6 +2353,7 @@ class App:
         self._lt_after(pairs, ms)
         self._lt_hide()
         size = int(st.get("tr_font", 15)); mode = force_mode or st.get("tr_mode", "subtitle")
+        log.info("Translation overlay: mode=%s pairs=%d area=%sx%s", mode, len(pairs), area.get("width"), area.get("height"))
         if mode == "inplace":
             return self._lt_show_inplace(pairs, area)
         sty = self.lt_style()
@@ -2397,7 +2398,12 @@ class App:
         ip = self._lt_inplace = overlay.InPlace(self.root, sty, on_window=self._lt_overlay_window)
         blocks = [(tr, b, en, max(1, en.count("\n") + 1)) for en, tr, b in pairs]
         items = overlay.layout(blocks, area, ip.measure_at)
-        if not items: return
+        log.info("In-place overlay layout: blocks=%d items=%d", len(blocks), len(items))
+        if not items:
+            # OCR kutuları oyun alanı dışında kaldıysa boş siyah pencere bırakma.
+            ip.hide()
+            self._lt_inplace = None
+            return self._lt_show(pairs, area, 0, force_mode="screen")
         self._lt_win = ip.show(items, area)
         self._lt_job = self.root.after(int(float(st.get("tr_hide", 10)) * 1000), self._lt_hide)
 
