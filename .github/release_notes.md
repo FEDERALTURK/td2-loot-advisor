@@ -14,6 +14,12 @@
 - Canlı çeviri durdurulurken sesli altyazı nesnesi yoksa oluşabilecek yan etki giderildi.
 - Sayı veya özel isim doğrulaması başarısız olan tek OCR bloğu, aynı ekrandaki güvenli blokların gösterilmesini engellemez; hatalı blok gösterilmez ve uyarı yazılır.
 
+**9.1.5.8 — Sürüm geri dönüşü, fabrika ayarı ve maskeli log raporu**
+
+- Güncellemeler bölümüne GitHub sürüm geçmişinden seçerek eski Windows sürümüne dönme akışı korunarak görünür hâle getirildi.
+- Aynı alana fabrika ayarları düğmesi eklendi. Ayarlar sıfırlanmadan önce otomatik yedeklenir; build, sandık, geçmiş ve log dosyaları silinmez.
+- Log ekranına kullanıcı onaylı “Logu GitHub'a gönder” düğmesi eklendi. Son kayıtlar token, anahtar, e-posta, kullanıcı yolu, IP ve webhook bilgileri maskelenerek mevcut rapor paneline gönderilir; bağlantı yoksa güvenli kuyruğa alınır.
+
 
 **9.1.4 — Komuta Merkezi ve güvenli güncelleme**
 

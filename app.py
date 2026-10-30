@@ -151,7 +151,7 @@ import game_assistant
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.1.5.7"
+APP_VERSION = "9.1.5.8"
 FROZEN = getattr(sys, "frozen", False)
 BASE = Path(sys.executable).parent if FROZEN else Path(__file__).resolve().parent
 TASKS_CACHE = BASE / "tasks_cache.json"  # son indirilen görev listesi
@@ -7624,6 +7624,7 @@ class App:
         ttk.Button(ur, text="🔎 " + t("upd.check"), command=lambda: (self.upd_lbl.config(text=t("upd.checking")),
                                                                      self.update_center(reason="manual"))).pack(side="left", padx=10)
         ttk.Button(ur, text="🕘 " + t("upd.history"), command=self.show_version_history).pack(side="left", padx=4)
+        ttk.Button(ur, text="⚙ " + t("set.factory"), command=self.factory_reset).pack(side="left", padx=4)
         self.upd_now_btn = ttk.Button(ur, text="⬆ " + t("upd.now"), command=self.do_update, style="Accent.TButton")
         self.upd_auto = tk.BooleanVar(value=bool(st.get("update_check", True)))
         ttk.Checkbutton(ur, text=t("upd.auto"), variable=self.upd_auto,
@@ -8277,6 +8278,7 @@ class App:
                    command=lambda: os.startfile(APPLOG_DIR) if os.name == "nt" else None).pack(side="left", padx=6)
         ttk.Button(bar, text=ui_theme.with_icon(t("log.save_as"), "💾"), command=self.export_log).pack(side="left")
         ttk.Button(bar, text=ui_theme.with_icon(t("log.clear"), "🧹"), command=self.clear_applog).pack(side="left", padx=6)
+        ttk.Button(bar, text="☁ " + t("log.send_github"), command=self.send_log_github, style="Accent.TButton").pack(side="left", padx=6)
         self.log_filter = tk.StringVar(value="ALL")
         ttk.Label(bar, text=t("log.level_filter")).pack(side="left", padx=(12, 2))
         cb = ttk.Combobox(bar, textvariable=self.log_filter, width=9, state="readonly",
@@ -8295,6 +8297,46 @@ class App:
         for lvl, col in (("DEBUG", PAL["muted"]), ("INFO", PAL["info"]), ("WARNING", PAL["warning"]), ("ERROR", PAL["danger"])):
             self.log_box.tag_configure(lvl, foreground=col)
         self.refresh_logtab()
+
+    def send_log_github(self):
+        """Kullanıcı onayıyla maskelenmiş son logu topluluk GitHub paneline gönderir."""
+        if not messagebox.askyesno(APP_NAME, t("log.send_github_ask"), parent=self.root): return
+        try:
+            st = self.cfg["settings"]
+            payload = reports.build("bug", f"TD2 Loot Advisor log — {APP_VERSION}",
+                                    "Kullanıcı tarafından uygulama içinden gönderilen tanılama kaydı.",
+                                    app_version=APP_VERSION, lang=i18n.current_language(),
+                                    client=st.get("drop_client", ""),
+                                    system=reports.system_info(APP_VERSION, {"ocr": getattr(OCR, "name", "")}),
+                                    log=reports.log_tail(APPLOG_PATH, lines=180))
+            url = self.report_server()
+            store = getattr(self, "fb_store", None) or reports.Store(BASE)
+            self.fb_store = store
+            def work():
+                state, rec = store.send(url, payload)
+                self.root.after(0, lambda: self.toast(t("log.sent_github") if state == "sent" else t("log.queued_github")))
+            threading.Thread(target=work, daemon=True).start()
+        except Exception as e:
+            log.exception("GitHub log report failed")
+            messagebox.showerror(APP_NAME, str(e), parent=self.root)
+
+    def factory_reset(self):
+        """Ayarları varsayılana döndürür; kişisel build/sandık/geçmiş verisini silmez."""
+        if not messagebox.askyesno(APP_NAME, t("set.factory_ask"), parent=self.root): return
+        try:
+            stamp = time.strftime("%Y%m%d_%H%M%S")
+            backup = BASE / "backup" / ("factory_reset_" + stamp)
+            backup.mkdir(parents=True, exist_ok=True)
+            if CFG_PATH.exists(): shutil.copy2(CFG_PATH, backup / "builds.json")
+            old = self.cfg
+            self.cfg = {"builds": list(old.get("builds", [])), "attributes": dict(old.get("attributes", {})), "settings": dict(DEFAULTS)}
+            save_cfg(self.cfg)
+            log.info("Factory settings reset; backup=%s", backup)
+            messagebox.showinfo(APP_NAME, t("set.factory_done", path=backup), parent=self.root)
+            self.rebuild_ui(tab="settings")
+        except Exception as e:
+            log.exception("Factory reset failed")
+            messagebox.showerror(APP_NAME, str(e), parent=self.root)
 
     def refresh_logtab(self, limit=800):
         """Günlük dosyasının son satırlarını gösterir."""
