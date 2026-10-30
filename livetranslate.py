@@ -380,7 +380,8 @@ class Translator:
         self.memory = memory if memory is not None and len(memory) else None
         self.ck = self.engine.name + "@4" + (":" + getattr(memory, "version", "") if self.memory else "")
 
-    def translate(self, texts):
+    def translate(self, texts, allow_partial=False):
+        self.last_errors = {}
         out, todo, first = [None] * len(texts), [], {}
         for i, t in enumerate(texts):
             c = self.cache.get(self.ck, t)
@@ -429,10 +430,16 @@ class Translator:
                 # OCR'daki sayısal hedefler değişmişse hatalı çeviriyi gösterme/önbelleğe alma.
                 placeholders = lambda value: Counter(int(n) for n in re.findall(r"Z\s*Q\s*(\d+)", value, flags=re.I))
                 if placeholders(units[unit_index]) != placeholders(r):
+                    if allow_partial:
+                        self.last_errors[i] = "proper_name"
+                        continue
                     raise RuntimeError("Translation lost a game name; retry the text")
                 clean = lambda value: re.sub(r"Z\s*Q\s*\d+", "", value, flags=re.I)
                 digits = lambda value: sorted(Decimal(n.replace(",", ".")) for n in re.findall(r"(?<!\w)\d+(?:[.,]\d+)?", clean(value)))
                 if digits(units[unit_index]) != digits(r):
+                    if allow_partial:
+                        self.last_errors[i] = "number"
+                        continue
                     raise RuntimeError("Translation changed a number; retry the text")
                 r = re.sub(r"\s*⁇\s*", " ", self.glossary.unmask(r, found)).strip()
                 for pat, rep in WORD_FIX: r = re.sub(pat, rep, r)
@@ -442,11 +449,15 @@ class Translator:
                 r = re.sub(r"([^\s+\-(])%(\d)", r"\1 %\2", r)     # "boyunca%1" → "boyunca %1"
                 lines.setdefault(i, {}).setdefault(ln_no, [bullet, []])[1].append(r)
             for i in todo:
+                if i in self.last_errors: continue
                 rows = lines.get(i, {})
                 out[i] = "\n".join(x for x in ((b + " ".join(parts)).strip() for _, (b, parts) in sorted(rows.items())) if x not in ("•", "")).strip()
                 self.cache.put(self.ck, texts[i], out[i])
             for i, t in enumerate(texts):
-                if out[i] is None: out[i] = out[first[t]]
+                if out[i] is None:
+                    out[i] = out[first[t]]
+                    if first[t] in self.last_errors:
+                        self.last_errors[i] = self.last_errors[first[t]]
         return out
 
 

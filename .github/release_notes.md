@@ -8,6 +8,12 @@
 - Beş regresyon testi eklendi. Yayın öncesi kurulu EXE üzerinde gerçek RapidOCR, OPUS-MT ve normal/yerinde kaplama testi zorunlu hale getirildi.
 - Yerel modelin kullanıcı tarafından indirilmesi korunur; bu güncelleme kullanıcıya otomatik model indirme başlatmaz.
 
+**9.1.5.7 — Kısayol görünürlüğü ve kısmi sonuç güvenliği**
+
+- Canlı çeviri kısayolunun alındığı ve düğme durumunun değiştiği tanılama günlüğünde görünür hâle getirildi.
+- Canlı çeviri durdurulurken sesli altyazı nesnesi yoksa oluşabilecek yan etki giderildi.
+- Sayı veya özel isim doğrulaması başarısız olan tek OCR bloğu, aynı ekrandaki güvenli blokların gösterilmesini engellemez; hatalı blok gösterilmez ve uyarı yazılır.
+
 
 **9.1.4 — Komuta Merkezi ve güvenli güncelleme**
 

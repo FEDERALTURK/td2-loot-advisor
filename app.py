@@ -151,7 +151,7 @@ import game_assistant
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.1.5.6"
+APP_VERSION = "9.1.5.7"
 FROZEN = getattr(sys, "frozen", False)
 BASE = Path(sys.executable).parent if FROZEN else Path(__file__).resolve().parent
 TASKS_CACHE = BASE / "tasks_cache.json"  # son indirilen görev listesi
@@ -1680,6 +1680,7 @@ class App:
 
     def _hotkey_action(self, action):
         if getattr(self, "_closing", False): return
+        log.info("Hotkey action received: %s", action)
         if action == "translate_toggle": self.lt_toggle()
         elif action == "translate_once": self.lt_once()
         elif action == "voice": self.toggle_voice()
@@ -2177,11 +2178,13 @@ class App:
         self._lt_ui()
 
     def lt_toggle(self):
-        active = bool(getattr(self, "lt_stop_ev", None) or getattr(self, "sp", None))
+        active = bool(getattr(self, "lt_stop_ev", None))
+        log.info("Live translation toggle requested (active=%s)", active)
         if active:
             self._paused_translation = (bool(getattr(self, "lt_stop_ev", None)), bool(getattr(self, "sp", None)))
             self.lt_stop()
-            self.speech_stop(quiet=False)
+            # Live çeviri durdurma, konuşma çevirisi nesnesi yoksa da tamamlanır.
+            if getattr(self, "sp", None) is not None: self.speech_stop(quiet=False)
             if not self._microphone_busy(): self.speaker.stop()
             self._lt_hide()
             self.toast(t("ga.translation_paused"))
@@ -2301,15 +2304,21 @@ class App:
             t0 = time.perf_counter()
             translator = self.lt_translator()
             with self.timings.measure("translate_model"):
-                out = translator.translate([b[0] for b in blocks])
-            if len(out) != len(blocks) or any(not isinstance(x, str) or not x.strip() for x in out):
+                out = translator.translate([b[0] for b in blocks], allow_partial=True)
+            if len(out) != len(blocks):
                 raise RuntimeError(t("lt.invalid_result"))
             ms = int((time.perf_counter() - t0) * 1000)
-            pairs = [(b[0], tr, b[1]) for b, tr in zip(blocks, out)]
+            pairs = [(b[0], tr, b[1]) for b, tr in zip(blocks, out) if isinstance(tr, str) and tr.strip()]
+            skipped = len(blocks) - len(pairs)
+            if not pairs:
+                raise RuntimeError(t("lt.validation_failed"))
+            if skipped:
+                log.info("Live translation: displayed %d blocks, rejected %d unsafe blocks", len(pairs), skipped)
             def deliver():
                 self._lt_last_sig = sig
                 self._lt_retry_at, self._lt_failures = 0.0, 0
                 self._lt_show(pairs, area, ms)
+                if skipped: self._lt_status(t("lt.partial", n=len(pairs), skipped=skipped), "warning")
             self._post_translation(token, deliver)
             if self._translation_jobs.is_current(token):
                 try: self._task_seen(lines, translator)
