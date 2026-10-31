@@ -201,22 +201,27 @@ class InPlace:
             lines = [str(line) for line in it.get("lines", []) if str(line).strip()]
             if not lines:
                 continue
+            # layout() measures with the Canvas font metrics.  Keep the
+            # Windows-safe renderer on Canvas as well: a Frame/Label tree
+            # adds its own requested height and padding, which can clip every
+            # glyph inside narrow source rectangles (dark box, no text).
+            ww, hh = max(24, int(it["w"])), max(14, int(it["h"]))
             w = tk.Toplevel(self.root)
             w.overrideredirect(True)
             w.attributes("-topmost", True)
             w.configure(bg=s["bg"])
-            w.geometry(f"{max(24, it['w'])}x{max(14, it['h'])}{int(area['left'] + it['x']):+d}{int(area['top'] + it['y']):+d}")
-            body = tk.Frame(w, bg=s["bg"], highlightthickness=1,
-                            highlightbackground=s.get("border", s["bg"]))
-            body.pack(fill="both", expand=True)
+            w.geometry(f"{ww}x{hh}{int(area['left'] + it['x']):+d}{int(area['top'] + it['y']):+d}")
+            cv = tk.Canvas(w, bg=s["bg"], highlightthickness=0, bd=0, width=ww, height=hh)
+            cv.pack(fill="both", expand=True)
+            cv.create_rectangle(0, 0, ww, hh, fill=s["bg"], outline=s.get("border", s["bg"]), width=1)
             stripe = s["accent"] if it["kind"] == "text" else s.get("border", s["accent"])
-            tk.Frame(body, bg=stripe, width=3).pack(side="left", fill="y")
-            text = tk.Frame(body, bg=s["bg"])
-            text.pack(side="left", fill="both", expand=True, padx=(PAD + 2, PAD), pady=PAD)
+            cv.create_rectangle(0, 0, 3, hh, fill=stripe, outline="")
             f = self._font(it["pt"])
+            lh = f.metrics("linespace") * 1.05
+            y = PAD
             for line in lines:
-                tk.Label(text, text=line, bg=s["bg"], fg=s["fg"], font=f,
-                         anchor="w", justify="left").pack(anchor="w")
+                cv.create_text(PAD + 4, y, text=line, fill=s["fg"], font=f, anchor="nw")
+                y += lh
             w.update_idletasks()
             if self.on_window:
                 self.on_window(w)

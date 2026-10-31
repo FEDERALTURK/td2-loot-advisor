@@ -84,6 +84,24 @@ class InplaceTests(unittest.TestCase):
         finally:
             root.destroy()
 
+    def test_native_windows_boxes_contain_canvas_text(self):
+        """Regression: native boxes must not be dark panels with clipped Labels."""
+        import tkinter as tk
+        root = tk.Tk(); root.withdraw()
+        try:
+            renderer = overlay.InPlace(root, {"bg": "#111111", "fg": "white", "accent": "orange"},
+                                       native_boxes=True)
+            items = [{"x": 8, "y": 8, "w": 160, "h": 42, "pt": 10,
+                      "lines": ["Türkçe test metni"], "kind": "text"}]
+            renderer.show(items, {"width": 220, "height": 90, "left": 0, "top": 0})
+            root.update_idletasks()
+            self.assertEqual(len(renderer._wins), 1)
+            canvas = renderer._wins[0].winfo_children()[0]
+            self.assertTrue(any(canvas.type(i) == "text" for i in canvas.find_all()))
+            renderer.hide()
+        finally:
+            root.destroy()
+
 
 if __name__ == "__main__":
     unittest.main()

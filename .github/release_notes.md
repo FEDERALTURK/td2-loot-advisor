@@ -1,5 +1,11 @@
 ## TD2 Loot Advisor — Windows
 
+**9.1.5.14 — Yerinde çeviri metin çizimi düzeltmesi**
+
+- v9.1.5.13'te Windows için eklenen küçük overlay kutularında `Label` yüksekliği Canvas ölçümünden büyük kalabildiği için koyu fon görünürken metin kırpılabiliyordu.
+- Windows kutuları artık yerleşim motoruyla aynı Canvas font ölçüsüyle, doğrudan Canvas üzerinde çizilir. Koyu fon ve Türkçe metin birlikte görünür.
+- Native kutu regresyon testi, oluşturulan kutuda gerçek Canvas metin öğesi bulunduğunu ve fiziksel ekran yakalamasında beyaz metin piksellerinin çizildiğini doğrular.
+
 **9.1.5.13 — Windows canlı çeviri renderer güvenli modu ve CI WebSocket düzeltmesi**
 
 - Windows'ta yerinde çeviri artık büyük saydam Canvas/Toplevel yüzeyi kullanmaz. Her Türkçe metin kendi küçük opak kutusunda çizilir; DX12/DWM saydamlık hatasının oluşturduğu boş siyah dikdörtgen ortadan kaldırılır.
