@@ -1,5 +1,14 @@
 ## TD2 Loot Advisor — Windows
 
+**9.1.5.10 — Windows OCR/CI güvenilirliği ve isteğe bağlı paketler**
+
+- DirectML sağlayıcısı bulunmayan GitHub/Windows ortamlarında GPU testi artık yanlış yayın hatası üretmez; durum kontrollü biçimde `SKIP` olarak raporlanır. DirectML bulunan makinelerde gerçek sonuç benzerliği denetlenmeye devam eder.
+- Windows senkronizasyon testi, uygulamanın Tesseract keşif akışını kullanır; standart Tesseract kurulumları ve kullanıcı tarafından seçilen yol testte de geçerlidir.
+- Küçük/ölçeklenmiş oyun pencerelerinde Tesseract attribute satırlarını kaybederse senkron benchmark doğal çözünürlükte güvenli doğrulama yapar; süre ölçümü hedef pencere boyutunda korunur.
+- Launcher, temel OCR/eşya okuma paketlerini ses, AI, sistem tepsisi ve QR gibi isteğe bağlı entegrasyonlardan ayırır. Eksik opsiyonel paketler artık programı durdurmak yerine hangi özelliğin kapalı olduğunu bildirir.
+- Python 3.13–3.15 test aralığı launcher tarafından görünür hâle getirildi; desteklenmeyen sürümlerde açık uyarı gösterilir.
+- OCR ve senkronizasyon testleri için Python çalışma sürümü workflow günlüğüne yazılır.
+
 **9.1.5.6 — Canlı çeviri başlatma ve sonuç kararlılığı**
 
 - İstatistik tarih seçicisinin konuşma çevirisi motoruyla aynı değişkeni kullanması düzeltildi. Canlı çeviriyi başlat düğmesi ve F6 artık istatistik ekranını ses motoru sanarak durdurmaya çalışmaz.

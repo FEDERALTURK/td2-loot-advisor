@@ -12,10 +12,19 @@ from pathlib import Path
 import subprocess
 import sys
 
-CORE = ("mss", "PIL", "pytesseract", "pynput", "pystray", "ctranslate2", "sentencepiece", "soundcard", "edge_tts", "sounddevice", "faster_whisper", "pyttsx3")
+# These modules are imported by the base screenshot/UI path.  Voice, AI and
+# tray integrations are deliberately optional: a missing optional module must
+# not prevent the OCR/equipment reader from starting.
+CORE = ("mss", "PIL", "pytesseract", "pynput")
+OPTIONAL = (("pystray", "system tray"), ("ctranslate2", "offline translation"),
+            ("sentencepiece", "offline translation"), ("soundcard", "voice output"),
+            ("edge_tts", "online voice"), ("sounddevice", "assistant audio"),
+            ("faster_whisper", "assistant speech-to-text"), ("pyttsx3", "system voice"),
+            ("av", "assistant audio decoding"), ("qrcode", "account QR"))
 OCR = (("onnxruntime", "onnxruntime"), ("rapidocr", "rapidocr"))
 EXTRAS = (("pyttsx3", "pyttsx3"), ("sounddevice", "sounddevice"), ("numpy", "numpy"),
           ("faster-whisper", "faster_whisper"), ("qrcode", "qrcode"), ("av", "av"))
+SUPPORTED_PYTHON = {(3, 13), (3, 14), (3, 15)}
 
 
 def present(module, finder=None):
@@ -62,6 +71,11 @@ def prepare(root, repair=False, extras=False, check_only=False, finder=None, run
     return True, []
 
 
+def optional_missing(finder=None):
+    """Return optional integrations that are unavailable in this environment."""
+    return [(module, feature) for module, feature in OPTIONAL if not present(module, finder)]
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--repair", action="store_true")
@@ -69,10 +83,17 @@ def main():
     parser.add_argument("--check", action="store_true")
     args, app_args = parser.parse_known_args()
     root = Path(__file__).resolve().parents[1]
+    runtime = sys.version_info[:2]
+    if runtime not in SUPPORTED_PYTHON:
+        print(f"Warning / Uyarı: Python {runtime[0]}.{runtime[1]} is outside the tested 3.13–3.15 range")
     ok, missing = prepare(root, args.repair, args.extras, args.check)
     if not ok:
         print("Required packages missing / Gerekli paketler eksik:", ", ".join(missing))
         return 1
+    optional = optional_missing()
+    if optional:
+        print("Optional features unavailable / İsteğe bağlı özellikler kapalı:",
+              ", ".join(f"{feature} ({module})" for module, feature in optional))
     if args.check:
         print("Required packages ready / Gerekli paketler hazir")
         return 0
