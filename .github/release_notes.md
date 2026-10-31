@@ -1,5 +1,11 @@
 ## TD2 Loot Advisor — Windows
 
+**9.1.5.17 — Panel ve oyun üstü kartlarda Windows metin görünürlüğü**
+
+- Panel eşya sonuç kartları, asistan HUD'u ve yerinde çeviri kutuları için tıklama geçirme varsayılanı artık `WS_EX_LAYERED` kullanmaz. Bu stil bazı Windows/DWM + DX12 birleşimlerinde koyu kartı bırakıp Canvas veya Label metnini görünmez yapabiliyordu.
+- Fare tıklaması oyuna geçmeye ve overlay odak almamaya devam eder.
+- Windows regresyon testleri hem yerinde çeviri Canvas metnini hem Panel sonuç kartı Label metnini ekran pikseliyle doğrular.
+
 **9.1.5.16 — Windows yerinde çeviri metin görünürlüğü**
 
 - Yerinde çevirinin küçük opak kutularında `WS_EX_LAYERED` kaldırıldı. Bu Windows/DWM + DX12 bileşiminde koyu kutu görünürken Canvas metninin kaybolmasına yol açabiliyordu.

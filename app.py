@@ -151,7 +151,7 @@ import game_assistant
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.1.5.16"
+APP_VERSION = "9.1.5.17"
 FROZEN = getattr(sys, "frozen", False)
 BASE = Path(sys.executable).parent if FROZEN else Path(__file__).resolve().parent
 TASKS_CACHE = BASE / "tasks_cache.json"  # son indirilen görev listesi
@@ -824,7 +824,7 @@ def slot_name(slot):
     """Slot adının çevirisi; bilinmeyen slot olduğu gibi döner."""
     return t(f"slot.{slot.lower()}") if slot else ""
 
-def click_through(win, *, layered=True):
+def click_through(win, *, layered=False):
     if os.name != "nt":
         return
     try:
@@ -838,11 +838,11 @@ def click_through(win, *, layered=True):
         for hwnd in handles:
             st = ctypes.windll.user32.GetWindowLongW(hwnd, -20)
             # WS_EX_TRANSPARENT + WS_EX_NOACTIVATE fareyi oyuna geçirir.
-            # WS_EX_LAYERED ise Tk Canvas'ın GDI metnini bazı Windows/DWM +
-            # DX12 oyun bileşimlerinde görünmez yapabiliyor: koyu kutu kalıp
-            # yazılar kayboluyordu.  Yerinde çevirinin küçük opak kutuları
-            # layered değildir; yalnız eski şeffaf tam-ekran renderer buna
-            # ihtiyaç duyar.
+            # WS_EX_LAYERED click-through için gerekli değildir; Tk Canvas ve
+            # Label metnini bazı Windows/DWM + DX12 bileşimlerinde görünmez
+            # yapabiliyor (koyu panel/kutu kalıp yazı kaybolur).  Bu yüzden
+            # oyun üstü opak sonuç, asistan ve çeviri kartlarının varsayılanı
+            # güvenli non-layered yoldur.
             flags = 0x00000020 | 0x08000000
             if layered:
                 flags |= 0x00080000
@@ -2424,10 +2424,9 @@ class App:
         self._lt_job = self.root.after(int(float(st.get("tr_hide", 10)) * 1000), self._lt_hide)
 
     def _lt_overlay_window(self, w):
-        # Opaque native in-place boxes need click-through, but must not become
-        # WS_EX_LAYERED: that exact Windows composition path leaves black
-        # rectangles with invisible Canvas glyphs over DX12 game windows.
-        click_through(w, layered=not bool(getattr(w, "_td2_native_box", False)))
+        # Opak native kutular click-through olur, fakat layered olmaz: bu
+        # Windows/DX12 yolunda koyu kutu kalıp Canvas metni kaybolabiliyor.
+        click_through(w)
         exclude_from_capture(w, "translate")
         w.bind("<Destroy>", lambda e, w=w: CAPTURE_MASK.pop("translate", None) if e.widget is w else None)
 

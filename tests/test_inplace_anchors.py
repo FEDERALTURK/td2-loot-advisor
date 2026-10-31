@@ -119,7 +119,7 @@ class InplaceTests(unittest.TestCase):
         try:
             renderer = overlay.InPlace(
                 root, {"bg": "#081a27", "fg": "#effdff", "accent": "#36d9e8", "border": "#25869b"},
-                on_window=lambda w: click_through(w, layered=not bool(getattr(w, "_td2_native_box", False))),
+                on_window=click_through,
                 native_boxes=True,
             )
             renderer.show([{"x": 8, "y": 8, "w": 220, "h": 52, "pt": 14,
@@ -134,6 +134,32 @@ class InplaceTests(unittest.TestCase):
             self.assertGreater(bright, 40, "click-through sonrası Canvas metni görünmez oldu")
             renderer.hide()
         finally:
+            root.destroy()
+
+    @unittest.skipUnless(os.name == "nt", "Windows composition regression")
+    def test_panel_card_click_through_keeps_label_glyphs_visible(self):
+        """Panel sonuç kartı Label metni de layered click-through ile kaybolmamalı."""
+        import tkinter as tk
+        from PIL import ImageGrab
+        from app import click_through
+        root = tk.Tk(); root.withdraw()
+        card = tk.Toplevel(root)
+        try:
+            card.overrideredirect(True); card.attributes("-topmost", True)
+            card.attributes("-alpha", 0.94); card.configure(bg="#081a27")
+            tk.Label(card, text="PANEL TEST 123", bg="#081a27", fg="#effdff",
+                     font=("Segoe UI", 16)).pack(padx=10, pady=8)
+            card.update_idletasks(); card.geometry("+70+70")
+            click_through(card)
+            root.update(); time.sleep(.15); root.update()
+            x, y = card.winfo_rootx(), card.winfo_rooty()
+            image = ImageGrab.grab(bbox=(x, y, x + card.winfo_width(), y + card.winfo_height()))
+            bright = sum(1 for red, green, blue in image.convert("RGB").getdata()
+                         if red > 175 and green > 195 and blue > 195)
+            self.assertGreater(bright, 40, "Panel kartında click-through sonrası Label metni görünmez oldu")
+        finally:
+            try: card.destroy()
+            except tk.TclError: pass
             root.destroy()
 
 
