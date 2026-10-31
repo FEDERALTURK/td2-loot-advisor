@@ -151,7 +151,7 @@ import game_assistant
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.1.5.10"
+APP_VERSION = "9.1.5.11"
 FROZEN = getattr(sys, "frozen", False)
 BASE = Path(sys.executable).parent if FROZEN else Path(__file__).resolve().parent
 TASKS_CACHE = BASE / "tasks_cache.json"  # son indirilen görev listesi
@@ -2405,6 +2405,11 @@ class App:
             self._lt_inplace = None
             return self._lt_show(pairs, area, 0, force_mode="screen")
         self._lt_win = ip.show(items, area)
+        if self._lt_win is None:
+            # A renderer can discard all lines after font measurement.  Do
+            # not leave an empty transparent Toplevel above the game.
+            self._lt_inplace = None
+            return self._lt_show(pairs, area, 0, force_mode="screen")
         self._lt_job = self.root.after(int(float(st.get("tr_hide", 10)) * 1000), self._lt_hide)
 
     def _lt_overlay_window(self, w):

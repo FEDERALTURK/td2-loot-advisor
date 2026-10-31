@@ -1,5 +1,12 @@
 ## TD2 Loot Advisor — Windows
 
+**9.1.5.11 — Boş/siyah canlı çeviri penceresi düzeltmesi**
+
+- Yerinde çeviri Toplevel arka planı Windows saydam renk anahtarıyla açıkça eşitlenir; saydamlık desteklenmediğinde siyah dikdörtgen oluşması engellenir.
+- Çizilecek Türkçe satırı kalmayan overlay öğeleri gösterilmeden filtrelenir.
+- Tüm yerleşim öğeleri elendiyse boş pencere açık bırakılmaz; güvenli ekran overlay’ine geri dönülür.
+- Overlay, yerinde çeviri ve canlı çeviri regresyon testleri yeniden doğrulandı.
+
 **9.1.5.10 — Windows OCR/CI güvenilirliği ve isteğe bağlı paketler**
 
 - DirectML sağlayıcısı bulunmayan GitHub/Windows ortamlarında GPU testi artık yanlış yayın hatası üretmez; durum kontrollü biçimde `SKIP` olarak raporlanır. DirectML bulunan makinelerde gerçek sonuç benzerliği denetlenmeye devam eder.

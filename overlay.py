@@ -146,9 +146,17 @@ class InPlace:
         import tkinter as tk
         self.hide()
         s = self.style
+        # A Tk Toplevel's default background is often black on Windows.  If
+        # it differs from the transparent color key, the whole capture area
+        # becomes a black rectangle even though the Canvas itself is keyed.
+        # Set both surfaces explicitly before the first paint.
+        items = [it for it in items if any(str(line).strip() for line in it.get("lines", []))]
+        if not items:
+            return None
         w = self.win = tk.Toplevel(self.root)
         w.overrideredirect(True)
         w.attributes("-topmost", True)
+        w.configure(bg=self.KEY)
         try: w.attributes("-transparentcolor", self.KEY)
         except tk.TclError: pass                           # Windows dışı: arka plan görünür (testler)
         w.geometry(f"{area['width']}x{area['height']}{int(area['left']):+d}{int(area['top']):+d}")
