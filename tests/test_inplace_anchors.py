@@ -1,7 +1,9 @@
 """Source-anchored in-place translation, including project-menu regressions."""
 import json
+import os
 from pathlib import Path
 import sys
+import time
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -98,6 +100,38 @@ class InplaceTests(unittest.TestCase):
             self.assertEqual(len(renderer._wins), 1)
             canvas = renderer._wins[0].winfo_children()[0]
             self.assertTrue(any(canvas.type(i) == "text" for i in canvas.find_all()))
+            renderer.hide()
+        finally:
+            root.destroy()
+
+    @unittest.skipUnless(os.name == "nt", "Windows composition regression")
+    def test_native_click_through_keeps_canvas_glyphs_visible(self):
+        """A native overlay must stay readable after becoming click-through.
+
+        WS_EX_LAYERED made Canvas text disappear on affected Windows/DX12
+        compositions while the dark rectangle remained.  Inspect real screen
+        pixels after applying the same non-layered style as production.
+        """
+        import tkinter as tk
+        from PIL import ImageGrab
+        from app import click_through
+        root = tk.Tk(); root.withdraw()
+        try:
+            renderer = overlay.InPlace(
+                root, {"bg": "#081a27", "fg": "#effdff", "accent": "#36d9e8", "border": "#25869b"},
+                on_window=lambda w: click_through(w, layered=not bool(getattr(w, "_td2_native_box", False))),
+                native_boxes=True,
+            )
+            renderer.show([{"x": 8, "y": 8, "w": 220, "h": 52, "pt": 14,
+                            "lines": ["Turkce test 123"], "kind": "text"}],
+                          {"width": 260, "height": 90, "left": 60, "top": 60})
+            root.update(); time.sleep(.15); root.update()
+            win = renderer._wins[0]
+            x, y = win.winfo_rootx(), win.winfo_rooty()
+            image = ImageGrab.grab(bbox=(x, y, x + win.winfo_width(), y + win.winfo_height()))
+            bright = sum(1 for red, green, blue in image.convert("RGB").getdata()
+                         if red > 185 and green > 210 and blue > 210)
+            self.assertGreater(bright, 40, "click-through sonrası Canvas metni görünmez oldu")
             renderer.hide()
         finally:
             root.destroy()

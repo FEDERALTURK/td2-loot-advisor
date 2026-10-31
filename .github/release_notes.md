@@ -1,5 +1,11 @@
 ## TD2 Loot Advisor — Windows
 
+**9.1.5.16 — Windows yerinde çeviri metin görünürlüğü**
+
+- Yerinde çevirinin küçük opak kutularında `WS_EX_LAYERED` kaldırıldı. Bu Windows/DWM + DX12 bileşiminde koyu kutu görünürken Canvas metninin kaybolmasına yol açabiliyordu.
+- Kutular tıklama geçiren ve odak almayan pencereler olmaya devam eder; yalnız saydam/layered pencere yolu kullanılmaz.
+- Windows regresyon testi, click-through stili uygulandıktan sonra gerçek ekranda Türkçe metin piksellerinin görünür kaldığını doğrular.
+
 **9.1.5.15 — Yerinde çeviri UI testi native renderer uyumu**
 
 - Windows native yerinde çeviri renderer'ı kutu başına Canvas kullandığı için eski UI testi yalnız `ip.cv` sayarak yanlış negatif üretiyordu. Test artık hem eski ortak Canvas'ı hem native kutu Canvas'larını sayar ve gerçek metin öğesini zorunlu kılar.

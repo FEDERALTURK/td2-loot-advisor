@@ -151,7 +151,7 @@ import game_assistant
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.1.5.15"
+APP_VERSION = "9.1.5.16"
 FROZEN = getattr(sys, "frozen", False)
 BASE = Path(sys.executable).parent if FROZEN else Path(__file__).resolve().parent
 TASKS_CACHE = BASE / "tasks_cache.json"  # son indirilen görev listesi
@@ -824,7 +824,7 @@ def slot_name(slot):
     """Slot adının çevirisi; bilinmeyen slot olduğu gibi döner."""
     return t(f"slot.{slot.lower()}") if slot else ""
 
-def click_through(win):
+def click_through(win, *, layered=True):
     if os.name != "nt":
         return
     try:
@@ -837,8 +837,16 @@ def click_through(win):
         handles = [wid] + ([parent] if parent and parent != wid else [])
         for hwnd in handles:
             st = ctypes.windll.user32.GetWindowLongW(hwnd, -20)
-            # WS_EX_LAYERED + WS_EX_TRANSPARENT + WS_EX_NOACTIVATE
-            ctypes.windll.user32.SetWindowLongW(hwnd, -20, st | 0x00080000 | 0x00000020 | 0x08000000)
+            # WS_EX_TRANSPARENT + WS_EX_NOACTIVATE fareyi oyuna geçirir.
+            # WS_EX_LAYERED ise Tk Canvas'ın GDI metnini bazı Windows/DWM +
+            # DX12 oyun bileşimlerinde görünmez yapabiliyor: koyu kutu kalıp
+            # yazılar kayboluyordu.  Yerinde çevirinin küçük opak kutuları
+            # layered değildir; yalnız eski şeffaf tam-ekran renderer buna
+            # ihtiyaç duyar.
+            flags = 0x00000020 | 0x08000000
+            if layered:
+                flags |= 0x00080000
+            ctypes.windll.user32.SetWindowLongW(hwnd, -20, st | flags)
     except Exception:
         pass
 
@@ -2416,7 +2424,11 @@ class App:
         self._lt_job = self.root.after(int(float(st.get("tr_hide", 10)) * 1000), self._lt_hide)
 
     def _lt_overlay_window(self, w):
-        click_through(w); exclude_from_capture(w, "translate")
+        # Opaque native in-place boxes need click-through, but must not become
+        # WS_EX_LAYERED: that exact Windows composition path leaves black
+        # rectangles with invisible Canvas glyphs over DX12 game windows.
+        click_through(w, layered=not bool(getattr(w, "_td2_native_box", False)))
+        exclude_from_capture(w, "translate")
         w.bind("<Destroy>", lambda e, w=w: CAPTURE_MASK.pop("translate", None) if e.widget is w else None)
 
     def _lt_after(self, pairs, ms):

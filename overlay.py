@@ -209,6 +209,10 @@ class InPlace:
             w = tk.Toplevel(self.root)
             w.overrideredirect(True)
             w.attributes("-topmost", True)
+            # app._lt_overlay_window uses this to keep the box click-through
+            # without enabling WS_EX_LAYERED.  Layered Tk Canvas windows can
+            # lose their text glyphs over some Windows/DX12 compositions.
+            w._td2_native_box = True
             w.configure(bg=s["bg"])
             w.geometry(f"{ww}x{hh}{int(area['left'] + it['x']):+d}{int(area['top'] + it['y']):+d}")
             cv = tk.Canvas(w, bg=s["bg"], highlightthickness=0, bd=0, width=ww, height=hh)
