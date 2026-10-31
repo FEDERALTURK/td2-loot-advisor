@@ -293,7 +293,10 @@ def read_game_settings(folder=None):
         except (KeyError, TypeError): pass
         out["display_mode"] = ("Borderless" if act.get("fullscreen") else "Windowed") if windowed else "Fullscreen"
         hdr = g.get("hdr")
-        out["hdr"] = None if hdr is None else str(hdr).lower() not in ("off", "0", "false")
+        # Ubisoft writes this as a quoted string (usually "Off").  Trim
+        # whitespace so a hand-edited/older state.cfg cannot become a false
+        # HDR-positive result.
+        out["hdr"] = None if hdr is None else str(hdr).strip().lower() not in ("off", "0", "false", "disabled", "no")
         out["dx12"] = g.get("dx12")
         loc = st.get("localization", {})
         if isinstance(loc, dict) and "mainLanguage" in loc: out["language"] = loc["mainLanguage"]
@@ -326,7 +329,7 @@ def read_game_settings(folder=None):
     o = {k.lower(): v for k, v in out["options"].items()}
     out["display_mode"] = o.get("displaymode") or o.get("windowmode") or ("Windowed" if o.get("windowed") == "true" else None)
     hdr = next((v for k, v in o.items() if "hdr" in k), None)
-    out["hdr"] = None if hdr is None else str(hdr).lower() in ("1", "true", "on", "enabled")
+    out["hdr"] = None if hdr is None else str(hdr).strip().lower() in ("1", "true", "on", "enabled", "yes")
     return out
 
 

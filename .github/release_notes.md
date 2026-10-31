@@ -1,5 +1,11 @@
 ## TD2 Loot Advisor — Windows
 
+**9.1.5.12 — HDR durumunun güncel okunması**
+
+- `state.cfg` içindeki `hdr = "Off"` değeri artık boşluk, `disabled` ve `no` varyantlarıyla birlikte güvenilir biçimde kapalı kabul edilir.
+- Program açıkken oyun HDR ayarı değiştirildiğinde eski `_last_game_settings` önbelleği kullanılmaz; senkron ve tanılama ekranı dosyayı yeniden okur.
+- HDR kapalı olduğu hâlde gösterilen yanlış HDR uyarıları giderildi.
+
 **9.1.5.11 — Boş/siyah canlı çeviri penceresi düzeltmesi**
 
 - Yerinde çeviri Toplevel arka planı Windows saydam renk anahtarıyla açıkça eşitlenir; saydamlık desteklenmediğinde siyah dikdörtgen oluşması engellenir.

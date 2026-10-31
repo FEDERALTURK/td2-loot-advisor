@@ -151,7 +151,7 @@ import game_assistant
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.1.5.11"
+APP_VERSION = "9.1.5.12"
 FROZEN = getattr(sys, "frozen", False)
 BASE = Path(sys.executable).parent if FROZEN else Path(__file__).resolve().parent
 TASKS_CACHE = BASE / "tasks_cache.json"  # son indirilen görev listesi
@@ -2155,7 +2155,10 @@ class App:
         self._lt_pad_start()
         self._lt_status(t("lt.running", key=st.get("tr_hotkey", "<f7>").upper().strip("<>")), "success")
         try:                                                 # özel tam ekranda kaplama görünmez: kullanıcıya söyle
-            gs = getattr(display, "_last_game_settings", None) or display.read_game_settings() or {}
+            # Do not reuse a stale HDR/window-mode value after the user
+            # changes the game settings while the advisor is open.
+            gs = display.read_game_settings() or getattr(display, "_last_game_settings", None) or {}
+            display._last_game_settings = gs
             if str(gs.get("display_mode", "")).lower() in ("fullscreen", "exclusive", "exclusive fullscreen"):
                 self._lt_status(t("lt.fullscreen_hint"), "warning")
                 if not quiet: self.toast(t("lt.fullscreen_hint"))
@@ -4859,7 +4862,8 @@ class App:
         bar = ttk.Frame(f); bar.pack(fill="x", pady=(8, 0))
 
         def payload():
-            gs = getattr(display, "_last_game_settings", None) or {}
+            gs = display.read_game_settings() or getattr(display, "_last_game_settings", None) or {}
+            display._last_game_settings = gs
             sysi = reports.system_info(APP_VERSION, {"res": "%sx%s" % game_size(st)[:2], "ocr": OCR.name if OCR else "",
                                                      "lang": i18n.current_language(), "game_mode": gs.get("display_mode"),
                                                      "frozen": FROZEN}) if v_sys.get() else {}
