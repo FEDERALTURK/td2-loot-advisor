@@ -12,6 +12,7 @@ ekran yakalamasından dışlanır (program kendi çevirisini yeniden okumaz).
 """
 import re
 import math
+import os
 
 MIN_PT = 8
 PAD = 4
@@ -125,10 +126,12 @@ class InPlace:
     """Tek bir şeffaf Toplevel; kutular Canvas'ta. style: {"bg","fg","accent","border","alpha","font"}."""
     KEY = "#010203"                                       # şeffaf renk anahtarı
 
-    def __init__(self, root, style, on_window=None):
+    def __init__(self, root, style, on_window=None, native_boxes=None):
         self.root, self.style, self.on_window = root, dict(style), on_window
         self.win = self.cv = None
+        self._wins = []
         self._fonts = {}
+        self.native_boxes = (os.name == "nt") if native_boxes is None else bool(native_boxes)
 
     def _font(self, pt, bold=False):
         import tkinter.font as tkfont
@@ -153,6 +156,13 @@ class InPlace:
         items = [it for it in items if any(str(line).strip() for line in it.get("lines", []))]
         if not items:
             return None
+        # Windows' colour-key transparency is not reliable when a game uses a
+        # DX12/DWM composition surface: it can leave a black transparent
+        # rectangle while Canvas text is absent.  Draw only the actual text
+        # boxes as ordinary opaque windows instead; there is no transparent
+        # parent surface that can turn black.
+        if self.native_boxes:
+            return self._show_native_boxes(tk, items, area)
         w = self.win = tk.Toplevel(self.root)
         w.overrideredirect(True)
         w.attributes("-topmost", True)
@@ -185,8 +195,38 @@ class InPlace:
         if self.on_window: self.on_window(w)
         return w
 
+    def _show_native_boxes(self, tk, items, area):
+        s = self.style
+        for it in items:
+            lines = [str(line) for line in it.get("lines", []) if str(line).strip()]
+            if not lines:
+                continue
+            w = tk.Toplevel(self.root)
+            w.overrideredirect(True)
+            w.attributes("-topmost", True)
+            w.configure(bg=s["bg"])
+            w.geometry(f"{max(24, it['w'])}x{max(14, it['h'])}{int(area['left'] + it['x']):+d}{int(area['top'] + it['y']):+d}")
+            body = tk.Frame(w, bg=s["bg"], highlightthickness=1,
+                            highlightbackground=s.get("border", s["bg"]))
+            body.pack(fill="both", expand=True)
+            stripe = s["accent"] if it["kind"] == "text" else s.get("border", s["accent"])
+            tk.Frame(body, bg=stripe, width=3).pack(side="left", fill="y")
+            text = tk.Frame(body, bg=s["bg"])
+            text.pack(side="left", fill="both", expand=True, padx=(PAD + 2, PAD), pady=PAD)
+            f = self._font(it["pt"])
+            for line in lines:
+                tk.Label(text, text=line, bg=s["bg"], fg=s["fg"], font=f,
+                         anchor="w", justify="left").pack(anchor="w")
+            w.update_idletasks()
+            if self.on_window:
+                self.on_window(w)
+            self._wins.append(w)
+        self.win = self._wins[0] if self._wins else None
+        return self.win
+
     def hide(self):
-        if self.win is not None:
-            try: self.win.destroy()
+        for w in list(self._wins) or ([self.win] if self.win is not None else []):
+            try: w.destroy()
             except Exception: pass
+        self._wins = []
         self.win = self.cv = None

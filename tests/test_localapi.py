@@ -77,9 +77,17 @@ node = shutil.which("node")
 if node:
     js = f"""const w=new WebSocket("ws://127.0.0.1:{port}/ws?t={api.token}");let n=0;
 w.onmessage=m=>{{const e=JSON.parse(m.data);if(e.type==="hello")w.send(JSON.stringify({{cmd:"get_state",id:1}}));
-else if(e.type==="result"){{console.log("NODEWS "+(e.ok&&e.state.game==="menu"?"ok":"bad"));w.close();}}}};
+else if(e.type==="result"){{const ok=e.ok&&e.state.game==="menu";console.log("NODEWS "+(ok?"ok":"bad"));w.close();process.exit(ok?0:1);}}}};
 w.onerror=e=>{{console.log("NODEWS err");process.exit(1)}};setTimeout(()=>process.exit(2),5000);"""
-    out = subprocess.run([node, "-e", js], capture_output=True, text=True, timeout=15).stdout
+    try:
+        node_run = subprocess.run([node, "-e", js], capture_output=True, text=True, timeout=30)
+        out = node_run.stdout
+        if node_run.returncode:
+            print("NODEWS stderr:", node_run.stderr[-1000:])
+    except subprocess.TimeoutExpired as e:
+        out = e.stdout or ""
+        if isinstance(out, bytes): out = out.decode("utf-8", "replace")
+        print("NODEWS timeout after 30s:", (e.stderr or "")[-1000:])
     ok("NODEWS ok" in out, "standart WebSocket istemcisi (node) bağlandı ve komut çalıştı")
 
 api.allow_control = False

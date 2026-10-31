@@ -151,7 +151,7 @@ import game_assistant
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.1.5.12"
+APP_VERSION = "9.1.5.13"
 FROZEN = getattr(sys, "frozen", False)
 BASE = Path(sys.executable).parent if FROZEN else Path(__file__).resolve().parent
 TASKS_CACHE = BASE / "tasks_cache.json"  # son indirilen görev listesi
@@ -2513,6 +2513,15 @@ class App:
             try: self.root.after_cancel(self._lt_job)
             except Exception: pass
             self._lt_job = None
+        ip = getattr(self, "_lt_inplace", None)
+        if ip is not None:
+            # Native Windows in-place mode can use several small text
+            # windows; hide all of them together rather than leaving a stale
+            # black rectangle on screen.
+            ip.hide()
+            self._lt_inplace = None
+            self._lt_win = None
+            return
         w = getattr(self, "_lt_win", None)
         if w is not None:
             try: w.destroy()

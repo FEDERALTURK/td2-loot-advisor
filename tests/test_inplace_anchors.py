@@ -63,8 +63,11 @@ class InplaceTests(unittest.TestCase):
         import tkinter as tk
         root = tk.Tk(); root.withdraw()
         try:
+            # Canvas backend stays covered as a cross-platform fallback;
+            # Windows production uses native opaque boxes to avoid DWM's
+            # colour-key transparency artefact.
             renderer = overlay.InPlace(root, {"bg": "#111111", "fg": "white", "accent": "orange"},
-                                       on_window=lambda win: win.withdraw())
+                                       on_window=lambda win: win.withdraw(), native_boxes=False)
             blocks = [("Haftalık Proje", (10, 10, 170, 35), "Weekly Project", 1),
                       ("Uzun açıklama metni " * 12, (10, 45, 170, 90), "Description", 2),
                       ("Ödüller", (10, 100, 170, 125), "Rewards", 1)]

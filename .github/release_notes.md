@@ -1,5 +1,12 @@
 ## TD2 Loot Advisor — Windows
 
+**9.1.5.13 — Windows canlı çeviri renderer güvenli modu ve CI WebSocket düzeltmesi**
+
+- Windows'ta yerinde çeviri artık büyük saydam Canvas/Toplevel yüzeyi kullanmaz. Her Türkçe metin kendi küçük opak kutusunda çizilir; DX12/DWM saydamlık hatasının oluşturduğu boş siyah dikdörtgen ortadan kaldırılır.
+- Yerinde çeviri kapanırken tüm küçük kutular birlikte kapatılır; ekranda bayat overlay kalmaz.
+- HDR durumu `state.cfg` dosyasından her senkron ve tanılama isteğinde güncel olarak okunur; eski önbellek yanlış HDR uyarısı üretmez.
+- Node.js WebSocket CI smoke testi sonuç aldıktan sonra süreci açıkça sonlandırır, zaman aşımı 30 saniyeye çıkarılır ve hata çıktısı workflow logunda korunur.
+
 **9.1.5.12 — HDR durumunun güncel okunması**
 
 - `state.cfg` içindeki `hdr = "Off"` değeri artık boşluk, `disabled` ve `no` varyantlarıyla birlikte güvenilir biçimde kapalı kabul edilir.
