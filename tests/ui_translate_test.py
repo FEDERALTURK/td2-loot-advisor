@@ -65,7 +65,7 @@ def s3():
     step("çeviri kaplaması oyunun üstünde", bool(w) and w.winfo_exists(), geo=w.winfo_geometry() if w else None)
     shot("02_overlay", full=True)
     a.lt_stop()
-    step("durduruldu", not getattr(a, "lt_stop_ev", None) and a._lt_win is None)
+    step("durduruldu", not getattr(a, "lt_stop_ev", None) and getattr(a, "_lt_win", None) is None)
     a.cfg["settings"].update(tr_mode="region", tr_region={"left": 30 + 30, "top": 30 + 30 + 80, "width": 880, "height": 90})
     a.lt_hist = []; a.lt_once(); a.root.after(8000, s4)
 def s4():
@@ -86,8 +86,25 @@ def s4():
     a.lt_hist = []; a.lt_once(); a.root.after(9000, s5)
 def s5():
     ip = getattr(a, "_lt_inplace", None)
-    n = len(ip.cv.find_all()) if ip and ip.cv else 0
-    step("yerinde çeviri: kutular oyun yazılarının yerinde", bool(ip and ip.win and n >= 4), canvas_items=n)
+    # Windows production renderer deliberately uses one opaque canvas per
+    # translated box (no large transparent parent window).  Older builds had
+    # a single ip.cv; count both backends and require actual text primitives.
+    canvases = []
+    if ip and ip.cv:
+        canvases.append(ip.cv)
+    if ip:
+        for win in getattr(ip, "_wins", []):
+            canvases.extend(c for c in win.winfo_children() if isinstance(c, app.tk.Canvas))
+    n = sum(len(c.find_all()) for c in canvases)
+    text_n = sum(sum(c.type(i) == "text" for i in c.find_all()) for c in canvases)
+    visible = sum(bool(w.winfo_viewable()) for w in getattr(ip, "_wins", [])) if ip else 0
+    # A native box is useful only when at least one of its own windows is
+    # mapped as well.  The legacy renderer uses the shared parent window.
+    backend_visible = bool(ip and ip.win and ip.win.winfo_viewable())
+    if getattr(ip, "_wins", []):
+        backend_visible = visible >= 1
+    step("yerinde çeviri: kutular oyun yazılarının yerinde", bool(ip and backend_visible and n >= 4 and text_n >= 1),
+         canvas_items=n, text_items=text_n, native_windows=visible)
     shot("04_inplace", full=True); a._lt_hide()
     # telefon / ikinci ekran
     a.cfg["settings"].update(tr_screen=True, tr_screen_port=8797); url = a.tr_screen_apply()

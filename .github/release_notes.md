@@ -1,5 +1,10 @@
 ## TD2 Loot Advisor — Windows
 
+**9.1.5.15 — Yerinde çeviri UI testi native renderer uyumu**
+
+- Windows native yerinde çeviri renderer'ı kutu başına Canvas kullandığı için eski UI testi yalnız `ip.cv` sayarak yanlış negatif üretiyordu. Test artık hem eski ortak Canvas'ı hem native kutu Canvas'larını sayar ve gerçek metin öğesini zorunlu kılar.
+- Çeviri altyapısı yüklenemeyen test ortamında durdurma denetimi ikincil `AttributeError` üretmez; gerçek model/kurulum hatası doğrudan raporlanır.
+
 **9.1.5.14 — Yerinde çeviri metin çizimi düzeltmesi**
 
 - v9.1.5.13'te Windows için eklenen küçük overlay kutularında `Label` yüksekliği Canvas ölçümünden büyük kalabildiği için koyu fon görünürken metin kırpılabiliyordu.
