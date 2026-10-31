@@ -1,8 +1,27 @@
 {
  "schema": 1,
- "version": "202610310729.0",
- "generated": 1793431759,
+ "version": "202610311352.0",
+ "generated": 1793454762,
  "tasks": [
+  {
+   "title": "Season Pass Project",
+   "subtitle": "Capitol Building",
+   "desc": "enemy presence that needs to be at the Capitol Building.",
+   "objective": "Complete the Capitol Building mission on hard difficulty or higher",
+   "key": "d5b113ff132dc1cf",
+   "category": "project",
+   "period": "season",
+   "first_seen": 1793418123,
+   "last_seen": 1793433590,
+   "reporters": 2,
+   "rewards": [
+    "Optimization Cache",
+    "00001 SHD Calibration",
+    "Challenging Black Tusk Bo",
+    "A Crafting Blueprint",
+    "Gear Item"
+   ]
+  },
   {
    "title": "Season Pass Project",
    "subtitle": "Legend Manning National Zoo",
