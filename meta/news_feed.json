@@ -1,7 +1,7 @@
 {
  "schema": 1,
- "version": "2026-10-26.2",
- "updated": "2026-10-26T13:43:21Z",
+ "version": "2026-11-01.1",
+ "updated": "2026-11-01T07:36:42Z",
  "season": "Year 8 Season 3 – Red Horizon",
  "items": [
   {
@@ -98,38 +98,6 @@
     "pl": "Globalne premie do przeładowania, zmiany broni, ochrony przed zagrożeniami, ruchu i pancerza.",
     "ru": "Глобальные бонусы к перезарядке, смене оружия, защите от угроз, передвижению и броне.",
     "nl": "Wereldwijde bonussen op herladen, wapenwissel, gevarenbescherming, beweging en pantser."
-   }
-  },
-  {
-   "id": "y8s3-expertise-surge",
-   "kind": "event",
-   "start": "2026-10-20T08:00:00Z",
-   "end": "2026-10-27T08:00:00Z",
-   "url": "https://www.ubisoft.com/en-gb/game/the-division/the-division-2/news-updates/7uzKuy4iB0MtOJfsXAr3TO/tuy8s32-red-moon-unleashed-creator-collaboration-escalation-updates-more",
-   "source": "Ubisoft",
-   "title": {
-    "en": "Expertise Surge",
-    "tr": "Expertise Surge",
-    "de": "Expertise Surge",
-    "fr": "Expertise Surge",
-    "es": "Expertise Surge",
-    "it": "Expertise Surge",
-    "pt": "Expertise Surge",
-    "pl": "Expertise Surge",
-    "ru": "Expertise Surge",
-    "nl": "Expertise Surge"
-   },
-   "text": {
-    "en": "Double upgrade materials for Expertise.",
-    "tr": "Expertise yükseltmesi için iki kat malzeme.",
-    "de": "Doppelte Upgrade-Materialien für Expertise.",
-    "fr": "Matériaux d'amélioration d'expertise doublés.",
-    "es": "Materiales de mejora de Pericia dobles.",
-    "it": "Materiali di potenziamento dell'esperienza raddoppiati.",
-    "pt": "Materiais de aprimoramento de Expertise em dobro.",
-    "pl": "Podwójne materiały do ulepszania biegłości.",
-    "ru": "Двойные материалы для улучшения мастерства.",
-    "nl": "Dubbele upgrade-materialen voor Expertise."
    }
   },
   {
