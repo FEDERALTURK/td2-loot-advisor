@@ -1,7 +1,7 @@
 {
  "schema": 1,
- "version": "2026-11-01.1",
- "updated": "2026-11-01T07:36:42Z",
+ "version": "2026-11-01.2",
+ "updated": "2026-11-01T19:48:07Z",
  "season": "Year 8 Season 3 – Red Horizon",
  "items": [
   {
@@ -34,6 +34,38 @@
     "pl": "Wydarzenie sezonowe: wrogowie Lunatic, Moon Cultists, zlecenia Revenant, klucze i skrzynie wydarzenia. Zaloguj się w trakcie, aby dostać Bound Slasher Mask. Niewykorzystane klucze znikają po zakończeniu.",
     "ru": "Сезонное событие: враги Lunatic, Moon Cultists, награды Revenant, ключи и тайники события. Войдите в игру во время события, чтобы получить Bound Slasher Mask. Неиспользованные ключи удаляются в конце.",
     "nl": "Seizoensevent: Lunatic-vijanden, Moon Cultists, Revenant-premies, eventsleutels en eventcaches. Log in tijdens het event voor het Bound Slasher Mask. Ongebruikte sleutels verdwijnen aan het einde."
+   }
+  },
+  {
+   "id": "y8s3-red-moon-rising",
+   "kind": "event",
+   "start": "2026-09-24T08:00:00Z",
+   "end": "2026-11-03T08:00:00Z",
+   "url": "https://www.ubisoft.com/en-gb/game/the-division/the-division-2/news-updates/3XY3PhLzRfbBPZ8cedURYO/tuy8s31-red-moon-rising-pvp-updates-rage-harvest",
+   "source": "Ubisoft",
+   "title": {
+    "en": "Red Moon Rising",
+    "tr": "Red Moon Rising",
+    "de": "Red Moon Rising",
+    "fr": "Red Moon Rising",
+    "es": "Red Moon Rising",
+    "it": "Red Moon Rising",
+    "pt": "Red Moon Rising",
+    "ru": "Red Moon Rising",
+    "pl": "Red Moon Rising",
+    "nl": "Red Moon Rising"
+   },
+   "text": {
+    "en": "PvE Dark Zone event ending on November 3: Black Tusk holds the area and time inside builds Red Moon Stacks with buffs and drawbacks. Its loot pools include Exotics, DZ Named items and Prototype gear, with the new Exotics Vertigo and Sarru.",
+    "tr": "3 Kasım'da biten PvE Dark Zone etkinliği: Bölgeyi Black Tusk tutuyor, içeride kaldıkça hem güçlendirme hem ceza getiren Red Moon Stack'ler birikiyor. Ganimette Exotic, DZ Named ve Prototype eşyalar var; yeni Exotic'ler Vertigo ve Sarru.",
+    "de": "PvE-Dark-Zone-Event bis zum 3. November: Black Tusk hält das Gebiet, und mit der Zeit baust du Red Moon Stacks mit Boni und Nachteilen auf. Die Beute umfasst Exotics, DZ-Named-Gegenstände und Prototype-Ausrüstung, darunter die neuen Exotics Vertigo und Sarru.",
+    "fr": "Événement Dark Zone PvE jusqu'au 3 novembre : Black Tusk tient la zone et rester à l'intérieur accumule des Red Moon Stacks, entre bonus et malus. Le butin compte des Exotics, des objets DZ Named et du matériel Prototype, dont les nouveaux Exotics Vertigo et Sarru.",
+    "es": "Evento PvE de la Dark Zone hasta el 3 de noviembre: Black Tusk controla la zona y permanecer dentro acumula Red Moon Stacks con ventajas y penalizaciones. El botín incluye Exotics, objetos DZ Named y equipo Prototype, con los nuevos Exotics Vertigo y Sarru.",
+    "it": "Evento PvE della Dark Zone fino al 3 novembre: Black Tusk controlla l'area e restare dentro accumula Red Moon Stacks con bonus e penalità. Il bottino comprende Exotics, oggetti DZ Named ed equipaggiamento Prototype, con i nuovi Exotics Vertigo e Sarru.",
+    "pt": "Evento PvE da Dark Zone até 3 de novembro: a Black Tusk controla a área e ficar lá dentro acumula Red Moon Stacks com bônus e penalidades. O saque inclui Exotics, itens DZ Named e equipamento Prototype, com os novos Exotics Vertigo e Sarru.",
+    "ru": "PvE-событие в Dark Zone до 3 ноября: зону держит Black Tusk, а со временем внутри копятся Red Moon Stacks с бонусами и штрафами. В добыче — Exotics, предметы DZ Named и снаряжение Prototype, включая новые Exotics Vertigo и Sarru.",
+    "pl": "Wydarzenie PvE w Dark Zone do 3 listopada: strefę trzyma Black Tusk, a pobyt w niej buduje Red Moon Stacks z premiami i karami. W łupach są Exotics, przedmioty DZ Named i sprzęt Prototype, w tym nowe Exotics Vertigo i Sarru.",
+    "nl": "PvE Dark Zone-evenement tot 3 november: Black Tusk houdt het gebied bezet en binnen blijven bouwt Red Moon Stacks op met voor- en nadelen. De buit bevat Exotics, DZ Named-items en Prototype-uitrusting, met de nieuwe Exotics Vertigo en Sarru."
    }
   },
   {
@@ -222,6 +254,37 @@
     "ru": "Massive поэтапно вводит кроссплей в течение ноября, начиная после выхода Echoes of Central Park; затем пройдёт миграция платформ, а полный кроссплей планируется к началу Season 4.",
     "pl": "Massive wprowadza crossplay etapami w listopadzie, po premierze Echoes of Central Park; potem nastąpi migracja platform, a pełny crossplay zaplanowano na start Season 4.",
     "nl": "Massive rolt crossplay in november gefaseerd uit, te beginnen na de lancering van Echoes of Central Park; daarna volgt de platformmigratie en volledige crossplay staat gepland voor de start van Season 4."
+   }
+  },
+  {
+   "id": "survivors-test-signup",
+   "kind": "community",
+   "date": "2026-09-24T08:00:00Z",
+   "url": "https://www.ubisoft.com/en-us/game/the-division/the-division-2/news-updates/66eHsBjxCIFICeGBof2a71/the-division-2-survivors-sign-up-for-upcoming-tests",
+   "source": "Ubisoft",
+   "title": {
+    "en": "Survivors: test sign-ups open",
+    "tr": "Survivors: test kayıtları açık",
+    "de": "Survivors: Test-Anmeldung offen",
+    "fr": "Survivors : inscriptions aux tests ouvertes",
+    "es": "Survivors: inscripciones a las pruebas abiertas",
+    "it": "Survivors: iscrizioni ai test aperte",
+    "pt": "Survivors: inscrições para testes abertas",
+    "ru": "Survivors: открыта запись на тесты",
+    "pl": "Survivors: zapisy na testy otwarte",
+    "nl": "Survivors: aanmelding voor tests open"
+   },
+   "text": {
+    "en": "Registration is open for PC tests of Survivors, a work-in-progress winter survival mode in Washington, D.C. You do not need to own the game. No test dates yet; selected players are contacted by email and testers must communicate in English.",
+    "tr": "Washington, D.C.'de geçen ve geliştirilmekte olan kış hayatta kalma modu Survivors'ın PC testleri için kayıtlar açık. Oyuna sahip olman gerekmiyor. Test tarihi henüz yok; seçilenlere e-posta gidiyor ve testçilerin İngilizce iletişim kurması gerekiyor.",
+    "de": "Die Anmeldung für PC-Tests von Survivors läuft, einem noch in Arbeit befindlichen Winter-Überlebensmodus in Washington, D.C. Du musst das Spiel nicht besitzen. Termine gibt es noch nicht; Ausgewählte werden per E-Mail kontaktiert und müssen auf Englisch kommunizieren.",
+    "fr": "Les inscriptions sont ouvertes pour les tests PC de Survivors, un mode de survie hivernale en développement à Washington, D.C. Posséder le jeu n'est pas nécessaire. Aucune date pour l'instant ; les joueurs retenus sont contactés par e-mail et doivent communiquer en anglais.",
+    "es": "Ya puedes inscribirte en las pruebas para PC de Survivors, un modo de supervivencia invernal en desarrollo en Washington, D.C. No hace falta tener el juego. Aún no hay fechas; se contacta por correo a los elegidos, que deben comunicarse en inglés.",
+    "it": "Sono aperte le iscrizioni ai test PC di Survivors, una modalità di sopravvivenza invernale in sviluppo ambientata a Washington, D.C. Non serve possedere il gioco. Ancora nessuna data; i selezionati ricevono un'e-mail e devono comunicare in inglese.",
+    "pt": "As inscrições estão abertas para os testes no PC de Survivors, um modo de sobrevivência no inverno em desenvolvimento em Washington, D.C. Não é preciso ter o jogo. Ainda não há datas; os selecionados recebem e-mail e precisam se comunicar em inglês.",
+    "ru": "Открыта запись на ПК-тесты Survivors — зимнего режима выживания в Вашингтоне, который ещё в разработке. Владеть игрой не обязательно. Дат пока нет; отобранным игрокам пишут на e-mail, общение на тестах идёт на английском.",
+    "pl": "Trwają zapisy na testy PC trybu Survivors, rozwijanego zimowego trybu przetrwania w Waszyngtonie. Nie musisz mieć gry. Terminów jeszcze nie ma; wybrani gracze dostaną e-mail i muszą porozumiewać się po angielsku.",
+    "nl": "Je kunt je aanmelden voor pc-tests van Survivors, een winterse overlevingsmodus in ontwikkeling in Washington, D.C. Je hoeft de game niet te bezitten. Er zijn nog geen data; geselecteerde spelers krijgen een e-mail en moeten in het Engels communiceren."
    }
   }
  ]
