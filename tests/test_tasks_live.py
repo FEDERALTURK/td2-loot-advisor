@@ -9,7 +9,6 @@ import subprocess
 import sys
 import io
 import tempfile
-import time
 from datetime import datetime, timezone
 from pathlib import Path
 

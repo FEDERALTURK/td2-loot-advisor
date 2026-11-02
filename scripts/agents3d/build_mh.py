@@ -179,7 +179,6 @@ def backpack(m, cr, w=0.32, h=0.44, d=0.17):
 
 def boots(m, ank):
     """Bot: ayak kutusu (topuktan buruna, ayak yönünde) + konç; yuvarlatılmış."""
-    from mathutils import Matrix
     rub = MATS.get("rubber") or mat("rubber", "#121314", rough=0.65, bump=0.1)
     for s in "LR":
         a = J("foot." + s)

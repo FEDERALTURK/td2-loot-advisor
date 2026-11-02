@@ -12,7 +12,7 @@ respect to Ubisoft's stance on overlay/automation tools.
 
 See README.md for setup and usage.
 """
-import csv, ctypes, json, math, logging, logging.handlers, os, queue, re, shutil, subprocess, sys, threading, time, tempfile
+import csv, ctypes, json, math, logging, logging.handlers, os, queue, re, shutil, subprocess, sys, threading, time, tempfile, webbrowser
 from contextlib import nullcontext
 import urllib.error, urllib.parse, urllib.request
 import tkinter as tk
@@ -62,7 +62,7 @@ if "--assistant-stt-probe" in sys.argv:
 if "--assistant-check" in sys.argv:
     _i = sys.argv.index("--assistant-check")
     try:
-        import faster_whisper as _fw, sounddevice as _sd, av as _av, pyttsx3 as _tts
+        import faster_whisper as _fw, sounddevice as _sd, av as _av
         import game_assistant as _ga
         _res = {"ok": True, "shortcuts": _ga.bindings({}), "whisper": _fw.__version__,
                 "sounddevice": _sd.__version__, "av": _av.__version__, "model_download_on_setup": True}
@@ -77,7 +77,6 @@ if "--voice-check" in sys.argv:
     from importlib.metadata import version as _package_version
     _i = sys.argv.index("--voice-check")
     try:
-        import edge_tts as _edge
         _bundle = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent))
         _manifest = json.loads((_bundle / "meta/voice_packs.json").read_text(encoding="utf-8"))
         assert set(_manifest["packs"]) == {"natural_tr", "natural_en"}
@@ -146,7 +145,7 @@ import diagnostics_center
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.1.5.18"
+APP_VERSION = "9.1.5.19"
 FROZEN = getattr(sys, "frozen", False)
 BASE = Path(sys.executable).parent if FROZEN else Path(__file__).resolve().parent
 TASKS_CACHE = BASE / "tasks_cache.json"  # son indirilen görev listesi
@@ -2435,7 +2434,6 @@ class App:
 
     def _lt_after(self, pairs, ms):
         """Çeviri sonrası: terimler, telefon / ikinci ekran, sesli okuma."""
-        st = self.cfg["settings"]
         now = int(time.time())
         items = []
         for en, tr, _ in pairs:
@@ -3076,7 +3074,6 @@ class App:
         self.enc_q = tk.StringVar()
         e = ttk.Entry(top, textvariable=self.enc_q, width=34); e.pack(side="left")
         self.enc_q.trace_add("write", lambda *a: self._enc_fill())
-        cats = [None] + list(knowledge.CATEGORIES)
         self._enc_cat_labels = [t("enc.all")] + [t("enc.c_" + c) for c in knowledge.CATEGORIES]
         self.enc_cat = tk.StringVar(value=self._enc_cat_labels[0])
         cb = ttk.Combobox(top, textvariable=self.enc_cat, values=self._enc_cat_labels, state="readonly", width=16); cb.pack(side="left", padx=6)
@@ -7812,7 +7809,8 @@ class App:
                 self.root.after(0, done)
             except Exception as exc:
                 log.exception("Diagnostic engine failed")
-                self.root.after(0, lambda: (setattr(self, "_diagnostic_busy", False), self.toast(f"Tanılama hatası: {type(exc).__name__}")))
+                exc_name = type(exc).__name__
+                self.root.after(0, lambda: (setattr(self, "_diagnostic_busy", False), self.toast(f"Tanılama hatası: {exc_name}")))
         threading.Thread(target=work, daemon=True, name="td2-diagnostics").start()
 
     def apply_detected_repairs(self):
@@ -8825,7 +8823,7 @@ class App:
             try:
                 info, err = updater.latest(), None
                 beta = updater.latest_beta()
-            except Exception as e:
+            except Exception:
                 beta = None
                 try: info, err = updater.latest(), None
                 except Exception as e2: info, err = None, e2
@@ -8900,7 +8898,8 @@ class App:
                     rollback_btn.config(state="normal" if releases else "disabled")
                 self.root.after(0, fill)
             except Exception as e:
-                self.root.after(0, lambda: status.config(text=t("upd.history_failed", e=e)))
+                err_msg = str(e)
+                self.root.after(0, lambda: status.config(text=t("upd.history_failed", e=err_msg)))
         bf = ttk.Frame(w); bf.pack(fill="x", padx=14, pady=10)
         def rollback():
             ix = lb.curselection()

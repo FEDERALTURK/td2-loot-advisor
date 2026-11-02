@@ -3,7 +3,6 @@
 Doğrulamalar: 5 model ve 6 kıyafet yüklenir, seçim ayarlara kaydedilir, her modelde 8 yuva parçası vardır,
 bir kare çizimi makul sürede biter. Ekran görüntüleri: shots/agent_*.png. Sonuç: RESULT: PASS / FAIL
 """
-import json
 import sys
 import time
 from pathlib import Path

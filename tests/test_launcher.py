@@ -1,8 +1,6 @@
 """Launcher decisions without installing packages or starting the application."""
 import importlib.util
-import json
 from pathlib import Path
-import sys
 import tempfile
 from types import SimpleNamespace
 import unittest

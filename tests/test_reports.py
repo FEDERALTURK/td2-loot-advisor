@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 """reports.py testleri: kişisel veri temizleme, rapor oluşturma, gönderme kuyruğu."""
-import json
 import sys
 import tempfile
 from pathlib import Path

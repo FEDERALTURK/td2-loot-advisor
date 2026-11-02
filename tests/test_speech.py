@@ -2,7 +2,6 @@
     python tests/test_speech.py              # birim (parçalama, Canlı Altyazı farkı, çözümleme, mel)
     python tests/test_speech.py --model DIR  # gerçek Whisper: Windows SAPI ile konuşturulan cümle → metin (Windows)
 """
-import math
 import os
 import sys
 import tempfile

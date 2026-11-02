@@ -11,7 +11,6 @@ Not: ses çıkışını dinlediği için sesli sohbet (Discord) de yazıya dök�
 çeviri seçilen motora bağlıdır ve çevrimiçi sağlayıcı seçildiyse döküm o sağlayıcıya gönderilir.
 """
 import hashlib
-import json
 import logging
 import os
 import re

@@ -120,7 +120,6 @@ class Store:
         """Kuyruktakileri göndermeyi dene. Dönüş: gönderilen sayısı."""
         q, left, n = self.queue, [], 0
         for item in q:
-            st, _ = ("error", None)
             try:
                 res = _post(url, item["payload"])
                 if res.get("ok"):

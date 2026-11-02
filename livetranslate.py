@@ -172,7 +172,7 @@ def blocks_from_lines(lines, ui_words=(), preserve_lines=False):
         h = max(1.0, b[3] - b[1])
         target = None
         for blk in reversed(blocks[-16:]):             # çok sütunlu ekran: satır kendi sütunundaki bloğa eklenir
-            lb, lh = blk[1], blk[3]
+            lb = blk[1]
             gap = b[1] - lb[3]
             if gap > 0.9 * h or gap < -0.4 * h: continue
             if blk[5][0] > b[2] or b[0] > blk[5][2]: continue        # son satırla yatayda hiç çakışmıyor

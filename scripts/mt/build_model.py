@@ -2,7 +2,7 @@
 programın kullanacağı biçimde paketler ve örnek cümlelerle dener.
     python scripts/mt/build_model.py Helsinki-NLP/opus-mt-tc-big-en-tr out_dir [target_prefix]
 """
-import json, os, shutil, subprocess, sys, time, hashlib, zipfile
+import json, shutil, subprocess, sys, time, hashlib, zipfile
 from pathlib import Path
 
 model, out = sys.argv[1], Path(sys.argv[2])

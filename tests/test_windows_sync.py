@@ -6,7 +6,6 @@ Pencere taşınıp yeniden boyutlandırılınca yeni alan ve profil bulunmalı.
 
     python tests/test_windows_sync.py
 """
-import json
 import os
 import subprocess
 import sys

@@ -8,7 +8,7 @@
 private/license_seed.hex GİZLİDİR: depoya girmez (.gitignore), kimseyle paylaşma, yedeğini al.
 Kaybolursa yeni çift üretilir ve eski anahtarların hepsi geçersiz olur.
 """
-import argparse, os, re, secrets, sys, time, uuid
+import argparse, re, secrets, sys, time, uuid
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]

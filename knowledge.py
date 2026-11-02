@@ -6,7 +6,6 @@ Hepsi programın zaten taşıdığı oyun kütüphanesinden (meta/game_data.json
 import json
 import random
 import re
-import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 

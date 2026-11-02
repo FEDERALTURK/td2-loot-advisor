@@ -149,7 +149,7 @@ def test_skill_build_not_weapon_type():
 
 def test_real_cards_and_learning():
     """Oyuncunun gerçek okumaları (tests/samples/cards): yuva, tür, marka; öğrenilen kütüphane."""
-    import gamedata, tempfile, os
+    import gamedata, tempfile
     from pathlib import Path
     base = Path(__file__).parent / "samples" / "cards"
     lib = Path(tempfile.mkdtemp()) / "learned.json"

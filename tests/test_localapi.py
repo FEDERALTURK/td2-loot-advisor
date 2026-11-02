@@ -1,5 +1,5 @@
 """Yerel API: belirteç, Origin, WebSocket olay/komut, Stream Deck uçları, OBS sayfası.   python tests/test_localapi.py"""
-import base64, json, os, shutil, socket, struct, subprocess, sys, time, urllib.request, urllib.error
+import base64, json, os, shutil, socket, struct, subprocess, sys, urllib.request, urllib.error
 from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))

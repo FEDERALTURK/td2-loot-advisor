@@ -68,7 +68,7 @@ def run(app, model_dir, output):
         assert obj._lt_win and obj._lt_win.winfo_exists(), "In-place overlay missing"
         result["steps"].append("in-place overlay")
         result["ok"] = True
-    except Exception as exc:
+    except Exception:
         import traceback
         result["error"] = traceback.format_exc()
     finally:

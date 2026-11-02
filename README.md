@@ -164,6 +164,7 @@ to the game.
 ## License
 
 MIT (`LICENSE`). Parts of the game data: CC BY-NC-SA 4.0 (mx-division-builds) and CC BY-SA (The Division Wiki).
+See [`LICENSE_NOTES.md`](LICENSE_NOTES.md) for how this interacts with the free/premium split.
 The Division is a trademark of Ubisoft; this project is not affiliated with Ubisoft.
 
 

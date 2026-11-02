@@ -2,7 +2,6 @@
 from pathlib import Path
 import sys
 import threading
-import time
 from types import SimpleNamespace
 import unittest
 from unittest.mock import patch

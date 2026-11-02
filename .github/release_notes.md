@@ -1,5 +1,13 @@
 ## TD2 Loot Advisor — Windows
 
+**9.1.5.19 — Kod taraması: çökme düzeltmeleri ve lisans şeffaflığı**
+
+- **Gerçek çökme düzeltmesi:** Ansiklopedi ve kaynak listelerindeki "Kaynağı aç" / "Aç" düğmeleri (`webbrowser` modülü eksik içe aktarmaydı) tıklandığında bazı ekranlarda programın hata vermesine yol açabiliyordu; artık modül en üstte, her zaman yüklü.
+- **Gerçek çökme düzeltmesi:** Tanılama Merkezi hata bildirimi ve Güncellemeler → Sürüm geçmişi yükleme hatası ekranları, Python'un `except ... as X` değişkenini blok bittiğinde otomatik serbest bırakması yüzünden (gecikmeli `root.after` çağrısı içinde) kendi hata mesajını göstermek isterken ikinci bir hatayla karşılaşabiliyordu; hata bilgisi artık gösterilmeden önce ayrıca saklanıyor.
+- **Statik kod taraması:** Tüm `.py` dosyaları (uygulama + sunucu betikleri + testler) `ruff`/`pyflakes` ile tarandı; kullanılmayan 23 içe aktarma ve birkaç ölü değişken temizlendi. Davranış değişikliği yok — her değişiklikten sonra tam test paketi (kararlılık, çekirdek motor, çeviri güvenilirliği, tanılama, proje yapısı) tekrar çalıştırıldı.
+- **Lisans şeffaflığı:** `meta/sources/mxswat` (CC BY-NC-SA 4.0, ticari olmayan) verisinin ücretsiz/premium özellik ayrımıyla ilişkisi `LICENSE_NOTES.md`'de ayrıntılı olarak belgelendi; hangi premium özelliğin bu veriye dolaylı olarak dokunduğu açıkça yazıldı.
+- **Depo bakımı:** `main` ve `master` dalları arasındaki ayrışma (son yayın koduyla `main`'in örtüşmemesi) birleştirilerek giderildi; tek, güncel ana dal.
+
 **9.1.5.18 — Tanılama motoru, güvenli düzeltmeler ve arayüz kararlılığı**
 
 - **Gerçek Tanılama Motoru:** Ayarlar → Hizmetler → Tanılama Merkezi artık ayar dosyası erişimini, günlük klasörü yazılabilirliğini, Tesseract OCR komutunu, çeviri motor/model hazırlığını, açık bindirme durumunu, görsel katmanları ve oyun penceresini gerçek yerel kontrollerle denetler. Ağ isteği, oyun belleği veya oyun dosyasına yazma yapılmaz.

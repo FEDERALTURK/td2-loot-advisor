@@ -1,6 +1,6 @@
 """Windows CI: açılıştaki güncelleme merkezi. Eski kütüphane + eski program sürümü + güncellenmiş oyun taklit edilir,
 pencere açılır, "Yükle"ye basılır. Program güncellemesi gerçekten indirilmez (do_update yalnız kayda yazar)."""
-import json, sys
+import sys
 from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))

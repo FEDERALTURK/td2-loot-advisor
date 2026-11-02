@@ -11,13 +11,12 @@ Tasarımlar tamamen özgündür; hiçbir oyunun karakter/kıyafet tasarımı kul
 import argparse
 import json
 import math
-import os
 import sys
 from pathlib import Path
 
 import bpy
 import bmesh
-from mathutils import Vector, Matrix
+from mathutils import Vector
 
 ROOT = Path(__file__).resolve().parents[2]
 SLOTS = ("Mask", "Chest", "Backpack", "Gloves", "Holster", "Kneepads", "Weapon", "Sidearm")

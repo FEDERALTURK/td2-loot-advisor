@@ -597,7 +597,6 @@ class SafeTrail:
         try:
             now=time.perf_counter(); self.points=[p for p in self.points if now-p[2] < .48]
             self.cv.delete("trail")
-            n=max(1,len(self.points))
             for i,(x,y,stamp) in enumerate(self.points):
                 age=now-stamp; radius=max(2,int(7*(1-age/.55)))
                 # Tk alpha yok; küçükten büyüğe dolgu yerine ince halkalar çizilir.

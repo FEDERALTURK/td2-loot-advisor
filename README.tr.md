@@ -205,6 +205,7 @@ Kayıtlı build, görev ve ilerleme sabit kimliklerle tutulduğu için dil deği
 ## Lisans
 
 MIT (`LICENSE`). Oyun verisinin bir kısmı CC BY-NC-SA 4.0 (mx-division-builds) ve CC BY-SA (The Division Wiki) lisanslıdır.
+Bunun ücretsiz/premium ayrımıyla ilişkisi: [`LICENSE_NOTES.md`](LICENSE_NOTES.md).
 The Division ve ilgili adlar Ubisoft'a aittir; bu proje Ubisoft ile bağlantılı değildir.
 
 
