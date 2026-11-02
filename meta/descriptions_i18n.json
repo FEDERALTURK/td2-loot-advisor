@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "version": "2026-11-02.1",
+ "version": "2026-11-02.2",
  "note": "Encyclopedia description translations. 'tr' seeded by OPUS-MT machine translation; other languages and reviews by the daily feed task.",
  "items": {
   "NinjaBike Messenger Bag": {
@@ -3602,6 +3602,150 @@
    "ru": "Даёт +22% к урону оружия ценой -25% к стабильности и -25% к точности.",
    "pl": "Daje 22% obrażeń broni kosztem 25% stabilności i 25% celności.",
    "nl": "Krijg 22% wapenschade ten koste van 25% stabiliteit en 25% nauwkeurigheid."
+  },
+  "Collector": {
+   "tr": "+3 el bombası kapasitesi. +%50 el bombası yarıçapı. +%35 el bombası hasarı. Patlamaya yakalanan her ek düşman için +%25 el bombası hasarı. Envanterinde 2'den az el bombası varsa her 30 sn'de bir otomatik olarak el bombası yenilenir.",
+   "_src": "+3 Grenade Capacity. +50% Grenade Radius. +35% Grenade Damage. +25% Grenade Dama",
+   "de": "+3 Granatenkapazität. +50 % Granatenradius. +35 % Granatenschaden. +25 % Granatenschaden für jeden weiteren Gegner in der Explosion. Hast du weniger als 2 Granaten im Inventar, wird alle 30 s automatisch eine Granate erneuert.",
+   "fr": "+3 de capacité de grenades. +50 % de rayon de grenade. +35 % de dégâts de grenade. +25 % de dégâts de grenade par ennemi supplémentaire pris dans l'explosion. Avec moins de 2 grenades dans l'inventaire, elles se régénèrent automatiquement toutes les 30 s.",
+   "es": "+3 de capacidad de granadas. +50 % de radio de granada. +35 % de daño de granada. +25 % de daño de granada por cada enemigo adicional alcanzado por la explosión. Si tienes menos de 2 granadas en el inventario, se regeneran automáticamente cada 30 s.",
+   "it": "+3 capacità granate. +50% raggio delle granate. +35% danni da granata. +25% danni da granata per ogni nemico aggiuntivo preso nell'esplosione. Con meno di 2 granate nell'inventario, si rigenerano automaticamente ogni 30 s.",
+   "pt": "+3 de capacidade de granadas. +50% de raio de granada. +35% de dano de granada. +25% de dano de granada para cada inimigo extra pego na explosão. Com menos de 2 granadas no inventário, elas se regeneram automaticamente a cada 30 s.",
+   "ru": "+3 к запасу гранат. +50% к радиусу гранат. +35% к урону гранат. +25% к урону гранат за каждого дополнительного врага в зоне взрыва. Если в инвентаре меньше 2 гранат, они автоматически восстанавливаются каждые 30 с.",
+   "pl": "+3 do pojemności granatów. +50% do promienia granatów. +35% do obrażeń od granatów. +25% do obrażeń od granatów za każdego dodatkowego wroga w zasięgu wybuchu. Gdy masz mniej niż 2 granaty w ekwipunku, odnawiają się automatycznie co 30 s.",
+   "nl": "+3 granaatcapaciteit. +50% granaatradius. +35% granaatschade. +25% granaatschade per extra vijand in de explosie. Heb je minder dan 2 granaten in je inventaris, dan worden ze elke 30 s automatisch aangevuld."
+  },
+  "Catalyst": {
+   "tr": "Catalysis: Durum etkisi uygulamak ve almak (Burn, Bleed, Shock, EMP/Disrupt, Poison ve blind/disorient) en fazla 12 Catalysis yığını biriktirir. Her yığın +%2 silah hasarı ve +%2 durum etkisi verir. 25 metre içinde durum etkisi altındaki her düşman saniyede +1 yığın, senin durum etkisi altında olman saniyede +2 yığın sağlar. Menzilde böyle düşman yoksa ya da sen etkilenmiyorsan 5 sn sonra saniyede 1 yığın eksilir. Reactant: Tam yığındayken durum etkisi altındaki bir düşmanı öldürmek 5 sn boyunca +%25 bonus zırh verir.",
+   "_src": "Catalysis: Dealing and receiving status effects (Burn, Bleed, Shock, EMP/Disrupt",
+   "de": "Catalysis: Das Verursachen und Erleiden von Statuseffekten (Burn, Bleed, Shock, EMP/Disrupt, Poison und blind/disorient) baut bis zu 12 Catalysis-Stapel auf. Jeder Stapel gibt +2 % Waffenschaden und +2 % Statuseffekte. Jeder Gegner mit Statuseffekt im Umkreis von 25 Metern gibt +1 Stapel/s, selbst betroffen zu sein +2 Stapel/s. Ohne Gegner im Radius oder eigenen Effekt verfallen nach 5 s 1 Stapel/s. Reactant: Bei maximalen Stapeln gibt das Töten eines Gegners mit Statuseffekt 5 s lang +25 % Bonusrüstung.",
+   "fr": "Catalysis : infliger et subir des effets d'état (Burn, Bleed, Shock, EMP/Disrupt, Poison et blind/disorient) accumule jusqu'à 12 cumuls de Catalysis. Chaque cumul donne +2 % de dégâts d'arme et +2 % d'effets d'état. Chaque ennemi affecté dans un rayon de 25 mètres donne +1 cumul/s, et être affecté soi-même +2 cumuls/s. Sans ennemi dans le rayon ni effet sur vous, vous perdez 1 cumul/s après 5 s. Reactant : au maximum de cumuls, tuer un ennemi affecté donne +25 % d'armure bonus pendant 5 s.",
+   "es": "Catalysis: infligir y recibir efectos de estado (Burn, Bleed, Shock, EMP/Disrupt, Poison y blind/disorient) acumula hasta 12 cargas de Catalysis. Cada carga da +2 % de daño de arma y +2 % de efectos de estado. Cada enemigo afectado a 25 metros da +1 carga/s, y estar afectado tú da +2 cargas/s. Sin enemigos en el radio ni efectos sobre ti, pierdes 1 carga/s tras 5 s. Reactant: con el máximo de cargas, matar a un enemigo afectado da +25 % de blindaje adicional durante 5 s.",
+   "it": "Catalysis: infliggere e subire effetti di stato (Burn, Bleed, Shock, EMP/Disrupt, Poison e blind/disorient) accumula fino a 12 cariche di Catalysis. Ogni carica dà +2% danni dell'arma e +2% effetti di stato. Ogni nemico colpito da un effetto entro 25 metri dà +1 carica/s, esserne colpito tu +2 cariche/s. Senza nemici nel raggio né effetti su di te, dopo 5 s perdi 1 carica/s. Reactant: al massimo delle cariche, uccidere un nemico sotto effetto dà +25% armatura bonus per 5 s.",
+   "pt": "Catalysis: causar e sofrer efeitos de status (Burn, Bleed, Shock, EMP/Disrupt, Poison e blind/disorient) acumula até 12 acúmulos de Catalysis. Cada acúmulo dá +2% de dano de arma e +2% de efeitos de status. Cada inimigo afetado a até 25 metros dá +1 acúmulo/s, e estar afetado dá +2 acúmulos/s. Sem inimigos no raio nem efeitos em você, perde 1 acúmulo/s após 5 s. Reactant: no máximo de acúmulos, matar um inimigo afetado dá +25% de blindagem bônus por 5 s.",
+   "ru": "Catalysis: наложение и получение эффектов состояния (Burn, Bleed, Shock, EMP/Disrupt, Poison и blind/disorient) копит до 12 зарядов Catalysis. Каждый заряд даёт +2% к урону оружия и +2% к эффектам состояния. Каждый враг под эффектом в радиусе 25 метров даёт +1 заряд/с, эффект на вас самих — +2 заряда/с. Если врагов в радиусе нет и на вас нет эффектов, через 5 с теряется 1 заряд/с. Reactant: при максимуме зарядов убийство врага под эффектом даёт +25% бонусной брони на 5 с.",
+   "pl": "Catalysis: zadawanie i otrzymywanie efektów statusu (Burn, Bleed, Shock, EMP/Disrupt, Poison oraz blind/disorient) buduje do 12 ładunków Catalysis. Każdy ładunek daje +2% obrażeń broni i +2% efektów statusu. Każdy wróg pod efektem w promieniu 25 metrów daje +1 ładunek/s, a efekt na tobie +2 ładunki/s. Bez wrogów w promieniu i efektów na tobie po 5 s tracisz 1 ładunek/s. Reactant: przy maksimum ładunków zabicie wroga pod efektem daje +25% dodatkowego pancerza na 5 s.",
+   "nl": "Catalysis: statuseffecten toebrengen en oplopen (Burn, Bleed, Shock, EMP/Disrupt, Poison en blind/disorient) bouwt tot 12 Catalysis-stacks op. Elke stack geeft +2% wapenschade en +2% statuseffecten. Elke getroffen vijand binnen 25 meter geeft +1 stack/s, zelf getroffen zijn +2 stacks/s. Zonder vijanden in de straal of effecten op jou verlies je na 5 s 1 stack/s. Reactant: op maximale stacks geeft het doden van een getroffen vijand 5 s lang +25% bonuspantser."
+  },
+  "NinjaBike Messenger Backpack": {
+   "tr": "Takılı herhangi bir Gear Set ve/veya Brand Set parçasıyla birlikte sayılır ve set bonusu için gereken parçalardan birini karşılar. Aynı anda birden fazla setin bonusunu açabilir.",
+   "_src": "Slots in with any equipped Gear Set and/or Brand Set item to fulfill a requireme",
+   "de": "Zählt zusammen mit jedem angelegten Gear-Set- und/oder Brand-Set-Teil als benötigtes Teil für einen Set-Bonus. Kann Boni mehrerer Sets gleichzeitig freischalten.",
+   "fr": "Compte comme une pièce requise avec tout élément de Gear Set et/ou Brand Set équipé pour débloquer un bonus d'ensemble. Peut débloquer les bonus de plusieurs ensembles à la fois.",
+   "es": "Cuenta como pieza necesaria junto a cualquier pieza equipada de Gear Set o Brand Set para desbloquear su bonificación. Puede activar bonificaciones de varios sets a la vez.",
+   "it": "Conta come pezzo richiesto insieme a qualsiasi pezzo di Gear Set e/o Brand Set equipaggiato per sbloccarne il bonus. Può attivare i bonus di più set contemporaneamente.",
+   "pt": "Conta como peça necessária junto com qualquer peça equipada de Gear Set e/ou Brand Set para liberar o bônus. Pode ativar bônus de vários conjuntos ao mesmo tempo.",
+   "ru": "Засчитывается как нужный предмет вместе с любым надетым предметом Gear Set и/или Brand Set для открытия бонуса. Может открывать бонусы нескольких комплектов одновременно.",
+   "pl": "Liczy się jako wymagany element razem z dowolnym założonym elementem Gear Set i/lub Brand Set przy odblokowaniu premii. Może odblokować premie kilku zestawów jednocześnie.",
+   "nl": "Telt als vereist onderdeel mee met elk uitgerust Gear Set- en/of Brand Set-onderdeel om een setbonus vrij te spelen. Kan bonussen van meerdere sets tegelijk activeren."
+  },
+  "Beacon": {
+   "tr": "10 m içinde bir takım arkadaşın varken sen ve takım arkadaşların +%30 kritik isabet hasarı, +%15 Skill Efficiency ve +%2 zırh yenilenmesi alırsınız. Yeteneklerinden biri 10 m içindeyken +%15 kritik isabet hasarı, +%7,5 Skill Efficiency ve +%1 zırh yenilenmesi alırsın. Aynı anda yalnız en yüksek bonus grubu etkin olur.",
+   "_src": "Both you and Allies receive +30% Critical Hit Damage, +15% Skill Efficiency and ",
+   "de": "Du und Verbündete erhaltet +30 % kritischen Trefferschaden, +15 % Skill Efficiency und +2 % Rüstungsregeneration, wenn ein Verbündeter bis zu 10 m entfernt ist. Ist einer deiner Skills bis zu 10 m entfernt, erhältst du +15 % kritischen Trefferschaden, +7,5 % Skill Efficiency und +1 % Rüstungsregeneration. Nur die höchste Bonusgruppe ist aktiv.",
+   "fr": "Vous et vos alliés recevez +30 % de dégâts critiques, +15 % de Skill Efficiency et +2 % de régénération d'armure si un allié est à moins de 10 m. Si l'une de vos compétences est à moins de 10 m, vous recevez +15 % de dégâts critiques, +7,5 % de Skill Efficiency et +1 % de régénération d'armure. Seul le groupe de bonus le plus élevé est actif.",
+   "es": "Tú y tus aliados recibís +30 % de daño crítico, +15 % de Skill Efficiency y +2 % de regeneración de blindaje si un aliado está a 10 m. Si una de tus habilidades está a 10 m, recibes +15 % de daño crítico, +7,5 % de Skill Efficiency y +1 % de regeneración de blindaje. Solo se activa el grupo de bonificaciones más alto.",
+   "it": "Tu e gli alleati ricevete +30% danni critici, +15% Skill Efficiency e +2% rigenerazione armatura con un alleato entro 10 m. Con una tua abilità entro 10 m ricevi +15% danni critici, +7,5% Skill Efficiency e +1% rigenerazione armatura. È attivo solo il gruppo di bonus più alto.",
+   "pt": "Você e os aliados recebem +30% de dano crítico, +15% de Skill Efficiency e +2% de regeneração de blindagem com um aliado a até 10 m. Com uma de suas habilidades a até 10 m, recebe +15% de dano crítico, +7,5% de Skill Efficiency e +1% de regeneração de blindagem. Só o grupo de bônus mais alto fica ativo.",
+   "ru": "Вы и союзники получаете +30% к критическому урону, +15% к Skill Efficiency и +2% к восстановлению брони, когда союзник в пределах 10 м. Если ваш навык в пределах 10 м, вы получаете +15% к критическому урону, +7,5% к Skill Efficiency и +1% к восстановлению брони. Активна только самая сильная группа бонусов.",
+   "pl": "Ty i sojusznicy otrzymujecie +30% obrażeń krytycznych, +15% Skill Efficiency i +2% regeneracji pancerza, gdy sojusznik jest w promieniu 10 m. Gdy twoja umiejętność jest w promieniu 10 m, otrzymujesz +15% obrażeń krytycznych, +7,5% Skill Efficiency i +1% regeneracji pancerza. Aktywna jest tylko najwyższa grupa premii.",
+   "nl": "Jij en bondgenoten krijgen +30% kritieke schade, +15% Skill Efficiency en +2% pantserherstel als een bondgenoot binnen 10 m is. Met een van je skills binnen 10 m krijg je +15% kritieke schade, +7,5% Skill Efficiency en +1% pantserherstel. Alleen de hoogste bonusgroep is actief."
+  },
+  "Exodus Gloves": {
+   "tr": "Zırhın kırıldığında ayağının dibine bir Smoke Bomb bırakır ve seni 3 sn düşmanlardan gizler. Bekleme süresi: 40 sn.",
+   "_src": "On Armor break, drop a Smoke Bomb at your feet, concealing you from enemies for ",
+   "de": "Bricht deine Rüstung, fällt eine Smoke Bomb vor deine Füße und verbirgt dich 3 s vor Gegnern. Abklingzeit: 40 s.",
+   "fr": "Quand votre armure se brise, une Smoke Bomb tombe à vos pieds et vous cache des ennemis pendant 3 s. Recharge : 40 s.",
+   "es": "Al romperse tu blindaje, sueltas una Smoke Bomb a tus pies que te oculta de los enemigos durante 3 s. Recarga: 40 s.",
+   "it": "Quando la tua armatura si rompe, lasci una Smoke Bomb ai tuoi piedi che ti nasconde ai nemici per 3 s. Ricarica: 40 s.",
+   "pt": "Quando sua blindagem quebra, uma Smoke Bomb cai aos seus pés e esconde você dos inimigos por 3 s. Recarga: 40 s.",
+   "ru": "Когда ломается броня, у ваших ног падает Smoke Bomb и скрывает вас от врагов на 3 с. Перезарядка: 40 с.",
+   "pl": "Gdy pęknie pancerz, u twoich stóp spada Smoke Bomb, która ukrywa cię przed wrogami na 3 s. Czas odnowienia: 40 s.",
+   "nl": "Als je pantser breekt, valt er een Smoke Bomb aan je voeten die je 3 s voor vijanden verbergt. Afkoeltijd: 40 s."
+  },
+  "Centurion Scabbard": {
+   "tr": "Silah değiştirmek şu bonus gruplarını sırayla verir: 1. +%20 atış hızı, +%20 silah hasarı. 2. +%50 şarjör boyutu, +%50 şarjör değiştirme hızı. Bonuslar 12 sn ya da bir sonraki silah değişimine kadar sürer. Tabancaya geçmek sıradaki grubu tetiklemez.",
+   "_src": "Swapping weapons will give the following groups of bonuses one by one, in order:",
+   "de": "Der Waffenwechsel gibt nacheinander diese Bonusgruppen: 1. +20 % Feuerrate, +20 % Waffenschaden. 2. +50 % Magazingröße, +50 % Nachladegeschwindigkeit. Die Boni halten 12 s oder bis zum nächsten Wechsel. Der Wechsel zur Seitenwaffe löst die nächste Gruppe nicht aus.",
+   "fr": "Changer d'arme donne ces groupes de bonus dans l'ordre : 1. +20 % de cadence de tir, +20 % de dégâts d'arme. 2. +50 % de taille de chargeur, +50 % de vitesse de rechargement. Ils durent 12 s ou jusqu'au changement suivant. Passer à l'arme de poing ne déclenche pas le groupe suivant.",
+   "es": "Cambiar de arma da estos grupos de bonificaciones en orden: 1. +20 % de cadencia de tiro, +20 % de daño de arma. 2. +50 % de tamaño del cargador, +50 % de velocidad de recarga. Duran 12 s o hasta el siguiente cambio. Pasar al arma secundaria no activa el siguiente grupo.",
+   "it": "Cambiare arma dà questi gruppi di bonus in ordine: 1. +20% cadenza di fuoco, +20% danni dell'arma. 2. +50% dimensione caricatore, +50% velocità di ricarica. Durano 12 s o fino al cambio successivo. Passare all'arma secondaria non attiva il gruppo seguente.",
+   "pt": "Trocar de arma dá estes grupos de bônus em ordem: 1. +20% de cadência de tiro, +20% de dano de arma. 2. +50% de tamanho do carregador, +50% de velocidade de recarga. Duram 12 s ou até a próxima troca. Trocar para a arma secundária não ativa o grupo seguinte.",
+   "ru": "Смена оружия даёт группы бонусов по очереди: 1. +20% к скорострельности, +20% к урону оружия. 2. +50% к размеру магазина, +50% к скорости перезарядки. Бонусы действуют 12 с или до следующей смены. Переход на пистолет не включает следующую группу.",
+   "pl": "Zmiana broni daje kolejno grupy premii: 1. +20% szybkostrzelności, +20% obrażeń broni. 2. +50% pojemności magazynka, +50% szybkości przeładowania. Trwają 12 s lub do następnej zmiany. Przejście na broń boczną nie uruchamia kolejnej grupy.",
+   "nl": "Van wapen wisselen geeft deze bonusgroepen op volgorde: 1. +20% vuursnelheid, +20% wapenschade. 2. +50% magazijngrootte, +50% herlaadsnelheid. Ze duren 12 s of tot de volgende wissel. Wisselen naar je sidearm activeert de volgende groep niet."
+  },
+  "Acosta Kneepads": {
+   "tr": "+%20 hareket hızı.",
+   "_src": "+20% Movement Speed.",
+   "de": "+20 % Bewegungsgeschwindigkeit.",
+   "fr": "+20 % de vitesse de déplacement.",
+   "es": "+20 % de velocidad de movimiento.",
+   "it": "+20% velocità di movimento.",
+   "pt": "+20% de velocidade de movimento.",
+   "ru": "+20% к скорости передвижения.",
+   "pl": "+20% szybkości ruchu.",
+   "nl": "+20% bewegingssnelheid."
+  },
+  "Chainkiller": {
+   "tr": "Headshot ile düşman öldürdükten sonra, 30 sn içindeki bir sonraki silah isabetin o öldürücü vuruşun hasarının %150'sini ek olarak verir. Bu hasar silah hasarının %800'üyle sınırlıdır; headshot hasarın %150'den yüksekse sınır %1250 olur.",
+   "_src": "After killing an enemy with a headshot, your next weapon hit within 30s deals 15",
+   "de": "Nach einem Kill per Kopfschuss verursacht dein nächster Waffentreffer innerhalb von 30 s zusätzlich 150 % des Schadens dieses Treffers. Der Schaden ist auf 800 % deines Waffenschadens begrenzt, bei über 150 % Kopfschussschaden auf 1250 %.",
+   "fr": "Après un kill par tir à la tête, votre prochain tir réussi dans les 30 s inflige en plus 150 % des dégâts de ce coup fatal. Plafond : 800 % de vos dégâts d'arme, porté à 1250 % si vos dégâts de tir à la tête dépassent 150 %.",
+   "es": "Tras matar con un disparo a la cabeza, tu siguiente impacto en 30 s inflige además el 150 % del daño de ese golpe mortal. Límite: 800 % de tu daño de arma, o 1250 % si tu daño a la cabeza supera el 150 %.",
+   "it": "Dopo un'uccisione con colpo alla testa, il tuo colpo successivo entro 30 s infligge in più il 150% dei danni di quel colpo letale. Limite: 800% dei danni dell'arma, che sale al 1250% se i danni da colpo alla testa superano il 150%.",
+   "pt": "Depois de matar com tiro na cabeça, seu próximo acerto em até 30 s causa também 150% do dano desse golpe fatal. Limite: 800% do seu dano de arma, ou 1250% se seu dano de tiro na cabeça passar de 150%.",
+   "ru": "После убийства выстрелом в голову следующее попадание в течение 30 с дополнительно наносит 150% урона того смертельного выстрела. Предел — 800% урона оружия, а при уроне в голову выше 150% — 1250%.",
+   "pl": "Po zabiciu strzałem w głowę następne trafienie w ciągu 30 s zadaje dodatkowo 150% obrażeń tego śmiertelnego strzału. Limit: 800% obrażeń broni, a 1250%, gdy obrażenia od strzału w głowę przekraczają 150%.",
+   "nl": "Na een kill met een headshot doet je volgende wapentreffer binnen 30 s extra 150% van de schade van die dodelijke treffer. Maximum: 800% van je wapenschade, of 1250% als je headshotschade boven 150% ligt."
+  },
+  "Equalizer": {
+   "tr": "Kritik isabetler toplam silah hasarını 10 sn boyunca %1 artırır. En fazla 24 kez yığılır.",
+   "_src": "Critical hits increase total weapon damage by 1% for 10s. Stacks up to 24 times.",
+   "de": "Kritische Treffer erhöhen den gesamten Waffenschaden 10 s lang um 1 %. Bis zu 24-mal stapelbar.",
+   "fr": "Les coups critiques augmentent les dégâts d'arme totaux de 1 % pendant 10 s. Cumulable jusqu'à 24 fois.",
+   "es": "Los impactos críticos aumentan el daño de arma total un 1 % durante 10 s. Se acumula hasta 24 veces.",
+   "it": "I colpi critici aumentano i danni dell'arma totali dell'1% per 10 s. Cumulabile fino a 24 volte.",
+   "pt": "Acertos críticos aumentam o dano total da arma em 1% por 10 s. Acumula até 24 vezes.",
+   "ru": "Критические попадания повышают общий урон оружия на 1% на 10 с. Суммируется до 24 раз.",
+   "pl": "Trafienia krytyczne zwiększają całkowite obrażenia broni o 1% na 10 s. Kumuluje się do 24 razy.",
+   "nl": "Kritieke treffers verhogen de totale wapenschade 10 s lang met 1%. Stapelt tot 24 keer."
+  },
+  "Bulldog": {
+   "tr": "Siperdeyken toplam silah hasarını %20 artırır.",
+   "_src": "While in cover, increases total weapon damage by 20%.",
+   "de": "Erhöht in Deckung den gesamten Waffenschaden um 20 %.",
+   "fr": "À couvert, augmente les dégâts d'arme totaux de 20 %.",
+   "es": "A cubierto, aumenta el daño de arma total un 20 %.",
+   "it": "Al riparo, aumenta i danni dell'arma totali del 20%.",
+   "pt": "Na cobertura, aumenta o dano total da arma em 20%.",
+   "ru": "В укрытии повышает общий урон оружия на 20%.",
+   "pl": "W osłonie zwiększa całkowite obrażenia broni o 20%.",
+   "nl": "Verhoogt in dekking de totale wapenschade met 20%."
+  },
+  "Closer": {
+   "tr": "Pulse uygulanmış düşmanlara toplam silah ve yetenek hasarını %20 güçlendirir.",
+   "_src": "Amplifies total weapon and skill damage by 20% to pulsed enemies.",
+   "de": "Verstärkt den gesamten Waffen- und Skill-Schaden gegen gepulste Gegner um 20 %.",
+   "fr": "Amplifie de 20 % les dégâts d'arme et de compétence totaux contre les ennemis pulsés.",
+   "es": "Amplifica un 20 % el daño total de arma y habilidad contra enemigos marcados por pulso.",
+   "it": "Amplifica del 20% i danni totali di arma e abilità contro i nemici rilevati dal pulse.",
+   "pt": "Amplifica em 20% o dano total de arma e habilidade contra inimigos marcados por pulso.",
+   "ru": "Усиливает общий урон оружия и навыков на 20% по врагам, отмеченным импульсом.",
+   "pl": "Wzmacnia o 20% całkowite obrażenia broni i umiejętności przeciw wrogom oznaczonym pulsem.",
+   "nl": "Versterkt de totale wapen- en skillschade met 20% tegen gepulste vijanden."
+  },
+  "Momma Badger": {
+   "tr": "Zırhın tamken toplam yetenek onarımını %160 artırır.",
+   "_src": "While at full armor, increases total skill repair by 160%.",
+   "de": "Erhöht bei voller Rüstung die gesamte Skill-Reparatur um 160 %.",
+   "fr": "Avec l'armure pleine, augmente la réparation totale des compétences de 160 %.",
+   "es": "Con el blindaje completo, aumenta la reparación total de habilidades un 160 %.",
+   "it": "Con l'armatura piena, aumenta la riparazione totale delle abilità del 160%.",
+   "pt": "Com a blindagem cheia, aumenta o reparo total de habilidades em 160%.",
+   "ru": "При полной броне повышает общее восстановление навыков на 160%.",
+   "pl": "Przy pełnym pancerzu zwiększa całkowitą naprawę umiejętności o 160%.",
+   "nl": "Verhoogt bij vol pantser de totale skillreparatie met 160%."
   }
  }
 }
