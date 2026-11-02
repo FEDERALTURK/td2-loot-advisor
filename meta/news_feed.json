@@ -1,7 +1,7 @@
 {
  "schema": 1,
- "version": "2026-11-01.2",
- "updated": "2026-11-01T19:48:07Z",
+ "version": "2026-11-02.1",
+ "updated": "2026-11-02T19:35:41Z",
  "season": "Year 8 Season 3 – Red Horizon",
  "items": [
   {
@@ -133,6 +133,163 @@
    }
   },
   {
+   "id": "y8s3-3-maintenance",
+   "kind": "maintenance",
+   "start": "2026-11-03T08:00:00Z",
+   "end": "2026-11-03T14:00:00Z",
+   "url": "https://x.com/TheDivisionGame/status/2117291904853221819",
+   "source": "Ubisoft (The Division on X)",
+   "title": {
+    "en": "Maintenance: Title Update Y8S3.3",
+    "tr": "Bakım: Title Update Y8S3.3",
+    "de": "Wartung: Title Update Y8S3.3",
+    "fr": "Maintenance : Title Update Y8S3.3",
+    "es": "Mantenimiento: Title Update Y8S3.3",
+    "it": "Manutenzione: Title Update Y8S3.3",
+    "pt": "Manutenção: Title Update Y8S3.3",
+    "ru": "Техработы: Title Update Y8S3.3",
+    "pl": "Przerwa techniczna: Title Update Y8S3.3",
+    "nl": "Onderhoud: Title Update Y8S3.3"
+   },
+   "text": {
+    "en": "Servers go offline on Nov 3 at 08:00 UTC for an estimated 6 hours to install Title Update Y8S3.3 and Echoes of Central Park.",
+    "tr": "Sunucular 3 Kasım 08:00 UTC'de (TSİ 11:00) Title Update Y8S3.3 ve Echoes of Central Park için tahminen 6 saatliğine kapanıyor.",
+    "de": "Die Server gehen am 3. Nov. um 08:00 UTC für voraussichtlich 6 Stunden offline, um Title Update Y8S3.3 und Echoes of Central Park einzuspielen.",
+    "fr": "Les serveurs seront coupés le 3 nov. à 08:00 UTC pendant environ 6 heures pour installer Title Update Y8S3.3 et Echoes of Central Park.",
+    "es": "Los servidores se desconectan el 3 de nov. a las 08:00 UTC durante unas 6 horas para instalar Title Update Y8S3.3 y Echoes of Central Park.",
+    "it": "I server andranno offline il 3 nov. alle 08:00 UTC per circa 6 ore per installare Title Update Y8S3.3 ed Echoes of Central Park.",
+    "pt": "Os servidores ficam offline em 3 de nov. às 08:00 UTC por cerca de 6 horas para instalar Title Update Y8S3.3 e Echoes of Central Park.",
+    "ru": "Серверы отключатся 3 ноября в 08:00 UTC примерно на 6 часов для установки Title Update Y8S3.3 и Echoes of Central Park.",
+    "pl": "Serwery zostaną wyłączone 3 listopada o 08:00 UTC na około 6 godzin, by wgrać Title Update Y8S3.3 i Echoes of Central Park.",
+    "nl": "De servers gaan op 3 nov. om 08:00 UTC naar verwachting 6 uur offline om Title Update Y8S3.3 en Echoes of Central Park te installeren."
+   }
+  },
+  {
+   "id": "tu-y8s3-3",
+   "kind": "patch",
+   "date": "2026-11-03T08:00:00Z",
+   "url": "https://www.ubisoft.com/en-us/game/the-division/the-division-2/news-updates/7L8TlD1Hv0XC1prOD8mdte/tuy8s33-crossplay-rollout-conflict-improvements-more",
+   "source": "Ubisoft",
+   "title": {
+    "en": "Title Update Y8S3.3",
+    "tr": "Güncelleme Y8S3.3",
+    "de": "Title Update Y8S3.3",
+    "fr": "Title Update Y8S3.3",
+    "es": "Title Update Y8S3.3",
+    "it": "Title Update Y8S3.3",
+    "pt": "Title Update Y8S3.3",
+    "ru": "Title Update Y8S3.3",
+    "pl": "Title Update Y8S3.3",
+    "nl": "Title Update Y8S3.3"
+   },
+   "text": {
+    "en": "Conflict: new scoreboard stats, new Combat Marks, one Honor Mark per match with XP and CCC rewards, and PvP balance changes. Stretch Goals pause this season for a redesign. Fixes include Steel & Sons ACR, Protected Reload and the missing Harrier Pride blueprint.",
+    "tr": "Conflict: yeni skor tablosu istatistikleri, yeni Combat Mark'lar, maç başına XP ve CCC veren bir Honor Mark ve PvP dengesi değişiklikleri. Stretch Goals yeniden tasarım için bu sezon duraklıyor. Steel & Sons ACR, Protected Reload ve eksik Harrier Pride planı düzeltildi.",
+    "de": "Conflict: neue Scoreboard-Werte, neue Combat Marks, ein Honor Mark pro Match mit XP und CCC sowie PvP-Balancing. Stretch Goals pausieren diese Season für ein Redesign. Korrekturen u. a. für Steel & Sons ACR, Protected Reload und den fehlenden Harrier-Pride-Bauplan.",
+    "fr": "Conflict : nouvelles stats au tableau des scores, nouvelles Combat Marks, une Honor Mark par match avec XP et CCC, et équilibrage PvP. Les Stretch Goals sont en pause cette saison pour refonte. Correctifs pour Steel & Sons ACR, Protected Reload et le plan manquant de Harrier Pride.",
+    "es": "Conflict: nuevas estadísticas en el marcador, nuevas Combat Marks, una Honor Mark por partida con XP y CCC, y ajustes de equilibrio PvP. Los Stretch Goals se pausan esta temporada por rediseño. Correcciones para Steel & Sons ACR, Protected Reload y el plano ausente de Harrier Pride.",
+    "it": "Conflict: nuove statistiche nel tabellone, nuovi Combat Marks, un Honor Mark a partita con XP e CCC e bilanciamento PvP. Gli Stretch Goals sono in pausa questa stagione per una revisione. Correzioni per Steel & Sons ACR, Protected Reload e il progetto mancante di Harrier Pride.",
+    "pt": "Conflict: novas estatísticas no placar, novos Combat Marks, um Honor Mark por partida com XP e CCC e ajustes de equilíbrio PvP. Os Stretch Goals ficam em pausa nesta temporada para reformulação. Correções para Steel & Sons ACR, Protected Reload e o projeto ausente de Harrier Pride.",
+    "ru": "Conflict: новая статистика в таблице счёта, новые Combat Marks, один Honor Mark за матч с XP и CCC и баланс PvP. Stretch Goals приостановлены на этот сезон для переработки. Исправления для Steel & Sons ACR, Protected Reload и пропавшего чертежа Harrier Pride.",
+    "pl": "Conflict: nowe statystyki na tablicy wyników, nowe Combat Marks, jeden Honor Mark na mecz z XP i CCC oraz zmiany balansu PvP. Stretch Goals wstrzymane na ten sezon z powodu przebudowy. Poprawki Steel & Sons ACR, Protected Reload i brakującego planu Harrier Pride.",
+    "nl": "Conflict: nieuwe scorebordstatistieken, nieuwe Combat Marks, één Honor Mark per match met XP en CCC, en PvP-balans. Stretch Goals pauzeren dit seizoen voor een herontwerp. Fixes voor Steel & Sons ACR, Protected Reload en de ontbrekende Harrier Pride-blauwdruk."
+   }
+  },
+  {
+   "id": "y8s3-master-climax",
+   "kind": "season",
+   "date": "2026-11-03T08:00:00Z",
+   "url": "https://www.ubisoft.com/en-us/game/the-division/the-division-2/news-updates/7L8TlD1Hv0XC1prOD8mdte/tuy8s33-crossplay-rollout-conflict-improvements-more",
+   "source": "Ubisoft",
+   "title": {
+    "en": "Master Climax Mission",
+    "tr": "Master Climax Mission",
+    "de": "Master Climax Mission",
+    "fr": "Master Climax Mission",
+    "es": "Master Climax Mission",
+    "it": "Master Climax Mission",
+    "pt": "Master Climax Mission",
+    "ru": "Master Climax Mission",
+    "pl": "Master Climax Mission",
+    "nl": "Master Climax Mission"
+   },
+   "text": {
+    "en": "Available Nov 3. The first Master clear guarantees the Loaded for Bear exotic gloves; they can drop on any difficulty, with better odds higher up. If the mission stays locked after all HVT Scouts, log out and back in.",
+    "tr": "3 Kasım'da açılıyor. İlk Master tamamlaması Loaded for Bear egzotik eldivenini garanti ediyor; eldiven her zorlukta düşebilir, zorluk arttıkça şans artar. Tüm HVT Scout'larından sonra görev kilitli kalırsa çıkış yapıp yeniden gir.",
+    "de": "Ab 3. Nov. verfügbar. Der erste Master-Abschluss garantiert die exotischen Handschuhe Loaded for Bear; sie können auf jeder Schwierigkeit droppen, je höher, desto besser die Chance. Bleibt die Mission nach allen HVT Scouts gesperrt, aus- und wieder einloggen.",
+    "fr": "Disponible le 3 nov. La première réussite en Master garantit les gants exotiques Loaded for Bear ; ils peuvent tomber à toute difficulté, avec de meilleures chances plus haut. Si la mission reste bloquée après tous les HVT Scouts, déconnectez-vous puis reconnectez-vous.",
+    "es": "Disponible el 3 de nov. La primera victoria en Master garantiza los guantes exóticos Loaded for Bear; pueden caer en cualquier dificultad, con más probabilidad cuanto más alta. Si la misión sigue bloqueada tras todos los HVT Scouts, cierra sesión y vuelve a entrar.",
+    "it": "Disponibile dal 3 nov. Il primo completamento in Master garantisce i guanti esotici Loaded for Bear; possono cadere a ogni difficoltà, con più probabilità salendo. Se la missione resta bloccata dopo tutti gli HVT Scout, esci e rientra.",
+    "pt": "Disponível em 3 de nov. A primeira conclusão em Master garante as luvas exóticas Loaded for Bear; elas podem cair em qualquer dificuldade, com mais chance nas mais altas. Se a missão continuar bloqueada após todos os HVT Scouts, saia e entre de novo.",
+    "ru": "Доступна с 3 ноября. Первое прохождение на Master гарантирует экзотические перчатки Loaded for Bear; они могут выпасть на любой сложности, но чем она выше, тем шанс больше. Если миссия закрыта после всех HVT Scout, выйдите и зайдите снова.",
+    "pl": "Dostępna od 3 listopada. Pierwsze ukończenie na Master gwarantuje egzotyczne rękawice Loaded for Bear; mogą wypaść na każdym poziomie, a wyższy daje większą szansę. Jeśli misja jest zablokowana po wszystkich HVT Scoutach, wyloguj się i zaloguj ponownie.",
+    "nl": "Beschikbaar vanaf 3 nov. De eerste Master-voltooiing garandeert de exotische handschoenen Loaded for Bear; ze kunnen op elke moeilijkheid vallen, met meer kans op hogere. Blijft de missie op slot na alle HVT Scouts, log dan uit en weer in."
+   }
+  },
+  {
+   "id": "shepherd-event-2026-11",
+   "kind": "event",
+   "start": "2026-11-17T08:00:00Z",
+   "end": "2026-11-26T08:00:00Z",
+   "url": "https://www.ubisoft.com/en-us/game/the-division/the-division-2/news-updates/7L8TlD1Hv0XC1prOD8mdte/tuy8s33-crossplay-rollout-conflict-improvements-more",
+   "source": "Ubisoft",
+   "title": {
+    "en": "Shepherd Event",
+    "tr": "Shepherd Etkinliği",
+    "de": "Shepherd-Event",
+    "fr": "Événement Shepherd",
+    "es": "Evento Shepherd",
+    "it": "Evento Shepherd",
+    "pt": "Evento Shepherd",
+    "ru": "Событие Shepherd",
+    "pl": "Wydarzenie Shepherd",
+    "nl": "Shepherd-evenement"
+   },
+   "text": {
+    "en": "Answer Calls for Backup to gain Shepherd Ranks. Six projects, all open from day one, each need one rank and give 10 Exotic Components and 700,000 XP. The first five add a Reconstructed Cache, the last one the Named Mk16 Malinois.",
+    "tr": "Calls for Backup çağrılarına yanıt vererek Shepherd Rank kazan. Hepsi ilk günden açık altı proje birer rank istiyor; her biri 10 Exotic Component ve 700.000 XP veriyor. İlk beşi ayrıca Reconstructed Cache, sonuncusu adlı Mk16 Malinois veriyor.",
+    "de": "Beantworte Calls for Backup, um Shepherd Ranks zu verdienen. Sechs Projekte, alle ab Tag eins offen, verlangen je einen Rang und geben 10 Exotic Components und 700.000 XP. Die ersten fünf bringen dazu einen Reconstructed Cache, das letzte die benannte Mk16 Malinois.",
+    "fr": "Répondez aux Calls for Backup pour gagner des Shepherd Ranks. Six projets, tous ouverts dès le premier jour, demandent chacun un rang et donnent 10 Exotic Components et 700 000 XP. Les cinq premiers ajoutent un Reconstructed Cache, le dernier le Mk16 nommé Malinois.",
+    "es": "Responde a Calls for Backup para ganar Shepherd Ranks. Seis proyectos, todos abiertos desde el primer día, piden un rango cada uno y dan 10 Exotic Components y 700.000 XP. Los cinco primeros añaden un Reconstructed Cache y el último el Mk16 con nombre Malinois.",
+    "it": "Rispondi alle Calls for Backup per ottenere Shepherd Ranks. Sei progetti, tutti aperti dal primo giorno, richiedono un rango ciascuno e danno 10 Exotic Components e 700.000 XP. I primi cinque aggiungono una Reconstructed Cache, l'ultimo il Mk16 nominato Malinois.",
+    "pt": "Responda a Calls for Backup para ganhar Shepherd Ranks. Seis projetos, todos abertos desde o primeiro dia, pedem um rank cada e dão 10 Exotic Components e 700.000 XP. Os cinco primeiros somam um Reconstructed Cache e o último o Mk16 nomeado Malinois.",
+    "ru": "Отвечайте на Calls for Backup, чтобы получать Shepherd Ranks. Шесть проектов, открытых с первого дня, требуют по одному рангу и дают 10 Exotic Components и 700 000 XP. Первые пять добавляют Reconstructed Cache, последний — именной Mk16 Malinois.",
+    "pl": "Odpowiadaj na Calls for Backup, by zdobywać Shepherd Ranks. Sześć projektów, wszystkie otwarte od pierwszego dnia, wymaga po jednej randze i daje 10 Exotic Components oraz 700 000 XP. Pierwsze pięć dodaje Reconstructed Cache, ostatni nazwany Mk16 Malinois.",
+    "nl": "Beantwoord Calls for Backup om Shepherd Ranks te verdienen. Zes projecten, allemaal open vanaf dag één, vragen elk één rank en geven 10 Exotic Components en 700.000 XP. De eerste vijf geven ook een Reconstructed Cache, de laatste de benoemde Mk16 Malinois."
+   }
+  },
+  {
+   "id": "friend-referral-2026",
+   "kind": "community",
+   "date": "2026-11-02T08:00:00Z",
+   "url": "https://www.ubisoft.com/en-us/game/the-division/the-division-2/news-updates/7L8TlD1Hv0XC1prOD8mdte/tuy8s33-crossplay-rollout-conflict-improvements-more",
+   "source": "Ubisoft",
+   "title": {
+    "en": "Friend Referral rewards",
+    "tr": "Arkadaş Davet ödülleri",
+    "de": "Friend-Referral-Belohnungen",
+    "fr": "Récompenses Friend Referral",
+    "es": "Recompensas de Friend Referral",
+    "it": "Ricompense Friend Referral",
+    "pt": "Recompensas de Friend Referral",
+    "ru": "Награды Friend Referral",
+    "pl": "Nagrody Friend Referral",
+    "nl": "Friend Referral-beloningen"
+   },
+   "text": {
+    "en": "Get your link from the Friend Referral website with a Ubisoft account. A friend must play at least 2 hours to count. You earn the Cyclops Outfit for the first referral and Esprit de Corps for the second; the invited friend gets the Frenzied Outfit.",
+    "tr": "Bağlantını Ubisoft hesabınla Friend Referral sitesinden al. Davetin sayılması için arkadaşın en az 2 saat oynamalı. İlk davette Cyclops Outfit, ikincide Esprit de Corps kazanırsın; davet edilen arkadaşın Frenzied Outfit alır.",
+    "de": "Hol dir deinen Link mit einem Ubisoft-Konto auf der Friend-Referral-Website. Ein Freund muss mindestens 2 Stunden spielen, damit es zählt. Du erhältst das Cyclops Outfit für die erste und Esprit de Corps für die zweite Einladung; der Freund erhält das Frenzied Outfit.",
+    "fr": "Récupérez votre lien sur le site Friend Referral avec un compte Ubisoft. L'ami doit jouer au moins 2 heures pour compter. Vous gagnez la tenue Cyclops au premier parrainage et Esprit de Corps au second ; l'ami invité reçoit la tenue Frenzied.",
+    "es": "Consigue tu enlace en la web de Friend Referral con una cuenta de Ubisoft. El amigo debe jugar al menos 2 horas para que cuente. Ganas el Cyclops Outfit con la primera invitación y Esprit de Corps con la segunda; el amigo invitado recibe el Frenzied Outfit.",
+    "it": "Ottieni il tuo link dal sito Friend Referral con un account Ubisoft. L'amico deve giocare almeno 2 ore perché valga. Ricevi il Cyclops Outfit per il primo invito ed Esprit de Corps per il secondo; l'amico invitato riceve il Frenzied Outfit.",
+    "pt": "Pegue seu link no site Friend Referral com uma conta Ubisoft. O amigo precisa jogar pelo menos 2 horas para contar. Você ganha o Cyclops Outfit no primeiro convite e Esprit de Corps no segundo; o amigo convidado recebe o Frenzied Outfit.",
+    "ru": "Получите ссылку на сайте Friend Referral через аккаунт Ubisoft. Друг должен сыграть не менее 2 часов, чтобы приглашение засчиталось. За первое приглашение вы получите Cyclops Outfit, за второе — Esprit de Corps; приглашённый друг получит Frenzied Outfit.",
+    "pl": "Pobierz link ze strony Friend Referral za pomocą konta Ubisoft. Znajomy musi zagrać co najmniej 2 godziny, by się liczyło. Za pierwsze zaproszenie dostajesz Cyclops Outfit, za drugie Esprit de Corps; zaproszony znajomy dostaje Frenzied Outfit.",
+    "nl": "Haal je link op de Friend Referral-website met een Ubisoft-account. Een vriend moet minstens 2 uur spelen om mee te tellen. Je krijgt de Cyclops Outfit voor de eerste verwijzing en Esprit de Corps voor de tweede; de uitgenodigde vriend krijgt de Frenzied Outfit."
+   }
+  },
+  {
    "id": "tu-y8s3-2",
    "kind": "patch",
    "date": "2026-10-13T08:00:00Z",
@@ -229,31 +386,31 @@
    "id": "crossplay-rollout-2026",
    "kind": "season",
    "start": "2026-11-03T08:00:00Z",
-   "url": "https://www.ubisoft.com/en-us/game/the-division/the-division-2/news-updates/2o0p19fLQGze5j7h3iEXTN/the-division-2-echoes-of-central-park-showcase-everything-you-need-to-know",
+   "url": "https://www.ubisoft.com/en-us/game/the-division/the-division-2/news-updates/7L8TlD1Hv0XC1prOD8mdte/tuy8s33-crossplay-rollout-conflict-improvements-more",
    "source": "Ubisoft",
    "title": {
-    "en": "Crossplay rollout begins",
-    "tr": "Crossplay kademeli olarak geliyor",
-    "de": "Crossplay-Einführung beginnt",
-    "fr": "Début du déploiement du crossplay",
-    "es": "Comienza el despliegue del juego cruzado",
-    "it": "Inizia il rilascio del crossplay",
-    "pt": "Começa a implementação do crossplay",
-    "ru": "Начинается внедрение кроссплея",
-    "pl": "Rusza wdrażanie crossplay",
-    "nl": "Uitrol van crossplay begint"
+    "en": "Crossplay rollout: Nov 3, 10 and 17",
+    "tr": "Crossplay takvimi: 3, 10 ve 17 Kasım",
+    "de": "Crossplay-Rollout: 3., 10. und 17. Nov.",
+    "fr": "Déploiement du crossplay : 3, 10 et 17 nov.",
+    "es": "Despliegue de crossplay: 3, 10 y 17 de nov.",
+    "it": "Arrivo del crossplay: 3, 10 e 17 nov.",
+    "pt": "Implantação do crossplay: 3, 10 e 17 de nov.",
+    "ru": "Запуск кроссплея: 3, 10 и 17 ноября",
+    "pl": "Wdrażanie crossplay: 3, 10 i 17 listopada",
+    "nl": "Crossplay-uitrol: 3, 10 en 17 nov."
    },
    "text": {
-    "en": "Massive is rolling out crossplay in stages through November, starting after the Echoes of Central Park launch; platform migration follows, and full crossplay is planned by the start of Season 4.",
-    "tr": "Massive, crossplay'i Kasım boyunca aşamalı olarak açıyor; Echoes of Central Park çıkışından sonra başlıyor, ardından platform geçişi geliyor. Tam crossplay Season 4 başlangıcına kadar planlanıyor.",
-    "de": "Massive führt Crossplay im November schrittweise ein, beginnend nach dem Start von Echoes of Central Park; danach folgt die Plattform-Migration. Volles Crossplay ist bis zum Start von Season 4 geplant.",
-    "fr": "Massive déploie le crossplay par étapes tout au long de novembre, après la sortie d'Echoes of Central Park ; la migration des plateformes suit et le crossplay complet est prévu pour le début de la Season 4.",
-    "es": "Massive activa el juego cruzado por fases durante noviembre, tras el lanzamiento de Echoes of Central Park; después llega la migración de plataformas y el juego cruzado completo está previsto para el inicio de la Season 4.",
-    "it": "Massive introduce il crossplay a fasi durante novembre, dopo l'uscita di Echoes of Central Park; segue la migrazione delle piattaforme e il crossplay completo è previsto per l'inizio della Season 4.",
-    "pt": "A Massive está a lançar o crossplay por fases ao longo de novembro, após o lançamento de Echoes of Central Park; segue-se a migração de plataformas e o crossplay completo está previsto para o início da Season 4.",
-    "ru": "Massive поэтапно вводит кроссплей в течение ноября, начиная после выхода Echoes of Central Park; затем пройдёт миграция платформ, а полный кроссплей планируется к началу Season 4.",
-    "pl": "Massive wprowadza crossplay etapami w listopadzie, po premierze Echoes of Central Park; potem nastąpi migracja platform, a pełny crossplay zaplanowano na start Season 4.",
-    "nl": "Massive rolt crossplay in november gefaseerd uit, te beginnen na de lancering van Echoes of Central Park; daarna volgt de platformmigratie en volledige crossplay staat gepland voor de start van Season 4."
+    "en": "Nov 3: icons and interface changes only. Nov 10: PC moves to new servers and PC leaderboards reset. Nov 17: PlayStation and Xbox move and cross-platform play goes live. Leaderboards stay hidden until then. Clan size rises from 50 to 100.",
+    "tr": "3 Kasım: yalnız simgeler ve arayüz değişiklikleri. 10 Kasım: PC yeni sunuculara geçer, PC sıralamaları sıfırlanır. 17 Kasım: PlayStation ve Xbox geçer, platformlar arası oyun başlar. Sıralamalar o güne kadar gizli. Klan sınırı 50'den 100'e çıkıyor.",
+    "de": "3. Nov.: nur Icons und Oberflächenänderungen. 10. Nov.: PC wechselt auf neue Server, PC-Bestenlisten werden zurückgesetzt. 17. Nov.: PlayStation und Xbox wechseln, plattformübergreifendes Spielen startet. Bestenlisten bleiben bis dahin verborgen. Clan-Limit steigt von 50 auf 100.",
+    "fr": "3 nov. : icônes et interface uniquement. 10 nov. : le PC passe sur les nouveaux serveurs et ses classements sont réinitialisés. 17 nov. : PlayStation et Xbox migrent, le jeu multiplateforme démarre. Classements masqués jusque-là. Les clans passent de 50 à 100 membres.",
+    "es": "3 de nov.: solo iconos y cambios de interfaz. 10 de nov.: PC pasa a los nuevos servidores y se reinician sus clasificaciones. 17 de nov.: PlayStation y Xbox migran y empieza el juego cruzado. Clasificaciones ocultas hasta entonces. Los clanes suben de 50 a 100 miembros.",
+    "it": "3 nov.: solo icone e modifiche all'interfaccia. 10 nov.: il PC passa ai nuovi server e le sue classifiche si azzerano. 17 nov.: PlayStation e Xbox migrano e parte il gioco multipiattaforma. Classifiche nascoste fino ad allora. I clan passano da 50 a 100 membri.",
+    "pt": "3 de nov.: apenas ícones e mudanças de interface. 10 de nov.: PC vai para os novos servidores e seus placares são zerados. 17 de nov.: PlayStation e Xbox migram e o jogo cruzado começa. Placares ocultos até lá. Clãs sobem de 50 para 100 membros.",
+    "ru": "3 ноября: только значки и изменения интерфейса. 10 ноября: ПК переходит на новые серверы, таблицы лидеров ПК сбрасываются. 17 ноября: переходят PlayStation и Xbox, запускается кроссплей. До этого таблицы лидеров скрыты. Лимит клана вырастет с 50 до 100.",
+    "pl": "3 listopada: tylko ikony i zmiany interfejsu. 10 listopada: PC przechodzi na nowe serwery, a rankingi PC są resetowane. 17 listopada: PlayStation i Xbox przechodzą, startuje gra międzyplatformowa. Do tego czasu rankingi są ukryte. Limit klanu rośnie z 50 do 100.",
+    "nl": "3 nov.: alleen iconen en interfacewijzigingen. 10 nov.: pc gaat naar nieuwe servers en pc-ranglijsten worden gereset. 17 nov.: PlayStation en Xbox verhuizen en cross-platform spelen start. Ranglijsten blijven tot dan verborgen. Clans groeien van 50 naar 100 leden."
    }
   },
   {
