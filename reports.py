@@ -19,8 +19,12 @@ TIMEOUT = 10
 def scrub(text):
     """Kişisel bilgileri temizle (sunucu da aynısını yapar; burada da yapılır ki hiç gönderilmesin)."""
     if not text: return ""
-    t = str(text)
+    # JSON/dict temsilinde Windows ayıracı iki kez kaçabilir. Maskeleme
+    # her iki gösterimi de aynı gerçek yol olarak ele almalıdır.
+    t = str(text).replace("\\\\", "\\")
     t = re.sub(r"TD2P-[A-Za-z0-9_\-]+\.[A-Za-z0-9_\-]+", "TD2P-<license>", t)
+    # Kullanıcı klasöründe ayıracı da gruba dahil et. Eski ifade `C:\Users`
+    # sonrasındaki ters bölü nedeniyle kullanıcı adını hiç yakalayamıyordu.
     t = re.sub(r"([A-Za-z]:\\(?:Users|Documents and Settings)\\)[^\\/\r\n\"']+", r"\1<user>", t, flags=re.I)
     t = re.sub(r"(/(?:home|Users)/)[^/\s\"']+", r"\1<user>", t)
     t = re.sub(r"[\w.+-]+@[\w-]+\.[\w.-]+", "<email>", t)

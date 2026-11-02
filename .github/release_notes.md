@@ -1,5 +1,15 @@
 ## TD2 Loot Advisor — Windows
 
+**9.1.5.18 — Tanılama motoru, güvenli düzeltmeler ve arayüz kararlılığı**
+
+- **Gerçek Tanılama Motoru:** Ayarlar → Hizmetler → Tanılama Merkezi artık ayar dosyası erişimini, günlük klasörü yazılabilirliğini, Tesseract OCR komutunu, çeviri motor/model hazırlığını, açık bindirme durumunu, görsel katmanları ve oyun penceresini gerçek yerel kontrollerle denetler. Ağ isteği, oyun belleği veya oyun dosyasına yazma yapılmaz.
+- **Bulunan güvenli hataları düzelt:** Tanılama sonucuna göre doğrulanmış Tesseract yolunu kaydeder, hatalı çeviri bindirmesini temiz biçimde sıfırlar ve etkileşimi riske atan görsel katmanlar için Güvenli Görünüm uygular. Çevrimiçi model indirme/gönderme ve GitHub kaydı hiçbir zaman otomatik yapılmaz.
+- **Güvenli Görünüm ve başlangıç kurtarma:** Fare izi, özel imleç, video, saydam arka plan ve geçiş katmanları tek adımda kapatılabilir. Arayüz sayfası kurulamazsa uygulama boş ekran yerine güvenli yeniden kurma ve maskelenmiş rapor önizleme seçenekleri sunar.
+- **Canlı olay kaydı ve rapor önizlemesi:** Sistem, OCR, çeviri, görünüm, oyun senkronu ve asistan olayları tanılama ekranında filtrelenebilir. GitHub raporu önce yerel Markdown önizlemesi olarak oluşturulur; kullanıcı yolu, e-posta, anahtar, token, webhook ve yerel IP adresleri maskelenir.
+- **Rapor gönderimi düzeltildi:** Uygulama içinden "Logu GitHub'a gönder" işlemindeki eksik rapor sunucusu bağlamı giderildi; bağlantı yoksa mevcut güvenli yerel kuyruk kullanılmaya devam eder.
+- **İmleç kararlılığı:** Kararsız Win32 native cursor subclass köprüsü normal kullanımda devre dışıdır. Özel `.cur` imleci Tk yöntemiyle uygulanır; Windows köprüsü kullanılamazsa sistem/Tk imlecine güvenli şekilde döner ve menü tıklamalarını etkilemez.
+- **Düzenli UI paketi:** Görsel arayüz bileşenleri `td2app/ui` altında gruplandı; eski kök modül adları uyumluluk köprüsü olarak korunur. Açılış sahnesi ve sekme vurguları 30 FPS bütçesine göre çalışır; sayfalar aşamalı kurulur.
+
 **9.1.5.17 — Panel ve oyun üstü kartlarda Windows metin görünürlüğü**
 
 - Panel eşya sonuç kartları, asistan HUD'u ve yerinde çeviri kutuları için tıklama geçirme varsayılanı artık `WS_EX_LAYERED` kullanmaz. Bu stil bazı Windows/DWM + DX12 birleşimlerinde koyu kartı bırakıp Canvas veya Label metnini görünmez yapabiliyordu.

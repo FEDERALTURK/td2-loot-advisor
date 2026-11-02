@@ -21,7 +21,7 @@ from datetime import datetime, timedelta, timezone
 from difflib import SequenceMatcher, get_close_matches
 from pathlib import Path
 from tkinter import ttk, filedialog, messagebox
-import splash
+from td2app.ui import splash, ui_theme, ui_hud, ui_art, view3d, fx, bgvideo
 
 if "--dml-probe" in sys.argv:          # ekran kartı (DirectML) denemesi: ayrı süreçte, programın geri kalanı yüklenmeden
     import ocr_backend as _ob                # sonuç dosyaya yazılır (pencere modundaki .exe'de konsol çıktısı yoktur)
@@ -102,17 +102,11 @@ import capture
 from PIL import Image, ImageDraw, ImageOps, ImageTk
 
 import i18n
-import ui_theme
-import ui_hud
-import ui_art
 import meta_sync
 import wiki_sync
 import gamedata
 import engine
 import display
-import view3d
-import fx
-import bgvideo
 import ocr_backend
 import features
 import stash
@@ -148,10 +142,11 @@ import itempolicy
 import performance
 import workqueue
 import game_assistant
+import diagnostics_center
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.1.5.17"
+APP_VERSION = "9.1.5.18"
 FROZEN = getattr(sys, "frozen", False)
 BASE = Path(sys.executable).parent if FROZEN else Path(__file__).resolve().parent
 TASKS_CACHE = BASE / "tasks_cache.json"  # son indirilen görev listesi
@@ -209,7 +204,7 @@ DEFAULTS = {"scan_mode": "hotkey", "auto_interval_ms": 700, "auto_record": True,
             "ui_theme": "isac", "ui_sounds": True, "bg_interval": 15,
             "fx_cursor": True, "fx_cursor_style": "crosshair", "fx_cursor_color": "#ff6d10", "fx_cursor_custom": "",
             "fx_trail": True, "fx_trail_color": "#ff6d10", "fx_trail_len": 18, "fx_transitions": True,
-            "fx_video": True, "fx_video_dim": 0.35, "fx_transition_ms": 260, "fx_bgwatch": True, "fx_bgwatch_dim": 0.0, "event_fx": "standard",
+            "fx_video": True, "fx_video_dim": 0.35, "fx_transition_ms": 260, "fx_transition_style": "tactical", "ui_nav_layout": "tactical", "ui_layout": "standard", "fx_bgwatch": True, "fx_bgwatch_dim": 0.0, "event_fx": "standard",
             "res_profile": "auto", "ocr_engine": "auto", "ocr_gpu": "auto", "license_key": "", "update_check": True, "update_last": 0, "update_skip": "", "stash_record": True, "vendor_mode": False, "vendor_auto": True, "drop_share": False, "drop_asked": False, "drop_activity": "none", "drop_server": "", "drop_client": "", "vision_ok": False, "vendor_notified": "", "companion_port": 8765, "svc_tray": True, "svc_close_to_tray": False, "svc_auto_run": True, "smart_scan": True, "api_on": False, "api_port": 8766, "api_lan": False, "api_control": True, "api_token": "", "rpc_on": False, "rpc_client_id": "", "push_on": False, "push_topic": "", "push_webhook": "", "push_drop": True, "push_build": True, "push_vendor": True, "push_session": True, "agent_model": "operator", "agent_outfit": "night", "agent_skin": 1, "ocr_threshold": 170, "ocr_scale": "auto", "ocr_psm": 6, "ocr_passes": 3,
             "overlay_mode": "card", "overlay_alpha": 0.94, "overlay_size": 1.0, "ui_depth": True,
             "meta_sync": True, "meta_feed_url": "", "meta_last_try": 0, "meta_last_sync": "", "meta_version": "",
@@ -1570,6 +1565,8 @@ class App:
         self._lt_retry_at, self._lt_failures = 0.0, 0
         stg = self.cfg["settings"]
         setup_logging(stg.get("log_level", "INFO"), stg.get("log_max_kb", 1024), stg.get("log_backups", 3))
+        self._diag_events = diagnostics_center.EventBuffer()
+        log.addHandler(self._diag_events)
         log.info("=== %s v%s starting ===", APP_NAME, APP_VERSION)
         # Dil: ayarlardaki seçim, yoksa işletim sisteminin dili, o da yoksa İngilizce.
         i18n.init(BASE)
@@ -1670,6 +1667,12 @@ class App:
 
     def _policy(self):
         return getattr(self, "_perf_policy", None) or performance.get_policy(self.cfg["settings"])
+
+    def _ensure_diagnostic_event_handler(self):
+        """Log yapılandırması yenilense bile canlı tanılama akışını korur."""
+        handler = getattr(self, "_diag_events", None)
+        if handler and handler not in log.handlers:
+            log.addHandler(handler)
 
     def _bind_global_hotkeys(self):
         if getattr(self, "_closing", False): return False
@@ -4143,11 +4146,8 @@ class App:
                                   st.get("fx_cursor_color", "#ff6d10"), st.get("fx_cursor_custom", ""), getattr(self, "ui_factor", 1.0))
         if not ok: log.warning("Custom cursor could not be applied")
         tr = getattr(self, "trail_fx", None)
-        # Eski TrailFX ayrı bir saydam Toplevel oluşturuyordu. Bazı Windows
-        # masaüstü bileşimlerinde transparent-color anahtarı uygulanmayınca
-        # siyah dikdörtgen bırakıyor ve menü tıklamalarını üstüne alıyordu.
-        # Yeni güvenli yöntemde hiçbir üst pencere oluşturulmuyor; özel imleç
-        # CursorFX tarafından yönetiliyor, menü yüzeyi tamamen serbest kalıyor.
+        # Fare izi devre dışı: tam pencere Canvas denemesi Windows şeffaf
+        # arka planıyla çakışarak arayüz katmanını görünmez yapabildi.
         if tr:
             tr.stop()
             self.trail_fx = None
@@ -4200,6 +4200,7 @@ class App:
 
     def build_ui(self):
         """ISAC kabuk + sabit ana gezinme + özellik gruplarının alt sekmeleri."""
+        self._ui_build_errors = []
         set_palette(ui_theme.apply(self.root, self.cfg["settings"].get("ui_theme", "isac")))
         self.build_header()
 
@@ -4215,6 +4216,10 @@ class App:
         self.group_labels = {"home": "⌂  " + t("tab.dash"), "gear": "🎒  " + t("nav.gear"),
                              "intel": "🛰  " + t("nav.intel"), "tools": "🧰  " + t("nav.tools"),
                              "settings": "⚙  " + t("nav.settings"), "system": "☰  " + t("nav.system")}
+        if self.cfg["settings"].get("ui_layout") == "field_command":
+            return self._build_field_command_shell()
+        if self.cfg["settings"].get("ui_layout") == "shd_terminal":
+            return self._build_shd_terminal_shell()
 
         # ISAC ana kabuğu: sol navigasyon sabit, içerik alanı kendi alt sekmelerini korur.
         self.workspace = ttk.Frame(self.root)
@@ -4228,20 +4233,38 @@ class App:
         # yalnızca açılış ekran profiline güvenme.
         self._responsive_job = None
         self.root.bind("<Configure>", self._responsive_configure, add="+")
-        self.fxbar = fx.Transition(self.root, self.root, color=PAL["accent"], bg=PAL["bg"],
-                                   duration_ms=int(self.cfg["settings"].get("fx_transition_ms", 260)))
+        self.fxbar = fx.Transition(
+            self.root, self.root, color=PAL["accent"], bg=PAL["bg"],
+            duration_ms=int(self.cfg["settings"].get("fx_transition_ms", 260)),
+            style=self.cfg["settings"].get("fx_transition_style", "tactical"),
+        )
+        # Ana içerik menülerinin üstünde görünür bir operasyon şeridi. Bu,
+        # yalnız dekoratif bir Canvas'tır; tıklama alanı veya sayfa düzeni
+        # hareket etmez.
+        self.command_ribbon = fx.CommandRibbon(self.main_area, accent=PAL["accent"], bg=PAL["bg"],
+                                                surface=PAL["surface"], muted=PAL["border"])
+        self.command_ribbon.pack(fill="x", padx=2, pady=(2, 4))
         nb = self.nb = ttk.Notebook(self.main_area, style="NoTabs.TNotebook")
         nb.pack(fill="both", expand=True, padx=2, pady=2)
 
-        ttk.Label(self.sidebar, text="◆ ISAC", style="Brand.TLabel").pack(anchor="w", padx=14, pady=(18, 2))
+        # Oyun arayüzündeki kesik / çapraz veri çizgilerini taklit eden hafif
+        # bir işaret bandı. Bu bir Canvas değil etkileşim katmanı değildir;
+        # menü düğmelerinin tıklamasını asla kapatmaz.
+        self.nav_motif = fx.NavMotif(self.sidebar, accent=PAL["accent"], bg=PAL["bg"], muted=PAL["border"])
+        self.nav_motif.pack(fill="x", padx=12, pady=(12, 0))
+        ttk.Label(self.sidebar, text="◆ ISAC", style="Brand.TLabel").pack(anchor="w", padx=14, pady=(4, 2))
         ttk.Label(self.sidebar, text=t("nav.ops_center"),
                   style="Muted.TLabel", font=(ui_theme.FONT_SEMI, 8)).pack(anchor="w", padx=14, pady=(0, 14))
         ttk.Separator(self.sidebar).pack(fill="x", padx=12, pady=(0, 10))
         self._sidebar_buttons = {}
-        for group in self.group_keys:
+        tactical_nav = self.cfg["settings"].get("ui_nav_layout", "tactical") == "tactical"
+        for index, group in enumerate(self.group_keys):
             btn = ttk.Button(self.sidebar, text=self.group_labels[group], style="Nav.TButton",
                              command=lambda g=group: self._sidebar_select_group(g))
-            btn.pack(fill="x", padx=8, pady=2)
+            # gerçek widget'ları döndürmek Tk'da hitbox/ölçek hatası üretir.
+            # Bunun yerine küçük ve sabit bir kademeli x-ofset kullanıyoruz.
+            # Bu, TD2 tarzı eğik HUD ritmini verirken küçük pencerede güvenli kalır.
+            btn.pack(fill="x", padx=((8 + min(index, 4) * 3) if tactical_nav else 8, 8), pady=2)
             self._sidebar_buttons[group] = btn
         ttk.Separator(self.sidebar).pack(fill="x", padx=12, pady=(12, 8))
         ttk.Label(self.sidebar, text=("SÜRÜM " if tr_ui else "VERSION ") + APP_VERSION,
@@ -4261,11 +4284,126 @@ class App:
             title = "The Division 3" if k == "division3" else t(f"tab.{k}")
             parent.add(self.tabs[k], text=ui_theme.with_icon(title, ui_theme.TAB_ICONS.get(k, "")))
 
-        self.build_dash(); self.build_builds(); self.build_prog(); self.build_stash(); self.build_stats(); self.build_info(); self.build_division3(); self.build_translate(); self.build_gorevler(); self.build_asistan()
-        self.build_settings(); self.build_hist(); self.build_logtab(); self.build_help()
+        # Her sayfayı tek büyük senkron blokta kurmak, açılış sahnesinin
+        # 3–4 saniye donuk görünmesine yol açıyordu.  Sayfalar event loop'a
+        # sırayla bırakılır; splash arada 30 FPS bütçesinden kare çizebilir.
+        self._ui_builders = [
+            self.build_dash, self.build_builds, self.build_prog, self.build_stash,
+            self.build_stats, self.build_info, self.build_division3, self.build_translate,
+            self.build_gorevler, self.build_asistan, self.build_settings, self.build_hist,
+            self.build_logtab, self.build_help,
+        ]
+        self._ui_build_index = 0
+        self._ui_ready = False
+        self._build_critical_ui_pages()
         nb.bind("<<NotebookTabChanged>>", self.on_tab)
         for inner in self.group_nbs.values(): inner.bind("<<NotebookTabChanged>>", self.on_tab)
         self._sidebar_activate("home")
+        self.root.after_idle(self._build_next_ui_page)
+
+    def _build_field_command_shell(self):
+        """Yeni tam-genişlikli saha terminali: sol sidebar yok, üst operasyon menüsü var."""
+        self.workspace = ttk.Frame(self.root); self.workspace.pack(fill="both", expand=True, padx=12, pady=(4, 12))
+        self.main_area = ttk.Frame(self.workspace); self.main_area.pack(fill="both", expand=True)
+        self._responsive_job = None; self.root.bind("<Configure>", self._responsive_configure, add="+")
+        self.fxbar = fx.Transition(self.root, self.root, color=PAL["accent"], bg=PAL["bg"],
+                                   duration_ms=int(self.cfg["settings"].get("fx_transition_ms", 220)), style="tactical")
+        self.command_ribbon = fx.FieldConsole(self.main_area, accent=PAL["accent"], bg=PAL["bg"], surface=PAL["surface"], muted=PAL["border"])
+        self.command_ribbon.pack(fill="x", pady=(2, 6))
+        nav = ttk.Frame(self.main_area); nav.pack(fill="x", pady=(0, 6)); self._field_nav = nav
+        self._sidebar_buttons = {}
+        for group in self.group_keys:
+            button = ttk.Button(nav, text=self.group_labels[group], style="FieldNav.TButton", command=lambda g=group: self._sidebar_select_group(g))
+            button.pack(side="left", fill="x", expand=True, padx=2)
+            self._sidebar_buttons[group] = button
+        self.nav_motif = None
+        nb = self.nb = ttk.Notebook(self.main_area, style="NoTabs.TNotebook"); nb.pack(fill="both", expand=True, padx=2, pady=2)
+        self.group_nbs = {}
+        for group in self.group_keys:
+            holder = ttk.Frame(nb); nb.add(holder, text=self.group_labels[group])
+            self.group_nbs[group] = ttk.Notebook(holder); self.group_nbs[group].pack(fill="both", expand=True, padx=4, pady=4)
+        self.tabs = {}
+        for key in self.tab_keys:
+            parent = self.group_nbs[self.tab_groups[key]]; self.tabs[key] = ttk.Frame(parent)
+            title = "The Division 3" if key == "division3" else t(f"tab.{key}")
+            parent.add(self.tabs[key], text=ui_theme.with_icon(title, ui_theme.TAB_ICONS.get(key, "")))
+        self._ui_builders = [self.build_dash, self.build_builds, self.build_prog, self.build_stash, self.build_stats,
+                             self.build_info, self.build_division3, self.build_translate, self.build_gorevler,
+                             self.build_asistan, self.build_settings, self.build_hist, self.build_logtab, self.build_help]
+        self._ui_build_index = 0; self._ui_ready = False; self._build_critical_ui_pages()
+        nb.bind("<<NotebookTabChanged>>", self.on_tab)
+        for inner in self.group_nbs.values(): inner.bind("<<NotebookTabChanged>>", self.on_tab)
+        self._sidebar_activate("home"); self.root.after_idle(self._build_next_ui_page)
+
+    def _build_shd_terminal_shell(self):
+        """Turuncu SHD terminal kabuğu: header, kodlu dikey nav, workspace, canlı footer."""
+        self.shd_header = fx.SHDStatusBar(self.root, accent=PAL["accent"], bg=PAL["bg"], fg=PAL["fg"], muted=PAL["muted"]); self.shd_header.pack(fill="x")
+        self.workspace = ttk.Frame(self.root); self.workspace.pack(fill="both", expand=True, padx=10, pady=8)
+        self.sidebar = ttk.Frame(self.workspace, style="Sidebar.TFrame", width=230); self.sidebar.pack(side="left", fill="y", padx=(0,8)); self.sidebar.pack_propagate(False)
+        ttk.Label(self.sidebar,text="[ NAVIGATION ]",style="Brand.TLabel").pack(anchor="w",padx=12,pady=(14,8))
+        self.main_area=ttk.Frame(self.workspace); self.main_area.pack(side="left",fill="both",expand=True)
+        self._responsive_job=None; self.root.bind("<Configure>",self._responsive_configure,add="+")
+        self.fxbar=fx.Transition(self.root,self.root,color=PAL["accent"],bg=PAL["bg"],duration_ms=240,style="tactical")
+        self.command_ribbon=fx.CommandRibbon(self.main_area,accent=PAL["accent"],bg=PAL["bg"],surface=PAL["surface"],muted=PAL["border"]); self.command_ribbon.pack(fill="x",pady=(0,5))
+        self._sidebar_buttons={}; codes=("01","02","03","04","05","06")
+        for index,group in enumerate(self.group_keys):
+            label="> "+codes[index]+". "+self.group_labels[group].replace("⌂  ","").upper()
+            button=ttk.Button(self.sidebar,text=label,style="Nav.TButton",command=lambda g=group:self._sidebar_select_group(g)); button.pack(fill="x",padx=(10,8),pady=3); self._sidebar_buttons[group]=button
+        ttk.Label(self.sidebar,text="[ STATUS ]\nLINK: SECURE\nNODE: LOCAL\nMODE: ADVISOR",style="Muted.TLabel",justify="left",font=("Consolas",8)).pack(side="bottom",anchor="w",padx=12,pady=12)
+        nb=self.nb=ttk.Notebook(self.main_area,style="NoTabs.TNotebook"); nb.pack(fill="both",expand=True)
+        self.group_nbs={}
+        for group in self.group_keys:
+            holder=ttk.Frame(nb); nb.add(holder,text=self.group_labels[group]); self.group_nbs[group]=ttk.Notebook(holder); self.group_nbs[group].pack(fill="both",expand=True,padx=3,pady=3)
+        self.tabs={}
+        for key in self.tab_keys:
+            parent=self.group_nbs[self.tab_groups[key]]; self.tabs[key]=ttk.Frame(parent); parent.add(self.tabs[key],text=ui_theme.with_icon("The Division 3" if key=="division3" else t(f"tab.{key}"),ui_theme.TAB_ICONS.get(key,"")))
+        self._ui_builders=[self.build_dash,self.build_builds,self.build_prog,self.build_stash,self.build_stats,self.build_info,self.build_division3,self.build_translate,self.build_gorevler,self.build_asistan,self.build_settings,self.build_hist,self.build_logtab,self.build_help]; self._ui_build_index=0; self._ui_ready=False; self._build_critical_ui_pages()
+        nb.bind("<<NotebookTabChanged>>",self.on_tab)
+        for inner in self.group_nbs.values(): inner.bind("<<NotebookTabChanged>>",self.on_tab)
+        self._sidebar_activate("home"); self.shd_footer=fx.SHDStatusBar(self.root,accent=PAL["accent"],bg=PAL["bg"],fg=PAL["fg"],muted=PAL["muted"],footer=True); self.shd_footer.pack(fill="x",side="bottom"); self.root.after_idle(self._build_next_ui_page)
+
+    def _build_critical_ui_pages(self):
+        """Ayarlar, Sandık, Çeviri ve Asistan ilk tıklamada hazır olmalı.
+
+        Ağır ve nadiren açılan sayfalar sonraki karelerde kurulur. Bu denge
+        açılışın akıcılığını korurken kullanıcının ilk menü tıklamasında boş
+        bir sayfa görmesini engeller.
+        """
+        critical = {"build_stash", "build_translate", "build_asistan", "build_settings"}
+        remaining = []
+        for builder in self._ui_builders:
+            if getattr(builder, "__name__", "") not in critical:
+                remaining.append(builder); continue
+            try:
+                builder()
+            except Exception:
+                name = getattr(builder, "__name__", "unknown")
+                self._ui_build_errors.append(name)
+                log.exception("Critical UI page build failed: %s", name)
+        self._ui_builders = remaining
+
+    def _build_next_ui_page(self):
+        """Build one tab, then yield so the opening scene stays responsive."""
+        if getattr(self, "_closing", False):
+            return
+        if self._ui_build_index < len(self._ui_builders):
+            builder = self._ui_builders[self._ui_build_index]
+            self._ui_build_index += 1
+            try:
+                builder()
+            except Exception:
+                name = getattr(builder, "__name__", "unknown")
+                self._ui_build_errors.append(name)
+                log.exception("UI page build failed: %s", name)
+            intro = getattr(self, "_intro", None)
+            if intro:
+                intro.pulse()
+            # 34 ms leaves one 30 FPS frame budget between page builders.
+            self.root.after(34, self._build_next_ui_page)
+            return
+        self._ui_ready = True
+        if self._ui_build_errors:
+            self.root.after(120, self._show_startup_recovery)
         self.root.after(300, self.apply_fx)
         self.root.after(400, lambda: self.cfg["settings"].get("fx_transitions", True) and self.fxbar.snap(self.nb))
         st = self.cfg["settings"]
@@ -4275,6 +4413,28 @@ class App:
                 self.select_settings_page(st["_start_page"])
             st["_start_tab"] = st["_start_page"] = ""
             save_cfg(self.cfg)
+
+    def _show_startup_recovery(self):
+        """Bir sayfa oluşturulamadıysa kullanıcıyı boş ekranla bırakma."""
+        if getattr(self, "_recovery_window", None):
+            try:
+                if self._recovery_window.winfo_exists(): return
+            except tk.TclError:
+                pass
+        failed = ", ".join(getattr(self, "_ui_build_errors", [])[:5])
+        w = self._recovery_window = tk.Toplevel(self.root)
+        w.title("TD2 Loot Advisor — Başlangıç kurtarma")
+        w.transient(self.root); w.geometry("640x300"); w.resizable(False, False)
+        ttk.Label(w, text="Arayüz güvenli kipte açılabilir", font=(ui_theme.FONT_SEMI, 14), foreground=PAL["warning"]).pack(anchor="w", padx=18, pady=(18, 8))
+        ttk.Label(w, text=f"Bazı arayüz bölümleri oluşturulamadı: {failed}\nBu, oyun verilerinizi silmez. Güvenli görünüm animasyon, video, özel imleç ve fare izi katmanlarını kapatır.",
+                  foreground=PAL["fg"], wraplength=600, justify="left").pack(anchor="w", padx=18)
+        ttk.Label(w, text="Rapor önizlemesi kişisel yol, e-posta, anahtar ve token bilgilerini maskeler; GitHub'a otomatik bir şey gönderilmez.",
+                  foreground=PAL["muted"], wraplength=600, justify="left").pack(anchor="w", padx=18, pady=(8, 14))
+        bar = ttk.Frame(w); bar.pack(fill="x", padx=18, pady=8)
+        ttk.Button(bar, text="Güvenli görünümle yeniden kur", style="Accent.TButton",
+                   command=lambda: (w.destroy(), self.activate_safe_view())).pack(side="left")
+        ttk.Button(bar, text="Rapor önizle", command=lambda: self.preview_github_report()).pack(side="left", padx=7)
+        ttk.Button(bar, text="Kapat", command=w.destroy).pack(side="right")
 
     def _responsive_configure(self, _event=None):
         """Boyut değişikliklerini gecikmeli uygula; her piksel hareketinde UI kurma."""
@@ -4288,16 +4448,20 @@ class App:
         try:
             width = self.root.winfo_width()
             compact_now = width < 1100
-            if compact_now == getattr(self, "_responsive_compact", None):
+            layout = self.cfg["settings"].get("ui_nav_layout", "tactical")
+            layout_changed = layout != getattr(self, "_responsive_nav_layout", None)
+            if compact_now == getattr(self, "_responsive_compact", None) and not layout_changed:
                 return
             self._responsive_compact = compact_now
+            self._responsive_nav_layout = layout
             self.compact = compact_now
             if hasattr(self, "sidebar"):
                 sidebar_w = 76 if compact_now else max(164, int(188 * getattr(self, "ui_factor", 1.0)))
                 self.sidebar.configure(width=sidebar_w)
             icons = {"home": "⌂", "gear": "🎒", "intel": "🛰", "tools": "🧰", "settings": "⚙", "system": "☰"}
-            for key, button in getattr(self, "_sidebar_buttons", {}).items():
+            for index, (key, button) in enumerate(getattr(self, "_sidebar_buttons", {}).items()):
                 button.configure(text=icons[key] if compact_now else self.group_labels[key])
+                button.pack_configure(padx=(6, 6) if compact_now else ((8 + min(index, 4) * 3) if layout == "tactical" else 8, 8))
             # Küçük modda saydam üst efektleri kapatıp menü yüzeyini güvenilir
             # bırak; büyük modda seçili görsel paketi aynen kullan.
             self.apply_fx()
@@ -4305,9 +4469,13 @@ class App:
             return
 
     def _sidebar_activate(self, group):
+        field_shell = self.cfg["settings"].get("ui_layout") == "field_command"
         for key, button in getattr(self, "_sidebar_buttons", {}).items():
             try:
-                button.configure(style="NavActive.TButton" if key == group else "Nav.TButton")
+                if field_shell:
+                    button.configure(style="FieldNavActive.TButton" if key == group else "FieldNav.TButton")
+                else:
+                    button.configure(style="NavActive.TButton" if key == group else "Nav.TButton")
             except tk.TclError:
                 pass
 
@@ -4424,6 +4592,18 @@ class App:
                 and hasattr(self, "fxbar"))
         if anim:
             self.fxbar.play(self.nb, prev[0] if isinstance(prev, tuple) else prev, cur[0])
+            if getattr(self, "nav_motif", None): self.nav_motif.flash()
+        # Seçilen grubu ve sekmeyi komuta şeridinde açıkça göster. Böylece
+        # menü hiyerarşisi oyundaki operasyon ekranları gibi okunur.
+        try:
+            page = cur[1] if isinstance(cur, tuple) else ""
+            group = self.tab_groups.get(page, "home")
+            group_text = self.group_labels.get(group, group).replace("⌂  ", "").strip()
+            page_text = "The Division 3" if page == "division3" else t(f"tab.{page}")
+            self.command_ribbon.set_context(f"ISAC // {group_text}", page_text)
+            if anim: self.command_ribbon.pulse()
+        except Exception:
+            pass
         k = self.current_tab()
         # sekmenin verisini yenilemek zaman alabilir: kayma animasyonu donmasın diye bittikten sonra
         def refresh(k=k):
@@ -7542,7 +7722,7 @@ class App:
         self.root.bind("<Key>", on_key)
 
     def build_diagnostics(self, parent):
-        """Yerel, kullanıcı kontrollü performans ve hata tanılama merkezi."""
+        """Yerel, kullanıcı kontrollü tanılama / iyileştirme merkezi."""
         top = ttk.Frame(parent); top.pack(fill="x", padx=10, pady=(10, 6))
         ttk.Label(top, text="Sistem Tanılama Merkezi", font=(ui_theme.FONT_SEMI, 14), foreground=PAL["accent"]).pack(side="left")
         self.diag_advanced = tk.BooleanVar(value=False)
@@ -7550,11 +7730,31 @@ class App:
                         command=self.refresh_diagnostics).pack(side="right", padx=6)
         ttk.Button(top, text="⟳ Yenile", command=self.refresh_diagnostics).pack(side="right")
         ttk.Button(top, text="Raporu dışa aktar", command=self.export_diagnostics).pack(side="right", padx=6)
-        ttk.Label(parent, text="Tanılama verileri varsayılan olarak yalnızca bu bilgisayarda tutulur. Rapor oluşturma işlemi kullanıcı tıklamasıyla yapılır.",
+        actions = ttk.LabelFrame(parent, text="Hızlı müdahale"); actions.pack(fill="x", padx=10, pady=(0, 8))
+        ttk.Button(actions, text="◈ Güvenli Görünüm", command=self.activate_safe_view,
+                   style="Accent.TButton").pack(side="left", padx=8, pady=7)
+        ttk.Button(actions, text="🔎 Sorunları tara", command=self.run_diagnostic_engine,
+                   style="Accent.TButton").pack(side="left", padx=4)
+        ttk.Button(actions, text="🛠 Bulunan güvenli hataları düzelt", command=self.apply_detected_repairs).pack(side="left", padx=4)
+        ttk.Button(actions, text="⚕ Sorun giderme sihirbazı", command=self.open_troubleshooter).pack(side="left", padx=4)
+        ttk.Button(actions, text="🧾 GitHub raporu önizle", command=self.preview_github_report).pack(side="left", padx=4)
+        ttk.Label(actions, text="Bu işlemler oyun dosyalarına, build/sandık verilerine veya GitHub'a otomatik olarak dokunmaz.",
+                  foreground=PAL["muted"]).pack(side="left", padx=10)
+        ttk.Label(parent, text="Tanılama verileri varsayılan olarak yalnızca bu bilgisayarda tutulur. GitHub raporu önce maskelenmiş Markdown taslağı olarak gösterilir.",
                   foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=10, pady=(0, 8))
-        self.diag_text = tk.Text(parent, height=24, bg=PAL["surface"], fg=PAL["fg"], insertbackground=PAL["fg"],
+        split = ttk.Panedwindow(parent, orient="vertical"); split.pack(fill="both", expand=True, padx=10, pady=(0, 10))
+        summary = ttk.Frame(split); events = ttk.Frame(split); split.add(summary, weight=3); split.add(events, weight=2)
+        self.diag_text = tk.Text(summary, height=15, bg=PAL["surface"], fg=PAL["fg"], insertbackground=PAL["fg"],
                                  relief="flat", wrap="word", state="disabled")
-        self.diag_text.pack(fill="both", expand=True, padx=10, pady=(0, 10))
+        self.diag_text.pack(fill="both", expand=True)
+        event_bar = ttk.Frame(events); event_bar.pack(fill="x", pady=(6, 3))
+        ttk.Label(event_bar, text="Canlı olay kaydı", foreground=PAL["accent"], font=(ui_theme.FONT_SEMI, 10)).pack(side="left")
+        self.diag_event_filter = tk.StringVar(value="ALL")
+        ttk.Combobox(event_bar, textvariable=self.diag_event_filter, state="readonly", width=10,
+                     values=["ALL", "INFO", "WARNING", "ERROR"]).pack(side="right")
+        ttk.Button(event_bar, text="⟳", width=3, command=self.refresh_diagnostics).pack(side="right", padx=4)
+        self.diag_event_text = tk.Text(events, height=9, bg=PAL["text_bg"], fg=PAL["fg"], relief="flat", wrap="none", state="disabled")
+        self.diag_event_text.pack(fill="both", expand=True)
         self.refresh_diagnostics()
 
     def _diagnostic_snapshot(self):
@@ -7565,7 +7765,19 @@ class App:
         st = self.cfg.get("settings", {})
         trans = self._translation_jobs.stats() if getattr(self, "_translation_jobs", None) else {}
         assistant = self._assistant_jobs.stats() if getattr(self, "_assistant_jobs", None) else {}
+        try: game_found = bool(display.game_window())
+        except Exception: game_found = False
+        try:
+            local_ready = livetranslate.LocalMT.available() and livetranslate.LocalMT(self.lt_model_dir()).installed()
+        except Exception: local_ready = False
         return {
+            "settings": dict(st),
+            "system_dict": {"python": sys.version.split()[0], "platform": sys.platform,
+                            "screen": f"{self.root.winfo_screenwidth()}x{self.root.winfo_screenheight()}",
+                            "window": f"{self.root.winfo_width()}x{self.root.winfo_height()}"},
+            "ocr_ready": bool(getattr(OCR, "name", "")),
+            "translation_ready": bool(local_ready or st.get("tr_engine") == "ai"),
+            "game_found": game_found,
             "sistem": [f"Python: {sys.version.split()[0]}", f"Platform: {sys.platform}", f"Çözünürlük: {self.root.winfo_screenwidth()}x{self.root.winfo_screenheight()}", f"Pencere: {self.root.winfo_width()}x{self.root.winfo_height()}", f"Mod: {'kompakt' if getattr(self, 'compact', False) else 'normal'}"],
             "ocr": [f"Motor: {getattr(OCR, 'name', 'yok')}", f"Son OCR: {stat('ocr_total')}", f"Son tarama: {stat('scan_total')}", f"OCR geçişi: {getattr(self, 'auto_passes', lambda: '?')()}", f"Durum: {'çalışıyor' if getattr(self, 'running', False) else 'durduruldu'}"],
             "ceviri": [f"Çeviri kuyruğu: active={trans.get('active', 0)} pending={trans.get('pending', 0)}", f"Çeviri ölçümü: {stat('translate_model')}", f"Canlı çeviri: {'açık' if st.get('tr_on') else 'kapalı'}"],
@@ -7574,15 +7786,164 @@ class App:
             "hatalar": [f"Kayıt sayısı: {len(getattr(self, '_diag_errors', []))}"] + [f"{x['time']}  {x['message']}" for x in getattr(self, '_diag_errors', [])[-10:]],
         }
 
+    def _diagnostic_context(self):
+        """Gerçek tanılama motoruna verilen salt-okunur anlık durum."""
+        data = self._diagnostic_snapshot()
+        try: game = display.game_window()
+        except Exception: game = None
+        return {"settings": data["settings"], "config_path": CFG_PATH, "log_dir": APPLOG_DIR,
+                "translation_ready": data["translation_ready"], "overlay_present": bool(getattr(self, "overlay", None)),
+                "last_error": self.last_err, "game_window": game}
+
+    def run_diagnostic_engine(self):
+        """Disk, OCR komutu ve model durumunu arka planda gerçekten denetle."""
+        if getattr(self, "_diagnostic_busy", False): return
+        self._diagnostic_busy = True
+        context = self._diagnostic_context()
+        self.toast("Tanılama motoru çalışıyor")
+        def work():
+            try:
+                results = diagnostics_center.run_checks(context)
+                def done():
+                    self._diagnostic_busy = False; self._diagnostic_results = results
+                    errors = sum(x.status == "error" for x in results); warnings = sum(x.status == "warning" for x in results)
+                    log.info("Diagnostic engine complete: %d error(s), %d warning(s)", errors, warnings)
+                    self.refresh_diagnostics(); self.toast(f"Tanılama bitti: {errors} hata, {warnings} uyarı")
+                self.root.after(0, done)
+            except Exception as exc:
+                log.exception("Diagnostic engine failed")
+                self.root.after(0, lambda: (setattr(self, "_diagnostic_busy", False), self.toast(f"Tanılama hatası: {type(exc).__name__}")))
+        threading.Thread(target=work, daemon=True, name="td2-diagnostics").start()
+
+    def apply_detected_repairs(self):
+        """Son gerçek taramanın önerdiği geri alınabilir düzeltmeleri uygula."""
+        results = getattr(self, "_diagnostic_results", None)
+        if not results:
+            self.toast("Önce ‘Sorunları tara’ ile gerçek tanılama çalıştırın")
+            return
+        changed, actions = diagnostics_center.apply_repairs(self.cfg["settings"], results)
+        overlay_reset = actions.get("reset_overlay", False)
+        was_translation = bool(self.cfg["settings"].get("tr_on"))
+        if overlay_reset:
+            try:
+                self.lt_stop(quiet=True)
+                if getattr(self, "overlay", None): self.overlay.destroy()
+                self.overlay = None
+                changed.append("çeviri bindirmesi sıfırlandı")
+            except Exception:
+                log.exception("Overlay reset failed")
+        if "tesseract_cmd" in changed:
+            self.tess = find_tesseract(self.cfg)
+        if changed:
+            save_cfg(self.cfg)
+        log.warning("Diagnostic repairs applied: %s", ", ".join(changed) if changed else "none")
+        # Çeviri açıksa temiz kapatma sonrasında bir kez yeniden başlatılır.
+        if overlay_reset and was_translation:
+            self.root.after(350, lambda: self.lt_start(quiet=True))
+        if any(key in changed for key in diagnostics_center.SAFE_VIEW_CHANGES):
+            self._set_page = "diagnostics"; self.rebuild_ui(tab="settings")
+        else:
+            self.refresh_diagnostics()
+        self.toast("Bulunan güvenli düzeltmeler uygulandı" if changed else "Uygulanacak güvenli hata bulunamadı")
+
     def refresh_diagnostics(self):
         if not getattr(self, "diag_text", None): return
         data = self._diagnostic_snapshot()
         lines = []
+        results = getattr(self, "_diagnostic_results", None)
+        if results:
+            lines += ["[GERÇEK TANILAMA MOTORU]"]
+            for result in results:
+                icon = {"ok": "✔", "warning": "⚠", "error": "✖", "info": "•"}.get(result.status, "•")
+                suffix = f" — {result.evidence}" if result.evidence else ""
+                fix = " [düzeltilebilir]" if result.repair else ""
+                lines.append(f"  {icon} {result.title}: {result.detail}{fix}{suffix}")
+            lines.append("")
+        lines += ["[HIZLI DURUM]"]
+        for check in diagnostics_center.assess(data):
+            icon = {"ok": "✔", "warning": "⚠", "info": "•"}.get(check["status"], "•")
+            lines.append(f"  {icon} {check['name']}: {check['detail']}")
+        lines.append("")
         for title, values in data.items():
+            if title in ("settings", "system_dict", "ocr_ready", "translation_ready", "game_found"):
+                continue
             if title == "hatalar" and not self.diag_advanced.get():
                 values = values[:1]
             lines += [f"[{title.upper()}]"] + [f"  {v}" for v in values] + [""]
         self.diag_text.configure(state="normal"); self.diag_text.delete("1.0", "end"); self.diag_text.insert("end", "\n".join(lines)); self.diag_text.configure(state="disabled")
+        self.refresh_diagnostic_events()
+
+    def refresh_diagnostic_events(self):
+        box = getattr(self, "diag_event_text", None)
+        if not box: return
+        level = self.diag_event_filter.get() if getattr(self, "diag_event_filter", None) else "ALL"
+        events = getattr(self, "_diag_events", diagnostics_center.EventBuffer()).snapshot(level=level)
+        box.configure(state="normal"); box.delete("1.0", "end")
+        for event in events:
+            box.insert("end", f"{event.timestamp} | {event.level:<7} | {event.category:<14} | {event.message}\n")
+        box.configure(state="disabled"); box.see("end")
+
+    def activate_safe_view(self):
+        changed = diagnostics_center.apply_safe_view(self.cfg["settings"])
+        save_cfg(self.cfg)
+        log.warning("Safe View Mode applied: %s", ", ".join(changed) if changed else "already active")
+        self._set_page = "diagnostics"
+        self.rebuild_ui(tab="settings")
+        self.toast("Güvenli Görünüm etkin: animasyon ve etkileşim katmanları kapatıldı")
+
+    def run_safe_autofix(self):
+        st = self.cfg["settings"]
+        fixed = diagnostics_center.apply_safe_view(st)
+        if not st.get("tesseract_cmd"):
+            tess = find_tesseract(self.cfg)
+            if tess:
+                st["tesseract_cmd"] = tess; fixed.append("tesseract_cmd")
+        if float(st.get("fx_video_dim", 0.35)) > 0.7:
+            st["fx_video_dim"] = 0.35; fixed.append("fx_video_dim")
+        save_cfg(self.cfg)
+        log.warning("Safe automatic fixes applied: %s", ", ".join(fixed) if fixed else "none needed")
+        self._set_page = "diagnostics"; self.rebuild_ui(tab="settings")
+        self.toast("Güvenli düzeltmeler uygulandı" if fixed else "Uygulanacak güvenli düzeltme yok")
+
+    def open_troubleshooter(self):
+        w = tk.Toplevel(self.root); w.title("Sorun giderme sihirbazı"); w.geometry("720x460")
+        ttk.Label(w, text="Sorun giderme sihirbazı", font=(ui_theme.FONT_SEMI, 14), foreground=PAL["accent"]).pack(anchor="w", padx=14, pady=(14, 6))
+        ttk.Label(w, text="Bir sorun seçin. Sihirbaz yalnız tanılama çalıştırır; düzeltme düğmesi açıkça seçilmeden ayar değiştirmez.", foreground=PAL["muted"], wraplength=680).pack(anchor="w", padx=14)
+        issue = tk.StringVar(value="Canlı çeviri / boş siyah kutu")
+        options = ["Canlı çeviri / boş siyah kutu", "Eşya OCR okuması", "Menü tıklanmıyor veya donuyor", "Kısayollar", "Oyun klasörü / senkron", "Sesli asistan", "Güncelleme"]
+        ttk.Combobox(w, textvariable=issue, values=options, state="readonly", width=42).pack(anchor="w", padx=14, pady=10)
+        result = tk.Text(w, height=14, bg=PAL["text_bg"], fg=PAL["fg"], relief="flat", wrap="word", state="disabled"); result.pack(fill="both", expand=True, padx=14, pady=6)
+        def diagnose():
+            data = self._diagnostic_snapshot(); text = []
+            selected = issue.get()
+            if selected.startswith("Canlı çeviri"):
+                text = ["Çeviri motoru: " + ("hazır" if data["translation_ready"] else "hazır değil"), "Overlay boşsa önce Güvenli Görünüm ile arka plan/iz katmanlarını kapatın.", "Sonra Ayarlar > Canlı çeviri > Şimdi çevir ile tekrar deneyin."]
+            elif selected.startswith("Eşya"):
+                text = ["OCR motoru: " + ("algılandı" if data["ocr_ready"] else "algılanmadı"), "Oyun HDR durumunu uygulama otomatik olarak zorlamaz; kart görüntüsü üzerinden doğrulama yapılır.", "Güven skoru düşükse karar REVIEW olarak kalmalıdır."]
+            elif selected.startswith("Menü"):
+                text = ["Pencere modu: " + ("kompakt" if self.compact else "normal"), "Fare izi ve saydam arka plan katmanları etkileşim riski yaratabilir.", "Güvenli Görünüm bu katmanları kapatır."]
+            else:
+                text = [x["name"] + ": " + x["detail"] for x in diagnostics_center.assess(data)]
+            result.configure(state="normal"); result.delete("1.0", "end"); result.insert("end", "\n\n".join(text)); result.configure(state="disabled")
+        row = ttk.Frame(w); row.pack(fill="x", padx=14, pady=(0, 12))
+        ttk.Button(row, text="Tanıla", command=diagnose, style="Accent.TButton").pack(side="left")
+        ttk.Button(row, text="Güvenli düzeltmeyi uygula", command=lambda: (self.run_safe_autofix(), w.destroy())).pack(side="left", padx=6)
+        ttk.Button(row, text="Kapat", command=w.destroy).pack(side="right")
+        diagnose()
+
+    def preview_github_report(self):
+        data = self._diagnostic_snapshot()
+        text = diagnostics_center.markdown_report(APP_VERSION, {"settings": data["settings"], "system": data["system_dict"],
+                                                                "ocr_ready": data["ocr_ready"], "translation_ready": data["translation_ready"], "game_found": data["game_found"]},
+                                                  self._diag_events.snapshot(100))
+        w = tk.Toplevel(self.root); w.title("Maskelenmiş GitHub raporu önizlemesi"); w.geometry("820x620")
+        ttk.Label(w, text="Maskelenmiş Markdown raporu", font=(ui_theme.FONT_SEMI, 13), foreground=PAL["accent"]).pack(anchor="w", padx=12, pady=(12, 4))
+        ttk.Label(w, text="Bu pencere raporu göndermez. Yalnızca kontrol edip isterseniz GitHub yeni kayıt sayfasını açabilirsiniz.", foreground=PAL["muted"]).pack(anchor="w", padx=12)
+        box = tk.Text(w, wrap="word", bg=PAL["text_bg"], fg=PAL["fg"], relief="flat"); box.pack(fill="both", expand=True, padx=12, pady=10); box.insert("1.0", text)
+        bar = ttk.Frame(w); bar.pack(fill="x", padx=12, pady=(0, 12))
+        ttk.Button(bar, text="Panoya kopyala", command=lambda: (self.root.clipboard_clear(), self.root.clipboard_append(text), self.toast("Rapor panoya kopyalandı"))).pack(side="left")
+        ttk.Button(bar, text="GitHub kayıt sayfasını aç", command=lambda: webbrowser_open(ISSUES_URL)).pack(side="left", padx=6)
+        ttk.Button(bar, text="Kapat", command=w.destroy).pack(side="right")
 
     def export_diagnostics(self):
         path = filedialog.asksaveasfilename(defaultextension=".json", initialfile="td2_diagnostics.json", filetypes=[("JSON", "*.json")])
@@ -7831,6 +8192,19 @@ class App:
         ttk.Button(ar, text=ui_theme.with_icon(t("fx.preview"), "▶"),
                    command=lambda: (setattr(self.fxbar, "duration", max(120, min(450, int(self.fx_tms.get())))),
                                     self.fxbar.play(self.nb, 0, self.nb.index(self.nb.select())))).pack(side="left", padx=8)
+        layout = ttk.Frame(an); layout.pack(fill="x", padx=8, pady=(0, 8))
+        ttk.Label(layout, text="Menü düzeni" if i18n.current_language() == "tr" else "Menu layout").pack(side="left")
+        self.fx_nav_layout = tk.StringVar(value=st.get("ui_nav_layout", "tactical"))
+        labels = {
+            "tactical": "Tactical HUD — hafif kademeli / çapraz" if i18n.current_language() == "tr" else "Tactical HUD — staggered / angled",
+            "flat": "Düz — klasik hizalama" if i18n.current_language() == "tr" else "Flat — classic alignment",
+        }
+        self._fx_nav_labels = labels
+        self.fx_nav_pick = ttk.Combobox(layout, state="readonly", width=34,
+                                        values=list(labels.values()))
+        self.fx_nav_pick.set(labels.get(self.fx_nav_layout.get(), labels["tactical"]))
+        self.fx_nav_pick.pack(side="left", padx=6)
+        ttk.Label(layout, text="Deneme düzeni; tıklama alanları dikdörtgen kalır." if i18n.current_language() == "tr" else "Trial layout; button hit areas remain rectangular.", foreground=PAL["muted"]).pack(side="left", padx=6)
 
         self.fxv["fx_bgwatch"] = tk.BooleanVar(value=bool(st.get("fx_bgwatch", True)))
         self.fx_wdim = tk.DoubleVar(value=float(st.get("fx_bgwatch_dim", 0.0)))
@@ -7839,7 +8213,7 @@ class App:
         ttk.Checkbutton(wr_, text=t("fx.enable"), variable=self.fxv["fx_bgwatch"]).pack(side="left")
         ttk.Label(wr_, text=t("fx.dim")).pack(side="left", padx=(16, 4))
         ttk.Scale(wr_, from_=0.0, to=0.7, variable=self.fx_wdim, length=160).pack(side="left")
-        modes = ("standard", "isac", "rogue")
+        modes = ("standard", "isac", "rogue", "field")
         ttk.Label(wr_, text=t("fx.watch_style")).pack(side="left", padx=(12, 4))
         self.fx_watch_style = ttk.Combobox(wr_, state="readonly", width=18, values=[t("fx.watch_" + m) for m in modes])
         self.fx_watch_style.current(modes.index(st.get("event_fx")) if st.get("event_fx") in modes else 0)
@@ -7872,12 +8246,24 @@ class App:
         st["fx_trail_len"] = int(self.fx_tlen.get())
         st["fx_video_dim"] = round(float(self.fx_dim.get()), 2)
         st["fx_transition_ms"] = int(self.fx_tms.get())
+        selected_layout = next((key for key, label in getattr(self, "_fx_nav_labels", {}).items()
+                                if label == self.fx_nav_pick.get()), "tactical")
+        st["ui_nav_layout"] = selected_layout
+        st["fx_transition_style"] = "tactical" if selected_layout == "tactical" else "soft"
         st["fx_bgwatch_dim"] = round(float(self.fx_wdim.get()), 2)
-        st["event_fx"] = ("standard", "isac", "rogue")[max(0, self.fx_watch_style.current())]
-        if hasattr(self, "fxbar"): self.fxbar.duration = max(120, min(450, int(st["fx_transition_ms"])))
+        st["event_fx"] = ("standard", "isac", "rogue", "field")[max(0, self.fx_watch_style.current())]
+        if hasattr(self, "fxbar"):
+            self.fxbar.duration = max(120, min(450, int(st["fx_transition_ms"])))
+            self.fxbar.style = st["fx_transition_style"]
 
     def save_fx(self):
-        self._fx_from_ui(); save_cfg(self.cfg); self.apply_fx(); self.toast(t("msg.settings_saved"))
+        old_layout = self.cfg["settings"].get("ui_nav_layout", "tactical")
+        self._fx_from_ui(); save_cfg(self.cfg); self.apply_fx()
+        # Kademeli menü, widget yeniden inşa edilmeden güvenli biçimde değişir.
+        if old_layout != self.cfg["settings"].get("ui_nav_layout"):
+            self._sync_responsive_layout()
+            if getattr(self, "nav_motif", None): self.nav_motif.flash()
+        self.toast(t("msg.settings_saved"))
 
     def make_videos(self, count=None):
         """Özgün (koddan çizilen) arka plan videoları üretir; count verilirse yeni çeşitlerle çoğaltır."""
@@ -8244,6 +8630,7 @@ class App:
         save_cfg(self.cfg); self.tess = find_tesseract(self.cfg)
         self._bind_global_hotkeys()
         setup_logging(st["log_level"], st["log_max_kb"], st["log_backups"])
+        self._ensure_diagnostic_event_handler()
         log.info("Settings saved (log level %s)", st["log_level"])
         if self.running: self.stop(quiet=True); self.start(quiet=True)
         if st["ui_theme"] != old_theme:
@@ -8355,6 +8742,11 @@ class App:
             log.exception("GitHub log report failed")
             messagebox.showerror(APP_NAME, str(e), parent=self.root)
 
+    def report_server(self):
+        """Rapor endpoint'i: yalnız kullanıcı gönderimi için, güvenli varsayım ile."""
+        st = self.cfg.get("settings", {})
+        return os.environ.get("TD2_REPORT_URL") or st.get("report_server") or st.get("drop_server") or dropstats.DEFAULT_URL
+
     def factory_reset(self):
         """Ayarları varsayılana döndürür; kişisel build/sandık/geçmiş verisini silmez."""
         if not messagebox.askyesno(APP_NAME, t("set.factory_ask"), parent=self.root): return
@@ -8415,6 +8807,7 @@ class App:
             except Exception: pass
         st = self.cfg["settings"]
         setup_logging(st.get("log_level", "INFO"), st.get("log_max_kb", 1024), st.get("log_backups", 3))
+        self._ensure_diagnostic_event_handler()
         log.info("Log cleared by user")
         self.refresh_logtab()
 
