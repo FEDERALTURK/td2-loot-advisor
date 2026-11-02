@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "version": "2026-10-25.1",
-  "updated": "2026-10-25T01:35:38Z",
+  "version": "2026-11-02.1",
+  "updated": "2026-11-02T01:43:44Z",
   "season": "Year 8 Season 3 – Red Horizon",
   "resets": {
     "daily_hour_utc": 8,
@@ -220,6 +220,102 @@
         "nl": "Kies controlepunten met het Hyena-icoon. Versla de golven, dood de leider, hijs de vlag. Op hogere moeilijkheid helpt dit ook bij de elite-Hyena-stap."
       },
       "wiki_id": "wiki-red-horizon-scout-9"
+    },
+    {
+      "id": "y8s3-scout10-cleaners-kills",
+      "cat": "manhunt",
+      "source": {
+        "url": "https://www.destructoid.com/the-division-2-y8s3-red-horizon-week-10-manhunt-scout-10-solutions/"
+      },
+      "wiki_id": "wiki-red-horizon-scout-10",
+      "text": {
+        "en": "Manhunt Scout 10 (week 10, from Oct 27): kill 50 Cleaners",
+        "tr": "Manhunt Scout 10 (10. hafta, 27 Ekim'den itibaren): 50 Cleaners öldür",
+        "de": "Manhunt Scout 10 (Woche 10, ab 27. Okt.): 50 Cleaners töten",
+        "fr": "Traque Éclaireur 10 (semaine 10, dès le 27 oct.) : tuer 50 Cleaners",
+        "es": "Cacería Explorador 10 (semana 10, desde el 27 de oct.): mata a 50 Cleaners",
+        "it": "Caccia Esploratore 10 (settimana 10, dal 27 ott.): uccidi 50 Cleaners",
+        "pt": "Caçada Batedor 10 (semana 10, desde 27 de out.): mate 50 Cleaners",
+        "ru": "Охота, Разведчик 10 (неделя 10, с 27 окт.): убейте 50 Cleaners",
+        "pl": "Obława, Zwiadowca 10 (tydzień 10, od 27 paź.): zabij 50 Cleaners",
+        "nl": "Manhunt Verkenner 10 (week 10, vanaf 27 okt.): dood 50 Cleaners"
+      },
+      "how": {
+        "en": "Only this first step shows at the start; finishing it reveals the next hint. Kills add up across activities. A Cleaners Bounty is a quick source, on any difficulty.",
+        "tr": "Başta yalnız bu adım görünür; bitince sıradaki ipucu açılır. Öldürmeler farklı aktivitelerde toplanır. Cleaners Bounty hızlı bir yoldur, her zorlukta olur.",
+        "de": "Anfangs ist nur dieser Schritt sichtbar; danach erscheint der nächste Hinweis. Kills zählen über alle Aktivitäten. Ein Cleaners-Bounty geht schnell, auf jeder Schwierigkeit.",
+        "fr": "Seule cette étape est visible au début ; la terminer révèle l'indice suivant. Les éliminations se cumulent entre activités. Un Bounty Cleaners va vite, à toute difficulté.",
+        "es": "Al principio solo se ve este paso; al completarlo aparece la siguiente pista. Las bajas se suman entre actividades. Un Bounty de Cleaners es rápido, en cualquier dificultad.",
+        "it": "All'inizio è visibile solo questo passo; completandolo appare l'indizio successivo. Le uccisioni si sommano tra le attività. Un Bounty dei Cleaners è rapido, a qualsiasi difficoltà.",
+        "pt": "No início só esta etapa aparece; ao concluí-la surge a próxima pista. Os abates somam entre atividades. Um Bounty de Cleaners é rápido, em qualquer dificuldade.",
+        "ru": "Сначала виден только этот шаг; его выполнение открывает следующую подсказку. Убийства суммируются между активностями. Bounty на Cleaners — быстрый способ, на любой сложности.",
+        "pl": "Na początku widać tylko ten etap; jego ukończenie odsłania kolejną wskazówkę. Zabójstwa sumują się między aktywnościami. Bounty na Cleaners to szybki sposób, na każdej trudności.",
+        "nl": "Eerst is alleen deze stap zichtbaar; daarna verschijnt de volgende hint. Kills tellen op over activiteiten. Een Cleaners-Bounty gaat snel, op elke moeilijkheid."
+      }
+    },
+    {
+      "id": "y8s3-scout10-cleaners-territory",
+      "cat": "manhunt",
+      "source": {
+        "url": "https://www.destructoid.com/the-division-2-y8s3-red-horizon-week-10-manhunt-scout-10-solutions/"
+      },
+      "wiki_id": "wiki-red-horizon-scout-10",
+      "text": {
+        "en": "Manhunt Scout 10: complete 1 Cleaners Territory Control activity",
+        "tr": "Manhunt Scout 10: 1 Cleaners Territory Control aktivitesini tamamla",
+        "de": "Manhunt Scout 10: 1 Cleaners-Aktivität Territory Control abschließen",
+        "fr": "Traque Éclaireur 10 : terminer 1 activité Territory Control des Cleaners",
+        "es": "Cacería Explorador 10: completa 1 actividad Territory Control de los Cleaners",
+        "it": "Caccia Esploratore 10: completa 1 attività Territory Control dei Cleaners",
+        "pt": "Caçada Batedor 10: conclua 1 atividade Territory Control dos Cleaners",
+        "ru": "Охота, Разведчик 10: завершите 1 активность Territory Control фракции Cleaners",
+        "pl": "Obława, Zwiadowca 10: ukończ 1 aktywność Territory Control frakcji Cleaners",
+        "nl": "Manhunt Verkenner 10: voltooi 1 Territory Control-activiteit van de Cleaners"
+      },
+      "how": {
+        "en": "Territory Control is a random open-world activity marked by two crossed shotguns; it must belong to the Cleaners, on any difficulty. If the map shows none, restart the game.",
+        "tr": "Territory Control, iki çapraz pompalı simgeli rastgele açık dünya aktivitesidir; Cleaners'a ait olmalı, zorluk fark etmez. Haritada yoksa oyunu yeniden başlat.",
+        "de": "Territory Control ist eine zufällige Open-World-Aktivität mit zwei gekreuzten Schrotflinten als Symbol; sie muss den Cleaners gehören, Schwierigkeit egal. Keine auf der Karte? Spiel neu starten.",
+        "fr": "Territory Control est une activité aléatoire du monde ouvert, avec deux fusils à pompe croisés ; elle doit appartenir aux Cleaners, à toute difficulté. Aucune sur la carte ? Relancez le jeu.",
+        "es": "Territory Control es una actividad aleatoria del mundo abierto con dos escopetas cruzadas como icono; debe ser de los Cleaners, en cualquier dificultad. Si no hay ninguna, reinicia el juego.",
+        "it": "Territory Control è un'attività casuale del mondo aperto con due fucili a pompa incrociati; deve essere dei Cleaners, a qualsiasi difficoltà. Se sulla mappa non c'è, riavvia il gioco.",
+        "pt": "Territory Control é uma atividade aleatória do mundo aberto com duas espingardas cruzadas; precisa ser dos Cleaners, em qualquer dificuldade. Se não houver no mapa, reinicie o jogo.",
+        "ru": "Territory Control — случайная активность открытого мира со значком двух скрещённых дробовиков; она должна принадлежать Cleaners, сложность любая. Если на карте её нет, перезапустите игру.",
+        "pl": "Territory Control to losowa aktywność otwartego świata z ikoną dwóch skrzyżowanych strzelb; musi należeć do Cleaners, trudność dowolna. Jeśli na mapie jej nie ma, uruchom grę ponownie.",
+        "nl": "Territory Control is een willekeurige open-wereld-activiteit met twee gekruiste shotguns als icoon; hij moet van de Cleaners zijn, elke moeilijkheid telt. Staat er geen op de kaart, herstart de game."
+      }
+    },
+    {
+      "id": "y8s3-scout10-cleaners-cp",
+      "cat": "manhunt",
+      "source": {
+        "url": "https://www.destructoid.com/the-division-2-y8s3-red-horizon-week-10-manhunt-scout-10-solutions/"
+      },
+      "wiki_id": "wiki-red-horizon-scout-10",
+      "text": {
+        "en": "Manhunt Scout 10: capture 1 Control Point from the Cleaners",
+        "tr": "Manhunt Scout 10: Cleaners'tan 1 kontrol noktası ele geçir",
+        "de": "Manhunt Scout 10: 1 Kontrollpunkt von den Cleaners einnehmen",
+        "fr": "Traque Éclaireur 10 : prendre 1 point de contrôle aux Cleaners",
+        "es": "Cacería Explorador 10: captura 1 punto de control de los Cleaners",
+        "it": "Caccia Esploratore 10: conquista 1 punto di controllo dei Cleaners",
+        "pt": "Caçada Batedor 10: capture 1 ponto de controle dos Cleaners",
+        "ru": "Охота, Разведчик 10: захватите 1 контрольную точку у Cleaners",
+        "pl": "Obława, Zwiadowca 10: zdobądź 1 punkt kontrolny Cleaners",
+        "nl": "Manhunt Verkenner 10: verover 1 controlepunt van de Cleaners"
+      },
+      "how": {
+        "en": "Find a Cleaners-held point on the map (the guide author only had the Washington Monument). Clearing part of it triggers a second wave; defeat that whole wave to capture it. Resetting your vault progress lets you recapture points.",
+        "tr": "Haritada Cleaners elindeki bir nokta bul (rehber yazarında yalnız Washington Monument vardı). Bir kısmını temizleyince ikinci dalga gelir; dalganın tamamını öldürünce nokta alınır. Kasa ilerlemesini sıfırlamak noktaları yeniden almayı sağlar.",
+        "de": "Suche einen Cleaners-Punkt auf der Karte (der Autor hatte nur das Washington Monument). Nach einem Teil startet die zweite Welle; besiege sie ganz, um einzunehmen. Zurücksetzen des Tresorfortschritts erlaubt erneutes Einnehmen.",
+        "fr": "Trouvez un point tenu par les Cleaners (l'auteur du guide n'avait que le Washington Monument). Une partie nettoyée déclenche une seconde vague ; éliminez-la entièrement pour capturer. Réinitialiser la progression du coffre permet de reprendre des points.",
+        "es": "Busca un punto de los Cleaners en el mapa (el autor de la guía solo tenía el Washington Monument). Al limpiar parte se activa una segunda oleada; elimínala entera para capturarlo. Reiniciar el progreso de la cámara permite recapturar puntos.",
+        "it": "Cerca un punto dei Cleaners sulla mappa (l'autore della guida aveva solo il Washington Monument). Ripulita una parte parte una seconda ondata; eliminala tutta per conquistarlo. Azzerare i progressi del caveau permette di riconquistare i punti.",
+        "pt": "Procure um ponto dos Cleaners no mapa (o autor do guia só tinha o Washington Monument). Limpar parte dele aciona uma segunda onda; elimine-a toda para capturar. Reiniciar o progresso do cofre permite recapturar pontos.",
+        "ru": "Найдите точку Cleaners на карте (у автора гайда был только Washington Monument). После частичной зачистки приходит вторая волна; уничтожьте её полностью, чтобы захватить точку. Сброс прогресса хранилища позволяет захватывать точки заново.",
+        "pl": "Znajdź punkt Cleaners na mapie (autor poradnika miał tylko Washington Monument). Po częściowym oczyszczeniu rusza druga fala; pokonaj ją całą, by zdobyć punkt. Reset postępu skarbca pozwala zdobywać punkty ponownie.",
+        "nl": "Zoek een Cleaners-punt op de kaart (de auteur van de gids had alleen het Washington Monument). Na een deel volgt een tweede golf; versla die helemaal om te veroveren. Kluisvoortgang resetten laat je punten opnieuw veroveren."
+      }
     },
     {
       "id": "y8s3-journey-m3-burn10",
@@ -1044,6 +1140,36 @@
       },
       "source": {
         "url": "https://www.theclick.gg/the-division-2-red-moon-unleashed-event-keys/"
+      }
+    },
+    {
+      "id": "territory-control",
+      "match": [
+        "territory control",
+        "gebietskontrolle",
+        "contrôle de territoire",
+        "control de territorio",
+        "controllo del territorio",
+        "controle de território",
+        "контроль территории",
+        "kontrola terytorium",
+        "gebiedscontrole",
+        "bölge kontrol"
+      ],
+      "source": {
+        "url": "https://www.destructoid.com/the-division-2-y8s3-red-horizon-week-10-manhunt-scout-10-solutions/"
+      },
+      "tip": {
+        "en": "Territory Control is a random open-world activity marked by two crossed shotguns. If a faction is named, pick its icon; if none is on the map, restart the game.",
+        "tr": "Territory Control, iki çapraz pompalı simgeli rastgele açık dünya aktivitesidir. Grup belirtilmişse onun simgesini seç; haritada yoksa oyunu yeniden başlat.",
+        "de": "Territory Control ist eine zufällige Open-World-Aktivität mit zwei gekreuzten Schrotflinten. Ist eine Fraktion genannt, wähle deren Symbol; keine auf der Karte? Spiel neu starten.",
+        "fr": "Territory Control est une activité aléatoire du monde ouvert (deux fusils à pompe croisés). Si une faction est citée, choisissez son icône ; aucune sur la carte ? Relancez le jeu.",
+        "es": "Territory Control es una actividad aleatoria del mundo abierto (dos escopetas cruzadas). Si se nombra una facción, elige su icono; si no hay ninguna, reinicia el juego.",
+        "it": "Territory Control è un'attività casuale del mondo aperto (due fucili a pompa incrociati). Se è indicata una fazione, scegli la sua icona; se non c'è, riavvia il gioco.",
+        "pt": "Territory Control é uma atividade aleatória do mundo aberto (duas espingardas cruzadas). Se uma facção for citada, escolha o ícone dela; se não houver, reinicie o jogo.",
+        "ru": "Territory Control — случайная активность открытого мира (два скрещённых дробовика). Если указана фракция, выбирайте её значок; если на карте пусто, перезапустите игру.",
+        "pl": "Territory Control to losowa aktywność otwartego świata (dwie skrzyżowane strzelby). Gdy podano frakcję, wybierz jej ikonę; gdy na mapie nic nie ma, uruchom grę ponownie.",
+        "nl": "Territory Control is een willekeurige open-wereld-activiteit (twee gekruiste shotguns). Is een factie genoemd, kies dan haar icoon; staat er niets op de kaart, herstart de game."
       }
     }
   ],

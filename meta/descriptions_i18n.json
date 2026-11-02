@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "version": "2026-11-01.3",
+ "version": "2026-11-02.1",
  "note": "Encyclopedia description translations. 'tr' seeded by OPUS-MT machine translation; other languages and reviews by the daily feed task.",
  "items": {
   "NinjaBike Messenger Bag": {
@@ -3364,104 +3364,244 @@
    "nl": "3 kills op rij vullen het magazijn aan en geven 10 seconden 40% wapenschade."
   },
   "Perfect Pumped Up": {
-   "tr": "Yeniden yükleme, 10 saniye boyunca %1 silah hasarı verir. 25'e kadar yığınlar.",
+   "tr": "Şarjör değiştirmek 10 saniyeliğine %1 silah hasarı verir. 25 kata kadar birikir.",
    "_src": "Reloading grants 1% weapon damage for 10 seconds. Stacks up to 25.",
-   "_mt": "tr"
+   "de": "Nachladen gewährt 10 Sekunden lang 1 % Waffenschaden. Bis zu 25-mal stapelbar.",
+   "fr": "Recharger donne 1 % de dégâts d'arme pendant 10 secondes. Cumulable jusqu'à 25 fois.",
+   "es": "Recargar da 1 % de daño de arma durante 10 segundos. Se acumula hasta 25 veces.",
+   "it": "Ricaricare dà l'1% di danni dell'arma per 10 secondi. Cumulabile fino a 25 volte.",
+   "pt": "Recarregar dá 1% de dano de arma por 10 segundos. Acumula até 25 vezes.",
+   "ru": "Перезарядка даёт +1% к урону оружия на 10 секунд. Суммируется до 25 раз.",
+   "pl": "Przeładowanie daje 1% obrażeń broni na 10 sekund. Kumuluje się do 25 razy.",
+   "nl": "Herladen geeft 10 seconden lang 1% wapenschade. Stapelt tot 25 keer."
   },
   "Perfect Ranger": {
-   "tr": "Hedefinizden uzakta olduğunuz her 4 metre için silah hasarını %2 artırır.",
+   "tr": "Hedefinden uzakta olduğun her 4 metre için silah hasarı %2 artar.",
    "_src": "Amplifies weapon damage by 2% for every 4 meters you are away from your target.",
-   "_mt": "tr"
+   "de": "Verstärkt den Waffenschaden um 2 % je 4 Meter Abstand zu deinem Ziel.",
+   "fr": "Augmente les dégâts d'arme de 2 % tous les 4 mètres de distance avec votre cible.",
+   "es": "Aumenta el daño de arma un 2 % por cada 4 metros de distancia a tu objetivo.",
+   "it": "Aumenta i danni dell'arma del 2% ogni 4 metri di distanza dal bersaglio.",
+   "pt": "Aumenta o dano de arma em 2% a cada 4 metros de distância do alvo.",
+   "ru": "Усиливает урон оружия на 2% за каждые 4 метра до цели.",
+   "pl": "Zwiększa obrażenia broni o 2% za każde 4 metry odległości od celu.",
+   "nl": "Verhoogt de wapenschade met 2% per 4 meter afstand tot je doelwit."
   },
   "Perfect Reformation": {
-   "tr": "Headshots, 8 saniye boyunca %40 beceri onarımı sağlar.",
+   "tr": "Kafa vuruşları 8 saniyeliğine %40 skill onarımı verir.",
    "_src": "Headshots grant 40% skill repair for 8 seconds.",
-   "_mt": "tr"
+   "de": "Kopftreffer gewähren 8 Sekunden lang 40 % Fertigkeitsreparatur.",
+   "fr": "Les tirs à la tête donnent 40 % de réparation de compétence pendant 8 secondes.",
+   "es": "Los disparos a la cabeza dan 40 % de reparación de habilidad durante 8 segundos.",
+   "it": "I colpi alla testa danno il 40% di riparazione abilità per 8 secondi.",
+   "pt": "Tiros na cabeça dão 40% de reparo de habilidade por 8 segundos.",
+   "ru": "Выстрелы в голову дают +40% к ремонту навыков на 8 секунд.",
+   "pl": "Trafienia w głowę dają 40% naprawy umiejętności na 8 sekund.",
+   "nl": "Headshots geven 8 seconden lang 40% vaardigheidsreparatie."
   },
   "Perfect Rifleman": {
-   "tr": "İniş headshot'ları, 5 saniye boyunca %10 oranında bonus silah hasarı ekler. Max yığını 5'tir. Ek headshot'lar süreyi tazeler.",
+   "tr": "Kafa vuruşları 5 saniyeliğine %10 bonus silah hasarı yığını ekler. En fazla 5 yığın. Yeni kafa vuruşları süreyi yeniler.",
    "_src": "Landing headshots adds a stack of bonus 10% weapon damage for 5 seconds. Max sta",
-   "_mt": "tr"
+   "de": "Kopftreffer fügen 5 Sekunden lang einen Stapel mit 10 % Bonus-Waffenschaden hinzu. Maximal 5 Stapel. Weitere Kopftreffer erneuern die Dauer.",
+   "fr": "Les tirs à la tête ajoutent une charge de 10 % de dégâts d'arme bonus pendant 5 secondes. Maximum 5 charges. D'autres tirs à la tête renouvellent la durée.",
+   "es": "Los disparos a la cabeza añaden una acumulación de 10 % de daño de arma adicional durante 5 segundos. Máximo 5. Más disparos a la cabeza renuevan la duración.",
+   "it": "I colpi alla testa aggiungono una carica di danni dell'arma bonus del 10% per 5 secondi. Massimo 5 cariche. Altri colpi alla testa rinnovano la durata.",
+   "pt": "Tiros na cabeça somam um acúmulo de 10% de dano de arma bônus por 5 segundos. Máximo de 5. Novos tiros na cabeça renovam a duração.",
+   "ru": "Выстрелы в голову дают заряд +10% к урону оружия на 5 секунд. Максимум 5 зарядов. Новые выстрелы в голову обновляют длительность.",
+   "pl": "Trafienia w głowę dodają ładunek 10% dodatkowych obrażeń broni na 5 sekund. Maksymalnie 5 ładunków. Kolejne trafienia w głowę odświeżają czas.",
+   "nl": "Headshots voegen 5 seconden lang een stapel van 10% extra wapenschade toe. Maximaal 5 stapels. Nieuwe headshots vernieuwen de duur."
   },
   "Perfect Sadist": {
-   "tr": "Kanayan düşmanlara %25 silah hasarı verin. 3 cinayetten sonra, çarptığınız bir sonraki düşmana kanama uygulayın.",
+   "tr": "Kanayan düşmanlara %25 silah hasarı verirsin. 3 öldürmeden sonra vurduğun sıradaki düşmana kanama uygulanır.",
    "_src": "Deal 25% weapon damage to bleeding enemies. After 3 kills, applies bleed to next",
-   "_mt": "tr"
+   "de": "Verursacht 25 % mehr Waffenschaden an blutenden Gegnern. Nach 3 Kills erleidet der nächste getroffene Gegner Blutung.",
+   "fr": "Inflige 25 % de dégâts d'arme aux ennemis qui saignent. Après 3 éliminations, le prochain ennemi touché subit un saignement.",
+   "es": "Inflige 25 % de daño de arma a enemigos sangrantes. Tras 3 bajas, el siguiente enemigo golpeado sufre sangrado.",
+   "it": "Infligge il 25% di danni dell'arma ai nemici sanguinanti. Dopo 3 uccisioni, il prossimo nemico colpito subisce sanguinamento.",
+   "pt": "Causa 25% de dano de arma a inimigos sangrando. Após 3 abates, o próximo inimigo atingido sofre sangramento.",
+   "ru": "Наносит +25% урона оружия кровоточащим врагам. После 3 убийств следующий поражённый враг получает кровотечение.",
+   "pl": "Zadaje 25% obrażeń broni krwawiącym wrogom. Po 3 zabójstwach następny trafiony wróg zaczyna krwawić.",
+   "nl": "Doet 25% wapenschade tegen bloedende vijanden. Na 3 kills krijgt de volgende geraakte vijand een bloeding."
   },
   "Perfect Salvage": {
-   "tr": "Bir hedefi öldürmek, dergiyi yeniden doldurmak için %70 şansa sahiptir.",
+   "tr": "Bir hedefi öldürmek %70 ihtimalle şarjörü doldurur.",
    "_src": "Killing a target has a 70% chance to refill the magazine.",
-   "_mt": "tr"
+   "de": "Das Töten eines Ziels füllt mit 70 % Chance das Magazin auf.",
+   "fr": "Tuer une cible a 70 % de chances de remplir le chargeur.",
+   "es": "Matar a un objetivo tiene un 70 % de probabilidad de rellenar el cargador.",
+   "it": "Uccidere un bersaglio ha il 70% di probabilità di riempire il caricatore.",
+   "pt": "Matar um alvo tem 70% de chance de encher o carregador.",
+   "ru": "Убийство цели с шансом 70% пополняет магазин.",
+   "pl": "Zabicie celu ma 70% szansy na uzupełnienie magazynka.",
+   "nl": "Een doelwit doden heeft 70% kans om het magazijn te vullen."
   },
   "Perfect Spike": {
-   "tr": "Headshots, 8 saniye boyunca %25 beceri hasarı verir.",
+   "tr": "Kafa vuruşları 8 saniyeliğine %25 skill hasarı verir.",
    "_src": "Headshots grant 25% skill damage for 8 seconds.",
-   "_mt": "tr"
+   "de": "Kopftreffer gewähren 8 Sekunden lang 25 % Fertigkeitsschaden.",
+   "fr": "Les tirs à la tête donnent 25 % de dégâts de compétence pendant 8 secondes.",
+   "es": "Los disparos a la cabeza dan 25 % de daño de habilidad durante 8 segundos.",
+   "it": "I colpi alla testa danno il 25% di danni abilità per 8 secondi.",
+   "pt": "Tiros na cabeça dão 25% de dano de habilidade por 8 segundos.",
+   "ru": "Выстрелы в голову дают +25% к урону навыков на 8 секунд.",
+   "pl": "Trafienia w głowę dają 25% obrażeń umiejętności na 8 sekund.",
+   "nl": "Headshots geven 8 seconden lang 25% vaardigheidsschade."
   },
   "Perfect Strained": {
-   "tr": "Ateşlediğiniz her 0.5 saniye için %10 kritik isabet hasarı kazanın. 8 kereye kadar istiflenir.",
+   "tr": "Ateş ettiğin her 0,5 saniye için %10 kritik vuruş hasarı kazanırsın. 8 kata kadar birikir.",
    "_src": "Gain 10% critical hit damage for every 0.5 seconds you are firing. Stacks up to ",
-   "_mt": "tr"
+   "de": "Pro 0,5 Sekunden Dauerfeuer erhältst du 10 % Kritischen Trefferschaden. Bis zu 8-mal stapelbar.",
+   "fr": "Gagnez 10 % de dégâts de coup critique par tranche de 0,5 seconde de tir. Cumulable jusqu'à 8 fois.",
+   "es": "Ganas 10 % de daño de golpe crítico por cada 0,5 segundos disparando. Se acumula hasta 8 veces.",
+   "it": "Ottieni il 10% di danni da colpo critico ogni 0,5 secondi di fuoco. Cumulabile fino a 8 volte.",
+   "pt": "Ganhe 10% de dano de acerto crítico a cada 0,5 segundo atirando. Acumula até 8 vezes.",
+   "ru": "Каждые 0,5 секунды стрельбы дают +10% к критическому урону. Суммируется до 8 раз.",
+   "pl": "Każde 0,5 sekundy strzelania daje 10% obrażeń krytycznych. Kumuluje się do 8 razy.",
+   "nl": "Elke 0,5 seconde vuren geeft 10% kritieke-treffer-schade. Stapelt tot 8 keer."
   },
   "Perfect Unwavering": {
-   "tr": "Bu silaha geçiş, 5 saniye boyunca %300 oranında silah işleme sağlar. ÖIdürücüler buff'ı tazeler. Takas yapmak bunu tüm silahlardan 5 saniyeliğine devre dışı bırakır.",
+   "tr": "Bu silaha geçmek 5 saniyeliğine %300 silah kullanımı verir. Öldürmeler etkiyi yeniler. Silahtan çıkmak etkiyi 5 saniyeliğine tüm silahlarda kapatır.",
    "_src": "Swapping to this weapon grants 300% weapon handling for 5 seconds. Kills refresh",
-   "_mt": "tr"
+   "de": "Das Wechseln auf diese Waffe gewährt 5 Sekunden lang 300 % Waffenhandhabung. Kills erneuern den Bonus. Wegwechseln deaktiviert ihn 5 Sekunden lang für alle Waffen.",
+   "fr": "Passer à cette arme donne 300 % de maniement pendant 5 secondes. Les éliminations renouvellent le bonus. Changer d'arme le désactive sur toutes les armes pendant 5 secondes.",
+   "es": "Cambiar a esta arma da 300 % de manejo durante 5 segundos. Las bajas renuevan el efecto. Cambiar de arma lo desactiva en todas las armas durante 5 segundos.",
+   "it": "Passare a quest'arma dà il 300% di maneggevolezza per 5 secondi. Le uccisioni rinnovano il bonus. Cambiare arma lo disattiva su tutte le armi per 5 secondi.",
+   "pt": "Trocar para esta arma dá 300% de manuseio por 5 segundos. Abates renovam o bônus. Trocar de arma o desativa em todas as armas por 5 segundos.",
+   "ru": "Переключение на это оружие даёт +300% к управляемости на 5 секунд. Убийства обновляют эффект. Смена оружия отключает его для всего оружия на 5 секунд.",
+   "pl": "Przełączenie na tę broń daje 300% obsługi broni na 5 sekund. Zabójstwa odświeżają premię. Zmiana broni wyłącza ją dla wszystkich broni na 5 sekund.",
+   "nl": "Wisselen naar dit wapen geeft 5 seconden lang 300% wapenhantering. Kills vernieuwen de bonus. Wegwisselen schakelt dit 5 seconden uit voor alle wapens."
   },
   "Perfect Vindictive": {
-   "tr": "Durum etkisi uygulanan bir düşmanı öldürmek, 20 metre içindeki tüm grup üyelerine, %18 kritik isabet şansı ve %18 kritik vuruş hasarına 20 saniye boyunca izin verir.",
+   "tr": "Durum etkisi uygulanmış bir düşmanı öldürmek, 20 metre içindeki tüm grup üyelerine 20 saniyeliğine %18 kritik vuruş şansı ve %18 kritik vuruş hasarı verir.",
    "_src": "Killing an enemy with a status effect applied grants all group members within 20",
-   "_mt": "tr"
+   "de": "Einen Gegner mit Statuseffekt zu töten gewährt allen Gruppenmitgliedern im Umkreis von 20 Metern 20 Sekunden lang 18 % Kritische Trefferchance und 18 % Kritischen Trefferschaden.",
+   "fr": "Tuer un ennemi sous effet de statut donne à tous les membres du groupe à moins de 20 mètres 18 % de chance et 18 % de dégâts de coup critique pendant 20 secondes.",
+   "es": "Matar a un enemigo con un efecto de estado da a todos los miembros del grupo a menos de 20 metros 18 % de probabilidad y 18 % de daño de golpe crítico durante 20 segundos.",
+   "it": "Uccidere un nemico con un effetto di stato dà a tutti i membri del gruppo entro 20 metri il 18% di probabilità e il 18% di danni da colpo critico per 20 secondi.",
+   "pt": "Matar um inimigo com efeito de status dá a todos os membros do grupo a até 20 metros 18% de chance e 18% de dano de acerto crítico por 20 segundos.",
+   "ru": "Убийство врага под эффектом состояния даёт всем членам группы в радиусе 20 метров +18% к шансу и +18% к урону критического попадания на 20 секунд.",
+   "pl": "Zabicie wroga z efektem statusu daje wszystkim członkom grupy w promieniu 20 metrów 18% szansy i 18% obrażeń krytycznych na 20 sekund.",
+   "nl": "Een vijand met een statuseffect doden geeft alle groepsleden binnen 20 meter 20 seconden lang 18% kritieke-treffer-kans en 18% kritieke-treffer-schade."
   },
   "Perfectly Accurate": {
-   "tr": "Doğruluk %25 artırılır.",
+   "tr": "İsabet %25 artar.",
    "_src": "Accuracy is increased by 25%.",
-   "_mt": "tr"
+   "de": "Die Genauigkeit wird um 25 % erhöht.",
+   "fr": "La précision augmente de 25 %.",
+   "es": "La precisión aumenta un 25 %.",
+   "it": "La precisione aumenta del 25%.",
+   "pt": "A precisão aumenta em 25%.",
+   "ru": "Точность повышается на 25%.",
+   "pl": "Celność wzrasta o 25%.",
+   "nl": "De nauwkeurigheid stijgt met 25%."
   },
   "Perfectly Close & Personal": {
-   "tr": "7 metre içinde bir hedefi öldürmek, 10 saniye boyunca %38 silah hasarı verir.",
+   "tr": "7 metre içinde bir hedefi öldürmek 10 saniyeliğine %38 silah hasarı verir.",
    "_src": "Killing a target within 7 meters grants 38% weapon damage for 10 seconds",
-   "_mt": "tr"
+   "de": "Ein Ziel innerhalb von 7 Metern zu töten gewährt 10 Sekunden lang 38 % Waffenschaden.",
+   "fr": "Tuer une cible à moins de 7 mètres donne 38 % de dégâts d'arme pendant 10 secondes.",
+   "es": "Matar a un objetivo a menos de 7 metros da 38 % de daño de arma durante 10 segundos.",
+   "it": "Uccidere un bersaglio entro 7 metri dà il 38% di danni dell'arma per 10 secondi.",
+   "pt": "Matar um alvo a até 7 metros dá 38% de dano de arma por 10 segundos.",
+   "ru": "Убийство цели в пределах 7 метров даёт +38% к урону оружия на 10 секунд.",
+   "pl": "Zabicie celu w promieniu 7 metrów daje 38% obrażeń broni na 10 sekund.",
+   "nl": "Een doelwit binnen 7 meter doden geeft 10 seconden lang 38% wapenschade."
   },
   "Perfectly Extra": {
-   "tr": "+%20 Dergi Kapasitesi.",
+   "tr": "+%20 şarjör kapasitesi.",
    "_src": "+20% Magazine Capacity.",
-   "_mt": "tr"
+   "de": "+20 % Magazingröße.",
+   "fr": "+20 % de capacité du chargeur.",
+   "es": "+20 % de capacidad del cargador.",
+   "it": "+20% di capacità del caricatore.",
+   "pt": "+20% de capacidade do carregador.",
+   "ru": "+20% к ёмкости магазина.",
+   "pl": "+20% pojemności magazynka.",
+   "nl": "+20% magazijncapaciteit."
   },
   "Perfectly Ignited": {
-   "tr": "Yanan düşmanlara %25 silah hasarı verin. 3 cinayetten sonra, vurduğunuz bir sonraki düşmana yanma uygular.",
+   "tr": "Yanan düşmanlara %25 silah hasarı verirsin. 3 öldürmeden sonra vurduğun sıradaki düşmana yanma uygulanır.",
    "_src": "Deal 25% weapon damage to burning enemies. After 3 kills, applies burning to the",
-   "_mt": "tr"
+   "de": "Verursacht 25 % Waffenschaden an brennenden Gegnern. Nach 3 Kills wird der nächste getroffene Gegner in Brand gesetzt.",
+   "fr": "Inflige 25 % de dégâts d'arme aux ennemis en feu. Après 3 éliminations, le prochain ennemi touché prend feu.",
+   "es": "Inflige 25 % de daño de arma a enemigos en llamas. Tras 3 bajas, el siguiente enemigo golpeado empieza a arder.",
+   "it": "Infligge il 25% di danni dell'arma ai nemici in fiamme. Dopo 3 uccisioni, il prossimo nemico colpito prende fuoco.",
+   "pt": "Causa 25% de dano de arma a inimigos em chamas. Após 3 abates, o próximo inimigo atingido pega fogo.",
+   "ru": "Наносит +25% урона оружия горящим врагам. После 3 убийств следующий поражённый враг загорается.",
+   "pl": "Zadaje 25% obrażeń broni płonącym wrogom. Po 3 zabójstwach następny trafiony wróg staje w płomieniach.",
+   "nl": "Doet 25% wapenschade tegen brandende vijanden. Na 3 kills vliegt de volgende geraakte vijand in brand."
   },
   "Perfectly Measured": {
-   "tr": "Derginin ilk yarısında +20% yangın oranı ve -30% silah hasarı vardır. Derginin alt yarısı -%20 oranında yangın ve +30% silah hasarına sahiptir.",
+   "tr": "Şarjörün üst yarısı +%20 atış hızı ve -%30 silah hasarına, alt yarısı -%20 atış hızı ve +%30 silah hasarına sahiptir.",
    "_src": "The top half of the magazine has +20% rate of fire and -30% weapon damage. The b",
-   "_mt": "tr"
+   "de": "Die obere Magazinhälfte hat +20 % Feuerrate und -30 % Waffenschaden. Die untere Hälfte hat -20 % Feuerrate und +30 % Waffenschaden.",
+   "fr": "La moitié supérieure du chargeur a +20 % de cadence et -30 % de dégâts d'arme. La moitié inférieure a -20 % de cadence et +30 % de dégâts d'arme.",
+   "es": "La mitad superior del cargador tiene +20 % de cadencia y -30 % de daño de arma. La mitad inferior tiene -20 % de cadencia y +30 % de daño de arma.",
+   "it": "La metà superiore del caricatore ha +20% di cadenza e -30% di danni dell'arma. La metà inferiore ha -20% di cadenza e +30% di danni dell'arma.",
+   "pt": "A metade superior do carregador tem +20% de cadência e -30% de dano de arma. A metade inferior tem -20% de cadência e +30% de dano de arma.",
+   "ru": "Верхняя половина магазина даёт +20% к скорострельности и -30% к урону оружия. Нижняя половина даёт -20% к скорострельности и +30% к урону оружия.",
+   "pl": "Górna połowa magazynka ma +20% szybkostrzelności i -30% obrażeń broni. Dolna połowa ma -20% szybkostrzelności i +30% obrażeń broni.",
+   "nl": "De bovenste helft van het magazijn heeft +20% vuursnelheid en -30% wapenschade. De onderste helft heeft -20% vuursnelheid en +30% wapenschade."
   },
   "Perfectly Naked": {
-   "tr": "Zırhsız bir düşmana vurmak, 5 saniye boyunca %50'lik bir kafa atışı hasarı verir.",
+   "tr": "Zırhı olmayan bir düşmana vurmak 5 saniyeliğine %50 kafa vuruşu hasarı verir.",
    "_src": "Hitting an enemy with no armor grants 50% headshot damage for 5 seconds.",
-   "_mt": "tr"
+   "de": "Einen Gegner ohne Rüstung zu treffen gewährt 5 Sekunden lang 50 % Kopftreffer-Schaden.",
+   "fr": "Toucher un ennemi sans armure donne 50 % de dégâts de tir à la tête pendant 5 secondes.",
+   "es": "Golpear a un enemigo sin armadura da 50 % de daño de disparo a la cabeza durante 5 segundos.",
+   "it": "Colpire un nemico senza armatura dà il 50% di danni da colpo alla testa per 5 secondi.",
+   "pt": "Acertar um inimigo sem armadura dá 50% de dano de tiro na cabeça por 5 segundos.",
+   "ru": "Попадание по врагу без брони даёт +50% к урону в голову на 5 секунд.",
+   "pl": "Trafienie wroga bez pancerza daje 50% obrażeń w głowę na 5 sekund.",
+   "nl": "Een vijand zonder pantser raken geeft 5 seconden lang 50% headshot-schade."
   },
   "Perfectly On Empty": {
-   "tr": "Boşluktan yeniden yükleme, 10 saniye boyunca %40 silah kullanımı sağlar.",
+   "tr": "Boş şarjörden yeniden doldurmak 10 saniyeliğine %40 silah kullanımı verir.",
    "_src": "Reloading from empty grants 40% weapon handling for 10 seconds.",
-   "_mt": "tr"
+   "de": "Nachladen aus leerem Magazin gewährt 10 Sekunden lang 40 % Waffenhandhabung.",
+   "fr": "Recharger à vide donne 40 % de maniement pendant 10 secondes.",
+   "es": "Recargar con el cargador vacío da 40 % de manejo durante 10 segundos.",
+   "it": "Ricaricare a caricatore vuoto dà il 40% di maneggevolezza per 10 secondi.",
+   "pt": "Recarregar com o carregador vazio dá 40% de manuseio por 10 segundos.",
+   "ru": "Перезарядка пустого магазина даёт +40% к управляемости на 10 секунд.",
+   "pl": "Przeładowanie pustego magazynka daje 40% obsługi broni na 10 sekund.",
+   "nl": "Herladen uit een leeg magazijn geeft 10 seconden lang 40% wapenhantering."
   },
   "Perfectly Optimized": {
-   "tr": "+%10 Silah Taşıma.",
+   "tr": "+%10 silah kullanımı.",
    "_src": "+10% Weapon Handling.",
-   "_mt": "tr"
+   "de": "+10 % Waffenhandhabung.",
+   "fr": "+10 % de maniement.",
+   "es": "+10 % de manejo.",
+   "it": "+10% di maneggevolezza.",
+   "pt": "+10% de manuseio.",
+   "ru": "+10% к управляемости.",
+   "pl": "+10% obsługi broni.",
+   "nl": "+10% wapenhantering."
   },
   "Perfectly Steady Handed": {
-   "tr": "Hits, %1 doğruluk ve istikrar yığını sağlar. 75 istifte, dergiyi doldurmak için onları tüketir.",
+   "tr": "İsabetler %1 isabet ve stabilite yığını verir. 75 yığında bunları tüketip şarjörü doldurur.",
    "_src": "Hits grant a stack of 1% accuracy and stability. At 75 stacks, consumes them to ",
-   "_mt": "tr"
+   "de": "Treffer gewähren einen Stapel mit 1 % Genauigkeit und Stabilität. Bei 75 Stapeln werden diese verbraucht, um das Magazin aufzufüllen.",
+   "fr": "Les coups au but donnent une charge de 1 % de précision et de stabilité. À 75 charges, elles sont consommées pour remplir le chargeur.",
+   "es": "Los impactos dan una acumulación de 1 % de precisión y estabilidad. Con 75 acumulaciones se consumen para rellenar el cargador.",
+   "it": "I colpi a segno danno una carica dell'1% di precisione e stabilità. A 75 cariche vengono consumate per riempire il caricatore.",
+   "pt": "Acertos dão um acúmulo de 1% de precisão e estabilidade. Com 75 acúmulos, eles são consumidos para encher o carregador.",
+   "ru": "Попадания дают заряд +1% к точности и стабильности. При 75 зарядах они расходуются на пополнение магазина.",
+   "pl": "Trafienia dają ładunek 1% celności i stabilności. Przy 75 ładunkach zużywają się, uzupełniając magazynek.",
+   "nl": "Treffers geven een stapel van 1% nauwkeurigheid en stabiliteit. Bij 75 stapels worden ze verbruikt om het magazijn te vullen."
   },
   "Perfectly Unhinged": {
-   "tr": "%25 stabilite ve %25 doğruluk maliyetinde %22 silah hasarı alın.",
+   "tr": "%25 stabilite ve %25 isabet karşılığında %22 silah hasarı alırsın.",
    "_src": "Receive 22% weapon damage at the cost of 25% stability and 25% accuracy.",
-   "_mt": "tr"
+   "de": "Erhalte 22 % Waffenschaden auf Kosten von 25 % Stabilität und 25 % Genauigkeit.",
+   "fr": "Obtenez 22 % de dégâts d'arme au prix de 25 % de stabilité et 25 % de précision.",
+   "es": "Obtienes 22 % de daño de arma a costa de 25 % de estabilidad y 25 % de precisión.",
+   "it": "Ottieni il 22% di danni dell'arma al costo del 25% di stabilità e del 25% di precisione.",
+   "pt": "Receba 22% de dano de arma ao custo de 25% de estabilidade e 25% de precisão.",
+   "ru": "Даёт +22% к урону оружия ценой -25% к стабильности и -25% к точности.",
+   "pl": "Daje 22% obrażeń broni kosztem 25% stabilności i 25% celności.",
+   "nl": "Krijg 22% wapenschade ten koste van 25% stabiliteit en 25% nauwkeurigheid."
   }
  }
 }

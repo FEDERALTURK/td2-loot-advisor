@@ -1,7 +1,7 @@
 {
  "schema": 1,
- "version": "2026-10-27.1",
- "updated": "2026-10-27T01:38:26Z",
+ "version": "2026-11-02.1",
+ "updated": "2026-11-02T01:43:44Z",
  "season": "Year 8 Season 3 – Red Horizon",
  "generator": "seed (manual research)",
  "popularity_method": "0-100; seed = how many independent sources feature the build, weighted by recency. Daily updater adds engagement signals (views/upvotes) where public.",
@@ -156,7 +156,7 @@
     "Perfect Optimized": 2,
     "Flatline": 3
    },
-   "popularity": 69,
+   "popularity": 72,
    "sources": [
     {
      "title": "Overgear – Division 2 builds (Red Horizon)",
@@ -169,6 +169,14 @@
     {
      "title": "GrindOut – Division 2 builds (Red Horizon, updated Oct 23 2026)",
      "url": "https://grindout.com/division-2/guides/builds"
+    },
+    {
+     "title": "FRANK (YouTube, Oct 2 2026) – 5 Division 2 builds that can handle almost anything",
+     "url": "https://www.youtube.com/watch?v=ecYq1Ff-H8w"
+    },
+    {
+     "title": "Neonsect – Solo Legendary Strongholds builds (Red Horizon)",
+     "url": "https://neonsect.com/the-division-2/solo-legendary-strongholds-builds/"
     }
    ],
    "summary": {
@@ -319,7 +327,7 @@
    "talents": {
     "Perfect Obliterate": 2
    },
-   "popularity": 75,
+   "popularity": 77,
    "sources": [
     {
      "title": "Overgear – Division 2 builds (Red Horizon)",
@@ -332,6 +340,10 @@
     {
      "title": "GrindOut – Division 2 builds (Red Horizon, updated Oct 23 2026)",
      "url": "https://grindout.com/division-2/guides/builds"
+    },
+    {
+     "title": "FRANK (YouTube, Oct 2 2026) – 5 Division 2 builds that can handle almost anything",
+     "url": "https://www.youtube.com/watch?v=ecYq1Ff-H8w"
     }
    ],
    "summary": {
@@ -465,11 +477,15 @@
    "talents": {
     "Perfect Protector": 2
    },
-   "popularity": 50,
+   "popularity": 54,
    "sources": [
     {
      "title": "Overgear – Division 2 builds (Red Horizon)",
      "url": "https://overgear.com/guides/division-2/best-builds-for-any-activities/"
+    },
+    {
+     "title": "BoostRoom – Division 2 builds guide (Aug 27, 2026)",
+     "url": "https://boostroom.com/blog/the-division-2-builds-guide-best-builds-gear-sets-and-playstyles"
     }
    ],
    "summary": {
@@ -507,11 +523,15 @@
    "talents": {
     "Perfect Vanguard": 2
    },
-   "popularity": 60,
+   "popularity": 62,
    "sources": [
     {
      "title": "The Division Dispatch – build guides",
      "url": "https://thedivisiondispatch.com/build-guides/"
+    },
+    {
+     "title": "BoostRoom – Division 2 builds guide (Aug 27, 2026)",
+     "url": "https://boostroom.com/blog/the-division-2-builds-guide-best-builds-gear-sets-and-playstyles"
     }
    ],
    "summary": {
@@ -653,7 +673,7 @@
     "Vigilance": 4,
     "Boomerang": 3
    },
-   "popularity": 52,
+   "popularity": 56,
    "sources": [
     {
      "title": "allthings.how – Red Moon Unleashed rewards, bounties and best build",
@@ -662,11 +682,123 @@
     {
      "title": "widdz (YouTube, Oct 17 2026) – 3 best builds for Red Moon Unleashed",
      "url": "https://www.youtube.com/watch?v=zLuctuWy9Ok"
+    },
+    {
+     "title": "FRANK (YouTube, Oct 2 2026) – 5 Division 2 builds that can handle almost anything",
+     "url": "https://www.youtube.com/watch?v=ecYq1Ff-H8w"
     }
    ],
    "summary": {
     "en": "4x Aces & Eights + 2x Palisade (backpack with Vigilance), rifle like UIC15 MOD2 with Boomerang; stack Protection from Elites mods. Benefits from the Y8S3.2 rifle buff.",
     "tr": "4 Aces & Eights + 2 Palisade (sırt çantası Vigilance), Boomerang'lı tüfek (ör. UIC15 MOD2); modlarda Protection from Elites topla. Y8S3.2 tüfek güçlendirmesinden faydalanır."
+   }
+  },
+  {
+   "id": "core-strength-memento",
+   "name": "Core Strength Memento (Fafnir / Status)",
+   "mode": "PvE / Solo farm",
+   "role": "close",
+   "sets_or_brands": [
+    "Core Strength",
+    "Electrique"
+   ],
+   "set_bonus": 15,
+   "attributes": {
+    "status_effects": {
+     "weight": 3,
+     "good_at": 8
+    },
+    "armor": {
+     "weight": 2.5,
+     "good_at": 5
+    },
+    "weapon_damage": {
+     "weight": 1,
+     "good_at": 10
+    }
+   },
+   "talents": {
+    "Kill Confirmed": 4
+   },
+   "items": [
+    "Fafnir",
+    "Memento"
+   ],
+   "popularity": 58,
+   "sources": [
+    {
+     "title": "GrindOut – Division 2 builds (Red Horizon, updated Oct 23 2026)",
+     "url": "https://grindout.com/division-2/guides/builds"
+    },
+    {
+     "title": "Overgear – Division 2 builds (Red Horizon)",
+     "url": "https://overgear.com/guides/division-2/best-builds-for-any-activities/"
+    },
+    {
+     "title": "LFCarry – Division 2 builds Y8S3 (updated Oct 27 2026)",
+     "url": "https://lfcarry.com/guides/division-2-builds"
+    }
+   ],
+   "summary": {
+    "en": "Core Strength with Memento backpack and blue cores with Status Effects, Fafnir shotgun; Gunner, Crusader shield and Reviver Hive for solo farming. Overgear's variant runs Capacitor or St. Elmo's Engine instead.",
+    "tr": "Core Strength + Memento sırt çantası, mavi çekirdek ve Status Effects, Fafnir pompalı; solo farm için Gunner, Crusader kalkan ve Reviver Hive. Overgear varyantı Capacitor veya St. Elmo's Engine kullanır."
+   }
+  },
+  {
+   "id": "empress-capacitor-skill",
+   "name": "Empress Capacitor (Skill)",
+   "mode": "Legendary / Solo",
+   "role": "skill",
+   "sets_or_brands": [
+    "Empress International",
+    "Hana-U Corporation"
+   ],
+   "set_bonus": 15,
+   "attributes": {
+    "skill_damage": {
+     "weight": 3,
+     "good_at": 8
+    },
+    "skill_haste": {
+     "weight": 2.5,
+     "good_at": 8
+    },
+    "skill_tier": {
+     "weight": 3,
+     "good_at": 1
+    },
+    "skill_duration": {
+     "weight": 1,
+     "good_at": 8
+    }
+   },
+   "talents": {
+    "Glass Cannon": 3,
+    "Combined Arms": 3,
+    "In Sync": 2
+   },
+   "items": [
+    "Capacitor",
+    "Waveform"
+   ],
+   "popularity": 60,
+   "sources": [
+    {
+     "title": "GrindOut – Division 2 builds (Red Horizon, updated Oct 23 2026)",
+     "url": "https://grindout.com/division-2/guides/builds"
+    },
+    {
+     "title": "Neonsect – Solo Legendary Strongholds builds (Red Horizon)",
+     "url": "https://neonsect.com/the-division-2/solo-legendary-strongholds-builds/"
+    },
+    {
+     "title": "LFCarry – Division 2 builds Y8S3 (updated Oct 27 2026)",
+     "url": "https://lfcarry.com/guides/division-2-builds"
+    }
+   ],
+   "summary": {
+    "en": "3x Empress + 2x Hana-U with Waveform and Capacitor, yellow cores, Skill Damage and Skill Haste; Technician, Striker Drone and Assault Turret. Red Horizon raised Empress skill damage.",
+    "tr": "3 Empress + 2 Hana-U, Waveform ve Capacitor; sarı çekirdek, Skill Damage ve Skill Haste; Technician, Striker Drone ve Assault Turret. Red Horizon, Empress skill hasarını artırdı."
    }
   }
  ]
