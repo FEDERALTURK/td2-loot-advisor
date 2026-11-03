@@ -1,21 +1,20 @@
-// td2 hero background: a quiet tactical "radar network" — small drifting nodes,
-// linked by faint lines when close, like a HUD scan. No external assets, no game
-// footage (keeps this copyright-clean and bandwidth-free on Cloudflare Pages).
+// td2 site-wide background: a quiet tactical "radar network" — small drifting
+// nodes, linked by faint lines when close, like a HUD scan. Fixed to the
+// viewport so it covers the whole page, not just one section. No external
+// assets, no game footage (copyright-clean, zero bandwidth on Cloudflare Pages).
 (() => {
-  const canvas = document.getElementById("td2-hero-canvas");
+  const canvas = document.getElementById("td2-bg-canvas");
   if (!canvas || !canvas.getContext) return;
   const ctx = canvas.getContext("2d");
-  const hero = canvas.closest(".td2-hero");
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   let w = 0, h = 0, dpr = Math.min(window.devicePixelRatio || 1, 2);
   let nodes = [];
-  const LINK_DIST = 130;
-  const SPEED = 0.18;
+  const LINK_DIST = 140;
+  const SPEED = 0.16;
 
   function sizeCanvas() {
-    const r = hero.getBoundingClientRect();
-    w = r.width; h = r.height;
+    w = window.innerWidth; h = window.innerHeight;
     canvas.width = Math.round(w * dpr);
     canvas.height = Math.round(h * dpr);
     canvas.style.width = w + "px";
@@ -24,8 +23,8 @@
   }
 
   function makeNodes() {
-    const density = 16000; // px^2 per node
-    const count = Math.max(14, Math.min(60, Math.round((w * h) / density)));
+    const density = 17000; // px^2 per node
+    const count = Math.max(16, Math.min(70, Math.round((w * h) / density)));
     nodes = Array.from({ length: count }, () => ({
       x: Math.random() * w,
       y: Math.random() * h,
@@ -49,25 +48,19 @@
         const dx = a.x - b.x, dy = a.y - b.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
         if (dist < LINK_DIST) {
-          ctx.strokeStyle = `rgba(255,109,16,${(1 - dist / LINK_DIST) * 0.22})`;
+          ctx.strokeStyle = `rgba(255,109,16,${(1 - dist / LINK_DIST) * 0.18})`;
           ctx.lineWidth = 1;
           ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
         }
       }
     }
     for (const n of nodes) {
-      ctx.fillStyle = "rgba(255,138,61,.55)";
+      ctx.fillStyle = "rgba(255,138,61,.5)";
       ctx.beginPath(); ctx.arc(n.x, n.y, 1.6, 0, Math.PI * 2); ctx.fill();
     }
   }
 
-  function drawStaticFrame() {
-    sizeCanvas();
-    makeNodes();
-    step();
-  }
-
-  if (reduce) { drawStaticFrame(); return; }
+  if (reduce) { sizeCanvas(); makeNodes(); step(); return; }
 
   let raf = null;
   function loop() { step(); raf = requestAnimationFrame(loop); }

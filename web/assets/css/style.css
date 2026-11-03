@@ -34,6 +34,8 @@ body::before {
     repeating-linear-gradient(0deg, rgba(255, 255, 255, .025) 0 1px, transparent 1px 48px),
     repeating-linear-gradient(90deg, rgba(255, 255, 255, .025) 0 1px, transparent 1px 48px);
 }
+/* site-wide drifting radar-node network, drawn on canvas, sat behind the grid above */
+.td2-bg-canvas { position: fixed; inset: 0; z-index: -2; pointer-events: none; }
 a { color: var(--accent-2); text-decoration: none; }
 a:hover { text-decoration: underline; }
 img { max-width: 100%; }
@@ -107,9 +109,6 @@ img { max-width: 100%; }
 .td2-hero p { color: var(--muted); font-size: 18px; max-width: 640px; margin: 0 auto 28px; }
 .td2-hero .cta-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 14px; }
 .td2-hero .note { color: var(--muted); font-size: 13px; }
-
-/* drifting radar-node network, drawn on canvas, sat behind the glow */
-.td2-hero-canvas { position: absolute; inset: 0; z-index: -2; }
 
 /* cursor-reactive targeting glow behind the hero copy */
 .td2-hero-glow {
