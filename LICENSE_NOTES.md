@@ -19,4 +19,4 @@ CC BY-NC-SA 4.0'daki "ticari olmayan kullanım" şartı, bu veriyi **doğrudan s
 ## Önerilen adım
 En sağlam çözüm, mxswat'a (GitHub üzerinden, repo'nun Issues'ı veya profili) kısaca ulaşıp bu küçük, açık kaynaklı, kâr amacı gütmeyen projede verinin bu şekilde (bir kısmı ücretsiz katalog, bir kısmı dolaylı olarak premium bir öneri özelliğinde) kullanılmasının uygun olup olmadığını sormak ve yanıtı burada (bu dosyada) kayıt altına almaktır. Yanıt olumsuz veya belirsiz kalırsa, en güvenli adım `recal_advisor`'ı yalnızca kullanıcının kendi taranmış/girilmiş eşya verisiyle çalışacak şekilde sınırlamak (mx kaynaklı katalog alanlarını bu öneri motorundan çıkarmak) olur.
 
-*(Bu not [tarih: bu sürümün yayın tarihi] itibarıyla eklenmiştir; mxswat'tan bir yanıt gelirse buraya eklenmelidir.)*
+**Durum (2026-11-03):** Soru mxswat'a GitHub Issues üzerinden soruldu — [mxswat/mx-division-builds#153](https://github.com/mxswat/mx-division-builds/issues/153). Yanıt bekleniyor; gelince bu bölüm güncellenecek.

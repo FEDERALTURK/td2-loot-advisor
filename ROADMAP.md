@@ -33,7 +33,7 @@ Bu dosya her gün güncellenir (bkz. en alt — otomatik günlük görev). Ayrı
 ## Diğer açık kalemler (BUGS.md/HANDOFF.md'den)
 
 - `master` dalı hâlâ silinmedi — kullanıcı GitHub Settings'ten silmeli (ortam kısıtlaması, bkz. HANDOFF.md).
-- mxswat/mx-division-builds lisans sorusu — issue taslağı hazır, kullanıcının GitHub'dan açması gerekiyor (üçüncü taraf repoya yazma, ortam kısıtlaması).
+- mxswat/mx-division-builds lisans sorusu — [issue #153](https://github.com/mxswat/mx-division-builds/issues/153) açıldı (2026-11-03, kullanıcının PC'sinde kendi GitHub oturumuyla), yanıt bekleniyor.
 - Tanıtım videoları (private repo) yayınlanmadı — kullanıcı onayı bekliyor.
 - SignPath durumu bilinmiyor.
 

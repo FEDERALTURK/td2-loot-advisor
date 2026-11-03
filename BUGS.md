@@ -10,7 +10,7 @@
 ## Açık / kullanıcı işlemi gerektiren
 
 1. **`master` dalı silinmedi.** İçeriği tamamen `main`'e merge edildi (kayıpsız), ama bu AI oturumunun ortam politikası `git push --delete` ve GitHub API `DELETE /git/refs` çağrılarını "bu proxy üzerinden yazma erişimine izin verilmiyor" diyerek engelliyor — kullanıcı onayıyla bile aşılamayan sabit bir platform kısıtlaması. **Kullanıcı kendisi silmeli**: GitHub → Settings → Branches, veya yerel `git push origin --delete master`, veya Actions sekmesinden `retire-releases.yml` workflow'unu `branches: master` ile manuel tetikleyerek.
-2. **mx-division-builds (CC BY-NC-SA 4.0) lisans gri alanı.** `recal_advisor` premium özelliği bu ticari-olmayan veriye dolaylı dokunuyor olabilir. `LICENSE_NOTES.md`'de belgelendi, mxswat'a henüz ulaşılmadı (bkz. HANDOFF.md).
+2. **mx-division-builds (CC BY-NC-SA 4.0) lisans gri alanı.** `recal_advisor` premium özelliği bu ticari-olmayan veriye dolaylı dokunuyor olabilir. `LICENSE_NOTES.md`'de belgelendi; mxswat'a soru [issue #153](https://github.com/mxswat/mx-division-builds/issues/153) ile soruldu (2026-11-03), yanıt bekleniyor (bkz. HANDOFF.md).
 3. **Tanıtım videoları yayınlanmadı.** Private `td2-loot-advisor-reports` reposundaki `promo` dalı kendi `main`'ine merge edilmemiş; README/Release/YouTube'a koyma kararı kullanıcı onayı bekliyor.
 4. **SignPath kod imzalama durumu bilinmiyor.** Bu oturumda kontrol edilmedi/yapılmadı (kimlik bilgilerine erişim gerektirir).
 
