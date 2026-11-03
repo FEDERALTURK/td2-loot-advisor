@@ -1,5 +1,11 @@
 ## TD2 Loot Advisor — Windows
 
+**9.1.5.20 — Hesap panelinde telefon eşleştirme**
+
+- **Yeni: "Telefon eşleştir" düğmesi.** Hesap panelinde, 5 dakika geçerli bir eşleştirme kodu üretir; bu kodu TD2 Loot Advisor Companion (Flutter) mobil uygulamasının "Bulut eşleştirmesi" ekranına girerek telefon, masaüstü hesabına bağlanabilir. Build senkronu ve bulut gösterge paneli bu bağlantı üzerinden çalışır; mevcut LAN/QR eşleştirmesine dokunulmadı, o ayrı ve bağımsız çalışmaya devam ediyor.
+- Eşleştirme kodu üretme/cihaz listeleme/cihaz iptal etme sunucu uçlarına karşı uçtan uca test edildi (28/28 geçti, regresyon yok).
+- Bu sürümde yalnızca masaüstü (Windows) uygulaması değişti. Sunucu tarafı (bulut eşleştirmesi, push bildirimi altyapısı) ayrı olarak zaten canlıda; mobil (Flutter) companion uygulaması henüz ayrı bir App/Play Store yayını olarak dağıtılmıyor.
+
 **9.1.5.19 — Kod taraması: çökme düzeltmeleri ve lisans şeffaflığı**
 
 - **Gerçek çökme düzeltmesi:** Ansiklopedi ve kaynak listelerindeki "Kaynağı aç" / "Aç" düğmeleri (`webbrowser` modülü eksik içe aktarmaydı) tıklandığında bazı ekranlarda programın hata vermesine yol açabiliyordu; artık modül en üstte, her zaman yüklü.
