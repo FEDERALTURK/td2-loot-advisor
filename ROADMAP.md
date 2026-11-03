@@ -10,7 +10,7 @@ Bu dosya her gün güncellenir (bkz. en alt — otomatik günlük görev). Ayrı
 | Mobil companion (Flutter) | **Faz 2 tamamlandı ve canlı; Faz 3'te bulut eşleştirmesi/build senkronu eklendi, Windows PC'de `flutter analyze`/`test` ile doğrulandı (0 sorun).** Gerçek cihaz/Play doğrulaması ve push-token kaydı (bkz. aşağıda) hâlâ bekliyor. |
 | Topluluk sunucusu (Cloudflare Worker) | Canlı. Mobil uçlar (eşleştirme, build senkronu, cihaz listesi/iptali, hesap silme) production'da. |
 | Lisans/telif (mx-division-builds) | [issue #153](https://github.com/mxswat/mx-division-builds/issues/153) açıldı, yanıt bekleniyor. |
-| Kod imzalama (SignPath) | Ücretsiz OSS başvurusu gönderildi (2026-11-03), SignPath'ten yanıt bekleniyor. |
+| Kod imzalama (SignPath) | **Reddedildi (2026-11-03).** Foundation (ücretsiz OSS) programı, GitHub yıldız/fork/katkıcı sayısı, dış makale/referans ve kurumsal destek gibi "kamuya görünürlük" sinyalleri yeterli olmadığı için onaylanmadı — proje kalitesiyle ilgisiz, tamamen görünürlük eşiği meselesi. Görünürlük arttıkça yeniden başvurulabilir; alternatif olarak ücretli SignPath aboneliği veya başka bir imzalama sağlayıcısı (ör. Azure Trusted Signing ~$9.99/ay — ABD/Kanada kökenli kuruluş şartı bildirilen yorumlar var, Türkiye'den uygunluk doğrulanmalı) değerlendirilebilir. |
 | Web sitesi (`web/`) | **Yayında (2026-11-03):** https://td2-loot-advisor.pages.dev — Cloudflare Pages'e GitHub bağlantısıyla yayınlandı, `td2-stats` Worker'ı da Cloudflare Workers Builds ile `main`'e bağlandı (otomatik CI/CD). Taktik HUD görsel kimliği eklendi. Geriye kalan: Gumroad ürünü (kullanıcı tarafı). Bkz. aşağıda ve `web/README.md`. |
 
 ## Şu an aktif: Web sitesi (`web/`) — YAYINDA, HUD görsel kimliği eklendi
@@ -108,7 +108,27 @@ başarıyla yüklendi, konsol hatası yok).
   bkz. HANDOFF.md) — kullanıcı GitHub Settings → Branches'tan silebilir, düşük risk.
 - mxswat/mx-division-builds lisans sorusu — [issue #153](https://github.com/mxswat/mx-division-builds/issues/153) açıldı (2026-11-03, kullanıcının PC'sinde kendi GitHub oturumuyla), yanıt bekleniyor. (Bu repo bu oturumun GitHub erişim kapsamında değil, durumu doğrudan kontrol edilemedi.)
 - Tanıtım videoları (private repo) yayınlanmadı — kullanıcı onayı bekliyor.
-- **SignPath Foundation ücretsiz kod imzalama başvurusu gönderildi (2026-11-03)** — signpath.org/apply formu dolduruldu (proje bilgileri, dürüst "Reputation" metni, `PRIVACY_POLICY.md` linki dahil) ve kullanıcı tarafından onaylanıp gönderildi ("Form submitted — we'll be in touch soon"). Onay/red yanıtı bekleniyor; onaylanırsa yapılacaklar: (1) indirme sayfasına SignPath'in istediği "Code signing policy" notu eklenmeli, (2) verilecek API token/proje slug'ı Cloudflare/GitHub secret olarak saklanmalı, (3) `.github/workflows/build-installer.yml`'a imzalama adımı eklenmeli.
+- **SignPath Foundation ücretsiz kod imzalama başvurusu — REDDEDİLDİ (2026-11-03).** signpath.org/apply formu
+  dolduruldu (proje bilgileri, dürüst "Reputation" metni, `PRIVACY_POLICY.md` linki dahil) ve kullanıcı tarafından
+  onaylanıp gönderilmişti. Phillip Deng (SignPath) imzalı yanıt (e-posta, 2026-11-03 17:37): *"we're unable to
+  approve your application at this time... we look for external signals such as community adoption (GitHub stars,
+  forks, contributors), external articles, independent references or discussions (Reddit, Stack Overflow, YouTube,
+  etc.) or institutional backing, and evidence of sustained activity and engagement. At the moment your project
+  doesn't yet show enough of these signals..."* — yani ret, proje kalitesiyle değil, projenin henüz yeterli kamuya
+  görünürlüğe ulaşmamasıyla ilgili; görünürlük arttıkça yeniden başvuru açıkça teşvik ediliyor.
+  **Yapılmadı / olası sıradaki adımlar (kullanıcı kararı bekliyor):**
+  1. Görünürlük biriktirip (GitHub star/fork, Reddit/r/thedivision paylaşımı, YouTube tanıtımı — zaten bekleyen
+     `promo` dalı bu amaca hizmet eder, bkz. yukarıda) SignPath Foundation'a **yeniden başvurmak** (ücretsiz, ama
+     zamana yayılır).
+  2. **Ücretli** bir alternatif: SignPath'in kendi ücretli aboneliği (signpath.io/change-subscription) ya da
+     Azure Trusted Signing (~$9.99/ay'dan başlıyor diye duyuruldu, ancak kullanıcı yorumlarında ABD/Kanada kökenli
+     kuruluş + en az 3 yıl geçmiş şartı bildirilmiş — Türkiye merkezli bireysel başvuru için uygunluk **doğrulanmadı,
+     ödeme yapmadan önce Azure tarafında teyit edilmeli**) ya da geleneksel bireysel OV kod imzalama sertifikası
+     (SSL.com, Certum vb. — güncel fiyat ve kimlik doğrulama şartları sağlayıcı sitesinden kontrol edilmeli, burada
+     bir rakam iddia edilmiyor).
+  3. **Maliyetsiz ara çözüm:** İmzasız kalındığı sürece SmartScreen uyarısı devam eder ama Microsoft'un itibar
+     sistemi zamanla/temiz indirme sayısı arttıkça uyarıyı azaltabilir; bu arada indirme sayfasında/README'de
+     "neden imzasız, SHA256SUMS ile nasıl doğrulanır" açıklaması kullanıcı güvenini destekler.
 - **Yeni bulundu (2026-11-03) — `td2-loot-advisor-reports` [issue #4](https://github.com/federalturk/td2-loot-advisor-reports/issues/4), uygulama içinden otomatik gönderilmiş v9.1.5.18 çökme kaydı, hâlâ AÇIK:**
   kayıtta üç ayrı hata var. (1) `send_log_github`'ın `self.report_server()` çağırdığı ama `App` sınıfının bu
   metodu olmadığı hatası — **kod incelendi, `app.py`'da `report_server()` artık TANIMLI (satır ~8760) ve

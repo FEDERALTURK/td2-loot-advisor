@@ -12,7 +12,11 @@
 1. **`master` dalı silinmedi.** İçeriği tamamen `main`'e merge edildi (kayıpsız), ama bu AI oturumunun ortam politikası `git push --delete` ve GitHub API `DELETE /git/refs` çağrılarını "bu proxy üzerinden yazma erişimine izin verilmiyor" diyerek engelliyor — kullanıcı onayıyla bile aşılamayan sabit bir platform kısıtlaması. **Kullanıcı kendisi silmeli**: GitHub → Settings → Branches, veya yerel `git push origin --delete master`, veya Actions sekmesinden `retire-releases.yml` workflow'unu `branches: master` ile manuel tetikleyerek.
 2. **mx-division-builds (CC BY-NC-SA 4.0) lisans gri alanı.** `recal_advisor` premium özelliği bu ticari-olmayan veriye dolaylı dokunuyor olabilir. `LICENSE_NOTES.md`'de belgelendi; mxswat'a soru [issue #153](https://github.com/mxswat/mx-division-builds/issues/153) ile soruldu (2026-11-03), yanıt bekleniyor (bkz. HANDOFF.md).
 3. **Tanıtım videoları yayınlanmadı.** Private `td2-loot-advisor-reports` reposundaki `promo` dalı kendi `main`'ine merge edilmemiş; README/Release/YouTube'a koyma kararı kullanıcı onayı bekliyor.
-4. **SignPath kod imzalama durumu bilinmiyor.** Bu oturumda kontrol edilmedi/yapılmadı (kimlik bilgilerine erişim gerektirir).
+4. **SignPath Foundation (ücretsiz OSS kod imzalama) başvurusu reddedildi (2026-11-03).** Gerekçe: proje henüz
+   yeterli kamuya görünürlük sinyaline (GitHub star/fork/katkıcı, dış makale/referans, kurumsal destek, sürekli
+   aktivite) sahip değil — kod/proje kalitesiyle ilgisiz, tekrar başvuru açıkça teşvik ediliyor. Ayrıntı ve
+   alternatifler için `ROADMAP.md` → "Diğer açık kalemler" bölümüne bakın. Karar kullanıcıya ait: (a) görünürlük
+   biriktirip yeniden başvurmak, (b) ücretli bir imzalama sağlayıcısına geçmek, (c) şimdilik imzasız devam etmek.
 
 ## Doğrulanmamış / gerçek Windows'ta teyit gerekli
 

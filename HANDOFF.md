@@ -13,7 +13,10 @@ Son güncelleme: bu dosyayı güncelleyen oturumun yaptığı iş — 9.1.5.19 y
 1. **`master` dalını sil.** AI oturumunun ortam politikası, hem `git push --delete master` hem GitHub API `DELETE /git/refs/heads/master` çağrısını "proxy üzerinden yazma erişimine izin verilmiyor" diyerek engelliyor — bu, kullanıcı onayıyla bile aşılamayan sabit bir kısıtlama (iki farklı AI oturumunda iki farklı yöntemle doğrulandı). Kullanıcı GitHub Settings → Branches'tan, ya da kendi makinesinden `git push origin --delete master` ile, ya da Actions → `retire-releases.yml`'i `branches: master` girdisiyle manuel tetikleyerek silebilir.
 2. **mxswat'a lisans sorusu — açıldı, yanıt bekleniyor.** [mxswat/mx-division-builds#153](https://github.com/mxswat/mx-division-builds/issues/153) (2026-11-03, kullanıcının kendi GitHub oturumuyla, PC üzerinden tarayıcı otomasyonuyla gönderildi — bkz. `LICENSE_NOTES.md`). Yanıt gelince `LICENSE_NOTES.md`'deki "Durum" bölümü ve `recal_advisor`'ın kapsamı buna göre güncellenmeli.
 3. **Tanıtım videoları.** Private `td2-loot-advisor-reports`'taki `promo` dalı hâlâ merge edilmedi; README/Release/YouTube'a koyma kararı kullanıcıya ait.
-4. **SignPath.** Durumu bu oturumda kontrol edilmedi (kimlik bilgisi gerektirir, kullanıcı tarafında).
+4. **SignPath Foundation — reddedildi (2026-11-03).** Gerekçe kamuya görünürlük eşiği (GitHub star/fork, dış
+   referans, sürekli aktivite) — proje kalitesiyle ilgisiz. Kullanıcıdan karar bekleniyor: yeniden başvuru
+   (görünürlük arttıktan sonra, ücretsiz) mu, ücretli bir sağlayıcıya (SignPath ücretli abonelik / Azure Trusted
+   Signing / geleneksel OV sertifika) mı geçilsin, yoksa şimdilik imzasız mı devam edilsin. Ayrıntı: `ROADMAP.md`.
 
 ## Bir sonraki oturumun yapabileceği, teknik olarak hazır işler
 
