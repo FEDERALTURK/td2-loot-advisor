@@ -7,7 +7,10 @@ Cloudflare Workers + D1 (ücretsiz katman yeterli). Uygulama düşüşleri buray
 
 `https://td2-stats.td2loot.workers.dev` (Cloudflare panelinden kuruldu: D1 `td2stats`, bağlama `DB`,
 değişkenler `LICENSE_PUBKEY` ve gizli `HASH_SALT`). Uygulamanın varsayılan adresi budur (`dropstats.DEFAULT_URL`).
-Kod güncellemesi: Workers & Pages → td2-stats → Edit code → `worker.js` içeriğini yapıştır → Deploy.
+Kod güncellemesi (2026-11-03'ten beri): Worker, Cloudflare Workers Builds ile GitHub'a bağlı — `main` dalındaki
+`server/` dizinine giden her push, `npx wrangler deploy`'u otomatik tetikler (Root directory: `server`). Elle
+"Edit code" ile yapıştırma artık gerekmiyor; yalnızca manuel/acil bir düzeltme gerekiyorsa Cloudflare panelinden
+Quick Edit hâlâ kullanılabilir ama normal akış artık `git push`.
 
 ## Kurulum (bir kez, ~10 dakika)
 
