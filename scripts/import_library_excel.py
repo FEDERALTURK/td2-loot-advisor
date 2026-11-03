@@ -179,7 +179,7 @@ def main(xlsx, dry=False):
     print("değişiklikler:", ch)
     print("önce → sonra:", {k: f"{before.get(k)}→{after[k]}" for k in after if before.get(k) != after[k]})
     if not dry:
-        path.write_text(json.dumps(d, ensure_ascii=False, indent=1), encoding="utf-8")
+        path.write_text(json.dumps(d, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
         print("yazıldı:", path, "sürüm", d["version"])
     return ch
 

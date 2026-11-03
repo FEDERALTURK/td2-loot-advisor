@@ -2,6 +2,13 @@
 
 Önemli kararların ve sürümlerin kısa, kronolojik özeti. Tam ayrıntı için `git log` ve `.github/release_notes.md`.
 
+## Akış boyut sınırı: sıkıştırma ve ikinci açıklama dosyası (2026-11-03)
+
+- Uygulama 512 KiB'tan büyük akışı reddediyor (`meta_sync.MAX_BYTES`). `descriptions_i18n.json` 520.801, `game_data.json` 522.958 bayta ulaşmıştı.
+- Her iki dosya girintisiz yazıldı (475.914 ve 419.358 bayt), kullanılmayan `_src` kaldırıldı, veri içeriği değişmedi. `game_data.json` yazan betikler de girintisiz yazıyor.
+- Çevrilmemiş 210 giriş (~370 KB) tek dosyaya sığmıyor. Sınırı yükseltmek eski sürümlerin indirmesini keseceği için `descriptions_i18n_2.json` eklendi; `meta_sync.fetch_descriptions` iki dosyayı birleştirir. Kural: `meta/UPDATER.md`.
+- İkinci dosya, bu kodu içeren sürüm yayınlanınca kullanıcılara görünür.
+
 ## Web sitesi yayını + sunucu CI/CD (2026-11-03)
 
 - `web/` (hesap/haberler/premium/tanıtım sayfaları) Cloudflare Pages'e yayınlandı: https://td2-loot-advisor.pages.dev — GitHub bağlantılı (Pages → `main` dalı, build output `web`), Direct Upload değil (native dosya seçici tarayıcı otomasyonundan görünmediği için GitHub entegrasyonuna geçildi).

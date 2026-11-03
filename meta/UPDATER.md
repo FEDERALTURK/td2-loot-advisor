@@ -145,6 +145,7 @@ Kategoriler oyundaki menülerle birebir aynıdır (başka kategori kullanma):
 - v3 alanları (2026-10-24.5): `items` (named/egzotik ekipman → `slot`, `quality`, `brand`, `talent`),
   `weapon_index` (silah adı → `type`, `quality`; uzmanlık tabancaları `quality: specialization`, `spec`),
   `specialization_weapons`, `weapon_mods`, `gear_mods`, `skills`, `item_kinds`, `ui_words`.
+  `game_data.json` da uygulamaya indirilir ve 512 KiB sınırına tabidir: girintisiz (sıkıştırılmış) yaz.
   Yeni named/egzotik eklerken `items` / `weapon_index` içine de yuva/tür ile ekle. Dosyayı baştan YAZMA:
   mevcut JSON'u oku, `version`'ı artır. Kayıt yalnız güncel kaynakla yanlış olduğu doğrulanırsa silinir;
   örneğin The Division 1'e ait AlphaBridge Division 2 listesinden çıkarılmıştır.

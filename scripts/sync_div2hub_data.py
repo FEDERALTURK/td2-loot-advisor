@@ -292,7 +292,7 @@ def main() -> None:
         previous = re.fullmatch(r"(\d{4}-\d{2}-\d{2})\.(\d+)", current)
         sequence = int(previous.group(2)) + 1 if previous and previous.group(1) == today else 1
         data["version"] = f"{today}.{sequence}"
-    DATA.write_text(json.dumps(data, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    DATA.write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
     print("Updated", DATA)
     for key in ("items", "weapon_index", "weapons", "gear_sets", "brands", "gear_talents", "weapon_talents",
                 "weapon_mods", "gear_mods", "skills", "skill_variants", "prototype_augments"):
