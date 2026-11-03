@@ -169,6 +169,28 @@ async function desktopLogin(device) {
   row = sql.prepare("SELECT * FROM accounts WHERE id = ?").get(row.account_id);
   ok(!row, "accounts satırı kalıcı olarak silindi");
 
+  // --- temizlik: süresi DOĞAL OLARAK dolan (iptal edilmemiş) cihaz + onun push belirteci de silinmeli
+  const now = Math.floor(Date.now() / 1000);
+  const staleDevice = "stale-device-" + b64u(randomBytes(8));
+  sql.prepare(
+    "INSERT INTO mobile_devices (device_id, account_id, token_hash, platform, created, last_seen, expires, revoked) " +
+    "VALUES (?1, ?2, 'x', 'android', ?3, ?3, ?4, 0)"
+  ).run(staleDevice, 999, now - 200 * 86400, now - 8 * 86400);   // 8 gün önce süresi dolmuş
+  sql.prepare("INSERT INTO push_tokens (device_id, token, platform, created) VALUES (?1, 'tok', 'android', ?2)")
+    .run(staleDevice, now);
+  const freshDevice = "fresh-device-" + b64u(randomBytes(8));
+  sql.prepare(
+    "INSERT INTO mobile_devices (device_id, account_id, token_hash, platform, created, last_seen, expires, revoked) " +
+    "VALUES (?1, ?2, 'y', 'android', ?3, ?3, ?4, 0)"
+  ).run(freshDevice, 999, now, now + 100 * 86400);   // hâlâ geçerli
+  const cl2 = await mobileCleanup(env);
+  ok(cl2.expired_devices === 1, "temizlik tam olarak 1 doğal-süresi-dolmuş cihaz buldu");
+  ok(!sql.prepare("SELECT 1 FROM mobile_devices WHERE device_id = ?").get(staleDevice), "süresi dolan cihaz silindi");
+  ok(!sql.prepare("SELECT 1 FROM push_tokens WHERE device_id = ?").get(staleDevice),
+     "süresi dolan cihazın push belirteci de silindi (yetim kalmadı)");
+  ok(!!sql.prepare("SELECT 1 FROM mobile_devices WHERE device_id = ?").get(freshDevice),
+     "hâlâ geçerli cihaz temizlikten etkilenmedi");
+
   console.log(fails ? `\n${fails} FAIL` : "\nAll mobile tests passed");
   process.exit(fails ? 1 : 0);
 })();

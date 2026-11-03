@@ -88,6 +88,11 @@ Public task/news/game-data endpoints should be reused where their schemas and ca
   active paired phones. Also closed: `mobile_builds.deleted` existed in the schema and in `listBuilds`'s response
   but nothing ever set it — `DELETE /v1/mobile/builds/{client_id}` now soft-deletes (tombstone) so other devices
   learn about the deletion on their next sync.
+- ✅ **Third gap found and closed (2026-11-03):** a phone session that expired naturally (180-day TTL, never
+  explicitly revoked via `revokeDevice`) was never cleaned up — its `mobile_devices` row and, if it had
+  registered one, its `push_tokens` row stayed in D1 forever (an orphan, since only the explicit-revoke path
+  deleted push tokens). `cleanup()` now also purges naturally-expired, non-revoked devices and their push
+  tokens (7-day grace after expiry). `server/test_mobile.mjs`: 30 → 35 tests.
 - ❌ **Not done yet**: real push delivery. `push_tokens` are stored, but `sendPush()` in `mobile.js` is an
   explicit stub — no APNs/FCM credentials exist yet, and the code says so in its response (`delivery:
   "not_yet_implemented"`) rather than pretending to send anything.

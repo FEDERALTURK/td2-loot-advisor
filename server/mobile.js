@@ -253,6 +253,15 @@ export async function cleanup(env) {
   await env.DB.prepare("DELETE FROM mobile_pairings WHERE expires < ?1").bind(t - DAY).run();
   await env.DB.prepare("DELETE FROM desktop_inbox WHERE delivered = 1 AND created < ?1").bind(t - 7 * DAY).run();
   await env.DB.prepare("DELETE FROM mobile_devices WHERE revoked = 1 AND last_seen < ?1").bind(t - 30 * DAY).run();
+  // Süresi doğal olarak dolan (ama açıkça iptal EDİLMEMİŞ) telefon oturumları: revokeDevice() hiç çağrılmadığı
+  // için push_tokens burada temizlenmezse kalıcı olarak yetim kalırdı — 7 günlük bir tampon payı ile ikisini de sil.
+  const expiredDevices = (await env.DB.prepare(
+    "SELECT device_id FROM mobile_devices WHERE revoked = 0 AND expires < ?1").bind(t - 7 * DAY).all()).results || [];
+  if (expiredDevices.length) {
+    const ids = expiredDevices.map(r => r.device_id);
+    await env.DB.batch(ids.map(id => env.DB.prepare("DELETE FROM push_tokens WHERE device_id = ?1").bind(id)));
+    await env.DB.batch(ids.map(id => env.DB.prepare("DELETE FROM mobile_devices WHERE device_id = ?1").bind(id)));
+  }
   // Hesap silme: bekleme süresini doldurmuş talepleri gerçekten (geri alınamaz şekilde) sil.
   const due = (await env.DB.prepare("SELECT account_id FROM account_deletions WHERE requested < ?1")
     .bind(t - DELETE_GRACE_SECONDS).all()).results || [];
@@ -271,7 +280,7 @@ export async function cleanup(env) {
       env.DB.prepare("DELETE FROM account_deletions WHERE account_id = ?1").bind(id),
     ]);
   }
-  return { deleted_accounts: due.length };
+  return { deleted_accounts: due.length, expired_devices: expiredDevices.length };
 }
 
 // ------------------------------------------------------------ yönlendirme

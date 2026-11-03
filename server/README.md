@@ -126,7 +126,7 @@ gönderimi henüz yok** (`mobile.js` → `sendPush()`, açıkça stub). `PUT /pu
 Tablolar `schema.sql`'de (`mobile_pairings`, `mobile_devices`, `desktop_inbox`, `desktop_status`, `push_tokens`,
 `mobile_builds`, `account_deletions`); `npx wrangler d1 execute td2stats --remote --file schema.sql` ile var olan
 veritabanına eklenir (CREATE TABLE IF NOT EXISTS — mevcut tabloları etkilemez). Test: `node server/test_mobile.mjs`
-(30 test).
+(35 test).
 
 ## Sürüm sayacı ve yönetici özeti (6.0.1)
 - Program `/v1/tasks/live` isteğinde sürümünü User-Agent'ta bildirir (`TD2LootAdvisor/6.0.1`); açılıştaki ilk istekte
