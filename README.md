@@ -1,5 +1,12 @@
 # TD2 Loot Advisor
 
+[![Latest release](https://img.shields.io/github/v/release/FEDERALTURK/td2-loot-advisor?label=release&color=ff6d10)](https://github.com/FEDERALTURK/td2-loot-advisor/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/FEDERALTURK/td2-loot-advisor/total?label=downloads&color=ff6d10)](https://github.com/FEDERALTURK/td2-loot-advisor/releases)
+[![Stars](https://img.shields.io/github/stars/FEDERALTURK/td2-loot-advisor?label=stars)](https://github.com/FEDERALTURK/td2-loot-advisor/stargazers)
+[![Forks](https://img.shields.io/github/forks/FEDERALTURK/td2-loot-advisor?label=forks)](https://github.com/FEDERALTURK/td2-loot-advisor/network/members)
+[![License: MIT](https://img.shields.io/github/license/FEDERALTURK/td2-loot-advisor)](LICENSE)
+[![Last commit](https://img.shields.io/github/last-commit/FEDERALTURK/td2-loot-advisor)](https://github.com/FEDERALTURK/td2-loot-advisor/commits/main)
+
 **EN** — A screen-reading (OCR) helper for *Tom Clancy's The Division 2*. Hover an item, press **F8**: the app reads
 the tooltip, checks it against a full game library, compares it with your **active build** and says
 **keep / consider / dismantle / check it** in seconds. It tracks missing build pieces and shows the current game

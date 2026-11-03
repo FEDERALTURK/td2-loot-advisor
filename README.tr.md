@@ -1,5 +1,12 @@
 # TD2 Loot Advisor — Türkçe kılavuz
 
+[![Son sürüm](https://img.shields.io/github/v/release/FEDERALTURK/td2-loot-advisor?label=s%C3%BCr%C3%BCm&color=ff6d10)](https://github.com/FEDERALTURK/td2-loot-advisor/releases/latest)
+[![İndirmeler](https://img.shields.io/github/downloads/FEDERALTURK/td2-loot-advisor/total?label=indirme&color=ff6d10)](https://github.com/FEDERALTURK/td2-loot-advisor/releases)
+[![Yıldız](https://img.shields.io/github/stars/FEDERALTURK/td2-loot-advisor?label=y%C4%B1ld%C4%B1z)](https://github.com/FEDERALTURK/td2-loot-advisor/stargazers)
+[![Fork](https://img.shields.io/github/forks/FEDERALTURK/td2-loot-advisor?label=fork)](https://github.com/FEDERALTURK/td2-loot-advisor/network/members)
+[![Lisans: MIT](https://img.shields.io/github/license/FEDERALTURK/td2-loot-advisor)](LICENSE)
+[![Son commit](https://img.shields.io/github/last-commit/FEDERALTURK/td2-loot-advisor)](https://github.com/FEDERALTURK/td2-loot-advisor/commits/main)
+
 *The Division 2* için ekran okuyan (OCR) yardımcı. Envanterde bir eşyanın üstüne gelip **F8**'e basarsın;
 program kartı okur, oyunun eşya kütüphanesiyle doğrular, **aktif build'inle** karşılaştırır ve saniyeler
 içinde **SAKLA / DÜŞÜN / KIR / KONTROL ET** der. Build'in eksik parçalarını takip eder, oyun görevlerini
