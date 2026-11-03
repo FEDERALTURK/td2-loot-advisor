@@ -11,8 +11,48 @@ Bu dosya her gün güncellenir (bkz. en alt — otomatik günlük görev). Ayrı
 | Topluluk sunucusu (Cloudflare Worker) | Canlı. Mobil uçlar (eşleştirme, build senkronu, cihaz listesi/iptali, hesap silme) production'da. |
 | Lisans/telif (mx-division-builds) | [issue #153](https://github.com/mxswat/mx-division-builds/issues/153) açıldı, yanıt bekleniyor. |
 | Kod imzalama (SignPath) | Ücretsiz OSS başvurusu gönderildi (2026-11-03), SignPath'ten yanıt bekleniyor. |
+| Web sitesi (`web/`) | **Kod hazır ve test edildi (2026-11-03), henüz Cloudflare Pages'e YAYINLANMADI.** Bkz. aşağıda ve `web/README.md`. |
 
-## Şu an aktif: Mobil companion — push bildirimi (Android canlı, iOS kod hazır/deploy bekliyor)
+## Şu an aktif: Web sitesi (`web/`) — yazıldı, henüz yayınlanmadı
+
+Kullanıcının "uygulama için özel bir web sayfası: hesap oluşturma, satın alma, güncel haberler, programlara
+bağlantılı olsun" isteğiyle: tanıtım (`index.html`), haberler (`news/` — `meta/news_feed.json` + The Division 3
+durumu `meta/division3_feed.json`'dan), premium (`premium/`) ve hesap (`account/`) sayfalarından oluşan statik
+bir Cloudflare Pages sitesi yazıldı. Üç tasarım kararı kullanıcıya soruldu ve şöyle karara bağlandı: (1) Gumroad
+ürününü kullanıcı kendisi oluşturacak, site ona bağlanacak — sunucu kodu (`/v1/license/redeem`'in Gumroad dalı)
+zaten vardı, yalnızca `GUMROAD_PRODUCT_ID` + site tarafında bir link eksik; (2) web girişi masaüstüyle **aynı**
+hesap sistemini kullansın diye sunucuya (`server/accounts.js`) yeni bir `platform:"web"` akışı eklendi — PKCE/grant
+modeli masaüstüyle birebir aynı, tek fark son yönlendirmenin 127.0.0.1 yerine sunucu-sabit `SITE_URL`'e gitmesi
+(istemciden asla alınmaz, açık yönlendirme riski yok); (3) barındırma Cloudflare Pages, workers.dev benzeri ücretsiz
+bir alt alan adıyla.
+
+**Bu çalışma sırasında bulunup düzeltilen iki gerçek hata** (gerçek bir Playwright tarayıcısıyla uçtan uca test
+ederken ortaya çıktı): `server/worker.js`'teki CORS ön-uçuş (OPTIONS) yanıtı, 204 durum koduyla birlikte JSON
+gövdesi göndermeye çalışıyordu — standart `Response` bunu kabul etmiyor, bu yüzden her çapraz-kaynak isteği
+500 ile patlıyordu (muhtemelen başından beri vardı, fark edilmemişti çünkü hiçbir tarayıcı istemcisi bu uçları
+çapraz-kaynak çağırmıyordu). İkincisi yalnızca test altyapısındaydı (`dev_server.mjs`). İkisi de düzeltildi, tüm
+sunucu test paketleri (`test_accounts.mjs` + yeni web-girişi testleri, `test_mobile.mjs`, `test_tasks.mjs`,
+`test_overview.mjs`, `test_reports.mjs`, Python `tests/test_account.py`) **PASS**. Ayrıca `web/test_web_account.mjs`
+eklendi: gerçek bir tarayıcıyla (Playwright) giriş → oturum kalıcılığı → anahtar kullanma → çıkış → token temizliği
+akışının tamamını uçtan uca doğruluyor (Discord'a gerçekten çıkmadan, `dev_server.mjs`'in sahte onay ucu üzerinden)
+— **PASS**.
+
+**Haberler sayfası için düzeltme:** İlk denemede `news_cache.json`'ı okumayı denedim — bu, uygulamanın YEREL çalışma
+zamanı önbelleği olduğu ve `.gitignore`'da olduğu için GitHub'da mevcut değil (404). Asıl, depoya işlenen kaynak
+`meta/news_feed.json` olduğu ortaya çıktı; site buna geçirildi ve gerçek bir tarayıcıyla doğrulandı (14 haber öğesi
+başarıyla yüklendi, konsol hatası yok).
+
+**Yapılmadı / sıradaki adımlar:**
+1. **Siteyi gerçekten yayınla** — `cd web && npx wrangler pages deploy .` (bkz. `web/README.md` → "Kurulum").
+   Yayınlanan adres `server/wrangler.toml`'daki `SITE_URL` ile birebir eşleşmeli (farklıysa güncelleyip sunucuyu
+   yeniden yayınla: `cd server && npx wrangler deploy`) — yoksa web girişi "login not configured" hatası verir.
+2. **Gumroad ürünü oluştur** (kullanıcı kendisi — ödeme hesabı açma kararı kullanıcıya ait): "Generate a unique
+   license key per sale" seçeneğiyle bir ürün aç, Product ID'yi `server/wrangler.toml` → `GUMROAD_PRODUCT_ID`'e
+   yaz ve sunucuyu yeniden yayınla; ürün linkini `web/assets/js/config.js` → `GUMROAD_URL`'e yapıştır. Adımlar:
+   `web/README.md` → "Premium satın alma (Gumroad)".
+3. Siteye kendi alan adını bağlamak istersen: Cloudflare Pages panelinden bağla, sonra `SITE_URL`'i güncelle.
+
+## Önceki tur: Mobil companion — push bildirimi (Android canlı, iOS kod hazır/deploy bekliyor)
 
 **Bu turda yapıldı — sunucu (push bildirimi, Faz 4):**
 - **Android/FCM — production'da canlı.** Yeni bir Firebase projesi (`td2-loot-advisor`) oluşturuldu (kullanıcının kendi Google oturumuyla, tarayıcı otomasyonu üzerinden — şifreye hiç dokunulmadı; Google Developer Program/Gemini-in-Firebase/Analytics gibi istenmeyen seçenekler bilerek reddedildi), Admin SDK servis hesabı anahtarı üretilip **sohbete hiç girmeden** doğrudan Cloudflare secret'ına (`FCM_SERVICE_ACCOUNT_JSON`) taşındı ve `wrangler deploy` ile canlıya alındı (Version ID `3846e50a-5eb6-4e42-825e-7343a38591d8`, `/v1/health` doğrulandı).
@@ -52,3 +92,4 @@ Bu dosya her gün güncellenir (bkz. en alt — otomatik günlük görev). Ayrı
 ## Güncelleme günlüğü
 
 - **2026-11-03**: Mobil Faz 2 (bulut altyapısı) başlatıldı, aynı gün production'a deploy edildi, Windows'ta v9.1.5.19 görsel testi tamamlandı. İki boşluk (cihaz listesi, build soft-delete) bulunup kapatıldı ve ikinci kez deploy edildi (Version ID `f75d2807-1da2-4f8d-a01d-12c7e1b6cbbb`). Masaüstüne eşleştirme-kodu üretme eklendi (`account.py`/`app.py`) ve Flutter uygulaması yeni bulut API'sine bağlandı (`cloud_api.dart`, `cloud_link.dart`, eski LAN/QR akışına dokunulmadan) — Flutter/Dart SDK'sı bu ortamda yok, Windows PC'de `flutter analyze` ile doğrulama bekliyor. Üçüncü bir boşluk (doğal süresi dolan, hiç iptal edilmemiş telefon oturumlarının push belirteçlerinin yetim kalması) bulunup kapatıldı, test edildi (35 test) ve production'a deploy edildi (Version ID `4815ae08-d05f-4279-8646-f93aeba575d3`). **Aynı gün, kullanıcının "Android/FCM ile şimdi başla" seçimiyle: yeni bir Firebase projesi oluşturuldu, Admin SDK servis hesabı anahtarı üretilip (sohbete hiç girmeden) doğrudan Cloudflare secret'ına taşındı, ve `server/mobile.js`'e gerçek FCM HTTP v1 push gönderimi eklendi** (RS256 JWT imzası `crypto.subtle` ile, `desktopEvent()`'teki `scan_result` olayından tetikleniyor, best-effort) — 40 test, hepsi geçti, kullanıcı onayıyla production'a deploy edildi (Version ID `3846e50a-5eb6-4e42-825e-7343a38591d8`, `/v1/health` doğrulandı). **Ardından aynı gün, kullanıcının "iOS'un gereken adımlarını yap" isteğiyle: `sendPush()`'a APNs HTTP/2 + ES256 provider-JWT desteği eklendi** (Android'den bağımsız, kendi secret seti yoksa no-op) ve Apple Developer Program kaydı için adım adım kullanıcı talimatı yazıldı (`docs/mobile_companion_roadmap.md`) — Apple ID gerektiren kayıt adımını AI asistan yapamadığı için bu kısım kullanıcıyı bekliyor. 44 test, hepsi geçti; iOS tarafı henüz deploy edilmedi (secret'lar yok). **Kullanıcı "Apple Developer Program'a ücretsiz giriş yaptım ama ödeme yapmadım" dedi** — ücretsiz girişle APNs anahtarı oluşturulamadığı açıklandı, kullanıcının "bu aşamayı geçelim, diğer aşamlara geçelim" isteğiyle iOS/APNs deploy "Ertelendi" bölümüne taşındı. Ardından sırada bekleyen **Windows PC'de Flutter doğrulama** işine geçildi: PC'de `git pull` + `flutter analyze`/`flutter test` ilk kez gerçek araç zinciriyle çalıştırıldı (önce `flutter` PATH'te bulunamadı → mutlak yola geçildi; sonra Flutter'ın kendi git ihtiyacı PATH'te bulunamadı → GitHubDesktop'ın git'i PATH'e eklendi). Sonuç: `flutter test` ilk seferde de geçti, `flutter analyze` tek bir `unused_field` uyarısı verdi (`cloud_link.dart`'taki `_deviceId`). Alan incelendi, gerçekten anlamlı olduğu (sunucudan gelen cihaz kimliği, ileride push-token kaydında gerekecek) görüldüğü için silinmek yerine genel bir `deviceId` getter'ı eklendi, commit+push edildi, PC'de `git pull` sonrası tekrar `flutter analyze`/`test` çalıştırılıp **"No issues found!"** / **"All tests passed!"** doğrulandı. Bu inceleme sırasında yeni bir boşluk bulundu: Flutter uygulaması hiçbir zaman `PUT /push-tokens` ucunu çağırmıyor, yani push bildirimi sunucu tarafı hazır olsa da mobil taraf kendi FCM/APNs tokenını hiç kaydetmiyor — bu, "Yapılmadı" listesine 1. madde olarak eklendi. **Aynı gün, kullanıcının "son yaptığını da dahil ederek yeni güncelleme yayınla" isteğiyle**: hesap panelindeki "Telefon eşleştir" düğmesinin (önceki turda kodlanmış ama hiç yayınlanmamış olduğu fark edildi — commit, son sürüm etiketinden sonra gelmiş) kullanıcılara ulaşması için `APP_VERSION` `9.1.5.20`'ye çıkarıldı, `release_notes.md`'ye yeni bölüm eklendi, ve mevcut CI/release pipeline'ı `workflow_dispatch` ile tetiklenerek (doğrudan `git push --tags` bu ortamda engelli olduğu için) yayın başarıyla tamamlandı (GitHub Actions run `41630705514`, release `v9.1.5.20` — portable zip + installer + SHA256SUMS). Ardından kullanıcının "Windows'ta lisanslı bir uygulama" (= Authenticode imzalı) isteği üzerine SignPath Foundation'ın ücretsiz açık kaynak imzalama programı araştırıldı (signpath.org/apply hâlâ açık ve başvuruya uygun bulundu), eksik olan "Privacy Policy URL" alanı için proje geneli, doğru ve kapsamlı bir `PRIVACY_POLICY.md` yazılıp yayınlandı (README'lere de bağlantı eklendi), "Reputation" alanının nasıl doldurulacağı kullanıcıya soruldu ve kullanıcı dürüst/gerçek rakamlarla başvurmayı seçti. Form, tarayıcı penceresinde alan alan dolduruldu (Project/Repo/Homepage/Download/Privacy URL, Tagline, Category: Gaming, Description, Reputation, Maintainer Type: Individual, Build System: GitHub Actions, First/Last Name, Email, Discovery Channel: AI / LLM tools → "Claude (Anthropic)"); onay kutuları, reCAPTCHA ve Submit — rıza/bot-doğrulama gerektirdiği için — kullanıcıya bırakıldı ve kullanıcı formu kendisi gönderip onayladı ("hallettim").
+ **Son olarak aynı gün, kullanıcının "uygulama için özel bir web sayfası: hesap oluşturma, satın alma, güncel haberler, programlara bağlantılı olsun" isteğiyle**: üç tasarım kararı (Gumroad/satın alma, web girişi/sunucu değişikliği, barındırma) AskUserQuestion ile netleştirildi, server/accounts.js'e masaüstüyle aynı hesap sistemini kullanan bir platform:"web" giriş akışı eklendi, ve tanıtım/haberler/premium/hesap sayfalarından oluşan bir Cloudflare Pages sitesi (web/) yazıldı. Gerçek bir tarayıcıyla (Playwright) uçtan uca test ederken iki gerçek hata bulundu ve düzeltildi: worker.js'in CORS ön-uçuşu (OPTIONS) 204 + JSON gövde kombinasyonu yüzünden her zaman 500 veriyordu (muhtemelen hep vardı, fark edilmemişti), ve haberler sayfası ilk denemede yanlışlıkla .gitignore'daki yerel önbellek dosyasını okumaya çalışıyordu — depoya işlenen asıl kaynak meta/news_feed.json'a geçirildi (Division 3 durumu için meta/division3_feed.json de eklendi). Tüm sunucu test paketleri + yeni web/test_web_account.mjs (gerçek tarayıcı, gerçek giriş/anahtar/çıkış akışı) PASS. Site henüz Cloudflare Pages'e yayınlanmadı — sıradaki adımlar yukarıda "Şu an aktif" bölümünde.
