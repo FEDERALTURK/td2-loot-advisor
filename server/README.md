@@ -71,7 +71,7 @@ Giriş isteğe bağlıdır; program hesapsız da ücretsiz çalışır. Kurulum 
 
 | Yol | Ne | Erişim |
 |---|---|---|
-| `POST /v1/auth/start` · `GET /v1/auth/callback` · `POST /v1/auth/token` | Discord girişi (PKCE + 127.0.0.1 dönüşü) | herkese açık, oran sınırlı |
+| `POST /v1/auth/start` · `GET /v1/auth/callback` · `POST /v1/auth/token` | Discord girişi (PKCE + 127.0.0.1 dönüşü, ya da `"platform":"web"` ile `SITE_URL`'e dönüş) | herkese açık, oran sınırlı |
 | `GET /v1/me` | hesap, lisans, 7 günlük imzalı yetki belgesi (TD2E) | `Authorization: Bearer <oturum>` |
 | `POST /v1/license/redeem` | `TD2K-…` anahtar, `TD2I-…` davet, Gumroad anahtarı | oturum; saatte 10 deneme |
 | `POST /v1/auth/logout` | oturumu kapat | oturum |
@@ -80,6 +80,12 @@ Giriş isteğe bağlıdır; program hesapsız da ücretsiz çalışır. Kurulum 
 Güvenlik: oturum belirteçleri, anahtarlar ve davet kodları veritabanında yalnız SHA-256 özetleriyle durur; düz anahtar
 yalnız üretildiği an panelde görünür. Bir lisans tek bilgisayara bağlanır (panelden "Cihazı sıfırla"). Yetki belgesi
 bilgisayara bağlıdır ve 7 gün internetsiz geçerlidir. Testler: `node test_accounts.mjs`, `python ../tests/test_account.py`.
+
+**Not: web sitesinden giriş de bu hesaba bağlanır.** `web/account/` sayfası aynı Discord hesabıyla giriş yapar ve
+`/v1/me`'yi çağırır — bu da (masaüstü gibi) bir "cihaz" sayılır. Lisansın `max_devices` değeri 1 ise (varsayılan),
+bir kullanıcı önce masaüstünde giriş yapıp sonra siteye girerse site "cihaz sınırına ulaşıldı" görebilir (hesap/tier
+bilgisi yine görünür, yalnız yetki belgesi verilmez — sitenin zaten ihtiyacı olmayan bir alan). Bunu bir sorun olarak
+görürseniz admin panelinden o lisansın `max_devices`'ını artırabilir ya da "Cihazı sıfırla" diyebilirsiniz.
 
 ## Topluluk görevleri (5.1.8)
 

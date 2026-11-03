@@ -13,7 +13,15 @@
 //
 // Ortam: DISCORD_CLIENT_ID (değişken), DISCORD_CLIENT_SECRET (gizli), ENT_SIGNING_KEY (gizli, PKCS8 base64),
 //        ENT_PUBLIC_KEY (değişken, hex), ADMIN_TOKEN (gizli), GUMROAD_PRODUCT_ID (değişken, isteğe bağlı),
-//        HASH_SALT (gizli), PUBLIC_URL (değişken, ör. https://td2-stats.td2loot.workers.dev)
+//        HASH_SALT (gizli), PUBLIC_URL (değişken, ör. https://td2-stats.td2loot.workers.dev),
+//        SITE_URL (değişken, isteğe bağlı — web sitesinden giriş için, ör. https://td2-loot-advisor.pages.dev)
+//
+// Web (tarayıcı) girişi: masaüstü akışıyla aynı PKCE/grant modeli, tek fark son yönlendirme hedefi.
+// authStart isteğinde "port" yerine "platform":"web" gönderilirse auth_pending.port = 0 ("web" işareti) kaydedilir
+// ve Discord dönüşünde grant, 127.0.0.1 yerine SABİT (sunucu ayarlı, istemciden ASLA alınmayan) SITE_URL'e
+// yönlendirilir — böylece bir saldırgan kendi "site" adresini vererek başkasının girişini kendi sayfasına
+// çekemez (açık yönlendirme riski kapalı). Teslimat yine tarayıcı-navigasyonu ile olur: grant yalnız Discord
+// onayını tamamlayan O tarayıcıda görünür, tıpkı loopback'in yalnız o bilgisayarda görünmesi gibi.
 
 const enc = new TextEncoder();
 const DAY = 86400;
@@ -23,7 +31,8 @@ const B64U = /^[A-Za-z0-9_\-]{32,128}$/;
 
 function json(data, status = 200, extra = {}) {
   return new Response(JSON.stringify(data), {
-    status, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", ...extra },
+    status, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store",
+                        "access-control-allow-origin": "*", ...extra },
   });
 }
 const now = () => Math.floor(Date.now() / 1000);
@@ -125,10 +134,12 @@ async function deviceHash(env, raw) {
 // ------------------------------------------------------------ Discord ile giriş
 async function authStart(req, env) {
   let b; try { b = await req.json(); } catch { return json({ error: "bad json" }, 400); }
-  const port = parseInt(b?.port, 10);
-  if (!B64U.test(b?.state || "") || !B64U.test(b?.challenge || "") || !(port >= 1024 && port <= 65535))
+  const isWeb = b?.platform === "web";
+  const port = isWeb ? 0 : parseInt(b?.port, 10);           // 0 = web işareti; masaüstü için 1024-65535 gerçek port
+  if (!B64U.test(b?.state || "") || !B64U.test(b?.challenge || "") || (!isWeb && !(port >= 1024 && port <= 65535)))
     return json({ error: "bad request" }, 400);
   if (!env.DISCORD_CLIENT_ID) return json({ error: "login not configured" }, 503);
+  if (isWeb && !env.SITE_URL) return json({ error: "web login not configured" }, 503);
   if (!(await rate(env, "start:" + (await sha256(salt(env) + ipOf(req))).slice(0, 24), 30))) return json({ error: "rate limited" }, 429);
   await env.DB.prepare("DELETE FROM auth_pending WHERE created < ?1").bind(now() - 900).run();
   await env.DB.prepare("INSERT INTO auth_pending (state, challenge, created, port) VALUES (?1, ?2, ?3, ?4)")
@@ -177,13 +188,17 @@ async function authCallback(req, env) {
     await env.DB.prepare("DELETE FROM auth_pending WHERE state = ?1").bind(state).run();
     return page("Hesap engelli / Account blocked", "Bu hesap kullanılamıyor. / This account is blocked.", false);
   }
-  // Tek kullanımlık "grant" yalnız bu tarayıcının kendi bilgisayarındaki programa (127.0.0.1) gider (RFC 8252).
-  // Giriş bağlantısını başkasına tıklatan biri grant'i alamaz: yönlendirme kurbanın kendi bilgisayarına düşer.
+  // Tek kullanımlık "grant" yalnız bu tarayıcının kendi bilgisayarındaki programa (127.0.0.1) gider (RFC 8252),
+  // ya da (platform="web" ise) yalnız sunucuda SABİT tanımlı SITE_URL'e — ikisinde de teslimat bu isteği şu an
+  // yapan TARAYICI/BİLGİSAYAR üzerinden olur; giriş bağlantısını başkasına tıklatan biri grant'i alamaz.
   const grant = randomToken(24);
   await env.DB.prepare("UPDATE auth_pending SET done = 1, account_id = ?1, grant_hash = ?2 WHERE state = ?3")
     .bind(acc.id, await sha256(grant), state).run();
+  const dest = p.port === 0
+    ? `${String(env.SITE_URL).replace(/\/$/, "")}/account/#state=${state}&grant=${grant}`
+    : `http://127.0.0.1:${p.port}/callback?state=${state}&grant=${grant}`;
   return new Response(null, { status: 302, headers: { "cache-control": "no-store", "referrer-policy": "no-referrer",
-    location: `http://127.0.0.1:${p.port}/callback?state=${state}&grant=${grant}` } });
+    location: dest } });
 }
 
 async function authToken(req, env) {

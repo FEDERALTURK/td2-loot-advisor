@@ -88,6 +88,27 @@ async function login(device, user) {
   ok(r.status === 400, "dönüş bağlantısı tekrar kullanılamaz");
 }
 
+// web girişi: SITE_URL yoksa kapalı; varsa son yönlendirme 127.0.0.1 değil, SITE_URL'in #fragment'ı
+{
+  const state = b64u(randomBytes(24)), verifier = b64u(randomBytes(32));
+  const challenge = b64u(createHash("sha256").update(verifier).digest());
+  let r = await call("/v1/auth/start", { method: "POST", body: { state, challenge, platform: "web" } });
+  ok(r.status === 503, "SITE_URL tanımlı değilken web girişi kapalı");
+  env.SITE_URL = "https://site.example/";
+  r = await call("/v1/auth/start", { method: "POST", body: { state, challenge, platform: "web" } });
+  const j = await r.json();
+  ok(r.status === 200 && j.url.includes("state=" + state), "web girişi bağlantısı (port gerekmiyor)");
+  r = await call(`/v1/auth/callback?state=${state}&code=c1`);
+  const loc = r.headers.get("location") || "";
+  ok(r.status === 302 && loc.startsWith("https://site.example/account/#state=" + state + "&grant="), "web dönüşü SABİT SITE_URL'e gider, 127.0.0.1'e değil");
+  const grant = new URL(loc.replace("#", "?")).searchParams.get("grant");
+  const device = b64u(randomBytes(32));
+  r = await call("/v1/auth/token", { method: "POST", body: { state, verifier, grant, device } });
+  const p = await r.json();
+  ok(p.status === "ok" && p.token, "web girişinden oturum alınır (aynı /v1/auth/token ucu)");
+  delete env.SITE_URL;
+}
+
 const DEV1 = b64u(randomBytes(32)), DEV2 = b64u(randomBytes(32));
 const tok = await login(DEV1);
 ok(!sql.prepare("SELECT * FROM sessions").all().some(s => s.token_hash === tok), "oturum belirteci düz saklanmıyor");

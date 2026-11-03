@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS auth_pending (
   done        INTEGER NOT NULL DEFAULT 0,
   account_id  INTEGER,
   error       TEXT,
-  port        INTEGER NOT NULL DEFAULT 0,   -- programın yerel dönüş portu (127.0.0.1)
+  port        INTEGER NOT NULL DEFAULT 0,   -- masaüstü: programın yerel dönüş portu (127.0.0.1); 0 = web girişi (SITE_URL)
   grant_hash  TEXT                          -- Discord dönüşünde yerel programa giden tek kullanımlık kanıt
 );
 CREATE TABLE IF NOT EXISTS sessions (
