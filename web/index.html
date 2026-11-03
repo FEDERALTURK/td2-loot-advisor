@@ -26,7 +26,9 @@
   </div>
 </header>
 
-<section class="td2-hero td2-wrap">
+<section class="td2-hero td2-wrap" id="td2-hero">
+  <div class="td2-hero-glow" aria-hidden="true"></div>
+  <div class="td2-scan" aria-hidden="true"></div>
   <h1 data-i18n="hero_title">Envanterde zaman kaybetme.</h1>
   <p data-i18n="hero_sub">Bir eşyanın üzerine gel, F8'e bas: TD2 Loot Advisor ekranı okur, kendi build kurallarınla karşılaştırır ve saniyeler içinde sakla / düşün / kır kararını verir. Oyunun belleğine hiç dokunmaz.</p>
   <div class="cta-row">
@@ -39,12 +41,12 @@
 <section class="section td2-wrap">
   <h2 data-i18n="feat_title">Ne yapıyor?</h2>
   <div class="grid">
-    <div class="card"><span class="emoji">🎯</span><h3 data-i18n="feat_scan_t">Ekran okuma ile anında karar</h3><p data-i18n="feat_scan_d"></p></div>
-    <div class="card"><span class="emoji">🧩</span><h3 data-i18n="feat_build_t">Build takibi</h3><p data-i18n="feat_build_d"></p></div>
-    <div class="card"><span class="emoji">🎒</span><h3 data-i18n="feat_stash_t">Envanter analizi (Stash)</h3><p data-i18n="feat_stash_d"></p></div>
-    <div class="card"><span class="emoji">🗒️</span><h3 data-i18n="feat_task_t">Görev çevirisi</h3><p data-i18n="feat_task_d"></p></div>
-    <div class="card"><span class="emoji">🔒</span><h3 data-i18n="feat_mem_t">Belleğe asla dokunmaz</h3><p data-i18n="feat_mem_d"></p></div>
-    <div class="card"><span class="emoji">🌍</span><h3 data-i18n="feat_lang_t">10 dil, herkes kendi dilini ekleyebilir</h3><p data-i18n="feat_lang_d"></p></div>
+    <div class="card hud-frame"><span class="emoji">🎯</span><h3 data-i18n="feat_scan_t">Ekran okuma ile anında karar</h3><p data-i18n="feat_scan_d"></p></div>
+    <div class="card hud-frame"><span class="emoji">🧩</span><h3 data-i18n="feat_build_t">Build takibi</h3><p data-i18n="feat_build_d"></p></div>
+    <div class="card hud-frame"><span class="emoji">🎒</span><h3 data-i18n="feat_stash_t">Envanter analizi (Stash)</h3><p data-i18n="feat_stash_d"></p></div>
+    <div class="card hud-frame"><span class="emoji">🗒️</span><h3 data-i18n="feat_task_t">Görev çevirisi</h3><p data-i18n="feat_task_d"></p></div>
+    <div class="card hud-frame"><span class="emoji">🔒</span><h3 data-i18n="feat_mem_t">Belleğe asla dokunmaz</h3><p data-i18n="feat_mem_d"></p></div>
+    <div class="card hud-frame"><span class="emoji">🌍</span><h3 data-i18n="feat_lang_t">10 dil, herkes kendi dilini ekleyebilir</h3><p data-i18n="feat_lang_d"></p></div>
   </div>
   <p style="margin-top:20px"><a href="https://github.com/FEDERALTURK/td2-loot-advisor#features" data-i18n="feat_more">Tüm özellikler → GitHub README</a></p>
 </section>
@@ -59,22 +61,22 @@
   <h2 data-i18n="down_title">İndir</h2>
   <div id="dl-status" style="color:var(--muted);font-size:14px;margin-bottom:16px" data-i18n="down_loading">Son sürüm bilgisi alınıyor…</div>
   <div class="dl-grid" id="dl-grid" hidden>
-    <div class="dl-card">
+    <div class="dl-card hud-frame">
       <strong data-i18n="down_installer">Kurulum dosyası (önerilen)</strong>
       <span class="ver" id="dl-ver"></span>
       <a class="btn btn-primary btn-sm" id="dl-installer" href="#">.exe</a>
     </div>
-    <div class="dl-card">
+    <div class="dl-card hud-frame">
       <strong data-i18n="down_portable">Taşınabilir (zip)</strong>
       <span class="ver">&nbsp;</span>
       <a class="btn btn-ghost btn-sm" id="dl-portable" href="#">.zip</a>
     </div>
-    <div class="dl-card" id="dl-mobile-card" hidden>
+    <div class="dl-card hud-frame" id="dl-mobile-card" hidden>
       <strong data-i18n="down_mobile">Android companion (beta)</strong>
       <span class="ver">&nbsp;</span>
       <a class="btn btn-ghost btn-sm" id="dl-mobile" href="#">.apk</a>
     </div>
-    <div class="dl-card">
+    <div class="dl-card hud-frame">
       <strong data-i18n="down_source">Kaynak kodundan çalıştır</strong>
       <span class="ver">&nbsp;</span>
       <a class="btn btn-ghost btn-sm" href="https://github.com/FEDERALTURK/td2-loot-advisor#install-from-source-windows">README</a>
@@ -94,6 +96,19 @@
 <script src="assets/js/config.js"></script>
 <script src="assets/js/i18n.js"></script>
 <script src="assets/js/api.js"></script>
+<script>
+(() => {
+  const hero = document.getElementById("td2-hero");
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const touch = window.matchMedia("(pointer: coarse)").matches;
+  if (!hero || reduce || touch) return;
+  hero.addEventListener("pointermove", (e) => {
+    const r = hero.getBoundingClientRect();
+    hero.style.setProperty("--mx", ((e.clientX - r.left) / r.width * 100) + "%");
+    hero.style.setProperty("--my", ((e.clientY - r.top) / r.height * 100) + "%");
+  });
+})();
+</script>
 <script>
 (async () => {
   const statusEl = document.getElementById("dl-status"), grid = document.getElementById("dl-grid");
