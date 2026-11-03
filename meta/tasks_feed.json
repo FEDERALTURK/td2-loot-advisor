@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "version": "2026-11-02.1",
-  "updated": "2026-11-02T01:43:44Z",
+  "version": "2026-11-03.1",
+  "updated": "2026-11-03T01:39:54Z",
   "season": "Year 8 Season 3 – Red Horizon",
   "resets": {
     "daily_hour_utc": 8,
@@ -315,6 +315,37 @@
         "ru": "Найдите точку Cleaners на карте (у автора гайда был только Washington Monument). После частичной зачистки приходит вторая волна; уничтожьте её полностью, чтобы захватить точку. Сброс прогресса хранилища позволяет захватывать точки заново.",
         "pl": "Znajdź punkt Cleaners na mapie (autor poradnika miał tylko Washington Monument). Po częściowym oczyszczeniu rusza druga fala; pokonaj ją całą, by zdobyć punkt. Reset postępu skarbca pozwala zdobywać punkty ponownie.",
         "nl": "Zoek een Cleaners-punt op de kaart (de auteur van de gids had alleen het Washington Monument). Na een deel volgt een tweede golf; versla die helemaal om te veroveren. Kluisvoortgang resetten laat je punten opnieuw veroveren."
+      }
+    },
+    {
+      "id": "y8s3-climax-master",
+      "cat": "manhunt",
+      "source": {
+        "url": "https://www.ubisoft.com/en-gb/game/the-division/the-division-2/news-updates/7L8TlD1Hv0XC1prOD8mdte/tuy8s33-crossplay-rollout-conflict-improvements-more"
+      },
+      "text": {
+        "en": "Manhunt Climax Mission: clear it on Master difficulty (available from Nov 3) for guaranteed Loaded for Bear exotic gloves",
+        "tr": "Manhunt Climax Mission: Master zorlukta bitir (3 Kasım'dan itibaren), Loaded for Bear egzotik eldivenleri garanti kazan",
+        "de": "Manhunt Climax Mission: auf Master abschließen (ab 3. Nov.) für garantierte exotische Handschuhe Loaded for Bear",
+        "fr": "Traque, Climax Mission : terminez-la en difficulté Master (dès le 3 nov.) pour obtenir à coup sûr les gants exotiques Loaded for Bear",
+        "es": "Cacería, Climax Mission: complétala en dificultad Master (desde el 3 nov.) para conseguir seguro los guantes exóticos Loaded for Bear",
+        "it": "Caccia, Climax Mission: completala a difficoltà Master (dal 3 nov.) per ottenere di sicuro i guanti esotici Loaded for Bear",
+        "pt": "Caçada, Climax Mission: conclua na dificuldade Master (desde 3 nov.) para garantir as luvas exóticas Loaded for Bear",
+        "ru": "Охота, Climax Mission: пройдите на сложности Master (с 3 нояб.) и гарантированно получите экзотические перчатки Loaded for Bear",
+        "pl": "Obława, Climax Mission: ukończ na poziomie Master (od 3 lis.), aby mieć pewność zdobycia egzotycznych rękawic Loaded for Bear",
+        "nl": "Manhunt Climax Mission: voltooi op Master (vanaf 3 nov.) voor gegarandeerd de exotic handschoenen Loaded for Bear"
+      },
+      "how": {
+        "en": "Finish all HVT Scouts first. If the mission stays locked in the Scouts menu and is missing from the map, log out and back in. Only the first Master clear is a guaranteed drop; the gloves can also drop on any difficulty, with better odds higher up.",
+        "tr": "Önce tüm HVT Scout'larını bitir. Görev Scouts menüsünde kilitli kalır ve haritada görünmezse çıkış yapıp yeniden gir. Garanti yalnız ilk Master bitirişte geçerli; eldivenler her zorlukta da düşebilir, zorluk arttıkça şans artar.",
+        "de": "Schließe zuerst alle HVT-Scouts ab. Bleibt die Mission im Scouts-Menü gesperrt und fehlt auf der Karte, melde dich ab und wieder an. Garantiert ist nur der erste Master-Abschluss; die Handschuhe können auf jeder Schwierigkeit droppen, je höher, desto besser die Chance.",
+        "fr": "Terminez d'abord tous les Éclaireurs HVT. Si la mission reste verrouillée dans le menu Scouts et absente de la carte, déconnectez-vous puis reconnectez-vous. Seule la première victoire en Master est garantie ; les gants peuvent aussi tomber à toute difficulté, avec plus de chances aux niveaux élevés.",
+        "es": "Primero completa todos los Exploradores HVT. Si la misión sigue bloqueada en el menú Scouts y no aparece en el mapa, cierra sesión y vuelve a entrar. Solo la primera victoria en Master es garantizada; los guantes también pueden caer en cualquier dificultad, con más probabilidad cuanto más alta.",
+        "it": "Completa prima tutti gli Esploratori HVT. Se la missione resta bloccata nel menu Scouts e non compare sulla mappa, esci e rientra. Solo il primo completamento a Master è garantito; i guanti possono cadere a qualsiasi difficoltà, con più probabilità a quelle alte.",
+        "pt": "Primeiro conclua todos os Batedores HVT. Se a missão continuar bloqueada no menu Scouts e não aparecer no mapa, saia e entre de novo. Só a primeira conclusão em Master é garantida; as luvas também podem cair em qualquer dificuldade, com mais chance nas mais altas.",
+        "ru": "Сначала завершите всех Разведчиков HVT. Если задание остаётся заблокированным в меню Scouts и его нет на карте, выйдите из игры и зайдите снова. Гарантия действует только на первое прохождение Master; перчатки могут выпасть на любой сложности, но чем она выше, тем больше шанс.",
+        "pl": "Najpierw ukończ wszystkich Zwiadowców HVT. Jeśli misja pozostaje zablokowana w menu Scouts i nie ma jej na mapie, wyloguj się i zaloguj ponownie. Gwarancja dotyczy tylko pierwszego ukończenia na Master; rękawice mogą wypaść na każdym poziomie, a im wyższy, tym większa szansa.",
+        "nl": "Voltooi eerst alle HVT-Verkenners. Blijft de missie vergrendeld in het Scouts-menu en staat ze niet op de kaart, log dan uit en weer in. Alleen de eerste Master-voltooiing is gegarandeerd; de handschoenen kunnen op elke moeilijkheid vallen, met betere kansen op hogere niveaus."
       }
     },
     {
