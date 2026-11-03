@@ -1,7 +1,7 @@
 {
  "schema": 1,
- "version": "2026-11-02.1",
- "updated": "2026-11-02T19:35:41Z",
+ "version": "2026-11-03.1",
+ "updated": "2026-11-03T19:38:09Z",
  "season": "Year 8 Season 3 – Red Horizon",
  "items": [
   {
@@ -259,6 +259,38 @@
    }
   },
   {
+   "id": "echoes-launch-twitch-drops",
+   "kind": "community",
+   "start": "2026-11-03T08:00:00Z",
+   "end": "2026-11-10T08:00:00Z",
+   "url": "https://www.ubisoft.com/en-us/game/the-division/the-division-2/news-updates/5EEgwKS6kDqyvUFo5PJYsB/the-division-2-drops-da-twitch-do-lanamento-de-ecos-do-central-park",
+   "source": "Ubisoft",
+   "title": {
+    "en": "Echoes of Central Park Twitch Drops",
+    "tr": "Echoes of Central Park Twitch Drop'ları",
+    "de": "Echoes of Central Park: Twitch Drops",
+    "fr": "Drops Twitch d'Echoes of Central Park",
+    "es": "Drops de Twitch de Echoes of Central Park",
+    "it": "Drop di Twitch di Echoes of Central Park",
+    "pt": "Drops da Twitch de Echoes of Central Park",
+    "ru": "Дропы Twitch: Echoes of Central Park",
+    "pl": "Dropy z Twitcha: Echoes of Central Park",
+    "nl": "Echoes of Central Park Twitch Drops"
+   },
+   "text": {
+    "en": "Nov 3–10: watch drop-enabled The Division 2 streams on Twitch: 30 min Central Park Arm Patch, 1 h Named Cache, 2 h Bird Skull Backpack Trophy, 3 h Exotic Cache, 4 h Outfit Token. Link Twitch and your platforms to Ubisoft Connect, then claim drops on Twitch.",
+    "tr": "3-10 Kasım: Twitch'te drop açık The Division 2 yayınlarını izle: 30 dk Central Park Arm Patch, 1 sa Named Cache, 2 sa Bird Skull Backpack Trophy, 3 sa Exotic Cache, 4 sa Outfit Token. Twitch ve platform hesaplarını Ubisoft Connect'e bağla; ödülleri Twitch'ten al.",
+    "de": "3.–10. Nov.: Schau auf Twitch Streams von The Division 2 mit aktivierten Drops: 30 Min. Central Park Arm Patch, 1 Std. Named Cache, 2 Std. Bird Skull Backpack Trophy, 3 Std. Exotic Cache, 4 Std. Outfit Token. Verknüpfe Twitch und deine Plattformen mit Ubisoft Connect und hole die Drops auf Twitch ab.",
+    "fr": "Du 3 au 10 nov. : regardez sur Twitch des streams The Division 2 avec drops activés : 30 min Central Park Arm Patch, 1 h Named Cache, 2 h Bird Skull Backpack Trophy, 3 h Exotic Cache, 4 h Outfit Token. Liez Twitch et vos plateformes à Ubisoft Connect, puis récupérez les drops sur Twitch.",
+    "es": "Del 3 al 10 de nov.: mira en Twitch directos de The Division 2 con drops activados: 30 min Central Park Arm Patch, 1 h Named Cache, 2 h Bird Skull Backpack Trophy, 3 h Exotic Cache, 4 h Outfit Token. Vincula Twitch y tus plataformas a Ubisoft Connect y reclama los drops en Twitch.",
+    "it": "Dal 3 al 10 nov.: guarda su Twitch le dirette di The Division 2 con drop attivi: 30 min Central Park Arm Patch, 1 h Named Cache, 2 h Bird Skull Backpack Trophy, 3 h Exotic Cache, 4 h Outfit Token. Collega Twitch e le tue piattaforme a Ubisoft Connect e riscatta i drop su Twitch.",
+    "pt": "De 3 a 10 de nov.: assista na Twitch a transmissões de The Division 2 com drops ativos: 30 min Central Park Arm Patch, 1 h Named Cache, 2 h Bird Skull Backpack Trophy, 3 h Exotic Cache, 4 h Outfit Token. Vincule a Twitch e suas plataformas à Ubisoft Connect e resgate os drops na Twitch.",
+    "ru": "3–10 ноября: смотрите на Twitch трансляции The Division 2 с включёнными дропами: 30 мин — Central Park Arm Patch, 1 ч — Named Cache, 2 ч — Bird Skull Backpack Trophy, 3 ч — Exotic Cache, 4 ч — Outfit Token. Привяжите Twitch и свои платформы к Ubisoft Connect и забирайте дропы на Twitch.",
+    "pl": "3–10 lis.: oglądaj na Twitchu transmisje The Division 2 z włączonymi dropami: 30 min Central Park Arm Patch, 1 godz. Named Cache, 2 godz. Bird Skull Backpack Trophy, 3 godz. Exotic Cache, 4 godz. Outfit Token. Połącz Twitcha i swoje platformy z Ubisoft Connect, a dropy odbierz na Twitchu.",
+    "nl": "3–10 nov.: kijk op Twitch naar streams van The Division 2 met drops: 30 min Central Park Arm Patch, 1 u Named Cache, 2 u Bird Skull Backpack Trophy, 3 u Exotic Cache, 4 u Outfit Token. Koppel Twitch en je platforms aan Ubisoft Connect en claim de drops op Twitch."
+   }
+  },
+  {
    "id": "friend-referral-2026",
    "kind": "community",
    "date": "2026-11-02T08:00:00Z",
@@ -355,7 +387,7 @@
    "id": "echoes-of-central-park",
    "kind": "dlc",
    "start": "2026-11-03T08:00:00Z",
-   "url": "https://www.ubisoft.com/en-us/game/the-division/the-division-2/news-updates/23q5ICm6Mf4PUPuPUUS0uP/the-division-2-echoes-of-central-park-coming-on-november-3",
+   "url": "https://www.ubisoft.com/en-us/game/the-division/the-division-2/news-updates/4yCTNp7RZ1Fdm1kMKYgndg/the-division-2-echoes-of-central-park-dlc-is-available-now",
    "source": "Ubisoft",
    "title": {
     "en": "Echoes of Central Park",
@@ -370,16 +402,16 @@
     "nl": "Echoes of Central Park"
    },
    "text": {
-    "en": "New content: Central Park and the Upper West Side, three companions, six new skill variants, the Ratel exotic and a new gear set.",
-    "tr": "Yeni içerik: Central Park ve Upper West Side, üç yoldaş, altı yeni yetenek çeşidi, Ratel egzotiği ve yeni bir gear set.",
-    "de": "Neue Inhalte: Central Park und Upper West Side, drei Begleiter, sechs neue Skill-Varianten, das Exotic Ratel und ein neues Gear-Set.",
-    "fr": "Nouveau contenu : Central Park et l'Upper West Side, trois compagnons, six nouvelles variantes de compétences, l'exotique Ratel et un nouvel ensemble.",
-    "es": "Contenido nuevo: Central Park y el Upper West Side, tres compañeros, seis variantes de habilidad, el exótico Ratel y un nuevo conjunto.",
-    "it": "Nuovi contenuti: Central Park e l'Upper West Side, tre compagni, sei nuove varianti di abilità, l'esotico Ratel e un nuovo set.",
-    "pt": "Novo conteúdo: Central Park e Upper West Side, três companheiros, seis novas variantes de habilidade, o exótico Ratel e um novo conjunto.",
-    "pl": "Nowa zawartość: Central Park i Upper West Side, trzech towarzyszy, sześć nowych wariantów umiejętności, egzotyk Ratel i nowy zestaw.",
-    "ru": "Новый контент: Central Park и Upper West Side, три компаньона, шесть новых вариантов навыков, экзотик Ratel и новый комплект.",
-    "nl": "Nieuwe content: Central Park en de Upper West Side, drie metgezellen, zes nieuwe skillvarianten, de exotic Ratel en een nieuwe gearset."
+    "en": "Out now. Prototype Gear is normalized inside the DLC at launch; Ubisoft plans to enable its full strength later. New content: Central Park and the Upper West Side, three companions, six new skill variants, the Ratel exotic and a new gear set.",
+    "tr": "Yayında. Prototype Gear, çıkışta DLC içinde normalize ediliyor; Ubisoft tam gücünü ileride açmayı planlıyor. Yeni içerik: Central Park ve Upper West Side, üç yoldaş, altı yeni yetenek çeşidi, Ratel egzotiği ve yeni bir gear set.",
+    "de": "Jetzt verfügbar. Prototype Gear wird im DLC zum Start normalisiert; Ubisoft will die volle Stärke später freischalten. Neue Inhalte: Central Park und Upper West Side, drei Begleiter, sechs neue Skill-Varianten, das Exotic Ratel und ein neues Gear-Set.",
+    "fr": "Disponible. Au lancement, le Prototype Gear est normalisé dans le DLC ; Ubisoft prévoit d'activer toute sa puissance plus tard. Nouveau contenu : Central Park et l'Upper West Side, trois compagnons, six nouvelles variantes de compétences, l'exotique Ratel et un nouvel ensemble.",
+    "es": "Ya disponible. Al inicio, el Prototype Gear está normalizado dentro del DLC; Ubisoft planea activar toda su potencia más adelante. Contenido nuevo: Central Park y el Upper West Side, tres compañeros, seis variantes de habilidad, el exótico Ratel y un nuevo conjunto.",
+    "it": "Disponibile ora. Al lancio il Prototype Gear è normalizzato nel DLC; Ubisoft prevede di attivarne tutta la potenza in seguito. Nuovi contenuti: Central Park e l'Upper West Side, tre compagni, sei nuove varianti di abilità, l'esotico Ratel e un nuovo set.",
+    "pt": "Já disponível. No lançamento, o Prototype Gear fica normalizado dentro do DLC; a Ubisoft planeja liberar toda a sua força mais tarde. Novo conteúdo: Central Park e Upper West Side, três companheiros, seis novas variantes de habilidade, o exótico Ratel e um novo conjunto.",
+    "pl": "Już dostępne. Na start Prototype Gear jest w DLC znormalizowany; Ubisoft planuje później włączyć jego pełną moc. Nowa zawartość: Central Park i Upper West Side, trzech towarzyszy, sześć nowych wariantów umiejętności, egzotyk Ratel i nowy zestaw.",
+    "ru": "Уже доступно. На старте Prototype Gear в DLC нормализован; Ubisoft планирует включить его полную силу позже. Новый контент: Central Park и Upper West Side, три компаньона, шесть новых вариантов навыков, экзотик Ratel и новый комплект.",
+    "nl": "Nu beschikbaar. Bij de lancering is Prototype Gear in de DLC genormaliseerd; Ubisoft wil de volledige kracht later inschakelen. Nieuwe content: Central Park en de Upper West Side, drie metgezellen, zes nieuwe skillvarianten, de exotic Ratel en een nieuwe gearset."
    }
   },
   {
