@@ -37,6 +37,11 @@ class CloudLinkModel extends ChangeNotifier {
 
   bool get paired => _token != null;
 
+  /// Sunucunun bu telefon için verdiği cihaz kimliği (`device_id`).
+  /// Eşleştirme sonrası `SharedPreferences`'te saklanır; push bildirimi
+  /// token kaydı (`PUT /push-tokens`) gibi cihaza özgü istekler bunu kullanır.
+  String? get deviceId => _deviceId;
+
   bool get desktopOnline => dashboardState?['desktop']?['online'] == true;
 
   Future<void> load() async {
