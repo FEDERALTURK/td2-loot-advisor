@@ -161,6 +161,12 @@ Sources: [The Division Wiki](https://thedivision.fandom.com) (CC BY-SA) and
 Reads only the screen and the game's own settings file. Never reads or writes game memory or files and sends no input
 to the game.
 
+## Privacy
+
+[`PRIVACY_POLICY.md`](PRIVACY_POLICY.md) — what the desktop app, the optional account/community server, and the
+mobile Companion app each collect (and what they never collect: the app never touches game memory, has no ads
+or analytics, and nothing works without opting in).
+
 ## License
 
 MIT (`LICENSE`). Parts of the game data: CC BY-NC-SA 4.0 (mx-division-builds) and CC BY-SA (The Division Wiki).

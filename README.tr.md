@@ -202,6 +202,12 @@ Kayıtlı build, görev ve ilerleme sabit kimliklerle tutulduğu için dil deği
 | Bindirme görünmüyor | Oyunu kenarlıksız pencerede çalıştır (tam ekranda Windows gizleyebilir). |
 | Tesseract bulunamadı | RapidOCR kuruluysa gerekmez (Ayarlar → OCR → motor). Değilse run.bat ile aç ya da Tesseract yolunu gir. |
 
+## Gizlilik
+
+[`PRIVACY_POLICY.md`](PRIVACY_POLICY.md) — masaüstü uygulamasının, isteğe bağlı hesap/topluluk sunucusunun ve
+mobil Companion uygulamasının neyi topladığı (ve asla toplamadığı: oyun belleğine hiç dokunulmaz, reklam/analitik
+yoktur, hiçbir şey izin vermeden çalışmaz).
+
 ## Lisans
 
 MIT (`LICENSE`). Oyun verisinin bir kısmı CC BY-NC-SA 4.0 (mx-division-builds) ve CC BY-SA (The Division Wiki) lisanslıdır.
