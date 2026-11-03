@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Haberler — TD2 Loot Advisor</title>
+<meta name="description" content="The Division 2 güncel sezon, etkinlik ve güncelleme haberleri.">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<header class="td2-header">
+  <div class="td2-wrap td2-nav">
+    <div class="td2-brand"><span class="dot"></span> TD2 Loot Advisor</div>
+    <nav class="td2-nav-links">
+      <a href="../" data-i18n="nav_home">Ana Sayfa</a>
+      <a href="./" class="active" data-i18n="nav_news">Haberler</a>
+      <a href="../premium/" data-i18n="nav_premium">Premium</a>
+      <a href="../account/" data-i18n="nav_account">Hesabım</a>
+    </nav>
+    <div class="td2-nav-right">
+      <div class="td2-lang"><button class="td2-lang-btn" data-lang="tr">TR</button><button class="td2-lang-btn" data-lang="en">EN</button></div>
+      <a class="btn btn-primary btn-sm" href="../#indir" data-i18n="nav_download">İndir</a>
+    </div>
+  </div>
+</header>
+
+<section class="section td2-wrap" style="border-top:none;padding-top:48px">
+  <h2 data-i18n="news_title">The Division 2 Haberleri</h2>
+  <p class="section-lede" data-i18n="news_sub">TD2 Loot Advisor'ın kendi oyun-içi haber akışından — aynı veri, uygulamadaki Bilgi sekmesinde de görünür.</p>
+  <div id="news-season" style="color:var(--muted);font-size:14px;margin:-16px 0 24px"></div>
+  <div id="news-status" data-i18n="news_loading">Haberler yükleniyor…</div>
+  <div id="news-list"></div>
+</section>
+
+<section class="section td2-wrap">
+  <h2 data-i18n="d3_title">The Division 3</h2>
+  <div id="d3-box" class="news-item"></div>
+</section>
+
+<footer class="td2-footer td2-wrap">
+  <div class="links">
+    <a href="https://github.com/FEDERALTURK/td2-loot-advisor/blob/main/PRIVACY_POLICY.md" data-i18n="footer_privacy">Gizlilik Politikası</a>
+    <a href="https://github.com/FEDERALTURK/td2-loot-advisor/blob/main/LICENSE" data-i18n="footer_license">Lisans (MIT)</a>
+    <a href="https://github.com/FEDERALTURK/td2-loot-advisor">GitHub</a>
+  </div>
+  <div data-i18n="footer_disclaimer">Bağımsız bir topluluk projesidir; Ubisoft veya Massive Entertainment tarafından yayımlanmaz ya da desteklenmez.</div>
+</footer>
+
+<script src="../assets/js/config.js"></script>
+<script src="../assets/js/i18n.js"></script>
+<script src="../assets/js/api.js"></script>
+<script>
+const KIND_BADGE = { event: "badge-event", update: "badge-update", season: "badge-season" };
+function fmtDate(iso) {
+  try { return new Date(iso).toLocaleDateString(td2Lang() === "tr" ? "tr-TR" : "en-US", { year: "numeric", month: "short", day: "numeric" }); }
+  catch (e) { return iso || ""; }
+}
+function render(news) {
+  const lang = td2Lang();
+  const seasonEl = document.getElementById("news-season");
+  if (news.season) seasonEl.textContent = `${td2T("news_season")}: ${news.season}` + (news.updated ? ` · ${td2T("news_updated")} ${fmtDate(news.updated)}` : "");
+  const list = document.getElementById("news-list");
+  list.innerHTML = "";
+  (news.items || []).forEach(item => {
+    const el = document.createElement("div");
+    el.className = "news-item";
+    const title = (item.title && (item.title[lang] || item.title.en)) || "";
+    const text = (item.text && (item.text[lang] || item.text.en)) || "";
+    const badgeClass = KIND_BADGE[item.kind] || "badge-update";
+    el.innerHTML = `
+      <div class="meta"><span class="badge ${badgeClass}">${item.kind || ""}</span>${fmtDate(item.start)}${item.end ? " – " + fmtDate(item.end) : ""}</div>
+      <h3></h3><p></p>
+      ${item.url ? `<a href="${item.url}" target="_blank" rel="noopener">${td2T("news_source")}: ${item.source || "Ubisoft"} ↗</a>` : ""}
+    `;
+    el.querySelector("h3").textContent = title;
+    el.querySelector("p").textContent = text;
+    list.appendChild(el);
+  });
+}
+function renderD3(d3) {
+  const lang = td2Lang();
+  const box = document.getElementById("d3-box");
+  const status = lang === "tr" && d3.status_tr ? d3.status_tr : td2T("d3_status_fallback");
+  const sources = (d3.sources || []).map(s => `<a href="${s.url}" target="_blank" rel="noopener">${s.name}</a>`).join(" · ");
+  const updates = (d3.updates || []).map(u =>
+    `<div style="margin-top:8px;font-size:13.5px"><span style="color:var(--muted)">${u.date}</span> — <a href="${u.url}" target="_blank" rel="noopener">${u.title}</a></div>`
+  ).join("");
+  box.innerHTML = `
+    <div class="meta">${d3.checked ? td2T("d3_checked") + ": " + d3.checked : ""}</div>
+    <p style="color:#c9ced8">${status}</p>
+    ${updates}
+    ${sources ? `<div style="margin-top:12px;font-size:12.5px;color:var(--muted)">${td2T("d3_sources")}: ${sources}</div>` : ""}
+  `;
+}
+
+(async () => {
+  try {
+    const news = await td2News();
+    document.getElementById("news-status").hidden = true;
+    render(news);
+    document.addEventListener("click", e => {
+      if (e.target.classList && e.target.classList.contains("td2-lang-btn")) setTimeout(() => render(news), 0);
+    });
+  } catch (e) {
+    const el = document.getElementById("news-status");
+    el.textContent = td2T("news_error") + " ";
+    const a = document.createElement("a");
+    a.href = "https://www.ubisoft.com/en-gb/game/the-division/the-division-2/news-updates"; a.target = "_blank"; a.rel = "noopener";
+    a.textContent = "ubisoft.com";
+    el.appendChild(a);
+  }
+  try {
+    const d3 = await td2Division3();
+    renderD3(d3);
+    document.addEventListener("click", e => {
+      if (e.target.classList && e.target.classList.contains("td2-lang-btn")) setTimeout(() => renderD3(d3), 0);
+    });
+  } catch (e) {
+    document.getElementById("d3-box").textContent = td2T("d3_status_fallback");
+  }
+})();
+</script>
+</body>
+</html>

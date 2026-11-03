@@ -33,7 +33,10 @@ const HEX = /^[0-9a-f]{8,64}$/;
 const enc = new TextEncoder();
 
 function json(data, status = 200, extra = {}) {
-  return new Response(JSON.stringify(data), {
+  // 204 (ve benzeri "gövdesiz" durum kodları) standart Response'ta gövde ALAMAZ — body geçilirse
+  // (hatta "{}" gibi boş bir JSON bile olsa) kurucu hata fırlatır. OPTIONS ön-uçuş yanıtı bunu 204 kullanıyor.
+  const noBody = status === 204 || status === 205 || status === 304;
+  return new Response(noBody ? null : JSON.stringify(data), {
     status,
     headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store",
                "access-control-allow-origin": "*", ...extra },

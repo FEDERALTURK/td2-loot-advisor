@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hesabım — TD2 Loot Advisor</title>
+<meta name="description" content="Discord ile giriş yap, lisans durumunu gör, anahtar veya davet kodunu kullan.">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<header class="td2-header">
+  <div class="td2-wrap td2-nav">
+    <div class="td2-brand"><span class="dot"></span> TD2 Loot Advisor</div>
+    <nav class="td2-nav-links">
+      <a href="../" data-i18n="nav_home">Ana Sayfa</a>
+      <a href="../news/" data-i18n="nav_news">Haberler</a>
+      <a href="../premium/" data-i18n="nav_premium">Premium</a>
+      <a href="./" class="active" data-i18n="nav_account">Hesabım</a>
+    </nav>
+    <div class="td2-nav-right">
+      <div class="td2-lang"><button class="td2-lang-btn" data-lang="tr">TR</button><button class="td2-lang-btn" data-lang="en">EN</button></div>
+      <a class="btn btn-primary btn-sm" href="../#indir" data-i18n="nav_download">İndir</a>
+    </div>
+  </div>
+</header>
+
+<section class="section td2-wrap" style="border-top:none;padding-top:48px">
+  <h2 data-i18n="acc_title" style="text-align:center">Hesabım</h2>
+  <p class="section-lede" data-i18n="acc_sub" style="text-align:center;margin-left:auto;margin-right:auto">Programdaki hesabınla aynı — Discord ile giriş yap, lisans durumunu gör, anahtar/davet kodunu kullan.</p>
+
+  <div class="acc-box">
+
+    <!-- durum: yükleniyor -->
+    <div id="acc-loading" style="text-align:center;padding:20px 0">
+      <span class="spinner"></span>
+    </div>
+
+    <!-- durum: giriş yapılmamış -->
+    <div id="acc-logged-out" hidden style="text-align:center">
+      <a class="btn btn-primary" id="acc-login-btn" href="#" style="width:100%;justify-content:center" data-i18n="acc_login_cta">Discord ile giriş yap</a>
+      <p style="color:var(--muted);font-size:13px;margin-top:14px" data-i18n="acc_login_note">Şifre yok; giriş tamamen Discord OAuth2 ile. Bu site Discord şifreni hiçbir zaman görmez.</p>
+      <div id="acc-start-err" class="acc-msg err" hidden></div>
+    </div>
+
+    <!-- durum: giriş yapılmış -->
+    <div id="acc-logged-in" hidden>
+      <div class="acc-row">
+        <img class="acc-avatar" id="acc-avatar" alt="">
+        <div>
+          <div class="acc-name" id="acc-name"></div>
+          <span class="acc-tier free" id="acc-tier"></span>
+        </div>
+      </div>
+      <div id="acc-device-limit" class="acc-msg err" hidden data-i18n="acc_device_limit"></div>
+
+      <hr class="acc-divider">
+      <strong data-i18n="acc_redeem_t">Anahtar / davet kodu kullan</strong>
+      <div class="acc-field">
+        <input id="acc-redeem-input" type="text" data-i18n-ph="acc_redeem_ph" autocomplete="off" spellcheck="false">
+        <button class="btn btn-primary btn-sm" id="acc-redeem-btn" data-i18n="acc_redeem_cta">Kullan</button>
+      </div>
+      <div id="acc-redeem-msg" class="acc-msg" hidden></div>
+
+      <hr class="acc-divider">
+      <button class="btn btn-ghost btn-sm" id="acc-logout-btn" data-i18n="acc_logout" style="width:100%;justify-content:center">Çıkış yap</button>
+
+      <hr class="acc-divider">
+      <strong data-i18n="acc_delete_t">Hesabı sil</strong>
+      <p style="color:var(--muted);font-size:13px;margin:8px 0 14px" data-i18n="acc_delete_note"></p>
+      <button class="btn btn-danger btn-sm" id="acc-delete-btn" data-i18n="acc_delete_cta" style="width:100%;justify-content:center">Hesabımı ve tüm verilerimi sil</button>
+      <div id="acc-delete-msg" class="acc-msg" hidden></div>
+    </div>
+
+  </div>
+</section>
+
+<footer class="td2-footer td2-wrap">
+  <div class="links">
+    <a href="https://github.com/FEDERALTURK/td2-loot-advisor/blob/main/PRIVACY_POLICY.md" data-i18n="footer_privacy">Gizlilik Politikası</a>
+    <a href="https://github.com/FEDERALTURK/td2-loot-advisor/blob/main/LICENSE" data-i18n="footer_license">Lisans (MIT)</a>
+    <a href="https://github.com/FEDERALTURK/td2-loot-advisor">GitHub</a>
+  </div>
+  <div data-i18n="footer_disclaimer">Bağımsız bir topluluk projesidir; Ubisoft veya Massive Entertainment tarafından yayımlanmaz ya da desteklenmez.</div>
+</footer>
+
+<script src="../assets/js/config.js"></script>
+<script src="../assets/js/i18n.js"></script>
+<script src="../assets/js/api.js"></script>
+<script>
+function discordAvatar(me) {
+  const { discord_id, avatar } = me.account || {};
+  if (avatar && discord_id) return `https://cdn.discordapp.com/avatars/${discord_id}/${avatar}.png?size=128`;
+  const idx = discord_id ? Number(BigInt(discord_id) % 5n) : 0;
+  return `https://cdn.discordapp.com/embed/avatars/${idx}.png`;
+}
+function showLoggedIn(me) {
+  document.getElementById("acc-loading").hidden = true;
+  document.getElementById("acc-logged-out").hidden = true;
+  const box = document.getElementById("acc-logged-in"); box.hidden = false;
+  document.getElementById("acc-avatar").src = discordAvatar(me);
+  document.getElementById("acc-name").textContent = me.account.username;
+  const tierEl = document.getElementById("acc-tier");
+  const isPrem = me.tier === "premium";
+  tierEl.textContent = td2T(isPrem ? "acc_tier_premium" : "acc_tier_free");
+  tierEl.className = "acc-tier " + (isPrem ? "premium" : "free");
+  document.getElementById("acc-device-limit").hidden = !me.device_limit;
+}
+function showLoggedOut() {
+  document.getElementById("acc-loading").hidden = true;
+  document.getElementById("acc-logged-in").hidden = true;
+  document.getElementById("acc-logged-out").hidden = false;
+}
+async function refresh() {
+  try {
+    const me = await td2Me();
+    if (me) showLoggedIn(me); else showLoggedOut();
+  } catch (e) { showLoggedOut(); }
+}
+
+document.getElementById("acc-login-btn").addEventListener("click", async (e) => {
+  e.preventDefault();
+  const errEl = document.getElementById("acc-start-err");
+  errEl.hidden = true;
+  try { await td2LoginStart(); }
+  catch (err) { errEl.textContent = td2T("acc_err_generic"); errEl.hidden = false; }
+});
+document.getElementById("acc-logout-btn").addEventListener("click", async () => {
+  await td2Logout();
+  showLoggedOut();
+});
+document.getElementById("acc-redeem-btn").addEventListener("click", async () => {
+  const input = document.getElementById("acc-redeem-input"), msg = document.getElementById("acc-redeem-msg");
+  const code = input.value.trim();
+  if (!code) return;
+  msg.hidden = true;
+  try {
+    const r = await td2Redeem(code);
+    msg.className = "acc-msg ok"; msg.textContent = td2T("acc_redeem_ok"); msg.hidden = false;
+    input.value = "";
+    showLoggedIn(r);
+  } catch (err) {
+    msg.className = "acc-msg err"; msg.textContent = err.message || td2T("acc_err_generic"); msg.hidden = false;
+  }
+});
+document.getElementById("acc-delete-btn").addEventListener("click", async () => {
+  if (!confirm(td2T("acc_delete_confirm"))) return;
+  const msg = document.getElementById("acc-delete-msg");
+  try {
+    await td2DeleteAccount();
+    msg.className = "acc-msg ok"; msg.textContent = td2T("acc_delete_ok"); msg.hidden = false;
+    setTimeout(showLoggedOut, 1500);
+  } catch (err) {
+    msg.className = "acc-msg err"; msg.textContent = err.message || td2T("acc_err_generic"); msg.hidden = false;
+  }
+});
+
+(async () => {
+  if (window.location.hash.includes("state=")) {
+    document.getElementById("acc-loading").querySelector(".spinner").insertAdjacentHTML("afterend",
+      ` <span style="color:var(--muted);font-size:13px;margin-left:8px">${td2T("acc_completing")}</span>`);
+    const r = await td2LoginComplete();
+    if (!r.ok) {
+      showLoggedOut();
+      const errEl = document.getElementById("acc-start-err");
+      errEl.textContent = td2T("acc_err_generic"); errEl.hidden = false;
+      return;
+    }
+  }
+  await refresh();
+})();
+</script>
+</body>
+</html>

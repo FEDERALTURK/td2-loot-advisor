@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Premium — TD2 Loot Advisor</title>
+<meta name="description" content="TD2 Loot Advisor Premium: kalibrasyon danışmanı, tüm build'ler için optimizasyon, satıcı takibi, telefon companion ve daha fazlası.">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<header class="td2-header">
+  <div class="td2-wrap td2-nav">
+    <div class="td2-brand"><span class="dot"></span> TD2 Loot Advisor</div>
+    <nav class="td2-nav-links">
+      <a href="../" data-i18n="nav_home">Ana Sayfa</a>
+      <a href="../news/" data-i18n="nav_news">Haberler</a>
+      <a href="./" class="active" data-i18n="nav_premium">Premium</a>
+      <a href="../account/" data-i18n="nav_account">Hesabım</a>
+    </nav>
+    <div class="td2-nav-right">
+      <div class="td2-lang"><button class="td2-lang-btn" data-lang="tr">TR</button><button class="td2-lang-btn" data-lang="en">EN</button></div>
+      <a class="btn btn-primary btn-sm" href="../#indir" data-i18n="nav_download">İndir</a>
+    </div>
+  </div>
+</header>
+
+<section class="section td2-wrap" style="border-top:none;padding-top:48px">
+  <h2 data-i18n="prem_title">Premium</h2>
+  <p class="section-lede" data-i18n="prem_sub">Ücretsiz sürüm tam ve sınırsız kalır. Premium, ekstra zaman kazandıran özellikler ekler.</p>
+
+  <div class="price-card" style="margin-bottom:40px">
+    <h3 data-i18n="prem_buy_t">Premium satın al</h3>
+    <div class="state" id="prem-state" data-i18n="prem_buy_soon">Satın alma yakında açılıyor — şu an için hesabından davet kodu veya anahtar girebilirsin.</div>
+    <a class="btn btn-primary" id="prem-buy-btn" href="#" hidden data-i18n="prem_buy_cta">Gumroad'da satın al</a>
+    <div style="margin-top:18px;font-size:13.5px;color:var(--muted)">
+      <span data-i18n="prem_redeem_t">Zaten bir anahtarın/kodun mu var?</span>
+      <a href="../account/" data-i18n="prem_redeem_cta">Hesabım sayfasından kullan →</a>
+    </div>
+  </div>
+
+  <h3 style="margin-bottom:18px" data-i18n="prem_list_t">Premium ile gelenler</h3>
+  <div class="grid">
+    <div class="card"><h3 data-i18n="prem_recal_t">Kalibrasyon danışmanı</h3><p data-i18n="prem_recal_d"></p></div>
+    <div class="card"><h3 data-i18n="prem_opt_t">Tüm build'ler için optimize</h3><p data-i18n="prem_opt_d"></p></div>
+    <div class="card"><h3 data-i18n="prem_export_t">CSV dışa aktarma</h3><p data-i18n="prem_export_d"></p></div>
+    <div class="card"><h3 data-i18n="prem_vendor_t">Satıcı takibi</h3><p data-i18n="prem_vendor_d"></p></div>
+    <div class="card"><h3 data-i18n="prem_phone_t">Telefon companion</h3><p data-i18n="prem_phone_d"></p></div>
+    <div class="card"><h3 data-i18n="prem_api_t">Yerel API ve bildirimler</h3><p data-i18n="prem_api_d"></p></div>
+    <div class="card"><h3 data-i18n="prem_stats_t">Topluluk düşüş istatistikleri</h3><p data-i18n="prem_stats_d"></p></div>
+  </div>
+  <p style="margin-top:24px;color:var(--muted);font-size:13.5px" data-i18n="prem_license_note">Bir lisans tek bilgisayara bağlanır; hesabından istediğin zaman cihazı sıfırlayabilirsin.</p>
+</section>
+
+<footer class="td2-footer td2-wrap">
+  <div class="links">
+    <a href="https://github.com/FEDERALTURK/td2-loot-advisor/blob/main/PRIVACY_POLICY.md" data-i18n="footer_privacy">Gizlilik Politikası</a>
+    <a href="https://github.com/FEDERALTURK/td2-loot-advisor/blob/main/LICENSE" data-i18n="footer_license">Lisans (MIT)</a>
+    <a href="https://github.com/FEDERALTURK/td2-loot-advisor">GitHub</a>
+  </div>
+  <div data-i18n="footer_disclaimer">Bağımsız bir topluluk projesidir; Ubisoft veya Massive Entertainment tarafından yayımlanmaz ya da desteklenmez.</div>
+</footer>
+
+<script src="../assets/js/config.js"></script>
+<script src="../assets/js/i18n.js"></script>
+<script src="../assets/js/api.js"></script>
+<script>
+if (window.TD2_CONFIG.GUMROAD_URL) {
+  document.getElementById("prem-state").hidden = true;
+  const btn = document.getElementById("prem-buy-btn");
+  btn.href = window.TD2_CONFIG.GUMROAD_URL;
+  btn.target = "_blank"; btn.rel = "noopener";
+  btn.hidden = false;
+}
+</script>
+</body>
+</html>

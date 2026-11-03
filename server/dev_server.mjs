@@ -22,7 +22,8 @@ const env = { DB: { prepare: stmt }, HASH_SALT: "dev", DISCORD_CLIENT_ID: "dev-c
   ENT_SIGNING_KEY: privateKey.export({ format: "der", type: "pkcs8" }).toString("base64"),
   ENT_PUBLIC_KEY: publicKey.export({ format: "der", type: "spki" }).subarray(-32).toString("hex"),
   ADMIN_TOKEN: process.env.DEV_ADMIN_TOKEN || "dev-admin-token-0123456789abcdef", GUMROAD_PRODUCT_ID: "dev-product",
-  PUBLIC_URL: `http://127.0.0.1:${port}`, LICENSE_PUBKEY: "00".repeat(32) };
+  PUBLIC_URL: `http://127.0.0.1:${port}`, LICENSE_PUBKEY: "00".repeat(32),
+  ...(process.env.DEV_SITE_URL ? { SITE_URL: process.env.DEV_SITE_URL } : {}) };   // web/ test_web_account.mjs için
 
 const realFetch = globalThis.fetch;
 globalThis.fetch = async (url, opts = {}) => {
@@ -51,7 +52,8 @@ createServer(async (rq, rs) => {
     res = await worker.fetch(req, env);
     if (u.pathname === "/v1/auth/start" && res.status === 200) {   // discord.com → sahte onay sayfası
       const j = await res.json(); const st = new URL(j.url).searchParams.get("state");
-      res = Response.json({ ...j, url: `https://discord.com/oauth2/authorize?state=${st}`, dev_url: `http://127.0.0.1:${port}/fake/discord?state=${st}` });
+      res = Response.json({ ...j, url: `https://discord.com/oauth2/authorize?state=${st}`, dev_url: `http://127.0.0.1:${port}/fake/discord?state=${st}` },
+        { headers: res.headers });   // orijinal yanıtın başlıklarını (ör. CORS) koru — yalnız gövde değişti
     }
   }
   rs.writeHead(res.status, Object.fromEntries(res.headers)); rs.end(Buffer.from(await res.arrayBuffer()));

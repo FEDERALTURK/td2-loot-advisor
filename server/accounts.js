@@ -30,7 +30,8 @@ const TIERS = new Set(["premium"]);
 const B64U = /^[A-Za-z0-9_\-]{32,128}$/;
 
 function json(data, status = 200, extra = {}) {
-  return new Response(JSON.stringify(data), {
+  const noBody = status === 204 || status === 205 || status === 304;   // bkz. worker.js json() — aynı sebep
+  return new Response(noBody ? null : JSON.stringify(data), {
     status, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store",
                         "access-control-allow-origin": "*", ...extra },
   });
