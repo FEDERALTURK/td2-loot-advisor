@@ -6,7 +6,7 @@ Bu dosya her gün güncellenir (bkz. en alt — otomatik günlük görev). Ayrı
 
 | Bileşen | Durum |
 |---|---|
-| Windows masaüstü uygulaması | Canlı, `v9.1.5.19`. Fazlı bir yol haritası yok — sürekli Windows render/kararlılık/tanılama düzeltme döngüsü (bkz. `DEVELOPMENT_LOG.md`). |
+| Windows masaüstü uygulaması | Canlı, `v9.1.5.20` (hesap panelinde "Telefon eşleştir" düğmesi eklendi). Fazlı bir yol haritası yok — sürekli Windows render/kararlılık/tanılama düzeltme döngüsü (bkz. `DEVELOPMENT_LOG.md`). |
 | Mobil companion (Flutter) | **Faz 2 tamamlandı ve canlı; Faz 3'te bulut eşleştirmesi/build senkronu eklendi, Windows PC'de `flutter analyze`/`test` ile doğrulandı (0 sorun).** Gerçek cihaz/Play doğrulaması ve push-token kaydı (bkz. aşağıda) hâlâ bekliyor. |
 | Topluluk sunucusu (Cloudflare Worker) | Canlı. Mobil uçlar (eşleştirme, build senkronu, cihaz listesi/iptali, hesap silme) production'da. |
 | Lisans/telif (mx-division-builds) | [issue #153](https://github.com/mxswat/mx-division-builds/issues/153) açıldı, yanıt bekleniyor. |
