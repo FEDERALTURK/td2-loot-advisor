@@ -365,6 +365,34 @@ def run_tasks(cfg, cache_path, app_version="", force=False):
 
 
 # ---------------------------------------------------------------- haber / sezon akışı (meta/news_feed.json)
+DESC_FILES = ("descriptions_i18n.json", "descriptions_i18n_2.json")
+
+
+def fetch_descriptions(builds_setting, app_version="", previous=None):
+    """Açıklama çevirilerini parçalardan birleştirir. İlk parça zorunlu, ikincisi henüz olmayabilir.
+
+    Bir ek parça indirilemezse `previous` içindeki girişler korunur; geçici ağ hatası çevirileri silmesin.
+    """
+    urls = [u for u in configured_urls(builds_setting) if u.endswith("meta_builds.json")]
+    base, _ = fetch([u.replace("meta_builds.json", DESC_FILES[0]) for u in urls], app_version)
+    if base.get("schema") != SCHEMA or not isinstance(base.get("items"), dict):
+        raise ValueError("bad description feed")
+    items = {}
+    versions = [str(base.get("version", ""))]
+    for name in DESC_FILES[1:]:
+        try:
+            part, _ = fetch([u.replace("meta_builds.json", name) for u in urls], app_version)
+            if part.get("schema") != SCHEMA or not isinstance(part.get("items"), dict):
+                raise ValueError("bad description shard")
+            items.update(part["items"])
+            versions.append(str(part.get("version", "")))
+        except Exception as e:
+            log.debug("Description shard %s skipped: %s", name, e)
+            items.update(previous or {})
+    items.update(base["items"])          # ilk parça her zaman güncel kabul edilir
+    return {"schema": SCHEMA, "version": "+".join(v for v in versions if v), "items": items}
+
+
 def news_urls(builds_setting):
     return [u.replace("meta_builds.json", "news_feed.json") for u in configured_urls(builds_setting)
             if u.endswith("meta_builds.json")]

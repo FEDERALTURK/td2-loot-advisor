@@ -65,6 +65,33 @@ ok(len(v["items"]) == 1 and v["items"][0]["url"] == "", "kötü kimlik ve https 
 ok(knowledge.pick_lang({"en": "a", "tr": "b"}, "tr") == "b" and knowledge.pick_lang({"en": "a"}, "pl") == "a", "dil seçimi + İngilizce yedeği")
 ok(meta_sync.news_urls("")[0].endswith("meta/news_feed.json"), "akış adresi")
 
+# açıklama çevirileri iki parçadan gelir; ikinci parça yoksa eskiler korunur
+_real_fetch = meta_sync.fetch
+_parts = {"descriptions_i18n.json": {"schema": 1, "version": "1", "items": {"A": {"tr": "yeni"}}},
+          "descriptions_i18n_2.json": {"schema": 1, "version": "2", "items": {"B": {"tr": "b"}}}}
+def _fake_fetch(urls, app_version=""):
+    name = urls[0].rsplit("/", 1)[1]
+    if name not in _parts: raise OSError("404")
+    return _parts[name], urls[0]
+meta_sync.fetch = _fake_fetch
+try:
+    merged = meta_sync.fetch_descriptions("", "t")
+    ok(set(merged["items"]) == {"A", "B"} and merged["version"] == "1+2", "açıklama parçaları birleşti")
+    del _parts["descriptions_i18n_2.json"]
+    kept = meta_sync.fetch_descriptions("", "t", {"A": {"tr": "eski"}, "B": {"tr": "b"}})
+    ok(kept["items"]["A"]["tr"] == "yeni" and "B" in kept["items"], "ikinci parça inmezse önbellek korunur")
+    ok(set(meta_sync.fetch_descriptions("", "t")["items"]) == {"A"}, "ikinci parça yoksa ilk parça yeter")
+    _parts.clear()
+    try:
+        meta_sync.fetch_descriptions("", "t"); ok(False, "ilk parça zorunlu")
+    except OSError:
+        ok(True, "ilk parça zorunlu")
+finally:
+    meta_sync.fetch = _real_fetch
+for _n in meta_sync.DESC_FILES:
+    _p = ROOT / "meta" / _n
+    ok(not _p.exists() or _p.stat().st_size <= 510000, f"{_n} boyut sınırının altında")
+
 # sıfırlama sayaçları (günlük 08:00 UTC, haftalık salı 08:00 UTC)
 res = {"daily_hour_utc": 8, "weekly_weekday": 1, "weekly_hour_utc": 8}
 dd, ww = knowledge.next_resets(res, datetime(2026, 10, 26, 12, 0, tzinfo=timezone.utc))   # pazartesi

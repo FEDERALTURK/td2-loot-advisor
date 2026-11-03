@@ -293,7 +293,7 @@ def main(dry=False):
     print(f"totals: brands {len(data['brands'])}, gear sets {len(data['gear_sets'])}, items {len(items)}, "
           f"named {len(data['named'])}, exotics {len(data['exotics'])}")
     if not dry:
-        path.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
+        path.write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
         print("written", path)
     return report
 

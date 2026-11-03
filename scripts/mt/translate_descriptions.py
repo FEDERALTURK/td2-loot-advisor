@@ -27,9 +27,9 @@ for i in range(0, len(todo), 24):
     if not chunk: continue
     res = tr.translate([x[2] for x in chunk])
     for (cat, name, desc), r in zip(chunk, res):
-        items.setdefault(name, {})["tr"] = r; items[name]["_src"] = desc[:80]; items[name]["_mt"] = "tr"; n += 1
+        items.setdefault(name, {})["tr"] = r; items[name]["_mt"] = "tr"; n += 1
 print(f"translated {n} descriptions in {time.time() - t0:.0f}s")
 out.write_text(json.dumps({"schema": 1, "version": time.strftime("%Y-%m-%d.1", time.gmtime()), "note":
     "Encyclopedia description translations. 'tr' seeded by OPUS-MT machine translation; other languages and reviews by the daily feed task.",
-    "items": items}, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    "items": items}, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
 for name in list(items)[:5]: print(name, "→", items[name]["tr"][:160])
