@@ -14,28 +14,139 @@
   --radius-hud: 4px;
   --max: 1080px;
   --mono: "Cascadia Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+
+  /* ---- Division background system: SHD operation-terminal palette & tuning knobs ---- */
+  --division-bg: #07090b;
+  --division-bg-2: #10151a;
+  --division-metal: #263039;
+  --division-accent: #ff7a18;
+  --division-accent-2: #ff9d42;
+  --division-text: #d7dee3;
+  --division-grid-opacity: .22;
+  --division-glow-opacity: .10;
+  --division-ring-opacity: .5;
+  --division-motion-scale: 1; /* >1 slows every background animation down, <1 speeds it up */
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; overflow-x: hidden; }
 body {
-  background: var(--bg);
+  background: var(--division-bg);
   color: var(--text);
   font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
   line-height: 1.55;
   position: relative;
+  overflow-x: hidden;
 }
-/* ambient tactical grid + top glow, fixed behind all pages */
-body::before {
-  content: "";
-  position: fixed; inset: 0; z-index: -1; pointer-events: none;
+
+/* =========================================================================
+   DIVISION ATMOSPHERIC BACKGROUND
+   Fixed, full-viewport, layered behind every page. Purely decorative
+   (aria-hidden) — never intercepts clicks or scrolling, never affects
+   layout or page height. See DEVELOPMENT_LOG.md for the full layer guide.
+   Layer order (back → front): base gradient → drifting glow/fog blobs →
+   faint tactical map → rotating SHD rings → dust/ember particles (canvas)
+   → slow radar scan pass → static grain → decorative corner labels.
+   ========================================================================= */
+.td2-bg {
+  position: fixed; inset: 0; z-index: -2;
+  overflow: hidden; pointer-events: none; contain: strict;
+}
+.td2-bg > * { position: absolute; }
+
+/* 1. base dark layer: soft anthracite gradient + vignette, content stays calmest at center */
+.td2-bg-base {
+  inset: 0;
   background:
-    radial-gradient(ellipse 900px 480px at 50% -8%, rgba(255, 109, 16, .12), transparent 60%),
-    repeating-linear-gradient(0deg, rgba(255, 255, 255, .025) 0 1px, transparent 1px 48px),
-    repeating-linear-gradient(90deg, rgba(255, 255, 255, .025) 0 1px, transparent 1px 48px);
+    radial-gradient(ellipse 70% 60% at 50% 42%, transparent 55%, rgba(0,0,0,.5) 100%),
+    radial-gradient(ellipse 1300px 900px at 50% 48%, var(--division-bg-2), var(--division-bg) 72%);
 }
-/* site-wide drifting radar-node network, drawn on canvas, sat behind the grid above */
-.td2-bg-canvas { position: fixed; inset: 0; z-index: -2; pointer-events: none; }
+
+/* 2. slow atmospheric glow blobs — low-opacity SHD-orange light, drifting imperceptibly */
+.td2-glow {
+  width: 620px; height: 620px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,122,24,var(--division-glow-opacity)), transparent 70%);
+  filter: blur(46px); mix-blend-mode: screen; will-change: transform;
+}
+.td2-glow-a { top: -10%; left: 4%; animation: td2-glow-drift-a calc(90s * var(--division-motion-scale)) ease-in-out infinite alternate; }
+.td2-glow-b { bottom: -14%; right: 2%; animation: td2-glow-drift-b calc(110s * var(--division-motion-scale)) ease-in-out infinite alternate; }
+@keyframes td2-glow-drift-a { from { transform: translate(0,0); } to { transform: translate(34px, 26px); } }
+@keyframes td2-glow-drift-b { from { transform: translate(0,0); } to { transform: translate(-42px,-22px); } }
+
+/* neutral fog blob — same idea, grey instead of orange, for a crisis-city haze */
+.td2-fog {
+  width: 1100px; height: 700px; left: -12%; top: 28%;
+  background: radial-gradient(circle, rgba(215,222,227,.045), transparent 70%);
+  filter: blur(64px); mix-blend-mode: screen; will-change: transform;
+  animation: td2-fog-drift calc(150s * var(--division-motion-scale)) ease-in-out infinite alternate;
+}
+@keyframes td2-fog-drift { from { transform: translate(0,0); } to { transform: translate(5%,-3%); } }
+
+/* 3. faint tactical map/topography — noticed only on close inspection, never a focal point */
+.td2-bg-map {
+  width: 140%; height: 140%; top: -20%; left: -20%;
+  color: var(--division-metal); opacity: var(--division-grid-opacity);
+  animation: td2-map-drift calc(170s * var(--division-motion-scale)) ease-in-out infinite alternate;
+}
+@keyframes td2-map-drift { from { transform: translate(0,0); } to { transform: translate(-2.2%,-1.4%); } }
+.td2-map-blip { fill: var(--division-accent); opacity: 0; animation: td2-blip-pulse 26s ease-in-out infinite; }
+.td2-map-blip-2 { animation-duration: 31s; animation-delay: 9s; }
+.td2-map-blip-3 { animation-duration: 23s; animation-delay: 17s; }
+@keyframes td2-blip-pulse { 0%, 92%, 100% { opacity: 0; } 94% { opacity: .85; } 97% { opacity: 0; } }
+
+/* 4. SHD-style technical rings, half off-frame, each turning at its own slow, independent rate */
+.td2-ring {
+  color: var(--division-metal); opacity: var(--division-ring-opacity);
+  transform-origin: center; will-change: transform;
+}
+.td2-ring-a { width: 480px; height: 480px; top: -150px; left: -130px; animation: td2-ring-spin calc(130s * var(--division-motion-scale)) linear infinite; }
+.td2-ring-b { width: 380px; height: 380px; bottom: -120px; right: -100px; animation: td2-ring-spin-rev calc(95s * var(--division-motion-scale)) linear infinite; }
+@keyframes td2-ring-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes td2-ring-spin-rev { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
+
+/* 5. dust/ember particles — single canvas, see bg-fx.js */
+.td2-bg-canvas { inset: 0; width: 100%; height: 100%; }
+
+/* 6. radar scan pass — a soft orange band crossing the page every ~20s, never a full-screen flash */
+.td2-bg-scan {
+  top: -18%; left: 0; width: 100%; height: 22%;
+  background: linear-gradient(180deg, transparent, rgba(255,122,24,.09) 45%, rgba(255,122,24,.15) 50%, rgba(255,122,24,.09) 55%, transparent);
+  animation: td2-bg-scan-pass calc(21s * var(--division-motion-scale)) cubic-bezier(.4,0,.3,1) infinite;
+}
+@keyframes td2-bg-scan-pass {
+  0% { transform: translateY(-120%); opacity: 0; }
+  4% { opacity: 1; }
+  34% { opacity: 1; transform: translateY(560%); }
+  40% { opacity: 0; transform: translateY(560%); }
+  100% { opacity: 0; transform: translateY(560%); }
+}
+
+/* 7. static film-grain texture — rendered once, never recomputed per frame */
+.td2-grain {
+  inset: 0; width: 100%; height: 100%; opacity: .05; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+}
+
+/* 8. minimal decorative technical labels — never real data, hidden from assistive tech */
+.td2-marks { inset: 0; width: 100%; height: 100%; }
+.td2-mark {
+  position: absolute; font-family: var(--mono); font-size: 10px; letter-spacing: .12em;
+  color: var(--division-metal); opacity: .4; text-transform: uppercase; white-space: nowrap;
+}
+.td2-mark-tl { top: 86px; left: 18px; }
+.td2-mark-tr { top: 86px; right: 18px; text-align: right; }
+.td2-mark-bl { bottom: 24px; left: 18px; }
+
+@media (max-width: 700px) {
+  .td2-ring-b { display: none; }
+  .td2-ring-a { width: 320px; height: 320px; opacity: calc(var(--division-ring-opacity) * .7); }
+  .td2-fog { display: none; }
+  .td2-bg-map { opacity: calc(var(--division-grid-opacity) * .6); }
+  .td2-bg-scan { height: 16%; }
+  .td2-mark-tr { display: none; }
+}
+
 a { color: var(--accent-2); text-decoration: none; }
 a:hover { text-decoration: underline; }
 img { max-width: 100%; }
@@ -146,6 +257,9 @@ img { max-width: 100%; }
   .td2-brand .dot { animation: none; }
   .td2-hero h1, .td2-hero p, .td2-hero .cta-row, .td2-hero .note { animation: none; opacity: 1; transform: none; }
   .td2-hero-glow { transition: none; }
+  /* Division background: keep the same palette/layers, just freeze every motion on a static frame */
+  .td2-glow, .td2-fog, .td2-bg-map, .td2-ring, .td2-bg-scan, .td2-map-blip { animation: none !important; }
+  .td2-bg-scan { opacity: 0; }
 }
 
 .section { padding: 48px 0; border-top: 1px solid var(--border); }
