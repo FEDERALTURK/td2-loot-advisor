@@ -2,6 +2,12 @@
 
 Önemli kararların ve sürümlerin kısa, kronolojik özeti. Tam ayrıntı için `git log` ve `.github/release_notes.md`.
 
+## Web sitesi yayını + sunucu CI/CD (2026-11-03)
+
+- `web/` (hesap/haberler/premium/tanıtım sayfaları) Cloudflare Pages'e yayınlandı: https://td2-loot-advisor.pages.dev — GitHub bağlantılı (Pages → `main` dalı, build output `web`), Direct Upload değil (native dosya seçici tarayıcı otomasyonundan görünmediği için GitHub entegrasyonuna geçildi).
+- `td2-stats` Worker'ı (backend) artık GitHub'a bağlı: Cloudflare Workers Builds, `main` dalındaki `server/` dizininden `npx wrangler deploy` ile otomatik derleyip yayınlıyor (Root directory: `server`). Önceden Quick Edit'te elle kopyala-yapıştırla denendi; Monaco editörü ayrı origin'deki bir iframe'de olduğu için tarayıcı otomasyonunun `paste` olayı güvenilir çalışmadı — bu yüzden API token yerine (gereksiz yetki eklemeden) doğrudan Git entegrasyonu tercih edildi, kullanıcı onayıyla kuruldu.
+- Bu commit, bağlantıdan sonraki ilk build'i tetiklemek için atıldı; `server/accounts.js` ve `worker.js`'deki CORS 204-gövde düzeltmesi ile `SITE_URL` tabanlı web girişi dalı zaten `main`'de mevcuttu, sadece canlıya alınması gerekiyordu.
+
 ## 9.1.5.19 — Kod taraması: çökme düzeltmeleri ve lisans şeffaflığı (2026-11)
 
 - Tüm `.py` dosyaları `ruff`/`pyflakes` ile tarandı (bir AI oturumunda, "ADMİN YETKİSİ" ile tüm kod tabanını tarayıp sorunları kendi başına düzeltip yeni sürüm yayınlama talimatıyla).
