@@ -17,6 +17,7 @@ ENT_PUBLIC_KEY = "06da3593d93eebb1a2df46d28577eca8b5c96364973194c900b337c1d74288
 LICENSE_PUBKEY = "d70b17497241261ca45bcd05bbaedcd0fdeb3d866de4993d23db3c25274f633a"
 MAX_BATCH = "50"
 MAX_PER_HOUR = "600"
+APNS_BUNDLE_ID = "com.federalturk.td2companion"   # mobile/ios Runner.xcodeproj + android/app build.gradle ile aynı
 
 # Hata rapor sistemi (worker.js /v1/reports endpoints)
 # Secrets: npx wrangler secret put GITHUB_TOKEN (ayrı olarak)
@@ -32,4 +33,10 @@ crons = ["17 * * * *"]
 
 # Android push bildirimi (FCM HTTP v1) — Firebase Admin SDK servis hesabı JSON'unun TAMAMI tek bir secret olarak:
 #   npx wrangler secret put FCM_SERVICE_ACCOUNT_JSON
-# Tanımlı değilse sendPush() sessizce no-op'tur (bkz. mobile.js); iOS/APNs için henüz karşılığı yok.
+# iOS push bildirimi (APNs HTTP/2 + JWT) — Apple Developer Program'dan alınan .p8 Auth Key + ilgili kimlikler:
+#   npx wrangler secret put APNS_AUTH_KEY_P8      (indirilen .p8 dosyasının TAMAMI, PEM metni olarak)
+#   npx wrangler secret put APNS_KEY_ID           (Apple Developer > Keys sayfasındaki 10 haneli Key ID)
+#   npx wrangler secret put APNS_TEAM_ID           (Apple Developer hesabının 10 haneli Team ID'si)
+# APNS_BUNDLE_ID gizli değil, [vars] altında zaten tanımlı (uygulamanın bundle identifier'ı — mobile/ ile aynı).
+# APNS_ENV="sandbox" verilirse (opsiyonel) geliştirme/TestFlight APNs sunucusu kullanılır; yoksa production.
+# Her iki platform da kendi secret/değişken seti tanımlı değilse BAĞIMSIZ olarak sessizce no-op'tur (bkz. mobile.js).

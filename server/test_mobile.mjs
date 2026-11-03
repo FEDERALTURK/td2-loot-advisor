@@ -37,6 +37,11 @@ const fcmServiceAccount = { client_email: "firebase-adminsdk-test@td2-loot-advis
   private_key: fcmPriv, project_id: "td2-loot-advisor" };
 let fcmTokenOutcomes = {};   // FCM gönderim mock'unun test-başına davranışı: token -> "unregistered"
 
+// --- APNs push testi için sahte EC (P-256) .p8 Auth Key (gerçek Apple ağına ASLA çıkılmaz — her şey mock'lanır)
+const { publicKey: apnsPub, privateKey: apnsPriv } = generateKeyPairSync("ec", { namedCurve: "prime256v1",
+  publicKeyEncoding: { type: "spki", format: "pem" }, privateKeyEncoding: { type: "pkcs8", format: "pem" } });
+let apnsTokenOutcomes = {};   // APNs gönderim mock'unun test-başına davranışı: token -> "baddevicetoken"
+
 globalThis.fetch = async (url, opts = {}) => {
   if (url.startsWith("https://discord.com/api/oauth2/token")) return Response.json({ access_token: "at" });
   if (url === "https://discord.com/api/users/@me") return Response.json(discordUser);
@@ -55,6 +60,18 @@ globalThis.fetch = async (url, opts = {}) => {
     if (fcmTokenOutcomes[token] === "unregistered")
       return new Response(JSON.stringify({ error: { status: "UNREGISTERED", message: "not registered" } }), { status: 404 });
     return Response.json({ name: "projects/x/messages/1" });
+  }
+  if (url.startsWith("https://api.push.apple.com/3/device/") || url.startsWith("https://api.sandbox.push.apple.com/3/device/")) {
+    // mobile.js'in imzaladığı ES256 provider JWT'sini gerçekten doğrula (IEEE P1363/ham r||s format).
+    const bearer = /^bearer\s+(.+)$/i.exec(opts.headers?.authorization || "");
+    const [h, p, s] = String(bearer?.[1] || "").split(".");
+    const verifier = createVerify("SHA256"); verifier.update(h + "." + p);
+    const valid = h && p && s && verifier.verify({ key: apnsPub, dsaEncoding: "ieee-p1363" }, Buffer.from(s, "base64url"));
+    if (!valid) return new Response(JSON.stringify({ reason: "InvalidProviderToken" }), { status: 403 });
+    const deviceToken = url.split("/device/")[1];
+    if (apnsTokenOutcomes[deviceToken] === "baddevicetoken")
+      return new Response(JSON.stringify({ reason: "BadDeviceToken" }), { status: 410 });
+    return new Response(null, { status: 200 });
   }
   return new Response("nf", { status: 404 });
 };
@@ -209,6 +226,37 @@ async function desktopLogin(device) {
   r = await call("/v1/mobile/desktop/events", { method: "POST", auth: dAuth, body: { type: "scan_result", slot: "Mask", decision: "keep" } });
   ok(r.status === 200, "secret tanımsızken scan_result olayı yine de 200 döner (push best-effort, olayı bloklamaz)");
   await call(`/v1/mobile/devices/${noCredDev.device_id}`, { method: "DELETE", auth: dAuth });
+
+  // --- APNs push gönderimi (iOS): gerçek ES256 (P-256) imzası doğrulanıyor, başarı + BadDeviceToken ayrı test ediliyor
+  const apnsPairA = await (await call("/v1/mobile/pairings", { method: "POST", auth: dAuth })).json();
+  const apnsDevA = await (await call("/v1/mobile/pairings/claim",
+    { method: "POST", body: { code: apnsPairA.code, platform: "ios" } })).json();
+  const apnsPairB = await (await call("/v1/mobile/pairings", { method: "POST", auth: dAuth })).json();
+  const apnsDevB = await (await call("/v1/mobile/pairings/claim",
+    { method: "POST", body: { code: apnsPairB.code, platform: "ios" } })).json();
+  await call(`/v1/mobile/push-tokens/${apnsDevA.device_id}`, { method: "PUT", auth: "Bearer " + apnsDevA.token, body: { token: "good-ios-token" } });
+  await call(`/v1/mobile/push-tokens/${apnsDevB.device_id}`, { method: "PUT", auth: "Bearer " + apnsDevB.token, body: { token: "stale-ios-token" } });
+  apnsTokenOutcomes = { "stale-ios-token": "baddevicetoken" };
+  env.APNS_AUTH_KEY_P8 = apnsPriv; env.APNS_KEY_ID = "TESTKEY123"; env.APNS_TEAM_ID = "TESTTEAM12"; env.APNS_BUNDLE_ID = "com.federalturk.td2lootadvisor";
+  r = await call("/v1/mobile/desktop/events", { method: "POST", auth: dAuth, body: { type: "scan_result", slot: "Backpack", decision: "keep" } });
+  ok(r.status === 200, "push tetikleyen scan_result olayı (iOS) kabul edildi");
+  ok(!!sql.prepare("SELECT 1 FROM push_tokens WHERE token = ?").get("good-ios-token"),
+     "APNs'in kabul ettiği belirteç gönderimden sonra hâlâ saklı (gerçek ES256 imzası doğrulandı)");
+  ok(!sql.prepare("SELECT 1 FROM push_tokens WHERE token = ?").get("stale-ios-token"),
+     "APNs'in BadDeviceToken dediği belirteç otomatik silindi (yetim kalmıyor)");
+  delete env.APNS_AUTH_KEY_P8; delete env.APNS_KEY_ID; delete env.APNS_TEAM_ID; delete env.APNS_BUNDLE_ID;
+  apnsTokenOutcomes = {};
+  await call(`/v1/mobile/devices/${apnsDevA.device_id}`, { method: "DELETE", auth: dAuth });
+  await call(`/v1/mobile/devices/${apnsDevB.device_id}`, { method: "DELETE", auth: dAuth });
+
+  // --- APNs kimlik bilgisi tanımsızken sendPush sessizce no-op (uydurma "gönderildi" durumu yok)
+  const noCredIosPair = await (await call("/v1/mobile/pairings", { method: "POST", auth: dAuth })).json();
+  const noCredIosDev = await (await call("/v1/mobile/pairings/claim",
+    { method: "POST", body: { code: noCredIosPair.code, platform: "ios" } })).json();
+  const noCredIosPush = await (await call(`/v1/mobile/push-tokens/${noCredIosDev.device_id}`,
+    { method: "PUT", auth: "Bearer " + noCredIosDev.token, body: { token: "whatever-ios" } })).json();
+  ok(noCredIosPush.delivery === "not_yet_implemented", "APNs kimlik bilgisi tanımsızken push kaydı yine 'henüz yok' diyor (dürüst durum)");
+  await call(`/v1/mobile/devices/${noCredIosDev.device_id}`, { method: "DELETE", auth: dAuth });
 
   // --- yeniden eşleştir, sonra hesap silme talebi + bekleme süresi + gerçek silme
   r = await call("/v1/mobile/pairings", { method: "POST", auth: dAuth });

@@ -106,10 +106,38 @@ Public task/news/game-data endpoints should be reused where their schemas and ca
   sign-in — the key itself was never typed into chat or committed to the repo.
   `server/test_mobile.mjs`: 35 → 40 tests, including one that verifies the RS256 JWT signature against a real
   (test-only) RSA key pair rather than just asserting "a request happened".
-- ❌ **Not done yet**: iOS/APNs push delivery. This requires a real, paid Apple Developer Program enrollment
-  (Apple ID + ~$99/year) that the AI assistant must not perform on the user's behalf — the user has to do this
-  step themselves when/if they want iOS push. `PUT /push-tokens` on an iOS device still reports
-  `delivery: "not_yet_implemented"` honestly rather than pretending it works.
+- ✅ **iOS push code implemented (2026-11-03), not yet deployed.** `sendPush()`/`apnsProviderJwt()` in `mobile.js`
+  now send real APNs HTTP/2 notifications using Apple's token-based auth: an ES256-signed provider JWT (Web
+  Crypto `crypto.subtle`, `.p8` Auth Key, Team ID + Key ID) posted to `https://api.push.apple.com/3/device/{token}`
+  with `apns-topic: <bundle id>`. A token APNs reports as `BadDeviceToken`/`Unregistered` (or HTTP 410) is deleted
+  automatically. Fully symmetric with the Android path and independent of it — each platform is a no-op on its own
+  if its own secrets aren't set. `server/test_mobile.mjs`: 40 → 44 tests, including a real ES256/P-256 signature
+  check (IEEE P1363 raw r‖s format) against a test-only EC key pair via `node:crypto`.
+  **Not deployed to production yet** — requires the user to complete the steps below first (a real Apple ID +
+  paid enrollment, which the AI assistant must not do on the user's behalf) and supply the resulting credentials.
+
+#### iOS push setup — steps the *user* must do (AI assistant cannot do these)
+
+1. Enroll in the [Apple Developer Program](https://developer.apple.com/programs/enroll/) (~$99/year, requires a
+   real Apple ID and a payment method — sign in with your own Apple ID, do not share the password with anyone).
+2. In the [Apple Developer portal](https://developer.apple.com/account/resources/authkeys/list) → **Certificates,
+   Identifiers & Profiles → Keys** → **+** to create a new key. Name it e.g. "TD2 Loot Advisor APNs", check
+   **Apple Push Notifications service (APNs)**, then **Continue → Register**.
+3. **Download the `.p8` key file immediately** — Apple only lets you download it once. Note the **Key ID** shown
+   on the same page (10 characters, e.g. `ABC1234DEF`).
+4. Find your **Team ID**: top-right of the Apple Developer portal (Membership details), also 10 characters.
+5. Register an **App ID** (identifier) matching the Flutter app's bundle id, `com.federalturk.td2companion`
+   (under **Identifiers**), with the **Push Notifications** capability enabled.
+6. Hand the `.p8` file's contents, Key ID, and Team ID to whoever is running the deploy (never paste the `.p8`
+   contents into a chat — pipe the file directly into `wrangler secret put`, same pattern as the FCM key):
+   - `npx wrangler secret put APNS_AUTH_KEY_P8` (paste/pipe the whole `.p8` file content)
+   - `npx wrangler secret put APNS_KEY_ID`
+   - `npx wrangler secret put APNS_TEAM_ID`
+   `APNS_BUNDLE_ID` is already set as a plain (non-secret) variable in `wrangler.toml`.
+7. In Xcode, enable the **Push Notifications** capability for the Runner target (Signing & Capabilities tab) and
+   add the Background Modes → Remote notifications capability if background delivery is wanted later.
+8. Redeploy the Worker (`npx wrangler deploy`) so it picks up the new secrets, then test end-to-end on a real
+   iOS device or TestFlight build (APNs does not work in the iOS Simulator).
 - ✅ **Deployed to the live Cloudflare Worker (2026-11-03).** Run from the user's own PC (already authenticated
   Cloudflare session, explicit user approval before the production step): `npx wrangler d1 execute td2stats --remote
   --file schema.sql` (27 queries, 23 tables total, additive `IF NOT EXISTS`) then `npx wrangler deploy` (Version ID

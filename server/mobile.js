@@ -9,11 +9,11 @@
 //    (bu Worker hiçbir komutu doğrudan çalıştırmaz, sadece kuyruğa koyar/okur).
 //  - Masaüstünden bulut'a giden "event" içinde ekran görüntüsü, oyun belleği veya dosya içeriği YOKTUR;
 //    yalnız küçük bir durum JSON'u (örn. {type:"scan_result", slot:"Mask", decision:"keep"}).
-//  - Push belirteçleri (APNs/FCM) burada saklanır. Android (FCM HTTP v1, servis hesabı JWT'siyle) için gerçek
-//    gönderim Faz 4'te eklendi — bkz. docs/mobile_companion_roadmap.md. iOS/APNs için gereken Apple Developer
-//    Program kimlik bilgisi henüz yok; iOS tarafı bilerek no-op'tur. env.FCM_SERVICE_ACCOUNT_JSON (Cloudflare
-//    secret'ı) tanımlı değilse Android için de sessizce no-op olur — hiçbir zaman "gönderildi" diye yalan
-//    söylemez (bkz. proje talimatları madde 5: sahte başarı göstermeme).
+//  - Push belirteçleri (APNs/FCM) burada saklanır. Hem Android (FCM HTTP v1) hem iOS (APNs HTTP/2+JWT) için
+//    gerçek gönderim Faz 4'te eklendi — bkz. docs/mobile_companion_roadmap.md. Her platform kendi Cloudflare
+//    secret'ı (Android: FCM_SERVICE_ACCOUNT_JSON; iOS: APNS_AUTH_KEY_P8/APNS_KEY_ID/APNS_TEAM_ID/APNS_BUNDLE_ID)
+//    tanımlı değilse BAĞIMSIZ olarak sessizce no-op'tur — hiçbir zaman "gönderildi" diye yalan söylemez
+//    (bkz. proje talimatları madde 5: sahte başarı göstermeme).
 //
 // Ortam: aynı D1 (env.DB), accounts.js ile aynı HASH_SALT.
 
@@ -28,6 +28,7 @@ const ALLOWED_COMMANDS = new Set(["scan_start", "scan_stop"]);
 const DELETE_GRACE_SECONDS = 24 * 3600;   // hesap silme talebinden sonra bekleme süresi
 const FCM_SCOPE = "https://www.googleapis.com/auth/firebase.messaging";
 let _fcmTokenCache = null;   // Worker isolate ömrü boyunca bellekte tutulan OAuth2 erişim belirteci (en fazla 1 saat)
+let _apnsJwtCache = null;    // Worker isolate ömrü boyunca bellekte tutulan APNs provider token'ı (Apple: en az 20dk'da bir yenile)
 
 function json(data, status = 200, extra = {}) {
   return new Response(JSON.stringify(data), {
@@ -242,38 +243,92 @@ async function fcmAccessToken(env) {
   return _fcmTokenCache;
 }
 
-// Bir hesaba eşleştirilmiş, hâlâ geçerli Android cihazlarına FCM bildirimi gönderir. iOS (APNs) için gereken
-// Apple Developer Program kimlik bilgisi henüz yok — iOS belirteçleri burada bilerek atlanır (no-op), uydurma
-// bir "gönderildi" durumu asla döndürülmez. env.FCM_SERVICE_ACCOUNT_JSON tanımlı değilse tüm fonksiyon no-op'tur.
+// ------------------------------------------------------------ APNs (HTTP/2 + JWT) gönderimi (iOS)
+// Apple'ın .p8 "Auth Key" formatı zaten PKCS8 PEM'dir — FCM'deki pemToArrayBuffer() burada da kullanılabilir.
+// Apple'ın token tabanlı kimlik doğrulaması: ES256 imzalı bir "provider token" (JWT), Team ID + Key ID ile.
+// Bu, cihaz başına değil TÜM uygulama için tek bir token'dır — Apple en az 20 dakikada bir yenilenmesini önerir;
+// burada ~55 dakikada bir yenilenip isolate içinde önbelleğe alınır (FCM'in erişim belirteci önbelleğiyle aynı desen).
+async function apnsProviderJwt(env) {
+  if (_apnsJwtCache && _apnsJwtCache.expiresAt > now() + 60) return _apnsJwtCache;
+  const p8 = env.APNS_AUTH_KEY_P8, keyId = env.APNS_KEY_ID, teamId = env.APNS_TEAM_ID;
+  if (!p8 || !keyId || !teamId) return null;
+  const iat = now();
+  const unsigned = b64uEnc(enc.encode(JSON.stringify({ alg: "ES256", kid: keyId }))) + "." +
+                   b64uEnc(enc.encode(JSON.stringify({ iss: teamId, iat })));
+  let key, sig;
+  try {
+    key = await crypto.subtle.importKey("pkcs8", pemToArrayBuffer(p8), { name: "ECDSA", namedCurve: "P-256" }, false, ["sign"]);
+    // Web Crypto'nun ECDSA imzası zaten ham (r||s) IEEE P1363 formatındadır — JWS ES256'nın beklediği format budur,
+    // DER'den çevirmeye gerek yoktur.
+    sig = await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-256" }, key, enc.encode(unsigned));
+  } catch { return null; }   // bozuk/eksik .p8 anahtarı — sessizce vazgeç, uydurma belirteç üretme
+  _apnsJwtCache = { jwt: unsigned + "." + b64uEnc(new Uint8Array(sig)), expiresAt: iat + 55 * 60 };
+  return _apnsJwtCache;
+}
+
+// Bir hesaba eşleştirilmiş, hâlâ geçerli Android (FCM) ve iOS (APNs) cihazlarına bildirim gönderir. Her platform
+// kendi kimlik bilgisi tanımlı değilse bağımsız olarak sessizce no-op'tur — uydurma bir "gönderildi" durumu
+// asla döndürülmez.
 export async function sendPush(env, accountId, payload) {
-  if (!env.FCM_SERVICE_ACCOUNT_JSON) return { sent: 0, failed: 0, skipped: "no_credentials" };
-  const rows = (await env.DB.prepare(
-    "SELECT pt.device_id AS device_id, pt.token AS token FROM push_tokens pt " +
-    "JOIN mobile_devices md ON md.device_id = pt.device_id " +
-    "WHERE md.account_id = ?1 AND md.revoked = 0 AND md.platform = 'android'").bind(accountId).all()).results || [];
-  if (!rows.length) return { sent: 0, failed: 0 };
-  const auth = await fcmAccessToken(env);
-  if (!auth) return { sent: 0, failed: rows.length, error: "auth_failed" };
-  let sent = 0, failed = 0;
-  for (const row of rows) {
-    try {
-      const resp = await fetch(`https://fcm.googleapis.com/v1/projects/${auth.projectId}/messages:send`, {
-        method: "POST", headers: { authorization: "Bearer " + auth.accessToken, "content-type": "application/json" },
-        body: JSON.stringify({ message: { token: row.token,
-          notification: { title: String(payload?.title || "TD2 Loot Advisor").slice(0, 120), body: String(payload?.body || "").slice(0, 200) },
-          data: payload?.data && typeof payload.data === "object" ? payload.data : {} } }),
-      });
-      if (resp.ok) { sent++; continue; }
-      failed++;
-      // FCM'in kalıcı-geçersiz belirteç durumları: telefon uygulamayı kaldırmış/belirteç yenilenmiş — yetim kalmasın.
-      const errBody = await resp.json().catch(() => null);
-      const status = errBody?.error?.status;
-      if (status === "UNREGISTERED" || status === "NOT_FOUND" || status === "INVALID_ARGUMENT") {
-        await env.DB.prepare("DELETE FROM push_tokens WHERE device_id = ?1").bind(row.device_id).run();
+  const title = String(payload?.title || "TD2 Loot Advisor").slice(0, 120);
+  const body = String(payload?.body || "").slice(0, 200);
+  const data = payload?.data && typeof payload.data === "object" ? payload.data : {};
+  let sent = 0, failed = 0, skipped = [];
+
+  // --- Android (FCM HTTP v1)
+  if (env.FCM_SERVICE_ACCOUNT_JSON) {
+    const rows = (await env.DB.prepare(
+      "SELECT pt.device_id AS device_id, pt.token AS token FROM push_tokens pt " +
+      "JOIN mobile_devices md ON md.device_id = pt.device_id " +
+      "WHERE md.account_id = ?1 AND md.revoked = 0 AND md.platform = 'android'").bind(accountId).all()).results || [];
+    const auth = rows.length ? await fcmAccessToken(env) : null;
+    if (rows.length && !auth) { failed += rows.length; } else {
+      for (const row of rows) {
+        try {
+          const resp = await fetch(`https://fcm.googleapis.com/v1/projects/${auth.projectId}/messages:send`, {
+            method: "POST", headers: { authorization: "Bearer " + auth.accessToken, "content-type": "application/json" },
+            body: JSON.stringify({ message: { token: row.token, notification: { title, body }, data } }),
+          });
+          if (resp.ok) { sent++; continue; }
+          failed++;
+          // FCM'in kalıcı-geçersiz belirteç durumları: telefon uygulamayı kaldırmış/belirteç yenilenmiş — yetim kalmasın.
+          const errBody = await resp.json().catch(() => null);
+          const status = errBody?.error?.status;
+          if (status === "UNREGISTERED" || status === "NOT_FOUND" || status === "INVALID_ARGUMENT")
+            await env.DB.prepare("DELETE FROM push_tokens WHERE device_id = ?1").bind(row.device_id).run();
+        } catch { failed++; }
       }
-    } catch { failed++; }
-  }
-  return { sent, failed };
+    }
+  } else skipped.push("android:no_credentials");
+
+  // --- iOS (APNs HTTP/2 + JWT)
+  if (env.APNS_AUTH_KEY_P8 && env.APNS_BUNDLE_ID) {
+    const rows = (await env.DB.prepare(
+      "SELECT pt.device_id AS device_id, pt.token AS token FROM push_tokens pt " +
+      "JOIN mobile_devices md ON md.device_id = pt.device_id " +
+      "WHERE md.account_id = ?1 AND md.revoked = 0 AND md.platform = 'ios'").bind(accountId).all()).results || [];
+    const prov = rows.length ? await apnsProviderJwt(env) : null;
+    if (rows.length && !prov) { failed += rows.length; } else {
+      const apnsHost = env.APNS_ENV === "sandbox" ? "api.sandbox.push.apple.com" : "api.push.apple.com";
+      for (const row of rows) {
+        try {
+          const resp = await fetch(`https://${apnsHost}/3/device/${row.token}`, {
+            method: "POST",
+            headers: { authorization: "bearer " + prov.jwt, "apns-topic": env.APNS_BUNDLE_ID, "apns-push-type": "alert", "apns-priority": "10" },
+            body: JSON.stringify({ aps: { alert: { title, body }, sound: "default" }, ...data }),
+          });
+          if (resp.ok) { sent++; continue; }
+          failed++;
+          // Apple'ın kalıcı-geçersiz belirteç durumları (BadDeviceToken, Unregistered) — yetim kalmasın.
+          const errBody = await resp.json().catch(() => null);
+          if (resp.status === 410 || errBody?.reason === "BadDeviceToken" || errBody?.reason === "Unregistered")
+            await env.DB.prepare("DELETE FROM push_tokens WHERE device_id = ?1").bind(row.device_id).run();
+        } catch { failed++; }
+      }
+    }
+  } else skipped.push("ios:no_credentials");
+
+  return { sent, failed, ...(skipped.length ? { skipped } : {}) };
 }
 
 async function putPushToken(req, env, deviceId) {
@@ -286,8 +341,10 @@ async function putPushToken(req, env, deviceId) {
     "INSERT INTO push_tokens (device_id, token, platform, created) VALUES (?1, ?2, ?3, ?4) " +
     "ON CONFLICT(device_id) DO UPDATE SET token = ?2, created = ?4")
     .bind(deviceId, token, d.platform, now()).run();
-  // Dürüst durum raporu: Android + servis hesabı secret'ı tanımlıysa gerçek gönderim mümkün; iOS (APNs) henüz değil.
-  const delivery = d.platform === "android" && env.FCM_SERVICE_ACCOUNT_JSON ? "available" : "not_yet_implemented";
+  // Dürüst durum raporu: ilgili platformun kimlik bilgisi (secret) tanımlıysa gerçek gönderim mümkün, değilse değil.
+  const delivery =
+    (d.platform === "android" && env.FCM_SERVICE_ACCOUNT_JSON) ||
+    (d.platform === "ios" && env.APNS_AUTH_KEY_P8 && env.APNS_BUNDLE_ID) ? "available" : "not_yet_implemented";
   return json({ ok: true, delivery });
 }
 

@@ -119,17 +119,23 @@ kodla eşleştirme; telefon asla masaüstüne doğrudan bağlanmaz, her şey bu 
 | `DELETE /v1/mobile/builds/{client_id}` | bir build'i siler (tombstone: `deleted:true`, diğer cihazlar senkronda görür) | telefon oturumu |
 | `DELETE /v1/mobile/me`, `DELETE /v1/me` | hesap silme talebi (telefon/masaüstü) — oturumlar hemen iptal, asıl veri 24 saat bekleme sonrası `scheduled()` görevinde gerçekten silinir | ilgili oturum |
 
-**Push bildirimi (Faz 4, 2026-11-03):** Android için gerçek gönderim var — FCM HTTP v1, Firebase Admin SDK servis
-hesabı JWT'siyle (`mobile.js` → `sendPush()`/`fcmAccessToken()`). Cloudflare secret'ı:
-`npx wrangler secret put FCM_SERVICE_ACCOUNT_JSON` (indirilen servis hesabı JSON dosyasının TAMAMI). Tanımlı
-değilse veya iOS cihazsa `sendPush()` sessizce no-op'tur ("çalışıyor" gibi göstermez); `PUT /push-tokens` yanıtı
-bunu `delivery: "available"` / `"not_yet_implemented"` ile açıkça söyler. **iOS/APNs henüz yok** — Apple Developer
-Program kaydı (ücretli, gerçek Apple ID gerektirir) henüz yapılmadı.
+**Push bildirimi (Faz 4):** Hem Android hem iOS için gerçek gönderim var (`mobile.js` → `sendPush()`).
+- **Android:** FCM HTTP v1, Firebase Admin SDK servis hesabı JWT'siyle (`fcmAccessToken()`). Secret:
+  `npx wrangler secret put FCM_SERVICE_ACCOUNT_JSON` (indirilen servis hesabı JSON dosyasının TAMAMI). **Production'a deploy edildi (2026-11-03).**
+- **iOS:** APNs HTTP/2 + JWT (token tabanlı kimlik doğrulama), `.p8` Auth Key ile ES256 imzalı provider token
+  (`apnsProviderJwt()`). Secret'lar: `npx wrangler secret put APNS_AUTH_KEY_P8` (indirilen `.p8` dosyasının
+  TAMAMI), `APNS_KEY_ID`, `APNS_TEAM_ID` (Apple Developer Program hesabından); `APNS_BUNDLE_ID` gizli değil,
+  `wrangler.toml`'daki `[vars]` içinde zaten tanımlı. **Henüz deploy edilmedi** — Apple Developer Program kaydı
+  (kullanıcının kendisinin yapması gereken, ücretli bir adım) henüz tamamlanmadı; adımlar için
+  `docs/mobile_companion_roadmap.md`'ye bakın.
+
+Her iki platform da kendi secret/değişken seti tanımlı değilse BAĞIMSIZ olarak sessizce no-op'tur ("çalışıyor"
+gibi göstermez); `PUT /push-tokens` yanıtı bunu `delivery: "available"` / `"not_yet_implemented"` ile açıkça söyler.
 
 Tablolar `schema.sql`'de (`mobile_pairings`, `mobile_devices`, `desktop_inbox`, `desktop_status`, `push_tokens`,
 `mobile_builds`, `account_deletions`); `npx wrangler d1 execute td2stats --remote --file schema.sql` ile var olan
 veritabanına eklenir (CREATE TABLE IF NOT EXISTS — mevcut tabloları etkilemez). Test: `node server/test_mobile.mjs`
-(40 test — FCM gönderimi gerçek bir RSA anahtar çiftiyle RS256 imzası doğrulanarak test edilir, ağa hiç çıkılmaz).
+(44 test — FCM/RS256 ve APNs/ES256 imzaları gerçek test anahtar çiftleriyle doğrulanarak test edilir, ağa hiç çıkılmaz).
 
 ## Sürüm sayacı ve yönetici özeti (6.0.1)
 - Program `/v1/tasks/live` isteğinde sürümünü User-Agent'ta bildirir (`TD2LootAdvisor/6.0.1`); açılıştaki ilk istekte
