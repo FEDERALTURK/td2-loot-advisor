@@ -1,0 +1,29 @@
+# Devir Notu (bir sonraki oturum/geliştirici/AI için)
+
+Son güncelleme: bu dosyayı güncelleyen oturumun yaptığı iş — 9.1.5.19 yayını sonrası ek sağlamlaştırma turu.
+
+## Şu an nerede kalındı
+
+- **Yayınlanmış, canlı sürüm**: `v9.1.5.19` (GitHub Releases, `main` dalından, installer `.exe` + taşınabilir `.zip` + `SHA256SUMS`).
+- **Dal durumu**: `main` güncel ve tek doğru kaynak; `master` içerik olarak `main`'e tamamen merge edildi ama GitHub'da hâlâ siliniyor değil (aşağıdaki "kullanıcı işlemi gerekli" kısmına bak).
+- **Bu turda eklenenler**: `tests/test_regression_crash_patterns.py` (9.1.5.19'daki iki çökme hatasının statik-analiz koruması), `DEVELOPMENT_LOG.md`, `BUGS.md`, `TESTING.md`, `DEPENDENCIES.md`, bu dosya.
+
+## Kullanıcıdan (Soner/DJVORLIX) beklenen işlemler
+
+1. **`master` dalını sil.** AI oturumunun ortam politikası, hem `git push --delete master` hem GitHub API `DELETE /git/refs/heads/master` çağrısını "proxy üzerinden yazma erişimine izin verilmiyor" diyerek engelliyor — bu, kullanıcı onayıyla bile aşılamayan sabit bir kısıtlama (iki farklı AI oturumunda iki farklı yöntemle doğrulandı). Kullanıcı GitHub Settings → Branches'tan, ya da kendi makinesinden `git push origin --delete master` ile, ya da Actions → `retire-releases.yml`'i `branches: master` girdisiyle manuel tetikleyerek silebilir.
+2. **mxswat'a lisans sorusu.** `LICENSE_NOTES.md`'nin önerdiği gibi, `mx-division-builds` reposuna (GitHub Issues) kısa bir mesaj: bu küçük, açık kaynaklı, kâr amacı gütmeyen projede verinin kısmen ücretsiz kataloga, kısmen dolaylı olarak premium bir öneri özelliğine (`recal_advisor`) girdi olarak kullanılmasının uygun olup olmadığını sormak. Bu AI oturumu, kullanıcı onaylamadan üçüncü taraf bir repoya public issue açmadı (bkz. açık görev #136).
+3. **Tanıtım videoları.** Private `td2-loot-advisor-reports`'taki `promo` dalı hâlâ merge edilmedi; README/Release/YouTube'a koyma kararı kullanıcıya ait.
+4. **SignPath.** Durumu bu oturumda kontrol edilmedi (kimlik bilgisi gerektirir, kullanıcı tarafında).
+
+## Bir sonraki oturumun yapabileceği, teknik olarak hazır işler
+
+- **Gerçek Windows testi artık mümkün**: Bu oturumda `C:\Users\PC\Desktop\Thedivision2program` klasörünün bağlı bir Windows bilgisayarına (win32, `mcp__remote-devices__get_device_info` ile doğrulandı) erişim olduğu görüldü. O makinede `device_bash` yok (shell erişimi yok), ama **computer-use** (ekran görüntüsü + tıklama/klavye) ile uygulama gerçekten açılıp Tanılama Merkezi, Ansiklopedi "Kaynağı aç" düğmeleri ve Sürüm Geçmişi ekranı manuel olarak tıklanarak 9.1.5.19 düzeltmeleri gerçek Windows'ta görsel olarak doğrulanabilir. Bu, "Linux+Xvfb testi geçti ama gerçek Windows'ta doğrulanmadı" boşluğunu kapatır (bkz. BUGS.md #5).
+- **mobile/ (Flutter) ve server/ (Node.js/Cloudflare Workers) testleri hiç çalıştırılmadı** — ikisi de bu depoda mevcut, ayrı bir oturumda ele alınabilir.
+
+## Güvenlik/kısıt hatırlatmaları (tüm oturumlar için geçerli)
+
+- Oyunun process/belleğine asla dokunulmaz (ReadProcessMemory/injection/packet sniffing/input automation yok) — her oturumda `git grep` ile yeniden doğrulanmalı.
+- Gerçek sır/token asla koda/commit'e girmez.
+- Panel PIN kilidi Windows'un kendi şifresine asla bağımlı olmamalı.
+- Belirsiz/geri alınamaz/public GitHub işlemlerinden önce kullanıcıya sor.
+- Test etmeden "çalışıyor" denmez; sahte test sonucu raporlanmaz.
