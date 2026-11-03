@@ -42,6 +42,7 @@ const STRINGS = {
     down_loading: "Son sürüm bilgisi alınıyor…",
     down_error: "Sürüm bilgisi şu an alınamadı — doğrudan Releases sayfasından indirebilirsin.",
     down_version: "Sürüm",
+    down_unsigned_note: "Henüz Windows kod imzalama sertifikası yok (küçük açık kaynak bir proje — ücretsiz SignPath Foundation programına başvurdu, henüz onaylanmadı). İlk çalıştırmada SmartScreen \"Bilinmeyen yayımcı\" uyarısı gösterebilir — \"Daha fazla bilgi\" → \"Yine de çalıştır\" ile devam edebilirsin. Her sürümle birlikte bir SHA256SUMS dosyası da yayımlanır; indirdiğin dosyayı çalıştırmadan önce karşılaştırabilirsin (Windows'ta: certutil -hashfile dosya.exe SHA256).",
 
     news_title: "The Division 2 Haberleri",
     news_sub: "TD2 Loot Advisor'ın kendi oyun-içi haber akışından — aynı veri, uygulamadaki Bilgi sekmesinde de görünür.",
@@ -142,6 +143,7 @@ const STRINGS = {
     down_loading: "Fetching the latest release…",
     down_error: "Couldn't fetch the latest release right now — download directly from the Releases page.",
     down_version: "Version",
+    down_unsigned_note: "No Windows code-signing certificate yet (small open-source project — applied to the free SignPath Foundation program, not yet approved). On first run, SmartScreen may show an \"Unknown publisher\" warning — click \"More info\" → \"Run anyway\" to continue. Every release also ships a SHA256SUMS file so you can verify your download before running it (on Windows: certutil -hashfile file.exe SHA256).",
 
     news_title: "The Division 2 News",
     news_sub: "From TD2 Loot Advisor's own in-game news feed — the same data shown in the app's Knowledge tab.",

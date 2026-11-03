@@ -300,6 +300,11 @@ img { max-width: 100%; }
   padding: 18px; display: flex; flex-direction: column; gap: 10px; transition: border-color .2s;
 }
 .dl-card .ver { color: var(--muted); font-size: 13px; font-family: var(--mono); }
+.down-note {
+  margin-top: 18px; max-width: 640px; color: var(--muted); font-size: 13px; line-height: 1.6;
+  padding: 12px 14px; border: 1px solid var(--border); border-left: 2px solid var(--accent-2);
+  border-radius: var(--radius-hud); background: rgba(255,109,16,.04);
+}
 
 /* ---- news ---- */
 .news-item {

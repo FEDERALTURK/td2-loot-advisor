@@ -11,6 +11,8 @@ senin dilinde gösterir. 10 dil; herkes kendi dilini ekleyebilir.
 `TD2LootAdvisor_Setup_<sürüm>.exe` (kurulum, önerilen), `TD2LootAdvisor_<sürüm>_portable.zip` (kurulumsuz) ve Android için `TD2LootAdvisor_Companion_0.1.2-beta.apk`.
 Telefon eşleştirme adımları: [Türkçe bağlantı kılavuzu](docs/mobile_companion_connection_tr.md).
 
+> **Henüz kod imzalı değil.** Küçük bir açık kaynak proje — ücretsiz [SignPath Foundation](https://signpath.org) programına başvurdu ama henüz onaylanmadı (güncel durum: `ROADMAP.md`). İlk çalıştırmada Windows SmartScreen "Bilinmeyen yayımcı" uyarısı gösterebilir — **Daha fazla bilgi → Yine de çalıştır** ile devam edebilirsin. Her sürümle bir `SHA256SUMS` dosyası da yayımlanır; indirdiğin dosyayı çalıştırmadan önce karşılaştırabilirsin (Windows'ta: `certutil -hashfile <dosya> SHA256`).
+
 ## Güncelleme
 
 Program açılışta (12 saatte bir) GitHub'daki en son sürümü denetler ve sorar. Ayarlar → Genel → **Güncellemeler**'den elle de
