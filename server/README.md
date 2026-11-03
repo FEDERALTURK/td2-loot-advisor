@@ -114,7 +114,9 @@ kodla eşleştirme; telefon asla masaüstüne doğrudan bağlanmaz, her şey bu 
 | `POST /v1/mobile/desktop/commands` | `{command}` — yalnız `scan_start`/`scan_stop` (allow-list) | telefon oturumu |
 | `GET/PUT /v1/mobile/builds` | telefonun kendi build kütüphanesi, `base_revision` ile çakışma kontrolü | telefon oturumu |
 | `PUT/DELETE /v1/mobile/push-tokens/{device_id}` | APNs/FCM belirteci kaydet/sil | telefon oturumu |
+| `GET /v1/mobile/devices` | masaüstünün kendi eşleştirdiği telefonları listeler (iptal için gereken `device_id`'ler) | masaüstü oturumu |
 | `DELETE /v1/mobile/devices/{device_id}` | bir telefonu iptal et | masaüstü oturumu |
+| `DELETE /v1/mobile/builds/{client_id}` | bir build'i siler (tombstone: `deleted:true`, diğer cihazlar senkronda görür) | telefon oturumu |
 | `DELETE /v1/mobile/me`, `DELETE /v1/me` | hesap silme talebi (telefon/masaüstü) — oturumlar hemen iptal, asıl veri 24 saat bekleme sonrası `scheduled()` görevinde gerçekten silinir | ilgili oturum |
 
 **Bilerek yapılmayan kısım:** push belirteçleri saklanıyor ama APNs/FCM kimlik bilgisi olmadığı için **gerçek bildirim
@@ -123,7 +125,8 @@ gönderimi henüz yok** (`mobile.js` → `sendPush()`, açıkça stub). `PUT /pu
 
 Tablolar `schema.sql`'de (`mobile_pairings`, `mobile_devices`, `desktop_inbox`, `desktop_status`, `push_tokens`,
 `mobile_builds`, `account_deletions`); `npx wrangler d1 execute td2stats --remote --file schema.sql` ile var olan
-veritabanına eklenir (CREATE TABLE IF NOT EXISTS — mevcut tabloları etkilemez). Test: `node server/test_mobile.mjs`.
+veritabanına eklenir (CREATE TABLE IF NOT EXISTS — mevcut tabloları etkilemez). Test: `node server/test_mobile.mjs`
+(30 test).
 
 ## Sürüm sayacı ve yönetici özeti (6.0.1)
 - Program `/v1/tasks/live` isteğinde sürümünü User-Agent'ta bildirir (`TD2LootAdvisor/6.0.1`); açılıştaki ilk istekte

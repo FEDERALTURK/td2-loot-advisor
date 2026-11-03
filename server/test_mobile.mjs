@@ -117,6 +117,26 @@ async function desktopLogin(device) {
   const list = await r.json();
   ok(list.builds.length === 1 && list.builds[0].name === "Tank build v2", "build listesi güncel");
 
+  // --- build silme (soft-delete, tombstone senkron için dönüyor)
+  r = await call(`/v1/mobile/builds/${clientId}`, { method: "DELETE", auth: pAuth });
+  const delBuild = await r.json();
+  ok(r.status === 200 && delBuild.revision === 3, "build silindi, revizyon arttı");
+  r = await call("/v1/mobile/builds", { auth: pAuth });
+  const list2 = await r.json();
+  ok(list2.builds.length === 1 && list2.builds[0].deleted === true, "silinen build tombstone olarak listede görünüyor");
+  r = await call(`/v1/mobile/builds/${clientId}`, { method: "DELETE", auth: pAuth });
+  ok(r.status === 200, "zaten silinmiş build tekrar silinebilir (idempotent)");
+  r = await call(`/v1/mobile/builds/doesnotexist1234567890`, { method: "DELETE", auth: pAuth });
+  ok(r.status === 404, "var olmayan build silme isteği 404 döner");
+
+  // --- eşleştirilmiş cihazları listeleme (masaüstü)
+  r = await call("/v1/mobile/devices", { auth: dAuth });
+  const devs = await r.json();
+  ok(r.status === 200 && devs.devices.length === 1 && devs.devices[0].device_id === claim.device_id,
+     "masaüstü eşleştirilmiş telefonu listede görüyor");
+  r = await call("/v1/mobile/devices");
+  ok(r.status === 401, "oturumsuz cihaz listesi alınamaz");
+
   // --- push belirteci (gönderim yok, sadece saklama — bilerek)
   r = await call(`/v1/mobile/push-tokens/${claim.device_id}`, { method: "PUT", auth: pAuth, body: { token: "fcm-abc" } });
   const pushRes = await r.json();
@@ -129,6 +149,9 @@ async function desktopLogin(device) {
   ok(r.status === 200, "masaüstü telefon cihazını iptal etti");
   r = await call("/v1/mobile/dashboard", { auth: pAuth });
   ok(r.status === 401, "iptal edilen telefon oturumu artık geçersiz");
+  r = await call("/v1/mobile/devices", { auth: dAuth });
+  const devsAfter = await r.json();
+  ok(devsAfter.devices.length === 0, "iptal edilen cihaz artık listede görünmüyor");
 
   // --- yeniden eşleştir, sonra hesap silme talebi + bekleme süresi + gerçek silme
   r = await call("/v1/mobile/pairings", { method: "POST", auth: dAuth });

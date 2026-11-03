@@ -173,6 +173,18 @@ async function putBuild(req, env) {
   return json({ ok: true, revision: nextRev });
 }
 
+async function deleteBuild(req, env, clientId) {
+  const d = await phoneSession(req, env);
+  if (!d) return json({ error: "unauthorized" }, 401);
+  if (!ID.test(clientId)) return json({ error: "bad client_id" }, 400);
+  const cur = await env.DB.prepare("SELECT revision FROM mobile_builds WHERE account_id = ?1 AND client_id = ?2")
+    .bind(d.account_id, clientId).first();
+  if (!cur) return json({ error: "not found" }, 404);
+  await env.DB.prepare("UPDATE mobile_builds SET deleted = 1, revision = revision + 1, updated = ?1 WHERE account_id = ?2 AND client_id = ?3")
+    .bind(now(), d.account_id, clientId).run();
+  return json({ ok: true, revision: cur.revision + 1 });
+}
+
 // ------------------------------------------------------------ push belirteçleri (iskelet — gerçek gönderim yok)
 async function sendPush(_env, _accountId, _payload) {
   // TODO(Faz 4): APNs (HTTP/2 + JWT) ve FCM (HTTP v1) kimlik bilgileri eklenince burada gerçek gönderim
@@ -199,6 +211,17 @@ async function deletePushToken(req, env, deviceId) {
   if (!d || d.device_id !== deviceId) return json({ error: "unauthorized" }, 401);
   await env.DB.prepare("DELETE FROM push_tokens WHERE device_id = ?1").bind(deviceId).run();
   return json({ ok: true });
+}
+
+// ------------------------------------------------------------ eşleştirilmiş cihazları listele (masaüstü)
+async function listDevices(req, env) {
+  const s = await desktopSession(req, env);
+  if (!s) return json({ error: "unauthorized" }, 401);
+  const rows = (await env.DB.prepare(
+    "SELECT device_id, platform, created, last_seen, expires FROM mobile_devices " +
+    "WHERE account_id = ?1 AND revoked = 0 AND expires > ?2 ORDER BY last_seen DESC")
+    .bind(s.account_id, now()).all()).results || [];
+  return json({ devices: rows });
 }
 
 // ------------------------------------------------------------ cihaz/hesap iptali
@@ -262,9 +285,11 @@ export async function route(req, env, path) {
   if (path === "/v1/mobile/desktop/commands" && req.method === "POST") return sendCommand(req, env);
   if (path === "/v1/mobile/builds" && req.method === "GET") return listBuilds(req, env);
   if (path === "/v1/mobile/builds" && req.method === "PUT") return putBuild(req, env);
+  if ((m = /^\/v1\/mobile\/builds\/([A-Za-z0-9_\-]{16,64})$/.exec(path)) && req.method === "DELETE") return deleteBuild(req, env, m[1]);
   if (path === "/v1/mobile/me" && req.method === "DELETE") return deleteMeFromPhone(req, env);
   if ((m = /^\/v1\/mobile\/push-tokens\/([A-Za-z0-9_\-]{16,64})$/.exec(path)) && req.method === "PUT") return putPushToken(req, env, m[1]);
   if ((m = /^\/v1\/mobile\/push-tokens\/([A-Za-z0-9_\-]{16,64})$/.exec(path)) && req.method === "DELETE") return deletePushToken(req, env, m[1]);
+  if (path === "/v1/mobile/devices" && req.method === "GET") return listDevices(req, env);
   if ((m = /^\/v1\/mobile\/devices\/([A-Za-z0-9_\-]{16,64})$/.exec(path)) && req.method === "DELETE") return revokeDevice(req, env, m[1]);
   return null;
 }

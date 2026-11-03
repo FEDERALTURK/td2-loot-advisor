@@ -80,9 +80,14 @@ Public task/news/game-data endpoints should be reused where their schemas and ca
 - ✅ Account deletion is real, not just a flag: sessions/devices revoked immediately, then a 24h grace period,
   then `mobile.js::cleanup()` (called from `worker.js`'s `scheduled()`) actually deletes the account and all
   related rows (builds, inbox, status, push tokens, mobile devices, sessions, licenses, devices, accounts).
-- ✅ 25 real, executed tests in `server/test_mobile.mjs` (`node server/test_mobile.mjs`) cover every endpoint,
+- ✅ 30 real, executed tests in `server/test_mobile.mjs` (`node server/test_mobile.mjs`) cover every endpoint,
   including the conflict/expiry/revocation/deletion edge cases. All existing server tests re-verified passing
   (no regressions).
+- ✅ **Gap found and closed (2026-11-03):** the architecture doc's own requirement — "the user can see and revoke
+  paired phones" — had no way to *see* them: `GET /v1/mobile/devices` (desktop session) now lists the account's
+  active paired phones. Also closed: `mobile_builds.deleted` existed in the schema and in `listBuilds`'s response
+  but nothing ever set it — `DELETE /v1/mobile/builds/{client_id}` now soft-deletes (tombstone) so other devices
+  learn about the deletion on their next sync.
 - ❌ **Not done yet**: real push delivery. `push_tokens` are stored, but `sendPush()` in `mobile.js` is an
   explicit stub — no APNs/FCM credentials exist yet, and the code says so in its response (`delivery:
   "not_yet_implemented"`) rather than pretending to send anything.
