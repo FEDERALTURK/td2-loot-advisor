@@ -181,3 +181,12 @@ Her çalışmada **en fazla 40 giriş** işle (öncelik: yeni sezon eşyaları, 
 - `"_mt": "tr"` işaretli girişler makine çevirisidir: Türkçesini gözden geçirip düzelt, sonra `_mt` alanını kaldır.
 - Madde işaretli satırları ("• ...") satır satır koru.
 - `version` = YYYY-MM-DD.N. Değişiklik yoksa dosyaya dokunma.
+
+**Boyut sınırı (zorunlu).** Uygulama 512 KiB'tan (524.288 bayt) büyük akışı tümüyle reddeder; çeviriler sessizce
+güncellenmez olur.
+- Dosyayı daima sıkıştırılmış yaz: `json.dumps(veri, ensure_ascii=False, separators=(",", ":"))` — girinti yok.
+  `_src` alanı kullanılmıyor, ekleme. `_mt` yalnız gözden geçirilmemiş girişte kalır.
+- `descriptions_i18n.json` 510.000 baytı geçmesin. Yeni girişi eklemek bunu aşacaksa girişi
+  `meta/descriptions_i18n_2.json` dosyasına yaz (aynı şema: `schema`, `version`, `note`, `items`; aynı boyut kuralı).
+  Bir giriş iki dosyada birden bulunmaz; mevcut girişin düzeltmesi bulunduğu dosyada yapılır.
+- `descriptions_i18n_2.json` dosyasını yalnız ikinci dosyayı okuyan uygulama sürümü gösterir. Eski sürümler yok sayar.
