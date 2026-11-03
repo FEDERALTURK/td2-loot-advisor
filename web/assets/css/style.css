@@ -108,6 +108,9 @@ img { max-width: 100%; }
 .td2-hero .cta-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 14px; }
 .td2-hero .note { color: var(--muted); font-size: 13px; }
 
+/* drifting radar-node network, drawn on canvas, sat behind the glow */
+.td2-hero-canvas { position: absolute; inset: 0; z-index: -2; }
+
 /* cursor-reactive targeting glow behind the hero copy */
 .td2-hero-glow {
   position: absolute; inset: 0; z-index: -1; pointer-events: none;
