@@ -2,7 +2,7 @@
 // build senkronu, push belirteci, cihaz/hesap iptali, periyodik temizlik.   node server/test_mobile.mjs
 import { DatabaseSync } from "node:sqlite";
 import { readFileSync } from "node:fs";
-import { createHash, generateKeyPairSync, randomBytes } from "node:crypto";
+import { createHash, createVerify, generateKeyPairSync, randomBytes } from "node:crypto";
 import worker from "./worker.js";
 import { cleanup as mobileCleanup } from "./mobile.js";
 
@@ -29,9 +29,33 @@ const env = { DB, HASH_SALT: "t", DISCORD_CLIENT_ID: "123", DISCORD_CLIENT_SECRE
   PUBLIC_URL: "https://w", LICENSE_PUBKEY: "00".repeat(32) };
 
 let discordUser = { id: "222222222222", username: "soner", global_name: "Soner" };
+
+// --- FCM push testi için sahte RSA servis hesabı (gerçek Google ağına ASLA çıkılmaz — her şey burada mock'lanır)
+const { publicKey: fcmPub, privateKey: fcmPriv } = generateKeyPairSync("rsa", { modulusLength: 2048,
+  publicKeyEncoding: { type: "spki", format: "pem" }, privateKeyEncoding: { type: "pkcs8", format: "pem" } });
+const fcmServiceAccount = { client_email: "firebase-adminsdk-test@td2-loot-advisor.iam.gserviceaccount.com",
+  private_key: fcmPriv, project_id: "td2-loot-advisor" };
+let fcmTokenOutcomes = {};   // FCM gönderim mock'unun test-başına davranışı: token -> "unregistered"
+
 globalThis.fetch = async (url, opts = {}) => {
   if (url.startsWith("https://discord.com/api/oauth2/token")) return Response.json({ access_token: "at" });
   if (url === "https://discord.com/api/users/@me") return Response.json(discordUser);
+  if (url === "https://oauth2.googleapis.com/token") {
+    // mobile.js'in imzaladığı JWT'yi gerçekten doğrula — sadece "istek geldi" demek yetmez, imza geçerli olmalı.
+    const assertion = new URLSearchParams(String(opts.body || "")).get("assertion") || "";
+    const [h, p, s] = assertion.split(".");
+    const verifier = createVerify("RSA-SHA256"); verifier.update(h + "." + p);
+    const valid = h && p && s && verifier.verify(fcmPub, Buffer.from(s, "base64url"));
+    if (!valid) return new Response("bad jwt", { status: 401 });
+    return Response.json({ access_token: "test-fcm-access-token", expires_in: 3600 });
+  }
+  if (url.startsWith("https://fcm.googleapis.com/v1/projects/") && url.endsWith(":send")) {
+    let payload; try { payload = JSON.parse(opts.body); } catch { payload = {}; }
+    const token = payload?.message?.token;
+    if (fcmTokenOutcomes[token] === "unregistered")
+      return new Response(JSON.stringify({ error: { status: "UNREGISTERED", message: "not registered" } }), { status: 404 });
+    return Response.json({ name: "projects/x/messages/1" });
+  }
   return new Response("nf", { status: 404 });
 };
 
@@ -152,6 +176,39 @@ async function desktopLogin(device) {
   r = await call("/v1/mobile/devices", { auth: dAuth });
   const devsAfter = await r.json();
   ok(devsAfter.devices.length === 0, "iptal edilen cihaz artık listede görünmüyor");
+
+  // --- FCM push gönderimi (Android): gerçek RS256 imzası doğrulanıyor, başarı + UNREGISTERED ayrı test ediliyor
+  const fcmPairA = await (await call("/v1/mobile/pairings", { method: "POST", auth: dAuth })).json();
+  const fcmDevA = await (await call("/v1/mobile/pairings/claim",
+    { method: "POST", body: { code: fcmPairA.code, platform: "android" } })).json();
+  const fcmPairB = await (await call("/v1/mobile/pairings", { method: "POST", auth: dAuth })).json();
+  const fcmDevB = await (await call("/v1/mobile/pairings/claim",
+    { method: "POST", body: { code: fcmPairB.code, platform: "android" } })).json();
+  await call(`/v1/mobile/push-tokens/${fcmDevA.device_id}`, { method: "PUT", auth: "Bearer " + fcmDevA.token, body: { token: "good-token" } });
+  await call(`/v1/mobile/push-tokens/${fcmDevB.device_id}`, { method: "PUT", auth: "Bearer " + fcmDevB.token, body: { token: "stale-token" } });
+  fcmTokenOutcomes = { "stale-token": "unregistered" };
+  env.FCM_SERVICE_ACCOUNT_JSON = JSON.stringify(fcmServiceAccount);
+  r = await call("/v1/mobile/desktop/events", { method: "POST", auth: dAuth, body: { type: "scan_result", slot: "Chest", decision: "dismantle" } });
+  ok(r.status === 200, "push tetikleyen scan_result olayı kabul edildi");
+  ok(!!sql.prepare("SELECT 1 FROM push_tokens WHERE token = ?").get("good-token"),
+     "FCM'in kabul ettiği belirteç gönderimden sonra hâlâ saklı (gerçek RS256 imzası doğrulandı)");
+  ok(!sql.prepare("SELECT 1 FROM push_tokens WHERE token = ?").get("stale-token"),
+     "FCM'in UNREGISTERED dediği belirteç otomatik silindi (yetim kalmıyor)");
+  delete env.FCM_SERVICE_ACCOUNT_JSON;
+  fcmTokenOutcomes = {};
+  await call(`/v1/mobile/devices/${fcmDevA.device_id}`, { method: "DELETE", auth: dAuth });
+  await call(`/v1/mobile/devices/${fcmDevB.device_id}`, { method: "DELETE", auth: dAuth });
+
+  // --- FCM_SERVICE_ACCOUNT_JSON tanımsızken sendPush sessizce no-op (uydurma "gönderildi" durumu yok)
+  const noCredPair = await (await call("/v1/mobile/pairings", { method: "POST", auth: dAuth })).json();
+  const noCredDev = await (await call("/v1/mobile/pairings/claim",
+    { method: "POST", body: { code: noCredPair.code, platform: "android" } })).json();
+  const noCredPush = await (await call(`/v1/mobile/push-tokens/${noCredDev.device_id}`,
+    { method: "PUT", auth: "Bearer " + noCredDev.token, body: { token: "whatever" } })).json();
+  ok(noCredPush.delivery === "not_yet_implemented", "secret tanımsızken push kaydı yine 'henüz yok' diyor (dürüst durum)");
+  r = await call("/v1/mobile/desktop/events", { method: "POST", auth: dAuth, body: { type: "scan_result", slot: "Mask", decision: "keep" } });
+  ok(r.status === 200, "secret tanımsızken scan_result olayı yine de 200 döner (push best-effort, olayı bloklamaz)");
+  await call(`/v1/mobile/devices/${noCredDev.device_id}`, { method: "DELETE", auth: dAuth });
 
   // --- yeniden eşleştir, sonra hesap silme talebi + bekleme süresi + gerçek silme
   r = await call("/v1/mobile/pairings", { method: "POST", auth: dAuth });

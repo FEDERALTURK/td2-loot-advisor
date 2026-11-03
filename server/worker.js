@@ -335,7 +335,7 @@ export default {
       if (tk) return tk;
       const acc = await accountRoute(req, env, u.pathname);
       if (acc) return acc;
-      const mob = await mobileRoute(req, env, u.pathname);
+      const mob = await mobileRoute(req, env, u.pathname, ctx);
       if (mob) return mob;
       if (u.pathname === "/v1/drops" && req.method === "POST") return await postDrops(req, env);
       if (u.pathname === "/v1/summary" && req.method === "GET") return await summary(env);

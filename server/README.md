@@ -119,14 +119,17 @@ kodla eşleştirme; telefon asla masaüstüne doğrudan bağlanmaz, her şey bu 
 | `DELETE /v1/mobile/builds/{client_id}` | bir build'i siler (tombstone: `deleted:true`, diğer cihazlar senkronda görür) | telefon oturumu |
 | `DELETE /v1/mobile/me`, `DELETE /v1/me` | hesap silme talebi (telefon/masaüstü) — oturumlar hemen iptal, asıl veri 24 saat bekleme sonrası `scheduled()` görevinde gerçekten silinir | ilgili oturum |
 
-**Bilerek yapılmayan kısım:** push belirteçleri saklanıyor ama APNs/FCM kimlik bilgisi olmadığı için **gerçek bildirim
-gönderimi henüz yok** (`mobile.js` → `sendPush()`, açıkça stub). `PUT /push-tokens` yanıtı bunu `delivery:
-"not_yet_implemented"` ile açıkça söyler — "çalışıyor" gibi göstermemek için.
+**Push bildirimi (Faz 4, 2026-11-03):** Android için gerçek gönderim var — FCM HTTP v1, Firebase Admin SDK servis
+hesabı JWT'siyle (`mobile.js` → `sendPush()`/`fcmAccessToken()`). Cloudflare secret'ı:
+`npx wrangler secret put FCM_SERVICE_ACCOUNT_JSON` (indirilen servis hesabı JSON dosyasının TAMAMI). Tanımlı
+değilse veya iOS cihazsa `sendPush()` sessizce no-op'tur ("çalışıyor" gibi göstermez); `PUT /push-tokens` yanıtı
+bunu `delivery: "available"` / `"not_yet_implemented"` ile açıkça söyler. **iOS/APNs henüz yok** — Apple Developer
+Program kaydı (ücretli, gerçek Apple ID gerektirir) henüz yapılmadı.
 
 Tablolar `schema.sql`'de (`mobile_pairings`, `mobile_devices`, `desktop_inbox`, `desktop_status`, `push_tokens`,
 `mobile_builds`, `account_deletions`); `npx wrangler d1 execute td2stats --remote --file schema.sql` ile var olan
 veritabanına eklenir (CREATE TABLE IF NOT EXISTS — mevcut tabloları etkilemez). Test: `node server/test_mobile.mjs`
-(35 test).
+(40 test — FCM gönderimi gerçek bir RSA anahtar çiftiyle RS256 imzası doğrulanarak test edilir, ağa hiç çıkılmaz).
 
 ## Sürüm sayacı ve yönetici özeti (6.0.1)
 - Program `/v1/tasks/live` isteğinde sürümünü User-Agent'ta bildirir (`TD2LootAdvisor/6.0.1`); açılıştaki ilk istekte

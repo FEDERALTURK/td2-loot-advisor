@@ -11,7 +11,17 @@ Bu dosya her gün güncellenir (bkz. en alt — otomatik günlük görev). Ayrı
 | Topluluk sunucusu (Cloudflare Worker) | Canlı. Mobil uçlar (eşleştirme, build senkronu, cihaz listesi/iptali, hesap silme) production'da. |
 | Lisans/telif (mx-division-builds) | [issue #153](https://github.com/mxswat/mx-division-builds/issues/153) açıldı, yanıt bekleniyor. |
 
-## Şu an aktif: Mobil companion — bulut eşleştirmesi Flutter'a bağlandı
+## Şu an aktif: Mobil companion — Android push bildirimi (FCM) canlı
+
+**Bu turda yapıldı — sunucu (FCM push, Faz 4):**
+- Yeni bir Firebase projesi (`td2-loot-advisor`) oluşturuldu (kullanıcının kendi Google oturumuyla, tarayıcı otomasyonu üzerinden — şifreye hiç dokunulmadı; Google Developer Program/Gemini-in-Firebase/Analytics gibi istenmeyen seçenekler bilerek reddedildi) ve Admin SDK servis hesabı anahtarı üretilip indirildi.
+- Anahtar dosyası **sohbete hiç yazılmadan/commit edilmeden** doğrudan Cloudflare secret'ına taşındı: `npx wrangler secret put FCM_SERVICE_ACCOUNT_JSON` (kullanıcının PC'sinde, zaten oturum açmış `wrangler` ile).
+- `server/mobile.js`: `sendPush()`/`fcmAccessToken()` artık gerçek FCM HTTP v1 gönderimi yapıyor — servis hesabı JSON'uyla RS256 imzalı bir Google OAuth2 JWT'si (`crypto.subtle`), erişim belirtecine çevrilip (isolate içinde önbelleklenir) her Android belirtecine POST ediliyor. `desktopEvent()`'te `scan_result` olayı geldiğinde tetikleniyor, olay yanıtını asla bloklamıyor/başarısız kılmıyor (best-effort). FCM'in `UNREGISTERED`/`NOT_FOUND`/`INVALID_ARGUMENT` dediği belirteçler otomatik siliniyor (yetim kalmıyor).
+- iOS/APNs **bilerek yapılmadı** — gerçek bir Apple Developer Program kaydı (ücretli, gerçek Apple ID) gerektiriyor; bu, AI asistanın kullanıcı adına yapmaması gereken bir işlem, kullanıcı isterse kendisi kaydolmalı.
+- `server/test_mobile.mjs`: 35 → 40 test. Yeni testler gerçek bir test-amaçlı RSA anahtar çiftiyle RS256 imzasını `node:crypto`'yla doğruluyor (sadece "istek gitti" değil, imza gerçekten geçerli mi kontrol ediliyor), başarılı gönderim + `UNREGISTERED` belirteç silme + secret tanımsızken sessiz no-op senaryolarını kapsıyor. **40/40 PASS**, diğer 4 sunucu test dosyası da regresyonsuz (**PASS**).
+- Production'a deploy edilmedi — kullanıcı onayı bekleniyor.
+
+## Önceki tur: Mobil companion — bulut eşleştirmesi Flutter'a bağlandı
 
 **Bu turda yapıldı — masaüstü (Python):**
 - `account.py`: `create_mobile_pairing()`, `list_mobile_devices()`, `revoke_mobile_device(id)` eklendi (var olan `Account._req` Bearer-oturum yardımcısını kullanıyor).
@@ -25,10 +35,11 @@ Bu dosya her gün güncellenir (bkz. en alt — otomatik günlük görev). Ayrı
 - ⚠️ **Doğrulanamadı**: bu kum havuzunda Flutter/Dart SDK'sı yok, dolayısıyla `flutter analyze`/`flutter test`/derleme çalıştırılamadı. Değişiklikler elle satır satır gözden geçirildi (parantez dengesi, tip uyumu, sınıf sınırları) ama **Windows PC'de (`Flutter 3.47.8` kurulu) `flutter analyze` ve bir derleme/çalıştırma ile doğrulanması gerekiyor** — bu yapılmadan "çalışıyor" sayılmamalı.
 
 **Yapılmadı / sıradaki adımlar:**
-1. **Windows PC'de doğrulama** — `flutter analyze` + `flutter run` (veya APK build), ardından gerçek akış: masaüstünde kod üret → telefonda gir → eşleşsin → build oluştur/sil → bulutla eşitle düğmesini dene.
-2. **Gerçek push bildirimi (APNs/FCM)** — kimlik bilgisi yok, `sendPush()` hâlâ stub. Faz 4.
-3. Gerçek Android/iOS cihazda test, Google Play imzalama/yükleme — hâlâ bekliyor (Faz 4).
-4. PC'deki eski `git stash` girişi (`rollback/claude-last` dalındaki yerel değişiklikler) incelenip gerekirse ayrı bir dala alınmalı — veri kaybı yok ama kullanıcı kontrol etmeli.
+1. **Production deploy onayı bekleniyor** — FCM push kodu test edildi ama henüz canlı Worker'a deploy edilmedi.
+2. **Windows PC'de doğrulama** — `flutter analyze` + `flutter run` (veya APK build), ardından gerçek akış: masaüstünde kod üret → telefonda gir → eşleşsin → build oluştur/sil → bulutla eşitle düğmesini dene.
+3. **iOS/APNs push** — kullanıcı isterse: Apple Developer Program kaydı (kullanıcının kendisi yapmalı, ~$99/yıl + Apple ID), sonra APNs HTTP/2+JWT gönderimi eklenebilir.
+4. Gerçek Android/iOS cihazda test, Google Play imzalama/yükleme — hâlâ bekliyor (Faz 4).
+5. PC'deki eski `git stash` girişi (`rollback/claude-last` dalındaki yerel değişiklikler) incelenip gerekirse ayrı bir dala alınmalı — veri kaybı yok ama kullanıcı kontrol etmeli.
 
 ## Diğer açık kalemler (BUGS.md/HANDOFF.md'den)
 
@@ -39,4 +50,4 @@ Bu dosya her gün güncellenir (bkz. en alt — otomatik günlük görev). Ayrı
 
 ## Güncelleme günlüğü
 
-- **2026-11-03**: Mobil Faz 2 (bulut altyapısı) başlatıldı, aynı gün production'a deploy edildi, Windows'ta v9.1.5.19 görsel testi tamamlandı. İki boşluk (cihaz listesi, build soft-delete) bulunup kapatıldı ve ikinci kez deploy edildi (Version ID `f75d2807-1da2-4f8d-a01d-12c7e1b6cbbb`). **Aynı gün: masaüstüne eşleştirme-kodu üretme eklendi (`account.py`/`app.py`) ve Flutter uygulaması yeni bulut API'sine bağlandı** (`cloud_api.dart`, `cloud_link.dart`, eski LAN/QR akışına dokunulmadan) — Flutter/Dart SDK'sı bu ortamda yok, Windows PC'de `flutter analyze` ile doğrulama bekliyor.
+- **2026-11-03**: Mobil Faz 2 (bulut altyapısı) başlatıldı, aynı gün production'a deploy edildi, Windows'ta v9.1.5.19 görsel testi tamamlandı. İki boşluk (cihaz listesi, build soft-delete) bulunup kapatıldı ve ikinci kez deploy edildi (Version ID `f75d2807-1da2-4f8d-a01d-12c7e1b6cbbb`). Masaüstüne eşleştirme-kodu üretme eklendi (`account.py`/`app.py`) ve Flutter uygulaması yeni bulut API'sine bağlandı (`cloud_api.dart`, `cloud_link.dart`, eski LAN/QR akışına dokunulmadan) — Flutter/Dart SDK'sı bu ortamda yok, Windows PC'de `flutter analyze` ile doğrulama bekliyor. Üçüncü bir boşluk (doğal süresi dolan, hiç iptal edilmemiş telefon oturumlarının push belirteçlerinin yetim kalması) bulunup kapatıldı, test edildi (35 test) ve production'a deploy edildi (Version ID `4815ae08-d05f-4279-8646-f93aeba575d3`). **Aynı gün, kullanıcının "Android/FCM ile şimdi başla" seçimiyle: yeni bir Firebase projesi oluşturuldu, Admin SDK servis hesabı anahtarı üretilip (sohbete hiç girmeden) doğrudan Cloudflare secret'ına taşındı, ve `server/mobile.js`'e gerçek FCM HTTP v1 push gönderimi eklendi** (RS256 JWT imzası `crypto.subtle` ile, `desktopEvent()`'teki `scan_result` olayından tetikleniyor, best-effort) — 40 test, hepsi geçti, henüz production'a deploy edilmedi (kullanıcı onayı bekleniyor). iOS/APNs bilerek yapılmadı (gerçek Apple Developer Program kaydı gerektiriyor, kullanıcı kendisi yapmalı).

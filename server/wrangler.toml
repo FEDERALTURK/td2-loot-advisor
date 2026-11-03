@@ -29,3 +29,7 @@ ADMIN_LOGIN = "FEDERALTURK"
 crons = ["17 * * * *"]
 
 # HASH_SALT gizli değişkendir, dosyaya yazılmaz:  npx wrangler secret put HASH_SALT
+
+# Android push bildirimi (FCM HTTP v1) — Firebase Admin SDK servis hesabı JSON'unun TAMAMI tek bir secret olarak:
+#   npx wrangler secret put FCM_SERVICE_ACCOUNT_JSON
+# Tanımlı değilse sendPush() sessizce no-op'tur (bkz. mobile.js); iOS/APNs için henüz karşılığı yok.

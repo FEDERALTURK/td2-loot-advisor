@@ -9,8 +9,11 @@
 //    (bu Worker hiçbir komutu doğrudan çalıştırmaz, sadece kuyruğa koyar/okur).
 //  - Masaüstünden bulut'a giden "event" içinde ekran görüntüsü, oyun belleği veya dosya içeriği YOKTUR;
 //    yalnız küçük bir durum JSON'u (örn. {type:"scan_result", slot:"Mask", decision:"keep"}).
-//  - Push belirteçleri (APNs/FCM) burada saklanır ama bu Faz 2 artımında gerçek bir push GÖNDERİMİ henüz
-//    yok (APNs/FCM kimlik bilgisi yok) — bkz. ROADMAP.md "Faz 2" notu. sendPush() bilerek bir iskelet/stub'dır.
+//  - Push belirteçleri (APNs/FCM) burada saklanır. Android (FCM HTTP v1, servis hesabı JWT'siyle) için gerçek
+//    gönderim Faz 4'te eklendi — bkz. docs/mobile_companion_roadmap.md. iOS/APNs için gereken Apple Developer
+//    Program kimlik bilgisi henüz yok; iOS tarafı bilerek no-op'tur. env.FCM_SERVICE_ACCOUNT_JSON (Cloudflare
+//    secret'ı) tanımlı değilse Android için de sessizce no-op olur — hiçbir zaman "gönderildi" diye yalan
+//    söylemez (bkz. proje talimatları madde 5: sahte başarı göstermeme).
 //
 // Ortam: aynı D1 (env.DB), accounts.js ile aynı HASH_SALT.
 
@@ -23,6 +26,8 @@ const PAIR_TTL = 300;                 // eşleştirme kodu 5 dakika geçerli
 const DEVICE_TTL = 180 * DAY;         // telefon oturumu 180 gün (sessizce pairing ile uzatılabilir)
 const ALLOWED_COMMANDS = new Set(["scan_start", "scan_stop"]);
 const DELETE_GRACE_SECONDS = 24 * 3600;   // hesap silme talebinden sonra bekleme süresi
+const FCM_SCOPE = "https://www.googleapis.com/auth/firebase.messaging";
+let _fcmTokenCache = null;   // Worker isolate ömrü boyunca bellekte tutulan OAuth2 erişim belirteci (en fazla 1 saat)
 
 function json(data, status = 200, extra = {}) {
   return new Response(JSON.stringify(data), {
@@ -126,7 +131,7 @@ async function desktopInbox(req, env) {
   return json({ commands: rows.map(r => ({ command: r.command, created: r.created })) });
 }
 
-async function desktopEvent(req, env) {
+async function desktopEvent(req, env, ctx) {
   const s = await desktopSession(req, env);
   if (!s) return json({ error: "unauthorized" }, 401);
   let b; try { b = await req.json(); } catch { return json({ error: "bad json" }, 400); }
@@ -137,6 +142,16 @@ async function desktopEvent(req, env) {
     "INSERT INTO desktop_status (account_id, online, last_event, last_seen) VALUES (?1, 1, ?2, ?3) " +
     "ON CONFLICT(account_id) DO UPDATE SET online = 1, last_event = ?2, last_seen = ?3")
     .bind(s.account_id, JSON.stringify(safe), now()).run();
+  // Bir tarama sonucu geldiğinde eşleştirilmiş telefona en iyi çaba (best-effort) push bildirimi gönder.
+  // Bu, masaüstü olay yanıtını asla bloklamaz/başarısız kılmaz — gönderim her zaman arka planda/yoksayılarak dener.
+  if (b.type === "scan_result") {
+    const slot = typeof safe.slot === "string" ? safe.slot : "";
+    const decisionRaw = typeof safe.decision === "string" ? safe.decision : "";
+    const decision = decisionRaw === "keep" ? "Sakla" : decisionRaw === "dismantle" ? "Kır" : decisionRaw;
+    const body = slot ? (decision ? `${slot}: ${decision}` : slot) : "Yeni tarama sonucu";
+    const p = sendPush(env, s.account_id, { title: "TD2 Loot Advisor", body, data: { type: "scan_result" } }).catch(() => {});
+    if (ctx && ctx.waitUntil) ctx.waitUntil(p); else await p;
+  }
   return json({ ok: true });
 }
 
@@ -185,12 +200,80 @@ async function deleteBuild(req, env, clientId) {
   return json({ ok: true, revision: cur.revision + 1 });
 }
 
-// ------------------------------------------------------------ push belirteçleri (iskelet — gerçek gönderim yok)
-async function sendPush(_env, _accountId, _payload) {
-  // TODO(Faz 4): APNs (HTTP/2 + JWT) ve FCM (HTTP v1) kimlik bilgileri eklenince burada gerçek gönderim
-  // yapılacak. Şu an sadece belirteç saklanıyor; hiçbir bildirim fiilen gönderilmiyor. Bunu "çalışıyor" gibi
-  // raporlamak proje talimatlarının 5. maddesine (sahte başarı göstermeme) aykırı olur — bilerek stub.
-  return false;
+// ------------------------------------------------------------ FCM HTTP v1 gönderimi (Android)
+// PEM-kodlu (PKCS8) bir özel anahtarı crypto.subtle.importKey'in beklediği ham ArrayBuffer'a çevirir.
+function pemToArrayBuffer(pem) {
+  const b64 = String(pem || "").replace(/-----BEGIN [^-]+-----/, "").replace(/-----END [^-]+-----/, "").replace(/\s+/g, "");
+  const raw = atob(b64);
+  const buf = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) buf[i] = raw.charCodeAt(i);
+  return buf.buffer;
+}
+
+// Firebase servis hesabı JWT'sini (RS256) imzalayıp Google'ın OAuth2 ucunda bir erişim belirteciyle değiştirir.
+// Belirteç isolate içinde (süresi dolana kadar) önbelleğe alınır; her push için yeniden imzalama yapılmaz.
+async function fcmAccessToken(env) {
+  if (_fcmTokenCache && _fcmTokenCache.expiresAt > now() + 60) return _fcmTokenCache;
+  let sa;
+  try { sa = JSON.parse(env.FCM_SERVICE_ACCOUNT_JSON || ""); } catch { return null; }
+  if (!sa?.client_email || !sa?.private_key || !sa?.project_id) return null;
+  const iat = now(), exp = iat + 3600;
+  const unsigned = b64uEnc(enc.encode(JSON.stringify({ alg: "RS256", typ: "JWT" }))) + "." +
+                   b64uEnc(enc.encode(JSON.stringify({ iss: sa.client_email, scope: FCM_SCOPE,
+                     aud: "https://oauth2.googleapis.com/token", iat, exp })));
+  let key, sig;
+  try {
+    key = await crypto.subtle.importKey("pkcs8", pemToArrayBuffer(sa.private_key),
+      { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["sign"]);
+    sig = await crypto.subtle.sign("RSASSA-PKCS1-v1_5", key, enc.encode(unsigned));
+  } catch { return null; }   // bozuk/eksik özel anahtar — sessizce vazgeç, uydurma belirteç üretme
+  const jwt = unsigned + "." + b64uEnc(new Uint8Array(sig));
+  let resp;
+  try {
+    resp = await fetch("https://oauth2.googleapis.com/token", {
+      method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: "grant_type=" + encodeURIComponent("urn:ietf:params:oauth:grant-type:jwt-bearer") + "&assertion=" + jwt,
+    });
+  } catch { return null; }
+  if (!resp.ok) return null;
+  const tok = await resp.json().catch(() => null);
+  if (!tok?.access_token) return null;
+  _fcmTokenCache = { accessToken: tok.access_token, expiresAt: iat + (Number(tok.expires_in) || 3600), projectId: sa.project_id };
+  return _fcmTokenCache;
+}
+
+// Bir hesaba eşleştirilmiş, hâlâ geçerli Android cihazlarına FCM bildirimi gönderir. iOS (APNs) için gereken
+// Apple Developer Program kimlik bilgisi henüz yok — iOS belirteçleri burada bilerek atlanır (no-op), uydurma
+// bir "gönderildi" durumu asla döndürülmez. env.FCM_SERVICE_ACCOUNT_JSON tanımlı değilse tüm fonksiyon no-op'tur.
+export async function sendPush(env, accountId, payload) {
+  if (!env.FCM_SERVICE_ACCOUNT_JSON) return { sent: 0, failed: 0, skipped: "no_credentials" };
+  const rows = (await env.DB.prepare(
+    "SELECT pt.device_id AS device_id, pt.token AS token FROM push_tokens pt " +
+    "JOIN mobile_devices md ON md.device_id = pt.device_id " +
+    "WHERE md.account_id = ?1 AND md.revoked = 0 AND md.platform = 'android'").bind(accountId).all()).results || [];
+  if (!rows.length) return { sent: 0, failed: 0 };
+  const auth = await fcmAccessToken(env);
+  if (!auth) return { sent: 0, failed: rows.length, error: "auth_failed" };
+  let sent = 0, failed = 0;
+  for (const row of rows) {
+    try {
+      const resp = await fetch(`https://fcm.googleapis.com/v1/projects/${auth.projectId}/messages:send`, {
+        method: "POST", headers: { authorization: "Bearer " + auth.accessToken, "content-type": "application/json" },
+        body: JSON.stringify({ message: { token: row.token,
+          notification: { title: String(payload?.title || "TD2 Loot Advisor").slice(0, 120), body: String(payload?.body || "").slice(0, 200) },
+          data: payload?.data && typeof payload.data === "object" ? payload.data : {} } }),
+      });
+      if (resp.ok) { sent++; continue; }
+      failed++;
+      // FCM'in kalıcı-geçersiz belirteç durumları: telefon uygulamayı kaldırmış/belirteç yenilenmiş — yetim kalmasın.
+      const errBody = await resp.json().catch(() => null);
+      const status = errBody?.error?.status;
+      if (status === "UNREGISTERED" || status === "NOT_FOUND" || status === "INVALID_ARGUMENT") {
+        await env.DB.prepare("DELETE FROM push_tokens WHERE device_id = ?1").bind(row.device_id).run();
+      }
+    } catch { failed++; }
+  }
+  return { sent, failed };
 }
 
 async function putPushToken(req, env, deviceId) {
@@ -203,7 +286,9 @@ async function putPushToken(req, env, deviceId) {
     "INSERT INTO push_tokens (device_id, token, platform, created) VALUES (?1, ?2, ?3, ?4) " +
     "ON CONFLICT(device_id) DO UPDATE SET token = ?2, created = ?4")
     .bind(deviceId, token, d.platform, now()).run();
-  return json({ ok: true, delivery: "not_yet_implemented" });
+  // Dürüst durum raporu: Android + servis hesabı secret'ı tanımlıysa gerçek gönderim mümkün; iOS (APNs) henüz değil.
+  const delivery = d.platform === "android" && env.FCM_SERVICE_ACCOUNT_JSON ? "available" : "not_yet_implemented";
+  return json({ ok: true, delivery });
 }
 
 async function deletePushToken(req, env, deviceId) {
@@ -284,13 +369,13 @@ export async function cleanup(env) {
 }
 
 // ------------------------------------------------------------ yönlendirme
-export async function route(req, env, path) {
+export async function route(req, env, path, ctx) {
   let m;
   if (path === "/v1/mobile/pairings" && req.method === "POST") return createPairing(req, env);
   if (path === "/v1/mobile/pairings/claim" && req.method === "POST") return claimPairing(req, env);
   if (path === "/v1/mobile/dashboard" && req.method === "GET") return dashboard(req, env);
   if (path === "/v1/mobile/desktop/inbox" && req.method === "GET") return desktopInbox(req, env);
-  if (path === "/v1/mobile/desktop/events" && req.method === "POST") return desktopEvent(req, env);
+  if (path === "/v1/mobile/desktop/events" && req.method === "POST") return desktopEvent(req, env, ctx);
   if (path === "/v1/mobile/desktop/commands" && req.method === "POST") return sendCommand(req, env);
   if (path === "/v1/mobile/builds" && req.method === "GET") return listBuilds(req, env);
   if (path === "/v1/mobile/builds" && req.method === "PUT") return putBuild(req, env);

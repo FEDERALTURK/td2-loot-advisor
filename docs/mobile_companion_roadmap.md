@@ -93,9 +93,23 @@ Public task/news/game-data endpoints should be reused where their schemas and ca
   registered one, its `push_tokens` row stayed in D1 forever (an orphan, since only the explicit-revoke path
   deleted push tokens). `cleanup()` now also purges naturally-expired, non-revoked devices and their push
   tokens (7-day grace after expiry). `server/test_mobile.mjs`: 30 → 35 tests.
-- ❌ **Not done yet**: real push delivery. `push_tokens` are stored, but `sendPush()` in `mobile.js` is an
-  explicit stub — no APNs/FCM credentials exist yet, and the code says so in its response (`delivery:
-  "not_yet_implemented"`) rather than pretending to send anything.
+- ✅ **Android push delivery implemented (2026-11-03, Phase 4).** `sendPush()`/`fcmAccessToken()` in `mobile.js`
+  now send real FCM HTTP v1 notifications: the Firebase Admin SDK service-account JSON (one Cloudflare secret,
+  `FCM_SERVICE_ACCOUNT_JSON`) is used to build and RS256-sign a Google OAuth2 JWT assertion (Web Crypto
+  `crypto.subtle`), exchange it for an access token (cached in-isolate until near expiry), then POST to
+  `https://fcm.googleapis.com/v1/projects/{project_id}/messages:send` for each of the account's registered
+  Android tokens. Triggered from `desktopEvent()` on `scan_result` events, best-effort (never blocks/fails the
+  event response — fire-and-await inline in the test harness, `ctx.waitUntil` in the real Worker). A token FCM
+  reports as `UNREGISTERED`/`NOT_FOUND`/`INVALID_ARGUMENT` is deleted automatically so it doesn't orphan. A new
+  Firebase project (`td2-loot-advisor`) was created in the Firebase console and its Admin SDK service-account
+  key generated and installed as the Cloudflare secret, via guided browser automation with the user's own Google
+  sign-in — the key itself was never typed into chat or committed to the repo.
+  `server/test_mobile.mjs`: 35 → 40 tests, including one that verifies the RS256 JWT signature against a real
+  (test-only) RSA key pair rather than just asserting "a request happened".
+- ❌ **Not done yet**: iOS/APNs push delivery. This requires a real, paid Apple Developer Program enrollment
+  (Apple ID + ~$99/year) that the AI assistant must not perform on the user's behalf — the user has to do this
+  step themselves when/if they want iOS push. `PUT /push-tokens` on an iOS device still reports
+  `delivery: "not_yet_implemented"` honestly rather than pretending it works.
 - ✅ **Deployed to the live Cloudflare Worker (2026-11-03).** Run from the user's own PC (already authenticated
   Cloudflare session, explicit user approval before the production step): `npx wrangler d1 execute td2stats --remote
   --file schema.sql` (27 queries, 23 tables total, additive `IF NOT EXISTS`) then `npx wrangler deploy` (Version ID
