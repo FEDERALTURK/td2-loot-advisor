@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "version": "2026-11-02.2",
+ "version": "2026-11-03.1",
  "note": "Encyclopedia description translations. 'tr' seeded by OPUS-MT machine translation; other languages and reviews by the daily feed task.",
  "items": {
   "NinjaBike Messenger Bag": {
@@ -3746,6 +3746,90 @@
    "ru": "При полной броне повышает общее восстановление навыков на 160%.",
    "pl": "Przy pełnym pancerzu zwiększa całkowitą naprawę umiejętności o 160%.",
    "nl": "Verhoogt bij vol pantser de totale skillreparatie met 160%."
+  },
+  "Perfect Obliterate": {
+   "tr": "Kritik vuruşlar toplam silah hasarını 10 saniye boyunca %1 artırır. 24 kata kadar birikir.",
+   "_src": "Critical hits increase total weapon damage by 1% for 10s. Stacks up to 24 times.",
+   "de": "Kritische Treffer erhöhen den Gesamtwaffenschaden 10 Sekunden lang um 1 %. Bis zu 24-mal stapelbar.",
+   "fr": "Les coups critiques augmentent les dégâts d'arme totaux de 1 % pendant 10 secondes. Cumulable jusqu'à 24 fois.",
+   "es": "Los críticos aumentan el daño total de arma un 1 % durante 10 segundos. Se acumula hasta 24 veces.",
+   "it": "I colpi critici aumentano i danni totali da arma dell'1% per 10 secondi. Cumulabile fino a 24 volte.",
+   "pt": "Os críticos aumentam o dano total de arma em 1% durante 10 segundos. Acumula até 24 vezes.",
+   "ru": "Критические попадания увеличивают общий урон оружием на 1% на 10 секунд. Суммируется до 24 раз.",
+   "pl": "Trafienia krytyczne zwiększają łączne obrażenia od broni o 1% na 10 sekund. Kumuluje się do 24 razy.",
+   "nl": "Kritieke treffers verhogen de totale wapenschade 10 seconden lang met 1%. Stapelt tot 24 keer."
+  },
+  "Perfect Unbreakable": {
+   "tr": "Zırhın tükendiğinde zırhının %100'ü onarılır. Bekleme süresi 55 saniye.",
+   "_src": "When your armor is depleted, repair 100% of your armor. 55s cool down.",
+   "de": "Wenn deine Rüstung aufgebraucht ist, werden 100 % deiner Rüstung repariert. Abklingzeit: 55 Sekunden.",
+   "fr": "Quand votre armure est épuisée, 100 % de votre armure est réparée. Recharge : 55 secondes.",
+   "es": "Cuando tu blindaje se agota, se repara el 100 % de tu blindaje. Tiempo de recarga: 55 segundos.",
+   "it": "Quando la tua armatura si esaurisce, viene riparato il 100% dell'armatura. Tempo di recupero: 55 secondi.",
+   "pt": "Quando sua blindagem se esgota, 100% da blindagem é reparada. Tempo de recarga: 55 segundos.",
+   "ru": "Когда броня полностью истощена, восстанавливается 100% брони. Перезарядка: 55 секунд.",
+   "pl": "Gdy twój pancerz się wyczerpie, naprawiane jest 100% pancerza. Czas odnowienia: 55 sekund.",
+   "nl": "Wanneer je pantser op is, wordt 100% van je pantser hersteld. Afkoeltijd: 55 seconden."
+  },
+  "Perfect Protector": {
+   "tr": "Kalkanın hasar aldığında 3 saniyeliğine +%25 bonus zırh kazanırsın; diğer tüm müttefikler de zırhının %35'i kadar bonus zırh alır. Bekleme süresi 3 saniye.",
+   "_src": "When your shield is damaged, you gain +25% bonus armor and all other allies gain",
+   "de": "Wird dein Schild beschädigt, erhältst du 3 Sekunden lang +25 % Bonuspanzerung; alle anderen Verbündeten erhalten 35 % deiner Panzerung als Bonuspanzerung. Abklingzeit 3 Sekunden.",
+   "fr": "Quand votre bouclier subit des dégâts, vous gagnez +25 % d'armure bonus et tous les autres alliés 35 % de votre armure en armure bonus pendant 3 secondes. Recharge : 3 secondes.",
+   "es": "Cuando tu escudo recibe daño, ganas +25 % de blindaje adicional y los demás aliados un 35 % de tu blindaje como blindaje adicional durante 3 segundos. Enfriamiento de 3 segundos.",
+   "it": "Quando il tuo scudo subisce danni, ottieni +25% di armatura bonus e tutti gli altri alleati il 35% della tua armatura come armatura bonus per 3 secondi. Tempo di recupero 3 secondi.",
+   "pt": "Quando seu escudo sofre dano, você ganha +25% de blindagem bônus e todos os outros aliados ganham 35% da sua blindagem como blindagem bônus por 3 segundos. Recarga de 3 segundos.",
+   "ru": "Когда ваш щит получает урон, вы получаете +25% бонусной брони, а все остальные союзники — 35% вашей брони в виде бонусной брони на 3 секунды. Перезарядка 3 секунды.",
+   "pl": "Gdy twoja tarcza otrzyma obrażenia, zyskujesz +25% dodatkowego pancerza, a pozostali sojusznicy 35% twojego pancerza jako dodatkowy pancerz na 3 sekundy. Czas odnowienia 3 sekundy.",
+   "nl": "Als je schild schade oploopt, krijg jij +25% bonuspantser en krijgen alle andere bondgenoten 3 seconden lang 35% van je pantser als bonuspantser. Afkoeltijd 3 seconden."
+  },
+  "Perfect Close & Personal": {
+   "tr": "7 metre içindeki bir hedefi öldürmek 10 saniyeliğine +%38 silah hasarı verir.",
+   "_src": "Killing a target within 7m grants +38% weapon damage for 10s.",
+   "de": "Das Töten eines Ziels innerhalb von 7 Metern gewährt 10 Sekunden lang +38 % Waffenschaden.",
+   "fr": "Tuer une cible à moins de 7 mètres octroie +38 % de dégâts d'arme pendant 10 secondes.",
+   "es": "Matar a un objetivo a menos de 7 metros otorga +38 % de daño de arma durante 10 segundos.",
+   "it": "Uccidere un bersaglio entro 7 metri conferisce +38% di danni dell'arma per 10 secondi.",
+   "pt": "Matar um alvo a até 7 metros concede +38% de dano de arma por 10 segundos.",
+   "ru": "Убийство цели в пределах 7 метров даёт +38% к урону оружия на 10 секунд.",
+   "pl": "Zabicie celu w odległości do 7 metrów daje +38% obrażeń od broni na 10 sekund.",
+   "nl": "Een doelwit binnen 7 meter doden geeft 10 seconden lang +38% wapenschade."
+  },
+  "Perfect Optimized": {
+   "tr": "%20 Silah Kullanımı.",
+   "_src": "20% weapon handling.",
+   "de": "20 % Waffenhandhabung.",
+   "fr": "20 % de maniement de l'arme.",
+   "es": "20 % de manejo del arma.",
+   "it": "20% di maneggevolezza dell'arma.",
+   "pt": "20% de manuseio da arma.",
+   "ru": "20% к управлению оружием.",
+   "pl": "20% obsługi broni.",
+   "nl": "20% wapenhantering."
+  },
+  "Resolved": {
+   "tr": "Bir sonraki gövde atışın headshot sayılır. Bekleme süresi: 2 saniye. Gerekli silah: Marksman Rifle, Rifle veya Pistol.",
+   "_src": "Your next body shot will be considered a headshot. Cooldown: 2s Requires Equippe",
+   "de": "Dein nächster Körpertreffer zählt als Kopfschuss. Abklingzeit: 2 s. Benötigt: Marksman Rifle, Rifle oder Pistol.",
+   "fr": "Votre prochain tir au corps compte comme un tir à la tête. Recharge : 2 s. Requiert : Marksman Rifle, Rifle ou Pistol.",
+   "es": "Tu próximo disparo al cuerpo cuenta como disparo a la cabeza. Recarga: 2 s. Requiere: Marksman Rifle, Rifle o Pistol.",
+   "it": "Il tuo prossimo colpo al corpo conta come colpo alla testa. Ricarica: 2 s. Richiede: Marksman Rifle, Rifle o Pistol.",
+   "pt": "Seu próximo tiro no corpo conta como tiro na cabeça. Recarga: 2 s. Requer: Marksman Rifle, Rifle ou Pistol.",
+   "ru": "Следующее попадание в корпус считается выстрелом в голову. Перезарядка: 2 с. Требуется: Marksman Rifle, Rifle или Pistol.",
+   "pl": "Twój następny strzał w korpus liczy się jako strzał w głowę. Czas odnowienia: 2 s. Wymaga: Marksman Rifle, Rifle lub Pistol.",
+   "nl": "Je volgende lichaamsschot telt als headshot. Afkoeltijd: 2 s. Vereist: Marksman Rifle, Rifle of Pistol."
+  },
+  "Kill Confirmed": {
+   "tr": "Öldürdüğün düşmanlar ganimet (trophy) düşürür. Ganimet toplamak kısa ve uzun süreli birer buff verir; kısa olanı takılı çekirdek özellik sayısıyla ölçeklenir ve 10 saniye sürer.\n• Kırmızı çekirdek: %5 Silah Hasarı\n• Mavi çekirdek: %10 Bonus Zırh\n• Sarı çekirdek: %5 Skill Efficiency\nHer ganimet ayrıca 300 saniyeliğine +%1 silah hasarı, +%1 Skill Efficiency ve +%0,1 zırh yenilenmesi verir. En fazla 30 birikim.",
+   "_src": "Enemies you kill drop a trophy on death. Collecting trophies provides both a sho",
+   "de": "Getötete Gegner lassen eine Trophäe fallen. Trophäen gewähren einen kurzen und einen langen Buff; der kurze skaliert mit der Zahl der Kernattribute und hält 10 s.\n• Roter Kern: 5 % Waffenschaden\n• Blauer Kern: 10 % Bonuspanzerung\n• Gelber Kern: 5 % Skill Efficiency\nJede Trophäe gibt zusätzlich 300 s lang +1 % Waffenschaden, +1 % Skill Efficiency und +0,1 % Panzerungsregeneration. Maximal 30 Stapel.",
+   "fr": "Les ennemis tués lâchent un trophée. Les trophées donnent un bonus court et un bonus long ; le premier dépend du nombre d'attributs principaux et dure 10 s.\n• Rouge : 5 % de dégâts d'arme\n• Bleu : 10 % d'armure bonus\n• Jaune : 5 % de Skill Efficiency\nChaque trophée donne aussi +1 % de dégâts d'arme, +1 % de Skill Efficiency et +0,1 % de régénération d'armure pendant 300 s. 30 cumuls maximum.",
+   "es": "Los enemigos que matas sueltan un trofeo. Los trofeos dan una mejora corta y otra larga; la corta escala con los atributos principales y dura 10 s.\n• Rojo: 5 % de daño de arma\n• Azul: 10 % de blindaje adicional\n• Amarillo: 5 % de Skill Efficiency\nCada trofeo da además +1 % de daño de arma, +1 % de Skill Efficiency y +0,1 % de regeneración de blindaje durante 300 s. Máximo 30 acumulaciones.",
+   "it": "I nemici uccisi lasciano un trofeo. I trofei danno un bonus breve e uno lungo; quello breve scala con gli attributi principali e dura 10 s.\n• Rosso: 5% danni dell'arma\n• Blu: 10% armatura bonus\n• Giallo: 5% Skill Efficiency\nOgni trofeo dà inoltre +1% danni dell'arma, +1% Skill Efficiency e +0,1% rigenerazione armatura per 300 s. Massimo 30 cumuli.",
+   "pt": "Inimigos mortos deixam um troféu. Troféus dão um bônus curto e um longo; o curto escala com os atributos principais e dura 10 s.\n• Vermelho: 5% de dano de arma\n• Azul: 10% de blindagem bônus\n• Amarelo: 5% de Skill Efficiency\nCada troféu dá ainda +1% de dano de arma, +1% de Skill Efficiency e +0,1% de regeneração de blindagem por 300 s. Máximo de 30 acúmulos.",
+   "ru": "Убитые враги оставляют трофей. Трофеи дают короткий и длительный бафф; короткий зависит от числа основных атрибутов и длится 10 с.\n• Красный: 5% урона оружия\n• Синий: 10% бонусной брони\n• Жёлтый: 5% Skill Efficiency\nКаждый трофей также даёт +1% урона оружия, +1% Skill Efficiency и +0,1% восстановления брони на 300 с. Максимум 30 зарядов.",
+   "pl": "Zabici wrogowie upuszczają trofeum. Trofea dają krótki i długi bonus; krótki zależy od liczby atrybutów głównych i trwa 10 s.\n• Czerwony: 5% obrażeń broni\n• Niebieski: 10% dodatkowego pancerza\n• Żółty: 5% Skill Efficiency\nKażde trofeum daje też +1% obrażeń broni, +1% Skill Efficiency i +0,1% regeneracji pancerza na 300 s. Maksymalnie 30 ładunków.",
+   "nl": "Gedode vijanden laten een trofee vallen. Trofeeën geven een korte en een lange buff; de korte schaalt met de kernattributen en duurt 10 s.\n• Rood: 5% wapenschade\n• Blauw: 10% bonuspantser\n• Geel: 5% Skill Efficiency\nElke trofee geeft ook 300 s lang +1% wapenschade, +1% Skill Efficiency en +0,1% pantserherstel. Maximaal 30 stapels."
   }
  }
 }
