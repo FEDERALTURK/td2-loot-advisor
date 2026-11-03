@@ -115,3 +115,64 @@ CREATE TABLE IF NOT EXISTS audit (
   action  TEXT NOT NULL,
   detail  TEXT
 );
+
+-- ---------------------------------------------------------------- mobil companion (mobile.js) — Faz 2 (bulut altyapısı)
+-- Telefon, masaüstü hesabına (accounts.id) kısa ömürlü bir kodla eşleşir ve kendi taşınabilir oturumunu alır.
+-- Masaüstüne komut göndermek yalnız izin verilmiş (allow-listed) komutlarla, bir kuyruk (inbox) üzerinden olur;
+-- telefon hiçbir zaman doğrudan masaüstüne bağlanmaz, yalnız bulut üzerinden.
+CREATE TABLE IF NOT EXISTS mobile_pairings (
+  code_hash   TEXT PRIMARY KEY,        -- kısa ömürlü eşleştirme kodunun SHA-256'sı
+  account_id  INTEGER NOT NULL,
+  created     INTEGER NOT NULL,
+  expires     INTEGER NOT NULL,
+  claimed     INTEGER NOT NULL DEFAULT 0
+);
+CREATE TABLE IF NOT EXISTS mobile_devices (
+  device_id   TEXT PRIMARY KEY,        -- istemcide üretilen rastgele cihaz kimliği
+  account_id  INTEGER NOT NULL,
+  token_hash  TEXT NOT NULL UNIQUE,    -- telefonun taşınabilir oturum belirtecinin özeti
+  platform    TEXT NOT NULL,           -- 'android' | 'ios'
+  created     INTEGER NOT NULL,
+  last_seen   INTEGER NOT NULL,
+  expires     INTEGER NOT NULL,
+  revoked     INTEGER NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_mobile_devices_acc ON mobile_devices (account_id);
+CREATE TABLE IF NOT EXISTS desktop_inbox (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  account_id  INTEGER NOT NULL,
+  command     TEXT NOT NULL,           -- allow-listed: scan_start | scan_stop
+  created     INTEGER NOT NULL,
+  delivered   INTEGER NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_desktop_inbox_acc ON desktop_inbox (account_id, delivered);
+CREATE TABLE IF NOT EXISTS desktop_status (
+  account_id  INTEGER PRIMARY KEY,
+  online      INTEGER NOT NULL DEFAULT 0,
+  last_event  TEXT,                    -- JSON: { type, ... } son durum olayı (görsel/ekran görüntüsü YOK)
+  last_seen   INTEGER NOT NULL
+);
+CREATE TABLE IF NOT EXISTS push_tokens (
+  device_id   TEXT PRIMARY KEY,        -- mobile_devices.device_id
+  token       TEXT NOT NULL,           -- APNs/FCM belirteci
+  platform    TEXT NOT NULL,
+  created     INTEGER NOT NULL
+);
+CREATE TABLE IF NOT EXISTS mobile_builds (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  account_id  INTEGER NOT NULL,
+  client_id   TEXT NOT NULL,           -- istemci tarafı build kimliği (UUID)
+  name        TEXT NOT NULL,
+  payload     TEXT NOT NULL,           -- JSON build verisi
+  revision    INTEGER NOT NULL DEFAULT 1,
+  updated     INTEGER NOT NULL,
+  deleted     INTEGER NOT NULL DEFAULT 0,
+  UNIQUE (account_id, client_id)
+);
+CREATE INDEX IF NOT EXISTS idx_mobile_builds_acc ON mobile_builds (account_id, updated);
+-- Hesap silme talebi (Apple/Google mağaza zorunluluğu): hemen oturum/cihazları iptal eder, asıl veri silme bir
+-- bekleme süresinden sonra scheduled() görevinde yapılır (yanlışlıkla/kötü niyetli anında silmeyi önlemek için).
+CREATE TABLE IF NOT EXISTS account_deletions (
+  account_id  INTEGER PRIMARY KEY,
+  requested   INTEGER NOT NULL
+);

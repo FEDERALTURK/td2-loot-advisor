@@ -105,7 +105,7 @@ export async function verifyEntitlement(env, token) {
 }
 
 // ------------------------------------------------------------ oturum
-async function session(req, env) {
+export async function session(req, env) {
   const m = /^Bearer\s+([A-Za-z0-9_\-]{32,128})$/.exec(req.headers.get("authorization") || "");
   if (!m) return null;
   const th = await sha256(m[1]);
@@ -209,6 +209,20 @@ async function logout(req, env) {
   const s = await session(req, env);
   if (s) await env.DB.prepare("UPDATE sessions SET revoked = 1 WHERE token_hash = ?1").bind(s.token_hash).run();
   return json({ ok: true });
+}
+
+// Hesap silme talebi (masaüstünden). Apple/Google mağaza zorunluluğu: uygulama içinden istenebilmeli.
+// Oturumlar ve eşleşmiş telefon cihazları HEMEN iptal edilir; asıl veri silme bir bekleme süresi sonunda
+// worker.js'in scheduled() görevinde yapılır (bkz. schema.sql account_deletions, mobile.js cleanup()).
+async function deleteMe(req, env) {
+  const s = await session(req, env);
+  if (!s) return json({ error: "unauthorized" }, 401);
+  await env.DB.prepare("INSERT INTO account_deletions (account_id, requested) VALUES (?1, ?2) ON CONFLICT(account_id) DO NOTHING")
+    .bind(s.account_id, now()).run();
+  await env.DB.prepare("UPDATE sessions SET revoked = 1 WHERE account_id = ?1").bind(s.account_id).run();
+  await env.DB.prepare("UPDATE mobile_devices SET revoked = 1 WHERE account_id = ?1").bind(s.account_id).run();
+  await audit(env, "acc:" + s.account_id, "delete_requested", {});
+  return json({ ok: true, deletion_requested: true });
 }
 
 // ------------------------------------------------------------ hesap durumu + yetki belgesi
@@ -413,6 +427,7 @@ export async function route(req, env, path) {
   if (path === "/v1/auth/token" && req.method === "POST") return authToken(req, env);
   if (path === "/v1/auth/logout" && req.method === "POST") return logout(req, env);
   if (path === "/v1/me" && req.method === "GET") return me(req, env);
+  if (path === "/v1/me" && req.method === "DELETE") return deleteMe(req, env);
   if (path === "/v1/license/redeem" && req.method === "POST") return redeem(req, env);
   if (path.startsWith("/v1/admin/")) return admin(req, env, path.slice(10));
   return null;

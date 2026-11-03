@@ -19,6 +19,7 @@
 import { route as accountRoute, verifyEntitlement, isAdmin } from "./accounts.js";
 import { route as tasksRoute, snapshotToRepo, cleanup as tasksCleanup } from "./tasks.js";
 import { route as overviewRoute, countUsage, markCron } from "./overview.js";
+import { route as mobileRoute, cleanup as mobileCleanup } from "./mobile.js";
 
 const ACTIVITIES = new Set(["open_world", "mission", "legendary", "countdown", "summit", "incursion", "raid", "dark_zone",
   "conflict", "descent", "manhunt", "control_point", "bounty", "season", "vendor", "caches", "crafting", "unknown"]);
@@ -319,7 +320,7 @@ export default {
   async fetch(req, env, ctx) {
     const u = new URL(req.url);
     try {
-      if (req.method === "OPTIONS") return json({}, 204, { "access-control-allow-methods": "GET, POST",
+      if (req.method === "OPTIONS") return json({}, 204, { "access-control-allow-methods": "GET, POST, PUT, DELETE",
                                                            "access-control-allow-headers": "content-type, authorization" });
       if (u.pathname === "/v1/health") return json({ ok: true, login: !!env.DISCORD_CLIENT_ID, discord_app: env.DISCORD_CLIENT_ID || null });
       if (req.method === "POST" && parseInt(req.headers.get("content-length") || "0", 10) > 262144)   // büyük gövde: reddet
@@ -334,6 +335,8 @@ export default {
       if (tk) return tk;
       const acc = await accountRoute(req, env, u.pathname);
       if (acc) return acc;
+      const mob = await mobileRoute(req, env, u.pathname);
+      if (mob) return mob;
       if (u.pathname === "/v1/drops" && req.method === "POST") return await postDrops(req, env);
       if (u.pathname === "/v1/summary" && req.method === "GET") return await summary(env);
       if (u.pathname === "/v1/stats" && req.method === "GET") return await stats(req, env);
@@ -352,6 +355,7 @@ export default {
     await env.DB.prepare("DELETE FROM sessions WHERE expires < ?1 OR (revoked = 1 AND last_seen < ?2)").bind(t, t - 7 * 86400).run();
     await flushQueue(env);                             // GitHub'a iletilemeyen raporlar
     try { await tasksCleanup(env); await snapshotToRepo(env, gh); } catch (e) { /* görev dökümü bir sonraki saate */ }
+    try { await mobileCleanup(env); } catch (e) { /* mobil temizlik bir sonraki saate */ }
     await markCron(env);
   },
 };

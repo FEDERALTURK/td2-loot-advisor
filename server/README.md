@@ -99,6 +99,32 @@ görevi tanır ve oyuncu izin verdiyse yalnız görev yazısını ve Türkçe ç
 - Tablolar ilk istekte kendiliğinden oluşur; güncellemek için yalnız `npx wrangler deploy` yeterli.
 - İsteğe bağlı değişkenler: `TASKS_MIN_REPORTERS` (2), `TASKS_PER_HOUR` (60), `TASKS_KEEP_DAYS` (8).
 
+## Mobil companion bulut altyapısı (Faz 2 — devam ediyor, bkz. `../docs/mobile_companion_roadmap.md`)
+
+Masaüstü hesabı (yukarıdaki Discord girişi, `Authorization: Bearer <oturum>`) ile telefon arasında kısa ömürlü bir
+kodla eşleştirme; telefon asla masaüstüne doğrudan bağlanmaz, her şey bu Worker üzerinden gider.
+
+| Yol | Ne | Erişim |
+|---|---|---|
+| `POST /v1/mobile/pairings` | 5 dakika geçerli, tek kullanımlık eşleştirme kodu üretir | masaüstü oturumu |
+| `POST /v1/mobile/pairings/claim` | `{code, platform}` → telefonun kendi `device_id`/`token`'ı | herkese açık, oran sınırlı |
+| `GET /v1/mobile/dashboard` | masaüstü çevrimiçi mi, son durum olayı | telefon oturumu (`Bearer <token>`) |
+| `GET /v1/mobile/desktop/inbox` | kuyruktaki izin verilen komutları alır (teslim edildikten sonra bir daha gelmez) | masaüstü oturumu |
+| `POST /v1/mobile/desktop/events` | `{type, ...}` küçük durum JSON'u (ekran görüntüsü/dosya YOK) | masaüstü oturumu |
+| `POST /v1/mobile/desktop/commands` | `{command}` — yalnız `scan_start`/`scan_stop` (allow-list) | telefon oturumu |
+| `GET/PUT /v1/mobile/builds` | telefonun kendi build kütüphanesi, `base_revision` ile çakışma kontrolü | telefon oturumu |
+| `PUT/DELETE /v1/mobile/push-tokens/{device_id}` | APNs/FCM belirteci kaydet/sil | telefon oturumu |
+| `DELETE /v1/mobile/devices/{device_id}` | bir telefonu iptal et | masaüstü oturumu |
+| `DELETE /v1/mobile/me`, `DELETE /v1/me` | hesap silme talebi (telefon/masaüstü) — oturumlar hemen iptal, asıl veri 24 saat bekleme sonrası `scheduled()` görevinde gerçekten silinir | ilgili oturum |
+
+**Bilerek yapılmayan kısım:** push belirteçleri saklanıyor ama APNs/FCM kimlik bilgisi olmadığı için **gerçek bildirim
+gönderimi henüz yok** (`mobile.js` → `sendPush()`, açıkça stub). `PUT /push-tokens` yanıtı bunu `delivery:
+"not_yet_implemented"` ile açıkça söyler — "çalışıyor" gibi göstermemek için.
+
+Tablolar `schema.sql`'de (`mobile_pairings`, `mobile_devices`, `desktop_inbox`, `desktop_status`, `push_tokens`,
+`mobile_builds`, `account_deletions`); `npx wrangler d1 execute td2stats --remote --file schema.sql` ile var olan
+veritabanına eklenir (CREATE TABLE IF NOT EXISTS — mevcut tabloları etkilemez). Test: `node server/test_mobile.mjs`.
+
 ## Sürüm sayacı ve yönetici özeti (6.0.1)
 - Program `/v1/tasks/live` isteğinde sürümünü User-Agent'ta bildirir (`TD2LootAdvisor/6.0.1`); açılıştaki ilk istekte
   `x-td2-run: start` başlığı da gelir. Sunucu yalnız `usage_daily (gün, sürüm, açılış, yoklama)` sayaçlarını tutar —

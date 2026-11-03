@@ -67,12 +67,30 @@ Public task/news/game-data endpoints should be reused where their schemas and ca
 - Define account linking for Discord and platform sign-in, portable device sessions, license/device limits, data retention, and deletion semantics.
 - Exit when pairing, sync, privacy, and billing decisions are written down; no production secrets are needed for this phase.
 
-### Phase 2 — Cloud foundation
+### Phase 2 — Cloud foundation (in progress)
 
-- Add database migrations for mobile devices, pairing challenges, desktop relay state, build revisions, and push registrations.
-- Add authenticated endpoints and account deletion; never return admin credentials to a client.
-- Implement desktop outbound relay and revocation/expiry behavior. Do not expose `localapi.py` to the internet.
-- Exit when pairing expires, one-time claims cannot be replayed, revoked devices lose access, and queued commands remain allow-listed.
+- ✅ D1 tables added (`schema.sql`): `mobile_pairings`, `mobile_devices`, `desktop_inbox`, `desktop_status`,
+  `push_tokens`, `mobile_builds`, `account_deletions`.
+- ✅ Endpoints implemented in `server/mobile.js`, wired into `worker.js`: pairing create/claim, dashboard,
+  desktop inbox/events, allow-listed commands (`scan_start`/`scan_stop` only), build sync with revision
+  conflict detection, push-token register/revoke, device revoke, account deletion (both from desktop
+  `DELETE /v1/me` in `accounts.js` and from phone `DELETE /v1/mobile/me` in `mobile.js`).
+- ✅ Pairing expires (5 min), one-time claims cannot be replayed (`claimed` flag + unique update), revoked
+  devices lose access immediately, queued desktop commands stay allow-listed server-side.
+- ✅ Account deletion is real, not just a flag: sessions/devices revoked immediately, then a 24h grace period,
+  then `mobile.js::cleanup()` (called from `worker.js`'s `scheduled()`) actually deletes the account and all
+  related rows (builds, inbox, status, push tokens, mobile devices, sessions, licenses, devices, accounts).
+- ✅ 25 real, executed tests in `server/test_mobile.mjs` (`node server/test_mobile.mjs`) cover every endpoint,
+  including the conflict/expiry/revocation/deletion edge cases. All existing server tests re-verified passing
+  (no regressions).
+- ❌ **Not done yet**: real push delivery. `push_tokens` are stored, but `sendPush()` in `mobile.js` is an
+  explicit stub — no APNs/FCM credentials exist yet, and the code says so in its response (`delivery:
+  "not_yet_implemented"`) rather than pretending to send anything.
+- ❌ Not deployed to the live Cloudflare Worker yet — this round of work is committed to the repo and tested
+  locally (`node:sqlite` in-memory D1 substitute), but `npx wrangler deploy` / `d1 execute --remote` against the
+  real `td2stats` database has not been run by an AI session (would touch the live production service).
+- Exit gate still open: desktop outbound relay is the simple poll-based inbox above, not a persistent
+  WebSocket/long-poll relay — good enough for low-frequency commands, revisit if latency matters.
 
 ### Phase 3 — Flutter MVP
 
