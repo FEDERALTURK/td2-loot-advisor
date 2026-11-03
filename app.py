@@ -3020,14 +3020,11 @@ class App:
         if time.time() - st.get("desc_last", 0) < 6 * 3600: return
         st["desc_last"] = time.time(); save_cfg(self.cfg)
         def work():
-            urls = [u.replace("meta_builds.json", "descriptions_i18n.json") for u in meta_sync.configured_urls(st.get("meta_feed_url", ""))
-                    if u.endswith("meta_builds.json")]
             try:
-                raw, _ = meta_sync.fetch(urls, APP_VERSION)
-                if raw.get("schema") == 1 and isinstance(raw.get("items"), dict):
-                    DESC_CACHE.write_text(json.dumps(raw, ensure_ascii=False), encoding="utf-8")
-                    self._desc_i18n = None
-                    log.info("Description translations: version %s, %d items", raw.get("version"), len(raw["items"]))
+                raw = meta_sync.fetch_descriptions(st.get("meta_feed_url", ""), APP_VERSION, self.desc_i18n())
+                DESC_CACHE.write_text(json.dumps(raw, ensure_ascii=False), encoding="utf-8")
+                self._desc_i18n = None
+                log.info("Description translations: version %s, %d items", raw.get("version"), len(raw["items"]))
             except Exception as e:
                 log.debug("desc sync: %s", e)
         threading.Thread(target=work, daemon=True).start()
