@@ -115,6 +115,10 @@ Public task/news/game-data endpoints should be reused where their schemas and ca
   check (IEEE P1363 raw r‖s format) against a test-only EC key pair via `node:crypto`.
   **Not deployed to production yet** — requires the user to complete the steps below first (a real Apple ID +
   paid enrollment, which the AI assistant must not do on the user's behalf) and supply the resulting credentials.
+  **Status (2026-11-03): paused by the user.** They signed into developer.apple.com with their own Apple ID but
+  have not paid for the Program membership yet — the free sign-in cannot create an APNs key (Apple's own
+  restriction, confirmed when they tried). They chose to move on to other work for now; this step is parked,
+  not blocked on anything from this side, and resumes whenever they complete the paid enrollment.
 
 #### iOS push setup — steps the *user* must do (AI assistant cannot do these)
 

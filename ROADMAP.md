@@ -16,7 +16,7 @@ Bu dosya her gün güncellenir (bkz. en alt — otomatik günlük görev). Ayrı
 **Bu turda yapıldı — sunucu (push bildirimi, Faz 4):**
 - **Android/FCM — production'da canlı.** Yeni bir Firebase projesi (`td2-loot-advisor`) oluşturuldu (kullanıcının kendi Google oturumuyla, tarayıcı otomasyonu üzerinden — şifreye hiç dokunulmadı; Google Developer Program/Gemini-in-Firebase/Analytics gibi istenmeyen seçenekler bilerek reddedildi), Admin SDK servis hesabı anahtarı üretilip **sohbete hiç girmeden** doğrudan Cloudflare secret'ına (`FCM_SERVICE_ACCOUNT_JSON`) taşındı ve `wrangler deploy` ile canlıya alındı (Version ID `3846e50a-5eb6-4e42-825e-7343a38591d8`, `/v1/health` doğrulandı).
 - `server/mobile.js`: `sendPush()` artık hem Android (FCM HTTP v1, RS256 JWT) hem **iOS (APNs HTTP/2, ES256 provider JWT, `.p8` Auth Key)** için gerçek gönderim yapıyor — iki platform birbirinden bağımsız, her biri kendi secret'ı yoksa sessizce no-op. `desktopEvent()`'teki `scan_result` olayından tetikleniyor, olay yanıtını asla bloklamıyor (best-effort). Her iki platformun da kalıcı-geçersiz belirteçleri (FCM: `UNREGISTERED`/`NOT_FOUND`/`INVALID_ARGUMENT`; APNs: `BadDeviceToken`/`Unregistered`/410) otomatik siliniyor.
-- **iOS/APNs: kod yazıldı ve test edildi, ama henüz deploy edilmedi** — Apple Developer Program kaydı (ücretli, gerçek Apple ID) kullanıcının kendisinin yapması gereken bir adım; `docs/mobile_companion_roadmap.md`'ye adım adım talimat eklendi.
+- **iOS/APNs: kod yazıldı ve test edildi, ama henüz deploy edilmedi — kullanıcı tarafında ERTELENDİ.** Kullanıcı developer.apple.com'a kendi Apple ID'siyle giriş yaptı ama ücretli Apple Developer Program üyeliğine (~$99/yıl) henüz kaydolmadı — ücretsiz girişle "Keys" sayfasında APNs anahtarı oluşturulamıyor (Apple'ın kendi kısıtlaması). Kullanıcı bu adımı şimdilik atlayıp diğer işlere geçmeyi tercih etti (2026-11-03). Kod ve adım adım talimat (`docs/mobile_companion_roadmap.md` → "iOS push setup") hazır bekliyor; kullanıcı ödemeyi yaptığında kaldığı yerden devam edilecek.
 - `server/test_mobile.mjs`: 35 → 40 → **44 test**. FCM'in RS256 ve APNs'in ES256 (P-256, IEEE P1363 ham imza formatı) imzaları gerçek test anahtar çiftleriyle `node:crypto` ile doğrulanıyor (sadece "istek gitti" değil, imza gerçekten geçerli mi kontrol ediliyor). **44/44 PASS**, diğer 4 sunucu test dosyası da regresyonsuz (**PASS**).
 
 ## Önceki tur: Mobil companion — bulut eşleştirmesi Flutter'a bağlandı
@@ -33,10 +33,12 @@ Bu dosya her gün güncellenir (bkz. en alt — otomatik günlük görev). Ayrı
 - ⚠️ **Doğrulanamadı**: bu kum havuzunda Flutter/Dart SDK'sı yok, dolayısıyla `flutter analyze`/`flutter test`/derleme çalıştırılamadı. Değişiklikler elle satır satır gözden geçirildi (parantez dengesi, tip uyumu, sınıf sınırları) ama **Windows PC'de (`Flutter 3.47.8` kurulu) `flutter analyze` ve bir derleme/çalıştırma ile doğrulanması gerekiyor** — bu yapılmadan "çalışıyor" sayılmamalı.
 
 **Yapılmadı / sıradaki adımlar:**
-1. **iOS/APNs deploy onayı bekleniyor** — kullanıcı önce Apple Developer Program'a kaydolmalı ve `.p8` Auth Key + Key ID + Team ID üretmeli (adımlar: `docs/mobile_companion_roadmap.md` → "iOS push setup"), sonra secret'lar Cloudflare'e taşınıp deploy edilebilir.
-2. **Windows PC'de doğrulama** — `flutter analyze` + `flutter run` (veya APK build), ardından gerçek akış: masaüstünde kod üret → telefonda gir → eşleşsin → build oluştur/sil → bulutla eşitle düğmesini dene.
-3. Gerçek Android/iOS cihazda test, Google Play imzalama/yükleme — hâlâ bekliyor (Faz 4).
-4. PC'deki eski `git stash` girişi (`rollback/claude-last` dalındaki yerel değişiklikler) incelenip gerekirse ayrı bir dala alınmalı — veri kaybı yok ama kullanıcı kontrol etmeli.
+1. **Windows PC'de Flutter doğrulama** — `flutter analyze` + `flutter run` (veya APK build), ardından gerçek akış: masaüstünde kod üret → telefonda gir → eşleşsin → build oluştur/sil → bulutla eşitle düğmesini dene. (Şu an sırada — kullanıcı "diğer aşamalara geçelim" dedi.)
+2. Gerçek Android/iOS cihazda test, Google Play imzalama/yükleme — hâlâ bekliyor (Faz 4).
+3. PC'deki eski `git stash` girişi (`rollback/claude-last` dalındaki yerel değişiklikler) incelenip gerekirse ayrı bir dala alınmalı — veri kaybı yok ama kullanıcı kontrol etmeli.
+
+**Ertelendi (kullanıcı onayı/ödemesi bekliyor, acil değil):**
+- **iOS/APNs deploy** — kullanıcı önce Apple Developer Program'a kaydolup (~$99/yıl) `.p8` Auth Key + Key ID + Team ID üretmeli (adımlar: `docs/mobile_companion_roadmap.md` → "iOS push setup"), sonra secret'lar Cloudflare'e taşınıp deploy edilebilir. Kod zaten hazır ve test edilmiş durumda, sadece bu adımı bekliyor.
 
 ## Diğer açık kalemler (BUGS.md/HANDOFF.md'den)
 
