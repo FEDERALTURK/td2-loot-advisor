@@ -20,11 +20,15 @@ Bu dosya her gün güncellenir (bkz. en alt — otomatik günlük görev). Ayrı
 - `accounts.js`'e `DELETE /v1/me` (masaüstünden hesap silme talebi) eklendi.
 - `server/README.md` ve `docs/mobile_companion_roadmap.md` güncellendi.
 
+**Bugün ayrıca yapıldı (PC üzerinden, kullanıcı onayıyla):**
+- ✅ **Production'a deploy edildi.** PC'de Cloudflare zaten oturum açıktı (`gokmensoner1888@gmail.com`, D1+Workers yazma izni). `npx wrangler d1 execute td2stats --remote --file schema.sql` (27 sorgu, 23 tablo — eklemeler `IF NOT EXISTS`, mevcut veriye dokunmadı) ve `npx wrangler deploy` (Version ID `278f119d-6683-4fc7-b8a4-c2d0a26e6a23`) çalıştırıldı. Canlı adres: `https://td2-stats.td2loot.workers.dev` — `GET /v1/health` doğrulandı (`{"ok":true,...}`).
+- ✅ **Windows'ta v9.1.5.19 görsel testi tamamlandı.** PC'de git PATH'te değilmiş (GitHub Desktop'ın gömülü git'i kullanıldı); repo `rollback/claude-last` dalındaydı ve kaydedilmemiş yerel değişiklikler vardı — bunlar silinmeden `git stash` ile korunup (`git stash list`'te duruyor) repo `main`'e (`6b5aa69`) güncellendi. `app.py` yeniden başlatıldı, süreç "Running" durumda, arka plan görev/haber senkronu normal çalışıyor — çökme yok.
+
 **Yapılmadı / sıradaki adımlar:**
-1. **Production'a deploy henüz yapılmadı** — bu değişiklikler yerel test ortamında (`node:sqlite`) doğrulandı, canlı Cloudflare Worker'a (`npx wrangler deploy` + `d1 execute --remote --file schema.sql`) gönderilmedi. Bu, gerçek üretim veritabanını etkileyeceği için kullanıcı onayı/kendi yapması daha güvenli — ya da açıkça onay alınıp bu oturumda yapılabilir.
-2. **Gerçek push bildirimi (APNs/FCM)** — kimlik bilgisi yok, `sendPush()` stub. Faz 4'te ele alınacak.
-3. **Flutter tarafında bu yeni API'leri kullanan ekranlar yok** — `mobile/lib/` şu an yalnız eski LAN tabanlı `companion.py` QR eşleştirmesini kullanıyor (roadmap Faz 3 notu). Yeni bulut API'sine geçiş ayrı bir iş.
-4. Gerçek Android/iOS cihazda test, Google Play imzalama/yükleme — hâlâ bekliyor (Faz 4).
+1. **Gerçek push bildirimi (APNs/FCM)** — kimlik bilgisi yok, `sendPush()` stub. Faz 4'te ele alınacak.
+2. **Flutter tarafında bu yeni API'leri kullanan ekranlar yok** — `mobile/lib/` şu an yalnız eski LAN tabanlı `companion.py` QR eşleştirmesini kullanıyor (roadmap Faz 3 notu). Yeni bulut API'sine geçiş ayrı bir iş.
+3. Gerçek Android/iOS cihazda test, Google Play imzalama/yükleme — hâlâ bekliyor (Faz 4).
+4. PC'deki eski `git stash` girişi (`rollback/claude-last` dalındaki yerel değişiklikler) incelenip gerekirse ayrı bir dala alınmalı — veri kaybı yok ama kullanıcı kontrol etmeli.
 
 ## Diğer açık kalemler (BUGS.md/HANDOFF.md'den)
 
@@ -32,8 +36,7 @@ Bu dosya her gün güncellenir (bkz. en alt — otomatik günlük görev). Ayrı
 - mxswat/mx-division-builds lisans sorusu — issue taslağı hazır, kullanıcının GitHub'dan açması gerekiyor (üçüncü taraf repoya yazma, ortam kısıtlaması).
 - Tanıtım videoları (private repo) yayınlanmadı — kullanıcı onayı bekliyor.
 - SignPath durumu bilinmiyor.
-- Gerçek Windows'ta 9.1.5.19 görsel doğrulaması — bağlı bilgisayarın ekranı kilitli/erişilemez olduğu için yapılamadı, kullanıcının ekranı açması gerekiyor.
 
 ## Güncelleme günlüğü
 
-- **2026-11-03**: Mobil Faz 2 (bulut altyapısı) başlatıldı — D1 şeması + `server/mobile.js` + 25 test. Bu dosya oluşturuldu.
+- **2026-11-03**: Mobil Faz 2 (bulut altyapısı) başlatıldı — D1 şeması + `server/mobile.js` + 25 test. **Aynı gün production'a deploy edildi** (PC üzerinden, kullanıcı onayıyla) ve Windows'ta v9.1.5.19 görsel testi tamamlandı.

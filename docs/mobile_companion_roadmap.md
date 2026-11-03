@@ -86,9 +86,10 @@ Public task/news/game-data endpoints should be reused where their schemas and ca
 - ❌ **Not done yet**: real push delivery. `push_tokens` are stored, but `sendPush()` in `mobile.js` is an
   explicit stub — no APNs/FCM credentials exist yet, and the code says so in its response (`delivery:
   "not_yet_implemented"`) rather than pretending to send anything.
-- ❌ Not deployed to the live Cloudflare Worker yet — this round of work is committed to the repo and tested
-  locally (`node:sqlite` in-memory D1 substitute), but `npx wrangler deploy` / `d1 execute --remote` against the
-  real `td2stats` database has not been run by an AI session (would touch the live production service).
+- ✅ **Deployed to the live Cloudflare Worker (2026-11-03).** Run from the user's own PC (already authenticated
+  Cloudflare session, explicit user approval before the production step): `npx wrangler d1 execute td2stats --remote
+  --file schema.sql` (27 queries, 23 tables total, additive `IF NOT EXISTS`) then `npx wrangler deploy` (Version ID
+  `278f119d-6683-4fc7-b8a4-c2d0a26e6a23`). Live at `https://td2-stats.td2loot.workers.dev`, `GET /v1/health` verified.
 - Exit gate still open: desktop outbound relay is the simple poll-based inbox above, not a persistent
   WebSocket/long-poll relay — good enough for low-frequency commands, revisit if latency matters.
 
