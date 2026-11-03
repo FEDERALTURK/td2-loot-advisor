@@ -9,6 +9,8 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'services/cloud_link.dart';
+
 const _bg = Color(0xFF090C12);
 const _panel = Color(0xFF121722);
 const _panel2 = Color(0xFF191F2B);
@@ -29,16 +31,19 @@ class TD2CompanionApp extends StatefulWidget {
 
 class _TD2CompanionAppState extends State<TD2CompanionApp> {
   late final CompanionModel model;
+  late final CloudLinkModel cloud;
 
   @override
   void initState() {
     super.initState();
     model = CompanionModel()..load();
+    cloud = CloudLinkModel()..load();
   }
 
   @override
   void dispose() {
     model.dispose();
+    cloud.dispose();
     super.dispose();
   }
 
@@ -86,7 +91,7 @@ class _TD2CompanionAppState extends State<TD2CompanionApp> {
           ),
         ),
       ),
-      home: MainShell(model: model),
+      home: MainShell(model: model, cloud: cloud),
     );
   }
 }
@@ -242,6 +247,17 @@ class CompanionModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Bulut senkronu (`CloudLinkModel.syncBuilds`) birleştirilmiş listeyi burada
+  /// kalıcı hâle getirir. Yerel tek bir ekranda çağrılan save/delete'ten ayrıdır.
+  Future<void> replaceSavedBuilds(List<Map<String, dynamic>> builds) async {
+    savedBuilds = builds;
+    await _prefs?.setStringList(
+      'saved_builds',
+      savedBuilds.map(jsonEncode).toList(),
+    );
+    notifyListeners();
+  }
+
   Future<bool> connectDesktop(String rawUrl) async {
     final scanned = Uri.tryParse(rawUrl.trim());
     if (scanned == null ||
@@ -350,8 +366,9 @@ bool _isPrivateIpv4(String value) {
 }
 
 class MainShell extends StatefulWidget {
-  const MainShell({super.key, required this.model});
+  const MainShell({super.key, required this.model, required this.cloud});
   final CompanionModel model;
+  final CloudLinkModel cloud;
 
   @override
   State<MainShell> createState() => _MainShellState();
@@ -363,13 +380,13 @@ class _MainShellState extends State<MainShell> {
   @override
   Widget build(BuildContext context) {
     final pages = [
-      OverviewPage(model: widget.model),
+      OverviewPage(model: widget.model, cloud: widget.cloud),
       TasksPage(model: widget.model),
-      BuildsPage(model: widget.model),
+      BuildsPage(model: widget.model, cloud: widget.cloud),
       NewsPage(model: widget.model),
     ];
     return AnimatedBuilder(
-      animation: widget.model,
+      animation: Listenable.merge([widget.model, widget.cloud]),
       builder: (context, _) => Scaffold(
         appBar: AppBar(
           titleSpacing: 20,
@@ -440,7 +457,7 @@ class _MainShellState extends State<MainShell> {
         body: IndexedStack(index: selected, children: pages),
         floatingActionButton: selected == 2
             ? FloatingActionButton.extended(
-                onPressed: () => _newBuild(context, widget.model),
+                onPressed: () => _newBuild(context, widget.model, widget.cloud),
                 backgroundColor: _orange,
                 foregroundColor: Colors.white,
                 icon: const Icon(Icons.add_rounded),
@@ -475,8 +492,9 @@ class _MainShellState extends State<MainShell> {
 }
 
 class OverviewPage extends StatelessWidget {
-  const OverviewPage({super.key, required this.model});
+  const OverviewPage({super.key, required this.model, required this.cloud});
   final CompanionModel model;
+  final CloudLinkModel cloud;
 
   @override
   Widget build(BuildContext context) {
@@ -574,6 +592,8 @@ class OverviewPage extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           _DesktopStatusCard(model: model),
+          const SizedBox(height: 10),
+          _CloudStatusCard(cloud: cloud),
           const SizedBox(height: 22),
           SectionTitle(
             title: 'AKTİF ETKİNLİKLER',
@@ -695,8 +715,9 @@ class _TasksPageState extends State<TasksPage> {
 }
 
 class BuildsPage extends StatefulWidget {
-  const BuildsPage({super.key, required this.model});
+  const BuildsPage({super.key, required this.model, required this.cloud});
   final CompanionModel model;
+  final CloudLinkModel cloud;
 
   @override
   State<BuildsPage> createState() => _BuildsPageState();
@@ -705,6 +726,20 @@ class BuildsPage extends StatefulWidget {
 class _BuildsPageState extends State<BuildsPage> {
   int tab = 0;
   String query = '';
+
+  Future<void> _sync() async {
+    final error = await widget.cloud.syncBuilds(
+      local: widget.model.savedBuilds,
+      persistLocal: widget.model.replaceSavedBuilds,
+    );
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(error ?? 'Buildler buluttan güncellendi.'),
+        backgroundColor: error == null ? null : const Color(0xFF7A2A1E),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -728,12 +763,32 @@ class _BuildsPageState extends State<BuildsPage> {
           style: TextStyle(fontSize: 25, fontWeight: FontWeight.w800),
         ),
         const SizedBox(height: 15),
-        TextField(
-          decoration: const InputDecoration(
-            prefixIcon: Icon(Icons.search),
-            hintText: 'Build veya rol ara',
-          ),
-          onChanged: (value) => setState(() => query = value),
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                decoration: const InputDecoration(
+                  prefixIcon: Icon(Icons.search),
+                  hintText: 'Build veya rol ara',
+                ),
+                onChanged: (value) => setState(() => query = value),
+              ),
+            ),
+            if (widget.cloud.paired) ...[
+              const SizedBox(width: 8),
+              IconButton.filledTonal(
+                tooltip: 'Bulutla eşitle',
+                onPressed: widget.cloud.syncing ? null : _sync,
+                icon: widget.cloud.syncing
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.cloud_sync_rounded),
+              ),
+            ],
+          ],
         ),
         const SizedBox(height: 12),
         SegmentedButton<int>(
@@ -771,7 +826,11 @@ class _BuildsPageState extends State<BuildsPage> {
           ...saved.map(
             (build) => SavedBuildCard(
               data: build,
-              onDelete: () => widget.model.deleteBuild('${build['id']}'),
+              onDelete: () {
+                final id = '${build['id']}';
+                widget.model.deleteBuild(id);
+                if (widget.cloud.paired) widget.cloud.deleteBuildQuietly(id);
+              },
             ),
           ),
       ],
@@ -1252,6 +1311,243 @@ class _DesktopStatusCard extends StatelessWidget {
   );
 }
 
+class _CloudStatusCard extends StatelessWidget {
+  const _CloudStatusCard({required this.cloud});
+  final CloudLinkModel cloud;
+
+  @override
+  Widget build(BuildContext context) => InkWell(
+    borderRadius: BorderRadius.circular(17),
+    onTap: () => Navigator.of(context).push(
+      MaterialPageRoute<void>(builder: (_) => CloudPairPage(cloud: cloud)),
+    ),
+    child: Container(
+      padding: const EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: _panel,
+        borderRadius: BorderRadius.circular(17),
+        border: Border.all(color: Colors.white10),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: .06),
+              borderRadius: BorderRadius.circular(13),
+            ),
+            child: Icon(
+              Icons.cloud_outlined,
+              color: cloud.paired ? _orange : _soft,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Bulut eşleştirmesi',
+                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  !cloud.paired
+                      ? 'Wi-Fi dışındayken de masaüstü durumunu görmek için eşleştir'
+                      : cloud.pairError ??
+                            (cloud.desktopOnline
+                                ? 'Masaüstü çevrimiçi'
+                                : 'Eşleştirildi · masaüstü çevrimdışı görünüyor'),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(color: _soft, fontSize: 11),
+                ),
+              ],
+            ),
+          ),
+          Icon(
+            cloud.paired ? Icons.chevron_right_rounded : Icons.key_rounded,
+            color: _soft,
+            size: 20,
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+class CloudPairPage extends StatefulWidget {
+  const CloudPairPage({super.key, required this.cloud});
+  final CloudLinkModel cloud;
+
+  @override
+  State<CloudPairPage> createState() => _CloudPairPageState();
+}
+
+class _CloudPairPageState extends State<CloudPairPage> {
+  final _code = TextEditingController();
+
+  @override
+  void dispose() {
+    _code.dispose();
+    super.dispose();
+  }
+
+  Future<void> _deleteAccount() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Hesabı ve tüm verileri sil'),
+        content: const Text(
+          'Bu işlem yalnızca bu telefonu değil, masaüstü programının bağlı olduğu '
+          'HESABIN TAMAMINI (lisans, kayıtlı buildler, eşleştirmeler dahil) 24 saat '
+          'sonra kalıcı olarak siler. Geri alınamaz.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Vazgeç'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            style: FilledButton.styleFrom(backgroundColor: const Color(0xFFB3261E)),
+            child: const Text('Hesabı sil'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    final error = await widget.cloud.deleteAccount();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(error ?? 'Silme talebi alındı. 24 saat içinde tamamlanacak.')),
+    );
+    if (error == null) Navigator.of(context).pop();
+  }
+
+  @override
+  Widget build(BuildContext context) => AnimatedBuilder(
+    animation: widget.cloud,
+    builder: (context, _) => Scaffold(
+      appBar: AppBar(title: const Text('Bulut eşleştirmesi')),
+      body: ListView(
+        padding: const EdgeInsets.all(20),
+        children: widget.cloud.paired ? _connected(context) : _pairForm(context),
+      ),
+    ),
+  );
+
+  List<Widget> _pairForm(BuildContext context) => [
+    const Text('EŞLEŞTİRME KODU', style: _eyebrow),
+    const SizedBox(height: 8),
+    const Text(
+      'Windows programında Hesap panelinden "Telefon eşleştir" düğmesine bas. '
+      'Ekrana gelen 8 haneli kodu aşağıya gir. Kod 5 dakika geçerlidir.',
+      style: TextStyle(color: _soft, height: 1.45),
+    ),
+    const SizedBox(height: 18),
+    TextField(
+      controller: _code,
+      textCapitalization: TextCapitalization.characters,
+      maxLength: 8,
+      decoration: const InputDecoration(labelText: 'Eşleştirme kodu', hintText: 'ör. A1B2C3D4'),
+      onSubmitted: (_) => widget.cloud.pair(_code.text),
+    ),
+    const SizedBox(height: 12),
+    FilledButton.icon(
+      onPressed: widget.cloud.pairing ? null : () => widget.cloud.pair(_code.text),
+      icon: widget.cloud.pairing
+          ? const SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+            )
+          : const Icon(Icons.link_rounded),
+      label: const Text('Eşleştir'),
+    ),
+    if (widget.cloud.pairError != null) ...[
+      const SizedBox(height: 14),
+      Text(widget.cloud.pairError!, style: const TextStyle(color: Color(0xFFFF8A80))),
+    ],
+    const SizedBox(height: 16),
+    const _EmptyCard(
+      icon: Icons.wifi_tethering_rounded,
+      text:
+          'Bulut eşleştirmesi Wi-Fi\'dan bağımsız çalışır: masaüstü ve telefon aynı '
+          'ağda olmak zorunda değildir. Masaüstü eşleştirdiğin telefonları her an '
+          'Hesap panelinden görüp iptal edebilir.',
+    ),
+  ];
+
+  List<Widget> _connected(BuildContext context) {
+    final desktop = widget.cloud.dashboardState?['desktop'];
+    final online = widget.cloud.desktopOnline;
+    return [
+      const Text('DURUM', style: _eyebrow),
+      const SizedBox(height: 8),
+      Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: _panel,
+          borderRadius: BorderRadius.circular(17),
+          border: Border.all(color: Colors.white10),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              online ? Icons.check_circle_rounded : Icons.cloud_off_rounded,
+              color: online ? const Color(0xFF6FCF97) : _soft,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                online ? 'Masaüstü çevrimiçi' : 'Masaüstü şu anda çevrimdışı görünüyor',
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+            IconButton(
+              tooltip: 'Yenile',
+              onPressed: widget.cloud.dashboardLoading ? null : widget.cloud.refreshDashboard,
+              icon: const Icon(Icons.refresh_rounded, size: 20),
+            ),
+          ],
+        ),
+      ),
+      if (desktop?['last_event'] != null) ...[
+        const SizedBox(height: 10),
+        Text(
+          'Son olay: ${desktop['last_event']}',
+          style: const TextStyle(color: _soft, fontSize: 12),
+        ),
+      ],
+      const SizedBox(height: 22),
+      OutlinedButton.icon(
+        onPressed: () => widget.cloud.unpair(),
+        icon: const Icon(Icons.link_off_rounded),
+        label: const Text('Bu telefonun eşleştirmesini yerel olarak kaldır'),
+      ),
+      const SizedBox(height: 8),
+      const Text(
+        'Bu, yalnızca telefonundaki bağlantıyı kaldırır. Masaüstünden tamamen '
+        'iptal etmek için Hesap panelindeki eşleştirilmiş cihaz listesini kullan.',
+        style: TextStyle(color: _soft, fontSize: 11),
+      ),
+      const SizedBox(height: 28),
+      const Divider(color: Colors.white10),
+      const SizedBox(height: 12),
+      const Text('HESAP', style: _eyebrow),
+      const SizedBox(height: 8),
+      OutlinedButton.icon(
+        onPressed: _deleteAccount,
+        style: OutlinedButton.styleFrom(foregroundColor: const Color(0xFFFF8A80)),
+        icon: const Icon(Icons.delete_forever_rounded),
+        label: const Text('Hesabı ve tüm verileri sil'),
+      ),
+    ];
+  }
+}
+
 class DesktopPairPage extends StatefulWidget {
   const DesktopPairPage({super.key, required this.model});
   final CompanionModel model;
@@ -1401,7 +1697,11 @@ class _EmptyCard extends StatelessWidget {
   );
 }
 
-Future<void> _newBuild(BuildContext context, CompanionModel model) async {
+Future<void> _newBuild(
+  BuildContext context,
+  CompanionModel model,
+  CloudLinkModel cloud,
+) async {
   final name = TextEditingController();
   final playstyle = TextEditingController(text: 'PvE / DPS');
   final gear = TextEditingController();
@@ -1430,9 +1730,11 @@ Future<void> _newBuild(BuildContext context, CompanionModel model) async {
                 style: TextStyle(fontSize: 21, fontWeight: FontWeight.w800),
               ),
               const SizedBox(height: 6),
-              const Text(
-                'Build cihazında saklanır; masaüstüyle eşitleme henüz etkin değil.',
-                style: TextStyle(color: _soft, fontSize: 12),
+              Text(
+                cloud.paired
+                    ? 'Build cihazında saklanır ve buluta gönderilir.'
+                    : 'Build cihazında saklanır. Buluta eşitlemek için önce Özet sayfasından telefonunu eşleştir.',
+                style: const TextStyle(color: _soft, fontSize: 12),
               ),
               const SizedBox(height: 18),
               TextFormField(
@@ -1474,14 +1776,16 @@ Future<void> _newBuild(BuildContext context, CompanionModel model) async {
               FilledButton.icon(
                 onPressed: () async {
                   if (formKey.currentState?.validate() != true) return;
-                  await model.saveBuild({
+                  final build = {
                     'id': DateTime.now().microsecondsSinceEpoch.toString(),
                     'name': name.text.trim(),
                     'playstyle': playstyle.text.trim(),
                     'gear': gear.text.trim(),
                     'notes': notes.text.trim(),
                     'created': DateTime.now().toIso8601String(),
-                  });
+                  };
+                  await model.saveBuild(build);
+                  if (cloud.paired) unawaited(cloud.pushBuildQuietly(build));
                   if (sheetContext.mounted) Navigator.pop(sheetContext);
                 },
                 icon: const Icon(Icons.save_outlined),

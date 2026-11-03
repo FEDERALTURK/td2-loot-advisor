@@ -7,26 +7,26 @@ Bu dosya her gün güncellenir (bkz. en alt — otomatik günlük görev). Ayrı
 | Bileşen | Durum |
 |---|---|
 | Windows masaüstü uygulaması | Canlı, `v9.1.5.19`. Fazlı bir yol haritası yok — sürekli Windows render/kararlılık/tanılama düzeltme döngüsü (bkz. `DEVELOPMENT_LOG.md`). |
-| Mobil companion (Flutter) | **Faz 2 (bulut altyapısı) — bu turda ilerletildi.** Faz 1 tamamlandı, Faz 3 (Flutter MVP) kısmen yapıldı ama gerçek cihaz/Play doğrulaması bekliyor. |
-| Topluluk sunucusu (Cloudflare Worker) | Canlı (düşüş istatistikleri, görevler, hesap/lisans). Bu turda mobil uçlar eklendi, henüz production'a deploy edilmedi. |
-| Lisans/telif (mx-division-builds) | Açıklığa kavuşturma talebi hazırlandı, kullanıcı tarafından açılması bekleniyor. |
+| Mobil companion (Flutter) | **Faz 2 tamamlandı ve canlı; Faz 3'te bulut eşleştirmesi/build senkronu bu turda eklendi.** Gerçek cihaz/Play doğrulaması hâlâ bekliyor. |
+| Topluluk sunucusu (Cloudflare Worker) | Canlı. Mobil uçlar (eşleştirme, build senkronu, cihaz listesi/iptali, hesap silme) production'da. |
+| Lisans/telif (mx-division-builds) | [issue #153](https://github.com/mxswat/mx-division-builds/issues/153) açıldı, yanıt bekleniyor. |
 
-## Şu an aktif: Mobil companion Faz 2 — Bulut altyapısı
+## Şu an aktif: Mobil companion — bulut eşleştirmesi Flutter'a bağlandı
 
-**Bugün (bu turda) yapıldı:**
-- D1 şeması: `mobile_pairings`, `mobile_devices`, `desktop_inbox`, `desktop_status`, `push_tokens`, `mobile_builds`, `account_deletions`.
-- `server/mobile.js`: eşleştirme, telefon oturumu, masaüstü komut kuyruğu/olayları, build senkronu (revizyon çakışma kontrolü), push-token saklama (gönderim YOK, bilerek stub), cihaz/hesap iptali, 24 saat bekleme sonrası gerçek hesap silme.
-- `server/test_mobile.mjs`: 25 test, hepsi geçti. Mevcut 4 test dosyası da regresyonsuz geçti.
-- `accounts.js`'e `DELETE /v1/me` (masaüstünden hesap silme talebi) eklendi.
-- `server/README.md` ve `docs/mobile_companion_roadmap.md` güncellendi.
+**Bu turda yapıldı — masaüstü (Python):**
+- `account.py`: `create_mobile_pairing()`, `list_mobile_devices()`, `revoke_mobile_device(id)` eklendi (var olan `Account._req` Bearer-oturum yardımcısını kullanıyor).
+- `app.py`: Hesap panelinde "📱 Telefon eşleştir" düğmesi — `_acc_pair_phone()` kodu üretir, 5 dakika geçerli kodu bir mesaj kutusunda gösterir. `lang/en.json` + `lang/tr.json`'a `acc.mobile_hint/mobile_pair/mobile_code` eklendi (diğer 8 dil İngilizce'ye düşüyor, `i18n.py`'ın tasarımı bu).
+- `tests/test_account.py`: gerçek `server/dev_server.mjs`'e karşı eşleştirme kodu üretme → telefon tarafından claim etme (ham HTTP ile simüle edildi) → cihaz listesi → iptal akışının uçtan uca testi eklendi. **`python3 tests/test_account.py` → 28/28 PASS**, regresyon yok.
 
-**Bugün ayrıca yapıldı (PC üzerinden, kullanıcı onayıyla):**
-- ✅ **Production'a deploy edildi.** PC'de Cloudflare zaten oturum açıktı (`gokmensoner1888@gmail.com`, D1+Workers yazma izni). `npx wrangler d1 execute td2stats --remote --file schema.sql` (27 sorgu, 23 tablo — eklemeler `IF NOT EXISTS`, mevcut veriye dokunmadı) ve `npx wrangler deploy` (Version ID `278f119d-6683-4fc7-b8a4-c2d0a26e6a23`) çalıştırıldı. Canlı adres: `https://td2-stats.td2loot.workers.dev` — `GET /v1/health` doğrulandı (`{"ok":true,...}`).
-- ✅ **Windows'ta v9.1.5.19 görsel testi tamamlandı.** PC'de git PATH'te değilmiş (GitHub Desktop'ın gömülü git'i kullanıldı); repo `rollback/claude-last` dalındaydı ve kaydedilmemiş yerel değişiklikler vardı — bunlar silinmeden `git stash` ile korunup (`git stash list`'te duruyor) repo `main`'e (`6b5aa69`) güncellendi. `app.py` yeniden başlatıldı, süreç "Running" durumda, arka plan görev/haber senkronu normal çalışıyor — çökme yok.
+**Bu turda yapıldı — mobil (Flutter):**
+- `mobile/lib/services/cloud_api.dart` (yeni): `server/mobile.js`'in tüm telefon-tarafı uçları için saf HTTP istemcisi (claim/dashboard/builds GET-PUT-DELETE/hesap silme), tipli hata (`CloudApiException`, `RevisionConflict`).
+- `mobile/lib/services/cloud_link.dart` (yeni): `CloudLinkModel` — eşleştirme durumu (cihaz id/token `shared_preferences`'ta), 8 saniyede bir gösterge paneli yoklaması, build senkronu (yerelde değişeni gönder → buluttakini çek → tombstone'ları yereldeki build'lerden kaldır → revizyonları sakla), hesap silme.
+- `mobile/lib/main.dart`: var olan LAN/QR eşleştirmesine **DOKUNULMADI** (ayrı, bağımsız özellik) — yanına yeni, bağımsız "Bulut eşleştirmesi" kartı/sayfası eklendi: 8 haneli kod girişi, çevrimiçi/çevrimdışı durumu, buildler sekmesinde "bulutla eşitle" düğmesi, yeni build kaydedince/silince otomatik (sessiz, en-iyi-gayret) bulut senkronu, ve mağaza kurallarının gerektirdiği "Hesabı ve tüm verilerimi sil" akışı (güçlü uyarı diyaloğuyla — bunun SADECE bu telefonu değil, masaüstünün bağlı TÜM hesabını sildiğini açıkça belirtiyor).
+- ⚠️ **Doğrulanamadı**: bu kum havuzunda Flutter/Dart SDK'sı yok, dolayısıyla `flutter analyze`/`flutter test`/derleme çalıştırılamadı. Değişiklikler elle satır satır gözden geçirildi (parantez dengesi, tip uyumu, sınıf sınırları) ama **Windows PC'de (`Flutter 3.47.8` kurulu) `flutter analyze` ve bir derleme/çalıştırma ile doğrulanması gerekiyor** — bu yapılmadan "çalışıyor" sayılmamalı.
 
 **Yapılmadı / sıradaki adımlar:**
-1. **Gerçek push bildirimi (APNs/FCM)** — kimlik bilgisi yok, `sendPush()` stub. Faz 4'te ele alınacak.
-2. **Flutter tarafında bu yeni API'leri kullanan ekranlar yok** — `mobile/lib/` şu an yalnız eski LAN tabanlı `companion.py` QR eşleştirmesini kullanıyor (roadmap Faz 3 notu). Yeni bulut API'sine geçiş ayrı bir iş.
+1. **Windows PC'de doğrulama** — `flutter analyze` + `flutter run` (veya APK build), ardından gerçek akış: masaüstünde kod üret → telefonda gir → eşleşsin → build oluştur/sil → bulutla eşitle düğmesini dene.
+2. **Gerçek push bildirimi (APNs/FCM)** — kimlik bilgisi yok, `sendPush()` hâlâ stub. Faz 4.
 3. Gerçek Android/iOS cihazda test, Google Play imzalama/yükleme — hâlâ bekliyor (Faz 4).
 4. PC'deki eski `git stash` girişi (`rollback/claude-last` dalındaki yerel değişiklikler) incelenip gerekirse ayrı bir dala alınmalı — veri kaybı yok ama kullanıcı kontrol etmeli.
 
@@ -39,4 +39,4 @@ Bu dosya her gün güncellenir (bkz. en alt — otomatik günlük görev). Ayrı
 
 ## Güncelleme günlüğü
 
-- **2026-11-03**: Mobil Faz 2 (bulut altyapısı) başlatıldı — D1 şeması + `server/mobile.js` + 25 test. **Aynı gün production'a deploy edildi** (PC üzerinden, kullanıcı onayıyla) ve Windows'ta v9.1.5.19 görsel testi tamamlandı.
+- **2026-11-03**: Mobil Faz 2 (bulut altyapısı) başlatıldı, aynı gün production'a deploy edildi, Windows'ta v9.1.5.19 görsel testi tamamlandı. İki boşluk (cihaz listesi, build soft-delete) bulunup kapatıldı ve ikinci kez deploy edildi (Version ID `f75d2807-1da2-4f8d-a01d-12c7e1b6cbbb`). **Aynı gün: masaüstüne eşleştirme-kodu üretme eklendi (`account.py`/`app.py`) ve Flutter uygulaması yeni bulut API'sine bağlandı** (`cloud_api.dart`, `cloud_link.dart`, eski LAN/QR akışına dokunulmadan) — Flutter/Dart SDK'sı bu ortamda yok, Windows PC'de `flutter analyze` ile doğrulama bekliyor.

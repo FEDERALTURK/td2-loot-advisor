@@ -101,9 +101,12 @@ Public task/news/game-data endpoints should be reused where their schemas and ca
 ### Phase 3 — Flutter MVP
 
 - A separate Flutter `mobile/` app now contains the game hub, task tracker, local build library, news feed, and Android QR pairing to the existing read-only desktop companion.
-- Desktop pairing is same-LAN only and uses the desktop's current HTTP QR token. It is a beta bridge, not the proposed TLS cloud relay. Mobile remote control, commands, account sync, cloud auth, push, and phone-token management remain out of scope.
+- Desktop pairing (LAN/QR) is same-LAN only and uses the desktop's current HTTP QR token. It is a beta bridge, not the cloud relay. It is untouched by the cloud work below and keeps working independently.
+- ✅ **Cloud pairing wired in (2026-11-03).** `mobile/lib/services/cloud_api.dart` (HTTP client for every `server/mobile.js` phone-side endpoint) and `cloud_link.dart` (`CloudLinkModel`: pairing-code claim, device token in `shared_preferences`, dashboard polling, build sync with revision tracking, account deletion). `main.dart` gained an independent "Bulut eşleştirmesi" card/page (code entry, not QR — the desktop now has a "Pair a phone" button in its Account panel, `account.py::create_mobile_pairing()` + `app.py`, that shows an 8-char code). Build create/delete push/tombstone to the cloud automatically (best-effort) when paired; a manual "sync" button pulls and reconciles. Account deletion has a prominent warning that it deletes the whole linked account, not just the phone.
+- ⚠️ **Not yet validated**: no Flutter/Dart SDK was available in the sandbox that wrote this, so `flutter analyze`/`flutter test`/a build have not been run. The code was reviewed by hand (brace balance, type checks, class boundaries) but needs `flutter analyze` and a real run on the Windows dev machine (Flutter 3.47.8) before being trusted end-to-end.
+- Push notifications, phone-initiated remote commands beyond `scan_start`/`scan_stop`, and push-token registration UI remain out of scope for this pass.
 - Use secure platform storage for mobile credentials, native push integrations, offline cache, and accessible loading/error/empty states.
-- The current local beta does not persist the desktop token; it drops it when the app closes or disconnects. Real-device validation on Android and iOS remains an exit gate.
+- The LAN/QR beta still does not persist the desktop token; it drops it when the app closes or disconnects. Real-device validation on Android and iOS remains an exit gate.
 
 ### Phase 4 — Beta and store readiness
 

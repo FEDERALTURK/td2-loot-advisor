@@ -24,7 +24,7 @@ import urllib.error
 import urllib.request
 import webbrowser
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import urlparse, parse_qs, quote as _urlquote
 
 TIMEOUT = 12
 LOGIN_TIMEOUT = 300
@@ -244,6 +244,19 @@ class Account:
     def redeem(self, code):
         j = self._req("POST", "/v1/license/redeem", {"code": code.strip()})
         return self._apply(j)
+
+    # ---- mobil companion eşleştirmesi (bkz. server/mobile.js, docs/mobile_companion_roadmap.md)
+    def create_mobile_pairing(self):
+        """Telefonun tek kullanımlık, 5 dakika geçerli eşleştirme kodunu üretir. {"code", "expires_in"} döner."""
+        return self._req("POST", "/v1/mobile/pairings", {})
+
+    def list_mobile_devices(self):
+        """Bu hesaba eşleştirilmiş, hâlâ geçerli telefonları listeler. {"devices": [...]} döner."""
+        return self._req("GET", "/v1/mobile/devices")
+
+    def revoke_mobile_device(self, device_id):
+        """Belirtilen telefon eşleştirmesini iptal eder (telefon bir sonraki istekte 401 alır)."""
+        return self._req("DELETE", "/v1/mobile/devices/" + _urlquote(str(device_id), safe=""))
 
     def logout(self):
         try:

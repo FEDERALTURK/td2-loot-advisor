@@ -3981,6 +3981,8 @@ class App:
                                         justify="left", wraplength=int(500 * getattr(self, "ui_factor", 1.0)))
             self._acc_status.pack(fill="x")
             P(t("acc.one_device")).pack(fill="x", pady=(14, 0))
+            P(t("acc.mobile_hint")).pack(fill="x", pady=(16, 2))
+            ttk.Button(b, text="📱 " + t("acc.mobile_pair"), command=self._acc_pair_phone).pack(fill="x", pady=(2, 0))
             bar = tk.Frame(b, bg=PAL["bg"]); bar.pack(fill="x", side="bottom", pady=(10, 0))
             ttk.Button(bar, text="🔄 " + t("acc.refresh"), command=lambda: (self._acc_set_status(t("acc.working")), self.account_refresh())).pack(side="left")
             ttk.Button(bar, text="🐞 " + t("acc.support"), command=lambda: self.open_feedback(
@@ -4021,6 +4023,21 @@ class App:
             except account.AuthError as e: err, j = e, {}
             msg = t("acc.redeemed") if err is None and j.get("tier") == "premium" else (t("acc.device_limit") if j.get("device_limit") else None)
             self.root.after(0, lambda: self._acc_after(err, msg=msg))
+        threading.Thread(target=work, daemon=True).start()
+
+    def _acc_pair_phone(self):
+        """TD2 Loot Advisor Companion (mobil) eşleştirme kodu üretir; kod 5 dakika geçerlidir."""
+        def work():
+            try: j = self.account.create_mobile_pairing(); err = None
+            except account.AuthError as e: err, j = e, {}
+            def after():
+                if err is not None:
+                    msg = t("acc.err_session") if err.code == "unauthorized" else (
+                        t("acc.err_" + err.code) if err.code in ACC_ERRORS else t("acc.err_http", e=str(err)))
+                    self._acc_set_status(msg, "danger")
+                else:
+                    messagebox.showinfo(APP_NAME, t("acc.mobile_code", code=j.get("code", "")), parent=self._acc_win)
+            self.root.after(0, after)
         threading.Thread(target=work, daemon=True).start()
 
     def _acc_logout(self):

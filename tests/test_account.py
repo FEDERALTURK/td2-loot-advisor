@@ -113,6 +113,31 @@ try:
         ok(e.code == "unauthorized" and not other.signed_in and not os.path.exists(os.path.join(tmp, "b.dat")),
            "engellenen hesabın yerel oturumu silindi")
 
+    # mobil companion eşleştirmesi (server/mobile.js)
+    acc3 = account.Account(os.path.join(tmp, "d.dat"), URL)
+    acc3.login(open_url=browser("Mobil"), timeout=20)
+    pr = acc3.create_mobile_pairing()
+    ok(len(pr.get("code", "")) >= 6 and pr.get("expires_in") == 300, "eşleştirme kodu üretildi (5 dk)")
+
+    def claim(code, platform="android"):
+        req = urllib.request.Request(URL + "/v1/mobile/pairings/claim",
+                                     data=json.dumps({"code": code, "platform": platform}).encode(),
+                                     headers={"Content-Type": "application/json"}, method="POST")
+        try:
+            with urllib.request.urlopen(req) as r: return r.status, json.loads(r.read())
+        except urllib.error.HTTPError as e:
+            return e.code, json.loads(e.read())
+
+    status, claimed = claim(pr["code"])
+    ok(status == 200 and claimed.get("token") and claimed.get("device_id"), "telefon kodu claim etti, cihaz oturumu aldı")
+    status2, _ = claim(pr["code"])
+    ok(status2 == 410 or status2 == 409, "aynı kod tekrar claim edilemiyor")
+
+    devs = acc3.list_mobile_devices()
+    ok(len(devs.get("devices", [])) == 1, "masaüstü eşleştirilmiş telefonu listede görüyor")
+    acc3.revoke_mobile_device(devs["devices"][0]["device_id"])
+    ok(acc3.list_mobile_devices()["devices"] == [], "iptal edilen telefon artık listede değil")
+
     acc.logout()
     ok(not acc.signed_in and not os.path.exists(path), "çıkış yapıldı, yerel veri silindi")
 
