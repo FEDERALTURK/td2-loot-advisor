@@ -96,11 +96,10 @@ başarıyla yüklendi, konsol hatası yok).
 
 ## Diğer açık kalemler (BUGS.md/HANDOFF.md'den)
 
-- `master` dalı hâlâ silinmedi — kullanıcı GitHub Settings'ten silmeli (ortam kısıtlaması, bkz. HANDOFF.md).
-  **Not (2026-11-03):** `main` dışında artık `archive/master-superseded-2026-11-03` adlı yeni bir dal da var
-  (aynı commit'i, `7a0d844`, işaret ediyor) — görünüşe göre `master`'ı silmeden önce bir yedek/arşiv dalı
-  oluşturulmuş; `master`'ın kendisi GitHub'da hâlâ duruyor (ls-remote ile doğrulandı), yani asıl silme işlemi
-  hâlâ kullanıcıyı bekliyor.
+- ✅ **`master` dalı silindi (2026-11-04, kullanıcı tarafından).** `git ls-remote`/GitHub API ile doğrulandı —
+  artık yalnızca `main`, `archive/master-superseded-2026-11-03`, `deploy/worker-bundle-temp` ve
+  `claude/descriptions-second-shard` dalları kalıyor. `archive/master-superseded-2026-11-03` aynı eski commit'i
+  (`7a0d844`) işaret eden bir arşiv/yedek dalı — istersen o da silinebilir, hiçbir aktif işe bağımlılığı yok.
 - **Yeni bulundu (2026-11-03):** `deploy/worker-bundle-temp` adında, kendi commit mesajında "will be removed"
   diye işaretlenmiş geçici bir dal repoda duruyor (Cloudflare Quick Edit'e elle yapıştırmak için hazırlanan
   worker bundle'ı taşıyordu, GitHub entegrasyonuna geçildiği için artık gereksiz). Bu oturum dal silme işlemi
