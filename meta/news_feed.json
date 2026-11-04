@@ -1,7 +1,7 @@
 {
  "schema": 1,
- "version": "2026-11-04.1",
- "updated": "2026-11-04T01:52:55Z",
+ "version": "2026-11-04.2",
+ "updated": "2026-11-04T07:36:08Z",
  "season": "Year 8 Season 3 – Red Horizon",
  "items": [
   {
@@ -136,7 +136,7 @@
    "id": "y8s3-3-maintenance",
    "kind": "maintenance",
    "start": "2026-11-03T08:00:00Z",
-   "end": "2026-11-03T14:00:00Z",
+   "end": "2026-11-03T15:30:00Z",
    "url": "https://x.com/TheDivisionGame/status/2117291904853221819",
    "source": "Ubisoft (The Division on X)",
    "title": {
@@ -152,16 +152,16 @@
     "nl": "Onderhoud: Title Update Y8S3.3"
    },
    "text": {
-    "en": "Servers go offline on Nov 3 at 08:00 UTC for an estimated 6 hours to install Title Update Y8S3.3 and Echoes of Central Park.",
-    "tr": "Sunucular 3 Kasım 08:00 UTC'de (TSİ 11:00) Title Update Y8S3.3 ve Echoes of Central Park için tahminen 6 saatliğine kapanıyor.",
-    "de": "Die Server gehen am 3. Nov. um 08:00 UTC für voraussichtlich 6 Stunden offline, um Title Update Y8S3.3 und Echoes of Central Park einzuspielen.",
-    "fr": "Les serveurs seront coupés le 3 nov. à 08:00 UTC pendant environ 6 heures pour installer Title Update Y8S3.3 et Echoes of Central Park.",
-    "es": "Los servidores se desconectan el 3 de nov. a las 08:00 UTC durante unas 6 horas para instalar Title Update Y8S3.3 y Echoes of Central Park.",
-    "it": "I server andranno offline il 3 nov. alle 08:00 UTC per circa 6 ore per installare Title Update Y8S3.3 ed Echoes of Central Park.",
-    "pt": "Os servidores ficam offline em 3 de nov. às 08:00 UTC por cerca de 6 horas para instalar Title Update Y8S3.3 e Echoes of Central Park.",
-    "ru": "Серверы отключатся 3 ноября в 08:00 UTC примерно на 6 часов для установки Title Update Y8S3.3 и Echoes of Central Park.",
-    "pl": "Serwery zostaną wyłączone 3 listopada o 08:00 UTC na około 6 godzin, by wgrać Title Update Y8S3.3 i Echoes of Central Park.",
-    "nl": "De servers gaan op 3 nov. om 08:00 UTC naar verwachting 6 uur offline om Title Update Y8S3.3 en Echoes of Central Park te installeren."
+    "en": "Servers went offline on Nov 3 at 08:00 UTC to install Title Update Y8S3.3 and Echoes of Central Park. The 6-hour estimate was extended by about 1.5 hours; maintenance ended around 15:30 UTC.",
+    "tr": "Sunucular 3 Kasım 08:00 UTC'de (TSİ 11:00) Title Update Y8S3.3 ve Echoes of Central Park için kapandı. Tahmini 6 saatlik süre yaklaşık 1,5 saat uzatıldı; bakım 15:30 UTC civarında bitti.",
+    "de": "Die Server gingen am 3. Nov. um 08:00 UTC für Title Update Y8S3.3 und Echoes of Central Park offline. Die geschätzten 6 Stunden wurden um rund 1,5 Stunden verlängert; die Wartung endete gegen 15:30 UTC.",
+    "fr": "Les serveurs ont été coupés le 3 nov. à 08:00 UTC pour installer Title Update Y8S3.3 et Echoes of Central Park. Les 6 heures prévues ont été prolongées d'environ 1 h 30 ; fin vers 15:30 UTC.",
+    "es": "Los servidores se desconectaron el 3 de nov. a las 08:00 UTC para instalar Title Update Y8S3.3 y Echoes of Central Park. Las 6 horas previstas se ampliaron cerca de 1,5 horas; acabó hacia las 15:30 UTC.",
+    "it": "I server sono andati offline il 3 nov. alle 08:00 UTC per installare Title Update Y8S3.3 ed Echoes of Central Park. Le 6 ore previste sono state estese di circa 1,5 ore; fine verso le 15:30 UTC.",
+    "pt": "Os servidores saíram do ar em 3 de nov. às 08:00 UTC para instalar Title Update Y8S3.3 e Echoes of Central Park. As 6 horas previstas foram estendidas em cerca de 1,5 hora; fim por volta das 15:30 UTC.",
+    "ru": "Серверы отключились 3 нояб. в 08:00 UTC для установки Title Update Y8S3.3 и Echoes of Central Park. Расчётные 6 часов продлили примерно на 1,5 часа; работы завершились около 15:30 UTC.",
+    "pl": "Serwery wyłączono 3 lis. o 08:00 UTC, by zainstalować Title Update Y8S3.3 i Echoes of Central Park. Szacowane 6 godzin wydłużono o około 1,5 godziny; koniec około 15:30 UTC.",
+    "nl": "De servers gingen op 3 nov. om 08:00 UTC offline voor Title Update Y8S3.3 en Echoes of Central Park. De geschatte 6 uur werd met zo'n 1,5 uur verlengd; einde rond 15:30 UTC."
    }
   },
   {
