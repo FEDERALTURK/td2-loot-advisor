@@ -235,6 +235,8 @@
   "tab.history": "Historial",
   "tab.log": "Registro",
   "tab.help": "Ayuda",
+  "tab.about": "Acerca de",
+  "about.body": "ACERCA DEL PROGRAMA\nTD2 Loot Advisor es una herramienta creada para reducir el tiempo que los jugadores de Division 2 pasan ordenando el inventario. Lee tu pantalla, compara cada objeto con tus propias reglas de build y da un veredicto de \"guardar o desmontar\" en segundos. También rastrea piezas de build que te faltan y traduce las misiones del juego a tu idioma.\n\nCÓMO FUNCIONA\nEl programa nunca toca la memoria del juego: funciona únicamente leyendo la pantalla. No accede a tu cuenta ni a los archivos del juego, y no es una trampa.\n\nCÓDIGO ABIERTO\nEste proyecto es de código abierto bajo la licencia MIT. El código fuente completo es público en GitHub: github.com/FEDERALTURK/td2-loot-advisor\n\nKAIVOLT\nTD2 Loot Advisor está desarrollado por Kaivolt — un estudio independiente y pequeño que crea herramientas y sonidos que hacen más valioso el tiempo de jugadores y oyentes. Kaivolt trabaja con transparencia, respeto por los usuarios y las reglas del juego, y oficio.\n\"Software & Sound, Engineered.\"\n\nDESARROLLADOR\nDJVORLIX / Gökmen SONER\ngokmensoner1888@gmail.com",
   "verdict.keep": "GUARDAR",
   "verdict.consider": "VALORAR",
   "verdict.dismantle": "DESMONTAR",

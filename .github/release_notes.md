@@ -447,3 +447,8 @@ Bu dosyalar GitHub Actions'ta otomatik derlendi; kurulum dosyası Windows'ta ses
 - Yeni: **"Bu karar yanlıştı"** düğmesi (Panel) — program bir eşyayı SAKLA/DÜŞÜN/KIR olarak yanlış değerlendirdiyse doğrusunu işaretleyebilirsin; kayıt yerel olarak tutulur (Ayarlar → Tanılama Merkezi → "Yanlış karar bildirimlerim") ve istersen tek tıkla geliştiriciye de iletilebilir.
 - Bu özellik programın kurallarını kendiliğinden değiştirmez — amacı, build'indeki attribute/ağırlık ayarlarını kendi gözlemlerine göre ince ayar yapmana yardımcı olacak bir kayıt tutmaktır.
 
+## 9.1.5.28
+
+- Yeni: **Kaivolt** — sade ve modern yeni varsayılan tema (lacivert zemin, elektrik moru vurgu, düz hizalı kenar çubuğu, yumuşak sayfa geçişi); 17 eski tema de Ayarlar → Görünüm'de seçilebilir kalıyor.
+- Yeni: **"Hakkında"** sekmesi (Diğer grubu) — programın ne yaptığı/yapmadığı ve ekrandan başka hiçbir şeye dokunmadığı; açık kaynak (MIT) bilgisi ve GitHub bağlantısı; kurucu stüdyo **Kaivolt**'un tanıtımı.
+

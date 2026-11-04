@@ -235,6 +235,8 @@
   "tab.history": "Geschiedenis",
   "tab.log": "Logboek",
   "tab.help": "Help",
+  "tab.about": "Over",
+  "about.body": "OVER HET PROGRAMMA\nTD2 Loot Advisor is een hulpmiddel gemaakt om de tijd die Division 2-spelers besteden aan het sorteren van hun inventaris te verkorten. Het leest je scherm, vergelijkt elk item met je eigen buildregels en geeft binnen seconden een \"bewaren of slopen\"-oordeel. Het houdt ook ontbrekende buildonderdelen bij en vertaalt in-game taken naar jouw taal.\n\nHOE HET WERKT\nHet programma raakt nooit het geheugen van het spel aan — het werkt uitsluitend door het scherm te lezen. Het heeft geen toegang tot je account of spelbestanden en is geen cheat.\n\nOPEN SOURCE\nDit project is open source onder de MIT-licentie. De volledige broncode is openbaar op GitHub: github.com/FEDERALTURK/td2-loot-advisor\n\nKAIVOLT\nTD2 Loot Advisor wordt gemaakt door Kaivolt — een kleine, onafhankelijke studio die tools en geluid maakt die de tijd van spelers en luisteraars waardevoller maken. Kaivolt werkt met transparantie, respect voor gebruikers en spelregels, en vakmanschap.\n\"Software & Sound, Engineered.\"\n\nONTWIKKELAAR\nDJVORLIX / Gökmen SONER\ngokmensoner1888@gmail.com",
   "verdict.keep": "HOUDEN",
   "verdict.consider": "OVERWEGEN",
   "verdict.dismantle": "SLOPEN",

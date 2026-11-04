@@ -145,7 +145,7 @@ import diagnostics_center
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.1.5.27"
+APP_VERSION = "9.1.5.28"
 # "Bu oturumda ne kazandın?" özeti için kaba tahmin: bir eşyayı elle inceleyip
 # build'e göre karar vermenin (istatistikleri okuma + karşılaştırma) ortalama
 # süresi, saniye. Gerçek bir ölçüm değil — yalnızca arayüzde "tahmini" etiketiyle
@@ -207,10 +207,10 @@ DEFAULTS = {"scan_mode": "hotkey", "auto_interval_ms": 700, "auto_record": True,
             "daily_reset_hour": 2, "weekly_reset_day": 1, "weekly_reset_hour": 2,  # weekly_reset_day: 0=Monday
             "tasks_hotkey": "<f10>",
             "language": "", "log_level": "INFO", "log_max_kb": 1024, "log_backups": 3,
-            "ui_theme": "isac", "ui_sounds": True, "bg_interval": 15,
-            "fx_cursor": True, "fx_cursor_style": "crosshair", "fx_cursor_color": "#ff6d10", "fx_cursor_custom": "",
-            "fx_trail": True, "fx_trail_color": "#ff6d10", "fx_trail_len": 18, "fx_transitions": True,
-            "fx_video": True, "fx_video_dim": 0.35, "fx_transition_ms": 260, "fx_transition_style": "tactical", "ui_nav_layout": "tactical", "ui_layout": "standard", "fx_bgwatch": True, "fx_bgwatch_dim": 0.0, "event_fx": "standard",
+            "ui_theme": "kaivolt", "ui_sounds": True, "bg_interval": 15,
+            "fx_cursor": True, "fx_cursor_style": "crosshair", "fx_cursor_color": "#7c5cfc", "fx_cursor_custom": "",
+            "fx_trail": True, "fx_trail_color": "#7c5cfc", "fx_trail_len": 18, "fx_transitions": True,
+            "fx_video": True, "fx_video_dim": 0.35, "fx_transition_ms": 220, "fx_transition_style": "soft", "ui_nav_layout": "flat", "ui_layout": "standard", "fx_bgwatch": False, "fx_bgwatch_dim": 0.0, "event_fx": "standard",
             "res_profile": "auto", "ocr_engine": "auto", "ocr_gpu": "auto", "license_key": "", "update_check": True, "update_last": 0, "update_skip": "", "stash_record": True, "vendor_mode": False, "vendor_auto": True, "drop_share": False, "drop_asked": False, "drop_activity": "none", "drop_server": "", "drop_client": "", "vision_ok": False, "vendor_notified": "", "companion_port": 8765, "svc_tray": True, "svc_close_to_tray": False, "svc_auto_run": True, "svc_session_popup": True, "smart_scan": True, "api_on": False, "api_port": 8766, "api_lan": False, "api_control": True, "api_token": "", "rpc_on": False, "rpc_client_id": "", "push_on": False, "push_topic": "", "push_webhook": "", "push_drop": True, "push_build": True, "push_vendor": True, "push_session": True, "agent_model": "operator", "agent_outfit": "night", "agent_skin": 1, "ocr_threshold": 170, "ocr_scale": "auto", "ocr_psm": 6, "ocr_passes": 3,
             "overlay_mode": "card", "overlay_alpha": 0.94, "overlay_size": 1.0, "ui_depth": True,
             "meta_sync": True, "meta_feed_url": "", "meta_last_try": 0, "meta_last_sync": "", "meta_version": "",
@@ -4289,15 +4289,15 @@ class App:
     def build_ui(self):
         """ISAC kabuk + sabit ana gezinme + özellik gruplarının alt sekmeleri."""
         self._ui_build_errors = []
-        set_palette(ui_theme.apply(self.root, self.cfg["settings"].get("ui_theme", "isac")))
+        set_palette(ui_theme.apply(self.root, self.cfg["settings"].get("ui_theme", "kaivolt")))
         self.build_header()
 
-        self.tab_keys = ("dash", "builds", "progress", "stash", "stats", "info", "tasks", "division3", "translate", "assistant", "settings", "history", "log", "help")
+        self.tab_keys = ("dash", "builds", "progress", "stash", "stats", "info", "tasks", "division3", "translate", "assistant", "settings", "history", "log", "help", "about")
         self.tab_groups = {
             "dash": "home", "builds": "gear", "progress": "gear", "stash": "gear", "stats": "gear",
             "info": "intel", "tasks": "intel", "division3": "intel",
             "translate": "tools", "assistant": "tools", "settings": "settings",
-            "history": "system", "log": "system", "help": "system",
+            "history": "system", "log": "system", "help": "system", "about": "system",
         }
         self.group_keys = ("home", "gear", "intel", "tools", "settings", "system")
         tr_ui = i18n.current_language() == "tr"
@@ -4379,7 +4379,7 @@ class App:
             self.build_dash, self.build_builds, self.build_prog, self.build_stash,
             self.build_stats, self.build_info, self.build_division3, self.build_translate,
             self.build_gorevler, self.build_asistan, self.build_settings, self.build_hist,
-            self.build_logtab, self.build_help,
+            self.build_logtab, self.build_help, self.build_about,
         ]
         self._ui_build_index = 0
         self._ui_ready = False
@@ -4417,7 +4417,8 @@ class App:
             parent.add(self.tabs[key], text=ui_theme.with_icon(title, ui_theme.TAB_ICONS.get(key, "")))
         self._ui_builders = [self.build_dash, self.build_builds, self.build_prog, self.build_stash, self.build_stats,
                              self.build_info, self.build_division3, self.build_translate, self.build_gorevler,
-                             self.build_asistan, self.build_settings, self.build_hist, self.build_logtab, self.build_help]
+                             self.build_asistan, self.build_settings, self.build_hist, self.build_logtab, self.build_help,
+                             self.build_about]
         self._ui_build_index = 0; self._ui_ready = False; self._build_critical_ui_pages()
         nb.bind("<<NotebookTabChanged>>", self.on_tab)
         for inner in self.group_nbs.values(): inner.bind("<<NotebookTabChanged>>", self.on_tab)
@@ -4445,7 +4446,7 @@ class App:
         self.tabs={}
         for key in self.tab_keys:
             parent=self.group_nbs[self.tab_groups[key]]; self.tabs[key]=ttk.Frame(parent); parent.add(self.tabs[key],text=ui_theme.with_icon("The Division 3" if key=="division3" else t(f"tab.{key}"),ui_theme.TAB_ICONS.get(key,"")))
-        self._ui_builders=[self.build_dash,self.build_builds,self.build_prog,self.build_stash,self.build_stats,self.build_info,self.build_division3,self.build_translate,self.build_gorevler,self.build_asistan,self.build_settings,self.build_hist,self.build_logtab,self.build_help]; self._ui_build_index=0; self._ui_ready=False; self._build_critical_ui_pages()
+        self._ui_builders=[self.build_dash,self.build_builds,self.build_prog,self.build_stash,self.build_stats,self.build_info,self.build_division3,self.build_translate,self.build_gorevler,self.build_asistan,self.build_settings,self.build_hist,self.build_logtab,self.build_help,self.build_about]; self._ui_build_index=0; self._ui_ready=False; self._build_critical_ui_pages()
         nb.bind("<<NotebookTabChanged>>",self.on_tab)
         for inner in self.group_nbs.values(): inner.bind("<<NotebookTabChanged>>",self.on_tab)
         self._sidebar_activate("home"); self.shd_footer=fx.SHDStatusBar(self.root,accent=PAL["accent"],bg=PAL["bg"],fg=PAL["fg"],muted=PAL["muted"],footer=True); self.shd_footer.pack(fill="x",side="bottom"); self.root.after_idle(self._build_next_ui_page)
@@ -9833,6 +9834,28 @@ class App:
         body = t("help.body")
         if body == "help.body":          # dil dosyasında yoksa İngilizceye düşülmüş olmalı
             body = "Help text is missing from this language file."
+        box.configure(bg=PAL["surface"], fg=PAL["fg"], relief="flat", padx=18, pady=14, spacing3=4)
+        box.tag_configure("h", foreground=PAL["accent"], font=(ui_theme.FONT_SEMI, 12), spacing1=10)
+        for line in body.splitlines(True):              # BÜYÜK HARFLİ satırlar başlık
+            plain = line.strip()
+            box.insert("end", line, ("h",) if plain and plain == plain.upper() and any(c.isalpha() for c in plain) else ())
+        box.config(state="disabled")
+
+    def build_about(self):
+        """Program hakkında ve kurucu stüdyo (Kaivolt) bilgileri — about.body dil dosyasından gelir."""
+        f = self.tabs["about"]
+        hb = ttk.Frame(f); hb.pack(side="top", fill="x", padx=10, pady=(10, 0))
+        ttk.Label(hb, text=f"{APP_NAME} — {APP_VERSION}", style="Item.TLabel").pack(side="left")
+        ttk.Button(hb, text=ui_theme.with_icon("GitHub", "🔗"), style="Accent.TButton",
+                   command=lambda: webbrowser.open("https://github.com/FEDERALTURK/td2-loot-advisor")).pack(side="right")
+        ttk.Button(hb, text=ui_theme.with_icon(t("fb.btn"), "🐞"),
+                   command=self.open_feedback).pack(side="right", padx=(0, 8))
+        box = tk.Text(f, wrap="word", font=("Segoe UI", 10))
+        sb = ttk.Scrollbar(f, orient="vertical", command=box.yview); box.configure(yscrollcommand=sb.set)
+        sb.pack(side="right", fill="y", pady=10); box.pack(side="left", fill="both", expand=True, padx=10, pady=10)
+        body = t("about.body")
+        if body == "about.body":          # dil dosyasında yoksa İngilizceye düşülmüş olmalı
+            body = "About text is missing from this language file."
         box.configure(bg=PAL["surface"], fg=PAL["fg"], relief="flat", padx=18, pady=14, spacing3=4)
         box.tag_configure("h", foreground=PAL["accent"], font=(ui_theme.FONT_SEMI, 12), spacing1=10)
         for line in body.splitlines(True):              # BÜYÜK HARFLİ satırlar başlık

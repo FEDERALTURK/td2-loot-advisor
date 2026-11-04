@@ -268,6 +268,52 @@ Bu seri, Linux/Xvfb testlerinin yakalayamadığı, yalnızca gerçek Windows + D
 - **Doğrulama**: `python3 -I -m py_compile app.py` temiz geçti; gerçek Tk penceresinin görsel render'ı bu
   ekransız konteynerde teyit edilemedi (bkz. `BUGS.md` #13).
 
+### Ana tema/menü modernizasyonu + "Hakkında" sekmesi (2026-11-04, v9.1.5.28)
+
+- **Amaç**: Kullanıcının isteği — "Programın ana teması ve menüleri daha modern ve sade bir tasarım
+  yapalım. Menüler açık ve net olmalı. Programın içerisinde Program hakkında ve kurucu şirket bilgileri
+  içeren bir bölüm olsun." Not: programın herhangi bir geleneksel menü çubuğu (`tk.Menu`) yok — "menüler"
+  burada mevcut kenar-çubuğu-grup-düğmeleri + iç notebook-sekme sistemi anlamına geliyor (`app.py`
+  `grep "tk.Menu("` sıfır sonuç verdi, bu araştırılıp doğrulandı).
+- **Yeni tema paketi "kaivolt"** (`td2app/ui/ui_theme.py` `_PACKS`): kurucu stüdyo Kaivolt'un marka
+  renkleri — Deep Space Navy zemin (`#0b1120`), Electric Violet vurgu (`#7c5cfc`), Volt Cyan ikincil renk
+  (`#22d3ee`), Ivory metin (`#f5f7ff`). Var olan `PALETTES`/`apply()` boyama altyapısı aynen yeniden
+  kullanıldı — `apply()` fonksiyonuna hiç dokunulmadı, sadece palet tablosuna yeni bir giriş eklendi.
+  `apply_pack()`'e yeni bir `elif mode == "kaivolt"` dalı eklendi: `ui_nav_layout="flat"` (var olan
+  kademeli/"tactical" kenar-çubuğu ofseti mantığı zaten bu değer için düz, hizalı bir görünüm üretiyordu —
+  `app.py build_ui()`'daki `tactical_nav` kontrolü sayesinde YENİ bir düzen kodu yazılmadı), `ui_layout=
+  "standard"` (alternatif "field_command"/"shd_terminal" kabuklarına girmez), `fx_transition_style="soft"`,
+  dekoratif arka plan animasyonu (`fx_bgwatch`) kapalı.
+- **Yeni varsayılan**: `DEFAULTS["ui_theme"]` `"isac"` → `"kaivolt"` (yalnız SIFIRDAN kurulumları etkiler —
+  var olan kullanıcıların kayıtlı `ui_theme` değeri dokunulmadan kalır). `build_ui()`'daki geri dönüş
+  değeri de güncellendi. Diğer 17 tema (ISAC dahil) Ayarlar → Görünüm'de seçilebilir kalıyor; "◆ ISAC"
+  kenar-çubuğu marka etiketi bilerek değiştirilmedi (oyun-içi ISAC referansı diğer tüm temalarla uyumlu;
+  Kaivolt kimliği yeni "Hakkında" sekmesine taşındı — bkz. altta).
+- **Yeni "Hakkında" sekmesi** (`app.py` `App.build_about()`, "Diğer" grubu, Geçmiş/Kayıt/Yardım'ın
+  yanında): sürüm numarası + GitHub bağlantısı + geri bildirim düğmesi üstte; alt kısımda `help.body`
+  ile aynı mekanizmayı (`Text` widget, BÜYÜK HARFLİ satırlar başlık rengiyle) kullanan `about.body` metni
+  — programın ne yaptığı/yapmadığı (ekranı okur, oyunun belleğine dokunmaz), açık kaynak/MIT lisansı, ve
+  kurucu stüdyo Kaivolt'un tanıtımı (vizyon/değerler, "Yazılım ve Ses, Mühendislikle." sloganı). İçerik
+  claude.ai projesindeki `kaivolt-brand-identity.md` belgesinden alındı. `TAB_ICONS`'a `"about": "🏢"`,
+  `tab_keys`/`tab_groups`'a `"about"` eklendi; normal/field_command/shd_terminal kabuklarının üçünün de
+  `_ui_builders` listesine `self.build_about` eklendi (üç kabuk da aynı `tab_keys`'i paylaşıyor).
+- **Çeviri**: 10 dilin hepsine `tab.about` + `about.body` anahtarları eklendi (satır bazlı yama, `"tab.help"`
+  çapası kullanılarak — `vf.*`/`cmp.*` yama script'leriyle aynı yöntem). `theme.kaivolt`/`themedesc.kaivolt`
+  ise yalnızca `tr.json` ve `en.json`'a eklendi — proje zaten tema-paketi çevirilerini (ör. `theme.isac`,
+  `theme.shd_terminal`) sadece bu iki dosyada tutuyor ve diğer 8 dil `i18n.t()`'nin İngilizce yedeğiyle
+  otomatik düşüyor (bu davranış doğrulandı, kod değişikliği gerekmedi).
+- **Doğrulama**: `python3 -I -c "import ast; ast.parse(...)"` ile `app.py` ve `ui_theme.py` temiz geçti.
+  10 dilin hepsi `json.load` ile geçerli JSON olarak doğrulandı. `i18n.init('.')` + her dil için
+  `i18n.set_language(code)` sonrası `i18n.missing_keys()` boş döndü (yeni anahtarların hepsi gerçekten
+  okunabiliyor, sessizce anahtar adına düşmüyor). Başlık-satırı algılama mantığı (`satır == satır.upper()`)
+  Türkçe/Rusça/Almanca/Fransızca başlıklar için de ayrı ayrı test edildi. **Bu konteynerde `tkinter` modülü
+  kurulu değil** (`ModuleNotFoundError`) — gerçek pencerenin görsel render'ı, kenar çubuğunun düz
+  hizalandığı ve "Hakkında" sekmesinin okunur göründüğü yalnızca statik olarak (kod akışı + palet/çeviri
+  anahtarları) doğrulanabildi; kullanıcının Windows'ta çalıştırıp görsel olarak teyit etmesi gerekiyor.
+- **Bilerek dışarıda bırakılan**: Space Grotesk marka fontu (web fontu, Windows sistem fontu değil —
+  mevcut "Segoe UI"/"Segoe UI Semibold" korundu); "◆ ISAC" kenar-çubuğu etiketinin değiştirilmesi/
+  kaldırılması (yukarıda açıklandı).
+
 ## Bu depoya dair AI-destekli geliştirme oturumları (genel not)
 
 Bu proje, farklı AI oturumlarının (bu oturum dahil) ardışık olarak çalıştığı bir geliştirme modeliyle sürdürülüyor. Her oturum kendi kapsamını `HANDOFF.md`'de bırakmalı. Bu depoya ayrıca bir "ChatGPT" oturumunun yaptığı iş (Android companion app `mobile/` + bazı güvenilirlik/tanılama işi) bu Claude oturumunda doğrulanıp `main`'e entegre edildi (9.1.5.18 merge'i).

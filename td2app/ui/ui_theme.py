@@ -119,6 +119,11 @@ _PACKS = {
     "shd_terminal": {"bg": "#0b0e14", "surface": "#111720", "surface2": "#18212c", "border": "#34404c", "fg": "#ffffff",
                      "muted": "#a0aab2", "accent": "#ff5a00", "accent_hover": "#ff7b38", "accent_fg": "#ffffff", "select": "#54250d",
                      "entry": "#080b10", "ov_bg": "#0d121a", "ov_fg": "#ffffff", "ov_border": "#ff5a00", "info": "#00e5ff"},
+    # Kaivolt: modern ve sade ana tema — kurucu stüdyonun marka renkleri
+    # (Deep Space Navy zemin, Electric Violet vurgu, Volt Cyan ikincil renk).
+    "kaivolt": {"bg": "#0b1120", "surface": "#121b30", "surface2": "#1b2740", "border": "#2a3655", "fg": "#f5f7ff",
+                "muted": "#9aa7c7", "accent": "#7c5cfc", "accent_hover": "#9b7dfd", "select": "#2a2158",
+                "entry": "#0a0f1c", "info": "#22d3ee", "ov_bg": "#0e1630", "ov_fg": "#f5f7ff", "ov_border": "#4a3fae"},
 }
 for _k, _v in _PACKS.items():
     PALETTES[_k] = {**PALETTES["dark"], **_v}
@@ -156,6 +161,11 @@ def apply_pack(settings, mode):
     elif mode == "shd_terminal":
         settings.update({"event_fx": "standard", "fx_bgwatch": False, "fx_transition_ms": 240,
                          "fx_transition_style": "tactical", "ui_nav_layout": "tactical", "ui_layout": "shd_terminal"})
+    elif mode == "kaivolt":
+        # Sade/modern kabuk: kademeli (tactical) kenar çubuğu yerine düz hizalama,
+        # yumuşak sayfa geçişi, dekoratif saha animasyonları kapalı.
+        settings.update({"event_fx": "standard", "fx_bgwatch": False, "fx_transition_ms": 220,
+                         "fx_transition_style": "soft", "ui_nav_layout": "flat", "ui_layout": "standard"})
     else:
         settings["event_fx"] = "standard"
     return True
@@ -165,7 +175,7 @@ FONT_SEMI = "Segoe UI Semibold"
 
 # Sekme ikonları (sekme kimliğine göre) / tab icons by tab id
 TAB_ICONS = {"dash": "🎯", "builds": "🧩", "progress": "📦", "stash": "🗄", "stats": "📊", "info": "📚", "translate": "🌐", "tasks": "📋",
-             "assistant": "🤖", "settings": "⚙", "history": "🕘", "log": "📜", "help": "❓"}
+             "assistant": "🤖", "settings": "⚙", "history": "🕘", "log": "📜", "help": "❓", "about": "🏢"}
 
 
 def with_icon(text, icon):
