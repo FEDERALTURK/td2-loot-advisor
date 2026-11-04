@@ -74,7 +74,7 @@ try:
     ent = features.Entitlements("")
     ok(ent.set_entitlement(acc.entitlement, account.device_pub(), PUB) and ent.tier == "premium" and ent.source == "account",
        "program yetki belgesini internetsiz doğruladı")
-    ok(ent.has("recal_advisor") and ent.server_auth().startswith("TD2 TD2E-"), "premium özellik açık, sunucu başlığı hazır")
+    ok(ent.has("optimizer_all") and ent.server_auth().startswith("TD2 TD2E-"), "premium özellik açık, sunucu başlığı hazır")
     ok(not features.Entitlements("").set_entitlement(acc.entitlement, account.device_pub("başka-bilgisayar"), PUB),
        "başka bilgisayara kopyalanan belge geçersiz")
     ok(not features.Entitlements("").set_entitlement(acc.entitlement, account.device_pub(), "11" * 32),

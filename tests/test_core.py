@@ -19,7 +19,7 @@ def test_license_key():
     assert features.check_key(k[:-4] + "AAAA", pub)[2] == "signature"
     assert features.check_key(features.make_key(seed, {"exp": 1}), pub)[2] == "expired"
     assert features.check_key("hello", pub)[2] == "format"
-    e = features.Entitlements(""); assert e.has("scan") and not e.has("recal_advisor")
+    e = features.Entitlements(""); assert e.has("scan") and e.has("recal_advisor") and not e.has("optimizer_all")
 
 def _game():
     return gamedata.GameData(ROOT / "tests/.game_cache.json", ROOT / "meta/game_data.json", ROOT / "meta/game_data.json")

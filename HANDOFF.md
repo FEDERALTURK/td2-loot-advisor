@@ -11,7 +11,7 @@ Son güncelleme: bu dosyayı güncelleyen oturumun yaptığı iş — 9.1.5.19 y
 ## Kullanıcıdan (Soner/DJVORLIX) beklenen işlemler
 
 1. ✅ **`master` dalı silindi (2026-11-04, kullanıcı tarafından).** Doğrulandı. İsteğe bağlı küçük temizlik: `archive/master-superseded-2026-11-03` (aynı eski commit'e işaret eden yedek dal) ve `deploy/worker-bundle-temp` (kendi commit mesajında "will be removed" diyen geçici dal) hâlâ repoda duruyor, hiçbir aktif işe bağımlılıkları yok.
-2. **mxswat'a lisans sorusu — açıldı, yanıt bekleniyor.** [mxswat/mx-division-builds#153](https://github.com/mxswat/mx-division-builds/issues/153) (2026-11-03, kullanıcının kendi GitHub oturumuyla, PC üzerinden tarayıcı otomasyonuyla gönderildi — bkz. `LICENSE_NOTES.md`). Yanıt gelince `LICENSE_NOTES.md`'deki "Durum" bölümü ve `recal_advisor`'ın kapsamı buna göre güncellenmeli.
+2. ✅ **mxswat lisans gri alanı — çözüldü (2026-11-04, kullanıcı kararı).** `recal_advisor` `free` yapılarak sorun kökünden çözüldü (bkz. `LICENSE_NOTES.md`, `BUGS.md` #2). [mxswat/mx-division-builds#153](https://github.com/mxswat/mx-division-builds/issues/153) nezaketen açık bırakıldı ama artık bekleyen bir karar yok; yanıt gelirse yalnızca bilgi amaçlı not düşülür.
 3. ✅ **Tanıtım videoları — GitHub Release'e yayınlandı (2026-11-04, kullanıcı tarafından).** `td2_promo_en_1080p.mp4` ve `td2_promo_tr_1080p.mp4` v9.1.5.20 (latest) release notlarına eklendi. Dikey (Shorts/Reels) versiyonları ve YouTube paylaşımı hâlâ isteğe bağlı.
 4. **SignPath Foundation — reddedildi (2026-11-03).** Gerekçe kamuya görünürlük eşiği (GitHub star/fork, dış
    referans, sürekli aktivite) — proje kalitesiyle ilgisiz. Kullanıcıdan karar bekleniyor: yeniden başvuru

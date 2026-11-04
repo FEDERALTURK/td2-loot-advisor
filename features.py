@@ -24,7 +24,7 @@ FEATURES = {
     "optimizer":       "free",     # aktif build için en iyi parça seçimi
     "drop_stats_share": "free",    # anonim düşüş istatistiği gönderme (gönüllü)
     "optimizer_all":   "premium",  # tüm build'leri sandığa göre karşılaştırma ve sıralama
-    "recal_advisor":   "premium",  # kalibrasyon danışmanı (hangi attribute hangi eşyadan)
+    "recal_advisor":   "free",     # kalibrasyon danışmanı (hangi attribute hangi eşyadan) — mx-division-builds (CC BY-NC-SA 4.0) verisine dolaylı dayandığı için ücretli değil, bkz. LICENSE_NOTES.md
     "stash_export":    "premium",  # sandık raporunu CSV / HTML dışa aktarma
     "drop_stats_view": "premium",  # topluluk düşüş istatistikleri (hangi aktivitede ne düşüyor)
     "vendor_watch":    "premium",  # haftalık satıcı / hedefli loot bildirimleri

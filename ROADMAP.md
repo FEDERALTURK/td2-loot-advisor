@@ -9,7 +9,7 @@ Bu dosya her gün güncellenir (bkz. en alt — otomatik günlük görev). Ayrı
 | Windows masaüstü uygulaması | Canlı, `v9.1.5.20` (hesap panelinde "Telefon eşleştir" düğmesi eklendi). Fazlı bir yol haritası yok — sürekli Windows render/kararlılık/tanılama düzeltme döngüsü (bkz. `DEVELOPMENT_LOG.md`). |
 | Mobil companion (Flutter) | **Faz 2 tamamlandı ve canlı; Faz 3'te bulut eşleştirmesi/build senkronu eklendi, Windows PC'de `flutter analyze`/`test` ile doğrulandı (0 sorun).** Gerçek cihaz/Play doğrulaması ve push-token kaydı (bkz. aşağıda) hâlâ bekliyor. |
 | Topluluk sunucusu (Cloudflare Worker) | Canlı. Mobil uçlar (eşleştirme, build senkronu, cihaz listesi/iptali, hesap silme) production'da. |
-| Lisans/telif (mx-division-builds) | [issue #153](https://github.com/mxswat/mx-division-builds/issues/153) açıldı, yanıt bekleniyor. |
+| Lisans/telif (mx-division-builds) | **Çözüldü (2026-11-04, kullanıcı kararı).** `recal_advisor` ücretsiz yapıldı — artık ticari bir özelliğin arkasında değil, gri alan ortadan kalktı. [issue #153](https://github.com/mxswat/mx-division-builds/issues/153) kibarlık/şeffaflık amacıyla açık bırakıldı, yanıt gelirse not düşülecek ama artık engelleyici değil. |
 | Kod imzalama (SignPath) | **Reddedildi (2026-11-03).** Foundation (ücretsiz OSS) programı, GitHub yıldız/fork/katkıcı sayısı, dış makale/referans ve kurumsal destek gibi "kamuya görünürlük" sinyalleri yeterli olmadığı için onaylanmadı — proje kalitesiyle ilgisiz, tamamen görünürlük eşiği meselesi. Görünürlük arttıkça yeniden başvurulabilir; alternatif olarak ücretli SignPath aboneliği veya başka bir imzalama sağlayıcısı (ör. Azure Trusted Signing ~$9.99/ay — ABD/Kanada kökenli kuruluş şartı bildirilen yorumlar var, Türkiye'den uygunluk doğrulanmalı) değerlendirilebilir. |
 | Web sitesi (`web/`) | **Yayında (2026-11-03):** https://td2-loot-advisor.pages.dev — Cloudflare Pages'e GitHub bağlantısıyla yayınlandı, `td2-stats` Worker'ı da Cloudflare Workers Builds ile `main`'e bağlandı (otomatik CI/CD). Taktik HUD görsel kimliği eklendi. Geriye kalan: Gumroad ürünü (kullanıcı tarafı). Bkz. aşağıda ve `web/README.md`. |
 
@@ -105,7 +105,13 @@ başarıyla yüklendi, konsol hatası yok).
   worker bundle'ı taşıyordu, GitHub entegrasyonuna geçildiği için artık gereksiz). Bu oturum dal silme işlemi
   yapmadı (önceki oturumlarda `git push --delete`/GitHub API `DELETE /git/refs` ortam politikasıyla engellenmiş,
   bkz. HANDOFF.md) — kullanıcı GitHub Settings → Branches'tan silebilir, düşük risk.
-- mxswat/mx-division-builds lisans sorusu — [issue #153](https://github.com/mxswat/mx-division-builds/issues/153) açıldı (2026-11-03, kullanıcının PC'sinde kendi GitHub oturumuyla), yanıt bekleniyor. (Bu repo bu oturumun GitHub erişim kapsamında değil, durumu doğrudan kontrol edilemedi.)
+- ✅ **mxswat/mx-division-builds lisans gri alanı — çözüldü (2026-11-04, kullanıcı kararı).** `recal_advisor`
+  (`features.py`) `premium`'dan `free`'ye çevrildi: artık mx verisini dolaylı kullanan tek özellik hiçbir ücretli
+  kapı arkasında değil, bu da CC BY-NC-SA 4.0'daki "ticari olmayan kullanım" şartıyla ilişkili belirsizliği ortadan
+  kaldırıyor. `LICENSE_NOTES.md` güncellendi. [issue #153](https://github.com/mxswat/mx-division-builds/issues/153)
+  nezaketen açık bırakıldı (yanıt gelirse not düşülür) ama artık karar/engelleyici bir durum değil.
+  İlgili test dosyaları (`tests/test_core.py`, `tests/test_account.py`, `tests/ui_account_test.py`) `recal_advisor`
+  yerine hâlâ premium olan `optimizer_all`'ı örnek alacak şekilde güncellendi.
 - ✅ **Tanıtım videoları — GitHub Release'e yayınlandı (2026-11-04, kullanıcı tarafından).** `td2-loot-advisor-reports`
   reposunun `promo` dalındaki uçtan uca üretim pipeline'ı (`promo/run_all.sh`: Chatterbox Multilingual TTS
   seslendirme + tamamen sentezlenmiş orijinal müzik + Pillow/ffmpeg render) başarıyla çalıştırıldı, 4 dosya üretildi:

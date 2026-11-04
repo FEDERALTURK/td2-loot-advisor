@@ -2,6 +2,18 @@
 
 Önemli kararların ve sürümlerin kısa, kronolojik özeti. Tam ayrıntı için `git log` ve `.github/release_notes.md`.
 
+## `recal_advisor` ücretsiz yapıldı — mx-division-builds lisans gri alanı çözüldü (2026-11-04)
+
+- `features.py`: `"recal_advisor": "premium"` → `"free"`. Kullanıcı kararı: mx-division-builds (CC BY-NC-SA 4.0,
+  "ticari olmayan kullanım") verisine dolaylı dayanan tek özellik artık hiçbir ücretli kapı arkasında değil, bu da
+  `LICENSE_NOTES.md`'de belgelenen gri alanı ortadan kaldırıyor.
+- `features.Entitlements.has()` "free" tier'ı lisanssız her zaman `True` döndürdüğü için başka kod değişikliği
+  gerekmedi; Premium sayfası (`app.build_premium_box`) listeyi `features.FEATURES`'tan otomatik çektiği için de
+  elle güncelleme gerekmedi.
+- Üç test dosyası güncellendi (artık premium örneği olarak `recal_advisor` yerine `optimizer_all` kullanıyorlar):
+  `tests/test_core.py`, `tests/test_account.py`, `tests/ui_account_test.py`. `test_core.py` yerel olarak çalıştırıldı, 18/18 PASS.
+- `LICENSE_NOTES.md`, `BUGS.md`, `HANDOFF.md`, `ROADMAP.md` güncellendi. [issue #153](https://github.com/mxswat/mx-division-builds/issues/153) nezaketen açık bırakıldı, artık engelleyici değil.
+
 ## 9.1.5.19 düzeltmelerinin gerçek Windows'ta doğrulanması (2026-11-04)
 
 - Kullanıcının bağlı Windows bilgisayarında (v9.1.5.20, kurulu/installer sürüm) computer-use (ekran görüntüsü + tıklama) ile üç senaryo manuel olarak test edildi:
