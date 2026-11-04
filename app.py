@@ -145,7 +145,7 @@ import diagnostics_center
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.1.5.28"
+APP_VERSION = "9.1.5.29"
 # "Bu oturumda ne kazandın?" özeti için kaba tahmin: bir eşyayı elle inceleyip
 # build'e göre karar vermenin (istatistikleri okuma + karşılaştırma) ortalama
 # süresi, saniye. Gerçek bir ölçüm değil — yalnızca arayüzde "tahmini" etiketiyle
@@ -217,6 +217,7 @@ DEFAULTS = {"scan_mode": "hotkey", "auto_interval_ms": 700, "auto_record": True,
             "meta_hidden": [], "tasks_sync": True, "auto_reset_times": True,
             "wiki_sync": True, "wiki_last_try": 0, "only_game_active": True, "scan_source": "screen"}
 AUTO_STABLE, AUTO_CHANGE, DEDUP_SECONDS, UPGRADE_MARGIN = 4, 8, 30, 3
+LOW_CONF_WARN = 0.68   # canlı çeviri: bu eşiğin altındaki OCR güveni "şüpheli çeviri" uyarısı verir
 
 if not CFG_PATH.exists() and (BUNDLE / "builds.json").exists():
     shutil.copy(BUNDLE / "builds.json", CFG_PATH)
@@ -1878,13 +1879,17 @@ class App:
         st = self.cfg["settings"]
         if not getattr(self, "lt_cache", None): self.lt_cache = livetranslate.Cache(BASE / "translate_cache.json", size=1500)
         if st.get("tr_engine", "local") == "ai":
-            eng = livetranslate.AIMT(self.ai_complete)
+            # AI motoru herhangi bir desteklenen dile çevirebilir: hedef, uygulamanın
+            # seçili arayüz dili (bkz. livetranslate.LANGUAGE_NAMES).
+            lang = i18n.current_language()
+            eng = livetranslate.AIMT(self.ai_complete, target_lang=lang)
         else:
             if not livetranslate.LocalMT.available(): raise RuntimeError(t("lt.no_runtime"))
             if not getattr(self, "_lt_local", None): self._lt_local = livetranslate.LocalMT(self.lt_model_dir())
             if not self._lt_local.installed(): raise RuntimeError(t("lt.need_model"))
             eng = self._lt_local
-        tr = livetranslate.Translator(eng, self.lt_glossary(), self.lt_cache)
+            lang = "tr"   # yerel model tek dil çifti (EN→TR); arayüz dilinden bağımsız
+        tr = livetranslate.Translator(eng, self.lt_glossary(), self.lt_cache, target_lang=lang)
         if st.get("task_live", True): tr.set_memory(getattr(self, "task_mem", None))
         return tr
 
@@ -2344,11 +2349,19 @@ class App:
                 raise RuntimeError(t("lt.validation_failed"))
             if skipped:
                 log.info("Live translation: displayed %d blocks, rejected %d unsafe blocks", len(pairs), skipped)
+            # Bulanık/karanlık ekranda OCR bazı harfleri yanlış okuyup modele gramer açısından
+            # tutarlı ama anlamca hatalı bir çeviri ürettirebilir — kullanıcı bunu fark edemez.
+            # OCR'ın kendi güven skoru düşükse (blocks_from_lines zaten <0.5'i eliyor; burada
+            # "şüpheli ama elenmemiş" aralığı yakalanır) durum satırında ayrıca uyarılır.
+            low_conf = any(len(b) > 2 and b[2] < LOW_CONF_WARN for b, tr in zip(blocks, out) if isinstance(tr, str) and tr.strip())
+            if low_conf:
+                log.info("Live translation: low OCR confidence in at least one block (<%.2f)", LOW_CONF_WARN)
             def deliver():
                 self._lt_last_sig = sig
                 self._lt_retry_at, self._lt_failures = 0.0, 0
                 self._lt_show(pairs, area, ms)
                 if skipped: self._lt_status(t("lt.partial", n=len(pairs), skipped=skipped), "warning")
+                elif low_conf: self._lt_status(t("lt.low_conf", n=len(pairs), ms=ms), "warning")
             self._post_translation(token, deliver)
             if self._translation_jobs.is_current(token):
                 try: self._task_seen(lines, translator)
@@ -2586,11 +2599,17 @@ class App:
         self.lt_dl_btn = ttk.Button(r1, text="⬇ " + t("lt.download"), command=self.lt_download); self.lt_dl_btn.pack(side="left")
         self.lt_pb = ttk.Progressbar(r1, length=180, mode="determinate"); self.lt_pb.pack(side="left", padx=8)
         ttk.Label(eb, text=t("lt.e_local_hint"), foreground=PAL["muted"], wraplength=880, justify="left").pack(anchor="w", padx=28)
+        cur_lang = i18n.current_language()
+        if cur_lang != "tr":          # yerel model tek dil çifti (EN→TR); başka arayüz dilinde bunu açıkça belirt
+            ttk.Label(eb, text="⚠ " + t("lt.e_local_tr_only"), foreground=PAL["warning"], wraplength=880,
+                      justify="left").pack(anchor="w", padx=28, pady=(0, 4))
         r2 = ttk.Frame(eb); r2.pack(fill="x", padx=8, pady=(8, 2))
         ttk.Radiobutton(r2, text=t("lt.e_ai"), value="ai", variable=self.lt_eng, command=eng_set).pack(side="left")
         prov = st.get("ai_provider", "builtin")
         ttk.Label(r2, text=t("lt.ai_now", p=provider_label(prov if prov in PROVIDER_KEYS else "builtin")), foreground=PAL["muted"]).pack(side="left", padx=10)
-        ttk.Label(eb, text=t("lt.e_ai_hint"), foreground=PAL["muted"], wraplength=880, justify="left").pack(anchor="w", padx=28, pady=(0, 8))
+        ttk.Label(eb, text=t("lt.e_ai_hint"), foreground=PAL["muted"], wraplength=880, justify="left").pack(anchor="w", padx=28, pady=(0, 2))
+        ttk.Label(eb, text=t("lt.ai_quality_hint"), foreground=PAL["muted"], wraplength=880, justify="left").pack(anchor="w", padx=28, pady=(0, 2))
+        ttk.Label(eb, text="🎯 " + t("lt.target", lang=i18n.language_name(cur_lang)), foreground=PAL["info"]).pack(anchor="w", padx=28, pady=(0, 8))
         self.lt_privacy_lbl = ttk.Label(eb, text=self._translation_privacy(), foreground=PAL["info"], wraplength=880, justify="left")
         self.lt_privacy_lbl.pack(anchor="w", padx=12, pady=(0, 8))
         # alan

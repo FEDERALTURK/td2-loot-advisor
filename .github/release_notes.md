@@ -452,3 +452,10 @@ Bu dosyalar GitHub Actions'ta otomatik derlendi; kurulum dosyası Windows'ta ses
 - Yeni: **Kaivolt** — sade ve modern yeni varsayılan tema (lacivert zemin, elektrik moru vurgu, düz hizalı kenar çubuğu, yumuşak sayfa geçişi); 17 eski tema de Ayarlar → Görünüm'de seçilebilir kalıyor.
 - Yeni: **"Hakkında"** sekmesi (Diğer grubu) — programın ne yaptığı/yapmadığı ve ekrandan başka hiçbir şeye dokunmadığı; açık kaynak (MIT) bilgisi ve GitHub bağlantısı; kurucu stüdyo **Kaivolt**'un tanıtımı.
 
+## 9.1.5.29
+
+- **Canlı çeviri artık yalnızca Türkçe değil, arayüzün 10 dilinin herhangi birine çevirebiliyor** — Asistan sekmesinde bir yapay zekâ sağlayıcısı seçiliyken, çeviri hedefi otomatik olarak programın seçili arayüz diline göre ayarlanır. (Yerel/çevrimdışı motor halen tek dil çifti olduğu için sadece İngilizce→Türkçe çalışır; Çeviri sekmesinde bu artık açıkça belirtiliyor.)
+- **Yeni: düşük OCR güveni uyarısı.** Ekran bulanık/karanlıksa ve OCR bir kelimeyi yanlış okumuşsa, çeviri artık durum satırında "şüpheli çeviri" olarak işaretleniyor — gramer açısından akıcı ama anlamca hatalı olabilecek bir çeviriyi fark etmen için.
+- Çeviri sekmesine, AI motorunun çeviri kalitesinin Asistan sekmesinde seçtiğin dil modeline bağlı olduğuna dair bir not eklendi.
+- Küçük düzeltme: hedef dile göre önbellek ayrımı eklendi (farklı diller artık birbirinin çeviri önbelleğini kullanamaz).
+

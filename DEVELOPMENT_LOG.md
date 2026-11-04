@@ -2,6 +2,52 @@
 
 Önemli kararların ve sürümlerin kısa, kronolojik özeti. Tam ayrıntı için `git log` ve `.github/release_notes.md`.
 
+## Canlı çeviri: çoklu dil, güven uyarısı, önbellek düzeltmesi (9.1.5.29, 2026-11-04)
+
+- Kullanıcı isteği: "canlı çeviri daha iyi çalışması için ne yapılmalı" sorusuna yanıt olarak belirlenen 4
+  iyileştirmenin tamamı ("hepsini yapalım").
+- **Kök sorun**: `livetranslate.AIMT` (yapay zekâ motoru) her zaman sabit bir İngilizce→Türkçe `SYSTEM` yönergesi
+  kullanıyordu — uygulamanın seçili arayüz dili (10 dil: tr/en/de/es/fr/it/nl/pl/pt/ru) ne olursa olsun. Yani "AI"
+  motoru seçili olsa da canlı çeviri fiilen her zaman Türkçeye çeviriyordu.
+  - Düzeltme: `AIMT.SYSTEM_TMPL` (biçim dizesi) + `LANGUAGE_NAMES` eklendi; `AIMT(complete, target_lang=...)` artık
+    hedef dile göre yönergeyi diziyor. `app.py`'nin `lt_translator()` metodu, AI motoru seçiliyken
+    `i18n.current_language()`'ı hedef dil olarak geçiriyor. Yerel model (OPUS-MT) tek dil çifti (EN→TR) olduğu
+    için o motor seçiliyken hedef her zaman `"tr"` sabit kalıyor — bu artık `build_translate()`'te açıkça
+    belirtiliyor (`lt.e_local_tr_only` uyarısı, arayüz dili tr değilken gösterilir).
+  - Geriye dönük uyumluluk: `AIMT.SYSTEM` sınıf özelliği (örnek oluşturulmadan erişilen eski kod/testler için)
+    Türkçe varsayılanla korunuyor; her örnek kendi `self.SYSTEM`'ini hedef diline göre kuruyor.
+  - Türkçeye özel son-işleme (`UI_TR` sözlük eşleşmesi, `WORD_FIX` regex düzeltmeleri) ve topluluk-onaylı düzeltme
+    hafızası (`tasks_live.Memory`, sunucu tarafı tamamen Türkçe şema) artık yalnızca `target_lang == "tr"` iken
+    devreye giriyor — başka bir hedef dilde bu Türkçeye özel kurallar artık çeviriyi bozmuyor. Bu mekanizmaların
+    tüm dillere genelleştirilmesi (sunucu şeması/`server/worker.js` değişikliği gerektirir) bu turun kapsamı
+    dışında bırakıldı.
+  - Yan düzeltme: `Translator.ck` (önbellek anahtarı) hedef dili içermiyordu — tek hedef dil varken sorun
+    yaratmıyordu ama çoklu hedef dil mümkün olunca diller arası önbellek çakışmasına yol açacaktı; anahtara
+    `target_lang` eklendi.
+- **OCR güven uyarısı**: `blocks_from_lines()` zaten her blok için 0-1 arası bir güven skoru döndürüyordu
+  (`conf < 0.5` olanlar zaten eleniyor) ama `_lt_run()` bunu hiç kullanmıyordu — bulanık/karanlık bir ekranda
+  OCR bazı harfleri yanlış okursa model gramer açısından tutarlı ama **anlamca hatalı** bir çeviri üretebilir ve
+  kullanıcı bunu fark edemez (ansiklopedi açıklamalarındaki önceki kesik-metin hatasına benzer bir sınıf).
+  - Düzeltme: yeni `LOW_CONF_WARN = 0.68` eşiği; `_lt_run()` içinde gösterilen her blok için güven kontrol
+    edilip eşiğin altındaysa durum satırında "şüpheli çeviri" uyarısı (`lt.low_conf`) gösteriliyor. `pairs`
+    tuple şeklini değiştirmeden (7+ yerde kullanıldığı için) ayrı bir `low_conf` boole değişkeniyle yapıldı.
+- **UI**: Çeviri sekmesine (`build_translate()`) üç yeni bilgi satırı eklendi: yerel motorun yalnız Türkçe
+  ürettiğine dair uyarı (arayüz dili ≠ tr ise), hedef dilin adı (`lt.target`), ve AI motorunun kalitesinin
+  Asistan sekmesinde seçilen modele bağlı olduğuna dair not (`lt.ai_quality_hint`).
+- i18n: `lt.low_conf`, `lt.e_local_tr_only`, `lt.target`, `lt.ai_quality_hint` — 10 dilin hepsine eklendi.
+- Regresyon bulundu ve düzeltildi: `tests/test_app_stability.py`'deki iki test `blocks_from_lines`'ı 2'li tuple
+  `(metin, kutu)` ile taklit ediyordu (gerçek fonksiyon her zaman 3'lü `(metin, kutu, güven)` döndürür); yeni
+  `low_conf` hesaplaması `b[2]`'ye doğrudan erişince bu testlerde `IndexError` → sessizce `_lt_failure`'a
+  düşüyordu. `len(b) > 2` koruması eklenerek düzeltildi.
+- Doğrulama: `ast.parse` (app.py, livetranslate.py) temiz; 10 dilin JSON'u geçerli ve `i18n.set_language` + `t()`
+  ile tüm yeni anahtarlar biçimlendirmeyle test edildi; `tests/test_livetranslate.py` (29/29), `tests/
+  test_translation_reliability.py` (9/9), `tests/test_translation_controls.py` (5/5), `tests/
+  test_app_stability.py` (17/17) ve `tests/test_stability_widgets.py` (xvfb altında, 15 sayfa/6 sekme, callback
+  hatası yok) PASS. (Bu ortamda `tkinter` yalnız `python3.12` + `python3-tk` ile vardı; testler ondan çalıştırıldı.)
+- Kapsam dışı bırakılan: topluluk düzeltme/öneri sisteminin (`tasks_live.suggest`) sunucu tarafının tüm dillere
+  genelleştirilmesi (büyük D1 şema değişikliği gerektirir); mevcut `"lt.partial"` anahtarının 10 dil dosyasının
+  hiçbirinde bulunmaması (önceden var olan, bu turla ilgisiz bir boşluk — not düşüldü, düzeltilmedi).
+
 ## Sürüm geçmişi penceresi: herhangi bir sürümü kurma + bilinen sorunlar (2026-11-04)
 
 - Kullanıcı isteği: kullanıcıların programın içinden istedikleri bir sürümü kurabilecekleri bir alan ve

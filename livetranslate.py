@@ -329,20 +329,45 @@ class LocalMT:
             return [self.spt.decode(r.hypotheses[0]) for r in res]
 
 
-class AIMT:
-    """Büyük dil modeliyle çeviri. complete(system, user) → metin (uygulama sağlar)."""
-    name = "ai"
-    SYSTEM = ("You translate on-screen text from the video game Tom Clancy's The Division 2 from English into natural, "
-              "fluent Turkish for a player. Keep tokens like ZQ0, ZQ1 exactly as they are (they are proper names); add Turkish "
-              "suffixes after them with an apostrophe when grammar needs it (ZQ0'ı). Preserve each pronoun's referent, "
-              "person, grammatical role and singular/plural meaning. Translate pronouns naturally into Turkish; do not leave "
-              "English pronouns, change who they refer to, or change singular they into a gendered character. Turkish may "
-              "omit a pronoun only when the referent and role remain unambiguous. Keep numbers, percentages and units. "
-              "Use the informal 'sen' form for instructions. Return ONLY a JSON array of strings, one translation per input "
-              "line, in the same order, nothing else.")
+# Yapay zekâ motorunun çevirebileceği hedef diller (uygulamanın 10 arayüz dili).
+# Yerel (OPUS-MT) motor bunun dışında: her zaman sabit tek bir çift (EN→TR) kullanır.
+LANGUAGE_NAMES = {
+    "tr": "Turkish", "en": "English", "de": "German", "es": "Spanish", "fr": "French",
+    "it": "Italian", "nl": "Dutch", "pl": "Polish", "pt": "Portuguese", "ru": "Russian",
+}
 
-    def __init__(self, complete):
+
+class AIMT:
+    """Büyük dil modeliyle çeviri. complete(system, user) → metin (uygulama sağlar).
+
+    Hedef dil `target_lang` ile seçilir (varsayılan Türkçe); uygulamanın seçili arayüz
+    diline göre `app.py` içinden ayarlanır. Yerel motorun aksine herhangi bir desteklenen
+    dile çevirebilir — tek kısıtı, kullanıcının Asistan sekmesinde çalışan bir yapay zekâ
+    sağlayıcısı olması.
+    """
+    name = "ai"
+    SYSTEM_TMPL = (
+        "You translate on-screen text from the video game Tom Clancy's The Division 2 from English into natural, "
+        "fluent {lang} for a player. Keep tokens like ZQ0, ZQ1 exactly as they are (they are proper names); if {lang} "
+        "grammar needs a suffix or marker attached to a name, attach it the way {lang} normally writes that attached "
+        "to a proper noun. Preserve each pronoun's referent, person, grammatical role and singular/plural meaning. "
+        "Translate pronouns naturally into {lang}; do not leave English pronouns, change who they refer to, or change "
+        "singular they into a gendered character. {lang} may omit a pronoun only when the referent and role remain "
+        "unambiguous and the language allows it. Keep numbers, percentages and units. Use an informal, friendly "
+        "register appropriate for a video game, the way one player would speak to another{extra}. Return ONLY a JSON "
+        "array of strings, one translation per input line, in the same order, nothing else."
+    )
+    # Geriye dönük uyumluluk: sınıf düzeyinde varsayılan (Türkçe) yönerge metni — örnek
+    # oluşturulmadan `AIMT.SYSTEM`'e bakan eski kod/testler için. Her örnek kendi hedef
+    # diline göre bunu `self.SYSTEM` ile üzerine yazar (bkz. __init__).
+    SYSTEM = SYSTEM_TMPL.format(lang=LANGUAGE_NAMES["tr"], extra=" (in Turkish, the informal 'sen' form)")
+
+    def __init__(self, complete, target_lang="tr"):
         self.complete = complete
+        self.target_lang = target_lang if target_lang in LANGUAGE_NAMES else "tr"
+        lang = LANGUAGE_NAMES[self.target_lang]
+        extra = " (in Turkish, the informal 'sen' form)" if self.target_lang == "tr" else ""
+        self.SYSTEM = self.SYSTEM_TMPL.format(lang=lang, extra=extra)
 
     def translate(self, texts, pronoun_hints=None):
         payload = json.dumps(texts, ensure_ascii=False)
@@ -367,18 +392,31 @@ class AIMT:
 
 
 class Translator:
-    """Maskeleme + cümlelere bölme + önbellek + motor."""
+    """Maskeleme + cümlelere bölme + önbellek + motor.
 
-    def __init__(self, engine, glossary, cache):
+    `target_lang`: çıktının gideceği dil. Yerel motor için her zaman sabit "tr"dir
+    (model tek dil çifti); AI motoru için uygulamanın seçili arayüz dilinden gelir.
+    Türkçeye özgü sabit düzeltmeler (`UI_TR`, `WORD_FIX`) ve topluluk hafızası
+    (`tasks_live.Memory` — yalnızca İngilizce→Türkçe çift tutuyor) sadece hedef dil
+    Türkçe iken uygulanır; başka bir dile çeviride devre dışı kalır.
+    """
+
+    def __init__(self, engine, glossary, cache, target_lang="tr"):
         self.engine, self.glossary, self.cache = engine, glossary, cache
-        self.ck = engine.name + "@4"           # ad sözlüğü ve zamir/bağlam kuralları değişti; eski çıktılar yenilenir
+        self.target_lang = target_lang or "tr"
+        # Önbellek anahtarına hedef dil eklendi: aksi halde dil değişince eski
+        # (başka dile ait) çeviriler önbellekten yanlışlıkla geri dönerdi.
+        self.ck = engine.name + "@4:" + self.target_lang
         self.memory = None                     # topluluk görevleri (tasks_live.Memory): bilinen satırın doğrulanmış Türkçesi
         self.memory_hits = 0
 
     def set_memory(self, memory):
-        """Hafıza değişince önbellek anahtarı da değişir (düzeltilmiş çeviri eski önbellekten gelmesin)."""
-        self.memory = memory if memory is not None and len(memory) else None
-        self.ck = self.engine.name + "@4" + (":" + getattr(memory, "version", "") if self.memory else "")
+        """Hafıza değişince önbellek anahtarı da değişir (düzeltilmiş çeviri eski önbellekten gelmesin).
+
+        Hafıza yalnızca Türkçe karşılık tutuyor; başka bir hedef dile çeviride göz ardı edilir.
+        """
+        self.memory = memory if memory is not None and len(memory) and self.target_lang == "tr" else None
+        self.ck = self.engine.name + "@4:" + self.target_lang + (":" + getattr(memory, "version", "") if self.memory else "")
 
     def translate(self, texts, allow_partial=False):
         self.last_errors = {}
@@ -401,7 +439,7 @@ class Translator:
                         continue
                     counters = COUNTER_RE.findall(body)            # "00/01" ilerleme sayaçları cümleden çıkarılır, sona eklenir
                     if counters: body = " ".join(COUNTER_RE.sub(" ", body).split())
-                    fixed = UI_TR.get(body.strip().lower())
+                    fixed = UI_TR.get(body.strip().lower()) if self.target_lang == "tr" else None
                     if not fixed and self.memory is not None:
                         fixed = self.memory.get(body)
                         if fixed: self.memory_hits += 1
@@ -442,7 +480,8 @@ class Translator:
                         continue
                     raise RuntimeError("Translation changed a number; retry the text")
                 r = re.sub(r"\s*⁇\s*", " ", self.glossary.unmask(r, found)).strip()
-                for pat, rep in WORD_FIX: r = re.sub(pat, rep, r)
+                if self.target_lang == "tr":
+                    for pat, rep in WORD_FIX: r = re.sub(pat, rep, r)
                 if tail: r = r + " " + tail
                 if r[:1].islower(): r = r[:1].upper() + r[1:]
                 r = re.sub(r"%\s+(\d)", r"%\1", r)              # "% 30" → "%30"
