@@ -18,6 +18,13 @@ Son güncelleme: bu dosyayı güncelleyen oturumun yaptığı iş — 9.1.5.19 y
    (görünürlük arttıktan sonra, ücretsiz) mu, ücretli bir sağlayıcıya (SignPath ücretli abonelik / Azure Trusted
    Signing / geleneksel OV sertifika) mı geçilsin, yoksa şimdilik imzasız mı devam edilsin. Ayrıntı: `ROADMAP.md`.
 
+3. ✅ **Ansiklopedi: 30 kesik açıklama düzeltildi (2026-11-04).** Kullanıcının "13 yarım ansiklopedi çevirisi"
+   isteği araştırılınca asıl kapsamın 30 isim olduğu ortaya çıktı (kök neden: `wiki_exotics.json`/
+   `wiki_talent_desc.json`'da 400/~190 karakterde kesik kayıtlar). Ayrıntı: `DEVELOPMENT_LOG.md`, `BUGS.md`.
+   Yan etki olarak `meta/descriptions_i18n_2.json` ilk kez oluşturuldu (önceden yalnızca ayrı bir dalda vardı,
+   `main`'de yoktu) — bir sonraki oturum bunun farkında olmalı, `claude/descriptions-second-shard` dalıyla
+   çakışma olabilir, merge edilirken dikkat edilmeli.
+
 ## Bir sonraki oturumun yapabileceği, teknik olarak hazır işler
 
 - ✅ **Gerçek Windows testi yapıldı (2026-11-04).** Bağlı Windows bilgisayarında (win32, `mcp__remote-devices__get_device_info` ile doğrulandı, `device_bash`/shell yok ama computer-use var) uygulama v9.1.5.20 olarak açıldı ve üç senaryo tıklanarak doğrulandı: Ansiklopedi "Wiki'de aç" düğmesi, Ayarlar → Sürüm geçmişi, Tanılama Merkezi → "Sorunları tara" (hata bildirimi yolu). Üçünde de çökme olmadı. Ayrıntı: `DEVELOPMENT_LOG.md`, `BUGS.md` #5 (artık ✅). Küçük, ayrı bir gözlem: Sürüm geçmişi penceresinin içerik listesi boş kaldı — çökmeyle ilgisiz, kök nedeni henüz araştırılmadı.
