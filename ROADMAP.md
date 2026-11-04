@@ -6,14 +6,33 @@ Bu dosya her gün güncellenir (bkz. en alt — otomatik günlük görev). Ayrı
 
 | Bileşen | Durum |
 |---|---|
-| Windows masaüstü uygulaması | Canlı, `v9.1.5.20` (hesap panelinde "Telefon eşleştir" düğmesi eklendi). Fazlı bir yol haritası yok — sürekli Windows render/kararlılık/tanılama düzeltme döngüsü (bkz. `DEVELOPMENT_LOG.md`). |
-| Mobil companion (Flutter) | **Faz 2 tamamlandı ve canlı; Faz 3'te bulut eşleştirmesi/build senkronu eklendi, Windows PC'de `flutter analyze`/`test` ile doğrulandı (0 sorun).** Gerçek cihaz/Play doğrulaması ve push-token kaydı (bkz. aşağıda) hâlâ bekliyor. |
+| Windows masaüstü uygulaması | Canlı, `v9.1.5.28` (2026-11-04'te 7 yeni sürüm: sürüm geçmişinden herhangi bir sürümü kurma + bilinen sorunlar paneli, 3 sağlamlaştırma düzeltmesi, oturum özeti, Build Karşılaştır, "Bu karar yanlıştı" geri bildirimi, Kaivolt teması + Hakkında sekmesi). Fazlı bir yol haritası yok — sürekli Windows render/kararlılık/özellik döngüsü (bkz. `DEVELOPMENT_LOG.md`); `v9.1.5.25`-`v9.1.5.28`'deki yeni ekranların çoğu gerçek Windows'ta görsel olarak henüz doğrulanmadı (bkz. `BUGS.md` #11-14). |
+| Mobil companion (Flutter) | **Faz 3 devam ediyor: push-token kaydı kodu yazıldı** (`firebase_core`/`firebase_messaging`, yeni `push_registration.dart`, Android `POST_NOTIFICATIONS` izni), Firebase Android uygulaması kaydedildi ve `google-services.json` kullanıcının PC'sine yerleştirildi (depoya girmiyor, `.gitignore`'da). **Kalan tek adım kullanıcı PC'sinde**: gradle `google-services` satırının yorumunu kaldırmak + `flutter pub get`/build ile gerçek cihazda doğrulamak (bkz. `docs/push_notifications_setup.md`). O adım tamamlanana kadar Faz 3 bitmiş sayılmaz; gerçek cihaz/Play doğrulaması (Faz 4) hâlâ bekliyor. |
 | Topluluk sunucusu (Cloudflare Worker) | Canlı. Mobil uçlar (eşleştirme, build senkronu, cihaz listesi/iptali, hesap silme) production'da. |
 | Lisans/telif (mx-division-builds) | **Çözüldü (2026-11-04, kullanıcı kararı).** `recal_advisor` ücretsiz yapıldı — artık ticari bir özelliğin arkasında değil, gri alan ortadan kalktı. [issue #153](https://github.com/mxswat/mx-division-builds/issues/153) kibarlık/şeffaflık amacıyla açık bırakıldı, yanıt gelirse not düşülecek ama artık engelleyici değil. |
 | Kod imzalama (SignPath) | **Reddedildi (2026-11-03).** Foundation (ücretsiz OSS) programı, GitHub yıldız/fork/katkıcı sayısı, dış makale/referans ve kurumsal destek gibi "kamuya görünürlük" sinyalleri yeterli olmadığı için onaylanmadı — proje kalitesiyle ilgisiz, tamamen görünürlük eşiği meselesi. Görünürlük arttıkça yeniden başvurulabilir; alternatif olarak ücretli SignPath aboneliği veya başka bir imzalama sağlayıcısı (ör. Azure Trusted Signing ~$9.99/ay — ABD/Kanada kökenli kuruluş şartı bildirilen yorumlar var, Türkiye'den uygunluk doğrulanmalı) değerlendirilebilir. |
 | Web sitesi (`web/`) | **Yayında (2026-11-03):** https://td2-loot-advisor.pages.dev — Cloudflare Pages'e GitHub bağlantısıyla yayınlandı, `td2-stats` Worker'ı da Cloudflare Workers Builds ile `main`'e bağlandı (otomatik CI/CD). Taktik HUD görsel kimliği eklendi. Geriye kalan: Gumroad ürünü (kullanıcı tarafı). Bkz. aşağıda ve `web/README.md`. |
 
-## Şu an aktif: Web sitesi (`web/`) — YAYINDA, HUD görsel kimliği eklendi
+## Şu an aktif: Masaüstü özellik/sağlamlaştırma döngüsü + mobil push bildirimi kaydı (Faz 3'ün son parçası)
+
+Bugün (2026-11-04) iki paralel iş hattı ilerledi.
+
+**Masaüstü (Windows, Python/Tkinter) — `v9.1.5.21` → `v9.1.5.28`:**
+- `v9.1.5.22`: Sürüm geçmişi penceresinden herhangi bir sürümü kurma + "Bilinen sorunlar" paneli.
+- `v9.1.5.23`: Az önce eklenen sürüm geçmişi penceresi, var olmayan bir palet anahtarına (`PAL["panel"]`) başvurduğu için sessizce açılmıyordu — düzeltildi (`PAL["surface"]`).
+- `v9.1.5.24`: 3 küçük sağlamlaştırma hatası kapatıldı — `SafeTrail.cv.lower()` TclError'ı (`td2app/ui/fx.py`, `tk.Misc.lower(self.cv)` ile düzeltildi), `_install_native_cursor`'daki `winfo_id` çağrısına ek `hasattr()` güvencesi, ve `self.root.report_callback_exception` ataması (artık hiçbir Tk callback hatası sessizce kaybolmuyor, `app.log`'a tam traceback ile yazılıyor). **Not**: bu düzeltmelerden ilki (`SafeTrail.cv.lower()`), `td2-loot-advisor-reports` [issue #4](https://github.com/federalturk/td2-loot-advisor-reports/issues/4)'te (hâlâ açık) bahsedilen üç iç içe hatadan biriyle birebir örtüşüyor — kod düzeyinde artık kapanmış görünüyor ama gerçek Windows/Tk ortamında yeniden üretilip doğrulanmadı, bu yüzden issue kasıtlı olarak kapatılmadı.
+- `v9.1.5.25`: "Bu oturumda ne kazandın?" oturum özeti penceresi (tahmini kazanılan süre kasıtlı kaba bir tahmin).
+- `v9.1.5.26`: "Build Karşılaştır" ekranı — iki build'i yan yana karşılaştırma (ortak eşya/geçiş maliyeti hesabı kaba bir yaklaşım).
+- `v9.1.5.27`: "Bu karar yanlıştı" geri bildirimi — yanlış SAKLA/KIR kararını yerel bir kayda (`verdict_feedback.json`) işaretleme; karar kurallarını (ağırlık/eşik) otomatik değiştirmiyor.
+- `v9.1.5.28`: Yeni "kaivolt" teması (`ui_theme.py`) + yeni "Hakkında" sekmesi (`app.py`).
+- Hepsi `python3 -m py_compile`/`ast.parse` ile sözdizimi ve 10 dilin tamamında `i18n.missing_keys()` ile çeviri anahtarı kontrolünden geçti, ama bu ekransız konteynerde **hiçbiri gerçek bir Tk penceresiyle görsel olarak kontrol edilmedi** (bkz. `BUGS.md` #11-14) — kullanıcının Windows'ta gözle kontrolü hâlâ bekleniyor.
+
+**Mobil (Flutter) — push bildirimi kaydı, `docs/mobile_companion_roadmap.md` Faz 3'ün son açık parçası:**
+- `firebase_core`/`firebase_messaging` bağımlılığı eklendi; yeni `mobile/lib/services/push_registration.dart` (bildirim izni isteme + token alma, Firebase yapılandırılmamışsa sessizce no-op) `cloud_link.dart`'a bağlandı — eşleştirme sonrası ve her açılışta (zaten eşleşmişse) token'ı `PUT /v1/mobile/push-tokens/{id}`'ye kaydediyor, `onTokenRefresh`'te otomatik yeniliyor, eşleşme kaldırılınca sunucudaki kaydı siliyor. Android manifestine `POST_NOTIFICATIONS` izni eklendi.
+- Firebase konsolunda Android uygulaması (`com.federalturk.td2companion`) kaydedildi; `google-services.json` kullanıcının PC'sindeki depo kopyasına (`mobile/android/app/`) yerleştirildi — bu dosya `.gitignore`'da, bu depoya hiç girmiyor.
+- **Kalan tek adım, kullanıcı PC'sinde (bu ortamda Flutter SDK'sı ve Firebase konsol erişimi yok, tamamlanamaz)**: `mobile/android/app/build.gradle.kts`'teki `// id("com.google.gms.google-services")` satırının başındaki yorumu kaldırmak, ardından `flutter pub get` + gerçek cihazda/emülatörde derleme ile push akışını doğrulamak (tam adımlar: `docs/push_notifications_setup.md`). Bu adım tamamlanana kadar Faz 3 teknik olarak bitmiş sayılmaz; Faz 4 (gerçek cihaz/mağaza testi) başlayamaz.
+
+## Önceki tur: Web sitesi (`web/`) — YAYINDA, HUD görsel kimliği eklendi
 
 Kullanıcının "uygulama için özel bir web sayfası: hesap oluşturma, satın alma, güncel haberler, programlara
 bağlantılı olsun" isteğiyle: tanıtım (`index.html`), haberler (`news/` — `meta/news_feed.json` + The Division 3
@@ -187,3 +206,27 @@ başarıyla yüklendi, konsol hatası yok).
   edilemedi. Değişiklikler: `ROADMAP.md` (bu güncelleme) + `server/README.md` (bir talimat satırı) — uygulama
   kodu (`.py`/`mobile/`/`server/*.js`/`web/*.html`) değişmedi, test çalıştırılmadı (çalıştırılacak kod değişikliği
   yok).
+
+- **2026-11-04 (otomatik günlük durum güncellemesi — zamanlanmış görev):** Bu girdiyi yazan oturum **sadece durum
+  güncellemesi yaptı, kod/belge değişikliği YAPMADI** (yalnızca `ROADMAP.md` değişti). `git pull --rebase` ile
+  `main` çekildi: 34 commit, fast-forward, çakışma yok (zaten `origin/main` ile aynı noktada, rebase gerekmedi).
+  Son 24 saatte **49 commit** oldu — bunların büyük kısmı masaüstü özellik/sağlamlaştırma turu
+  (`v9.1.5.21` → `v9.1.5.28`, bkz. yukarıdaki "Şu an aktif"), bir mobil push-token kaydı turu, ve periyodik
+  "Feeds" botu commit'leri (`4d34949`, `030e90c`, `ccf18d0`, `d77d3bc`, `1015a0d` — otomatik veri senkronu,
+  inceleme gerektirmiyor). Bulgular: (1) ROADMAP.md hâlâ "şu an aktif" olarak web sitesi HUD çalışmasını
+  gösteriyordu, ama gerçek en son iş masaüstü özellik döngüsü ve mobil push-token kaydıydı — tablo ve "Şu an
+  aktif" bölümü buna göre güncellendi, eski web sitesi bölümü "Önceki tur" olarak yeniden adlandırıldı.
+  (2) `a2893d0` ("3 bilinen küçük sağlamlaştırma hatası") commit'i incelendi: `SafeTrail.cv.lower()` TclError
+  düzeltmesi, `td2-loot-advisor-reports` [issue #4](https://github.com/federalturk/td2-loot-advisor-reports/issues/4)
+  (GitHub'da hâlâ açık, doğrulandı) içindeki üç iç içe hatadan biriyle birebir örtüşüyor — kod artık düzeltilmiş
+  görünüyor ama gerçek Windows/Tk ortamında yeniden üretilip doğrulanmadığı için issue'yu **kapatmadım**, sadece
+  örtüşmeyi not düştüm (yukarıda). (3) Mobil push-token tarafı incelendi: Flutter kodu yazılmış, Firebase Android
+  uygulaması kaydedilmiş, `google-services.json` kullanıcının PC'sine yerleştirilmiş — ama `build.gradle.kts`'teki
+  `google-services` eklenti satırı hâlâ yorumlu ve `flutter pub get`/build hiç çalıştırılmamış; bu zaten
+  `docs/push_notifications_setup.md`'de kullanıcı için net yazılı tek kalan adım olarak duruyordu, ROADMAP'e de
+  yansıtıldı — yeni bir bulgu değil, doğrulandı. (4) GitHub kontrol edildi: `federalturk/td2-loot-advisor`'da 0
+  açık issue, 0 açık PR; `federalturk/td2-loot-advisor-reports`'ta yalnızca bilinen #4 açık, yeni bir şey yok.
+  (5) Büyük/riskli bir karar gerektiren **yeni** bir şey bulunmadı — mevcut bekleyen kullanıcı kararları (SignPath
+  yeniden başvuru/ücretli alternatif, Gumroad ürünü oluşturma, `archive/master-superseded-2026-11-03` ve
+  `deploy/worker-bundle-temp` dallarının temizliği) aynen duruyor, bu oturum hiçbirine dokunmadı. Değişen dosya:
+  yalnızca `ROADMAP.md`.
