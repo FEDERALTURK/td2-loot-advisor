@@ -442,3 +442,8 @@ Bu dosyalar GitHub Actions'ta otomatik derlendi; kurulum dosyası Windows'ta ses
 - Yeni: **Build Karşılaştır** ekranı (Build'ler sekmesi → "🆚 Karşılaştır") — iki build'i yan yana, yuva yuva tamamlanma durumuyla karşılaştırır; ortak set/marka/özel eşya/talent'leri ve hangi yuvaların aynı fiziksel eşyayla paylaşılabileceğini (tahmini) gösterir.
 - Hangi build'in tamamlanmaya daha yakın olduğu ve diğerine geçerken kaç yuva için farklı eşya gerekeceği (tahmini) özetleniyor.
 
+## 9.1.5.27
+
+- Yeni: **"Bu karar yanlıştı"** düğmesi (Panel) — program bir eşyayı SAKLA/DÜŞÜN/KIR olarak yanlış değerlendirdiyse doğrusunu işaretleyebilirsin; kayıt yerel olarak tutulur (Ayarlar → Tanılama Merkezi → "Yanlış karar bildirimlerim") ve istersen tek tıkla geliştiriciye de iletilebilir.
+- Bu özellik programın kurallarını kendiliğinden değiştirmez — amacı, build'indeki attribute/ağırlık ayarlarını kendi gözlemlerine göre ince ayar yapmana yardımcı olacak bir kayıt tutmaktır.
+

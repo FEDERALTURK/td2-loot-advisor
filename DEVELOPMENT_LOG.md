@@ -243,6 +243,31 @@ Bu seri, Linux/Xvfb testlerinin yakalayamadığı, yalnızca gerçek Windows + D
   ekransız konteynerde teyit edilemedi (bkz. `BUGS.md` #12). "Ortak kullanılabilir eşya" tahmini kasıtlı
   olarak kaba bir heuristik — gerçek roll kalitesini hesaba katmaz.
 
+### Yeni özellik: "Bu karar yanlıştı" geri bildirimi (2026-11-04, v9.1.5.27)
+
+- **Amaç**: Program bir eşyayı SAKLA/DÜŞÜN/KIR olarak yanlış değerlendirdiğinde kullanıcının bunu tek
+  tıkla işaretleyebilmesi — "yanlış karar verilerinin toplanıp kuralların iyileştirilmesi" proje hedefine
+  hizmet eder. **Bilerek açık netlik**: bu, programın kendi kurallarını (attribute ağırlıkları, eşikler)
+  otomatik değiştiren bir öğrenme sistemi DEĞİL — öyle bir altyapı yok ve proje talimatları "gerçek olmayan
+  işlevi tamamlanmış gibi sunma" diyor. Yaptığı: kullanıcının gözlemini yapılandırılmış biçimde yerel bir
+  kayda (ve istersen mevcut geri bildirim kanalıyla geliştiriciye) iletmek; build ince ayarı (attribute/
+  weight) kullanıcının kendi elinde kalıyor.
+- **Eklenenler** (`app.py`): `VERDICT_FEEDBACK_PATH`/`VERDICT_FEEDBACK_KEEP` sabitleri, `load_verdict_feedback`/
+  `save_verdict_feedback` (mevcut `safeio.write_json`/`read_json` — atomik yazım + `.bak` yedek — kullanılarak,
+  yeni bir dosya I/O şeması kurulmadı). `App.report_wrong_verdict()` — Panel'deki "⚠ Bu karar yanlıştı"
+  düğmesi (mevcut "⚑ Yanlış okundu" düğmesinin yanına, `self.last_shown`'daki son taranan eşya/karar/skor
+  üzerinden çalışır): doğru kararı seçtirir, isteğe bağlı not aldırır, "💾 Kaydet" (yalnız yerel) veya
+  "Kaydet ve gönder" (yerel + mevcut `open_feedback`/`reports.Store` akışına, `report_wrong`'daki gibi
+  `type="bug"` ile, yapılandırılmış JSON gövdeyle devam). `App.show_verdict_feedback_log()` — Tanılama
+  Merkezi'ne eklenen "⚠ Yanlış karar bildirimlerim" düğmesiyle açılan, kaydedilen tüm bildirimleri listeleyen
+  bir Treeview penceresi.
+- **Çeviri**: 10 dilin hepsine `vf.*` (btn, title, ask, note_label, need_pick, saved_local, save_local,
+  save_send, fb_title, fb_body, log_btn, log_title, log_empty, col_time/item/given/correct/build/note)
+  anahtarları eklendi — aynı satır bazlı yama kuralıyla, 10 dosyanın da geçerli JSON kaldığı ve
+  `i18n.missing_keys()` boş döndüğü doğrulandı.
+- **Doğrulama**: `python3 -I -m py_compile app.py` temiz geçti; gerçek Tk penceresinin görsel render'ı bu
+  ekransız konteynerde teyit edilemedi (bkz. `BUGS.md` #13).
+
 ## Bu depoya dair AI-destekli geliştirme oturumları (genel not)
 
 Bu proje, farklı AI oturumlarının (bu oturum dahil) ardışık olarak çalıştığı bir geliştirme modeliyle sürdürülüyor. Her oturum kendi kapsamını `HANDOFF.md`'de bırakmalı. Bu depoya ayrıca bir "ChatGPT" oturumunun yaptığı iş (Android companion app `mobile/` + bazı güvenilirlik/tanılama işi) bu Claude oturumunda doğrulanıp `main`'e entegre edildi (9.1.5.18 merge'i).

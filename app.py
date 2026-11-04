@@ -145,7 +145,7 @@ import diagnostics_center
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.1.5.26"
+APP_VERSION = "9.1.5.27"
 # "Bu oturumda ne kazandın?" özeti için kaba tahmin: bir eşyayı elle inceleyip
 # build'e göre karar vermenin (istatistikleri okuma + karşılaştırma) ortalama
 # süresi, saniye. Gerçek bir ölçüm değil — yalnızca arayüzde "tahmini" etiketiyle
@@ -170,6 +170,8 @@ DROPQ_PATH = BASE / "drop_queue.json"
 ACCOUNT_PATH = BASE / "account.dat"
 SESSIONS_PATH = BASE / "sessions.json"
 SCREEN_PATH = BASE / "screen_states.json"
+VERDICT_FEEDBACK_PATH = BASE / "verdict_feedback.json"  # "Bu karar yanlıştı" bildirimleri (yerel, son 300)
+VERDICT_FEEDBACK_KEEP = 300
 START_IN_TRAY = "--tray" in sys.argv
 ACC_ERRORS = {"offline", "timeout", "invalid", "used", "expired", "payment", "rate", "disabled", "forbidden", "noserver"}
 
@@ -319,6 +321,14 @@ def load_progress():
 
 def save_progress(p):
     safeio.write_json(PROG_PATH, p)
+
+def load_verdict_feedback():
+    """'Bu karar yanlıştı' bildirimlerinin yerel kaydı — kuralları (build attribute/weight) elle
+    iyileştirmek isteyen kullanıcı için; program bunları kendisi otomatik işlemez (bkz. ROADMAP)."""
+    return safeio.read_json(VERDICT_FEEDBACK_PATH, {}).get("items", [])
+
+def save_verdict_feedback(items):
+    safeio.write_json(VERDICT_FEEDBACK_PATH, {"v": 1, "items": items[-VERDICT_FEEDBACK_KEEP:]})
 
 def ensure_log():
     """Eski 5 sütunlu geçmişi 7 sütuna çevirir."""
@@ -4752,6 +4762,7 @@ class App:
         ttk.Button(tb, text="🤖 " + t("ai.ask_item"), command=self.ask_about_item).pack(side="left")
         ttk.Button(tb, text="👁 " + t("ai.vision_read"), command=self.vision_read).pack(side="left", padx=6)
         ttk.Button(tb, text="⚑ " + t("report.wrong"), command=self.report_wrong).pack(side="left")
+        ttk.Button(tb, text="⚠ " + t("vf.btn"), command=self.report_wrong_verdict).pack(side="left", padx=6)
         self.status = ttk.Label(left, foreground=PAL["muted"], wraplength=560, justify="left"); self.status.pack(anchor="w", pady=(4, 2))
 
         card = ttk.Frame(left, style="Card.TFrame", padding=(0, 0, 0, 12)); card.pack(fill="x", pady=(6, 8))
@@ -5767,6 +5778,87 @@ class App:
         self.open_feedback(prefill={"type": "bug", "title": t("fb.wrong_title", name=it.get("name") or "?"),
                                     "body": t("fb.wrong_body") + "\n\n" + json.dumps(read_as, ensure_ascii=False),
                                     "card": True})
+
+    def report_wrong_verdict(self):
+        """'Bu karar yanlıştı': eşya doğru okunmuş ama SAKLA/DÜŞÜN/KIR kararı kullanıcıya göre hatalıysa,
+        doğrusunu işaretlemesini sağlar. Program bunu kendiliğinden kurallara işleyen bir öğrenme sistemi
+        DEĞİLDİR (öyle bir altyapı yok) — yalnızca yerel bir kayıt tutar (Tanılama Merkezi'nden görülebilir,
+        bkz. show_verdict_feedback_log) ve istenirse mevcut geri bildirim kanalıyla geliştiriciye iletilir;
+        kullanıcı kendi build'indeki attribute/weight ayarlarını bu kayda bakarak elle ince ayar yapabilir."""
+        if not self.last_shown: return messagebox.showinfo(APP_NAME, t("ocr.need_card"))
+        text, item, verdict, res, note, debug, diff = self.last_shown
+        if not valid_item(item): return messagebox.showinfo(APP_NAME, t("ocr.need_card"))
+        w = tk.Toplevel(self.root); w.title(t("vf.title")); w.configure(bg=PAL["bg"]); w.transient(self.root)
+        w.geometry("460x400"); w.minsize(420, 360)
+        ttk.Label(w, text=t("vf.title"), style="Title.TLabel").pack(anchor="w", padx=16, pady=(14, 2))
+        sub = (item.get("name") or "?") + ("  ·  " + verdict_label(verdict) if verdict else "")
+        ttk.Label(w, text=sub, wraplength=420, justify="left", foreground=PAL["muted"]).pack(anchor="w", padx=16)
+        ttk.Label(w, text=t("vf.ask"), wraplength=420, justify="left").pack(anchor="w", padx=16, pady=(10, 4))
+        vv = tk.StringVar(value="")
+        opts = ttk.Frame(w); opts.pack(anchor="w", padx=16)
+        for v in ("KEEP", "CONSIDER", "DISMANTLE", "REVIEW"):
+            if v == verdict: continue
+            ttk.Radiobutton(opts, text=verdict_label(v), value=v, variable=vv).pack(anchor="w")
+        ttk.Label(w, text=t("vf.note_label")).pack(anchor="w", padx=16, pady=(10, 2))
+        note_box = tk.Text(w, height=4, wrap="word", bg=PAL["entry"], fg=PAL["fg"], insertbackground=PAL["fg"],
+                           relief="flat", font=(ui_theme.FONT, 10), padx=8, pady=6)
+        note_box.pack(fill="x", padx=16)
+        status = ttk.Label(w, text="", foreground=PAL["muted"]); status.pack(anchor="w", padx=16, pady=(8, 0))
+        bar = ttk.Frame(w); bar.pack(fill="x", padx=16, pady=(10, 14))
+
+        def record():
+            return {"time": time.strftime("%Y-%m-%d %H:%M:%S"),
+                    "item": {k: item.get(k) for k in ("name", "kind", "slot", "brand", "gear_set", "rarity", "attrs", "talents")},
+                    "given_verdict": verdict, "correct_verdict": vv.get() or None,
+                    "best_match": (res[0][1] if res else None), "best_pct": (res[0][0] if res else None),
+                    "build": (active_build(self.cfg) or {}).get("name"), "note": note_box.get("1.0", "end").strip(),
+                    "app_version": APP_VERSION}
+
+        def save_only():
+            if not vv.get(): return status.config(text=t("vf.need_pick"), foreground=PAL["danger"])
+            items = load_verdict_feedback(); items.append(record()); save_verdict_feedback(items)
+            status.config(text=t("vf.saved_local"), foreground=PAL["success"])
+            self.toast(t("vf.saved_local"))
+
+        def save_and_send():
+            if not vv.get(): return status.config(text=t("vf.need_pick"), foreground=PAL["danger"])
+            rec = record()
+            items = load_verdict_feedback(); items.append(rec); save_verdict_feedback(items)
+            w.destroy()
+            self.open_feedback(prefill={
+                "type": "bug",
+                "title": t("vf.fb_title", name=item.get("name") or "?", given=verdict_label(verdict),
+                           correct=verdict_label(rec["correct_verdict"])),
+                "body": t("vf.fb_body") + "\n\n" + json.dumps(rec, ensure_ascii=False, indent=1)})
+
+        ttk.Button(bar, text=t("vf.save_local"), command=save_only).pack(side="left")
+        ttk.Button(bar, text="📨 " + t("vf.save_send"), command=save_and_send, style="Accent.TButton").pack(side="right")
+        ttk.Button(bar, text=t("upd.close"), command=w.destroy).pack(side="right", padx=(0, 8))
+
+    def show_verdict_feedback_log(self):
+        """'Bu karar yanlıştı' ile yerel olarak kaydedilen bildirimleri listeler (bkz. report_wrong_verdict)."""
+        items = load_verdict_feedback()
+        w = tk.Toplevel(self.root); w.title(t("vf.log_title")); w.geometry("860x480"); w.minsize(640, 360)
+        w.transient(self.root); w.configure(bg=PAL["bg"])
+        top = ttk.Frame(w); top.pack(fill="x", padx=12, pady=(10, 4))
+        ttk.Label(top, text=t("vf.log_title") + f"  ({len(items)})", style="Title.TLabel").pack(side="left")
+        ttk.Button(top, text=t("upd.close"), command=w.destroy).pack(side="right")
+        cols = ("time", "item", "given", "correct", "build", "note")
+        tree = ttk.Treeview(w, columns=cols, show="headings", height=16)
+        heads = {"time": t("vf.col_time"), "item": t("vf.col_item"), "given": t("vf.col_given"),
+                 "correct": t("vf.col_correct"), "build": t("vf.col_build"), "note": t("vf.col_note")}
+        widths = {"time": 120, "item": 170, "given": 90, "correct": 90, "build": 150, "note": 220}
+        for c in cols:
+            tree.heading(c, text=heads[c]); tree.column(c, width=widths[c], anchor="w")
+        tree.pack(fill="both", expand=True, padx=12, pady=(4, 8))
+        for rec in reversed(items[-200:]):
+            tree.insert("", "end", values=(
+                rec.get("time", ""), (rec.get("item") or {}).get("name") or "?",
+                verdict_label(rec["given_verdict"]) if rec.get("given_verdict") else "—",
+                verdict_label(rec["correct_verdict"]) if rec.get("correct_verdict") else "—",
+                rec.get("build") or "—", (rec.get("note") or "")[:80]))
+        if not items:
+            ttk.Label(w, text=t("vf.log_empty"), foreground=PAL["muted"]).pack(anchor="w", padx=12, pady=(0, 10))
 
     def report_wrong_github(self):
         """(eski yol) Yanlış okunan kartı kaydet ve GitHub'da hata bildirimi aç."""
@@ -7912,6 +8004,7 @@ class App:
         ttk.Button(actions, text="🛠 Bulunan güvenli hataları düzelt", command=self.apply_detected_repairs).pack(side="left", padx=4)
         ttk.Button(actions, text="⚕ Sorun giderme sihirbazı", command=self.open_troubleshooter).pack(side="left", padx=4)
         ttk.Button(actions, text="🧾 GitHub raporu önizle", command=self.preview_github_report).pack(side="left", padx=4)
+        ttk.Button(actions, text="⚠ " + t("vf.log_btn"), command=self.show_verdict_feedback_log).pack(side="left", padx=4)
         ttk.Label(actions, text="Bu işlemler oyun dosyalarına, build/sandık verilerine veya GitHub'a otomatik olarak dokunmaz.",
                   foreground=PAL["muted"]).pack(side="left", padx=10)
         ttk.Label(parent, text="Tanılama verileri varsayılan olarak yalnızca bu bilgisayarda tutulur. GitHub raporu önce maskelenmiş Markdown taslağı olarak gösterilir.",
