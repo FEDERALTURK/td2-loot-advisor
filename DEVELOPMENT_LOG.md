@@ -14,8 +14,9 @@
 - Düzeltme: `server/package.json` (Wrangler `^4.0.0` devDependency) ve `npm install` ile üretilen
   `server/package-lock.json` eklendi. `node_modules/server` zaten `.gitignore`'daydı. `npx wrangler deploy --dry-run`
   yeniden çalıştırılıp aynı binding listesiyle başarılı olduğu doğrulandı (gerçek deploy yapılmadı — sadece dry-run).
-- Bir sonraki push/PR'da "Workers Builds: td2-stats" kontrolünün gerçekten geçtiğini GitHub'dan doğrulamak gerekiyor
-  (bu oturumda yalnızca yerel `--dry-run` ile doğrulanabildi, canlı CI çalıştırması bu commit push edilince görülecek).
+- **Doğrulandı (2026-11-04, aynı oturum):** Commit push edildikten sonra GitHub üzerinde "Workers Builds: td2-stats"
+  check'i izlendi ve `success` ile tamamlandı (önceki commit'lerde `failure` idi). "Cloudflare Pages" ve "server"
+  check'leri de `success`. Sorun tamamen çözüldü, CI'da canlı olarak doğrulandı.
 
 ## `recal_advisor` ücretsiz yapıldı — mx-division-builds lisans gri alanı çözüldü (2026-11-04)
 
