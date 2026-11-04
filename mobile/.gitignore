@@ -46,3 +46,8 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# Firebase yapılandırması (proje kimlik bilgisi — depoya girmez, bkz.
+# docs/push_notifications_setup.md)
+/android/app/google-services.json
+/ios/Runner/GoogleService-Info.plist

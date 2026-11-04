@@ -12,6 +12,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'cloud_api.dart';
+import 'push_registration.dart';
 
 const _kDeviceIdKey = 'cloud_device_id';
 const _kTokenKey = 'cloud_token';
@@ -23,6 +24,8 @@ class CloudLinkModel extends ChangeNotifier {
 
   SharedPreferences? _prefs;
   Timer? _poll;
+  StreamSubscription<String>? _pushTokenSub;
+  bool _pushListenerStarted = false;
 
   String? _deviceId;
   String? _token;
@@ -51,13 +54,45 @@ class CloudLinkModel extends ChangeNotifier {
     if (_token != null) {
       _startPolling();
       unawaited(refreshDashboard());
+      unawaited(registerPushTokenQuietly());
     }
   }
 
   @override
   void dispose() {
     _poll?.cancel();
+    _pushTokenSub?.cancel();
     super.dispose();
+  }
+
+  // ---------------------------------------------------------------- push bildirimi (Faz 4)
+  /// Bu cihazın FCM/APNs token'ını alır ve sunucuya kaydeder. En-iyi-gayret:
+  /// izin verilmemişse, Firebase henüz kurulu değilse (google-services.json
+  /// eksik, bkz. docs/push_notifications_setup.md (depo köküne göre)) veya istek başarısız
+  /// olursa sessizce hiçbir şey yapmaz — uygulamanın ana işlevi buna bağımlı
+  /// değil. Eşleştirme sonrası ve her uygulama açılışında (zaten eşleşmişse)
+  /// çağrılır; ayrıca token yenilenirse (ilk çağrıda abone olunur) otomatik
+  /// tekrar kaydeder.
+  Future<void> registerPushTokenQuietly() async {
+    final token = _token;
+    final deviceId = _deviceId;
+    if (token == null || deviceId == null) return;
+    try {
+      final pushToken = await PushRegistration.requestPermissionAndGetToken();
+      if (pushToken == null) return;
+      await _api.putPushToken(token, deviceId, pushToken);
+      if (!_pushListenerStarted) {
+        _pushListenerStarted = true;
+        _pushTokenSub = PushRegistration.onTokenRefresh.listen((refreshed) async {
+          final t = _token;
+          final d = _deviceId;
+          if (t == null || d == null) return;
+          try {
+            await _api.putPushToken(t, d, refreshed);
+          } catch (_) {/* sessizce yut */}
+        });
+      }
+    } catch (_) {/* sessizce yut — push bildirimi olmadan da program tam çalışır */}
   }
 
   // ---------------------------------------------------------------- eşleştirme
@@ -79,6 +114,7 @@ class CloudLinkModel extends ChangeNotifier {
       await _prefs?.setString(_kTokenKey, result.token);
       _startPolling();
       await refreshDashboard();
+      unawaited(registerPushTokenQuietly());
       return true;
     } on CloudApiException catch (e) {
       pairError = _describe(e);
@@ -90,6 +126,16 @@ class CloudLinkModel extends ChangeNotifier {
   }
 
   Future<void> unpair() async {
+    // En-iyi-gayret: eşleşme kalkmadan önce sunucudaki push token kaydını da
+    // temizle — yoksa artık eşleşmemiş bir cihaza gönderilmeye çalışılır.
+    if (_token != null && _deviceId != null) {
+      try {
+        await _api.deletePushToken(_token!, _deviceId!);
+      } catch (_) {/* sessizce yut — cihaz/hesap zaten kalkıyor */}
+    }
+    _pushTokenSub?.cancel();
+    _pushTokenSub = null;
+    _pushListenerStarted = false;
     _poll?.cancel();
     _poll = null;
     _deviceId = null;

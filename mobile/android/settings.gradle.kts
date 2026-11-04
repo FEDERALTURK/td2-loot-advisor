@@ -21,6 +21,11 @@ plugins {
     id("dev.flutter.flutter-plugin-loader") version "1.0.0"
     id("com.android.application") version "9.1.0" apply false
     id("org.jetbrains.kotlin.android") version "2.4.0" apply false
+    // Push bildirimi (Faz 4): android/app/google-services.json eklenip app/build.gradle.kts'teki
+    // ilgili satır açılana kadar BİLEREK apply false + yorumlu bırakıldı — google-services.json yokken
+    // bu plugin uygulanırsa Gradle derlemesi "File google-services.json is missing" ile patlar.
+    // Kurulum adımları: ../../docs/push_notifications_setup.md
+    id("com.google.gms.google-services") version "4.5.0" apply false
 }
 
 include(":app")

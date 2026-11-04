@@ -175,4 +175,23 @@ class CloudApi {
   /// Hesap silme talebi oluşturur (24 saat bekleme süresi, ardından kalıcı silme).
   /// Bu, SADECE bu telefonu değil, masaüstünün bağlı olduğu TÜM hesabı siler.
   Future<void> deleteAccount(String token) => _send('DELETE', '/v1/mobile/me', token: token);
+
+  /// Bu cihazın FCM/APNs push belirtecini sunucuya kaydeder (bkz. server/mobile.js
+  /// → putPushToken). `delivery` sunucunun dürüst durumu: "available" (ilgili
+  /// platformun secret'ı tanımlı, gerçekten gönderilebilir) ya da
+  /// "not_yet_implemented" (secret henüz yok — bkz. ROADMAP.md, iOS/APNs).
+  Future<String> putPushToken(String token, String deviceId, String pushToken) async {
+    final j = await _send(
+      'PUT',
+      '/v1/mobile/push-tokens/$deviceId',
+      token: token,
+      body: {'token': pushToken},
+    );
+    return '${j['delivery'] ?? 'unknown'}';
+  }
+
+  /// Bu cihazın kayıtlı push belirtecini siler (ör. eşleştirme kaldırılırken —
+  /// artık eşleşmemiş bir cihaza bildirim gönderilmeye çalışılmasın).
+  Future<void> deletePushToken(String token, String deviceId) =>
+      _send('DELETE', '/v1/mobile/push-tokens/$deviceId', token: token);
 }

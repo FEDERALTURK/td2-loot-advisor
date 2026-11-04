@@ -164,6 +164,28 @@ Bu seri, Linux/Xvfb testlerinin yakalayamadığı, yalnızca gerçek Windows + D
   karşılaştırılmalı; ayrıca bu sınıfın (`Tk.report_callback_exception` yokluğu) bir sonraki fırsatta genel
   olarak ele alınması, benzer hataların geleceğe gizlenmesini önler (bkz. `TODO.md`/`ROADMAP.md`).
 
+### Mobil: push-token sunucuya kaydı eksikti, kod yazıldı (2026-11-04)
+
+- **Boşluk**: `server/mobile.js`'in `PUT/DELETE /v1/mobile/push-tokens/{id}` ucu hazırdı (Android/FCM canlı,
+  iOS/APNs kodu hazır) ama Flutter uygulaması bu ucu hiçbir zaman çağırmıyordu — telefon kendi FCM/APNs
+  token'ını sunucuya hiç kaydetmiyordu, bu yüzden hiçbir telefon push bildirimi alamıyordu.
+- **Eklenenler**: `mobile/pubspec.yaml`'a `firebase_core`/`firebase_messaging`; yeni
+  `mobile/lib/services/push_registration.dart` (izin isteme + token alma, Firebase kurulu değilse
+  sessizce `null` döner — çökmez); `mobile/lib/services/cloud_api.dart`'a `putPushToken`/`deletePushToken`;
+  `mobile/lib/services/cloud_link.dart`'a `registerPushTokenQuietly()` (eşleştirme sonrası + her açılışta
+  zaten eşleşmişse çağrılır, `onTokenRefresh`'e abone olup token yenilenince otomatik tekrar kaydeder;
+  `unpair()` artık sunucudaki kaydı da temizliyor); `AndroidManifest.xml`'e `POST_NOTIFICATIONS` izni;
+  `settings.gradle.kts`'e `com.google.gms.google-services` plugin bildirimi (`apply false` — güvenli,
+  dosya olmasa da derlemeyi bozmaz); `app/build.gradle.kts`'te asıl `apply` satırı **bilerek yorumlu**
+  bırakıldı (gerçek `google-services.json` olmadan açılırsa Gradle derlemesi patlar).
+- **Kalan tek adım (kullanıcı/Firebase konsolu gerekiyor)**: `google-services.json`'ı mevcut
+  "td2-loot-advisor" Firebase projesinden indirip `mobile/android/app/`'a koymak, sonra bir Gradle
+  satırının yorumunu kaldırmak. Tam adımlar: `docs/push_notifications_setup.md` (yeni).
+- **Doğrulama sınırı**: Bu konteynerde Flutter SDK'sı yok — kod sözdizimi elle (brace/parantez dengesi,
+  satır satır okuma) kontrol edildi ama `flutter pub get`/`analyze`/`test` ÇALIŞTIRILMADI. Bir sonraki
+  oturum veya kullanıcı bunu Windows PC'sinde (Flutter zaten kurulu ve doğrulanmış, bkz. yukarısı)
+  çalıştırmalı. Ayrıntı ve gerekçe: `BUGS.md` #6, `docs/mobile_companion_roadmap.md`.
+
 ## Bu depoya dair AI-destekli geliştirme oturumları (genel not)
 
 Bu proje, farklı AI oturumlarının (bu oturum dahil) ardışık olarak çalıştığı bir geliştirme modeliyle sürdürülüyor. Her oturum kendi kapsamını `HANDOFF.md`'de bırakmalı. Bu depoya ayrıca bir "ChatGPT" oturumunun yaptığı iş (Android companion app `mobile/` + bazı güvenilirlik/tanılama işi) bu Claude oturumunda doğrulanıp `main`'e entegre edildi (9.1.5.18 merge'i).
