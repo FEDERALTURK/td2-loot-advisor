@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "version": "2026-11-03.2",
-  "updated": "2026-11-03T13:35:37Z",
+  "version": "2026-11-04.1",
+  "updated": "2026-11-04T01:52:55Z",
   "season": "Year 8 Season 3 – Red Horizon",
   "resets": {
     "daily_hour_utc": 8,
@@ -315,6 +315,68 @@
         "ru": "Найдите точку Cleaners на карте (у автора гайда был только Washington Monument). После частичной зачистки приходит вторая волна; уничтожьте её полностью, чтобы захватить точку. Сброс прогресса хранилища позволяет захватывать точки заново.",
         "pl": "Znajdź punkt Cleaners na mapie (autor poradnika miał tylko Washington Monument). Po częściowym oczyszczeniu rusza druga fala; pokonaj ją całą, by zdobyć punkt. Reset postępu skarbca pozwala zdobywać punkty ponownie.",
         "nl": "Zoek een Cleaners-punt op de kaart (de auteur van de gids had alleen het Washington Monument). Na een deel volgt een tweede golf; versla die helemaal om te veroveren. Kluisvoortgang resetten laat je punten opnieuw veroveren."
+      }
+    },
+    {
+      "id": "y8s3-scout11-invaded",
+      "cat": "manhunt",
+      "source": {
+        "url": "https://www.destructoid.com/the-division-2-y8s3-red-horizon-week-11-manhunt-hvt-scout-11-solutions/"
+      },
+      "text": {
+        "en": "Manhunt Scout 11 (final HVT, from Nov 3): complete any Invaded mission",
+        "tr": "Manhunt Scout 11 (son HVT, 3 Kasım'dan itibaren): herhangi bir Invaded görevi bitir",
+        "de": "Manhunt Scout 11 (letztes HVT, ab 3. Nov.): beliebige Invaded-Mission abschließen",
+        "fr": "Traque Éclaireur 11 (dernier HVT, dès le 3 nov.) : terminez n'importe quelle mission Invaded",
+        "es": "Cacería Explorador 11 (último HVT, desde el 3 de nov.): completa cualquier misión Invaded",
+        "it": "Caccia Esploratore 11 (ultimo HVT, dal 3 nov.): completa una missione Invaded qualsiasi",
+        "pt": "Caçada Batedor 11 (último HVT, desde 3 de nov.): conclua qualquer missão Invaded",
+        "ru": "Охота, Разведчик 11 (последняя HVT, с 3 нояб.): пройдите любую миссию Invaded",
+        "pl": "Obława, Zwiadowca 11 (ostatni HVT, od 3 lis.): ukończ dowolną misję Invaded",
+        "nl": "Manhunt Verkenner 11 (laatste HVT, vanaf 3 nov.): voltooi een willekeurige Invaded-missie"
+      },
+      "how": {
+        "en": "Invaded missions are Black Tusk versions of regular missions, marked with a red hexagon pattern instead of the grey one. Switch the mission to Invaded in the menu before you start it. Tidal Basin must be finished first so the world reaches Tier 5.",
+        "tr": "Invaded görevler, normal görevlerin Black Tusk sürümüdür; gri yerine kırmızı altıgen desenle gösterilir. Başlamadan önce menüden görevi Invaded'a çevir. Dünyanın Tier 5 olması için önce Tidal Basin bitmiş olmalı.",
+        "de": "Invaded-Missionen sind Black-Tusk-Versionen normaler Missionen, erkennbar am roten statt grauen Sechseckmuster. Stelle die Mission vor dem Start im Menü auf Invaded um. Zuerst muss Tidal Basin abgeschlossen sein, damit die Welt Tier 5 erreicht.",
+        "fr": "Les missions Invaded sont des versions Black Tusk des missions normales, signalées par un motif hexagonal rouge au lieu de gris. Passez la mission en Invaded dans le menu avant de la lancer. Tidal Basin doit être terminé pour que le monde atteigne le Tier 5.",
+        "es": "Las misiones Invaded son versiones Black Tusk de las normales y llevan un patrón hexagonal rojo en lugar de gris. Cambia la misión a Invaded en el menú antes de empezar. Debes terminar Tidal Basin para que el mundo llegue a Tier 5.",
+        "it": "Le missioni Invaded sono versioni Black Tusk di quelle normali, con un motivo esagonale rosso anziché grigio. Passa la missione a Invaded dal menu prima di avviarla. Devi aver finito Tidal Basin perché il mondo arrivi al Tier 5.",
+        "pt": "Missões Invaded são versões Black Tusk das normais, com padrão hexagonal vermelho em vez de cinza. Mude a missão para Invaded no menu antes de iniciar. É preciso concluir Tidal Basin para o mundo chegar ao Tier 5.",
+        "ru": "Миссии Invaded — версии обычных миссий с Black Tusk; они отмечены красным шестиугольным узором вместо серого. Переключите миссию на Invaded в меню перед запуском. Сначала пройдите Tidal Basin, чтобы мир достиг Tier 5.",
+        "pl": "Misje Invaded to wersje zwykłych misji z Black Tusk, oznaczone czerwonym wzorem sześciokątów zamiast szarego. Przełącz misję na Invaded w menu przed startem. Najpierw ukończ Tidal Basin, aby świat osiągnął Tier 5.",
+        "nl": "Invaded-missies zijn Black Tusk-versies van gewone missies, herkenbaar aan een rood in plaats van grijs zeshoekpatroon. Zet de missie in het menu op Invaded voordat je begint. Rond eerst Tidal Basin af zodat de wereld Tier 5 bereikt."
+      }
+    },
+    {
+      "id": "y8s3-scout11-higgins",
+      "cat": "manhunt",
+      "source": {
+        "url": "https://www.destructoid.com/the-division-2-y8s3-red-horizon-week-11-manhunt-hvt-scout-11-solutions/"
+      },
+      "text": {
+        "en": "Manhunt Scout 11: complete the Bounty on Carl \"Eagle Eye\" Higgins (opens the Climax Mission)",
+        "tr": "Manhunt Scout 11: Carl \"Eagle Eye\" Higgins Bounty'sini bitir (Climax Mission'ı açar)",
+        "de": "Manhunt Scout 11: Bounty auf Carl \"Eagle Eye\" Higgins abschließen (schaltet die Climax Mission frei)",
+        "fr": "Traque Éclaireur 11 : terminez le Bounty de Carl \"Eagle Eye\" Higgins (débloque la Climax Mission)",
+        "es": "Cacería Explorador 11: completa el Bounty de Carl \"Eagle Eye\" Higgins (desbloquea la Climax Mission)",
+        "it": "Caccia Esploratore 11: completa il Bounty su Carl \"Eagle Eye\" Higgins (sblocca la Climax Mission)",
+        "pt": "Caçada Batedor 11: conclua o Bounty de Carl \"Eagle Eye\" Higgins (libera a Climax Mission)",
+        "ru": "Охота, Разведчик 11: выполните Bounty на Carl \"Eagle Eye\" Higgins (открывает Climax Mission)",
+        "pl": "Obława, Zwiadowca 11: ukończ Bounty na Carla \"Eagle Eye\" Higginsa (odblokowuje Climax Mission)",
+        "nl": "Manhunt Verkenner 11: voltooi de Bounty op Carl \"Eagle Eye\" Higgins (ontgrendelt de Climax Mission)"
+      },
+      "how": {
+        "en": "Appears after the earlier steps of this Scout. Its spot is marked on the map and you have 15 minutes to start it. Clear all enemies, then Higgins arrives in special gear; defeat him to finish.",
+        "tr": "Bu Scout'un önceki adımlarından sonra açılır. Yeri haritada işaretlidir ve başlatmak için 15 dakikan var. Tüm düşmanları temizle, Higgins özel teçhizatla gelir; onu yenince görev biter.",
+        "de": "Erscheint nach den vorherigen Schritten dieses Scouts. Der Ort ist auf der Karte markiert, du hast 15 Minuten zum Starten. Besiege alle Gegner, dann kommt Higgins in Spezialausrüstung; schalte ihn aus.",
+        "fr": "Apparaît après les étapes précédentes de ce Scout. Le lieu est indiqué sur la carte et vous avez 15 minutes pour le lancer. Éliminez tous les ennemis, puis Higgins arrive avec un équipement spécial ; battez-le.",
+        "es": "Aparece tras los pasos anteriores de este Scout. Está marcado en el mapa y tienes 15 minutos para activarlo. Elimina a todos los enemigos; Higgins llega con equipo especial y debes derrotarlo.",
+        "it": "Compare dopo i passi precedenti di questo Scout. Il punto è segnato sulla mappa e hai 15 minuti per avviarlo. Elimina tutti i nemici; poi arriva Higgins con equipaggiamento speciale: sconfiggilo.",
+        "pt": "Aparece após as etapas anteriores deste Scout. O local fica marcado no mapa e você tem 15 minutos para iniciar. Elimine todos os inimigos; Higgins chega com equipamento especial e deve ser derrotado.",
+        "ru": "Появляется после предыдущих шагов этого Scout. Место отмечено на карте, на запуск даётся 15 минут. Уничтожьте всех врагов, затем появится Higgins в особом снаряжении; победите его.",
+        "pl": "Pojawia się po wcześniejszych krokach tego Scouta. Miejsce jest zaznaczone na mapie, a na start masz 15 minut. Pokonaj wszystkich wrogów, potem przybywa Higgins w specjalnym ekwipunku; pokonaj go.",
+        "nl": "Verschijnt na de eerdere stappen van deze Scout. De plek staat op de kaart en je hebt 15 minuten om te starten. Schakel alle vijanden uit; daarna komt Higgins in speciale uitrusting, versla hem."
       }
     },
     {

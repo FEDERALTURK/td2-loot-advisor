@@ -1,7 +1,7 @@
 {
  "schema": 1,
- "version": "2026-11-03.1",
- "updated": "2026-11-03T19:38:09Z",
+ "version": "2026-11-04.1",
+ "updated": "2026-11-04T01:52:55Z",
  "season": "Year 8 Season 3 – Red Horizon",
  "items": [
   {
@@ -162,6 +162,37 @@
     "ru": "Серверы отключатся 3 ноября в 08:00 UTC примерно на 6 часов для установки Title Update Y8S3.3 и Echoes of Central Park.",
     "pl": "Serwery zostaną wyłączone 3 listopada o 08:00 UTC na około 6 godzin, by wgrać Title Update Y8S3.3 i Echoes of Central Park.",
     "nl": "De servers gaan op 3 nov. om 08:00 UTC naar verwachting 6 uur offline om Title Update Y8S3.3 en Echoes of Central Park te installeren."
+   }
+  },
+  {
+   "id": "y8s3-3-pc-fps-known-issue",
+   "kind": "maintenance",
+   "date": "2026-11-03T15:30:00Z",
+   "url": "https://x.com/TheDivisionGame/status/2117640661230813344",
+   "source": "Ubisoft (The Division on X)",
+   "title": {
+    "en": "Maintenance over: PC FPS issue known",
+    "tr": "Bakım bitti: PC FPS sorunu biliniyor",
+    "de": "Wartung beendet: PC-FPS-Problem bekannt",
+    "fr": "Maintenance terminée : problème de FPS sur PC connu",
+    "es": "Mantenimiento terminado: problema de FPS en PC conocido",
+    "it": "Manutenzione finita: problema FPS su PC noto",
+    "pt": "Manutenção concluída: problema de FPS no PC conhecido",
+    "ru": "Техработы завершены: известна проблема с FPS на ПК",
+    "pl": "Koniec przerwy: znany problem z FPS na PC",
+    "nl": "Onderhoud klaar: FPS-probleem op pc bekend"
+   },
+   "text": {
+    "en": "Ubisoft is working on FPS drops some PC players see in the Base of Operations and Settlements. It says gameplay elsewhere, including Echoes of Central Park, is not affected.",
+    "tr": "Ubisoft, bazı PC oyuncularının Base of Operations ve Settlements'ta yaşadığı FPS düşüşleri üzerinde çalışıyor. Echoes of Central Park dahil diğer alanlardaki oynanışın etkilenmediğini söylüyor.",
+    "de": "Ubisoft arbeitet an FPS-Einbrüchen, die manche PC-Spieler in der Base of Operations und in Settlements haben. Das Spielgeschehen anderswo, auch in Echoes of Central Park, sei nicht betroffen.",
+    "fr": "Ubisoft travaille sur les chutes de FPS de certains joueurs PC dans la Base of Operations et les Settlements. Selon le studio, le reste du jeu, dont Echoes of Central Park, n'est pas touché.",
+    "es": "Ubisoft trabaja en las caídas de FPS que sufren algunos jugadores de PC en la Base of Operations y los Settlements. Indica que el resto del juego, incluido Echoes of Central Park, no se ve afectado.",
+    "it": "Ubisoft sta lavorando ai cali di FPS che alcuni giocatori PC notano nella Base of Operations e nei Settlements. Il resto del gioco, Echoes of Central Park compreso, non risulta colpito.",
+    "pt": "A Ubisoft trabalha nas quedas de FPS que alguns jogadores de PC têm na Base of Operations e nos Settlements. Segundo ela, o restante do jogo, incluindo Echoes of Central Park, não é afetado.",
+    "ru": "Ubisoft исправляет просадки FPS, которые некоторые игроки на ПК замечают в Base of Operations и Settlements. По её словам, остальная игра, включая Echoes of Central Park, не затронута.",
+    "pl": "Ubisoft pracuje nad spadkami FPS, które część graczy PC ma w Base of Operations i Settlements. Według firmy nie dotyczy to rozgrywki w innych miejscach, w tym w Echoes of Central Park.",
+    "nl": "Ubisoft werkt aan FPS-dalingen die sommige pc-spelers zien in de Base of Operations en Settlements. Volgens Ubisoft heeft dit geen effect op de rest van het spel, ook niet op Echoes of Central Park."
    }
   },
   {
