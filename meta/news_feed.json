@@ -1,7 +1,7 @@
 {
  "schema": 1,
- "version": "2026-11-04.2",
- "updated": "2026-11-04T07:36:08Z",
+ "version": "2026-11-04.3",
+ "updated": "2026-11-04T19:42:46Z",
  "season": "Year 8 Season 3 – Red Horizon",
  "items": [
   {
@@ -162,6 +162,37 @@
     "ru": "Серверы отключились 3 нояб. в 08:00 UTC для установки Title Update Y8S3.3 и Echoes of Central Park. Расчётные 6 часов продлили примерно на 1,5 часа; работы завершились около 15:30 UTC.",
     "pl": "Serwery wyłączono 3 lis. o 08:00 UTC, by zainstalować Title Update Y8S3.3 i Echoes of Central Park. Szacowane 6 godzin wydłużono o około 1,5 godziny; koniec około 15:30 UTC.",
     "nl": "De servers gingen op 3 nov. om 08:00 UTC offline voor Title Update Y8S3.3 en Echoes of Central Park. De geschatte 6 uur werd met zo'n 1,5 uur verlengd; einde rond 15:30 UTC."
+   }
+  },
+  {
+   "id": "y8s3-3-pc-performance-update",
+   "kind": "patch",
+   "date": "2026-11-03T20:15:00Z",
+   "url": "https://x.com/TheDivisionGame/status/2117712368578822350",
+   "source": "Ubisoft (The Division on X)",
+   "title": {
+    "en": "Small update for PC performance",
+    "tr": "PC performansı için küçük güncelleme",
+    "de": "Kleines Update für die PC-Leistung",
+    "fr": "Petite mise à jour pour les performances PC",
+    "es": "Pequeña actualización para el rendimiento en PC",
+    "it": "Piccolo aggiornamento per le prestazioni su PC",
+    "pt": "Pequena atualização para o desempenho no PC",
+    "ru": "Небольшое обновление для производительности на ПК",
+    "pl": "Mała aktualizacja wydajności na PC",
+    "nl": "Kleine update voor pc-prestaties"
+   },
+   "text": {
+    "en": "Ubisoft released a small PC patch against the performance issues: download it and restart the game to apply it. On PS5, the problem that kept some pre-order players out of Echoes of Central Park has also been fixed.",
+    "tr": "Ubisoft, performans sorunlarına karşı küçük bir PC yaması yayımladı: uygulanması için yamayı indirip oyunu yeniden başlatın. PS5'te ön sipariş veren bazı oyuncuların Echoes of Central Park'a girememesi sorunu da düzeltildi.",
+    "de": "Ubisoft hat einen kleinen PC-Patch gegen die Leistungsprobleme veröffentlicht: Herunterladen und das Spiel neu starten, damit er wirkt. Auf der PS5 wurde zudem das Problem behoben, dass manche Vorbesteller nicht auf Echoes of Central Park zugreifen konnten.",
+    "fr": "Ubisoft a publié un petit correctif PC contre les problèmes de performances : téléchargez-le et redémarrez le jeu pour l'appliquer. Sur PS5, le problème qui empêchait certains précommandeurs d'accéder à Echoes of Central Park est aussi corrigé.",
+    "es": "Ubisoft ha publicado un pequeño parche para PC contra los problemas de rendimiento: descárgalo y reinicia el juego para aplicarlo. En PS5 también se ha corregido el problema que impedía a algunos jugadores con reserva acceder a Echoes of Central Park.",
+    "it": "Ubisoft ha pubblicato una piccola patch per PC contro i problemi di prestazioni: scaricala e riavvia il gioco per applicarla. Su PS5 è stato risolto anche il problema che impediva ad alcuni giocatori con preordine di accedere a Echoes of Central Park.",
+    "pt": "A Ubisoft lançou um pequeno patch para PC contra os problemas de desempenho: baixe-o e reinicie o jogo para aplicá-lo. No PS5, também foi corrigido o problema que impedia alguns jogadores com pré-venda de acessar Echoes of Central Park.",
+    "ru": "Ubisoft выпустила небольшой патч для ПК против проблем с производительностью: скачайте его и перезапустите игру. На PS5 также устранена проблема, из-за которой некоторые игроки с предзаказом не могли получить доступ к Echoes of Central Park.",
+    "pl": "Ubisoft wydał małą łatkę na PC na problemy z wydajnością: pobierz ją i uruchom grę ponownie, by zadziałała. Na PS5 naprawiono też problem, przez który część graczy z zamówieniem przedpremierowym nie miała dostępu do Echoes of Central Park.",
+    "nl": "Ubisoft heeft een kleine pc-patch uitgebracht tegen de prestatieproblemen: download hem en start het spel opnieuw om hem toe te passen. Op PS5 is ook het probleem verholpen waardoor sommige spelers met een pre-order geen toegang hadden tot Echoes of Central Park."
    }
   },
   {
