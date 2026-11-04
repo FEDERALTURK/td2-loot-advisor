@@ -81,7 +81,7 @@ def main():
             result["widgets_ms"]=round((time.perf_counter()-init)*1000,1)
             result["pages"]=len(obj.tab_keys)
             result["tabs"]=len(obj.nb.tabs())
-            assert result["pages"]==14 and result["tabs"]==6
+            assert result["pages"]==15 and result["tabs"]==6
             assert len(obj.set_nb.tabs())==4 and "shortcuts" in obj.set_pages
             obj.select_page("settings"); obj.select_settings_page("shortcuts"); obj.root.update_idletasks()
             assert obj.current_tab()=="settings"
