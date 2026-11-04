@@ -2,6 +2,21 @@
 
 Önemli kararların ve sürümlerin kısa, kronolojik özeti. Tam ayrıntı için `git log` ve `.github/release_notes.md`.
 
+## `server/` için eksik `package.json` eklendi — Workers Builds CI hatası çözüldü (2026-11-04)
+
+- Kök neden: `server/` dizininde hiç `package.json`/`package-lock.json` yoktu. Cloudflare Workers Builds (CI servisi),
+  deploy komutunu (`npx wrangler deploy`) çalıştırmadan önce paket yöneticisini tespit edip bir kurulum adımı
+  yapıyor ve Wrangler sürümünü `package.json`'dan okuyor (bkz. Cloudflare resmi dokümantasyonu, workers/ci-cd/builds).
+  `package.json` olmadan bu adım CI'da başarısız oluyordu.
+- Yerelde neden fark edilmedi: `npx wrangler deploy` yerelde her çalıştırıldığında, yerel bir sürüm bulamayınca
+  Wrangler'ı ağdan taze indirip çalıştırıyor (npx'in standart davranışı) — bu da `package.json` olmadan da yerel
+  `--dry-run`'ın sorunsuz görünmesine yol açıyordu. CI ortamı ise farklı bir kurulum akışı izliyor.
+- Düzeltme: `server/package.json` (Wrangler `^4.0.0` devDependency) ve `npm install` ile üretilen
+  `server/package-lock.json` eklendi. `node_modules/server` zaten `.gitignore`'daydı. `npx wrangler deploy --dry-run`
+  yeniden çalıştırılıp aynı binding listesiyle başarılı olduğu doğrulandı (gerçek deploy yapılmadı — sadece dry-run).
+- Bir sonraki push/PR'da "Workers Builds: td2-stats" kontrolünün gerçekten geçtiğini GitHub'dan doğrulamak gerekiyor
+  (bu oturumda yalnızca yerel `--dry-run` ile doğrulanabildi, canlı CI çalıştırması bu commit push edilince görülecek).
+
 ## `recal_advisor` ücretsiz yapıldı — mx-division-builds lisans gri alanı çözüldü (2026-11-04)
 
 - `features.py`: `"recal_advisor": "premium"` → `"free"`. Kullanıcı kararı: mx-division-builds (CC BY-NC-SA 4.0,
