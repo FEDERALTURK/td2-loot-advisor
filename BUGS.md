@@ -9,7 +9,21 @@
 
 ## Açık / kullanıcı işlemi gerektiren
 
-- **Yarım kalan ansiklopedi açıklamaları.** 13 girişin çevirisi `…` ile bitiyor (ör. Eagle Bearer, NinjaBike Messenger Bag). Bakılan örneklerde İngilizce kaynak metin de yarım; önce kaynak metin tamamlanmalı.
+- ✅ **Yarım kalan ansiklopedi açıklamaları — kök neden bulundu ve düzeltildi (2026-11-04).** İlk bakışta 13 giriş
+  `…` ile bitiyor gibi görünse de, gerçek kapsam **30 isimdi**: `meta/sources/wiki_exotics.json`'daki 18 egzotik
+  kaydı tam olarak **400 karakterde**, `meta/sources/wiki_talent_desc.json`'daki 12 talent kaydı ise **~190
+  karakterde** kelime/cümle ortasında kesilmişti (muhtemelen eski bir wiki-kazıma betiğinin sabit karakter
+  limitinden). 17 kayıtta kesilen İngilizce metin, makine çevirisi tarafından gramer açısından tam görünen ama
+  içerik olarak eksik cümlelere çevrildiği için `…` arama yöntemi bunları yakalamıyordu. `knowledge.py`'daki
+  önceliklendirme (`wiki_exotics.json`/`wiki_talent_desc.json` > `game_data.json`) kesik metni, `game_data.json`'da
+  zaten var olan tam/doğru metnin önüne geçiriyordu.
+  - Düzeltme: `wiki_exotics.json`'daki 18 kaydın `desc` alanı `game_data.json`'daki tam metinle değiştirildi;
+    `wiki_talent_desc.json`'daki 12 kesik kayıt tamamen silindi (kod otomatik olarak `game_data.json`'daki tam
+    metne düşüyor). `meta/descriptions_i18n.json`'da bu 30 ismin 9 dildeki (tr de fr es it pt ru pl nl) çevirileri
+    tam İngilizce kaynağa göre yeniden yazıldı.
+  - Boyut sınırı: düzeltme `descriptions_i18n.json`'ı 512 KiB sınırının (test eşiği 510.000 bayt) üzerine
+    çıkardı. Proje kuralına uygun olarak en büyük 3 kayıt (`Disruptor Rounds`, `Bluescreen`, `The Ravenous`)
+    `meta/descriptions_i18n_2.json`'a taşındı (bkz. `meta/UPDATER.md`). `tests/test_knowledge.py` tam paket PASS.
 - ✅ **`Workers Builds: td2-stats` PR'da başarısız oluyordu — kök neden bulundu ve düzeltildi (2026-11-04).** `server/` dizininde hiç `package.json` yoktu. Cloudflare Workers Builds, `npx wrangler deploy`'u çalıştırmadan önce paket yöneticisini tespit edip kurulum adımı yapıyor ve Wrangler sürümünü `package.json`'dan alıyor (resmi doküman: "Workers Builds will use the Wrangler version set in your package.json"). `package.json` yokken bu adım başarısız oluyordu; yerelde ise `npx wrangler deploy` her seferinde Wrangler'ı ağdan taze indirdiği için (npx'in kendi davranışı) sorun görünmüyordu — bu yüzden "yerelde çalışıyor, CI'da çalışmıyor" farkı oluşuyordu. `server/package.json` (Wrangler `^4.0.0` devDependency) ve `server/package-lock.json` eklendi; `npx wrangler deploy --dry-run` yeniden doğrulandı (başarılı, aynı binding listesi). `node_modules/` zaten `.gitignore`'da. **GitHub'da doğrulandı (2026-11-04): "Workers Builds: td2-stats" check'i artık `success` dönüyor** (önceki commit'lerde `failure`'dı).
 
 1. ✅ **`master` dalı silindi (2026-11-04, kullanıcı tarafından).** `git ls-remote`/GitHub API ile doğrulandı. Kalan dallar: `main` (tek doğru kaynak), `archive/master-superseded-2026-11-03` (eski yedek, isteğe bağlı temizlenebilir), `deploy/worker-bundle-temp` (geçici, "will be removed" olarak işaretli), `claude/descriptions-second-shard`.

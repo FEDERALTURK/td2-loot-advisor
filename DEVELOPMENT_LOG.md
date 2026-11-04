@@ -2,6 +2,31 @@
 
 Önemli kararların ve sürümlerin kısa, kronolojik özeti. Tam ayrıntı için `git log` ve `.github/release_notes.md`.
 
+## Ansiklopedi: 30 kesik açıklama düzeltildi (asıl kapsam 13 değil 30) (2026-11-04)
+
+- Kullanıcı isteği "13 yarım ansiklopedi çevirisi" üzerine araştırma, asıl kapsamın **30 isim** olduğunu ortaya
+  çıkardı. İlk tarama yöntemi (çevrilmiş metinde `…` arama) yalnızca 13'ünü buluyordu; kalan 17'si, kesik
+  İngilizce kaynağın makine çevirisi tarafından gramer olarak tam görünen (ama içerik olarak eksik) cümlelere
+  çevrilmesi nedeniyle görünür bir iz bırakmıyordu.
+- Kök neden: `meta/sources/wiki_exotics.json`'da 18 egzotik kaydının `desc` alanı tam olarak **400 karakterde**,
+  `meta/sources/wiki_talent_desc.json`'da 12 talent kaydı ise **~190 karakterde** kelime/cümle ortasında
+  kesilmişti. `knowledge.py`'nin kaynak önceliği (`wiki_exotics.json`/`wiki_talent_desc.json` → `game_data.json`)
+  bu kesik metni, `game_data.json`'da zaten eksiksiz bulunan açıklamanın önüne geçiriyordu.
+- Düzeltme:
+  - `meta/sources/wiki_exotics.json`: 18 kaydın `desc` alanı `game_data.json`'daki (`gear_talent_details`/
+    `weapon_talent_details[].description`) tam metinle değiştirildi.
+  - `meta/sources/wiki_talent_desc.json`: 12 kesik kayıt tamamen kaldırıldı — kod otomatik olarak
+    `game_data.json`'daki tam metne düşüyor (`setdefault` ile dolduruluyor), ek kod değişikliği gerekmedi.
+  - `meta/descriptions_i18n.json`: bu 30 ismin tr/de/fr/es/it/pt/ru/pl/nl çevirileri, artık tam olan İngilizce
+    kaynağa göre sıfırdan yeniden yazıldı (270 metin).
+- Yan etki ve ikinci düzeltme: yeni, tam çeviriler `descriptions_i18n.json`'ı proje için belirlenen
+  510.000 bayt sınırının (bkz. `meta/UPDATER.md`, `tests/test_knowledge.py`) üzerine çıkardı (516.482 bayt).
+  Kurala uygun olarak en büyük 3 kayıt (`Disruptor Rounds`, `Bluescreen`, `The Ravenous` — toplam ~17 KB)
+  `meta/descriptions_i18n_2.json`'a taşındı (ilk kez oluşturuldu; `meta_sync.fetch_descriptions` iki dosyayı
+  birleştirir, bir giriş iki dosyada birden bulunmaz).
+- Doğrulama: `tests/test_knowledge.py` (boyut sınırı dahil tüm 30 kontrol), `tests/test_core.py`,
+  `tests/test_regression_crash_patterns.py` — üçü de tam PASS.
+
 ## `server/` için eksik `package.json` eklendi — Workers Builds CI hatası çözüldü (2026-11-04)
 
 - Kök neden: `server/` dizininde hiç `package.json`/`package-lock.json` yoktu. Cloudflare Workers Builds (CI servisi),

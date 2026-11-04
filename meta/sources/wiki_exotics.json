@@ -2,11 +2,11 @@
  "NinjaBike Messenger Bag": {
   "type": "backpack",
   "talent": "Talent",
-  "desc": "Talent - Ninjabike Messenger Bag (Tom Clancy's The Division) *Slots in with any equipped Gear Set item to fulfill a requirement towards unlocking a Gear Sets bonus. Can unlock bonuses from multiple sets simultaneously. Cannot unlock Classified Gear Set bonuses. Talent - Resourceful (Tom Clancy's The Division 2) *Slots in with any equipped Gear Set or Brand Set item to fulfill a requirement towards"
+  "desc": "Slots in with any equipped Gear Set and/or Brand Set item to fulfill a requirement towards unlocking a Gear and/or Brand Sets bonus. Can unlock bonuses from multiple sets simultaneously."
  },
  "Memento": {
   "type": "Backpack",
-  "desc": "Kill Confirmed Enemies you kill drop a trophy on death. Collecting trophies provides you with both a short and long term buff, the first of which scales with the number of corresponding core attributes equipped, and lasts 10s. * +5% Weapon Damage per Weapon Damage Core * +10% Bonus Armor per Armor Core * +5% Skill Efficiency per Skill Core For every trophy collected, gain an additional +1% weapon "
+  "desc": "Enemies you kill drop a trophy on death. Collecting trophies provides both a short and long term buff, the first of which scales with the number of core attributes equipped and lasts 10s. Red Core - 5% Weapon Damage. Blue Core - 10% Bonus Armor. Yellow Core - 5% Skill Efficiency. For every trophy collected gain an additional +1% weapon damage, +1% skill efficiency and +0.1% armor regeneration for 300s. Maximum 30 stacks."
  },
  "Birdie's Quick Fix Pack": {
   "type": "Backpack",
@@ -16,7 +16,7 @@
  "Sarru": {
   "type": "Backpack",
   "talent": "Decoy King",
-  "desc": "Decoy King ** While in combat, the Moon will cycle through its phases every 5s. There are 8 Moon phases. ** Starting from a New Moon, all damage you deal will be Amplified by 5%. The value of the Amplifier will increase by 5% each phase until reaching 25% during a Full Moon, then it will decrease as the Moon return to being a New Moon, restarting the cycle. ** During a Full Moon, deploying a Decoy"
+  "desc": "While in combat, the Moon will cycle through its phases every 5s. There are 8 Moon phases. Starting from a New Moon, weapon damage you deal will be Amplified by 5%. The value of the Amplifier will increase by 5% each phase until reaching 25% during a Full Moon, then it will decrease as the Moon return to being a New Moon, restarting the cycle. During a Full Moon, deploying a Decoy will grant it Overcharge and the cycle will pause for 10s."
  },
  "Acosta's Go-Bag": {
   "type": "Backpack",
@@ -37,7 +37,7 @@
  "Harrier Pride": {
   "type": "Backpack",
   "talent": "Rebalance",
-  "desc": "Rebalance ** Getting kills and hitting enemies 3 times builds Red Stacks. Each stack provides 0.5% Weapon Damage ** Getting hit 3 times builds Blue Stacks. Each Stack Provides 0.5% Damage Resistance ** Upon reaching 80 stacks in total, lose all stacks and receive a separate bonus of 0.5% Damage Resistance per Red Stack and 0.5% Weapon damage per Blue Stack until the next time the stack cap is reac"
+  "desc": "Getting kills and hitting enemies 3 times build Red stacks. Each stack provides 0.5% Weapon Damage. Getting hit 3 times builds Blue stacks. Each stack provides 0.5% Damage Resistance. Upon reaching 80 stacks in total, lose all stacks and receive a separate bonus of 0.5% Damage Resistance per Red stack and 0.5% Weapon Damage per Blue stack until the next time the stack cap is reached."
  },
  "BTSU Datagloves": {
   "talent": "Talent",
@@ -46,12 +46,12 @@
  "Bloody Knuckles": {
   "type": "gloves",
   "talent": "Talent",
-  "desc": "Talent - Over the Top * Damaging an enemy with a grenade or striking an enemy with a melee attack activates Seeing Red * Seeing Red grants +25% weapon damage and +100% melee damage. * Seeing Red lasts 20 seconds and has a 60 second cooldown after completion. * While in cooldown, damaging an enemy with a melee attack or hitting an enemy with the effect of a grenade will complete the cooldown instan"
+  "desc": "Damaging an enemy with a grenade or striking an enemy with a melee attack, activates Seeing Red. Seeing Red grants +25% total weapon damage and +100% melee damage. Seeing Red lasts 20 seconds and starts a 60 second cooldown after completion. While in cooldown, damaging an enemy with a melee attack or hitting an enemy with the effect of a grenade will complete the cooldown instantly."
  },
  "Shocker Punch": {
   "type": "holster",
   "talent": "Talent",
-  "desc": "Talent - Defibrillator * While \"Shocker Punch\" is equipped, the stun received by the agent from Shock status effect will be reduced by 50%. * Using a shield will give 100% to melee damage. * Using St. Elmo's Engine with the holster will give 100% extra melee damage and will make the next melee attack to apply Shock to the target. * Using all three items will offer all of the above mentioned bonuse"
+  "desc": "While \"Shocker Punch\" is equipped, the stun received by the agent from the Shock status effect will be reduced by 50%. Using a shield will give 100% to melee damage. Using St. Elmo's Engine with the holster will give 100% extra melee damage and will make the next melee attack apply shock to the target. Using all three items will offer all of the above mentioned bonuses and the Shock from the melee attack will have a 5m radius, starting from the first target. 15 second cooldown."
  },
  "Rugged Gauntlets": {
   "talent": "Iron Grip",
@@ -65,7 +65,7 @@
  "Centurion's Scabbard": {
   "type": "holster",
   "talent": "Talent",
-  "desc": "Talent - Counter *Swapping weapons will give the following groups of bonuses one by one, in order: *1. 20% Rate of Fire, 20% Weapon Damage (10% Rate of Fire, 10% Weapon Damage in PvP) *2. 50% Magazine Size, 50% Reload Speed (25% Magazine Size, 50% Reload Speed in PvP) *The bonuses will remain active for 12s(10s) or until the next weapon swap. Swapping to your sidearm will not trigger the next grou"
+  "desc": "Swapping weapons will give the following groups of bonuses one by one, in order: 1. +20% Rate of Fire, +20% Weapon Damage. 2. +50% Magazine Size, +50% Reload Speed. The bonuses remain active for 12s or until the next weapon swap. Swapping to your sidearm will not trigger the next group of bonuses."
  },
  "Nimble Holster": {
   "type": "holster",
@@ -84,7 +84,7 @@
  },
  "Blacklisters": {
   "talent": "Ostracize",
-  "desc": "Ostracize * Shooting an enemy applies a mark. Only one mark can be active at a time. The mark disappears after 15s, or when the marked enemy dies. * Receive 600% Amplified Damage from the marked enemy. * Deal 20% Amplified Damage to unmarked enemies. * If only one enemy remains in combat, the mark disappears and cannot be reapplied. Category:The Division 2 Category:Exotic Category:Named Kneepads C"
+  "desc": "Shooting an enemy applies a mark. Only one mark can be active at a time. The mark disappears after 15s, or when the marked enemy dies. Receive 600% Amplified Damage from the marked enemy. Deal 30% Amplified Damage to unmarked enemies. If only one enemy remains in combat, the mark disappears and cannot be reapplied."
  },
  "NinjaBike Messenger Kneepads": {
   "talent": "Talent",
@@ -99,7 +99,7 @@
  "Investor": {
   "type": "Mask",
   "talent": "Slotted",
-  "desc": "Slotted ** Receive bonuses for each non-Core Attribute on this item, depending on the color: *** Red: +10% Crit Damage *** Yellow: +5% Skill Efficiency *** Blue: +1% Armor Regen *** PvP Only: +0.5% Armor Regen ** This item can feature any Core Attribute. ** This item features a third random Attribute instead of a mod slot. ** This item cannot feature the Headshot Damage, Health, or Skill Repair At"
+  "desc": "Receive bonuses for each non-Core Attribute on this item, depending on their color: Red: +10% Critical Hit Damage. Yellow: +5% Skill Efficiency. Blue: +1% Armor Regen. This item can feature any Core Attribute. This item features a third random Attribute instead of having a Gear Mod Slot. This item cannot feature the Headshot Damage, Health, or Skill Repair Attributes."
  },
  "Vile": {
   "type": "mask",
@@ -160,7 +160,7 @@
  "Eagle Bearer": {
   "type": "Assault Rifle",
   "talent": "Icon",
-  "desc": "{| class=\"article-table sortable; width: 100%\" |- !Icon !Description |- |left|thumb|100px |Eagle's Strike * Accuracy increases as you continuously fire, up to +30% . *Headshot kills grant Tenacity buff for 15s . *The strength of Tenacity is increased by 1% for body shots and 5% for headshots. |- |left|thumb|100px |Tenacity * 40-80% of damage taken is delayed until the buff expires. *All of the tot"
+  "desc": "Accuracy increases as you continuously fire, up to 30%. Headshot kills grant the Tenacity buff for 15 seconds. The strength of Tenacity is increased by 1% for body shots and 5% for headshots. Tenacity: 40-80% of damage taken is delayed until the buff expires. All of the total delayed damage is reduced for each enemy killed while the buff is active, up to 100%."
  },
  "Merciless": {
   "type": "Rifle",
@@ -170,7 +170,7 @@
  "Diamondback": {
   "type": "Rifle",
   "talent": "Icon",
-  "desc": "{| class=\"article-table sortable; width: 100%\" |- !Icon !Description |- |left|thumb|100px |Agonizing Bite * Diamondback randomly marks an enemy within 20m . If no enemies are within 20m , marks the enemy closest to you . * Hitting that enemy consumes the mark, guaranteeing a critical hit with damage amplified by 20% . * After hitting a mark, all shots fired are guaranteed critical hits for 5s . * "
+  "desc": "Diamondback randomly marks an enemy within 20m. If no enemies are within 20m, it marks the enemy closest to you. Hitting that enemy consumes the mark, guaranteeing a critical hit with damage amplified by 20%. After hitting a mark, all shots fired are guaranteed critical hits for 5 seconds. A new random enemy is marked afterwards and whenever you reload."
  },
  "Chameleon": {
   "type": "Assault Rifle",
@@ -190,7 +190,7 @@
  "The Ravenous": {
   "type": "Rifle",
   "talent": "Icon",
-  "desc": "{| class=\"article-table sortable; width: 100%\" |- !Icon !Description |- |left|thumb|100px |Geri and Freki *On trigger-pull, fire both barrels at once. *When fired from the right shoulder , hits add offensive primers, and defensive primers when fired from the left shoulder . *Hits from one shoulder will detonate all of the opposite shoulder's primers when present. *When detonated or affected enemy "
+  "desc": "On trigger pull, fire both barrels at once. When fired from the right shoulder, hits add offensive primers, and defensive primers when fired from the left shoulder. Hits from one shoulder will detonate all of the opposite shoulder's primers when present. When detonated, each offensive primer deals 100% weapon damage, while each defensive primer grants +4% bonus armor and +10% amplified damage to armor plates for 5s. Primer effectiveness is doubled at 10 stacks."
  },
  "Regulus": {
   "type": "Sidearm",
@@ -205,7 +205,7 @@
  "Scorpio": {
   "type": "Shotgun",
   "talent": "Icon",
-  "desc": "{| class=\"article-table sortable; width: 100%\" |- !Icon !Description |- |left|thumb|100px |Septic Shock * Shooting a target applies stacks of venom, which last for 10s . Increasing stacks adds more severe debuffs to the target. ** 2 - Poison ** 4 - Disorient ** 6 - Shock ** 9 - Target takes an additional 20% damage (from all sources). Stacks no longer increase. * Duration of Status Effects is base"
+  "desc": "Shooting a target applies stacks of venom, which last for 10s. Increasing stacks add more severe debuffs to the target. 1 - Poison. 3 - Disorient. 6 - Shock. 7 - Target takes an additional 20% damage (from all sources). Stacks no longer increase. Duration of Status Effects is based on percentage of pellets hit on applying shot."
  },
  "The Grudge": {
   "type": "Submachine Gun",
@@ -225,7 +225,7 @@
  "Bluescreen": {
   "type": "Light Machine Gun",
   "talent": "Icon",
-  "desc": "{| class=\"article-table sortable; width: 100%\" |- !Icon !Description |- |left|thumb|100px |Disruptor Rounds * Shooting an enemy marks that enemy and adds a stack to the agent up to a count of 50 . Shooting a marked enemy refreshes the mark and adds stacks to the agent. * When you deploy a non-shield skill , remove all stacks on agent and all marked targets trigger an effect. ** 1-10 Stacks - Pulse"
+  "desc": "Shooting an enemy marks that enemy and adds a stack to the agent up to a count of 50. Shooting a marked enemy refreshes the mark and adds stacks to the agent. When you deploy a non-shield skill, remove all stacks on agent and all marked targets trigger an effect. 1-10 Stacks: Pulse marked targets for 5 seconds. 11-25 Stacks: Pulse and Disrupt marked targets for 5 seconds. 26-49 Stacks: Pulse, Disrupt, and Disorient marked targets for 5 seconds. 50 Stacks: Pulse, Disrupt, and Disorient marked targets and all hostiles within 10 meters of the marked targets. This effect will trigger immediately if any marked enemy is killed."
  },
  "Doctor Home": {
   "type": "Rifle",
@@ -240,12 +240,12 @@
  "Sacrum Imperium": {
   "type": "Marksman Rifle",
   "talent": "Icon",
-  "desc": "{| class=\"article-table sortable; width: 100%\" |- !Icon !Description |- |left|thumb|100px |The Trap * Tags enemies when in crosshair (maximum of 10). If Agent kills any marked target with a headshot, all other targets will have 50% (20% PVP) movement speed decreased and receive burn for 10 seconds. Cooldown: 30 seconds. * Killing another enemy with a headshot will shorten the cooldown for 10 secon"
+  "desc": "Tags enemies when in scope (maximum 10). If Agent kills any marked target with a headshot, all other targets will have 50% (20% PVP) movement speed and receive burn for 10 seconds. Cooldown 30 seconds. Killing another enemy with a headshot will shorten the cooldown for 10 seconds. Targets are marked after 1 second in crosshair."
  },
  "Dread Edict": {
   "type": "Marksman Rifle",
   "talent": "Icon",
-  "desc": "{| class=\"article-table sortable; width: 100%\" |- !Icon !Description |- |left|thumb|80px |Full Stop * Shooting enemies builds stacks to a cap of 20 . Headshots grants 2 stacks. Each stack grants 2% Weapon Damage and 5% Headshot Damage . On reload , clear all stacks and gain 5% of your max armor as temp armor for 10 seconds for each stack removed. * Headshot kills with Dread Edict restore all bulle"
+  "desc": "Shooting enemies builds stacks to a cap of 20. Headshots grant 2 stacks. Each stack grants 2% Weapon Damage and 5% Headshot Damage. On reload, clear all stacks and gain 5% of your max armor as temp armor for 10 seconds for each stack removed. Headshot kills with Dread Edict restore all bullets in the magazine. This does not count as a reload."
  },
  "St. Elmo's Engine": {
   "type": "Assault Rifle",
@@ -275,7 +275,7 @@
  "Iron Lung": {
   "type": "Light Machine Gun",
   "talent": "Icon",
-  "desc": "{| class=\"article-table sortable; width: 100%\" |- !Icon !Description |- |left|thumb|100px |Ardent * Shooting heats up the weapon, filling up heat meter . The meter is equivalent to 50% of the weapon's standard Magazine Size . * When the meter is full , rounds shot by the weapon ignite enemies. * When not shooting, the meter depletes over time . Reloading or swapping the weapon fully depletes the m"
+  "desc": "Shooting heats up the weapon, filling up heat meter. The meter is equivalent to 50% of the weapon's standard Magazine Size. When the meter is full, rounds shot by the weapon will ignite enemies. When not shooting, the meter depletes over time. Reloading or swapping the weapon fully depletes the meter."
  },
  "Mosquito": {
   "type": "Sidearm",
@@ -340,7 +340,7 @@
  "Underboss": {
   "type": "Submachine Gun",
   "talent": "Gangland Hit",
-  "desc": "Gangland Hit ** PvE version: *** Shooting an enemy with this weapon applies a mark. You can only apply one mark at a time. Shooting another enemy will transfer the mark. *** More marks can be applied on the same enemy by other agents using this weapon. Maximum amount of marks that can be applied on an enemy is 4. *** This weapon deals +20% Amplified Damage to marked enemies. The bonus is increased"
+  "desc": "Shooting an enemy with this weapon applies a mark. You can only apply one mark at a time. Shooting another enemy will transfer the mark. More marks can be applied on the same enemy by other agents using this weapon. Maximum amount of marks that can be applied on an enemy is 4. This weapon deals +20% Amplified Damage to marked enemies. The bonus is increased by 5% for each extra mark on the enemy other than your own."
  },
  "Fafnir": {
   "type": "Shotgun",
