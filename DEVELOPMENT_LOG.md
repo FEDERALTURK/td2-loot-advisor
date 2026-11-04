@@ -130,6 +130,40 @@ Bu seri, Linux/Xvfb testlerinin yakalayamadığı, yalnızca gerçek Windows + D
 - 9.1.5.15: native renderer'a göre eski UI testinin yanlış negatif üretmesi düzeltildi.
 - 9.1.5.16–9.1.5.17: Panel/HUD/yerinde çeviri kutularında `WS_EX_LAYERED` kaldırıldı (bazı Windows/DWM+DX12 kombinasyonlarında metni görünmez yapıyordu).
 
+### Sürüm geçmişi penceresi: "liste boş kalıyor" şikayetinin kök nedeni (2026-11-04, v9.1.5.23)
+
+- **Semptom:** Kullanıcı Ayarlar → Genel → Güncellemeler → "Sürüm geçmişi" düğmesine tıkladığında hiçbir şey
+  görmedi — ne sürüm listesi, ne durum metni, ne de tıklanabilecek bir buton. Bu, 9.1.5.22'de tam olarak
+  kullanıcının istediği şekilde (herhangi bir sürümü seçip onaylayarak kurma) yeniden yazılan özellikle aynı
+  anda, ve daha önce 9.1.5.20'nin gerçek Windows testinde not edilen "içerik listesi boş kaldı" gözlemiyle
+  aynı belirtiydi (bkz. `BUGS.md` #5) — demek ki bu iki farklı olay değil, aynı, o zamandan beri çözülmemiş
+  tek bir hataydı.
+- **Teşhis:** Uzak bilgisayara ekran görüntüsü alma özelliği o sırada arızalıydı
+  ("desktopCapturer returned no screen sources"), bu yüzden pencereyi gözle doğrulamak mümkün olmadı.
+  Önce `app.log`'dan kullanıcının gerçekten v9.1.5.22'yi çalıştırdığı ve kurulu `lang/tr.json`'da yeni
+  `upd.*` metinlerinin doğru şekilde mevcut olduğu doğrulandı (kod/çeviri dağıtımı sorunlu değildi).
+  Kullanıcıya doğrudan ne gördüğü soruldu; yanıt ("liste yok, bakabileceğim bir tuş da yok") bir ağ/API
+  hatasıyla (o zaman en azından bir hata metni görünürdü) değil, pencerenin **hiç kurulamadan** sessizce
+  başarısız olduğuna işaret ediyordu. `app.py`'deki `show_version_history` kodu satır satır yeniden okunduğunda
+  `lb = tk.Listbox(..., bg=PAL["panel"], ...)` ve `notes_txt = tk.Text(..., bg=PAL["panel"], ...)` satırları
+  bulundu — `ui_theme.PALETTES`'teki hiçbir temada (`dark`, `light`, `classic`, ne de ondan türeyen oyun
+  paketlerinde: `hunter`, `darkzone`, vb.) `panel` adlı bir anahtar yok (anahtarlar: `bg`, `surface`,
+  `surface2`, `fg`, `accent`, …). Bu satırlar çalışınca Python `KeyError: 'panel'` fırlatıyor; bu bir
+  Tkinter buton-komutu (callback) içinde olduğu için ve uygulamada `Tk.report_callback_exception` override'ı
+  bulunmadığı için hata ne bir diyalogla kullanıcıya gösteriliyor ne de `log.py` tabanlı uygulama loguna
+  yazılıyor (`--noconsole` build'de varsayılan Tk hatası stderr'e basılır, oraya kimse bakmaz) — sonuç:
+  tamamen sessiz, iz bırakmayan bir başarısızlık.
+- **Düzeltme:** İki `PAL["panel"]` kullanımı `PAL["surface"]` ile değiştirildi (dosyadaki tüm diğer
+  temalı Listbox/Text widget'larının kullandığı anahtarla aynı — bkz. örn. `self.lt_hist_txt`,
+  `self.enc_txt`, `self.diag_text`). Ardından `app.py`'deki tüm `PAL["…"]` kullanımları (`grep`) yeniden
+  tarandı; geçersiz başka bir anahtar kalmadığı doğrulandı.
+- **Doğrulama:** `ast.parse` (sözdizimi), `tests/test_core.py` + `tests/test_regression_crash_patterns.py`
+  (20/20 PASS — Tkinter bu konteynerde yok, bu yüzden pencerenin gerçek açılışı yalnızca Windows CI/gerçek
+  makinede doğrulanabilir). Bu tür bir hatanın bir daha sessizce geçmemesi için not: ileride benzer GUI
+  değişikliklerinde `PAL[...]` anahtarları mutlaka `ui_theme.PALETTES["dark"]`'ın gerçek anahtar kümesiyle
+  karşılaştırılmalı; ayrıca bu sınıfın (`Tk.report_callback_exception` yokluğu) bir sonraki fırsatta genel
+  olarak ele alınması, benzer hataların geleceğe gizlenmesini önler (bkz. `TODO.md`/`ROADMAP.md`).
+
 ## Bu depoya dair AI-destekli geliştirme oturumları (genel not)
 
 Bu proje, farklı AI oturumlarının (bu oturum dahil) ardışık olarak çalıştığı bir geliştirme modeliyle sürdürülüyor. Her oturum kendi kapsamını `HANDOFF.md`'de bırakmalı. Bu depoya ayrıca bir "ChatGPT" oturumunun yaptığı iş (Android companion app `mobile/` + bazı güvenilirlik/tanılama işi) bu Claude oturumunda doğrulanıp `main`'e entegre edildi (9.1.5.18 merge'i).

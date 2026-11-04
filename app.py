@@ -145,7 +145,7 @@ import diagnostics_center
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.1.5.22"
+APP_VERSION = "9.1.5.23"
 FROZEN = getattr(sys, "frozen", False)
 BASE = Path(sys.executable).parent if FROZEN else Path(__file__).resolve().parent
 TASKS_CACHE = BASE / "tasks_cache.json"  # son indirilen görev listesi
@@ -8893,14 +8893,14 @@ class App:
         ttk.Label(w, text=t("upd.history_title"), style="Title.TLabel").pack(anchor="w", padx=14, pady=(12, 2))
         ttk.Label(w, text=t("upd.history_note", v=APP_VERSION), wraplength=600, justify="left").pack(anchor="w", padx=14, pady=(0, 8))
         body = ttk.Frame(w); body.pack(fill="both", expand=True, padx=14, pady=4)
-        lb = tk.Listbox(body, bg=PAL["panel"], fg=PAL["fg"], selectbackground=PAL["accent"], height=8, exportselection=False)
+        lb = tk.Listbox(body, bg=PAL["surface"], fg=PAL["fg"], selectbackground=PAL["accent"], height=8, exportselection=False)
         sb = ttk.Scrollbar(body, orient="vertical", command=lb.yview); lb.configure(yscrollcommand=sb.set)
         lb.pack(side="left", fill="both", expand=True); sb.pack(side="right", fill="y")
         status = ttk.Label(w, text=t("upd.history_loading"), foreground=PAL["muted"]); status.pack(anchor="w", padx=14, pady=4)
 
         # ---- seçili sürümün notları / bilinen sorunları (GitHub release metni) ----
         nb = ttk.LabelFrame(w, text=t("upd.notes_label")); nb.pack(fill="both", expand=True, padx=14, pady=(2, 6))
-        notes_txt = tk.Text(nb, bg=PAL["panel"], fg=PAL["fg"], wrap="word", height=10, state="disabled",
+        notes_txt = tk.Text(nb, bg=PAL["surface"], fg=PAL["fg"], wrap="word", height=10, state="disabled",
                              relief="flat", padx=8, pady=6)
         notes_sb = ttk.Scrollbar(nb, orient="vertical", command=notes_txt.yview); notes_txt.configure(yscrollcommand=notes_sb.set)
         notes_txt.pack(side="left", fill="both", expand=True); notes_sb.pack(side="right", fill="y")

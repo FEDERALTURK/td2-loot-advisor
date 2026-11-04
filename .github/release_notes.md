@@ -1,5 +1,10 @@
 ## TD2 Loot Advisor — Windows
 
+**9.1.5.23 — Sürüm geçmişi penceresi açılmıyordu, düzeltildi**
+
+- **"Sürüm geçmişi" penceresi artık gerçekten açılıyor.** 9.1.5.22'de eklenen özellik (herhangi bir sürümü seçip kurma) kodda var olmayan bir renk anahtarına (`PAL["panel"]`) başvurduğu için pencere kurulurken sessizce başarısız oluyordu — ne liste, ne buton, hiçbir hata mesajı görünmüyordu. Doğru anahtara (`PAL["surface"]`) düzeltildi; pencere artık normal şekilde açılıp sürüm listesini dolduruyor.
+- Bu hata, 9.1.5.20'nin gerçek Windows testinde not edilmiş ama kök nedeni o zaman bulunamamış olan "içerik listesi boş kaldı" gözlemiyle aynı hataydı — artık kapandı.
+
 **9.1.5.22 — Sürüm geçmişinden herhangi bir sürümü kurma + bilinen sorunlar paneli**
 
 - **"Sürüm geçmişi" penceresi artık geri dönüşle sınırlı değil.** Ayarlar → Genel → Güncellemeler → "Sürüm geçmişi"nde listelenen herhangi bir sürümü (eski, yeni veya beta) seçip kurabilirsin; yalnızca zaten kurulu olan sürüm engellenir (listede "✓" ile işaretli).
