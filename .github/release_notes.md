@@ -431,3 +431,9 @@ Bu dosyalar GitHub Actions'ta otomatik derlendi; kurulum dosyası Windows'ta ses
 - Kaynak/run.bat kullananlarda proje içindeki `models/en-tr` davranışı değişmez.
 - Model indirme ve sonraki açılışta model bulma yolu aynılaştırıldı.
 
+## 9.1.5.25
+
+- Yeni: oyun kapandığında "Bu oturumda ne kazandın?" özeti — o oturumda taranan eşya sayısı, saklanan/kırılan/düşünülen dağılımı, egzotik/adlı eşyalar, build yükseltmeleri ve **tahmini kazanılan süre**.
+- Ayarlar → Hizmet sayfasına bu özetin otomatik açılmasını kapatma seçeneği eklendi; tepsi menüsünden de her zaman tekrar açılabilir.
+- Sağlamlaştırma: bilinen 3 küçük hata kapatıldı (sürüm geçmişi/çizim/pencere imleci alt yapısı) ve mobil companion'a (Flutter) FCM/APNs push bildirimi kaydı eklendi.
+

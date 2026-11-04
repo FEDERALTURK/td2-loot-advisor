@@ -145,7 +145,12 @@ import diagnostics_center
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.1.5.24"
+APP_VERSION = "9.1.5.25"
+# "Bu oturumda ne kazandın?" özeti için kaba tahmin: bir eşyayı elle inceleyip
+# build'e göre karar vermenin (istatistikleri okuma + karşılaştırma) ortalama
+# süresi, saniye. Gerçek bir ölçüm değil — yalnızca arayüzde "tahmini" etiketiyle
+# gösterilen bir gösterge (bkz. App._session_time_saved_min).
+SESSION_SAVE_SEC_PER_ITEM = 12
 FROZEN = getattr(sys, "frozen", False)
 BASE = Path(sys.executable).parent if FROZEN else Path(__file__).resolve().parent
 TASKS_CACHE = BASE / "tasks_cache.json"  # son indirilen görev listesi
@@ -204,7 +209,7 @@ DEFAULTS = {"scan_mode": "hotkey", "auto_interval_ms": 700, "auto_record": True,
             "fx_cursor": True, "fx_cursor_style": "crosshair", "fx_cursor_color": "#ff6d10", "fx_cursor_custom": "",
             "fx_trail": True, "fx_trail_color": "#ff6d10", "fx_trail_len": 18, "fx_transitions": True,
             "fx_video": True, "fx_video_dim": 0.35, "fx_transition_ms": 260, "fx_transition_style": "tactical", "ui_nav_layout": "tactical", "ui_layout": "standard", "fx_bgwatch": True, "fx_bgwatch_dim": 0.0, "event_fx": "standard",
-            "res_profile": "auto", "ocr_engine": "auto", "ocr_gpu": "auto", "license_key": "", "update_check": True, "update_last": 0, "update_skip": "", "stash_record": True, "vendor_mode": False, "vendor_auto": True, "drop_share": False, "drop_asked": False, "drop_activity": "none", "drop_server": "", "drop_client": "", "vision_ok": False, "vendor_notified": "", "companion_port": 8765, "svc_tray": True, "svc_close_to_tray": False, "svc_auto_run": True, "smart_scan": True, "api_on": False, "api_port": 8766, "api_lan": False, "api_control": True, "api_token": "", "rpc_on": False, "rpc_client_id": "", "push_on": False, "push_topic": "", "push_webhook": "", "push_drop": True, "push_build": True, "push_vendor": True, "push_session": True, "agent_model": "operator", "agent_outfit": "night", "agent_skin": 1, "ocr_threshold": 170, "ocr_scale": "auto", "ocr_psm": 6, "ocr_passes": 3,
+            "res_profile": "auto", "ocr_engine": "auto", "ocr_gpu": "auto", "license_key": "", "update_check": True, "update_last": 0, "update_skip": "", "stash_record": True, "vendor_mode": False, "vendor_auto": True, "drop_share": False, "drop_asked": False, "drop_activity": "none", "drop_server": "", "drop_client": "", "vision_ok": False, "vendor_notified": "", "companion_port": 8765, "svc_tray": True, "svc_close_to_tray": False, "svc_auto_run": True, "svc_session_popup": True, "smart_scan": True, "api_on": False, "api_port": 8766, "api_lan": False, "api_control": True, "api_token": "", "rpc_on": False, "rpc_client_id": "", "push_on": False, "push_topic": "", "push_webhook": "", "push_drop": True, "push_build": True, "push_vendor": True, "push_session": True, "agent_model": "operator", "agent_outfit": "night", "agent_skin": 1, "ocr_threshold": 170, "ocr_scale": "auto", "ocr_psm": 6, "ocr_passes": 3,
             "overlay_mode": "card", "overlay_alpha": 0.94, "overlay_size": 1.0, "ui_depth": True,
             "meta_sync": True, "meta_feed_url": "", "meta_last_try": 0, "meta_last_sync": "", "meta_version": "",
             "meta_hidden": [], "tasks_sync": True, "auto_reset_times": True,
@@ -1584,6 +1589,7 @@ class App:
         self._acc_apply()
         log.info("Tier: %s (key=%s, account=%s)", self.ent.tier, self.ent.reason, self.ent.ent_reason)
         self.sessions = service.SessionLog(SESSIONS_PATH)
+        self._last_session = None  # "Bu oturumda ne kazandın?" — son tamamlanan oturum (tepsi menüsünden tekrar açılabilir)
         self.screen = screenstate.Detector(SCREEN_PATH)
         self.game_state, self.game_on, self._auto_started = "unknown", False, False
         self.notifier, self.presence, self.api, self.tray, self.watcher = notify.Notifier(), None, None, None, None
@@ -3557,12 +3563,70 @@ class App:
             if self._auto_started and self.running: self.stop(quiet=True)
             self._auto_started = False
             if c and c["scanned"]:
+                self._last_session = c
                 mins = max(1, (c["end"] - c["start"]) // 60)
                 body = t("push.session_body", mins=mins, n=c["scanned"], keep=c["keep"], dis=c["dismantle"], ex=c["exotic"], named=c["named"])
                 if c["highlights"]: body += "\n" + " · ".join(c["highlights"][-6:])
                 self._push("session", "🎮 " + t("push.session_title"), body)
+                # "Bu oturumda ne kazandın?" penceresi: sessiz tepside çalışırken (pencere
+                # withdraw edilmişken) odağı çalmamak için pop-up'ı atlıyoruz; özet
+                # _last_session'da tutulur, tepsi menüsünden her zaman tekrar açılabilir.
+                if st.get("svc_session_popup", True) and self.root.state() != "withdrawn":
+                    self.root.after(500, lambda cc=c: self._show_session_summary(cc))
         self._service_publish(kind="game")
         self.refresh_header()
+
+    # --- "Bu oturumda ne kazandın?" özeti
+    def _session_time_saved_min(self, c):
+        """Elle inceleme süresine kıyasla tahmini kazanılan süre (dakika).
+        Varsayım: taranan her eşyayı elle inceleyip build'e göre karar vermek
+        (istatistikleri okuma + karşılaştırma) ortalama SESSION_SAVE_SEC_PER_ITEM
+        saniye sürer; programın kararı anında geldiği için bu süre kazanılmış
+        sayılır. Kesin bir ölçüm değildir — yalnızca kaba bir gösterge, bu yüzden
+        arayüzde her zaman "tahmini" etiketiyle gösterilir."""
+        return max(0, round((c or {}).get("scanned", 0) * SESSION_SAVE_SEC_PER_ITEM / 60, 1))
+
+    def _show_last_session_summary(self):
+        """Tepsi menüsünden: en son tamamlanmış oturumun özetini (varsa) tekrar gösterir."""
+        self.tray_show()
+        self._show_session_summary(self._last_session)
+
+    def _show_session_summary(self, c):
+        """Bir oyun oturumu bittiğinde (veya tepsi menüsünden istenince) özet penceresi.
+        SessionLog.end()'in döndürdüğü veriyi kullanır, yeni bir ölçüm yapmaz."""
+        if not c:
+            return self.toast(t("session.none_yet"))
+        w = tk.Toplevel(self.root); w.title(t("session.summary_title")); w.geometry("480x540")
+        w.minsize(440, 460); w.transient(self.root); w.configure(bg=PAL["bg"])
+        mins = max(1, (c["end"] - c["start"]) // 60) if c.get("end") and c.get("start") else 0
+        saved = self._session_time_saved_min(c)
+        ttk.Label(w, text="🎮 " + t("session.summary_title"), style="Title.TLabel").pack(anchor="w", padx=16, pady=(14, 2))
+        ttk.Label(w, text=t("session.duration", mins=mins), foreground=PAL["muted"]).pack(anchor="w", padx=16)
+        saved_box = ttk.Frame(w); saved_box.pack(fill="x", padx=16, pady=(10, 6))
+        ttk.Label(saved_box, text=t("session.time_saved", mins=saved), style="Title.TLabel",
+                  foreground=PAL["success"]).pack(anchor="w")
+        ttk.Label(saved_box, text=t("session.time_saved_note"), foreground=PAL["muted"],
+                  wraplength=440, justify="left").pack(anchor="w", pady=(2, 0))
+        ttk.Separator(w).pack(fill="x", padx=16, pady=8)
+        ttk.Label(w, text=t("session.scanned", n=c.get("scanned", 0))).pack(anchor="w", padx=16)
+        cv = tk.Canvas(w, bg=PAL["bg"], highlightthickness=0, height=110)
+        cv.pack(fill="x", padx=16, pady=(4, 6))
+        data = [(verdict_label(v), c.get(v.lower(), 0), COLORS[v]) for v in ("KEEP", "CONSIDER", "DISMANTLE")]
+        w.after(50, lambda: draw_bars(cv, t("session.breakdown"), data))
+        bits = []
+        if c.get("exotic"): bits.append(t("session.exotic_n", n=c["exotic"]))
+        if c.get("named"): bits.append(t("session.named_n", n=c["named"]))
+        if c.get("upgrades"): bits.append(t("session.upgrades_n", n=c["upgrades"]))
+        if bits:
+            ttk.Label(w, text=" · ".join(bits), foreground=PAL["accent"]).pack(anchor="w", padx=16, pady=(2, 6))
+        if c.get("highlights"):
+            hl = ttk.LabelFrame(w, text=t("session.highlights_label")); hl.pack(fill="both", expand=True, padx=16, pady=(4, 8))
+            txt = tk.Text(hl, bg=PAL["surface"], fg=PAL["fg"], wrap="word", height=5,
+                          relief="flat", padx=8, pady=6)
+            txt.insert("1.0", "\n".join(c["highlights"][-10:]))
+            txt.config(state="disabled")
+            txt.pack(fill="both", expand=True)
+        ttk.Button(w, text=t("upd.close"), command=w.destroy, style="Accent.TButton").pack(anchor="e", padx=16, pady=(0, 14))
 
     def _screen_observe(self, small):
         """Tarama döngüsünden (arka plan) — ekran durumu; değişince arayüze bildirir."""
@@ -3726,6 +3790,7 @@ class App:
         ui = lambda f: (lambda: self.root.after(0, f))
         self.tray = service.Tray(APP_NAME, img, [(t("svc.tray_open"), ui(self.tray_show)),
                                                  (t("svc.tray_toggle"), ui(lambda: (self.stop if self.running else self.start)())),
+                                                 (t("svc.tray_last_session"), ui(self._show_last_session_summary)),
                                                  None, (t("svc.tray_quit"), ui(lambda: self.on_close(force=True)))])
         if self.tray.available: self.tray.start()
         else: log.info("Tray: pystray not installed")
@@ -3760,6 +3825,7 @@ class App:
         # 1) arka plan
         g = ttk.LabelFrame(f, text="🎮 " + t("svc.box_game")); g.pack(fill="x", padx=10, pady=(10, 6))
         chk(g, "svc_auto_run", t("svc.auto_run"))
+        chk(g, "svc_session_popup", t("svc.session_popup"))
         chk(g, "svc_tray", t("svc.tray"), cmd=lambda: (self.tray_start() if st.get("svc_tray") else (self.tray and self.tray.stop(), setattr(self, "tray", None))))
         chk(g, "svc_close_to_tray", t("svc.close_to_tray"))
         av = tk.BooleanVar(value=service.autostart_get())

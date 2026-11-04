@@ -186,6 +186,38 @@ Bu seri, Linux/Xvfb testlerinin yakalayamadığı, yalnızca gerçek Windows + D
   oturum veya kullanıcı bunu Windows PC'sinde (Flutter zaten kurulu ve doğrulanmış, bkz. yukarısı)
   çalıştırmalı. Ayrıntı ve gerekçe: `BUGS.md` #6, `docs/mobile_companion_roadmap.md`.
 
+### Yeni özellik: "Bu oturumda ne kazandın?" oturum özeti (2026-11-04)
+
+- **Amaç**: Kullanıcının envanterde harcadığı zamanı azaltmak olan proje hedefini somutlaştıran bir
+  "wow" anı — oyun kapandığında (veya tepsi menüsünden istenince) o oturumda ne kadar eşya tarandığını,
+  kaç tanesinin saklanıp/kırıldığını ve **tahmini kazanılan süreyi** gösteren bir özet penceresi.
+- **Veri kaynağı**: Yeni bir ölçüm sistemi kurulmadı — mevcut `service.SessionLog` sınıfı (zaten
+  `scanned/keep/consider/dismantle/exotic/named/upgrades/highlights` tutuyordu) ve `App._game_event`'in
+  `"game"/"stopped"` dalındaki `self.sessions.end()` çağrısı olduğu gibi kullanıldı; önceden bu veri
+  sadece telefon push bildirimine gidiyordu, masaüstünde hiç gösterilmiyordu.
+- **Tahmini kazanılan süre**: `SESSION_SAVE_SEC_PER_ITEM = 12` (saniye/eşya) sabiti — "bir eşyayı elle
+  inceleyip build'e göre karar vermenin ortalama süresi" kabaca varsayımı. **Gerçek bir ölçüm değil**,
+  bilerek yalnızca kaba bir gösterge; arayüzde her yerde "tahmini" ibaresiyle gösteriliyor (bkz. proje
+  talimatları madde 5: "gerçek olmayan işlevleri tamamlanmış gibi sunma").
+  `App._session_time_saved_min(c) = round(c["scanned"] * 12 / 60, 1)` dakika.
+- **Eklenenler** (`app.py`): `App._show_session_summary(c)` (yeni `Toplevel` penceresi; `show_version_history`
+  ile aynı stil kalıbı, `draw_bars`/`COLORS`/`verdict_label` ile mevcut İstatistik sekmesiyle görsel tutarlılık),
+  `App._session_time_saved_min(c)`, `App._show_last_session_summary()` (tepsi menüsü girişi için). `_game_event`
+  artık `self._last_session = c` tutuyor ve yeni `svc_session_popup` ayarı (varsayılan açık) açıksa **ve**
+  pencere tepside gizli değilse (`self.root.state() != "withdrawn"`) pencereyi otomatik açıyor — sessiz
+  tepside çalışırken odağı çalmamak için pop-up atlanıyor, ama özet `_last_session`'da kalıyor ve tepsi
+  menüsündeki yeni "📊 Son oturum özeti" girişiyle her zaman tekrar açılabiliyor. Ayarlar sayfasına
+  (`build_service_page`) "Oyun kapanınca oturum özetini göster" onay kutusu eklendi.
+- **Çeviri**: 10 dilin hepsine (`lang/*.json`) `session.*` (summary_title, duration, time_saved,
+  time_saved_note, scanned, breakdown, exotic_n, named_n, upgrades_n, highlights_label, none_yet) ve
+  `svc.session_popup`/`svc.tray_last_session` anahtarları eklendi — mevcut raw-metin-ekleme kuralına
+  uyularak (tam `json.dump` yerine, var olan dosyaların satır bazlı yama'sı), `python3 -c "import json;
+  json.load(...)"` ile 10 dosyanın da geçerli JSON kaldığı doğrulandı.
+- **Doğrulama**: `python3 -I -m py_compile app.py` temiz geçti; `i18n` modülü ile 10 dilin tamamında
+  yeni anahtarlar gerçekten okunabiliyor mu (`i18n.missing_keys()` boş) test edildi. Gerçek bir Tkinter
+  penceresinin görsel olarak açılması bu (ekransız) konteynerde doğrulanamadı — kullanıcının programı
+  bir oturum sonunda çalıştırıp pencereyi görmesi gerekiyor.
+
 ## Bu depoya dair AI-destekli geliştirme oturumları (genel not)
 
 Bu proje, farklı AI oturumlarının (bu oturum dahil) ardışık olarak çalıştığı bir geliştirme modeliyle sürdürülüyor. Her oturum kendi kapsamını `HANDOFF.md`'de bırakmalı. Bu depoya ayrıca bir "ChatGPT" oturumunun yaptığı iş (Android companion app `mobile/` + bazı güvenilirlik/tanılama işi) bu Claude oturumunda doğrulanıp `main`'e entegre edildi (9.1.5.18 merge'i).
