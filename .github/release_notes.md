@@ -1,5 +1,12 @@
 ## TD2 Loot Advisor — Windows
 
+**9.1.5.24 — Sağlamlaştırma: bilinen 3 küçük hata kapatıldı**
+
+- **Fare izi efekti artık bazı durumlarda sessizce hata vermiyordu — düzeltildi.** `Canvas.lower()` çağrısı yanlış metodu (canvas-öge sıralaması yerine pencere sıralaması) tetikleyip `TclError` fırlatabiliyordu; kod düzeltildi.
+- **Genel güvenlik ağı: artık hiçbir arayüz hatası sessizce kaybolmuyor.** Daha önce 9.1.5.23'te düzeltilen "Sürüm geçmişi açılmıyordu" hatası gibi sorunlar bir dahaki sefere log dosyasına yazılacak, kullanıcıdan ekran görüntüsü beklemeden teşhis edilebilecek.
+- Özel imleç köprüsündeki bir uyarı (teorik, pratikte tetiklenmiyordu) için ek bir güvence eklendi.
+- Kullanıcıya görünür davranış değişikliği yok; bu tamamen sağlamlaştırma/önleyici bir sürüm.
+
 **9.1.5.23 — Sürüm geçmişi penceresi açılmıyordu, düzeltildi**
 
 - **"Sürüm geçmişi" penceresi artık gerçekten açılıyor.** 9.1.5.22'de eklenen özellik (herhangi bir sürümü seçip kurma) kodda var olmayan bir renk anahtarına (`PAL["panel"]`) başvurduğu için pencere kurulurken sessizce başarısız oluyordu — ne liste, ne buton, hiçbir hata mesajı görünmüyordu. Doğru anahtara (`PAL["surface"]`) düzeltildi; pencere artık normal şekilde açılıp sürüm listesini dolduruyor.

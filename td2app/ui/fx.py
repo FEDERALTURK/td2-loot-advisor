@@ -171,7 +171,7 @@ class CursorFX:
         # Bir uygulamadaki tüm alt HWND'leri subclass etmek kararsızdır.
         # Tk zaten her alt widget'a @.cur atıyor; deneysel köprü yalnız ana
         # pencereye uygulanabilir.
-        if widget is not self.root:
+        if widget is not self.root or not hasattr(widget, "winfo_id"):
             return
         try:
             import ctypes
@@ -578,7 +578,10 @@ class SafeTrail:
         self.length = max(6, min(32, int(length)))
         self.cv = tk.Canvas(root, bg=root.cget("bg"), highlightthickness=0, bd=0)
         self.cv.place(x=0, y=0, relwidth=1, relheight=1)
-        self.cv.lower()
+        # NOT: self.cv.lower() ÇAĞIRMA — Canvas kendi .lower() metodunu canvas-öge (tag_lower)
+        # sözdizimiyle gölgeliyor; argümansız çağrılırsa Tcl "wrong # args" TclError fırlatır.
+        # Pencere yığın sırasında bu widget'ı geriye almak için Misc'in orijinal metodunu kullan.
+        tk.Misc.lower(self.cv)
         self.points, self.alive, self._job = [], True, None
         self._bind = root.bind("<Motion>", self._motion, add="+")
 

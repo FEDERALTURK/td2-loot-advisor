@@ -145,7 +145,7 @@ import diagnostics_center
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.1.5.23"
+APP_VERSION = "9.1.5.24"
 FROZEN = getattr(sys, "frozen", False)
 BASE = Path(sys.executable).parent if FROZEN else Path(__file__).resolve().parent
 TASKS_CACHE = BASE / "tasks_cache.json"  # son indirilen görev listesi
@@ -1545,6 +1545,7 @@ class App:
         # Show the lightweight intro while the rest of the app prepares.
         display.set_dpi_aware()
         self.root = tk.Tk()
+        self.root.report_callback_exception = self._tk_callback_exception
         self._intro = None
         if not os.environ.get("TD2_NO_SPLASH"):
             self.root.withdraw()
@@ -9583,6 +9584,15 @@ class App:
             plain = line.strip()
             box.insert("end", line, ("h",) if plain and plain == plain.upper() and any(c.isalpha() for c in plain) else ())
         box.config(state="disabled")
+
+    def _tk_callback_exception(self, exc, val, tb):
+        """Tkinter varsayılanı (--noconsole build'de hiçbir yere görünmeyen stderr basımı) yerine:
+        her callback (buton komutu, after(), bind) hatasını app.log'a yazar. Böylece örn.
+        PAL[...] KeyError gibi sessiz GUI hataları bir daha hiç iz bırakmadan kaybolmaz."""
+        try:
+            log.error("Tk callback hatası: %s", val, exc_info=(exc, val, tb))
+        except Exception:
+            pass
 
     def on_close(self, force=False):
         st0 = self.cfg["settings"]
