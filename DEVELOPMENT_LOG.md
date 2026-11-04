@@ -2,6 +2,16 @@
 
 Önemli kararların ve sürümlerin kısa, kronolojik özeti. Tam ayrıntı için `git log` ve `.github/release_notes.md`.
 
+## 9.1.5.19 düzeltmelerinin gerçek Windows'ta doğrulanması (2026-11-04)
+
+- Kullanıcının bağlı Windows bilgisayarında (v9.1.5.20, kurulu/installer sürüm) computer-use (ekran görüntüsü + tıklama) ile üç senaryo manuel olarak test edildi:
+  1. **Ansiklopedi → "Wiki'de aç" düğmesi** (`webbrowser` global import düzeltmesi): "Acosta Kneepads" öğesinde tıklandı, Chrome yeni sekmede ilgili wiki sayfasını açtı, uygulama çökmedi/hata vermedi. ✅
+  2. **Ayarlar → Genel → Sürüm geçmişi** (`except...as X` kapanış-değişkeni düzeltmesi, Sürüm Geçmişi yükleme hatası yolu): pencere açıldı, başlık metni göründü, içerik listesi boş kaldı (ayrı, teşhis edilmemiş bir görüntü davranışı — bkz. not altında) ama **hiçbir çökme/hata diyaloğu çıkmadı**. ✅ (çökme açısından)
+  3. **Ayarlar → Hizmetler → Tanılama Merkezi → "Sorunları tara"** (aynı `except...as X` bug sınıfının asıl kaynağı — hata bildirimi `root.after` lambda'sı): tarama çalıştırıldı, sonuç bildirimi ("Tanılama bitti: 0 hata, 1 uyarı") üstte bildirim olarak göründü, olay kaydına INFO satırları eklendi, uygulama tamamen yanıt verir durumda kaldı. ✅
+- Üçü de çökmesiz tamamlandı; 9.1.5.19'daki iki `NameError` çökmesinin gerçek Windows + DWM render yolunda da düzeldiği doğrulandı (önceden yalnızca Linux/Xvfb'de doğrulanmıştı).
+- Not: "Sürüm geçmişi" penceresindeki boş liste alanı ayrı bir gözlem — kök nedeni araştırılmadı (muhtemelen GitHub Releases API'sinden veri çekme/gösterme ile ilgili, çökme hatasından bağımsız bir görüntü sorunu olabilir). Kayıt altına alındı, aktif olarak izlenmiyor.
+- Sonuç: BUGS.md #5 ("Gerçek Windows render testi henüz yapılmadı") çözüldü olarak işaretlendi.
+
 ## Akış boyut sınırı: sıkıştırma ve ikinci açıklama dosyası (2026-11-03)
 
 - Uygulama 512 KiB'tan büyük akışı reddediyor (`meta_sync.MAX_BYTES`). `descriptions_i18n.json` 520.801, `game_data.json` 522.958 bayta ulaşmıştı.

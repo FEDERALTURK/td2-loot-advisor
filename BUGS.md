@@ -23,7 +23,7 @@
 
 ## Doğrulanmamış / gerçek Windows'ta teyit gerekli
 
-5. **Gerçek Windows render testi henüz yapılmadı.** Bu düzeltmeler Linux + Xvfb'de doğrulandı; gerçek Windows + DWM/DX12 render yolu geçmişte (9.1.5.10–9.1.5.17) birkaç kez Linux testinin yakalayamadığı görsel hatalar çıkarmıştı. Bağlı Windows bilgisayarı üzerinden gerçek doğrulama ayrıca planlandı (bkz. HANDOFF.md "Sıradaki adım").
+5. ✅ **Gerçek Windows render testi yapıldı (2026-11-04).** Bağlı Windows bilgisayarında (v9.1.5.20) computer-use ile üç senaryo manuel test edildi: Ansiklopedi "Wiki'de aç" düğmesi, Ayarlar → Sürüm geçmişi, Tanılama Merkezi → "Sorunları tara" (hata bildirimi yolu). Üçünde de çökme/hata diyaloğu oluşmadı — 9.1.5.19'daki iki `NameError` düzeltmesi gerçek Windows + DWM render yolunda doğrulandı. Ayrıntı: `DEVELOPMENT_LOG.md`. Küçük, çökmeyle ilgisiz bir gözlem: Sürüm geçmişi penceresinin içerik listesi boş kaldı — kök nedeni araştırılmadı, ayrı bir görüntü/veri-yükleme konusu olabilir, izlemeye değer ama acil değil.
 6. **Mobil companion (`mobile/`, Flutter) bu oturumda build/test edilmedi.** Sadece dosya varlığı ve sır taraması yapıldı.
 7. **`server/test_*.mjs` (Node.js sunucu testleri) bu oturumda çalıştırılmadı.**
 

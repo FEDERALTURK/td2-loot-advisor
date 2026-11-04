@@ -20,7 +20,7 @@ Son güncelleme: bu dosyayı güncelleyen oturumun yaptığı iş — 9.1.5.19 y
 
 ## Bir sonraki oturumun yapabileceği, teknik olarak hazır işler
 
-- **Gerçek Windows testi artık mümkün**: Bu oturumda `C:\Users\PC\Desktop\Thedivision2program` klasörünün bağlı bir Windows bilgisayarına (win32, `mcp__remote-devices__get_device_info` ile doğrulandı) erişim olduğu görüldü. O makinede `device_bash` yok (shell erişimi yok), ama **computer-use** (ekran görüntüsü + tıklama/klavye) ile uygulama gerçekten açılıp Tanılama Merkezi, Ansiklopedi "Kaynağı aç" düğmeleri ve Sürüm Geçmişi ekranı manuel olarak tıklanarak 9.1.5.19 düzeltmeleri gerçek Windows'ta görsel olarak doğrulanabilir. Bu, "Linux+Xvfb testi geçti ama gerçek Windows'ta doğrulanmadı" boşluğunu kapatır (bkz. BUGS.md #5).
+- ✅ **Gerçek Windows testi yapıldı (2026-11-04).** Bağlı Windows bilgisayarında (win32, `mcp__remote-devices__get_device_info` ile doğrulandı, `device_bash`/shell yok ama computer-use var) uygulama v9.1.5.20 olarak açıldı ve üç senaryo tıklanarak doğrulandı: Ansiklopedi "Wiki'de aç" düğmesi, Ayarlar → Sürüm geçmişi, Tanılama Merkezi → "Sorunları tara" (hata bildirimi yolu). Üçünde de çökme olmadı. Ayrıntı: `DEVELOPMENT_LOG.md`, `BUGS.md` #5 (artık ✅). Küçük, ayrı bir gözlem: Sürüm geçmişi penceresinin içerik listesi boş kaldı — çökmeyle ilgisiz, kök nedeni henüz araştırılmadı.
 - **mobile/ (Flutter) ve server/ (Node.js/Cloudflare Workers) testleri hiç çalıştırılmadı** — ikisi de bu depoda mevcut, ayrı bir oturumda ele alınabilir.
 
 ## Güvenlik/kısıt hatırlatmaları (tüm oturumlar için geçerli)
