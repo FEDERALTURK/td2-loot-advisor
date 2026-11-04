@@ -11,6 +11,15 @@ Bu dosya olmadan `Firebase.initializeApp()` sessizce başarısız olur (uygulama
 en-iyi-gayret tasarımı) — yani bu adım tamamlanana kadar push bildirimi
 telefonda hiç çalışmaz, ama programın geri kalanı etkilenmez.
 
+## Durum: 1-3 arası tamamlandı (2026-11-04), kalan adımlar aşağıda
+
+Firebase konsolunda Android uygulaması (`com.federalturk.td2companion`) eklendi ve
+`google-services.json` indirilip doğrudan kullanıcının PC'sindeki depo kopyasına
+(`C:\Users\PC\Desktop\Thedivision2program\mobile\android\app\google-services.json`)
+yazıldı — bu dosya `.gitignore`'da olduğu için git'e hiç girmedi, yalnızca o PC'de var.
+**Kalan**: o PC'de `git pull` (bu oturumun push-token kodunu çekmek için) + 4. maddedeki
+tek satırın yorumunu kaldırmak + 5. maddedeki doğrulama.
+
 ## Yapılacaklar (tek seferlik, Firebase konsolunda)
 
 1. https://console.firebase.google.com → mevcut proje **`td2-loot-advisor`**
