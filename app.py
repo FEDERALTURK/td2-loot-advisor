@@ -8887,18 +8887,36 @@ class App:
             except Exception: pass
 
     def show_version_history(self):
-        """Kullanıcının açık onayıyla eski bir GitHub sürümüne dönmesini sağlar."""
-        w = tk.Toplevel(self.root); w.title(t("upd.history_title")); w.geometry("620x430"); w.transient(self.root)
+        """Kullanıcının açık onayıyla istediği herhangi bir GitHub sürümünü (eski ya da yeni) kurmasını sağlar."""
+        w = tk.Toplevel(self.root); w.title(t("upd.history_title")); w.geometry("640x560"); w.minsize(560, 460); w.transient(self.root)
         w.configure(bg=PAL["bg"])
         ttk.Label(w, text=t("upd.history_title"), style="Title.TLabel").pack(anchor="w", padx=14, pady=(12, 2))
-        ttk.Label(w, text=t("upd.history_note", v=APP_VERSION), wraplength=580, justify="left").pack(anchor="w", padx=14, pady=(0, 8))
+        ttk.Label(w, text=t("upd.history_note", v=APP_VERSION), wraplength=600, justify="left").pack(anchor="w", padx=14, pady=(0, 8))
         body = ttk.Frame(w); body.pack(fill="both", expand=True, padx=14, pady=4)
-        lb = tk.Listbox(body, bg=PAL["panel"], fg=PAL["fg"], selectbackground=PAL["accent"], height=12)
+        lb = tk.Listbox(body, bg=PAL["panel"], fg=PAL["fg"], selectbackground=PAL["accent"], height=8, exportselection=False)
         sb = ttk.Scrollbar(body, orient="vertical", command=lb.yview); lb.configure(yscrollcommand=sb.set)
         lb.pack(side="left", fill="both", expand=True); sb.pack(side="right", fill="y")
         status = ttk.Label(w, text=t("upd.history_loading"), foreground=PAL["muted"]); status.pack(anchor="w", padx=14, pady=4)
+
+        # ---- seçili sürümün notları / bilinen sorunları (GitHub release metni) ----
+        nb = ttk.LabelFrame(w, text=t("upd.notes_label")); nb.pack(fill="both", expand=True, padx=14, pady=(2, 6))
+        notes_txt = tk.Text(nb, bg=PAL["panel"], fg=PAL["fg"], wrap="word", height=10, state="disabled",
+                             relief="flat", padx=8, pady=6)
+        notes_sb = ttk.Scrollbar(nb, orient="vertical", command=notes_txt.yview); notes_txt.configure(yscrollcommand=notes_sb.set)
+        notes_txt.pack(side="left", fill="both", expand=True); notes_sb.pack(side="right", fill="y")
+
+        def set_notes(text):
+            notes_txt.config(state="normal"); notes_txt.delete("1.0", "end"); notes_txt.insert("1.0", text or t("upd.notes_empty"))
+            notes_txt.config(state="disabled")
+
         releases = []
-        rollback_btn = None
+        install_btn = None
+
+        def on_select(_e=None):
+            ix = lb.curselection()
+            if not ix or not releases: return
+            set_notes(releases[ix[0]].get("notes", ""))
+
         def load():
             nonlocal releases
             try:
@@ -8907,20 +8925,23 @@ class App:
                     lb.delete(0, "end")
                     for x in releases:
                         mark = " [BETA]" if x.get("prerelease") else ""
-                        lb.insert("end", f"{x['version']}{mark} — {x.get('name') or 'TD2 Loot Advisor'}")
+                        cur = " ✓" if updater.parse_version(x["version"]) == updater.parse_version(APP_VERSION) else ""
+                        lb.insert("end", f"{x['version']}{mark}{cur} — {x.get('name') or 'TD2 Loot Advisor'}")
                     status.config(text=t("upd.history_ready", n=len(releases)))
-                    rollback_btn.config(state="normal" if releases else "disabled")
+                    install_btn.config(state="normal" if releases else "disabled")
+                    if releases:
+                        lb.selection_set(0); on_select()
                 self.root.after(0, fill)
             except Exception as e:
                 err_msg = str(e)
                 self.root.after(0, lambda: status.config(text=t("upd.history_failed", e=err_msg)))
         bf = ttk.Frame(w); bf.pack(fill="x", padx=14, pady=10)
-        def rollback():
+        def install_selected():
             ix = lb.curselection()
             if not ix or not releases: return
             info = releases[ix[0]]
-            if not updater.newer(APP_VERSION, info["version"]):
-                return messagebox.showinfo(APP_NAME, t("upd.rollback_not_older"))
+            if updater.parse_version(info["version"]) == updater.parse_version(APP_VERSION):
+                return messagebox.showinfo(APP_NAME, t("upd.already_installed"))
             if FROZEN and not info.get("setup"):
                 return messagebox.showwarning(APP_NAME, t("upd.rollback_missing"))
             if not messagebox.askyesno(APP_NAME, t("upd.rollback_ask", old=APP_VERSION, new=info["version"])):
@@ -8929,9 +8950,12 @@ class App:
             w.destroy()
             self._upd_show(info)
             self.do_update()
-        rollback_btn = ttk.Button(bf, text=t("upd.rollback"), command=rollback, style="Accent.TButton", state="disabled")
-        rollback_btn.pack(side="left")
-        lb.bind("<Double-Button-1>", lambda e: rollback())
+        install_btn = ttk.Button(bf, text=t("upd.rollback"), command=install_selected, style="Accent.TButton", state="disabled")
+        install_btn.pack(side="left")
+        ttk.Button(bf, text="🐞 " + t("upd.known_issues"),
+                   command=lambda: webbrowser.open(f"https://github.com/{updater.REPO}/blob/main/BUGS.md")).pack(side="left", padx=8)
+        lb.bind("<<ListboxSelect>>", on_select)
+        lb.bind("<Double-Button-1>", lambda e: install_selected())
         ttk.Button(bf, text=t("upd.close"), command=w.destroy).pack(side="right")
         threading.Thread(target=load, daemon=True).start()
 

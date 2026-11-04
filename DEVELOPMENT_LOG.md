@@ -2,6 +2,30 @@
 
 Önemli kararların ve sürümlerin kısa, kronolojik özeti. Tam ayrıntı için `git log` ve `.github/release_notes.md`.
 
+## Sürüm geçmişi penceresi: herhangi bir sürümü kurma + bilinen sorunlar (2026-11-04)
+
+- Kullanıcı isteği: kullanıcıların programın içinden istedikleri bir sürümü kurabilecekleri bir alan ve
+  kurdukları sürümdeki bilinen sorunları görebilecekleri bir bölüm.
+- Önceden var olan "Sürüm geçmişi" penceresi (`app.py` → `show_version_history`) yalnızca **mevcut sürümden
+  eski** bir GitHub sürümüne dönüşe izin veriyordu (`upd.rollback_not_older` ile bloklanıyordu). Artık listedeki
+  **herhangi bir sürüm** (eski ya da yeni, beta dahil) seçilip kurulabiliyor; tek engel, zaten kurulu olan
+  sürümün seçilmesi (`upd.already_installed`).
+  - Liste satırında kurulu sürüm "✓" ile işaretlenir ve pencere açılışında ilk satır otomatik seçilir.
+- **Bilinen sorunlar / bu sürümde ne var:** Listede bir sürüm seçildiğinde, o GitHub Release'in notları (zaten
+  `updater.releases()` ile çekilen `notes` alanı — `.github/release_notes.md`'deki içerik) pencere içinde ayrı bir
+  kaydırılabilir metin alanında gösterilir. Ayrıca "🐞 Bilinen sorunlar (GitHub)" düğmesi, depodaki canlı
+  `BUGS.md`'yi tarayıcıda açar (her zaman en güncel durum).
+- Ağ/kurulum mantığında değişiklik yok (`updater.install_frozen`/`update_source` zaten yön bağımsız çalışıyor);
+  yalnızca UI kısıtlaması gevşetildi ve bilgi paneli eklendi.
+- i18n: `upd.history_title`, `upd.history_note`, `upd.history_ready`, `upd.rollback`, `upd.rollback_ask`
+  metinleri (eski "geri dönüş" dilinden "kurulum" diline) güncellendi; `upd.notes_label`, `upd.notes_empty`,
+  `upd.known_issues`, `upd.already_installed` eklendi. Önceden bu pencerenin metinleri **yalnızca tr/en**'de
+  vardı (diğer 8 dil İngilizce'ye düşüyordu) — bu fırsatla **10 dilin hepsine** tam çeviri eklendi
+  (`upd.history*`, `upd.rollback*`, `upd.close` dahil).
+- Doğrulama: `tests/test_core.py` PASS; `ast.parse(app.py)` ile sözdizimi doğrulandı (bu ortamda `tkinter` yok,
+  gerçek pencere açılış testi `tests/ui_update_shot.py` ile yalnız Windows CI'da çalışır — yayın akışında
+  (`build-installer.yml`) zaten tetiklenecek).
+
 ## Ansiklopedi: 30 kesik açıklama düzeltildi (asıl kapsam 13 değil 30) (2026-11-04)
 
 - Kullanıcı isteği "13 yarım ansiklopedi çevirisi" üzerine araştırma, asıl kapsamın **30 isim** olduğunu ortaya
