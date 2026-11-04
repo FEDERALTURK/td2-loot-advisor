@@ -1,5 +1,11 @@
 ## TD2 Loot Advisor — Windows
 
+**9.1.5.21 — Ansiklopedi düzeltmesi, ücretsiz kalibrasyon danışmanı, sunucu CI düzeltmesi**
+
+- **Ansiklopedide 30 kesik açıklama düzeltildi.** Bazı egzotik ve yetenek açıklamaları ("Eagle Bearer", "NinjaBike Messenger Bag" ve 28 isim daha) kaynak wiki verisinde sabit karakter sınırında (400 ya da ~190 karakterde) kelime ortasında kesilmişti; birkaçında bu durum çeviride görünür "…" ile, çoğunda ise gramer olarak tam görünen ama içerik eksik bir cümleyle sonuçlanıyordu. Tüm 30 açıklama, programın kendi oyun kütüphanesindeki (`game_data.json`) eksiksiz İngilizce kaynağa göre 9 dilde yeniden çevrildi.
+- **"Kalibrasyon danışmanı" artık ücretsiz.** Bu özellik topluluk build verisine (CC BY-NC-SA 4.0, ticari olmayan) dolaylı olarak dayandığı için artık hiçbir ücretli kapı arkasında değil; lisans gri alanı ortadan kalktı.
+- **Sunucu (bulut istatistik/hesap) tarafı derleme hatası düzeltildi.** `server/` dizininde eksik olan `package.json` eklendi; Cloudflare'nin otomatik derleme servisi artık her commit'te sorunsuz çalışıyor. Kullanıcı tarafında görünür bir etkisi yok.
+
 **9.1.5.20 — Hesap panelinde telefon eşleştirme**
 
 - **Yeni: "Telefon eşleştir" düğmesi.** Hesap panelinde, 5 dakika geçerli bir eşleştirme kodu üretir; bu kodu TD2 Loot Advisor Companion (Flutter) mobil uygulamasının "Bulut eşleştirmesi" ekranına girerek telefon, masaüstü hesabına bağlanabilir. Build senkronu ve bulut gösterge paneli bu bağlantı üzerinden çalışır; mevcut LAN/QR eşleştirmesine dokunulmadı, o ayrı ve bağımsız çalışmaya devam ediyor.
