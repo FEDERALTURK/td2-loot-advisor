@@ -106,16 +106,15 @@ başarıyla yüklendi, konsol hatası yok).
   yapmadı (önceki oturumlarda `git push --delete`/GitHub API `DELETE /git/refs` ortam politikasıyla engellenmiş,
   bkz. HANDOFF.md) — kullanıcı GitHub Settings → Branches'tan silebilir, düşük risk.
 - mxswat/mx-division-builds lisans sorusu — [issue #153](https://github.com/mxswat/mx-division-builds/issues/153) açıldı (2026-11-03, kullanıcının PC'sinde kendi GitHub oturumuyla), yanıt bekleniyor. (Bu repo bu oturumun GitHub erişim kapsamında değil, durumu doğrudan kontrol edilemedi.)
-- **Tanıtım videoları — render edildi (2026-11-04), yayın kararı bekliyor.** `td2-loot-advisor-reports` reposunun
-  `promo` dalındaki uçtan uca üretim pipeline'ı (`promo/run_all.sh`: Chatterbox Multilingual TTS seslendirme +
-  tamamen sentezlenmiş orijinal müzik + Pillow/ffmpeg render) ilk kez başarıyla çalıştırıldı. 4 dosya üretildi ve
-  kullanıcıya teslim edildi: `td2_promo_en_1080p.mp4` (1920×1080, ~59s), `td2_promo_tr_1080p.mp4` (1920×1080, ~66s),
+- ✅ **Tanıtım videoları — GitHub Release'e yayınlandı (2026-11-04, kullanıcı tarafından).** `td2-loot-advisor-reports`
+  reposunun `promo` dalındaki uçtan uca üretim pipeline'ı (`promo/run_all.sh`: Chatterbox Multilingual TTS
+  seslendirme + tamamen sentezlenmiş orijinal müzik + Pillow/ffmpeg render) başarıyla çalıştırıldı, 4 dosya üretildi:
+  `td2_promo_en_1080p.mp4` (1920×1080, ~59s), `td2_promo_tr_1080p.mp4` (1920×1080, ~66s),
   `td2_promo_en_vertical.mp4` (1080×1920, Shorts/Reels formatı, ~59s), `td2_promo_tr_vertical.mp4` (1080×1920, ~66s).
-  Her dosya ffprobe ile doğrulandı (h264+aac, doğru çözünürlük/süre, bozuk değil) ve örnek kareler görsel olarak
-  kontrol edildi. Üretim çıktıları (`promo/out/`, `promo/assets_*/`) bilinçli olarak git'e commit edilmedi
-  (`.gitignore`'a eklendi — build output, kaynak değil); videolar yalnızca kullanıcıya doğrudan teslim edildi.
-  **Kalan karar kullanıcıya ait:** bu videoların README'ye gömülmesi, bir GitHub Release asset'i olarak eklenmesi
-  ve/veya YouTube'a yüklenmesi — hiçbiri bu oturumda yapılmadı.
+  Her dosya ffprobe ile doğrulandı (h264+aac, doğru çözünürlük/süre, bozuk değil). EN+TR yatay versiyonlar kullanıcı
+  tarafından v9.1.5.20 (latest) GitHub Release notlarına eklendi, GitHub API ile doğrulandı. Üretim çıktıları
+  (`promo/out/`, `promo/assets_*/`) bilinçli olarak git'e commit edilmedi (`.gitignore`'a eklendi). **Kalan,
+  isteğe bağlı:** dikey versiyonların Shorts/Reels'e, herhangi birinin YouTube'a yüklenmesi — kullanıcı kararı.
 - **SignPath Foundation ücretsiz kod imzalama başvurusu — REDDEDİLDİ (2026-11-03).** signpath.org/apply formu
   dolduruldu (proje bilgileri, dürüst "Reputation" metni, `PRIVACY_POLICY.md` linki dahil) ve kullanıcı tarafından
   onaylanıp gönderilmişti. Phillip Deng (SignPath) imzalı yanıt (e-posta, 2026-11-03 17:37): *"we're unable to

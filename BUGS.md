@@ -14,7 +14,7 @@
 
 1. ✅ **`master` dalı silindi (2026-11-04, kullanıcı tarafından).** `git ls-remote`/GitHub API ile doğrulandı. Kalan dallar: `main` (tek doğru kaynak), `archive/master-superseded-2026-11-03` (eski yedek, isteğe bağlı temizlenebilir), `deploy/worker-bundle-temp` (geçici, "will be removed" olarak işaretli), `claude/descriptions-second-shard`.
 2. **mx-division-builds (CC BY-NC-SA 4.0) lisans gri alanı.** `recal_advisor` premium özelliği bu ticari-olmayan veriye dolaylı dokunuyor olabilir. `LICENSE_NOTES.md`'de belgelendi; mxswat'a soru [issue #153](https://github.com/mxswat/mx-division-builds/issues/153) ile soruldu (2026-11-03), yanıt bekleniyor (bkz. HANDOFF.md).
-3. **Tanıtım videoları render edildi, yayınlanmadı (2026-11-04).** Private `td2-loot-advisor-reports` reposundaki `promo` pipeline'ı çalıştırıldı; 4 video (EN/TR × yatay/dikey) üretildi ve kullanıcıya teslim edildi. `promo` dalı kendi `main`'ine hâlâ merge edilmedi (üretim çıktıları zaten git'e commit edilmiyor, bkz. `.gitignore`). README/Release/YouTube'a koyma kararı kullanıcıya ait — detay: `ROADMAP.md`.
+3. ✅ **Tanıtım videoları yayınlandı (2026-11-04, kullanıcı tarafından).** `td2_promo_en_1080p.mp4` ve `td2_promo_tr_1080p.mp4` v9.1.5.20 (latest) GitHub Release notlarına eklendi, GitHub API ile doğrulandı. Dikey (Shorts/Reels) versiyonları ve YouTube paylaşımı hâlâ isteğe bağlı — kullanıcı kararı.
 4. **SignPath Foundation (ücretsiz OSS kod imzalama) başvurusu reddedildi (2026-11-03).** Gerekçe: proje henüz
    yeterli kamuya görünürlük sinyaline (GitHub star/fork/katkıcı, dış makale/referans, kurumsal destek, sürekli
    aktivite) sahip değil — kod/proje kalitesiyle ilgisiz, tekrar başvuru açıkça teşvik ediliyor. Ayrıntı ve
