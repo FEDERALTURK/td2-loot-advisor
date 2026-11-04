@@ -16,6 +16,8 @@ tasks in your language. It never touches game memory. 10 interface languages; an
 **sakla / düşün / kır** der; eksik parçaları ve görevleri takip eder. Oyunun belleğine dokunmaz.
 Türkçe tam kılavuz: [`README.tr.md`](README.tr.md).
 
+> If this saves you time in your runs, a ⭐ **star** helps other players find it — thanks!
+
 ## Download
 
 **[Latest release → Releases](https://github.com/FEDERALTURK/td2-loot-advisor/releases/latest)**:

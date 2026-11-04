@@ -12,6 +12,8 @@ program kartı okur, oyunun eşya kütüphanesiyle doğrular, **aktif build'inle
 içinde **SAKLA / DÜŞÜN / KIR / KONTROL ET** der. Build'in eksik parçalarını takip eder, oyun görevlerini
 senin dilinde gösterir. 10 dil; herkes kendi dilini ekleyebilir.
 
+> İşine yarıyorsa bir ⭐ **yıldız** bırakman diğer oyuncuların da bulmasına yardımcı olur — teşekkürler!
+
 ## İndir
 
 **[En son sürüm → Releases](https://github.com/FEDERALTURK/td2-loot-advisor/releases/latest)**:
