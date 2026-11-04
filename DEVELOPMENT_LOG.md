@@ -218,6 +218,31 @@ Bu seri, Linux/Xvfb testlerinin yakalayamadığı, yalnızca gerçek Windows + D
   penceresinin görsel olarak açılması bu (ekransız) konteynerde doğrulanamadı — kullanıcının programı
   bir oturum sonunda çalıştırıp pencereyi görmesi gerekiyor.
 
+### Yeni özellik: "Build Karşılaştır" ekranı (2026-11-04, v9.1.5.26)
+
+- **Amaç**: Kullanıcının birden fazla build'i olduğunda hangisine odaklanmasının daha mantıklı olduğuna
+  karar vermesini kolaylaştırmak — iki build'i yan yana, yuva yuva tamamlanma durumuyla karşılaştıran
+  yeni bir ekran. Proje hedefi olan "envanterde harcanan zamanı azaltma"ya, bu kez build seçimi
+  aşamasında hizmet ediyor.
+- **Veri kaynağı**: Yine yeni bir ölçüm sistemi yok — mevcut `App.build_status`/`plan_of`/`self.progress`
+  (zaten "Build Planı" sekmesinin tek-build görünümünde kullanılıyordu) olduğu gibi iki build için
+  paralel çağrılıyor.
+- **Eklenenler** (`app.py`): `App._slots_shareable(req1, req2)` — iki yuva şartının aynı fiziksel eşyayla
+  karşılanıp karşılanamayacağının kaba tahmini (aynı özel eşya, ya da aynı çekirdek attribute + ortak
+  set/marka adı → "ortak kullanılabilir"; kesin bir garanti değil, sadece gösterge). `App.show_build_compare()`
+  — yeni `Toplevel` penceresi: iki `Combobox` ile build seçimi, her build için ilerleme çubuğu/yüzde,
+  8 yuvalık karşılaştırma tablosu (renk kodlu durum + `req_lines_short` ile kısa özet + "🔁 Ortak" etiketi),
+  ortak set/marka/özel eşya/talent listesi, ve hangi build'in tamamlanmaya daha yakın olduğu + diğerine
+  geçerken kaç yuva için farklı eşya gerekeceğinin (tahmini) özeti. "Build'ler" sekmesindeki sol panele
+  "🆚 Karşılaştır" düğmesi eklendi (varsayılan seçim: şu an açık build + listedeki ilk farklı build).
+- **Çeviri**: 10 dilin hepsine `cmp.*` (compare_btn, title, pick_a, pick_b, need_two, overlap, shared_sets,
+  shared_items, shared_talents, none, shareable, verdict_equal, verdict_closer, switch_cost) anahtarları
+  eklendi — aynı satır bazlı yama kuralıyla, 10 dosyanın da geçerli JSON kaldığı ve `i18n.missing_keys()`
+  boş döndüğü doğrulandı.
+- **Doğrulama**: `python3 -I -m py_compile app.py` temiz geçti; gerçek Tk penceresinin görsel render'ı bu
+  ekransız konteynerde teyit edilemedi (bkz. `BUGS.md` #12). "Ortak kullanılabilir eşya" tahmini kasıtlı
+  olarak kaba bir heuristik — gerçek roll kalitesini hesaba katmaz.
+
 ## Bu depoya dair AI-destekli geliştirme oturumları (genel not)
 
 Bu proje, farklı AI oturumlarının (bu oturum dahil) ardışık olarak çalıştığı bir geliştirme modeliyle sürdürülüyor. Her oturum kendi kapsamını `HANDOFF.md`'de bırakmalı. Bu depoya ayrıca bir "ChatGPT" oturumunun yaptığı iş (Android companion app `mobile/` + bazı güvenilirlik/tanılama işi) bu Claude oturumunda doğrulanıp `main`'e entegre edildi (9.1.5.18 merge'i).

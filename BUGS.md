@@ -48,6 +48,8 @@
 
 11. **Yeni özellik: "Bu oturumda ne kazandın?" oturum özeti (2026-11-04, v9.1.5.25) — görsel doğrulama gerçek Windows'ta yapılmadı.** `App._show_session_summary` yeni bir `Toplevel` penceresi açıyor; `python3 -m py_compile` ile sözdizimi ve `i18n.missing_keys()` ile 10 dilin tamamında çeviri anahtarlarının varlığı doğrulandı, ama bu (ekransız) konteynerde gerçek bir Tk penceresi render edilip gözle kontrol edilemedi. Kullanıcının bir oyun oturumu bitirip (veya tepsi menüsünden "📊 Son oturum özeti"yle) pencereyi gerçekten görmesi, düzen/kaydırma/metin taşması sorunu olup olmadığını teyit etmesi gerekiyor. "Tahmini kazanılan süre" rakamı kasıtlı olarak kaba bir tahmindir (`SESSION_SAVE_SEC_PER_ITEM = 12` sabiti, bkz. `app.py` ve `DEVELOPMENT_LOG.md`) — gerçek bir ölçüm değildir.
 
+12. **Yeni özellik: "Build Karşılaştır" ekranı (2026-11-04, v9.1.5.26) — görsel doğrulama gerçek Windows'ta yapılmadı.** `App.show_build_compare`/`App._slots_shareable` yeni bir `Toplevel` penceresi açıyor; `python3 -m py_compile` ve 10 dilde `i18n.missing_keys()` boş çıktı ile doğrulandı, ama bu (ekransız) konteynerde gerçek render/düzen gözle kontrol edilemedi. "Ortak kullanılabilir eşya" ve "tahmini geçiş maliyeti" hesapları kasıtlı olarak kaba bir tahmindir (aynı çekirdek attribute + ortak set/marka adı varsa "ortak" sayılıyor; gerçek roll kalitesi/attribute kombinasyonunu hesaba katmaz) — kullanıcının en az 2 build'i olan gerçek bir profille ekranı açıp kontrol etmesi gerekiyor.
+
 ## Bilinen test kapsamı boşlukları
 
 - `webbrowser`/except-closure hata sınıfı için statik AST taraması var (`tests/test_regression_crash_patterns.py`), ama gerçek Tk buton `invoke()` ile uçtan uca test yok.

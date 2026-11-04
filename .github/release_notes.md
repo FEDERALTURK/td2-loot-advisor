@@ -437,3 +437,8 @@ Bu dosyalar GitHub Actions'ta otomatik derlendi; kurulum dosyası Windows'ta ses
 - Ayarlar → Hizmet sayfasına bu özetin otomatik açılmasını kapatma seçeneği eklendi; tepsi menüsünden de her zaman tekrar açılabilir.
 - Sağlamlaştırma: bilinen 3 küçük hata kapatıldı (sürüm geçmişi/çizim/pencere imleci alt yapısı) ve mobil companion'a (Flutter) FCM/APNs push bildirimi kaydı eklendi.
 
+## 9.1.5.26
+
+- Yeni: **Build Karşılaştır** ekranı (Build'ler sekmesi → "🆚 Karşılaştır") — iki build'i yan yana, yuva yuva tamamlanma durumuyla karşılaştırır; ortak set/marka/özel eşya/talent'leri ve hangi yuvaların aynı fiziksel eşyayla paylaşılabileceğini (tahmini) gösterir.
+- Hangi build'in tamamlanmaya daha yakın olduğu ve diğerine geçerken kaç yuva için farklı eşya gerekeceği (tahmini) özetleniyor.
+

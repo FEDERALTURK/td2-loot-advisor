@@ -145,7 +145,7 @@ import diagnostics_center
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.1.5.25"
+APP_VERSION = "9.1.5.26"
 # "Bu oturumda ne kazandın?" özeti için kaba tahmin: bir eşyayı elle inceleyip
 # build'e göre karar vermenin (istatistikleri okuma + karşılaştırma) ortalama
 # süresi, saniye. Gerçek bir ölçüm değil — yalnızca arayüzde "tahmini" etiketiyle
@@ -6042,6 +6042,7 @@ class App:
         bb3 = ttk.Frame(left); bb3.pack(fill="x", pady=(4, 0))
         ttk.Button(bb3, text="🔗 " + t("share.share"), command=self.share_build).pack(side="left", fill="x", expand=True)
         ttk.Button(bb3, text="📥 " + t("share.paste"), command=self.import_build_code).pack(side="left", fill="x", expand=True, padx=(4, 0))
+        ttk.Button(left, text="🆚 " + t("cmp.compare_btn"), command=self.show_build_compare).pack(fill="x", pady=(6, 0))
         ttk.Button(left, text=ui_theme.with_icon(t("meta.sync_now"), "⭐"), command=lambda: self.meta_sync_start(force=True, what=("builds",)),
                    style="Accent.TButton").pack(fill="x", pady=(6, 0))
         self.meta_info = ttk.Label(left, text=self.meta_status_text(), foreground=PAL["muted"], wraplength=300, justify="left")
@@ -6276,6 +6277,101 @@ class App:
                          font=(ui_theme.FONT, 9), wraplength=300).pack(fill="x")
             card.bind("<Configure>", lambda e, c=card: [w.config(wraplength=max(120, e.width - 26))
                                                        for w in c.winfo_children() if isinstance(w, tk.Label)])
+
+    # ---------- build karşılaştırma ----------
+    def _slots_shareable(self, req1, req2):
+        """İki yuva şartının AYNI fiziksel eşyayla karşılanıp karşılanamayacağının kaba tahmini:
+        ikisi de aktifse ve (aynı özel eşya) ya da (aynı çekirdek attribute + ortak set/marka) varsa
+        'ortak kullanılabilir' sayılır. Kesin bir garanti değildir — yalnızca bir gösterge."""
+        if not req1 or not req2 or req1.get("kind") == "off" or req2.get("kind") == "off":
+            return False
+        if req1.get("kind") == "item" and req2.get("kind") == "item":
+            return bool(req1.get("item")) and req1.get("item") == req2.get("item")
+        if req1.get("kind") == "item" or req2.get("kind") == "item":
+            return False
+        same_core = req1.get("core") == req2.get("core")
+        shared_src = set(req1.get("source") or []) & set(req2.get("source") or [])
+        return same_core and bool(shared_src)
+
+    def show_build_compare(self):
+        """İki build'i yan yana karşılaştırır: tamamlanma oranı, yuva yuva durum ve hangi yuvaların
+        aynı fiziksel eşyayla paylaşılabileceğine dair kaba bir tahmin (bkz. _slots_shareable).
+        Yeni bir ölçüm sistemi kurmaz — mevcut build_status/plan_of/self.progress verisini kullanır."""
+        names = [b["name"] for b in self.cfg["builds"]]
+        if len(names) < 2:
+            return self.toast(t("cmp.need_two"))
+        w = tk.Toplevel(self.root); w.title(t("cmp.title")); w.geometry("940x680"); w.minsize(760, 520)
+        w.transient(self.root); w.configure(bg=PAL["bg"])
+        top = ttk.Frame(w); top.pack(fill="x", padx=14, pady=(12, 4))
+        ttk.Label(top, text=t("cmp.title"), style="Title.TLabel").pack(side="left")
+        cur = getattr(self, "cur", None)
+        default_a = cur["name"] if cur else (active_build(self.cfg) or {}).get("name", names[0])
+        default_b = next((n for n in names if n != default_a), names[0])
+        va, vb = tk.StringVar(value=default_a), tk.StringVar(value=default_b)
+        pick = ttk.Frame(w); pick.pack(fill="x", padx=14, pady=(2, 8))
+        ttk.Label(pick, text=t("cmp.pick_a")).grid(row=0, column=0, sticky="w", padx=(0, 6))
+        cba = ttk.Combobox(pick, textvariable=va, state="readonly", values=names, width=34)
+        cba.grid(row=0, column=1, padx=(0, 20))
+        ttk.Label(pick, text=t("cmp.pick_b")).grid(row=0, column=2, sticky="w", padx=(0, 6))
+        cbb = ttk.Combobox(pick, textvariable=vb, state="readonly", values=names, width=34)
+        cbb.grid(row=0, column=3)
+        body = ui_theme.scrollable(w, PAL["bg"]); body.pack(fill="both", expand=True, padx=14, pady=(0, 10))
+
+        def redraw(_e=None):
+            for ch in body.winfo_children(): ch.destroy()
+            b1, b2 = build_by_name(self.cfg, va.get()), build_by_name(self.cfg, vb.get())
+            if not b1 or not b2: return
+            plan1, plan2 = plan_of(b1), plan_of(b2)
+            stt1, stt2 = self.build_status(b1), self.build_status(b2)
+            colors = {"done": PAL["success"], "partial": PAL["warning"], "missing": PAL["danger"], "off": PAL["border"]}
+            head = ttk.Frame(body); head.pack(fill="x", pady=(0, 8))
+            for col, (b, stt) in enumerate(((b1, stt1), (b2, stt2))):
+                have = sum(1 for v in stt.values() if v[0] in ("done", "partial")); full = sum(1 for v in stt.values() if v[0] == "done")
+                tot = sum(1 for v in stt.values() if v[0] != "off")
+                c = ttk.Frame(head); c.grid(row=0, column=col, sticky="ew", padx=(0, 14) if col == 0 else 0)
+                head.columnconfigure(col, weight=1)
+                ttk.Label(c, text=b["name"], font=(ui_theme.FONT_SEMI, 13)).pack(anchor="w")
+                ttk.Progressbar(c, maximum=max(tot, 1), value=have).pack(fill="x", pady=(4, 2))
+                ttk.Label(c, text=t("plan.progress", have=have, full=full, total=tot), foreground=PAL["muted"]).pack(anchor="w")
+            grid = ttk.Frame(body); grid.pack(fill="x", pady=(4, 10))
+            grid.columnconfigure(1, weight=1); grid.columnconfigure(2, weight=1)
+            mismatched = 0
+            for i, slot in enumerate(engine.ALL_SLOTS):
+                r1, r2 = plan1.get(slot, {"kind": "off"}), plan2.get(slot, {"kind": "off"})
+                s1, s2 = stt1[slot][0], stt2[slot][0]
+                if s1 != "off" and s2 != "off" and not self._slots_shareable(r1, r2): mismatched += 1
+                ttk.Label(grid, text=f"{SLOT_ICONS.get(slot, '•')} {slot_name(slot)}").grid(row=i, column=0, sticky="w", padx=(0, 10), pady=3)
+                for col, (req, state) in enumerate(((r1, s1), (r2, s2))):
+                    cell = tk.Frame(grid, bg=PAL["surface"], highlightthickness=1, highlightbackground=colors[state])
+                    cell.grid(row=i, column=1 + col, sticky="ew", padx=(0, 10) if col == 0 else 0, pady=3)
+                    txt = t("plan.st_" + state) + ("  —  " + req_lines_short(req) if state != "off" else "")
+                    tk.Label(cell, text=txt, bg=PAL["surface"], fg=colors[state] if state != "off" else PAL["muted"],
+                             font=(ui_theme.FONT, 9), anchor="w", justify="left", wraplength=320).pack(fill="x", padx=8, pady=4)
+                if s1 != "off" and s2 != "off" and self._slots_shareable(r1, r2):
+                    ttk.Label(grid, text="🔁 " + t("cmp.shareable"), foreground=PAL["accent"], font=(ui_theme.FONT, 8)).grid(
+                        row=i, column=3, sticky="w", padx=(6, 0))
+            shared_sets = sorted(set(b1.get("sets_or_brands", [])) & set(b2.get("sets_or_brands", [])))
+            shared_items = sorted(set(b1.get("items", [])) & set(b2.get("items", [])))
+            shared_tal = sorted(set(b1.get("talents", {})) & set(b2.get("talents", {})))
+            info = ttk.LabelFrame(body, text=t("cmp.overlap")); info.pack(fill="x", pady=(2, 10))
+            for key, vals in (("cmp.shared_sets", shared_sets), ("cmp.shared_items", shared_items), ("cmp.shared_talents", shared_tal)):
+                ttk.Label(info, text=t(key, s=", ".join(vals) if vals else t("cmp.none")), wraplength=880, justify="left").pack(anchor="w", padx=10, pady=2)
+            have1 = sum(1 for v in stt1.values() if v[0] in ("done", "partial")); tot1 = sum(1 for v in stt1.values() if v[0] != "off")
+            have2 = sum(1 for v in stt2.values() if v[0] in ("done", "partial")); tot2 = sum(1 for v in stt2.values() if v[0] != "off")
+            pct1 = round(100 * have1 / tot1) if tot1 else 0
+            pct2 = round(100 * have2 / tot2) if tot2 else 0
+            verdict = ttk.Frame(body); verdict.pack(fill="x")
+            if pct1 == pct2:
+                vtxt = t("cmp.verdict_equal")
+            else:
+                closer, pct = (b1["name"], pct1) if pct1 > pct2 else (b2["name"], pct2)
+                vtxt = t("cmp.verdict_closer", name=closer, pct=pct)
+            ttk.Label(verdict, text="⚖ " + vtxt, font=(ui_theme.FONT_SEMI, 10), foreground=PAL["accent"]).pack(anchor="w", pady=(0, 2))
+            ttk.Label(verdict, text=t("cmp.switch_cost", n=mismatched), foreground=PAL["muted"], wraplength=880, justify="left").pack(anchor="w")
+
+        cba.bind("<<ComboboxSelected>>", redraw); cbb.bind("<<ComboboxSelected>>", redraw)
+        ttk.Button(top, text=t("upd.close"), command=w.destroy).pack(side="right")
+        redraw()
 
     def meta_detail_text(self, b):
         if not b.get("meta_id"): return ""
