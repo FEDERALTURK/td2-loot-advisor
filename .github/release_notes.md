@@ -1,5 +1,11 @@
 ## TD2 Loot Advisor — Windows
 
+**9.1.5.22 — Sürüm geçmişinden herhangi bir sürümü kurma + bilinen sorunlar paneli**
+
+- **"Sürüm geçmişi" penceresi artık geri dönüşle sınırlı değil.** Ayarlar → Genel → Güncellemeler → "Sürüm geçmişi"nde listelenen herhangi bir sürümü (eski, yeni veya beta) seçip kurabilirsin; yalnızca zaten kurulu olan sürüm engellenir (listede "✓" ile işaretli).
+- **Bu sürümde ne var / bilinen sorunlar paneli.** Listede bir sürüm seçince o sürümün GitHub yayın notları pencerenin içinde görünür; ayrıca "🐞 Bilinen sorunlar (GitHub)" düğmesi depodaki canlı `BUGS.md`'yi tarayıcıda açar.
+- Bu pencerenin metinleri önceden yalnızca Türkçe ve İngilizce'de vardı; artık **10 dilin hepsinde** tam çevrili.
+
 **9.1.5.21 — Ansiklopedi düzeltmesi, ücretsiz kalibrasyon danışmanı, sunucu CI düzeltmesi**
 
 - **Ansiklopedide 30 kesik açıklama düzeltildi.** Bazı egzotik ve yetenek açıklamaları ("Eagle Bearer", "NinjaBike Messenger Bag" ve 28 isim daha) kaynak wiki verisinde sabit karakter sınırında (400 ya da ~190 karakterde) kelime ortasında kesilmişti; birkaçında bu durum çeviride görünür "…" ile, çoğunda ise gramer olarak tam görünen ama içerik eksik bir cümleyle sonuçlanıyordu. Tüm 30 açıklama, programın kendi oyun kütüphanesindeki (`game_data.json`) eksiksiz İngilizce kaynağa göre 9 dilde yeniden çevrildi.
