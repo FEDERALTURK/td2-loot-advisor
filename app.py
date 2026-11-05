@@ -145,7 +145,7 @@ import diagnostics_center
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.1.5.30"
+APP_VERSION = "9.1.5.31"
 # "Bu oturumda ne kazandın?" özeti için kaba tahmin: bir eşyayı elle inceleyip
 # build'e göre karar vermenin (istatistikleri okuma + karşılaştırma) ortalama
 # süresi, saniye. Gerçek bir ölçüm değil — yalnızca arayüzde "tahmini" etiketiyle
@@ -4332,12 +4332,10 @@ class App:
         if self.cfg["settings"].get("ui_layout") == "shd_terminal":
             return self._build_shd_terminal_shell()
 
-        # ISAC ana kabuğu: sol navigasyon sabit, içerik alanı kendi alt sekmelerini korur.
+        # ISAC ana kabuğu: dikey sol navigasyon yok; tüm menü üstte yatay bir şeritte,
+        # içerik alanı tüm genişliği kullanır.
         self.workspace = ttk.Frame(self.root)
         self.workspace.pack(fill="both", expand=True, padx=10, pady=(4, 10))
-        self.sidebar = ttk.Frame(self.workspace, style="Sidebar.TFrame", width=max(164, int(188 * getattr(self, "ui_factor", 1.0))))
-        self.sidebar.pack(side="left", fill="y", padx=(0, 8))
-        self.sidebar.pack_propagate(False)
         self.main_area = ttk.Frame(self.workspace)
         self.main_area.pack(side="left", fill="both", expand=True)
         # Pencere elle küçültüldüğünde de kompakt menü davranışını uygula;
@@ -4349,6 +4347,26 @@ class App:
             duration_ms=int(self.cfg["settings"].get("fx_transition_ms", 260)),
             style=self.cfg["settings"].get("fx_transition_style", "tactical"),
         )
+        # Üst yatay menü şeridi: arka planında aşağı akan kod animasyonu var,
+        # menü düğmeleri bu canvas'a gömülü (create_window) — aralarındaki
+        # boşluklarda animasyon görünür kalır. Sol/dikey bir sidebar yoktur.
+        self.nav_motif = None
+        self.topnav = fx.DigitalRain(self.main_area, bg=PAL["bg"],
+                                     dim=PAL.get("ov_border", PAL["border"]), bright=PAL["accent"],
+                                     height=max(46, int(50 * getattr(self, "ui_factor", 1.0))))
+        self.topnav.pack(fill="x", padx=2, pady=(2, 4))
+        self._sidebar_buttons = {}
+        self._topnav_windows = {}
+        for group in self.group_keys:
+            btn = ttk.Button(self.topnav, text=self.group_labels[group], style="FieldNav.TButton",
+                             command=lambda g=group: self._sidebar_select_group(g))
+            self._topnav_windows[group] = self.topnav.create_window(0, 0, window=btn, anchor="w", tags=("navbtn",))
+            self._sidebar_buttons[group] = btn
+        self._topnav_version_id = self.topnav.create_text(
+            0, 0, text=("SÜRÜM " if tr_ui else "VERSION ") + APP_VERSION,
+            fill=PAL["muted"], font=(ui_theme.FONT, 8), anchor="e", tags=("navbtn",))
+        self.topnav.bind("<Configure>", self._layout_topnav_buttons, add="+")
+        self.topnav.after_idle(self._layout_topnav_buttons)
         # Ana içerik menülerinin üstünde görünür bir operasyon şeridi. Bu,
         # yalnız dekoratif bir Canvas'tır; tıklama alanı veya sayfa düzeni
         # hareket etmez.
@@ -4357,29 +4375,6 @@ class App:
         self.command_ribbon.pack(fill="x", padx=2, pady=(2, 4))
         nb = self.nb = ttk.Notebook(self.main_area, style="NoTabs.TNotebook")
         nb.pack(fill="both", expand=True, padx=2, pady=2)
-
-        # Oyun arayüzündeki kesik / çapraz veri çizgilerini taklit eden hafif
-        # bir işaret bandı. Bu bir Canvas değil etkileşim katmanı değildir;
-        # menü düğmelerinin tıklamasını asla kapatmaz.
-        self.nav_motif = fx.NavMotif(self.sidebar, accent=PAL["accent"], bg=PAL["bg"], muted=PAL["border"])
-        self.nav_motif.pack(fill="x", padx=12, pady=(12, 0))
-        ttk.Label(self.sidebar, text="◆ ISAC", style="Brand.TLabel").pack(anchor="w", padx=14, pady=(4, 2))
-        ttk.Label(self.sidebar, text=t("nav.ops_center"),
-                  style="Muted.TLabel", font=(ui_theme.FONT_SEMI, 8)).pack(anchor="w", padx=14, pady=(0, 14))
-        ttk.Separator(self.sidebar).pack(fill="x", padx=12, pady=(0, 10))
-        self._sidebar_buttons = {}
-        tactical_nav = self.cfg["settings"].get("ui_nav_layout", "tactical") == "tactical"
-        for index, group in enumerate(self.group_keys):
-            btn = ttk.Button(self.sidebar, text=self.group_labels[group], style="Nav.TButton",
-                             command=lambda g=group: self._sidebar_select_group(g))
-            # gerçek widget'ları döndürmek Tk'da hitbox/ölçek hatası üretir.
-            # Bunun yerine küçük ve sabit bir kademeli x-ofset kullanıyoruz.
-            # Bu, TD2 tarzı eğik HUD ritmini verirken küçük pencerede güvenli kalır.
-            btn.pack(fill="x", padx=((8 + min(index, 4) * 3) if tactical_nav else 8, 8), pady=2)
-            self._sidebar_buttons[group] = btn
-        ttk.Separator(self.sidebar).pack(fill="x", padx=12, pady=(12, 8))
-        ttk.Label(self.sidebar, text=("SÜRÜM " if tr_ui else "VERSION ") + APP_VERSION,
-                  style="Muted.TLabel", font=(ui_theme.FONT, 8)).pack(side="bottom", anchor="w", padx=14, pady=12)
 
         self.group_nbs = {}
         for group in self.group_keys:
@@ -4560,31 +4555,66 @@ class App:
         try:
             width = self.root.winfo_width()
             compact_now = width < 1100
-            layout = self.cfg["settings"].get("ui_nav_layout", "tactical")
-            layout_changed = layout != getattr(self, "_responsive_nav_layout", None)
-            if compact_now == getattr(self, "_responsive_compact", None) and not layout_changed:
+            if compact_now == getattr(self, "_responsive_compact", None):
                 return
             self._responsive_compact = compact_now
-            self._responsive_nav_layout = layout
             self.compact = compact_now
-            if hasattr(self, "sidebar"):
+            if hasattr(self, "sidebar"):          # eski dikey kabuklar (shd_terminal) için korunur
                 sidebar_w = 76 if compact_now else max(164, int(188 * getattr(self, "ui_factor", 1.0)))
                 self.sidebar.configure(width=sidebar_w)
             icons = {"home": "⌂", "gear": "🎒", "intel": "🛰", "tools": "🧰", "settings": "⚙", "system": "☰"}
-            for index, (key, button) in enumerate(getattr(self, "_sidebar_buttons", {}).items()):
+            for key, button in getattr(self, "_sidebar_buttons", {}).items():
                 button.configure(text=icons[key] if compact_now else self.group_labels[key])
-                button.pack_configure(padx=(6, 6) if compact_now else ((8 + min(index, 4) * 3) if layout == "tactical" else 8, 8))
+            self._layout_topnav_buttons()
             # Küçük modda saydam üst efektleri kapatıp menü yüzeyini güvenilir
             # bırak; büyük modda seçili görsel paketi aynen kullan.
             self.apply_fx()
         except (tk.TclError, AttributeError):
             return
 
+    def _layout_topnav_buttons(self, _event=None):
+        """Üst yatay menüdeki düğmeleri (DigitalRain canvas'ına gömülü) soldan sağa diz.
+
+        Düğmeler arasında kalan boşluklarda arka plandaki kod animasyonu görünür kalır.
+        """
+        canvas = getattr(self, "topnav", None)
+        if not canvas:
+            return
+        try:
+            if not canvas.winfo_exists():
+                return
+            canvas.update_idletasks()
+            h = max(1, canvas.winfo_height())
+            x = 10
+            for group in self.group_keys:
+                btn = self._sidebar_buttons.get(group)
+                win_id = self._topnav_windows.get(group)
+                if not btn or win_id is None:
+                    continue
+                canvas.coords(win_id, x, h / 2)
+                x += btn.winfo_reqwidth() + 8
+            if getattr(self, "_topnav_version_id", None) is not None:
+                canvas.coords(self._topnav_version_id, max(x + 10, canvas.winfo_width() - 14), h / 2)
+                # Arkadaki kod animasyonu metnin içinden geçip karışmasın diye küçük bir dolgu arkaplanı.
+                bbox = canvas.bbox(self._topnav_version_id)
+                if bbox:
+                    pad = 4
+                    rect = (bbox[0] - pad, bbox[1] - pad, bbox[2] + pad, bbox[3] + pad)
+                    if getattr(self, "_topnav_version_bg_id", None) is None:
+                        self._topnav_version_bg_id = canvas.create_rectangle(
+                            *rect, fill=canvas["bg"], outline="", tags=("navbtn",))
+                    else:
+                        canvas.coords(self._topnav_version_bg_id, *rect)
+                    canvas.tag_lower(self._topnav_version_bg_id, self._topnav_version_id)
+            canvas.tag_raise("navbtn")
+        except tk.TclError:
+            return
+
     def _sidebar_activate(self, group):
-        field_shell = self.cfg["settings"].get("ui_layout") == "field_command"
+        field_style = not hasattr(self, "sidebar")      # yatay üst menü (ana kabuk + eski field_command) FieldNav stili kullanır
         for key, button in getattr(self, "_sidebar_buttons", {}).items():
             try:
-                if field_shell:
+                if field_style:
                     button.configure(style="FieldNavActive.TButton" if key == group else "FieldNav.TButton")
                 else:
                     button.configure(style="NavActive.TButton" if key == group else "Nav.TButton")

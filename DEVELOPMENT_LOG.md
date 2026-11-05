@@ -2,6 +2,52 @@
 
 Önemli kararların ve sürümlerin kısa, kronolojik özeti. Tam ayrıntı için `git log` ve `.github/release_notes.md`.
 
+## Üst yatay menü, dijital yağmur efekti, 3B radar + rastgele tespit noktaları (9.1.5.31, 2026-11-05)
+
+- Kullanıcı isteği: "Arkada bulunan haritanın dah 3 boyutlu ve gerçek olmasını saatin dönmesiyle tespit
+  edilen düşman noktalarının belirgin olmasını ve parlamasını istiyorum. Bu rasgele gelişecek sürekli aynı
+  noktada düşman tespiti yapılıyor efekti olmasın. Menülerin üst kısmında ise yeşil kodların aşağıya doğru
+  indiği animasyon efekti istiyorum menü yerleri değiştir..." Netleştirme soruları üzerine kullanıcının
+  verdiği yanıtlar: (1) **"3B harita"** → gelişmiş prosedürel 3D radar (gerçek oyun haritası görüntüsü değil
+  — proje zaten ekran-OCR dışında oyuna hiç dokunmuyor); (2) **"düşman tespiti"** → tamamen dekoratif/
+  rastgele bir HUD efekti (gerçek oyun belleğinden okunan bir konum olamaz, `HANDOFF.md`'deki "oyunun
+  process/belleğine asla dokunulmaz" kuralı korunur); (3) **üst menü** → sol kenar çubuğu tamamen kaldırılıp
+  tüm navigasyon tek, yatay üst şeride taşınacak (önceki görevde eklenen, kullanılmayan
+  `_build_field_command_shell()` kabuğundaki yatay-nav deseni referans alındı).
+- **`td2app/ui/ui_hud.py`** (`DashboardScene` — Panel/dash sekmesinde her zaman görünen asıl arka-plan
+  radarı; Windows-özel, varsayılan kapalı `fx.AgentWatch` değil): tüm halkalara/işaretlere `ry=0.50`
+  dikey-sıkıştırma uygulanarak 3B/izometrik perspektif hissi eklendi (4 eşmerkezli elips halka, ekstra
+  derinlik katmanı, 12 ışın/tarama çizgisi/merkez nabız hepsi aynı oranla yeniden hesaplandı). Yeni
+  `_draw_blips()` metodu: her "tespit" noktası kendi rastgele açısı/yarıçapı/ömrüyle (`random.uniform`)
+  doğup kısa süre parlayıp sönüyor; aynı anda en fazla 3 nokta, yeni doğuşlar arası rastgele bekleme
+  (1.3–3.4 sn) — sabit/tekrarlayan bir "hep aynı yerde tarama" örüntüsü kasıtlı olarak önlendi.
+- **`td2app/ui/fx.py`**: yeni `DigitalRain(tk.Canvas)` sınıfı (Matrix esintili, yalnızca ASCII-güvenli
+  glif seti — Windows'ta CJK font eksikliği riskini önlemek için Katakana kullanılmadı). Persistent
+  canvas-item havuzu deseni (proje genelinde `fx._ItemPool`/`ui_hud.DashboardScene` ile aynı felsefe —
+  her karede item silip yeniden yaratmak yerine `itemconfigure`/`coords` ile güncelleniyor), `_animation_budget()`
+  ile diğer dekoratif efektlerle tutarlı duraklatma/ölçekleme.
+- **`app.py`**: `build_ui()`'daki dikey kenar çubuğu bloğu tamamen kaldırıldı; yerine `fx.DigitalRain`
+  üzerine `canvas.create_window(...)` ile gerçek `ttk.Button` nav düğmeleri (Panel/Gear/Intel/Tools/
+  Settings/More) gömülü yatay bir üst şerit geldi — düğmeler arası boş alanlarda arka plandaki kod
+  animasyonu görünür kalıyor. Yeni `_layout_topnav_buttons()` metodu düğmeleri soldan sağa diziyor,
+  sürüm metnini sağa yaslıyor ve **arkadan geçen yağmur glifleriyle görsel çakışmayı önlemek için** sürüm
+  etiketinin arkasına opak dolgu dikdörtgeni (`canvas["bg"]` renginde, `tag_lower` ile metnin altında)
+  ekliyor. `_sync_responsive_layout()`'taki artık geçersiz `button.pack_configure(...)` çağrısı (düğmeler
+  artık `pack` değil `create_window` ile yönetiliyor — çalışsaydı `TclError` fırlatırdı) kaldırılıp
+  `_layout_topnav_buttons()` çağrısıyla değiştirildi. `_sidebar_activate()` artık `hasattr(self, "sidebar")`
+  ile hangi buton stilini (`FieldNav.TButton` vs `Nav.TButton`) kullanacağına karar veriyor. Eski
+  `_build_field_command_shell()`/`_build_shd_terminal_shell()` kabukları (zaten `_cfg_defaults()` tarafından
+  `ui_layout="standard"`a zorlandığı için erişilemez durumda) kapsam dışı bırakılıp dokunulmadan bırakıldı.
+- **Doğrulama**: `ast.parse` ile tüm dosyalar temiz geçti. `xvfb-run -a python3.12 tests/test_stability_widgets.py`
+  gerçek Tk widget'larıyla `callback_errors: []`, `ok: true` ile geçti. Ekran görüntüsü alınıp (Xvfb +
+  ImageMagick `import`) yakınlaştırılarak doğrulandı: sürüm etiketi artık yağmur glifleriyle çakışmıyor,
+  üst nav şeridi düğün/boşluk görünümü doğru, radar halkaları elips/3B perspektifte görünüyor. `test_core`,
+  `test_app_stability`, `test_hardening`, `test_regression_crash_patterns`, `test_release_914`,
+  `test_intelligence`, `test_translation_controls`, `test_project_structure` hepsi `xvfb-run` altında OK.
+- **Bilerek dışarıda bırakılan**: dekoratif tespit noktaları yalnızca birkaç saniyede bir rastgele
+  doğduğu için tek bir ekran görüntüsünde her zaman görünmeyebilir — bu beklenen davranış, tekrarlayan
+  sabit-konum taraması hissini önlemek amacıyla kasıtlı.
+
 ## Tüm temalar silindi, baştan tek yeni tema/şema (9.1.5.30, 2026-11-05)
 
 - Kullanıcı isteği: "Uygulamadaki tüm temaların sil ve baştan sıfırdan uygulama teması ve şemasını değiştir."
