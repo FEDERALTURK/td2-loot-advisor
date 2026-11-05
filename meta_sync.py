@@ -368,6 +368,22 @@ def run_tasks(cfg, cache_path, app_version="", force=False):
 DESC_FILES = ("descriptions_i18n.json", "descriptions_i18n_2.json")
 
 
+def read_local_descriptions(folder):
+    """Klasördeki açıklama parçalarını birleştirir (önbellek henüz yokken yedek). İlk parça zorunlu.
+
+    `fetch_descriptions` ile aynı öncelik: ortak bir ad varsa ilk parça geçerlidir.
+    """
+    base = json.loads((folder / DESC_FILES[0]).read_text(encoding="utf-8")).get("items", {})
+    items = {}
+    for name in DESC_FILES[1:]:
+        try:
+            items.update(json.loads((folder / name).read_text(encoding="utf-8")).get("items", {}))
+        except Exception as e:
+            log.debug("Local description shard %s skipped: %s", name, e)
+    items.update(base)
+    return items
+
+
 def fetch_descriptions(builds_setting, app_version="", previous=None):
     """Açıklama çevirilerini parçalardan birleştirir. İlk parça zorunlu, ikincisi henüz olmayabilir.
 

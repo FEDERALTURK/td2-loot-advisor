@@ -88,6 +88,21 @@ try:
         ok(True, "ilk parça zorunlu")
 finally:
     meta_sync.fetch = _real_fetch
+# önbellek yokken yerel yedek de iki parçayı okur
+with tempfile.TemporaryDirectory() as _d:
+    _dir = Path(_d)
+    (_dir / meta_sync.DESC_FILES[0]).write_text(json.dumps({"items": {"A": {"tr": "ilk"}}}), encoding="utf-8")
+    ok(set(meta_sync.read_local_descriptions(_dir)) == {"A"}, "yerel: ikinci parça yoksa ilk parça yeter")
+    (_dir / meta_sync.DESC_FILES[1]).write_text(json.dumps({"items": {"A": {"tr": "ikinci"}, "B": {"tr": "b"}}}), encoding="utf-8")
+    _local = meta_sync.read_local_descriptions(_dir)
+    ok(set(_local) == {"A", "B"} and _local["A"]["tr"] == "ilk", "yerel: parçalar birleşti, ilk parça öncelikli")
+    (_dir / meta_sync.DESC_FILES[0]).unlink()
+    try:
+        meta_sync.read_local_descriptions(_dir); ok(False, "yerel: ilk parça zorunlu")
+    except OSError:
+        ok(True, "yerel: ilk parça zorunlu")
+_repo_desc = meta_sync.read_local_descriptions(ROOT / "meta")
+ok("Apex Predator" in _repo_desc and "Obliterate" in _repo_desc, "depodaki iki parça da okunuyor")
 for _n in meta_sync.DESC_FILES:
     _p = ROOT / "meta" / _n
     ok(not _p.exists() or _p.stat().st_size <= 510000, f"{_n} boyut sınırının altında")
