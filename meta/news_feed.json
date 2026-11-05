@@ -1,7 +1,7 @@
 {
  "schema": 1,
- "version": "2026-11-04.3",
- "updated": "2026-11-04T19:42:46Z",
+ "version": "2026-11-05.1",
+ "updated": "2026-11-05T01:44:22Z",
  "season": "Year 8 Season 3 – Red Horizon",
  "items": [
   {
@@ -255,6 +255,37 @@
     "ru": "Conflict: новая статистика в таблице счёта, новые Combat Marks, один Honor Mark за матч с XP и CCC и баланс PvP. Stretch Goals приостановлены на этот сезон для переработки. Исправления для Steel & Sons ACR, Protected Reload и пропавшего чертежа Harrier Pride.",
     "pl": "Conflict: nowe statystyki na tablicy wyników, nowe Combat Marks, jeden Honor Mark na mecz z XP i CCC oraz zmiany balansu PvP. Stretch Goals wstrzymane na ten sezon z powodu przebudowy. Poprawki Steel & Sons ACR, Protected Reload i brakującego planu Harrier Pride.",
     "nl": "Conflict: nieuwe scorebordstatistieken, nieuwe Combat Marks, één Honor Mark per match met XP en CCC, en PvP-balans. Stretch Goals pauzeren dit seizoen voor een herontwerp. Fixes voor Steel & Sons ACR, Protected Reload en de ontbrekende Harrier Pride-blauwdruk."
+   }
+  },
+  {
+   "id": "echoes-ratel-how-to-get",
+   "kind": "dlc",
+   "date": "2026-11-04T04:15:00Z",
+   "url": "https://www.keengamer.com/articles/guides/how-to-get-the-ratel-exotic-in-the-division-2-talent-mods-and-farming/",
+   "source": "KeenGamer",
+   "title": {
+    "en": "How to get the Ratel exotic",
+    "tr": "Ratel egzotiği nasıl alınır",
+    "de": "So bekommst du die Exotic Ratel",
+    "fr": "Comment obtenir l'exotique Ratel",
+    "es": "Cómo conseguir la exótica Ratel",
+    "it": "Come ottenere l'esotica Ratel",
+    "pt": "Como obter a exótica Ratel",
+    "ru": "Как получить экзотику Ratel",
+    "pl": "Jak zdobyć egzotyk Ratel",
+    "nl": "Zo krijg je de exotic Ratel"
+   },
+   "text": {
+    "en": "KeenGamer's guide: finish the DLC campaign, kill all five Guardians in The Hunt, then kill them again in one Containment session (24-hour timer; leaving the park resets progress). The first clear gives this Exotic Assault Rifle on any difficulty. Ubisoft has not confirmed these steps.",
+    "tr": "KeenGamer rehberine göre: DLC hikâyesini bitir, The Hunt'ta beş Guardian'ın hepsini öldür, sonra tek bir Containment oturumunda hepsini yeniden öldür (24 saat süre; parktan çıkmak ilerlemeyi sıfırlar). İlk başarı, her zorlukta bu Exotic Assault Rifle'ı verir. Ubisoft bu adımları doğrulamadı.",
+    "de": "Laut KeenGamer: DLC-Kampagne beenden, alle fünf Guardians in The Hunt töten, dann alle erneut in einer Containment-Sitzung (24-Stunden-Timer; Verlassen des Parks setzt den Fortschritt zurück). Der erste Abschluss gibt dieses Exotic Assault Rifle auf jeder Schwierigkeit. Von Ubisoft nicht bestätigt.",
+    "fr": "Selon KeenGamer : finissez la campagne du DLC, tuez les cinq Guardians dans The Hunt, puis à nouveau en une session de Containment (minuteur de 24 h ; quitter le parc réinitialise la progression). La première réussite donne ce fusil d'assaut exotique, quelle que soit la difficulté. Non confirmé par Ubisoft.",
+    "es": "Según KeenGamer: termina la campaña del DLC, mata a los cinco Guardians en The Hunt y vuelve a matarlos en una sesión de Containment (24 horas; salir del parque reinicia el progreso). La primera vez da este fusil de asalto exótico en cualquier dificultad. Ubisoft no lo ha confirmado.",
+    "it": "Secondo KeenGamer: finisci la campagna del DLC, uccidi tutti e cinque i Guardians in The Hunt, poi di nuovo in una sessione di Containment (timer di 24 ore; uscire dal parco azzera i progressi). Il primo completamento dà questo fucile d'assalto esotico a qualsiasi difficoltà. Non confermato da Ubisoft.",
+    "pt": "Segundo a KeenGamer: termina a campanha do DLC, mata os cinco Guardians em The Hunt e volta a matá-los numa sessão de Containment (24 horas; sair do parque reinicia o progresso). A primeira conclusão dá esta espingarda de assalto exótica em qualquer dificuldade. Não confirmado pela Ubisoft.",
+    "ru": "По данным KeenGamer: пройдите кампанию DLC, убейте всех пятерых Guardians в The Hunt, затем снова за один сеанс Containment (таймер 24 часа; выход из парка сбрасывает прогресс). Первое прохождение на любой сложности даёт эту экзотическую штурмовую винтовку. Ubisoft этого не подтверждала.",
+    "pl": "Według KeenGamer: ukończ kampanię DLC, zabij wszystkich pięciu Guardians w The Hunt, a potem ponownie w jednej sesji Containment (24 godziny; wyjście z parku zeruje postęp). Pierwsze ukończenie daje ten egzotyczny karabin szturmowy na każdym poziomie trudności. Ubisoft tego nie potwierdził.",
+    "nl": "Volgens KeenGamer: rond de DLC-campagne af, dood alle vijf Guardians in The Hunt en daarna opnieuw in één Containment-sessie (24 uur; het park verlaten reset je voortgang). De eerste keer levert dit Exotic Assault Rifle op, op elke moeilijkheidsgraad. Niet bevestigd door Ubisoft."
    }
   },
   {
