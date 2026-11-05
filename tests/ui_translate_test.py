@@ -130,14 +130,15 @@ def s6():
     tops = [w for w in a.root.winfo_children() if isinstance(w, app.tk.Toplevel)]
     step("düzeltme önerisi penceresi", bool(tops))
     if tops: shot("07_suggest", w=tops[-1]); tops[-1].destroy()
-    a.apply_theme_pack("nightops"); a.root.after(2500, s7)
+    # Not: uygulamanın artık seçilebilir birden çok teması yok (tek, sabit görsel kimlik);
+    # eski tema-paketi geçiş adımları kaldırıldı. Burada yalnızca sabit temanın kendisini doğrularız.
+    step("tema sabit uygulandı", a.cfg["settings"]["ui_theme"] == "default" and app.PAL["accent"] == "#36e0c4")
+    shot("08_theme_default")
+    a.root.after(2500, s7)
 def s7():
-    step("tema paketi uygulandı (Gece Operasyonu)", a.cfg["settings"]["ui_theme"] == "nightops" and app.PAL["accent"] == "#22d3ee")
-    shot("08_theme_nightops")
-    a.apply_theme_pack("blacktusk"); a.root.after(2500, s8)
+    a.select_page("translate"); shot("09_translate_tab")
+    a.root.after(500, s8)
 def s8():
-    a.select_page("translate"); shot("09_theme_blacktusk")
-    a.apply_theme_pack("dark")
     finish()
 def finish():
     if res.get("done"): return

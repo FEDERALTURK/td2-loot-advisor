@@ -145,7 +145,7 @@ import diagnostics_center
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.1.5.29"
+APP_VERSION = "9.1.5.30"
 # "Bu oturumda ne kazandın?" özeti için kaba tahmin: bir eşyayı elle inceleyip
 # build'e göre karar vermenin (istatistikleri okuma + karşılaştırma) ortalama
 # süresi, saniye. Gerçek bir ölçüm değil — yalnızca arayüzde "tahmini" etiketiyle
@@ -207,10 +207,10 @@ DEFAULTS = {"scan_mode": "hotkey", "auto_interval_ms": 700, "auto_record": True,
             "daily_reset_hour": 2, "weekly_reset_day": 1, "weekly_reset_hour": 2,  # weekly_reset_day: 0=Monday
             "tasks_hotkey": "<f10>",
             "language": "", "log_level": "INFO", "log_max_kb": 1024, "log_backups": 3,
-            "ui_theme": "kaivolt", "ui_sounds": True, "bg_interval": 15,
-            "fx_cursor": True, "fx_cursor_style": "crosshair", "fx_cursor_color": "#7c5cfc", "fx_cursor_custom": "",
-            "fx_trail": True, "fx_trail_color": "#7c5cfc", "fx_trail_len": 18, "fx_transitions": True,
-            "fx_video": True, "fx_video_dim": 0.35, "fx_transition_ms": 220, "fx_transition_style": "soft", "ui_nav_layout": "flat", "ui_layout": "standard", "fx_bgwatch": False, "fx_bgwatch_dim": 0.0, "event_fx": "standard",
+            "ui_theme": "default", "ui_sounds": True, "bg_interval": 15,
+            "fx_cursor": True, "fx_cursor_style": "crosshair", "fx_cursor_color": "#36e0c4", "fx_cursor_custom": "",
+            "fx_trail": True, "fx_trail_color": "#36e0c4", "fx_trail_len": 18, "fx_transitions": True,
+            "fx_video": True, "fx_video_dim": 0.35, "fx_transition_ms": 220, "fx_transition_style": "tactical", "ui_nav_layout": "tactical", "ui_layout": "standard", "fx_bgwatch": False, "fx_bgwatch_dim": 0.0, "event_fx": "standard",
             "res_profile": "auto", "ocr_engine": "auto", "ocr_gpu": "auto", "license_key": "", "update_check": True, "update_last": 0, "update_skip": "", "stash_record": True, "vendor_mode": False, "vendor_auto": True, "drop_share": False, "drop_asked": False, "drop_activity": "none", "drop_server": "", "drop_client": "", "vision_ok": False, "vendor_notified": "", "companion_port": 8765, "svc_tray": True, "svc_close_to_tray": False, "svc_auto_run": True, "svc_session_popup": True, "smart_scan": True, "api_on": False, "api_port": 8766, "api_lan": False, "api_control": True, "api_token": "", "rpc_on": False, "rpc_client_id": "", "push_on": False, "push_topic": "", "push_webhook": "", "push_drop": True, "push_build": True, "push_vendor": True, "push_session": True, "agent_model": "operator", "agent_outfit": "night", "agent_skin": 1, "ocr_threshold": 170, "ocr_scale": "auto", "ocr_psm": 6, "ocr_passes": 3,
             "overlay_mode": "card", "overlay_alpha": 0.94, "overlay_size": 1.0, "ui_depth": True,
             "meta_sync": True, "meta_feed_url": "", "meta_last_try": 0, "meta_last_sync": "", "meta_version": "",
@@ -294,6 +294,10 @@ def _cfg_defaults(cfg):
     for k, v in DEFAULTS.items():
         st.setdefault(k, v)
     if st.get("perf_mode") not in performance.MODES: st["perf_mode"] = "balanced"
+    # Eski çoklu tema sistemi kaldırıldı (tek sabit tema): eski kayıtlı tema adlarını ("kaivolt",
+    # "isac", "shd_terminal" vb.) ve onlara bağlı özel kabuk düzenini sessizce yeni varsayılana taşı.
+    if st.get("ui_theme") not in ui_theme.THEME_MODES: st["ui_theme"] = DEFAULTS["ui_theme"]
+    if st.get("ui_layout") != "standard": st["ui_layout"] = "standard"
     try:
         st["keep_threshold"], st["consider_threshold"] = itempolicy.validate_thresholds(st["keep_threshold"], st["consider_threshold"])
     except ValueError:
@@ -817,7 +821,7 @@ def apply_progress(cfg, progress, item, verdict, res):
 
 # ───────────── UI sabitleri ─────────────
 # Renkler seçili temadan gelir (ui_theme.py). App açılışta PAL/COLORS/VFG'yi günceller.
-PAL = dict(ui_theme.PALETTES["dark"], mode="dark")
+PAL = dict(ui_theme.PALETTES["default"], mode="default")
 COLORS = dict(PAL["verdict"])      # karar kartı arka planları (beyaz yazı)
 VFG = dict(PAL["verdict_fg"])      # karar renkleri yazı olarak (tablolar, sohbet)
 
@@ -4308,7 +4312,7 @@ class App:
     def build_ui(self):
         """ISAC kabuk + sabit ana gezinme + özellik gruplarının alt sekmeleri."""
         self._ui_build_errors = []
-        set_palette(ui_theme.apply(self.root, self.cfg["settings"].get("ui_theme", "kaivolt")))
+        set_palette(ui_theme.apply(self.root, self.cfg["settings"].get("ui_theme", "default")))
         self.build_header()
 
         self.tab_keys = ("dash", "builds", "progress", "stash", "stats", "info", "tasks", "division3", "translate", "assistant", "settings", "history", "log", "help", "about")
@@ -6032,7 +6036,7 @@ class App:
         shell = tk.Frame(w, bg=dark, highlightthickness=1, highlightbackground="#2c313d"); shell.pack(fill="both", expand=True)
         tk.Frame(shell, bg=col, width=max(5, int(7 * k))).pack(side="left", fill="y")      # renkli şerit
         body = tk.Frame(shell, bg=dark, padx=int(16 * k), pady=int(12 * k)); body.pack(side="left", fill="both")
-        tk.Label(body, text=verdict_label(verdict), fg=ui_theme.PALETTES["dark"]["verdict_fg"].get(verdict, fg),
+        tk.Label(body, text=verdict_label(verdict), fg=ui_theme.PALETTES["default"]["verdict_fg"].get(verdict, fg),
                  bg=dark, font=(ui_theme.FONT_SEMI, fz(18))).pack(anchor="w")
         sub = item["name"][:42] + ("  ·  " + ", ".join(item["rarity"]) if item.get("rarity") else "")
         tk.Label(body, text=sub, fg=fg, bg=dark, font=(ui_theme.FONT_SEMI, fz(11))).pack(anchor="w")
@@ -8350,33 +8354,13 @@ class App:
         self.build_display_box(P, st)
 
         # ---- Görünüm / appearance ----
+        # Not: uygulamanın artık seçilebilir birden çok teması yok — tek, sabit bir görsel kimlik var.
+        # Bu yüzden eski tema galerisi/açılır listesi kaldırıldı; burada yalnızca tema-dışı görünüm
+        # ayarları (sesler, arka plan aralığı, özel sanat klasörü, 3B derinlik) kalıyor.
         ap = ttk.LabelFrame(f, text=t("set.appearance_box")); ap.pack(fill="x", padx=10, pady=6)
         ra = ttk.Frame(ap); ra.pack(fill="x", padx=8, pady=6)
-        ttk.Label(ra, text=t("set.theme")).pack(side="left")
-        self.theme_var = tk.StringVar(value=t("theme." + (st.get("ui_theme") if st.get("ui_theme") in ui_theme.THEME_MODES else "dark")))
-        ttk.Combobox(ra, textvariable=self.theme_var, values=[t("theme." + m) for m in ui_theme.THEME_MODES],
-                     width=18, state="readonly").pack(side="left", padx=6)
         self.bv["ui_sounds"] = tk.BooleanVar(value=bool(st.get("ui_sounds", True)))
-        ttk.Checkbutton(ra, text=t("set.ui_sounds"), variable=self.bv["ui_sounds"]).pack(side="left", padx=(18, 0))
-        ttk.Label(ap, text=t("theme.pack_hint"), foreground=PAL["muted"], wraplength=820,
-                  justify="left").pack(anchor="w", padx=10, pady=(0, 4))
-        # Her karta basmak arayüz paletini, bindirme renklerini ve vurgu efektlerini birlikte uygular.
-        gal = ttk.Frame(ap); gal.pack(fill="x", padx=8, pady=(0, 8))
-        cur = st.get("ui_theme", "dark")
-        for i, m in enumerate(ui_theme.PACKS):
-            pp = ui_theme.PALETTES[m]
-            card = tk.Frame(gal, bg=pp["surface"], highlightthickness=2, highlightbackground=pp["accent"] if m == cur else pp["border"], cursor="hand2")
-            card.grid(row=i // 4, column=i % 4, padx=4, pady=4, sticky="we")
-            tk.Frame(card, bg=pp["accent"], height=4).pack(fill="x")
-            sw = tk.Frame(card, bg=pp["bg"]); sw.pack(fill="x", padx=6, pady=(6, 2))
-            for c in (pp["accent"], pp["surface2"], pp["ov_bg"], pp["fg"]):
-                tk.Frame(sw, bg=c, width=18, height=12).pack(side="left", padx=1)
-            tk.Label(card, text=("◆ " if m == cur else "") + t("theme." + m), bg=pp["surface"], fg=pp["fg"], font=(ui_theme.FONT_SEMI, 9)).pack(anchor="w", padx=6)
-            tk.Label(card, text=t("themedesc." + m), bg=pp["surface"], fg=pp["muted"], font=(ui_theme.FONT, 8), wraplength=190, justify="left").pack(anchor="w", padx=6, pady=(0, 6))
-            tk.Label(card, text=t("theme.pack_includes"), bg=pp["surface"], fg=pp["accent"], font=(ui_theme.FONT_SEMI, 8), wraplength=190, justify="left").pack(anchor="w", padx=6, pady=(0, 7))
-            for w_ in [card] + list(card.winfo_children()) + list(sw.winfo_children()):
-                w_.bind("<Button-1>", lambda e, m=m: self.apply_theme_pack(m))
-        for c in range(4): gal.columnconfigure(c, weight=1)
+        ttk.Checkbutton(ra, text=t("set.ui_sounds"), variable=self.bv["ui_sounds"]).pack(side="left")
         rb = ttk.Frame(ap); rb.pack(fill="x", padx=8, pady=(0, 6))
         ttk.Label(rb, text=t("set.bg_interval")).pack(side="left")
         self.sv["bg_interval"] = tk.StringVar(value=str(st.get("bg_interval", 15)))
@@ -8384,7 +8368,7 @@ class App:
         ttk.Button(rb, text=ui_theme.with_icon(t("set.open_art"), "📂"), command=self.open_art_folder).pack(side="left", padx=(12, 0))
         self.bv["ui_depth"] = tk.BooleanVar(value=bool(st.get("ui_depth", True)))
         ttk.Checkbutton(rb, text=t("v3d.depth"), variable=self.bv["ui_depth"]).pack(side="left", padx=(18, 0))
-        ttk.Label(ap, text=t("set.theme_note") + "\n" + t("set.art_note"), foreground=PAL["muted"], wraplength=820,
+        ttk.Label(ap, text=t("set.art_note"), foreground=PAL["muted"], wraplength=820,
                   justify="left").pack(anchor="w", padx=8, pady=(0, 6))
 
         # ---- Tarama / scanning ----
@@ -8911,9 +8895,6 @@ class App:
         st["res_profile"] = self._profile_key()
         st["overlay_mode"] = "card" if self.ov_mode.get() == t("overlay.mode_card") else "corner"
         apply_ocr_settings(st); self.card_box = None
-        old_theme = st.get("ui_theme", "dark")
-        new_theme = next((m for m in ui_theme.THEME_MODES if t("theme." + m) == self.theme_var.get()), old_theme)
-        if new_theme != old_theme: ui_theme.apply_pack(st, new_theme)
         self.sounds.enabled = bool(st.get("ui_sounds", True))
         save_cfg(self.cfg); self.tess = find_tesseract(self.cfg)
         self._bind_global_hotkeys()
@@ -8921,28 +8902,10 @@ class App:
         self._ensure_diagnostic_event_handler()
         log.info("Settings saved (log level %s)", st["log_level"])
         if self.running: self.stop(quiet=True); self.start(quiet=True)
-        if st["ui_theme"] != old_theme:
-            self.rebuild_ui(tab="settings")          # tema anında uygulanır, yeniden başlatma yok
-        else:
-            self.banner.set_interval(st["bg_interval"])
-            self.refresh_status()
-            self.apply_fx()
+        self.banner.set_interval(st["bg_interval"])
+        self.refresh_status()
+        self.apply_fx()
         self.toast(t("msg.settings_saved"))
-
-    def apply_theme_pack(self, mode):
-        st = self.cfg["settings"]
-        if mode not in ui_theme.THEME_MODES: return
-        accent = ui_theme.PALETTES[mode]["accent"]
-        if (st.get("ui_theme") == mode and st.get("fx_cursor_color") == accent
-                and st.get("fx_trail_color") == accent): return
-        ui_theme.apply_pack(st, mode); save_cfg(self.cfg)
-        log.info("Theme pack: %s", mode)
-        self.rebuild_ui(tab="settings")
-        try:
-            if getattr(self, "tr_api", None) and self.tr_api.clients:
-                self.tr_api.broadcast({"type": "translate", "items": [], "theme": self.tr_theme_vars()})
-        except Exception:
-            pass
 
     def meta_restore_hidden(self):
         self.cfg["settings"]["meta_hidden"] = []; save_cfg(self.cfg)

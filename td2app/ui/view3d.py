@@ -475,7 +475,7 @@ BUILDERS = {"operator": m_operator, "scout": m_scout, "heavy": m_heavy, "urban":
 
 class AgentView(Scene3D):
     """3D ajan modeli; yuva durumları: {"Mask": "ok"|"miss"|"off", …}. Modeller ve kıyafetler değiştirilebilir."""
-    COLORS = {"ok": "#22c55e", "miss": "#ef4444", "off": "#4b5263", "sel": "#ff6d10"}
+    COLORS = {"ok": "#22c55e", "miss": "#ef4444", "off": "#4b5263", "sel": "#36e0c4"}
     LABELS = {}
 
     def __init__(self, parent, model="operator", outfit="night", skin=1, **kw):
@@ -682,7 +682,7 @@ class SpriteAgentView(tk.Canvas):
         self.render()
 
     def label_color(self, tag):
-        if tag == self.selected: return "#ff6d10"
+        if tag == self.selected: return "#36e0c4"
         return {"ok": "#4ade80", "miss": "#f87171", "off": "#8d95a5"}.get(self.status.get(tag, "off"), "#cfd5df")
 
     def render(self):

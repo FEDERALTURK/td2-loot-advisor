@@ -15,7 +15,7 @@ class IntroSplash:
     FPS = 30
     FRAME_INTERVAL_MS = 1000 / FPS
     KEY = "#010203"
-    ORANGE = "#ff6d10"
+    ACCENT = "#36e0c4"      # Uygulamanın yeni, tek görsel kimliğinin vurgu rengi (camgöbeği-teal)
     WHITE = "#edf0f5"
     MUTED = "#8d95a5"
 
@@ -56,8 +56,8 @@ class IntroSplash:
     @staticmethod
     def _color(level: float) -> str:
         level = min(1.0, max(0.0, level))
-        start = (68, 36, 25)
-        end = (255, 109, 16)
+        start = (8, 36, 32)        # koyu, sönük camgöbeği-teal (soğuk "ember")
+        end = (54, 224, 196)       # tam vurgu rengi (#36e0c4)
         return "#" + "".join(f"{round(a + (b - a) * level):02x}" for a, b in zip(start, end))
 
     @staticmethod
@@ -109,7 +109,7 @@ class IntroSplash:
                 a = progress * 5 + i * 1.6
                 px, py = cx + math.cos(a)*rx, y + math.sin(a)*ry
                 c.create_oval(px-2*scale, py-2*scale, px+2*scale, py+2*scale,
-                              fill=self.ORANGE, outline="")
+                              fill=self.ACCENT, outline="")
 
         # Orbiting halo around the watch, with a subtle rotating perspective squeeze.
         orbit = progress * math.tau * 1.25
@@ -122,7 +122,7 @@ class IntroSplash:
         for i in range(4):
             c.create_arc(cx-92*scale, watch_y-54*scale, cx+92*scale, watch_y+54*scale,
                          start=(progress*480 + i*90) % 360, extent=42,
-                         style="arc", outline=self.ORANGE if i == 0 else "#a24c20", width=2*scale)
+                         style="arc", outline=self.ACCENT if i == 0 else "#1f7a73", width=2*scale)
 
         # Watch face: rotating hands and minute marks remain crisp on the transparent canvas.
         clock_r = 48 * scale
@@ -136,14 +136,14 @@ class IntroSplash:
             a = i * math.tau / 36 + angle
             inner = clock_r - (9 if i % 3 == 0 else 4) * scale
             outer = clock_r - scale
-            color = self.ORANGE if i in (0, 1, 2, 3) else "#aeb4bf"
+            color = self.ACCENT if i in (0, 1, 2, 3) else "#aeb4bf"
             c.create_line(cx+math.cos(a)*inner, watch_y+math.sin(a)*inner,
                           cx+math.cos(a)*outer, watch_y+math.sin(a)*outer,
                           fill=color, width=(2 if i % 3 == 0 else 1) * scale)
         hand = angle * 1.8 - math.pi/2
         c.create_line(cx, watch_y, cx+math.cos(hand)*33*scale,
                       watch_y+math.sin(hand)*33*scale,
-                      fill=self.ORANGE, width=3*scale, capstyle="round")
+                      fill=self.ACCENT, width=3*scale, capstyle="round")
         c.create_oval(cx-4*scale, watch_y-4*scale, cx+4*scale, watch_y+4*scale,
                       fill=self.WHITE, outline="")
 
@@ -152,9 +152,9 @@ class IntroSplash:
         mark_angle = (1-mark_progress) * math.tau * 2 + math.sin(progress * 7) * (1-mark_progress) * .3
         mark_radius = (13 + 17 * reveal) * scale
         mark_points = self._hex_points(cx, watch_y, mark_radius, mark_angle)
-        c.create_polygon(*mark_points, fill="", outline=self.ORANGE, width=2*scale)
+        c.create_polygon(*mark_points, fill="", outline=self.ACCENT, width=2*scale)
         c.create_oval(cx-4*scale, watch_y-4*scale, cx+4*scale, watch_y+4*scale,
-                      fill=self.ORANGE, outline="")
+                      fill=self.ACCENT, outline="")
 
         # A thin, transparent title panel flips from edge-on to full width.
         flip = min(1.0, max(0.0, (progress - .35) / .55))
@@ -167,7 +167,7 @@ class IntroSplash:
         if flip > .42:
             c.create_line(cx-panel_w/2+18*scale, panel_cy-panel_h/2,
                           cx-panel_w/2+18*scale, panel_cy+panel_h/2,
-                          fill=self.ORANGE, width=3*scale)
+                          fill=self.ACCENT, width=3*scale)
             c.create_text(cx, panel_cy-5, text="TD2 LOOT ADVISOR", fill=self.WHITE,
                           font=("Segoe UI", round(20*scale), "bold"))
             c.create_text(cx, panel_cy+19*scale, text=f"TACTICAL COMPANION  ·  v{self.version}",
@@ -177,7 +177,7 @@ class IntroSplash:
                       fill="#737d8a", font=("Segoe UI", round(8*scale)))
         progress_w = 148 * scale * progress
         c.create_line(cx-74*scale, 554*scale, cx-74*scale+progress_w, 554*scale,
-                      fill=self.ORANGE, width=2*scale)
+                      fill=self.ACCENT, width=2*scale)
 
     def pulse(self):
         """Paint a due intro frame during synchronous application startup.

@@ -2,6 +2,54 @@
 
 Önemli kararların ve sürümlerin kısa, kronolojik özeti. Tam ayrıntı için `git log` ve `.github/release_notes.md`.
 
+## Tüm temalar silindi, baştan tek yeni tema/şema (9.1.5.30, 2026-11-05)
+
+- Kullanıcı isteği: "Uygulamadaki tüm temaların sil ve baştan sıfırdan uygulama teması ve şemasını değiştir."
+  Netleştirme soruları üzerine kullanıcının verdiği yanıtlar: (1) **tek tema, hiç seçim yok** — eski 17 tema
+  (3 taban: dark/light/classic + 14 oyun-atmosferi paketi: darkzone, blacktusk, hunter, winter_ny, nightops,
+  kenly, isac, tactical, rogue_signal, isac_operations, darkzone_rogue, field_terminal, shd_terminal, kaivolt)
+  tamamen kaldırıldı; (2) **bambaşka, yeni bir görsel yön** — ne eski SHD turuncusu ne Kaivolt'un moru; (3)
+  **geriye dönük uyumluluk otomatik ve sessiz** — eski kayıtlı tema adı/düzen bilgisiyle açılan kullanıcılar
+  hatasız biçimde yeni temaya geçer. Ayrıca kullanıcı, menülerin/yazı tipinin/gölgeleme-derinlik hissinin
+  Division 2'nin kendi arayüzüyle "nitelik ve nicelik olarak benzer" olmasını istedi.
+- **`td2app/ui/ui_theme.py`**: `PALETTES`/`_PACKS`/`PACKS`/`THEME_MODES` tek bir `"default"` girdisine
+  indirildi (koyu grafit zemin `#0a0d12`/`#121720`/`#1a212c`, camgöbeği-teal vurgu `#36e0c4`/hover `#6aedd9`,
+  karar/işlev renkleri — KEEP/CONSIDER/DISMANTLE/REVIEW/success/danger/warning/info — okunabilirlik kanıtlı
+  eski "dark" paletinden korundu). `apply_pack()` artık paket-özel dallanma içermiyor: tek koşulsuz davranış
+  olarak `ui_nav_layout="tactical"` + `fx_transition_style="tactical"` + `ui_layout="standard"` uygular — bu,
+  Division 2'nin kademeli/çaprazlı (HUD) kenar çubuğu ve geçiş temposunu zaten uygulayan mevcut altyapıyı
+  (`fx.CommandRibbon`, `fx.NavMotif`, `fx.Transition`, kademeli kenar-çubuğu girintisi) yeniden kullanır —
+  sıfırdan "gölgelik/HUD" kodu yazmaya gerek kalmadı. `apply()`'deki "classic" özel dalı (ham `clam` teması)
+  kaldırıldı. Bağımsız bir özellik olan `event_fx`/`fx_watch_style` (ajan-saat dekoratif animasyon modu:
+  standard/isac/rogue/field) kasıtlı olarak dokunulmadan bırakıldı — renk teması değil, ayrı bir dekoratif
+  seçici; yeni temada sade biçimde `event_fx="standard"`'a düşüyor.
+- **`app.py`**: iki sabit-kodlanmış `ui_theme.PALETTES["dark"]` referansı (`PAL` ilk ataması, build-share
+  kartındaki verdict rengi) `"default"`e güncellendi. `DEFAULTS["ui_theme"]` `"kaivolt"` → `"default"`,
+  `DEFAULTS["ui_nav_layout"]`/`["fx_transition_style"]` `"flat"`/`"soft"` → `"tactical"`/`"tactical"`.
+  Ayarlar → Görünüm kutusundaki tema galerisi/açılır listesi (17 kart + combobox) tamamen kaldırıldı; artık
+  yalnızca tema-dışı görünüm ayarları (sesler, arka plan aralığı, özel sanat klasörü, 3B derinlik) kalıyor.
+  Artık çağrılmayan `apply_theme_pack()` yardımcı metodu ve ayarları-kaydet akışındaki eski tema-adı
+  eşleştirme kodu silindi.
+  - **Geriye dönük uyumluluk / göç**: `_cfg_defaults()`'a eklendi — `ui_theme` artık `THEME_MODES` içinde
+    değilse (örn. eski `"kaivolt"`, `"isac"`, `"shd_terminal"`) sessizce `DEFAULTS["ui_theme"]`'e döner;
+    ayrıca `ui_layout` `"standard"` değilse (silinen `field_terminal`/`shd_terminal` paketlerinin yan etkisi
+    olarak ayarlanmış, artık palet anahtarları eksik kalacak `field_command`/`shd_terminal` özel kabuklarına
+    yönlendiren `ui_layout` değerleri) sessizce `"standard"`'a sıfırlanır. Hiçbir hata/bildirim gösterilmez.
+- Kapsam dışı bırakılan, bilinçli kararlar: `_build_field_command_shell`/`_build_shd_terminal_shell` (app.py)
+  ve fx.py'deki "isac"/"rogue"/"field" saat varyantları yapısal/dekoratif kod olarak silinmedi (yalnızca artık
+  hiçbir tema seçiminden tetiklenmiyor) — "tema/şema" kapsamına girmiyor. 10 dil dosyasındaki artık kullanılmayan
+  `theme.*`/`themedesc.*`/`set.theme`/`set.theme_note`/`theme.pack_hint`/`theme.pack_includes` çeviri anahtarları
+  (~340+ satır) bilerek silinmedi — zararsız, kullanılmayan çeviri anahtarları olarak bırakıldı; `set.theme_note`
+  artık görüntülenmiyor (Ayarlar ekranındaki kullanımı kaldırıldı) ama JSON'larda duruyor.
+- **Test güncellemeleri**: `tests/test_project_structure.py`'deki `field_terminal`'e özel tema testi, artık
+  tek-palet yapısını ve eski paket adının geçersiz olduğunu doğrulayan testlerle değiştirildi (fx.py'nin "field"
+  varyant kodunun kendisinin hâlâ var olduğu ayrı bir testte korundu). `tests/ui_translate_test.py`'deki
+  `apply_theme_pack("nightops"/"blacktusk"/"dark")` adımları (artık var olmayan bir metod) kaldırıldı/basitleştirildi.
+  CI'daki (`build-installer.yml`) 21 test dosyasının hepsi + bu iki dosya, gerçek Tk widget kurulumuyla
+  (python3.12 + xvfb-run) tekrar çalıştırılıp doğrulandı — hepsi geçti, `test_stability_widgets.py` tüm
+  sayfaları/sekmeleri hatasız kurdu (`ok: true`, `callback_errors: []`).
+- Sürüm `9.1.5.30`'a yükseltildi. Etiket/GitHub Release henüz oluşturulmadı — kullanıcı onayı bekliyor.
+
 ## Canlı çeviri: çoklu dil, güven uyarısı, önbellek düzeltmesi (9.1.5.29, 2026-11-04)
 
 - Kullanıcı isteği: "canlı çeviri daha iyi çalışması için ne yapılmalı" sorusuna yanıt olarak belirlenen 4
