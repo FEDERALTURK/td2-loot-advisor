@@ -4,7 +4,10 @@ pytesseract
 pynput
 pystray
 ctranslate2>=4.8.4,<5
-sentencepiece
+# sentencepiece 0.2.3 (PyPI, 2026-11-05) Windows win_amd64 wheel'inde PyInstaller ile paketlenince
+# _sentencepiece.pyd "DLL load failed ... module could not be found" ile çöküyor (0.2.2 ile sorun yok,
+# bkz. BUGS.md #17). Üst sınır olmadan 0.2.3+ otomatik çekilmesin diye sabitlendi.
+sentencepiece==0.2.2
 soundcard
 edge-tts>=7.3.1,<8
 sounddevice

@@ -145,7 +145,7 @@ import diagnostics_center
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.1.5.29"
+APP_VERSION = "9.1.5.31"
 # "Bu oturumda ne kazandın?" özeti için kaba tahmin: bir eşyayı elle inceleyip
 # build'e göre karar vermenin (istatistikleri okuma + karşılaştırma) ortalama
 # süresi, saniye. Gerçek bir ölçüm değil — yalnızca arayüzde "tahmini" etiketiyle
@@ -207,10 +207,10 @@ DEFAULTS = {"scan_mode": "hotkey", "auto_interval_ms": 700, "auto_record": True,
             "daily_reset_hour": 2, "weekly_reset_day": 1, "weekly_reset_hour": 2,  # weekly_reset_day: 0=Monday
             "tasks_hotkey": "<f10>",
             "language": "", "log_level": "INFO", "log_max_kb": 1024, "log_backups": 3,
-            "ui_theme": "kaivolt", "ui_sounds": True, "bg_interval": 15,
-            "fx_cursor": True, "fx_cursor_style": "crosshair", "fx_cursor_color": "#7c5cfc", "fx_cursor_custom": "",
-            "fx_trail": True, "fx_trail_color": "#7c5cfc", "fx_trail_len": 18, "fx_transitions": True,
-            "fx_video": True, "fx_video_dim": 0.35, "fx_transition_ms": 220, "fx_transition_style": "soft", "ui_nav_layout": "flat", "ui_layout": "standard", "fx_bgwatch": False, "fx_bgwatch_dim": 0.0, "event_fx": "standard",
+            "ui_theme": "default", "ui_sounds": True, "bg_interval": 15,
+            "fx_cursor": True, "fx_cursor_style": "crosshair", "fx_cursor_color": "#36e0c4", "fx_cursor_custom": "",
+            "fx_trail": True, "fx_trail_color": "#36e0c4", "fx_trail_len": 18, "fx_transitions": True,
+            "fx_video": True, "fx_video_dim": 0.35, "fx_transition_ms": 220, "fx_transition_style": "tactical", "ui_nav_layout": "tactical", "ui_layout": "standard", "fx_bgwatch": False, "fx_bgwatch_dim": 0.0, "event_fx": "standard",
             "res_profile": "auto", "ocr_engine": "auto", "ocr_gpu": "auto", "license_key": "", "update_check": True, "update_last": 0, "update_skip": "", "stash_record": True, "vendor_mode": False, "vendor_auto": True, "drop_share": False, "drop_asked": False, "drop_activity": "none", "drop_server": "", "drop_client": "", "vision_ok": False, "vendor_notified": "", "companion_port": 8765, "svc_tray": True, "svc_close_to_tray": False, "svc_auto_run": True, "svc_session_popup": True, "smart_scan": True, "api_on": False, "api_port": 8766, "api_lan": False, "api_control": True, "api_token": "", "rpc_on": False, "rpc_client_id": "", "push_on": False, "push_topic": "", "push_webhook": "", "push_drop": True, "push_build": True, "push_vendor": True, "push_session": True, "agent_model": "operator", "agent_outfit": "night", "agent_skin": 1, "ocr_threshold": 170, "ocr_scale": "auto", "ocr_psm": 6, "ocr_passes": 3,
             "overlay_mode": "card", "overlay_alpha": 0.94, "overlay_size": 1.0, "ui_depth": True,
             "meta_sync": True, "meta_feed_url": "", "meta_last_try": 0, "meta_last_sync": "", "meta_version": "",
@@ -294,6 +294,10 @@ def _cfg_defaults(cfg):
     for k, v in DEFAULTS.items():
         st.setdefault(k, v)
     if st.get("perf_mode") not in performance.MODES: st["perf_mode"] = "balanced"
+    # Eski çoklu tema sistemi kaldırıldı (tek sabit tema): eski kayıtlı tema adlarını ("kaivolt",
+    # "isac", "shd_terminal" vb.) ve onlara bağlı özel kabuk düzenini sessizce yeni varsayılana taşı.
+    if st.get("ui_theme") not in ui_theme.THEME_MODES: st["ui_theme"] = DEFAULTS["ui_theme"]
+    if st.get("ui_layout") != "standard": st["ui_layout"] = "standard"
     try:
         st["keep_threshold"], st["consider_threshold"] = itempolicy.validate_thresholds(st["keep_threshold"], st["consider_threshold"])
     except ValueError:
@@ -817,7 +821,7 @@ def apply_progress(cfg, progress, item, verdict, res):
 
 # ───────────── UI sabitleri ─────────────
 # Renkler seçili temadan gelir (ui_theme.py). App açılışta PAL/COLORS/VFG'yi günceller.
-PAL = dict(ui_theme.PALETTES["dark"], mode="dark")
+PAL = dict(ui_theme.PALETTES["default"], mode="default")
 COLORS = dict(PAL["verdict"])      # karar kartı arka planları (beyaz yazı)
 VFG = dict(PAL["verdict_fg"])      # karar renkleri yazı olarak (tablolar, sohbet)
 
@@ -4311,7 +4315,7 @@ class App:
     def build_ui(self):
         """ISAC kabuk + sabit ana gezinme + özellik gruplarının alt sekmeleri."""
         self._ui_build_errors = []
-        set_palette(ui_theme.apply(self.root, self.cfg["settings"].get("ui_theme", "kaivolt")))
+        set_palette(ui_theme.apply(self.root, self.cfg["settings"].get("ui_theme", "default")))
         self.build_header()
 
         self.tab_keys = ("dash", "builds", "progress", "stash", "stats", "info", "tasks", "division3", "translate", "assistant", "settings", "history", "log", "help", "about")
@@ -4331,12 +4335,10 @@ class App:
         if self.cfg["settings"].get("ui_layout") == "shd_terminal":
             return self._build_shd_terminal_shell()
 
-        # ISAC ana kabuğu: sol navigasyon sabit, içerik alanı kendi alt sekmelerini korur.
+        # ISAC ana kabuğu: dikey sol navigasyon yok; tüm menü üstte yatay bir şeritte,
+        # içerik alanı tüm genişliği kullanır.
         self.workspace = ttk.Frame(self.root)
         self.workspace.pack(fill="both", expand=True, padx=10, pady=(4, 10))
-        self.sidebar = ttk.Frame(self.workspace, style="Sidebar.TFrame", width=max(164, int(188 * getattr(self, "ui_factor", 1.0))))
-        self.sidebar.pack(side="left", fill="y", padx=(0, 8))
-        self.sidebar.pack_propagate(False)
         self.main_area = ttk.Frame(self.workspace)
         self.main_area.pack(side="left", fill="both", expand=True)
         # Pencere elle küçültüldüğünde de kompakt menü davranışını uygula;
@@ -4348,6 +4350,26 @@ class App:
             duration_ms=int(self.cfg["settings"].get("fx_transition_ms", 260)),
             style=self.cfg["settings"].get("fx_transition_style", "tactical"),
         )
+        # Üst yatay menü şeridi: arka planında aşağı akan kod animasyonu var,
+        # menü düğmeleri bu canvas'a gömülü (create_window) — aralarındaki
+        # boşluklarda animasyon görünür kalır. Sol/dikey bir sidebar yoktur.
+        self.nav_motif = None
+        self.topnav = fx.DigitalRain(self.main_area, bg=PAL["bg"],
+                                     dim=PAL.get("ov_border", PAL["border"]), bright=PAL["accent"],
+                                     height=max(46, int(50 * getattr(self, "ui_factor", 1.0))))
+        self.topnav.pack(fill="x", padx=2, pady=(2, 4))
+        self._sidebar_buttons = {}
+        self._topnav_windows = {}
+        for group in self.group_keys:
+            btn = ttk.Button(self.topnav, text=self.group_labels[group], style="FieldNav.TButton",
+                             command=lambda g=group: self._sidebar_select_group(g))
+            self._topnav_windows[group] = self.topnav.create_window(0, 0, window=btn, anchor="w", tags=("navbtn",))
+            self._sidebar_buttons[group] = btn
+        self._topnav_version_id = self.topnav.create_text(
+            0, 0, text=("SÜRÜM " if tr_ui else "VERSION ") + APP_VERSION,
+            fill=PAL["muted"], font=(ui_theme.FONT, 8), anchor="e", tags=("navbtn",))
+        self.topnav.bind("<Configure>", self._layout_topnav_buttons, add="+")
+        self.topnav.after_idle(self._layout_topnav_buttons)
         # Ana içerik menülerinin üstünde görünür bir operasyon şeridi. Bu,
         # yalnız dekoratif bir Canvas'tır; tıklama alanı veya sayfa düzeni
         # hareket etmez.
@@ -4356,29 +4378,6 @@ class App:
         self.command_ribbon.pack(fill="x", padx=2, pady=(2, 4))
         nb = self.nb = ttk.Notebook(self.main_area, style="NoTabs.TNotebook")
         nb.pack(fill="both", expand=True, padx=2, pady=2)
-
-        # Oyun arayüzündeki kesik / çapraz veri çizgilerini taklit eden hafif
-        # bir işaret bandı. Bu bir Canvas değil etkileşim katmanı değildir;
-        # menü düğmelerinin tıklamasını asla kapatmaz.
-        self.nav_motif = fx.NavMotif(self.sidebar, accent=PAL["accent"], bg=PAL["bg"], muted=PAL["border"])
-        self.nav_motif.pack(fill="x", padx=12, pady=(12, 0))
-        ttk.Label(self.sidebar, text="◆ ISAC", style="Brand.TLabel").pack(anchor="w", padx=14, pady=(4, 2))
-        ttk.Label(self.sidebar, text=t("nav.ops_center"),
-                  style="Muted.TLabel", font=(ui_theme.FONT_SEMI, 8)).pack(anchor="w", padx=14, pady=(0, 14))
-        ttk.Separator(self.sidebar).pack(fill="x", padx=12, pady=(0, 10))
-        self._sidebar_buttons = {}
-        tactical_nav = self.cfg["settings"].get("ui_nav_layout", "tactical") == "tactical"
-        for index, group in enumerate(self.group_keys):
-            btn = ttk.Button(self.sidebar, text=self.group_labels[group], style="Nav.TButton",
-                             command=lambda g=group: self._sidebar_select_group(g))
-            # gerçek widget'ları döndürmek Tk'da hitbox/ölçek hatası üretir.
-            # Bunun yerine küçük ve sabit bir kademeli x-ofset kullanıyoruz.
-            # Bu, TD2 tarzı eğik HUD ritmini verirken küçük pencerede güvenli kalır.
-            btn.pack(fill="x", padx=((8 + min(index, 4) * 3) if tactical_nav else 8, 8), pady=2)
-            self._sidebar_buttons[group] = btn
-        ttk.Separator(self.sidebar).pack(fill="x", padx=12, pady=(12, 8))
-        ttk.Label(self.sidebar, text=("SÜRÜM " if tr_ui else "VERSION ") + APP_VERSION,
-                  style="Muted.TLabel", font=(ui_theme.FONT, 8)).pack(side="bottom", anchor="w", padx=14, pady=12)
 
         self.group_nbs = {}
         for group in self.group_keys:
@@ -4559,31 +4558,66 @@ class App:
         try:
             width = self.root.winfo_width()
             compact_now = width < 1100
-            layout = self.cfg["settings"].get("ui_nav_layout", "tactical")
-            layout_changed = layout != getattr(self, "_responsive_nav_layout", None)
-            if compact_now == getattr(self, "_responsive_compact", None) and not layout_changed:
+            if compact_now == getattr(self, "_responsive_compact", None):
                 return
             self._responsive_compact = compact_now
-            self._responsive_nav_layout = layout
             self.compact = compact_now
-            if hasattr(self, "sidebar"):
+            if hasattr(self, "sidebar"):          # eski dikey kabuklar (shd_terminal) için korunur
                 sidebar_w = 76 if compact_now else max(164, int(188 * getattr(self, "ui_factor", 1.0)))
                 self.sidebar.configure(width=sidebar_w)
             icons = {"home": "⌂", "gear": "🎒", "intel": "🛰", "tools": "🧰", "settings": "⚙", "system": "☰"}
-            for index, (key, button) in enumerate(getattr(self, "_sidebar_buttons", {}).items()):
+            for key, button in getattr(self, "_sidebar_buttons", {}).items():
                 button.configure(text=icons[key] if compact_now else self.group_labels[key])
-                button.pack_configure(padx=(6, 6) if compact_now else ((8 + min(index, 4) * 3) if layout == "tactical" else 8, 8))
+            self._layout_topnav_buttons()
             # Küçük modda saydam üst efektleri kapatıp menü yüzeyini güvenilir
             # bırak; büyük modda seçili görsel paketi aynen kullan.
             self.apply_fx()
         except (tk.TclError, AttributeError):
             return
 
+    def _layout_topnav_buttons(self, _event=None):
+        """Üst yatay menüdeki düğmeleri (DigitalRain canvas'ına gömülü) soldan sağa diz.
+
+        Düğmeler arasında kalan boşluklarda arka plandaki kod animasyonu görünür kalır.
+        """
+        canvas = getattr(self, "topnav", None)
+        if not canvas:
+            return
+        try:
+            if not canvas.winfo_exists():
+                return
+            canvas.update_idletasks()
+            h = max(1, canvas.winfo_height())
+            x = 10
+            for group in self.group_keys:
+                btn = self._sidebar_buttons.get(group)
+                win_id = self._topnav_windows.get(group)
+                if not btn or win_id is None:
+                    continue
+                canvas.coords(win_id, x, h / 2)
+                x += btn.winfo_reqwidth() + 8
+            if getattr(self, "_topnav_version_id", None) is not None:
+                canvas.coords(self._topnav_version_id, max(x + 10, canvas.winfo_width() - 14), h / 2)
+                # Arkadaki kod animasyonu metnin içinden geçip karışmasın diye küçük bir dolgu arkaplanı.
+                bbox = canvas.bbox(self._topnav_version_id)
+                if bbox:
+                    pad = 4
+                    rect = (bbox[0] - pad, bbox[1] - pad, bbox[2] + pad, bbox[3] + pad)
+                    if getattr(self, "_topnav_version_bg_id", None) is None:
+                        self._topnav_version_bg_id = canvas.create_rectangle(
+                            *rect, fill=canvas["bg"], outline="", tags=("navbtn",))
+                    else:
+                        canvas.coords(self._topnav_version_bg_id, *rect)
+                    canvas.tag_lower(self._topnav_version_bg_id, self._topnav_version_id)
+            canvas.tag_raise("navbtn")
+        except tk.TclError:
+            return
+
     def _sidebar_activate(self, group):
-        field_shell = self.cfg["settings"].get("ui_layout") == "field_command"
+        field_style = not hasattr(self, "sidebar")      # yatay üst menü (ana kabuk + eski field_command) FieldNav stili kullanır
         for key, button in getattr(self, "_sidebar_buttons", {}).items():
             try:
-                if field_shell:
+                if field_style:
                     button.configure(style="FieldNavActive.TButton" if key == group else "FieldNav.TButton")
                 else:
                     button.configure(style="NavActive.TButton" if key == group else "Nav.TButton")
@@ -6035,7 +6069,7 @@ class App:
         shell = tk.Frame(w, bg=dark, highlightthickness=1, highlightbackground="#2c313d"); shell.pack(fill="both", expand=True)
         tk.Frame(shell, bg=col, width=max(5, int(7 * k))).pack(side="left", fill="y")      # renkli şerit
         body = tk.Frame(shell, bg=dark, padx=int(16 * k), pady=int(12 * k)); body.pack(side="left", fill="both")
-        tk.Label(body, text=verdict_label(verdict), fg=ui_theme.PALETTES["dark"]["verdict_fg"].get(verdict, fg),
+        tk.Label(body, text=verdict_label(verdict), fg=ui_theme.PALETTES["default"]["verdict_fg"].get(verdict, fg),
                  bg=dark, font=(ui_theme.FONT_SEMI, fz(18))).pack(anchor="w")
         sub = item["name"][:42] + ("  ·  " + ", ".join(item["rarity"]) if item.get("rarity") else "")
         tk.Label(body, text=sub, fg=fg, bg=dark, font=(ui_theme.FONT_SEMI, fz(11))).pack(anchor="w")
@@ -8353,33 +8387,13 @@ class App:
         self.build_display_box(P, st)
 
         # ---- Görünüm / appearance ----
+        # Not: uygulamanın artık seçilebilir birden çok teması yok — tek, sabit bir görsel kimlik var.
+        # Bu yüzden eski tema galerisi/açılır listesi kaldırıldı; burada yalnızca tema-dışı görünüm
+        # ayarları (sesler, arka plan aralığı, özel sanat klasörü, 3B derinlik) kalıyor.
         ap = ttk.LabelFrame(f, text=t("set.appearance_box")); ap.pack(fill="x", padx=10, pady=6)
         ra = ttk.Frame(ap); ra.pack(fill="x", padx=8, pady=6)
-        ttk.Label(ra, text=t("set.theme")).pack(side="left")
-        self.theme_var = tk.StringVar(value=t("theme." + (st.get("ui_theme") if st.get("ui_theme") in ui_theme.THEME_MODES else "dark")))
-        ttk.Combobox(ra, textvariable=self.theme_var, values=[t("theme." + m) for m in ui_theme.THEME_MODES],
-                     width=18, state="readonly").pack(side="left", padx=6)
         self.bv["ui_sounds"] = tk.BooleanVar(value=bool(st.get("ui_sounds", True)))
-        ttk.Checkbutton(ra, text=t("set.ui_sounds"), variable=self.bv["ui_sounds"]).pack(side="left", padx=(18, 0))
-        ttk.Label(ap, text=t("theme.pack_hint"), foreground=PAL["muted"], wraplength=820,
-                  justify="left").pack(anchor="w", padx=10, pady=(0, 4))
-        # Her karta basmak arayüz paletini, bindirme renklerini ve vurgu efektlerini birlikte uygular.
-        gal = ttk.Frame(ap); gal.pack(fill="x", padx=8, pady=(0, 8))
-        cur = st.get("ui_theme", "dark")
-        for i, m in enumerate(ui_theme.PACKS):
-            pp = ui_theme.PALETTES[m]
-            card = tk.Frame(gal, bg=pp["surface"], highlightthickness=2, highlightbackground=pp["accent"] if m == cur else pp["border"], cursor="hand2")
-            card.grid(row=i // 4, column=i % 4, padx=4, pady=4, sticky="we")
-            tk.Frame(card, bg=pp["accent"], height=4).pack(fill="x")
-            sw = tk.Frame(card, bg=pp["bg"]); sw.pack(fill="x", padx=6, pady=(6, 2))
-            for c in (pp["accent"], pp["surface2"], pp["ov_bg"], pp["fg"]):
-                tk.Frame(sw, bg=c, width=18, height=12).pack(side="left", padx=1)
-            tk.Label(card, text=("◆ " if m == cur else "") + t("theme." + m), bg=pp["surface"], fg=pp["fg"], font=(ui_theme.FONT_SEMI, 9)).pack(anchor="w", padx=6)
-            tk.Label(card, text=t("themedesc." + m), bg=pp["surface"], fg=pp["muted"], font=(ui_theme.FONT, 8), wraplength=190, justify="left").pack(anchor="w", padx=6, pady=(0, 6))
-            tk.Label(card, text=t("theme.pack_includes"), bg=pp["surface"], fg=pp["accent"], font=(ui_theme.FONT_SEMI, 8), wraplength=190, justify="left").pack(anchor="w", padx=6, pady=(0, 7))
-            for w_ in [card] + list(card.winfo_children()) + list(sw.winfo_children()):
-                w_.bind("<Button-1>", lambda e, m=m: self.apply_theme_pack(m))
-        for c in range(4): gal.columnconfigure(c, weight=1)
+        ttk.Checkbutton(ra, text=t("set.ui_sounds"), variable=self.bv["ui_sounds"]).pack(side="left")
         rb = ttk.Frame(ap); rb.pack(fill="x", padx=8, pady=(0, 6))
         ttk.Label(rb, text=t("set.bg_interval")).pack(side="left")
         self.sv["bg_interval"] = tk.StringVar(value=str(st.get("bg_interval", 15)))
@@ -8387,7 +8401,7 @@ class App:
         ttk.Button(rb, text=ui_theme.with_icon(t("set.open_art"), "📂"), command=self.open_art_folder).pack(side="left", padx=(12, 0))
         self.bv["ui_depth"] = tk.BooleanVar(value=bool(st.get("ui_depth", True)))
         ttk.Checkbutton(rb, text=t("v3d.depth"), variable=self.bv["ui_depth"]).pack(side="left", padx=(18, 0))
-        ttk.Label(ap, text=t("set.theme_note") + "\n" + t("set.art_note"), foreground=PAL["muted"], wraplength=820,
+        ttk.Label(ap, text=t("set.art_note"), foreground=PAL["muted"], wraplength=820,
                   justify="left").pack(anchor="w", padx=8, pady=(0, 6))
 
         # ---- Tarama / scanning ----
@@ -8914,9 +8928,6 @@ class App:
         st["res_profile"] = self._profile_key()
         st["overlay_mode"] = "card" if self.ov_mode.get() == t("overlay.mode_card") else "corner"
         apply_ocr_settings(st); self.card_box = None
-        old_theme = st.get("ui_theme", "dark")
-        new_theme = next((m for m in ui_theme.THEME_MODES if t("theme." + m) == self.theme_var.get()), old_theme)
-        if new_theme != old_theme: ui_theme.apply_pack(st, new_theme)
         self.sounds.enabled = bool(st.get("ui_sounds", True))
         save_cfg(self.cfg); self.tess = find_tesseract(self.cfg)
         self._bind_global_hotkeys()
@@ -8924,28 +8935,10 @@ class App:
         self._ensure_diagnostic_event_handler()
         log.info("Settings saved (log level %s)", st["log_level"])
         if self.running: self.stop(quiet=True); self.start(quiet=True)
-        if st["ui_theme"] != old_theme:
-            self.rebuild_ui(tab="settings")          # tema anında uygulanır, yeniden başlatma yok
-        else:
-            self.banner.set_interval(st["bg_interval"])
-            self.refresh_status()
-            self.apply_fx()
+        self.banner.set_interval(st["bg_interval"])
+        self.refresh_status()
+        self.apply_fx()
         self.toast(t("msg.settings_saved"))
-
-    def apply_theme_pack(self, mode):
-        st = self.cfg["settings"]
-        if mode not in ui_theme.THEME_MODES: return
-        accent = ui_theme.PALETTES[mode]["accent"]
-        if (st.get("ui_theme") == mode and st.get("fx_cursor_color") == accent
-                and st.get("fx_trail_color") == accent): return
-        ui_theme.apply_pack(st, mode); save_cfg(self.cfg)
-        log.info("Theme pack: %s", mode)
-        self.rebuild_ui(tab="settings")
-        try:
-            if getattr(self, "tr_api", None) and self.tr_api.clients:
-                self.tr_api.broadcast({"type": "translate", "items": [], "theme": self.tr_theme_vars()})
-        except Exception:
-            pass
 
     def meta_restore_hidden(self):
         self.cfg["settings"]["meta_hidden"] = []; save_cfg(self.cfg)

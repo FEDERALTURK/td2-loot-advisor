@@ -6,6 +6,7 @@ oyun ön plandayken bile OCR ve çeviri kuyruğunu etkilememesi amaçlanır.
 from __future__ import annotations
 
 import math
+import random
 import time
 from pathlib import Path
 import tkinter as tk
@@ -36,6 +37,10 @@ class DashboardScene(tk.Canvas):
         self._image, self._photo, self._size, self._job = None, None, (0, 0), None
         self._bg_item = None
         self._started = time.perf_counter()
+        # Rastgele "tespit" noktaları: her biri kendi açısı/yarıçapı/ömrüyle doğar ve söner;
+        # sabit bir örüntü yok — aynı noktada tekrar eden bir "tarama" hissi kasıtlı olarak önlenir.
+        self._blips = []
+        self._next_blip_at = 0.0
         self.snapshot = {"name": "EŞYA TARAMASI BEKLİYOR", "verdict": "READY", "score": "—", "status": "SİSTEM HAZIR", "translation": "Canlı çeviri beklemede"}
         self.configure(cursor="hand2")
         self.bind("<Configure>", self._resize, add="+")
@@ -89,6 +94,41 @@ class DashboardScene(tk.Canvas):
         self.create_text(x1 + 12, y1 + 13, anchor="w", text=title, fill=self.pal["muted"], font=("Segoe UI Semibold", 8), tags="hud")
         self.create_text(x1 + 12, y1 + 33, anchor="w", text=value[:48], fill=self.pal["fg"], font=("Segoe UI Semibold", 11), tags="hud")
 
+    def _draw_blips(self, cx, cy, radius, ry, accent, sweep_deg):
+        """Rastgele 'tespit' noktaları: açı/yarıçap her defasında yeniden seçilir,
+        her biri kısa bir süre parlayıp söner. Asla sabit bir örüntü/konum tekrarlamaz —
+        bu dekoratif bir efekttir, oyunun belleğinden okunan gerçek bir düşman konumu değildir."""
+        now = time.time()
+        if now >= self._next_blip_at and len(self._blips) < 3:
+            # Yeni nokta, tarama çizgisinin az gerisinde "yeni tespit edilmiş" hissiyle doğar;
+            # açı ve yarıçap her seferinde rastgele seçilir (aynı konumun tekrarını önler).
+            spawn_angle = (sweep_deg + random.uniform(-70, 10)) % 360
+            self._blips.append({
+                "angle": spawn_angle,
+                "rfrac": random.uniform(0.30, 0.94),
+                "t0": now,
+                "dur": random.uniform(1.6, 2.6),
+            })
+            self._next_blip_at = now + random.uniform(1.3, 3.4)
+        kept = []
+        for b in self._blips:
+            age = now - b["t0"]
+            if age >= b["dur"]:
+                continue
+            frac = age / b["dur"]
+            # Hızlı parlama + yavaş sönme: tespit anı belirgin, sonrası dekoratif bir iz bırakır.
+            glow = (1.0 - frac) ** 0.5 * (1.0 if frac > 0.1 else frac / 0.1)
+            a = math.radians(b["angle"])
+            r = radius * b["rfrac"]
+            x, y = cx + math.cos(a) * r, cy + math.sin(a) * r * ry
+            rad = 3 + glow * 4
+            self.create_oval(x - rad * 2.1, y - rad * 2.1, x + rad * 2.1, y + rad * 2.1,
+                             outline=_blend(self.pal["bg"], accent, 0.18 + glow * 0.35), width=1, tags="hud")
+            self.create_oval(x - rad, y - rad, x + rad, y + rad,
+                             fill=_blend(self.pal["bg"], accent, 0.45 + glow * 0.55), outline="", tags="hud")
+            kept.append(b)
+        self._blips = kept
+
     def _draw(self):
         try:
             width, height = self.winfo_width(), self.winfo_height()
@@ -114,36 +154,43 @@ class DashboardScene(tk.Canvas):
         now = time.perf_counter() - self._started
         cx, cy, radius = width * 0.56, height * 0.50, min(width, height) * 0.39
         accent = self.pal["accent"]
-        # Arka plan radarı: değişen tema için aynı maliyet, farklı hareket dili.
-        for frac, width_px in ((1.0, 1), (0.78, 2), (0.57, 1)):
+        # 3B eğimli radar tabanı: daire yerine basık elips ("squash") çizmek,
+        # sahte bir zemin perspektifi verir — halkalar bir masa üstünde değil,
+        # eğik bir tarama diski gibi görünür. ry: dikey basıklık oranı.
+        ry = 0.50
+        # Alt katman: hafif aşağı kaymış, daha donuk bir "derinlik" elipsi —
+        # diskin kalınlığı/3B hacmi hissini ucuz şekilde verir.
+        self.create_oval(cx - radius, cy - radius * ry + radius * 0.05, cx + radius, cy + radius * ry + radius * 0.05,
+                         outline=_blend(self.pal["bg"], accent, 0.10), width=1, tags="hud")
+        for frac, width_px in ((1.0, 1), (0.78, 2), (0.57, 1), (0.33, 1)):
             r = radius * frac
-            self.create_oval(cx - r, cy - r, cx + r, cy + r, outline=_blend(self.pal["bg"], accent, 0.27), width=width_px, tags="hud")
+            self.create_oval(cx - r, cy - r * ry, cx + r, cy + r * ry,
+                             outline=_blend(self.pal["bg"], accent, 0.27), width=width_px, tags="hud")
         for i in range(12):
             angle = math.radians(i * 30)
-            self.create_line(cx + math.cos(angle) * radius * 0.42, cy + math.sin(angle) * radius * 0.42,
-                             cx + math.cos(angle) * radius, cy + math.sin(angle) * radius,
-                             fill=_blend(self.pal["bg"], accent, 0.13), width=1, tags="hud")
+            x0, y0 = cx + math.cos(angle) * radius * 0.42, cy + math.sin(angle) * radius * 0.42 * ry
+            x1, y1 = cx + math.cos(angle) * radius, cy + math.sin(angle) * radius * ry
+            self.create_line(x0, y0, x1, y1, fill=_blend(self.pal["bg"], accent, 0.13), width=1, tags="hud")
         if self.mode == "rogue":
             scan = (now * 28) % 360
             for i in range(7):
                 start = scan + i * 51
-                self.create_arc(cx - radius * .92, cy - radius * .92, cx + radius * .92, cy + radius * .92,
+                self.create_arc(cx - radius * .92, cy - radius * .92 * ry, cx + radius * .92, cy + radius * .92 * ry,
                                 start=start, extent=15, style="arc", outline=_blend(self.pal["bg"], accent, 0.50), width=4, tags="hud")
             event_text = "ROGUE SİNYALİ // KARARSIZ"
+            sweep_deg = scan
         else:
-            angle = math.radians((now * 23) % 360)
-            self.create_line(cx, cy, cx + math.cos(angle) * radius, cy + math.sin(angle) * radius,
+            sweep_deg = (now * 23) % 360
+            angle = math.radians(sweep_deg)
+            self.create_line(cx, cy, cx + math.cos(angle) * radius, cy + math.sin(angle) * radius * ry,
                              fill=_blend(self.pal["bg"], accent, 0.74), width=2, tags="hud")
-            for i in range(5):
-                a = math.radians(now * 17 + i * 71)
-                x, y = cx + math.cos(a) * radius * (0.42 + (i % 3) * .18), cy + math.sin(a) * radius * (0.42 + (i % 3) * .18)
-                self.create_oval(x - 4, y - 4, x + 4, y + 4, fill=accent, outline="", tags="hud")
             event_text = "ISAC // CANLI TARAMA"
         pulse = (math.sin(now * 2.0) + 1) / 2
-        self.create_oval(cx - radius * (.28 + pulse * .08), cy - radius * (.28 + pulse * .08),
-                         cx + radius * (.28 + pulse * .08), cy + radius * (.28 + pulse * .08),
+        self.create_oval(cx - radius * (.28 + pulse * .08), cy - radius * (.28 + pulse * .08) * ry,
+                         cx + radius * (.28 + pulse * .08), cy + radius * (.28 + pulse * .08) * ry,
                          outline=_blend(self.pal["bg"], accent, 0.16 + pulse * .22), width=2, tags="hud")
-        self.create_text(cx, cy + radius * .55, text=event_text, fill=_blend(self.pal["bg"], accent, .78),
+        self._draw_blips(cx, cy, radius, ry, accent, sweep_deg)
+        self.create_text(cx, cy + radius * ry + 18, text=event_text, fill=_blend(self.pal["bg"], accent, .78),
                          font=("Segoe UI Semibold", 9), tags="hud")
 
         pad, card_w = 16, min(325, int(width * .27))

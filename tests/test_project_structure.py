@@ -37,11 +37,21 @@ class ProjectStructureTests(unittest.TestCase):
         self.assertIn('style="soft"', source)
         self.assertIn('(\"soft\", \"tactical\")', source)
 
-    def test_field_terminal_theme_uses_map_scan_instead_of_agent_watch(self):
-        self.assertIn("field_terminal", packaged_theme.PALETTES)
+    def test_single_theme_applies_tactical_nav_and_transitions(self):
+        """Tek, sabit tema (eski çoklu tema/paket sistemi kaldırıldı): uygulanınca
+        Division 2'ye benzer kademeli (tactical) kenar çubuğu ve geçiş temposu gelir."""
+        self.assertEqual(tuple(packaged_theme.PALETTES.keys()), ("default",))
+        self.assertEqual(packaged_theme.THEME_MODES, ("default",))
         settings = {}
-        self.assertTrue(packaged_theme.apply_pack(settings, "field_terminal"))
-        self.assertEqual(settings["event_fx"], "field")
+        self.assertTrue(packaged_theme.apply_pack(settings, "default"))
+        self.assertEqual(settings["ui_nav_layout"], "tactical")
+        self.assertEqual(settings["fx_transition_style"], "tactical")
+        self.assertEqual(settings["ui_layout"], "standard")
+        self.assertFalse(packaged_theme.apply_pack({}, "field_terminal"))   # kaldırılan eski paket adı artık geçersiz
+
+    def test_field_command_shell_code_still_supports_map_scan_variant(self):
+        """`_build_field_command_shell` kod olarak kapsam dışı bırakıldı (silinmedi); fx.py'deki
+        "field" varyantının kendisi hâlâ var olmalı, yeni tek temadan tetiklenmese de."""
         source = (ROOT / "td2app" / "ui" / "fx.py").read_text(encoding="utf-8")
         self.assertIn('self.variant == "field"', source)
         self.assertIn("SHD FIELD TERMINAL", source)

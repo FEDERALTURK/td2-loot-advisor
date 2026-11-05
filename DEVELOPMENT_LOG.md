@@ -11,6 +11,99 @@
 - Düzeltme: `meta_sync.read_local_descriptions(folder)` iki parçayı `fetch_descriptions` ile aynı öncelikle birleştirir.
 - Test: `python tests/test_knowledge.py` → RESULT: PASS. Arayüzde elle denenmedi. Eski sürümler `_2`'yi okumaz; bu
   ancak uygulama güncellenince çözülür.
+## Üst yatay menü, dijital yağmur efekti, 3B radar + rastgele tespit noktaları (9.1.5.31, 2026-11-05)
+
+- Kullanıcı isteği: "Arkada bulunan haritanın dah 3 boyutlu ve gerçek olmasını saatin dönmesiyle tespit
+  edilen düşman noktalarının belirgin olmasını ve parlamasını istiyorum. Bu rasgele gelişecek sürekli aynı
+  noktada düşman tespiti yapılıyor efekti olmasın. Menülerin üst kısmında ise yeşil kodların aşağıya doğru
+  indiği animasyon efekti istiyorum menü yerleri değiştir..." Netleştirme soruları üzerine kullanıcının
+  verdiği yanıtlar: (1) **"3B harita"** → gelişmiş prosedürel 3D radar (gerçek oyun haritası görüntüsü değil
+  — proje zaten ekran-OCR dışında oyuna hiç dokunmuyor); (2) **"düşman tespiti"** → tamamen dekoratif/
+  rastgele bir HUD efekti (gerçek oyun belleğinden okunan bir konum olamaz, `HANDOFF.md`'deki "oyunun
+  process/belleğine asla dokunulmaz" kuralı korunur); (3) **üst menü** → sol kenar çubuğu tamamen kaldırılıp
+  tüm navigasyon tek, yatay üst şeride taşınacak (önceki görevde eklenen, kullanılmayan
+  `_build_field_command_shell()` kabuğundaki yatay-nav deseni referans alındı).
+- **`td2app/ui/ui_hud.py`** (`DashboardScene` — Panel/dash sekmesinde her zaman görünen asıl arka-plan
+  radarı; Windows-özel, varsayılan kapalı `fx.AgentWatch` değil): tüm halkalara/işaretlere `ry=0.50`
+  dikey-sıkıştırma uygulanarak 3B/izometrik perspektif hissi eklendi (4 eşmerkezli elips halka, ekstra
+  derinlik katmanı, 12 ışın/tarama çizgisi/merkez nabız hepsi aynı oranla yeniden hesaplandı). Yeni
+  `_draw_blips()` metodu: her "tespit" noktası kendi rastgele açısı/yarıçapı/ömrüyle (`random.uniform`)
+  doğup kısa süre parlayıp sönüyor; aynı anda en fazla 3 nokta, yeni doğuşlar arası rastgele bekleme
+  (1.3–3.4 sn) — sabit/tekrarlayan bir "hep aynı yerde tarama" örüntüsü kasıtlı olarak önlendi.
+- **`td2app/ui/fx.py`**: yeni `DigitalRain(tk.Canvas)` sınıfı (Matrix esintili, yalnızca ASCII-güvenli
+  glif seti — Windows'ta CJK font eksikliği riskini önlemek için Katakana kullanılmadı). Persistent
+  canvas-item havuzu deseni (proje genelinde `fx._ItemPool`/`ui_hud.DashboardScene` ile aynı felsefe —
+  her karede item silip yeniden yaratmak yerine `itemconfigure`/`coords` ile güncelleniyor), `_animation_budget()`
+  ile diğer dekoratif efektlerle tutarlı duraklatma/ölçekleme.
+- **`app.py`**: `build_ui()`'daki dikey kenar çubuğu bloğu tamamen kaldırıldı; yerine `fx.DigitalRain`
+  üzerine `canvas.create_window(...)` ile gerçek `ttk.Button` nav düğmeleri (Panel/Gear/Intel/Tools/
+  Settings/More) gömülü yatay bir üst şerit geldi — düğmeler arası boş alanlarda arka plandaki kod
+  animasyonu görünür kalıyor. Yeni `_layout_topnav_buttons()` metodu düğmeleri soldan sağa diziyor,
+  sürüm metnini sağa yaslıyor ve **arkadan geçen yağmur glifleriyle görsel çakışmayı önlemek için** sürüm
+  etiketinin arkasına opak dolgu dikdörtgeni (`canvas["bg"]` renginde, `tag_lower` ile metnin altında)
+  ekliyor. `_sync_responsive_layout()`'taki artık geçersiz `button.pack_configure(...)` çağrısı (düğmeler
+  artık `pack` değil `create_window` ile yönetiliyor — çalışsaydı `TclError` fırlatırdı) kaldırılıp
+  `_layout_topnav_buttons()` çağrısıyla değiştirildi. `_sidebar_activate()` artık `hasattr(self, "sidebar")`
+  ile hangi buton stilini (`FieldNav.TButton` vs `Nav.TButton`) kullanacağına karar veriyor. Eski
+  `_build_field_command_shell()`/`_build_shd_terminal_shell()` kabukları (zaten `_cfg_defaults()` tarafından
+  `ui_layout="standard"`a zorlandığı için erişilemez durumda) kapsam dışı bırakılıp dokunulmadan bırakıldı.
+- **Doğrulama**: `ast.parse` ile tüm dosyalar temiz geçti. `xvfb-run -a python3.12 tests/test_stability_widgets.py`
+  gerçek Tk widget'larıyla `callback_errors: []`, `ok: true` ile geçti. Ekran görüntüsü alınıp (Xvfb +
+  ImageMagick `import`) yakınlaştırılarak doğrulandı: sürüm etiketi artık yağmur glifleriyle çakışmıyor,
+  üst nav şeridi düğün/boşluk görünümü doğru, radar halkaları elips/3B perspektifte görünüyor. `test_core`,
+  `test_app_stability`, `test_hardening`, `test_regression_crash_patterns`, `test_release_914`,
+  `test_intelligence`, `test_translation_controls`, `test_project_structure` hepsi `xvfb-run` altında OK.
+- **Bilerek dışarıda bırakılan**: dekoratif tespit noktaları yalnızca birkaç saniyede bir rastgele
+  doğduğu için tek bir ekran görüntüsünde her zaman görünmeyebilir — bu beklenen davranış, tekrarlayan
+  sabit-konum taraması hissini önlemek amacıyla kasıtlı.
+
+## Tüm temalar silindi, baştan tek yeni tema/şema (9.1.5.30, 2026-11-05)
+
+- Kullanıcı isteği: "Uygulamadaki tüm temaların sil ve baştan sıfırdan uygulama teması ve şemasını değiştir."
+  Netleştirme soruları üzerine kullanıcının verdiği yanıtlar: (1) **tek tema, hiç seçim yok** — eski 17 tema
+  (3 taban: dark/light/classic + 14 oyun-atmosferi paketi: darkzone, blacktusk, hunter, winter_ny, nightops,
+  kenly, isac, tactical, rogue_signal, isac_operations, darkzone_rogue, field_terminal, shd_terminal, kaivolt)
+  tamamen kaldırıldı; (2) **bambaşka, yeni bir görsel yön** — ne eski SHD turuncusu ne Kaivolt'un moru; (3)
+  **geriye dönük uyumluluk otomatik ve sessiz** — eski kayıtlı tema adı/düzen bilgisiyle açılan kullanıcılar
+  hatasız biçimde yeni temaya geçer. Ayrıca kullanıcı, menülerin/yazı tipinin/gölgeleme-derinlik hissinin
+  Division 2'nin kendi arayüzüyle "nitelik ve nicelik olarak benzer" olmasını istedi.
+- **`td2app/ui/ui_theme.py`**: `PALETTES`/`_PACKS`/`PACKS`/`THEME_MODES` tek bir `"default"` girdisine
+  indirildi (koyu grafit zemin `#0a0d12`/`#121720`/`#1a212c`, camgöbeği-teal vurgu `#36e0c4`/hover `#6aedd9`,
+  karar/işlev renkleri — KEEP/CONSIDER/DISMANTLE/REVIEW/success/danger/warning/info — okunabilirlik kanıtlı
+  eski "dark" paletinden korundu). `apply_pack()` artık paket-özel dallanma içermiyor: tek koşulsuz davranış
+  olarak `ui_nav_layout="tactical"` + `fx_transition_style="tactical"` + `ui_layout="standard"` uygular — bu,
+  Division 2'nin kademeli/çaprazlı (HUD) kenar çubuğu ve geçiş temposunu zaten uygulayan mevcut altyapıyı
+  (`fx.CommandRibbon`, `fx.NavMotif`, `fx.Transition`, kademeli kenar-çubuğu girintisi) yeniden kullanır —
+  sıfırdan "gölgelik/HUD" kodu yazmaya gerek kalmadı. `apply()`'deki "classic" özel dalı (ham `clam` teması)
+  kaldırıldı. Bağımsız bir özellik olan `event_fx`/`fx_watch_style` (ajan-saat dekoratif animasyon modu:
+  standard/isac/rogue/field) kasıtlı olarak dokunulmadan bırakıldı — renk teması değil, ayrı bir dekoratif
+  seçici; yeni temada sade biçimde `event_fx="standard"`'a düşüyor.
+- **`app.py`**: iki sabit-kodlanmış `ui_theme.PALETTES["dark"]` referansı (`PAL` ilk ataması, build-share
+  kartındaki verdict rengi) `"default"`e güncellendi. `DEFAULTS["ui_theme"]` `"kaivolt"` → `"default"`,
+  `DEFAULTS["ui_nav_layout"]`/`["fx_transition_style"]` `"flat"`/`"soft"` → `"tactical"`/`"tactical"`.
+  Ayarlar → Görünüm kutusundaki tema galerisi/açılır listesi (17 kart + combobox) tamamen kaldırıldı; artık
+  yalnızca tema-dışı görünüm ayarları (sesler, arka plan aralığı, özel sanat klasörü, 3B derinlik) kalıyor.
+  Artık çağrılmayan `apply_theme_pack()` yardımcı metodu ve ayarları-kaydet akışındaki eski tema-adı
+  eşleştirme kodu silindi.
+  - **Geriye dönük uyumluluk / göç**: `_cfg_defaults()`'a eklendi — `ui_theme` artık `THEME_MODES` içinde
+    değilse (örn. eski `"kaivolt"`, `"isac"`, `"shd_terminal"`) sessizce `DEFAULTS["ui_theme"]`'e döner;
+    ayrıca `ui_layout` `"standard"` değilse (silinen `field_terminal`/`shd_terminal` paketlerinin yan etkisi
+    olarak ayarlanmış, artık palet anahtarları eksik kalacak `field_command`/`shd_terminal` özel kabuklarına
+    yönlendiren `ui_layout` değerleri) sessizce `"standard"`'a sıfırlanır. Hiçbir hata/bildirim gösterilmez.
+- Kapsam dışı bırakılan, bilinçli kararlar: `_build_field_command_shell`/`_build_shd_terminal_shell` (app.py)
+  ve fx.py'deki "isac"/"rogue"/"field" saat varyantları yapısal/dekoratif kod olarak silinmedi (yalnızca artık
+  hiçbir tema seçiminden tetiklenmiyor) — "tema/şema" kapsamına girmiyor. 10 dil dosyasındaki artık kullanılmayan
+  `theme.*`/`themedesc.*`/`set.theme`/`set.theme_note`/`theme.pack_hint`/`theme.pack_includes` çeviri anahtarları
+  (~340+ satır) bilerek silinmedi — zararsız, kullanılmayan çeviri anahtarları olarak bırakıldı; `set.theme_note`
+  artık görüntülenmiyor (Ayarlar ekranındaki kullanımı kaldırıldı) ama JSON'larda duruyor.
+- **Test güncellemeleri**: `tests/test_project_structure.py`'deki `field_terminal`'e özel tema testi, artık
+  tek-palet yapısını ve eski paket adının geçersiz olduğunu doğrulayan testlerle değiştirildi (fx.py'nin "field"
+  varyant kodunun kendisinin hâlâ var olduğu ayrı bir testte korundu). `tests/ui_translate_test.py`'deki
+  `apply_theme_pack("nightops"/"blacktusk"/"dark")` adımları (artık var olmayan bir metod) kaldırıldı/basitleştirildi.
+  CI'daki (`build-installer.yml`) 21 test dosyasının hepsi + bu iki dosya, gerçek Tk widget kurulumuyla
+  (python3.12 + xvfb-run) tekrar çalıştırılıp doğrulandı — hepsi geçti, `test_stability_widgets.py` tüm
+  sayfaları/sekmeleri hatasız kurdu (`ok: true`, `callback_errors: []`).
+- Sürüm `9.1.5.30`'a yükseltildi. Etiket/GitHub Release henüz oluşturulmadı — kullanıcı onayı bekliyor.
 
 ## Canlı çeviri: çoklu dil, güven uyarısı, önbellek düzeltmesi (9.1.5.29, 2026-11-04)
 

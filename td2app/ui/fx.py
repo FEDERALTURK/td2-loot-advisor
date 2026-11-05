@@ -446,6 +446,94 @@ class NavMotif(tk.Canvas):
         self._draw()
 
 
+class DigitalRain(tk.Canvas):
+    """Üst menü şeridi için aşağı akan yeşil/camgöbeği kod animasyonu (Matrix esintili).
+
+    Yalnızca dekoratiftir: fare/tık olayı bağlamaz. Üstüne `create_window` ile gömülen
+    gerçek widget'lar (ör. menü düğmeleri) aralarındaki boşluklarda animasyonu görünür
+    bırakır — ayrı bir sidebar veya şeffaflık hilesi gerekmez. Kare başı hücre silip
+    yeniden yaratmak yerine sabit bir ızgara item'ı yeniden kullanılır (Tk'da asıl yük budur).
+    """
+
+    FPS = 12
+    GLYPHS = "01" + "ABCDEF0123456789" + ":;.·-_/"   # her fontta güvenle render olan sade bir küme
+
+    def __init__(self, parent, bg="#0a0d12", dim="#1f7a73", bright="#6aedd9", height=50, cell_w=15, cell_h=16):
+        super().__init__(parent, height=height, bg=bg, highlightthickness=0, bd=0)
+        self.dim_color, self.bright_color = dim, bright
+        self.cell_w, self.cell_h = cell_w, cell_h
+        self._cols = []            # her sütun: {head, speed, trail, glyphs: {row: char}}
+        self._grid = []            # [[item_id, ...], ...] sütun x satır, kalıcı metin item'ları
+        self._size = (0, 0)
+        self._alive = True
+        self.bind("<Configure>", self._on_resize, add="+")
+        self.bind("<Destroy>", lambda _e: setattr(self, "_alive", False), add="+")
+        self.after_idle(self._tick)
+
+    def _on_resize(self, _event=None):
+        w, h = max(1, self.winfo_width()), max(1, self.winfo_height())
+        n_cols = max(1, w // self.cell_w)
+        n_rows = max(1, h // self.cell_h) + 2       # +2: iz, görünür alanın az ötesine taşabilsin
+        if (n_cols, n_rows) == self._size:
+            return
+        self._size = (n_cols, n_rows)
+        self.delete("rain")
+        self._grid = [[self.create_text((c + 0.5) * self.cell_w, r * self.cell_h, text="",
+                                        fill=self.dim_color, font=("Consolas", 10), anchor="n", tags=("rain",))
+                       for r in range(n_rows)] for c in range(n_cols)]
+        self._cols = [self._new_column(n_rows) for _ in range(n_cols)]
+        self.tag_lower("rain")
+
+    def _new_column(self, n_rows):
+        return {"head": random.uniform(-n_rows, 0), "speed": random.uniform(0.35, 1.1),
+                "trail": random.randint(5, max(6, n_rows)), "glyphs": {}}
+
+    def _tick(self):
+        if not self._alive:
+            return
+        try:
+            if not self.winfo_viewable():
+                self.after(260, self._tick); return
+            self._on_resize()
+            paused, delay = _animation_budget(self, round(1000 / self.FPS))
+            if not paused:
+                self._advance()
+            self.after(delay, self._tick)
+        except tk.TclError:
+            self._alive = False
+
+    def _advance(self):
+        n_cols, n_rows = self._size
+        for c in range(n_cols):
+            col = self._cols[c]
+            col["head"] += col["speed"]
+            if col["head"] - col["trail"] > n_rows:           # kuyruk ekranın tamamen dışına çıktı: baştan başlat
+                self._cols[c] = col = self._new_column(n_rows)
+            glyphs, head, trail = col["glyphs"], col["head"], col["trail"]
+            for r in range(n_rows):
+                item = self._grid[c][r]
+                dist = head - r
+                if dist < 0 or dist >= trail:
+                    self.itemconfigure(item, text="")
+                    glyphs.pop(r, None)
+                    continue
+                if r not in glyphs or random.random() < 0.04:      # karakterler ara sıra kendiliğinden değişir
+                    glyphs[r] = random.choice(self.GLYPHS)
+                k = 1.0 - dist / trail                              # 1.0 = baş (parlak), 0 = kuyruk ucu (soluk)
+                color = self.bright_color if dist < 1.1 else _blend_hex(self.dim_color, self.bright_color, max(0.0, k))
+                self.itemconfigure(item, text=glyphs[r], fill=color)
+
+    def destroy(self):
+        self._alive = False
+        super().destroy()
+
+
+def _blend_hex(a, b, amount):
+    amount = max(0.0, min(1.0, amount))
+    ar, ag, ab = _hex(a); br, bg_, bb = _hex(b)
+    return "#%02x%02x%02x" % (int(ar + (br - ar) * amount), int(ag + (bg_ - ag) * amount), int(ab + (bb - ab) * amount))
+
+
 class CommandRibbon(tk.Canvas):
     """İçerik alanı için TD2-esintili komuta şeridi.
 
