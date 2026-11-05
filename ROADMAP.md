@@ -6,7 +6,7 @@ Bu dosya her gün güncellenir (bkz. en alt — otomatik günlük görev). Ayrı
 
 | Bileşen | Durum |
 |---|---|
-| Windows masaüstü uygulaması | Canlı, `v9.1.5.28` (2026-11-04'te 7 yeni sürüm: sürüm geçmişinden herhangi bir sürümü kurma + bilinen sorunlar paneli, 3 sağlamlaştırma düzeltmesi, oturum özeti, Build Karşılaştır, "Bu karar yanlıştı" geri bildirimi, Kaivolt teması + Hakkında sekmesi). Fazlı bir yol haritası yok — sürekli Windows render/kararlılık/özellik döngüsü (bkz. `DEVELOPMENT_LOG.md`); `v9.1.5.25`-`v9.1.5.28`'deki yeni ekranların çoğu gerçek Windows'ta görsel olarak henüz doğrulanmadı (bkz. `BUGS.md` #11-14). |
+| Windows masaüstü uygulaması | Canlı, `v9.1.5.31` (2026-11-04/05'te 3 yeni sürüm: canlı çeviri 10 dile genelleştirme + düşük OCR güveni uyarısı [`v9.1.5.29`], tüm eski temalar kaldırılıp tek yeni görsel kimlik [`v9.1.5.30`], üst yatay menü + dijital kod yağmuru + 3B radar [`v9.1.5.31`]). `v9.1.5.31` yayın build'i, uygulama koduyla ilgisiz bağımsız bir üçüncü taraf paket regresyonu yüzünden (yeni `sentencepiece 0.2.3` wheel'i, PyInstaller'da `_sentencepiece.pyd` "DLL load failed") iki kez art arda başarısız oldu; `requirements.txt`'te `sentencepiece==0.2.2` sabitlenerek düzeltildi ve GitHub Actions'da başarılı bir yayın build'iyle doğrulandı (bkz. `BUGS.md` #17). Fazlı bir yol haritası yok — sürekli Windows render/kararlılık/özellik döngüsü (bkz. `DEVELOPMENT_LOG.md`); `v9.1.5.25`-`v9.1.5.31` arasındaki birçok görsel değişiklik (yeni tema/şema, üst nav, 3B radar) gerçek Windows'ta kullanıcı tarafından henüz gözle teyit edilmedi (bkz. `BUGS.md` #11-16). Ayrıca `main`'e henüz birleştirilmemiş, CI'si yeşil geçen bir **draft PR** var: [#3](https://github.com/FEDERALTURK/td2-loot-advisor/pull/3) "açıklama yedeği iki parçayı da okuyor" (`fix/desc-offline-fallback`) — inceleme/birleştirme kararı bekliyor, bu oturum dokunmadı. |
 | Mobil companion (Flutter) | **Faz 3 devam ediyor: push-token kaydı kodu yazıldı** (`firebase_core`/`firebase_messaging`, yeni `push_registration.dart`, Android `POST_NOTIFICATIONS` izni), Firebase Android uygulaması kaydedildi ve `google-services.json` kullanıcının PC'sine yerleştirildi (depoya girmiyor, `.gitignore`'da). **Kalan tek adım kullanıcı PC'sinde**: gradle `google-services` satırının yorumunu kaldırmak + `flutter pub get`/build ile gerçek cihazda doğrulamak (bkz. `docs/push_notifications_setup.md`). O adım tamamlanana kadar Faz 3 bitmiş sayılmaz; gerçek cihaz/Play doğrulaması (Faz 4) hâlâ bekliyor. |
 | Topluluk sunucusu (Cloudflare Worker) | Canlı. Mobil uçlar (eşleştirme, build senkronu, cihaz listesi/iptali, hesap silme) production'da. |
 | Lisans/telif (mx-division-builds) | **Çözüldü (2026-11-04, kullanıcı kararı).** `recal_advisor` ücretsiz yapıldı — artık ticari bir özelliğin arkasında değil, gri alan ortadan kalktı. [issue #153](https://github.com/mxswat/mx-division-builds/issues/153) kibarlık/şeffaflık amacıyla açık bırakıldı, yanıt gelirse not düşülecek ama artık engelleyici değil. |
@@ -15,9 +15,11 @@ Bu dosya her gün güncellenir (bkz. en alt — otomatik günlük görev). Ayrı
 
 ## Şu an aktif: Masaüstü özellik/sağlamlaştırma döngüsü + mobil push bildirimi kaydı (Faz 3'ün son parçası)
 
-Bugün (2026-11-04) iki paralel iş hattı ilerledi.
+2026-11-04/05'te iki paralel iş hattı ilerledi: masaüstü özellik/sağlamlaştırma döngüsü (`v9.1.5.21` → `v9.1.5.31`,
+en son üç sürüm — çeviri genelleştirme, tema sıfırlama, üst nav/radar — ve ardından bir bağımlılık regresyonu
+düzeltmesi) ve mobil push-token kaydının son açık parçası (durağan, kullanıcı PC'sindeki tek bir adımı bekliyor).
 
-**Masaüstü (Windows, Python/Tkinter) — `v9.1.5.21` → `v9.1.5.28`:**
+**Masaüstü (Windows, Python/Tkinter) — `v9.1.5.21` → `v9.1.5.31`:**
 - `v9.1.5.22`: Sürüm geçmişi penceresinden herhangi bir sürümü kurma + "Bilinen sorunlar" paneli.
 - `v9.1.5.23`: Az önce eklenen sürüm geçmişi penceresi, var olmayan bir palet anahtarına (`PAL["panel"]`) başvurduğu için sessizce açılmıyordu — düzeltildi (`PAL["surface"]`).
 - `v9.1.5.24`: 3 küçük sağlamlaştırma hatası kapatıldı — `SafeTrail.cv.lower()` TclError'ı (`td2app/ui/fx.py`, `tk.Misc.lower(self.cv)` ile düzeltildi), `_install_native_cursor`'daki `winfo_id` çağrısına ek `hasattr()` güvencesi, ve `self.root.report_callback_exception` ataması (artık hiçbir Tk callback hatası sessizce kaybolmuyor, `app.log`'a tam traceback ile yazılıyor). **Not**: bu düzeltmelerden ilki (`SafeTrail.cv.lower()`), `td2-loot-advisor-reports` [issue #4](https://github.com/federalturk/td2-loot-advisor-reports/issues/4)'te (hâlâ açık) bahsedilen üç iç içe hatadan biriyle birebir örtüşüyor — kod düzeyinde artık kapanmış görünüyor ama gerçek Windows/Tk ortamında yeniden üretilip doğrulanmadı, bu yüzden issue kasıtlı olarak kapatılmadı.
@@ -25,7 +27,12 @@ Bugün (2026-11-04) iki paralel iş hattı ilerledi.
 - `v9.1.5.26`: "Build Karşılaştır" ekranı — iki build'i yan yana karşılaştırma (ortak eşya/geçiş maliyeti hesabı kaba bir yaklaşım).
 - `v9.1.5.27`: "Bu karar yanlıştı" geri bildirimi — yanlış SAKLA/KIR kararını yerel bir kayda (`verdict_feedback.json`) işaretleme; karar kurallarını (ağırlık/eşik) otomatik değiştirmiyor.
 - `v9.1.5.28`: Yeni "kaivolt" teması (`ui_theme.py`) + yeni "Hakkında" sekmesi (`app.py`).
-- Hepsi `python3 -m py_compile`/`ast.parse` ile sözdizimi ve 10 dilin tamamında `i18n.missing_keys()` ile çeviri anahtarı kontrolünden geçti, ama bu ekransız konteynerde **hiçbiri gerçek bir Tk penceresiyle görsel olarak kontrol edilmedi** (bkz. `BUGS.md` #11-14) — kullanıcının Windows'ta gözle kontrolü hâlâ bekleniyor.
+- `v9.1.5.22`-`v9.1.5.28` hepsi `python3 -m py_compile`/`ast.parse` ile sözdizimi ve 10 dilin tamamında `i18n.missing_keys()` ile çeviri anahtarı kontrolünden geçti, ama bu ekransız konteynerde **hiçbiri gerçek bir Tk penceresiyle görsel olarak kontrol edilmedi** (bkz. `BUGS.md` #11-14) — kullanıcının Windows'ta gözle kontrolü hâlâ bekleniyor.
+- `v9.1.5.29` (2026-11-04): Canlı çeviri (AIMT) artık sabit Türkçe yerine uygulamanın seçili arayüz diline çeviriyor; Türkçeye özel son-işleme artık yalnızca `target_lang=="tr"` iken devrede; düşük OCR güven skoru altındaki bloklar "şüpheli çeviri" uyarısıyla işaretleniyor. `test_livetranslate.py` (29/29), `test_translation_reliability.py` (9/9), `test_translation_controls.py` (5/5), `test_app_stability.py` (17/17), `test_stability_widgets.py` PASS.
+- `v9.1.5.30` (2026-11-05): Kullanıcı isteğiyle tüm eski temalar (17 paket) tek bir "default" koyu-grafit + camgöbeği-teal (`#36e0c4`) kimliğine indirildi; Ayarlar → Görünüm'deki 17 kartlık tema galerisi kaldırıldı; eski tema adları için sessiz geriye-dönük-uyumluluk göçü eklendi. **Bu sürümden itibaren doğrulama seviyesi arttı**: `xvfb-run` + `python3.12` + `python3-tk` ile bu ortamda gerçek bir Tk penceresi fiilen inşa edilip `tests/test_stability_widgets.py` (15 sayfa/6 sekme, `callback_errors: []`) ve CI'nin 21 test dosyasının tamamıyla doğrulandı — ama yeni paletin gerçek ekranda nasıl göründüğü (kontrast/okunabilirlik) hâlâ kullanıcının Windows'ta gözle onayını bekliyor (bkz. `BUGS.md` #15).
+- `v9.1.5.31` (2026-11-05): Sol kenar çubuğu kaldırıldı, navigasyon tek yatay üst şeride taşındı (dijital kod yağmuru animasyonu arka planda); `ui_hud.DashboardScene` radarına 3B/izometrik perspektif + rastgele (dekoratif, oyuna dokunmayan) "tespit" noktaları eklendi. Aynı şekilde gerçek Tk penceresiyle (`xvfb-run`) + ekran görüntüsüyle doğrulandı; canlı animasyon akıcılığı hâlâ kullanıcının Windows'ta izlemesini bekliyor (bkz. `BUGS.md` #16).
+- **Yayın build'i regresyonu, aynı gün bulunup düzeltildi**: `v9.1.5.31` için GitHub Actions "Build Windows installer" iki ardışık denemede `_sentencepiece.pyd` `DLL load failed` hatasıyla başarısız oldu — kök neden, `requirements.txt`'te sürüm sabitlenmediği için PyPI'den o sabah yüklenen yeni `sentencepiece 0.2.3` wheel'inin PyInstaller paketlemesiyle uyumsuz olmasıydı (0.2.2 sorunsuz). `sentencepiece==0.2.2` sabitlenerek üçüncü denemede yayın başarıyla tamamlandı (bu oturum GitHub Actions run `41979625554`'ü `success` olarak doğruladı) — uygulama kodunda (üst nav/radar/tema değişiklikleri) bir regresyon değildi, bağımsız üçüncü taraf paket sorunuydu (bkz. `BUGS.md` #17).
+- **Birleştirilmemiş açık iş**: `fix/desc-offline-fallback` dalında, `main`'e henüz birleştirilmemiş bir **draft PR** var ([#3](https://github.com/FEDERALTURK/td2-loot-advisor/pull/3), "açıklama yedeği iki parçayı da okuyor" — `desc_i18n()`'in önbellek yokken `descriptions_i18n_2.json`'daki 124 kaydı atlaması sorununu düzeltiyor). CI (`Stability and workload policy`) yeşil, ama PR hâlâ taslak ve `mergeable_state: unstable` — birleştirme kararı kullanıcıya/bir sonraki oturuma bırakıldı, bu otomatik oturum dokunmadı.
 
 **Mobil (Flutter) — push bildirimi kaydı, `docs/mobile_companion_roadmap.md` Faz 3'ün son açık parçası:**
 - `firebase_core`/`firebase_messaging` bağımlılığı eklendi; yeni `mobile/lib/services/push_registration.dart` (bildirim izni isteme + token alma, Firebase yapılandırılmamışsa sessizce no-op) `cloud_link.dart`'a bağlandı — eşleştirme sonrası ve her açılışta (zaten eşleşmişse) token'ı `PUT /v1/mobile/push-tokens/{id}`'ye kaydediyor, `onTokenRefresh`'te otomatik yeniliyor, eşleşme kaldırılınca sunucudaki kaydı siliyor. Android manifestine `POST_NOTIFICATIONS` izni eklendi.
@@ -230,3 +237,30 @@ başarıyla yüklendi, konsol hatası yok).
   yeniden başvuru/ücretli alternatif, Gumroad ürünü oluşturma, `archive/master-superseded-2026-11-03` ve
   `deploy/worker-bundle-temp` dallarının temizliği) aynen duruyor, bu oturum hiçbirine dokunmadı. Değişen dosya:
   yalnızca `ROADMAP.md`.
+
+- **2026-11-05 (otomatik günlük durum güncellemesi — zamanlanmış görev):** Bu oturum **sadece durum güncellemesi
+  yaptı, kod değişikliği YAPMADI** (yalnızca `ROADMAP.md` değişti). `git pull --rebase origin main` çalıştırıldı:
+  `main` zaten `origin/main` ile aynı noktadaydı (rebase/çakışma gerekmedi, "Feeds" botu commit'i bu pencerede
+  gelmedi). Son 24 saatteki commit'ler (`d34fe38`, `db6b1dc`, `986f79c`, `1711cb5` "Feeds" botu, `e249a1c`,
+  `69e030c`, `2ba007b`, `c538a0a` "Feeds" botu, `6eeeb56`) tek tek `git show --stat`/commit mesajlarıyla incelendi.
+  Bulgular: (1) ROADMAP.md hâlâ en son sürüm olarak `v9.1.5.28`'i gösteriyordu; gerçekte `v9.1.5.29` (çeviri
+  genelleştirme), `v9.1.5.30` (tüm temaların kaldırılıp tek yeni kimliğe geçilmesi) ve `v9.1.5.31` (üst yatay
+  menü + dijital yağmur + 3B radar) yayınlanmıştı — tablo ve "Şu an aktif" bölümü üçüne göre güncellendi.
+  (2) `v9.1.5.31`'in ilk yayın build denemesi (`db6b1dc`, GitHub Actions run `41977777580`) `_sentencepiece.pyd`
+  "DLL load failed" hatasıyla `failure` ile sonuçlanmıştı; `d34fe38` (`sentencepiece==0.2.2` sabitleme) sonrası
+  run `41979625554` `success` döndü — bu, zaten `BUGS.md` #17'de ayrıntılı belgelenmiş kök-neden analizini
+  GitHub Actions API'siyle doğruladı, yeni bir bulgu değil (GitHub Release listesi de `v9.1.5.31`'in
+  2026-11-05T06:27:54Z'de yayınlandığını teyit etti). (3) `docs/mobile_companion_roadmap.md` Faz 3 bölümü
+  kontrol edildi: mobil push-token tarafında dünden (2026-11-04) bu yana bir değişiklik yok — `google-services.json`
+  kullanıcının PC'sine yerleştirilmiş durumda duruyor, `build.gradle.kts`'teki `google-services` satırı hâlâ
+  yorumlu, `flutter pub get`/build hâlâ çalıştırılmamış; ROADMAP'teki mobil satırı/bölümü zaten bu durumu
+  doğru yansıtıyordu, değiştirilmedi. (4) GitHub kontrol edildi: `federalturk/td2-loot-advisor`'da 0 açık issue,
+  ama **1 açık (taslak) PR** bulundu — [#3](https://github.com/FEDERALTURK/td2-loot-advisor/pull/3) "açıklama
+  yedeği iki parçayı da okuyor" (`fix/desc-offline-fallback`, CI yeşil, `mergeable_state: unstable`, henüz
+  `main`'e birleştirilmemiş) — bu PR'ın kendi commit geçmişi bu oturumun `main` dalı taramasında görünmüyordu,
+  bu yüzden daha önceki günlük güncellemelerde fark edilmemiş olabilir; ROADMAP'e not düşüldü, **birleştirme
+  gibi geri döndürülmesi zor bir GitHub işlemi bu oturum tarafından yapılmadı** (madde 6'daki otonomi kuralına
+  göre). `federalturk/td2-loot-advisor-reports`'ta yalnızca bilinen #4 açık, yeni bir şey yok. (5) Büyük/riskli
+  bir karar gerektiren **yeni** bir şey bulunmadı (yukarıdaki draft PR dışında); mevcut bekleyen kullanıcı
+  kararları (SignPath, Gumroad, eski dalların temizliği, Apple Developer Program ödemesi, mobil gradle adımı)
+  aynen duruyor, bu oturum hiçbirine dokunmadı. Değişen dosya: yalnızca `ROADMAP.md`.
