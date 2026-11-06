@@ -1,7 +1,7 @@
 {
  "schema": 1,
- "version": "2026-11-05.1",
- "updated": "2026-11-05T01:44:22Z",
+ "version": "2026-11-06.1",
+ "updated": "2026-11-06T01:49:22Z",
  "season": "Year 8 Season 3 – Red Horizon",
  "items": [
   {
@@ -255,6 +255,37 @@
     "ru": "Conflict: новая статистика в таблице счёта, новые Combat Marks, один Honor Mark за матч с XP и CCC и баланс PvP. Stretch Goals приостановлены на этот сезон для переработки. Исправления для Steel & Sons ACR, Protected Reload и пропавшего чертежа Harrier Pride.",
     "pl": "Conflict: nowe statystyki na tablicy wyników, nowe Combat Marks, jeden Honor Mark na mecz z XP i CCC oraz zmiany balansu PvP. Stretch Goals wstrzymane na ten sezon z powodu przebudowy. Poprawki Steel & Sons ACR, Protected Reload i brakującego planu Harrier Pride.",
     "nl": "Conflict: nieuwe scorebordstatistieken, nieuwe Combat Marks, één Honor Mark per match met XP en CCC, en PvP-balans. Stretch Goals pauzeren dit seizoen voor een herontwerp. Fixes voor Steel & Sons ACR, Protected Reload en de ontbrekende Harrier Pride-blauwdruk."
+   }
+  },
+  {
+   "id": "echoes-apex-protocol-gear-set",
+   "kind": "dlc",
+   "date": "2026-11-04T16:41:00Z",
+   "url": "https://www.destructoid.com/how-to-get-apex-protocol-gear-set-in-the-division-2/",
+   "source": "Destructoid",
+   "title": {
+    "en": "How to get the Apex Protocol gear set",
+    "tr": "Apex Protocol seti nasıl alınır",
+    "de": "So bekommst du das Gear Set Apex Protocol",
+    "fr": "Comment obtenir l'ensemble Apex Protocol",
+    "es": "Cómo conseguir el conjunto Apex Protocol",
+    "it": "Come ottenere il set Apex Protocol",
+    "pt": "Como obter o conjunto Apex Protocol",
+    "ru": "Как получить комплект Apex Protocol",
+    "pl": "Jak zdobyć zestaw Apex Protocol",
+    "nl": "Zo krijg je de gearset Apex Protocol"
+   },
+   "text": {
+    "en": "Destructoid names the DLC's new gear set: its pieces drop only from the five Guardian bosses in Central Park. 2 pieces give +10% Weapon Damage and +10% Skill Damage; 3 pieces +15% Weapon Handling and +15% Hazard Protection; 4 pieces Apex Engine. Ubisoft has not published these details.",
+    "tr": "Destructoid, DLC'nin yeni setinin adını veriyor: parçaları yalnızca Central Park'taki beş Guardian boss'tan düşüyor. 2 parça +%10 silah ve +%10 skill hasarı, 3 parça +%15 silah kontrolü ve +%15 tehlike koruması, 4 parça Apex Engine verir. Ubisoft bu ayrıntıları yayımlamadı.",
+    "de": "Destructoid nennt das neue Gear Set des DLC: Teile droppen nur von den fünf Guardian-Bossen im Central Park. 2 Teile: +10 % Waffen- und +10 % Skill-Schaden; 3 Teile: +15 % Waffenhandling und +15 % Gefahrenschutz; 4 Teile: Apex Engine. Von Ubisoft nicht veröffentlicht.",
+    "fr": "Destructoid nomme le nouvel ensemble du DLC : ses pièces viennent uniquement des cinq boss Guardian de Central Park. 2 pièces : +10 % de dégâts d'arme et de compétence ; 3 pièces : +15 % de maniement et de protection contre les dangers ; 4 pièces : Apex Engine. Détails non publiés par Ubisoft.",
+    "es": "Destructoid nombra el nuevo conjunto del DLC: sus piezas solo caen de los cinco jefes Guardian de Central Park. 2 piezas: +10 % de daño de arma y de habilidad; 3 piezas: +15 % de manejo y de protección contra peligros; 4 piezas: Apex Engine. Ubisoft no ha publicado estos datos.",
+    "it": "Destructoid indica il nuovo set del DLC: i pezzi cadono solo dai cinque boss Guardian di Central Park. 2 pezzi: +10% danni dell'arma e da abilità; 3 pezzi: +15% maneggevolezza e protezione dai pericoli; 4 pezzi: Apex Engine. Dettagli non pubblicati da Ubisoft.",
+    "pt": "A Destructoid dá o nome do novo conjunto do DLC: as peças caem só dos cinco chefes Guardian do Central Park. 2 peças: +10% de dano de arma e de habilidade; 3 peças: +15% de manuseio e de proteção contra perigos; 4 peças: Apex Engine. A Ubisoft não publicou esses detalhes.",
+    "ru": "Destructoid называет новый комплект DLC: его части выпадают только с пяти боссов Guardian в Central Park. 2 части: +10% урона оружия и умений; 3 части: +15% управления оружием и защиты от опасностей; 4 части: Apex Engine. Ubisoft эти данные не публиковала.",
+    "pl": "Destructoid podaje nazwę nowego zestawu z DLC: części wypadają tylko z pięciu bossów Guardian w Central Park. 2 części: +10% obrażeń broni i umiejętności; 3 części: +15% obsługi broni i ochrony przed zagrożeniami; 4 części: Apex Engine. Ubisoft tego nie opublikował.",
+    "nl": "Destructoid noemt de naam van de nieuwe DLC-gearset: onderdelen vallen alleen bij de vijf Guardian-bazen in Central Park. 2 stuks: +10% wapen- en skillschade; 3 stuks: +15% wapenhantering en gevarenbescherming; 4 stuks: Apex Engine. Niet gepubliceerd door Ubisoft."
    }
   },
   {
