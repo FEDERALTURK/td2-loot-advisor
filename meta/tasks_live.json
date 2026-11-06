@@ -1,7 +1,7 @@
 {
  "schema": 1,
- "version": "202610311352.0",
- "generated": 1793454762,
+ "version": "202611062330.0",
+ "generated": 1794007804,
  "tasks": [
   {
    "title": "Season Pass Project",
@@ -21,25 +21,6 @@
     "A Crafting Blueprint",
     "Gear Item"
    ]
-  },
-  {
-   "title": "Season Pass Project",
-   "subtitle": "Legend Manning National Zoo",
-   "desc": "The Division has identified a hardened enemy presence that needs to be dealt with at Manning National Zoo.",
-   "objective": "Complete the Manning National Zoo mission on hard difficulty or higher",
-   "key": "a0f21316c21c9f3b",
-   "category": "project",
-   "period": "season",
-   "first_seen": 1793304186,
-   "last_seen": 1793306008,
-   "reporters": 3,
-   "total": 1,
-   "tr": {
-    "title": "Sezon Bileti Projesi",
-    "subtitle": "Legend Manning Ulusal Hayvanat Bahçesi",
-    "desc": "The Division, Manning Ulusal Hayvanat Bahçesi'nde ele alınması gereken sertleştirilmiş bir düşman varlığını belirledi.",
-    "objective": "Manning Ulusal Hayvanat Bahçesi görevini zor veya daha yüksek bir zorlukla tamamlayın"
-   }
   }
  ],
  "lines": []
