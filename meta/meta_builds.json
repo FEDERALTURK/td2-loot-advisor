@@ -1,7 +1,7 @@
 {
  "schema": 1,
- "version": "2026-11-04.1",
- "updated": "2026-11-04T01:52:55Z",
+ "version": "2026-11-06.1",
+ "updated": "2026-11-06T03:46:53Z",
  "season": "Year 8 Season 3 – Red Horizon",
  "generator": "seed (manual research)",
  "popularity_method": "0-100; seed = how many independent sources feature the build, weighted by recency. Daily updater adds engagement signals (views/upvotes) where public.",
@@ -666,55 +666,39 @@
    ]
   },
   {
-   "id": "aces-eights-palisade-rifle",
-   "name": "Aces & Eights Palisade Rifle (Red Moon solo)",
-   "mode": "PvE / Solo event",
+   "id": "ratel-striker",
+   "name": "The Ratel Striker (long fights)",
+   "mode": "PvE / Long fights",
    "role": "dps",
    "sets_or_brands": [
-    "Aces & Eights",
-    "Palisade Steelworks"
+    "Striker's Battlegear",
+    "Striker"
    ],
    "set_bonus": 15,
    "attributes": {
-    "headshot_damage": {
+    "crit_chance": {
      "weight": 3,
-     "good_at": 9
-    },
-    "weapon_damage": {
-     "weight": 2.5,
-     "good_at": 10
+     "good_at": 5
     },
     "crit_damage": {
-     "weight": 2,
+     "weight": 3,
      "good_at": 9
-    },
-    "armor": {
-     "weight": 1,
-     "good_at": 5
     }
    },
-   "talents": {
-    "Vigilance": 4,
-    "Boomerang": 3
-   },
-   "popularity": 56,
+   "talents": {},
+   "items": [
+    "The Ratel"
+   ],
+   "popularity": 50,
    "sources": [
     {
-     "title": "allthings.how – Red Moon Unleashed rewards, bounties and best build",
-     "url": "https://allthings.how/red-moon-unleashed-in-the-division-2-event-rewards-bounties-and-best-build/"
-    },
-    {
-     "title": "widdz (YouTube, Oct 17 2026) – 3 best builds for Red Moon Unleashed",
-     "url": "https://www.youtube.com/watch?v=zLuctuWy9Ok"
-    },
-    {
-     "title": "FRANK (YouTube, Oct 2 2026) – 5 Division 2 builds that can handle almost anything",
-     "url": "https://www.youtube.com/watch?v=ecYq1Ff-H8w"
+     "title": "KeenGamer – How to get the Ratel exotic (Nov 2026)",
+     "url": "https://www.keengamer.com/articles/guides/how-to-get-the-ratel-exotic-in-the-division-2-talent-mods-and-farming/"
     }
    ],
    "summary": {
-    "en": "4x Aces & Eights + 2x Palisade (backpack with Vigilance), rifle like UIC15 MOD2 with Boomerang; stack Protection from Elites mods. Benefits from the Y8S3.2 rifle buff.",
-    "tr": "4 Aces & Eights + 2 Palisade (sırt çantası Vigilance), Boomerang'lı tüfek (ör. UIC15 MOD2); modlarda Protection from Elites topla. Y8S3.2 tüfek güçlendirmesinden faydalanır."
+    "en": "The Ratel with Striker's Battlegear (Tipping Scales as an alternative); stack Crit Chance and Crit Damage, counting the optic's +15% CHC. Best in long fights: Voracious needs 100 hits per stack and swapping weapons wipes stacks. Single source.",
+    "tr": "The Ratel + Striker's Battlegear (alternatif: Tipping Scales); kritik şansı ve kritik hasar topla, nişangâhın +%15 kritik şansını hesaba kat. Uzun savaşlar için: Voracious yığın başına 100 isabet ister, silah değiştirmek yığınları siler. Tek kaynak."
    }
   },
   {
