@@ -47,6 +47,11 @@ class PushRegistration {
       final granted = settings.authorizationStatus == AuthorizationStatus.authorized ||
           settings.authorizationStatus == AuthorizationStatus.provisional;
       if (!granted) return null;
+      // firebase_messaging 17'deki yeni registration-ID akışı FCM tokenının
+      // yerine geçmez: sunucunun HTTP v1 hedefi hâlâ gerçek FCM tokenı ister.
+      // Bu nedenle paket bu geçişi tamamlayana kadar bu çağrı bilinçli olarak
+      // korunur; kullanıcı açıkça bildirimleri etkinleştirmedikçe çalışmaz.
+      // ignore: deprecated_member_use
       return await messaging.getToken();
     } catch (e) {
       debugPrint('Push bildirimi: token alınamadı: $e');
@@ -60,6 +65,8 @@ class PushRegistration {
   /// (hiç olay yaymayan) bir stream döner.
   static Stream<String> get onTokenRefresh {
     if (_firebaseFailed) return const Stream.empty();
+    // Yukarıdaki aynı FCM tokenı uyumluluk gerekçesi için.
+    // ignore: deprecated_member_use
     return FirebaseMessaging.instance.onTokenRefresh;
   }
 }

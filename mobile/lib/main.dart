@@ -1603,6 +1603,38 @@ class _CloudPairPageState extends State<CloudPairPage> {
           style: const TextStyle(color: _soft, fontSize: 12),
         ),
       ],
+      const SizedBox(height: 18),
+      const Text('BİLDİRİMLER', style: _eyebrow),
+      const SizedBox(height: 8),
+      Container(
+        decoration: BoxDecoration(
+          color: _panel,
+          borderRadius: BorderRadius.circular(17),
+          border: Border.all(color: Colors.white10),
+        ),
+        child: SwitchListTile.adaptive(
+          value: widget.cloud.notificationsEnabled,
+          onChanged: widget.cloud.notificationChanging
+              ? null
+              : (enabled) async {
+                  final error = await widget.cloud.setNotificationsEnabled(enabled);
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(error ?? (enabled
+                          ? 'Bildirimler etkinleştirildi.'
+                          : 'Bildirimler kapatıldı.')),
+                      backgroundColor: error == null ? null : const Color(0xFF7A2A1E),
+                    ),
+                  );
+                },
+          title: const Text('Masaüstü tarama bildirimleri'),
+          subtitle: const Text(
+            'Yalnızca açarsan izin istenir ve bu cihazın bildirim belirteci kaydedilir.',
+            style: TextStyle(color: _soft, fontSize: 11),
+          ),
+        ),
+      ),
       const SizedBox(height: 22),
       OutlinedButton.icon(
         onPressed: () => widget.cloud.unpair(),

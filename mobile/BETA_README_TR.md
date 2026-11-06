@@ -12,7 +12,9 @@
 - Görev ilerlemesi ve kullanıcı build'leri bu cihazda saklanır.
 - Dış kaynak sayfaları bağlantıları kullanıcının tarayıcısında açılır.
 - Android'de Windows programının Telefon Arkadaşı QR kodu okutularak aynı Wi-Fi üzerinden salt-okunur canlı masaüstü durumu görüntülenebilir.
-- Hesap/giriş, anlık bildirim, oyun içi OCR veya oyun belleği erişimi yoktur.
+- İsteğe bağlı Bulut eşleştirmesi, Windows uygulamasının ürettiği kısa ömürlü kodla çalışır; build senkronu ve masaüstü durumunu aynı Wi-Fi dışında da gösterir. Hesap ve bağlı bulut verilerini silme akışı uygulama içinde bulunur.
+- Bildirimler varsayılan olarak kapalıdır. Yalnız kullanıcı Bulut eşleştirmesi ekranındaki anahtarı açarsa izin istenir ve cihaz bildirim belirteci kaydedilir.
+- Oyun içi OCR, oyun belleği erişimi veya oyuna giriş gönderme yoktur.
 - Uygulama Ubisoft veya Massive Entertainment tarafından yayımlanmamıştır ya da desteklenmemektedir.
 
 Telefon ve Windows programını eşleştirmek için ayrıntılı kılavuz: `docs/mobile_companion_connection_tr.md`.

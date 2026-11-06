@@ -1,5 +1,13 @@
 ## TD2 Loot Advisor — Windows
 
+**9.1.5.33 — Companion güvenlik ve cihaz yayını hazırlığı**
+
+- Mobil Companion bulut oturumu ve cihaz kimliği artık düz uygulama tercihleri yerine Android Keystore / iOS Keychain temelli güvenli depoda tutulur. Önceki beta kurulumlarının kayıtları güvenli biçimde taşınır; taşıma tamamlanmadan eski kayıt silinmez.
+- Masaüstü tarama bildirimleri varsayılan olarak kapalıdır. Telefon eşleştirmek veya uygulamayı açmak bildirim izni istemez; kullanıcı Bulut eşleştirmesi ekranındaki anahtarı açıkça etkinleştirdiğinde izin ve token kaydı başlar.
+- Gizlilik politikası, beta kılavuzu ve Play Store hazırlık metinleri uygulamanın gerçek bulut eşleştirme, build senkronizasyonu ve isteğe bağlı bildirim davranışıyla uyumlu hâle getirildi.
+- Tek komutlu yerel mobil ön-kontrol ve gerçek Android cihaz kabul kontrol listesi eklendi. Kod analizi, widget testi, mobil sunucu/eşleştirme testleri ve Android paket derlemesi geçmiştir.
+- **Cihaz notu:** Bu yayın anında USB ile bağlı fiziksel Android cihaz olmadığı için gerçek cihaz kurulumu, izin diyaloğu ve canlı FCM teslimi henüz doğrulanmamıştır. Bu doğrulama Play Store gönderiminden önce yapılmalıdır.
+
 **9.1.5.24 — Sağlamlaştırma: bilinen 3 küçük hata kapatıldı**
 
 - **Fare izi efekti artık bazı durumlarda sessizce hata vermiyordu — düzeltildi.** `Canvas.lower()` çağrısı yanlış metodu (canvas-öge sıralaması yerine pencere sıralaması) tetikleyip `TclError` fırlatabiliyordu; kod düzeltildi.
