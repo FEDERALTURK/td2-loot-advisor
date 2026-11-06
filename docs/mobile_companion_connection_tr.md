@@ -1,11 +1,11 @@
 # Telefon uygulamasını Windows programına bağlama
 
-Bu kılavuz `TD2 Loot Advisor Companion 0.1.4.1-beta (Android yapı 6)` içindir. Telefon uygulaması ile Windows masaüstü programı şu anda **aynı yerel Wi-Fi ağı** üzerinden, masaüstündeki Telefon Arkadaşı sunucusuna bağlanır. Eşleşme QR kodla yapılır. Bağlantı salt okunurdur: telefon son eşya kararını, aktif build ilerlemesini ve varsa satıcı eşleşmelerini gösterir; bilgisayarda tarama başlatamaz, ayar değiştiremez ve oyunla etkileşime girmez.
+Bu kılavuz `TD2 Loot Advisor Companion 0.1.5-beta (Android yapı 7)` içindir. Telefon uygulaması ile Windows masaüstü programı şu anda **aynı yerel Wi-Fi ağı** üzerinden, masaüstündeki Telefon Arkadaşı sunucusuna bağlanır. Eşleşme QR kodla yapılır. Bağlantı salt okunurdur: telefon son eşya kararını, aktif build ilerlemesini ve varsa satıcı eşleşmelerini gösterir; bilgisayarda tarama başlatamaz, ayar değiştiremez ve oyunla etkileşime girmez.
 
 ## Gerekli olanlar
 
 - Windows programı `9.0.8` veya üstü.
-- Android beta uygulaması `0.1.4.1` (Android yapı 6).
+- Android beta uygulaması `0.1.5` (Android yapı 7).
 - Bilgisayar ve telefon aynı güvenilir ev Wi-Fi ağına bağlı olmalı. Misafir Wi-Fi, cihaz yalıtımı açık ağlar, VPN'ler ve mobil veri üzerinden bağlantı kurulamıyor.
 - Masaüstündeki Telefon Arkadaşı özelliği hesap/lisans tarafından kilitliyse, uygulamada bu özelliğe erişim veren lisans etkin olmalı.
 

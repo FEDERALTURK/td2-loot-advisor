@@ -21,7 +21,7 @@ Türkçe tam kılavuz: [`README.tr.md`](README.tr.md).
 ## Download
 
 **[Latest release → Releases](https://github.com/FEDERALTURK/td2-loot-advisor/releases/latest)**:
-`TD2LootAdvisor_Setup_<version>.exe` (installer, recommended) and `TD2LootAdvisor_<version>_portable.zip`. The Companion source is currently version `0.1.4.1-beta` (Android package `0.1.4+6`); Android distribution remains in local/device and Play Internal Testing preparation until real-device acceptance is complete.
+`TD2LootAdvisor_Setup_<version>.exe` (installer, recommended) and `TD2LootAdvisor_<version>_portable.zip`. The Companion source is currently version `0.1.5-beta` (Android package `0.1.5+7`); Android distribution remains in local/device and Play Internal Testing preparation until real-device acceptance is complete.
 Phone pairing steps: [Turkish connection guide](docs/mobile_companion_connection_tr.md).
 
 > **Not code-signed yet.** This is a small open-source project — it applied to the free [SignPath Foundation](https://signpath.org) program but hasn't been approved (see `ROADMAP.md` for status). Windows SmartScreen may show an "Unknown publisher" warning on first run; click **More info → Run anyway** to continue. Every release includes a `SHA256SUMS` file — verify your download against it before running (Windows: `certutil -hashfile <file> SHA256`).
