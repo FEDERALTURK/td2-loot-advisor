@@ -1,19 +1,19 @@
-# TD2 Loot Advisor Companion 0.1.3-beta (yapı 4)
+# TD2 Loot Advisor Companion 0.1.4-beta (yapı 5)
 
 ## Android kurulumu
 
-1. `TD2LootAdvisor_Companion_0.1.3-beta.apk` dosyasını Android telefona aktarın.
+1. `TD2LootAdvisor_Companion_0.1.4-beta.apk` dosyasını Android telefona aktarın.
 2. Dosyayı açın ve Android'in istediği durumda bu kaynaktan uygulama yükleme iznini verin.
 3. Uygulamayı başlatın. İlk kullanımda görev ve haber akışlarını yenilemek için internet bağlantısı gerekir.
 
 ## Beta kapsamı
 
-- Görevler, haberler ve önerilen build listeleri herkese açık proje JSON verilerinden alınır; bağlantı olmadığında uygulamayla gelen başlangıç verileri kullanılır.
+- Görevler, haberler ve önerilen build listeleri uygulama açılırken herkese açık proje JSON verilerinden yenilenir; son başarılı veri cihazda önbelleğe alınır, bağlantı olmadığında önbellek veya uygulamayla gelen başlangıç verileri kullanılır.
 - Görev ilerlemesi ve kullanıcı build'leri bu cihazda saklanır.
 - Dış kaynak sayfaları bağlantıları kullanıcının tarayıcısında açılır.
 - Android'de Windows programının Telefon Arkadaşı QR kodu okutularak aynı Wi-Fi üzerinden salt-okunur canlı masaüstü durumu görüntülenebilir.
 - İsteğe bağlı Bulut eşleştirmesi, Windows uygulamasının ürettiği kısa ömürlü kodla çalışır; build senkronu ve masaüstü durumunu aynı Wi-Fi dışında da gösterir. Hesap ve bağlı bulut verilerini silme akışı uygulama içinde bulunur.
-- Bildirimler varsayılan olarak kapalıdır. Yalnız kullanıcı Bulut eşleştirmesi ekranındaki anahtarı açarsa izin istenir ve cihaz bildirim belirteci kaydedilir.
+- Bildirimler varsayılan olarak kapalıdır. Kullanıcı Bulut eşleştirmesi veya İçerik ve güncellemeler alanındaki anahtarı açarsa izin istenir. Uygulama açıkken yeni haber ve Companion güncelleme bildirimi yerel olarak gösterilebilir; masaüstü tarama bildirimi için cihaz belirteci yalnız Bulut eşleştirmesi anahtarıyla kaydedilir.
 - Oyun içi OCR, oyun belleği erişimi veya oyuna giriş gönderme yoktur.
 - Uygulama Ubisoft veya Massive Entertainment tarafından yayımlanmamıştır ya da desteklenmemektedir.
 
@@ -29,4 +29,4 @@ Android başlatıcı manifestindeki `MainActivity` paketi ile Kotlin sınıfın�
 
 ## Önceki beta üzerinden kurulum
 
-Bu yerel 0.1.3 test APK'sı bilgisayardaki Android debug anahtarıyla imzalanabilir. Farklı anahtarla imzalanmış önceki bir APK varsa Android doğrudan üzerine kurulum izni vermeyebilir; böyle olursa eski sürümü kaldırıp bu sürümü kurun. Kaldırma uygulama içi verileri siler. Play Store için debug imzalı APK kullanılmaz.
+Bu yerel 0.1.4 test APK'sı bilgisayardaki Android debug anahtarıyla imzalanabilir. Farklı anahtarla imzalanmış önceki bir APK varsa Android doğrudan üzerine kurulum izni vermeyebilir; böyle olursa eski sürümü kaldırıp bu sürümü kurun. Kaldırma uygulama içi verileri siler. Play Store için debug imzalı APK kullanılmaz.

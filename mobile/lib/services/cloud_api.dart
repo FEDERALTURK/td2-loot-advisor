@@ -45,7 +45,7 @@ class CloudApi {
   CloudApi({http.Client? client}) : _client = client ?? http.Client();
   final http.Client _client;
 
-  static const _userAgent = 'TD2-Loot-Advisor-Companion/0.1.3';
+  static const _userAgent = 'TD2-Loot-Advisor-Companion/0.1.4';
   static const _timeout = Duration(seconds: 8);
 
   Uri _uri(String path) => Uri.parse('$kCloudApiBase$path');

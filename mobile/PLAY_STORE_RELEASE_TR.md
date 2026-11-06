@@ -6,7 +6,7 @@ Bu belge Google Play üretim yayını için yerel AAB hazırlama adımlarını i
 
 - Uygulama kimliği: `com.federalturk.td2companion`
 - Android hedefi: API 36
-- Companion sürümü: `0.1.3+4`
+- Companion sürümü: `0.1.4+5`
 - Play Console'a APK değil Android App Bundle (`.aab`) yüklenir.
 - GitHub beta APK'ları debug anahtarıyla imzalanır. Bu imzalı APK'lar Play Console'a üretim sürümü olarak yüklenmemelidir.
 - Play App Signing'e katılın ve yalnızca yükleme anahtarını (upload key) yerel makinede saklayın. Keystore ve `key.properties` dosyasını Git'e, issue'lara veya mesajlara eklemeyin.
@@ -28,7 +28,7 @@ Bu belge Google Play üretim yayını için yerel AAB hazırlama adımlarını i
    cd mobile
    flutter pub get
    flutter analyze
-   flutter build appbundle --release --build-name=0.1.3 --build-number=4 --android-project-arg=playRelease=true
+   flutter build appbundle --release --build-name=0.1.4 --build-number=5 --android-project-arg=playRelease=true
    ```
 
 Çıktı: `mobile/build/app/outputs/bundle/release/app-release.aab`.
@@ -49,7 +49,7 @@ Bu belge Google Play üretim yayını için yerel AAB hazırlama adımlarını i
 
 ## Bu projede açık kalan yayın engelleri
 
-- `0.1.3+4` APK'nın HONOR Android 16 cihazında açıldığı doğrulanmalı.
+- `0.1.4+5` APK'nın HONOR Android 16 cihazında açıldığı doğrulanmalı.
 - Upload key sahibi/parolaları kullanıcı tarafından kurulmalı ve yedeklenmeli.
 - Play Console geliştirici hesabı ve uygulama kaydı kullanıcı tarafında tamamlanmalı.
 - Mağaza görselleri ve gerekli iletişim bilgileri tamamlanmalı.

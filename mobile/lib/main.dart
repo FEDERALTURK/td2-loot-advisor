@@ -10,6 +10,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'services/cloud_link.dart';
+import 'services/companion_release.dart';
+import 'services/local_alerts.dart';
 
 const _bg = Color(0xFF090C12);
 const _panel = Color(0xFF121722);
@@ -143,6 +145,12 @@ class CompanionModel extends ChangeNotifier {
   bool refreshing = false;
   String? refreshMessage;
   DateTime? lastRefresh;
+  bool newsAlertsEnabled = false;
+  bool updateAlertsEnabled = false;
+  bool alertChanging = false;
+  String? availableVersion;
+  String? availableVersionUrl;
+  DateTime? lastUpdateCheck;
   SharedPreferences? _prefs;
   Timer? _desktopPoll;
   String? _desktopToken;
@@ -172,6 +180,8 @@ class CompanionModel extends ChangeNotifier {
   }
   int get activeNews => news.where((e) => _isCurrent(e)).length;
   int get doneCount => completedTasks.length;
+  bool get updateAvailable =>
+      availableVersion != null && isNewerVersion(availableVersion!, companionVersion);
 
   Future<void> load() async {
     try {
@@ -184,8 +194,11 @@ class CompanionModel extends ChangeNotifier {
       newsFeed = loaded[1];
       metaBuilds = loaded[2];
       _prefs = await SharedPreferences.getInstance();
+      _restoreContentCache();
       completedTasks = (_prefs?.getStringList('completed_tasks') ?? <String>[])
           .toSet();
+      newsAlertsEnabled = _prefs?.getBool('news_alerts_enabled') ?? false;
+      updateAlertsEnabled = _prefs?.getBool('update_alerts_enabled') ?? false;
       final rawBuilds = _prefs?.getStringList('saved_builds') ?? <String>[];
       savedBuilds = rawBuilds
           .map((row) {
@@ -204,7 +217,40 @@ class CompanionModel extends ChangeNotifier {
     loading = false;
     notifyListeners();
     await refresh(quiet: true);
+    unawaited(checkForUpdate());
   }
+
+  void _restoreContentCache() {
+    final cachedTasks = _cachedFeed('cached_tasks_feed', 'tasks');
+    final cachedNews = _cachedFeed('cached_news_feed', 'items');
+    final cachedBuilds = _cachedFeed('cached_meta_builds', 'builds');
+    if (cachedTasks != null) tasksFeed = cachedTasks;
+    if (cachedNews != null) newsFeed = cachedNews;
+    if (cachedBuilds != null) metaBuilds = cachedBuilds;
+  }
+
+  Map<String, dynamic>? _cachedFeed(String key, String listKey) {
+    final raw = _prefs?.getString(key);
+    if (raw == null) return null;
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is Map && decoded[listKey] is List && (decoded[listKey] as List).isNotEmpty) {
+        return Map<String, dynamic>.from(decoded);
+      }
+    } catch (_) {
+      // Bozuk önbellek, uygulamanın paketle gelen güvenli verisini engellemez.
+    }
+    return null;
+  }
+
+  Future<void> _saveFeed(String key, Map<String, dynamic> feed) async {
+    await _prefs?.setString(key, jsonEncode(feed));
+  }
+
+  Set<String> _newsIds(Map<String, dynamic> feed) => _maps(feed['items'])
+      .map((item) => '${item['id'] ?? item['url'] ?? item['title'] ?? ''}')
+      .where((id) => id.isNotEmpty)
+      .toSet();
 
   Future<Map<String, dynamic>> _asset(String path) async {
     final text = await rootBundle.loadString(path);
@@ -246,25 +292,116 @@ class CompanionModel extends ChangeNotifier {
       _fetch('meta_builds.json'),
     ]);
     var changed = false;
+    final beforeNews = _newsIds(newsFeed);
     if (results[0]?['tasks'] is List &&
         (results[0]!['tasks'] as List).isNotEmpty) {
       tasksFeed = results[0]!;
+      await _saveFeed('cached_tasks_feed', tasksFeed);
       changed = true;
     }
     if (results[1]?['items'] is List &&
         (results[1]!['items'] as List).isNotEmpty) {
       newsFeed = results[1]!;
+      await _saveFeed('cached_news_feed', newsFeed);
       changed = true;
     }
     if (results[2]?['builds'] is List &&
         (results[2]!['builds'] as List).isNotEmpty) {
       metaBuilds = results[2]!;
+      await _saveFeed('cached_meta_builds', metaBuilds);
       changed = true;
     }
+    if (results[1] != null) await _notifyNewNews(beforeNews);
     refreshing = false;
     lastRefresh = DateTime.now();
     if (!changed) refreshMessage = 'Çevrimdışı içerik gösteriliyor';
     notifyListeners();
+  }
+
+  Future<void> _notifyNewNews(Set<String> beforeNews) async {
+    final current = _newsIds(newsFeed);
+    final remembered = (_prefs?.getStringList('known_news_ids') ?? <String>[]).toSet();
+    final baseline = remembered.isEmpty ? beforeNews : remembered;
+    final fresh = current.difference(baseline);
+    await _prefs?.setStringList('known_news_ids', current.toList());
+    if (!newsAlertsEnabled || fresh.isEmpty) return;
+    final item = news.firstWhere(
+      (row) => fresh.contains('${row['id'] ?? row['url'] ?? row['title'] ?? ''}'),
+      orElse: () => <String, dynamic>{},
+    );
+    final title = '${item['title'] ?? 'Yeni TD2 haberi'}';
+    await LocalAlerts.show(
+      id: 2201,
+      title: 'Yeni Division haberi',
+      body: title,
+    );
+  }
+
+  Future<void> checkForUpdate() async {
+    final client = http.Client();
+    try {
+      final release = await fetchLatestCompanionRelease(client);
+      if (release == null) return;
+      availableVersion = release.version;
+      availableVersionUrl = release.url;
+      lastUpdateCheck = DateTime.now();
+      if (updateAlertsEnabled && updateAvailable) {
+        final notified = _prefs?.getString('notified_companion_version');
+        if (notified != release.version) {
+          await LocalAlerts.show(
+            id: 2202,
+            title: 'Companion güncellemesi hazır',
+            body: 'v${release.version} indirilmeye hazır.',
+          );
+          await _prefs?.setString('notified_companion_version', release.version);
+        }
+      }
+      notifyListeners();
+    } catch (_) {
+      // Güncelleme denetimi içerik veya uygulama açılışını engellemez.
+    } finally {
+      client.close();
+    }
+  }
+
+  Future<String?> setNewsAlertsEnabled(bool enabled) => _setAlerts(
+        enabled: enabled,
+        preferenceKey: 'news_alerts_enabled',
+        news: true,
+      );
+
+  Future<String?> setUpdateAlertsEnabled(bool enabled) => _setAlerts(
+        enabled: enabled,
+        preferenceKey: 'update_alerts_enabled',
+        news: false,
+      );
+
+  Future<String?> _setAlerts({
+    required bool enabled,
+    required String preferenceKey,
+    required bool news,
+  }) async {
+    if (alertChanging) return null;
+    alertChanging = true;
+    notifyListeners();
+    try {
+      if (enabled) {
+        final granted = await LocalAlerts.requestPermission();
+        if (!granted) return 'Bildirim izni verilmedi.';
+      }
+      if (news) {
+        newsAlertsEnabled = enabled;
+        if (enabled) await _prefs?.setStringList('known_news_ids', _newsIds(newsFeed).toList());
+      } else {
+        updateAlertsEnabled = enabled;
+      }
+      await _prefs?.setBool(preferenceKey, enabled);
+      if (enabled && !news) unawaited(checkForUpdate());
+      return null;
+    } finally {
+      alertChanging = false;
+      notifyListeners();
+    }
   }
 
   Future<void> toggleTask(String id) async {
@@ -359,7 +496,7 @@ class CompanionModel extends ChangeNotifier {
       final response = await http
           .get(
             endpoint,
-            headers: const {'User-Agent': 'TD2-Loot-Advisor-Companion/0.1.3'},
+            headers: const {'User-Agent': 'TD2-Loot-Advisor-Companion/0.1.4'},
           )
           .timeout(const Duration(seconds: 4));
       if (response.statusCode != 200) {
@@ -467,7 +604,7 @@ class _MainShellState extends State<MainShell> {
                     ),
                   ),
                   Text(
-                    'COMPANION  ·  BETA 0.1.3',
+                    'COMPANION  ·  BETA 0.1.4',
                     style: TextStyle(
                       fontSize: 9,
                       color: _soft,
@@ -645,6 +782,8 @@ class OverviewPage extends StatelessWidget {
           const SizedBox(height: 10),
           _CloudStatusCard(cloud: cloud),
           const SizedBox(height: 22),
+          _ContentAlertsCard(model: model),
+          const SizedBox(height: 22),
           SectionTitle(
             title: 'AKTİF ETKİNLİKLER',
             trailing: '${active.length} KAYIT',
@@ -680,6 +819,92 @@ class OverviewPage extends StatelessWidget {
       ),
     );
   }
+}
+
+class _ContentAlertsCard extends StatelessWidget {
+  const _ContentAlertsCard({required this.model});
+
+  final CompanionModel model;
+
+  Future<void> _change(
+    BuildContext context,
+    bool enabled,
+    Future<String?> Function(bool) apply,
+  ) async {
+    final error = await apply(enabled);
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(error ?? (enabled ? 'Bildirimler etkinleştirildi.' : 'Bildirimler kapatıldı.')),
+        backgroundColor: error == null ? null : const Color(0xFF7A2A1E),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SectionTitle(
+            title: 'İÇERİK VE GÜNCELLEMELER',
+            trailing: model.updateAvailable ? 'v${model.availableVersion} HAZIR' : 'OTOMATİK KONTROL',
+          ),
+          const SizedBox(height: 10),
+          Container(
+            decoration: BoxDecoration(
+              color: _panel,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: Colors.white10),
+            ),
+            child: Column(
+              children: [
+                SwitchListTile.adaptive(
+                  value: model.newsAlertsEnabled,
+                  onChanged: model.alertChanging
+                      ? null
+                      : (value) => _change(context, value, model.setNewsAlertsEnabled),
+                  title: const Text('Yeni haber bildirimleri'),
+                  subtitle: const Text(
+                    'Uygulama açıkken yeni TD2 haberi bulunursa bildirir.',
+                    style: TextStyle(color: _soft, fontSize: 11),
+                  ),
+                ),
+                const Divider(height: 1),
+                SwitchListTile.adaptive(
+                  value: model.updateAlertsEnabled,
+                  onChanged: model.alertChanging
+                      ? null
+                      : (value) => _change(context, value, model.setUpdateAlertsEnabled),
+                  title: const Text('Companion güncelleme bildirimi'),
+                  subtitle: Text(
+                    model.updateAvailable
+                        ? 'v${model.availableVersion} GitHub’da hazır. Dokunarak indirme sayfasını aç.'
+                        : 'Uygulama açıldığında yeni beta sürümleri denetler.',
+                    style: const TextStyle(color: _soft, fontSize: 11),
+                  ),
+                ),
+                if (model.updateAvailable && model.availableVersionUrl != null) ...[
+                  const Divider(height: 1),
+                  ListTile(
+                    leading: const Icon(Icons.system_update_alt_rounded, color: _orange),
+                    title: Text('v${model.availableVersion} sürümünü indir'),
+                    trailing: const Icon(Icons.open_in_new_rounded, size: 18),
+                    onTap: () => launchUrl(
+                      Uri.parse(model.availableVersionUrl!),
+                      mode: LaunchMode.externalApplication,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'İzin yalnız yukarıdaki anahtarlardan biri açıldığında istenir. Arka planda haber bildirimi için ayrıca Firebase/Play dağıtımı doğrulaması gerekir.',
+            style: TextStyle(color: _soft, fontSize: 11),
+          ),
+        ],
+      );
 }
 
 class TasksPage extends StatefulWidget {
@@ -1920,7 +2145,7 @@ Future<void> _newBuild(
 void _about(BuildContext context) => showAboutDialog(
   context: context,
   applicationName: 'TD2 Loot Advisor Companion',
-  applicationVersion: '0.1.3-beta (build 4)',
+  applicationVersion: '0.1.4-beta (build 5)',
   applicationIcon: const Icon(Icons.hexagon_outlined, color: _orange, size: 34),
   children: [
     const Text(
