@@ -1,8 +1,8 @@
-# TD2 Loot Advisor Companion 0.1.4-beta (yapı 5)
+# TD2 Loot Advisor Companion 0.1.4.1-beta (Android yapı 6)
 
 ## Android kurulumu
 
-1. `TD2LootAdvisor_Companion_0.1.4-beta.apk` dosyasını Android telefona aktarın.
+1. `TD2LootAdvisor_Companion_0.1.4.1-beta.apk` dosyasını Android telefona aktarın.
 2. Dosyayı açın ve Android'in istediği durumda bu kaynaktan uygulama yükleme iznini verin.
 3. Uygulamayı başlatın. İlk kullanımda görev ve haber akışlarını yenilemek için internet bağlantısı gerekir.
 
@@ -29,4 +29,4 @@ Android başlatıcı manifestindeki `MainActivity` paketi ile Kotlin sınıfın�
 
 ## Önceki beta üzerinden kurulum
 
-Bu yerel 0.1.4 test APK'sı bilgisayardaki Android debug anahtarıyla imzalanabilir. Farklı anahtarla imzalanmış önceki bir APK varsa Android doğrudan üzerine kurulum izni vermeyebilir; böyle olursa eski sürümü kaldırıp bu sürümü kurun. Kaldırma uygulama içi verileri siler. Play Store için debug imzalı APK kullanılmaz.
+Bu yerel 0.1.4.1 test APK'sı bilgisayardaki Android debug anahtarıyla imzalanabilir. Farklı anahtarla imzalanmış önceki bir APK varsa Android doğrudan üzerine kurulum izni vermeyebilir; böyle olursa eski sürümü kaldırıp bu sürümü kurun. Kaldırma uygulama içi verileri siler. Play Store için debug imzalı APK kullanılmaz.

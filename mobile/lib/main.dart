@@ -496,7 +496,7 @@ class CompanionModel extends ChangeNotifier {
       final response = await http
           .get(
             endpoint,
-            headers: const {'User-Agent': 'TD2-Loot-Advisor-Companion/0.1.4'},
+            headers: const {'User-Agent': 'TD2-Loot-Advisor-Companion/0.1.4.1'},
           )
           .timeout(const Duration(seconds: 4));
       if (response.statusCode != 200) {
@@ -604,7 +604,7 @@ class _MainShellState extends State<MainShell> {
                     ),
                   ),
                   Text(
-                    'COMPANION  ·  BETA 0.1.4',
+                    'COMPANION  ·  BETA 0.1.4.1',
                     style: TextStyle(
                       fontSize: 9,
                       color: _soft,
@@ -2145,7 +2145,7 @@ Future<void> _newBuild(
 void _about(BuildContext context) => showAboutDialog(
   context: context,
   applicationName: 'TD2 Loot Advisor Companion',
-  applicationVersion: '0.1.4-beta (build 5)',
+  applicationVersion: '0.1.4.1-beta (build 6)',
   applicationIcon: const Icon(Icons.hexagon_outlined, color: _orange, size: 34),
   children: [
     const Text(

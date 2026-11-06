@@ -2,7 +2,9 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
-const companionVersion = '0.1.4';
+/// GitHub beta etiketi dört bileşene izin verir (ör. 0.1.4.1). Android'in
+/// package sürümü ise pubspec içinde üç bileşen + artan build numarasıdır.
+const companionVersion = '0.1.4.1';
 
 class CompanionRelease {
   const CompanionRelease({required this.version, required this.url});
@@ -47,7 +49,7 @@ bool isNewerVersion(String candidate, String installed) {
   final a = _parts(candidate);
   final b = _parts(installed);
   if (a == null || b == null) return false;
-  for (var index = 0; index < 3; index++) {
+  for (var index = 0; index < 4; index++) {
     if (a[index] != b[index]) return a[index] > b[index];
   }
   return false;
@@ -56,11 +58,12 @@ bool isNewerVersion(String candidate, String installed) {
 bool _validVersion(String value) => _parts(value) != null;
 
 List<int>? _parts(String value) {
-  final match = RegExp(r'^(\d+)\.(\d+)\.(\d+)$').firstMatch(value);
+  final match = RegExp(r'^(\d+)\.(\d+)\.(\d+)(?:\.(\d+))?$').firstMatch(value);
   if (match == null) return null;
   return [
     int.parse(match.group(1)!),
     int.parse(match.group(2)!),
     int.parse(match.group(3)!),
+    int.tryParse(match.group(4) ?? '') ?? 0,
   ];
 }
