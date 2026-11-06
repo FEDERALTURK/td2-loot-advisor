@@ -11,4 +11,30 @@ void main() {
     expect(isNewerVersion('0.1.3', '0.1.4'), isFalse);
     expect(isNewerVersion('beta', '0.1.4'), isFalse);
   });
+
+  test('companion release selects the newest direct APK asset', () {
+    final release = parseLatestCompanionRelease([
+      {
+        'tag_name': 'v9.9.9',
+        'html_url': 'https://github.com/FEDERALTURK/td2-loot-advisor/releases/tag/v9.9.9',
+      },
+      {
+        'tag_name': 'companion-v0.1.4.1-beta',
+        'html_url': 'https://github.com/FEDERALTURK/td2-loot-advisor/releases/tag/companion-v0.1.4.1-beta',
+        'assets': [
+          {
+            'name': 'SHA256SUMS.sha256',
+            'browser_download_url': 'https://github.com/FEDERALTURK/td2-loot-advisor/releases/download/companion-v0.1.4.1-beta/SHA256SUMS.sha256',
+          },
+          {
+            'name': 'TD2LootAdvisor_Companion_0.1.4.1-beta.apk',
+            'browser_download_url': 'https://github.com/FEDERALTURK/td2-loot-advisor/releases/download/companion-v0.1.4.1-beta/TD2LootAdvisor_Companion_0.1.4.1-beta.apk',
+          },
+        ],
+      },
+    ]);
+
+    expect(release?.version, '0.1.4.1');
+    expect(release?.apkUrl, endsWith('.apk'));
+  });
 }

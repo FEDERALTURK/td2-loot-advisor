@@ -150,6 +150,7 @@ class CompanionModel extends ChangeNotifier {
   bool alertChanging = false;
   String? availableVersion;
   String? availableVersionUrl;
+  String? availableApkUrl;
   DateTime? lastUpdateCheck;
   SharedPreferences? _prefs;
   Timer? _desktopPoll;
@@ -178,10 +179,12 @@ class CompanionModel extends ChangeNotifier {
     });
     return list;
   }
+
   int get activeNews => news.where((e) => _isCurrent(e)).length;
   int get doneCount => completedTasks.length;
   bool get updateAvailable =>
-      availableVersion != null && isNewerVersion(availableVersion!, companionVersion);
+      availableVersion != null &&
+      isNewerVersion(availableVersion!, companionVersion);
 
   Future<void> load() async {
     try {
@@ -234,7 +237,9 @@ class CompanionModel extends ChangeNotifier {
     if (raw == null) return null;
     try {
       final decoded = jsonDecode(raw);
-      if (decoded is Map && decoded[listKey] is List && (decoded[listKey] as List).isNotEmpty) {
+      if (decoded is Map &&
+          decoded[listKey] is List &&
+          (decoded[listKey] as List).isNotEmpty) {
         return Map<String, dynamic>.from(decoded);
       }
     } catch (_) {
@@ -247,10 +252,11 @@ class CompanionModel extends ChangeNotifier {
     await _prefs?.setString(key, jsonEncode(feed));
   }
 
-  Set<String> _newsIds(Map<String, dynamic> feed) => _maps(feed['items'])
-      .map((item) => '${item['id'] ?? item['url'] ?? item['title'] ?? ''}')
-      .where((id) => id.isNotEmpty)
-      .toSet();
+  Set<String> _newsIds(Map<String, dynamic> feed) =>
+      _maps(feed['items'])
+          .map((item) => '${item['id'] ?? item['url'] ?? item['title'] ?? ''}')
+          .where((id) => id.isNotEmpty)
+          .toSet();
 
   Future<Map<String, dynamic>> _asset(String path) async {
     final text = await rootBundle.loadString(path);
@@ -320,13 +326,15 @@ class CompanionModel extends ChangeNotifier {
 
   Future<void> _notifyNewNews(Set<String> beforeNews) async {
     final current = _newsIds(newsFeed);
-    final remembered = (_prefs?.getStringList('known_news_ids') ?? <String>[]).toSet();
+    final remembered = (_prefs?.getStringList('known_news_ids') ?? <String>[])
+        .toSet();
     final baseline = remembered.isEmpty ? beforeNews : remembered;
     final fresh = current.difference(baseline);
     await _prefs?.setStringList('known_news_ids', current.toList());
     if (!newsAlertsEnabled || fresh.isEmpty) return;
     final item = news.firstWhere(
-      (row) => fresh.contains('${row['id'] ?? row['url'] ?? row['title'] ?? ''}'),
+      (row) =>
+          fresh.contains('${row['id'] ?? row['url'] ?? row['title'] ?? ''}'),
       orElse: () => <String, dynamic>{},
     );
     final title = '${item['title'] ?? 'Yeni TD2 haberi'}';
@@ -344,6 +352,7 @@ class CompanionModel extends ChangeNotifier {
       if (release == null) return;
       availableVersion = release.version;
       availableVersionUrl = release.url;
+      availableApkUrl = release.apkUrl;
       lastUpdateCheck = DateTime.now();
       if (updateAlertsEnabled && updateAvailable) {
         final notified = _prefs?.getString('notified_companion_version');
@@ -353,7 +362,10 @@ class CompanionModel extends ChangeNotifier {
             title: 'Companion güncellemesi hazır',
             body: 'v${release.version} indirilmeye hazır.',
           );
-          await _prefs?.setString('notified_companion_version', release.version);
+          await _prefs?.setString(
+            'notified_companion_version',
+            release.version,
+          );
         }
       }
       notifyListeners();
@@ -365,16 +377,16 @@ class CompanionModel extends ChangeNotifier {
   }
 
   Future<String?> setNewsAlertsEnabled(bool enabled) => _setAlerts(
-        enabled: enabled,
-        preferenceKey: 'news_alerts_enabled',
-        news: true,
-      );
+    enabled: enabled,
+    preferenceKey: 'news_alerts_enabled',
+    news: true,
+  );
 
   Future<String?> setUpdateAlertsEnabled(bool enabled) => _setAlerts(
-        enabled: enabled,
-        preferenceKey: 'update_alerts_enabled',
-        news: false,
-      );
+    enabled: enabled,
+    preferenceKey: 'update_alerts_enabled',
+    news: false,
+  );
 
   Future<String?> _setAlerts({
     required bool enabled,
@@ -391,7 +403,12 @@ class CompanionModel extends ChangeNotifier {
       }
       if (news) {
         newsAlertsEnabled = enabled;
-        if (enabled) await _prefs?.setStringList('known_news_ids', _newsIds(newsFeed).toList());
+        if (enabled) {
+          await _prefs?.setStringList(
+            'known_news_ids',
+            _newsIds(newsFeed).toList(),
+          );
+        }
       } else {
         updateAlertsEnabled = enabled;
       }
@@ -835,76 +852,124 @@ class _ContentAlertsCard extends StatelessWidget {
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(error ?? (enabled ? 'Bildirimler etkinleştirildi.' : 'Bildirimler kapatıldı.')),
+        content: Text(
+          error ??
+              (enabled
+                  ? 'Bildirimler etkinleştirildi.'
+                  : 'Bildirimler kapatıldı.'),
+        ),
         backgroundColor: error == null ? null : const Color(0xFF7A2A1E),
+      ),
+    );
+  }
+
+  Future<void> _startUpdate(BuildContext context) async {
+    final raw = model.availableApkUrl ?? model.availableVersionUrl;
+    final uri = raw == null ? null : Uri.tryParse(raw);
+    if (uri == null || uri.scheme != 'https') return;
+    final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          opened
+              ? model.availableApkUrl != null
+                    ? 'APK indiriliyor. İndirme bitince Android kurulum onayını ver.'
+                    : 'GitHub sürüm sayfası açıldı. APK dosyasını indirip Android kurulum onayını ver.'
+              : 'İndirme bağlantısı açılamadı. Ağ bağlantını veya varsayılan tarayıcıyı kontrol et.',
+        ),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SectionTitle(
-            title: 'İÇERİK VE GÜNCELLEMELER',
-            trailing: model.updateAvailable ? 'v${model.availableVersion} HAZIR' : 'OTOMATİK KONTROL',
-          ),
-          const SizedBox(height: 10),
-          Container(
-            decoration: BoxDecoration(
-              color: _panel,
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: Colors.white10),
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      SectionTitle(
+        title: 'İÇERİK VE GÜNCELLEMELER',
+        trailing: model.updateAvailable
+            ? 'v${model.availableVersion} HAZIR'
+            : 'OTOMATİK KONTROL',
+      ),
+      const SizedBox(height: 10),
+      Container(
+        decoration: BoxDecoration(
+          color: _panel,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: Colors.white10),
+        ),
+        child: Column(
+          children: [
+            SwitchListTile.adaptive(
+              value: model.newsAlertsEnabled,
+              onChanged: model.alertChanging
+                  ? null
+                  : (value) =>
+                        _change(context, value, model.setNewsAlertsEnabled),
+              title: const Text('Yeni haber bildirimleri'),
+              subtitle: const Text(
+                'Uygulama açıkken yeni TD2 haberi bulunursa bildirir.',
+                style: TextStyle(color: _soft, fontSize: 11),
+              ),
             ),
-            child: Column(
-              children: [
-                SwitchListTile.adaptive(
-                  value: model.newsAlertsEnabled,
-                  onChanged: model.alertChanging
-                      ? null
-                      : (value) => _change(context, value, model.setNewsAlertsEnabled),
-                  title: const Text('Yeni haber bildirimleri'),
-                  subtitle: const Text(
-                    'Uygulama açıkken yeni TD2 haberi bulunursa bildirir.',
-                    style: TextStyle(color: _soft, fontSize: 11),
+            const Divider(height: 1),
+            SwitchListTile.adaptive(
+              value: model.updateAlertsEnabled,
+              onChanged: model.alertChanging
+                  ? null
+                  : (value) =>
+                        _change(context, value, model.setUpdateAlertsEnabled),
+              title: const Text('Companion güncelleme bildirimi'),
+              subtitle: Text(
+                model.updateAvailable
+                    ? 'v${model.availableVersion} hazır. Tek tuşla APK indirmeyi başlat.'
+                    : 'Uygulama açıldığında yeni beta sürümleri denetler.',
+                style: const TextStyle(color: _soft, fontSize: 11),
+              ),
+            ),
+            if (model.updateAvailable && model.availableVersionUrl != null) ...[
+              const Divider(height: 1),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
+                child: FilledButton.icon(
+                  onPressed: () => _startUpdate(context),
+                  icon: const Icon(Icons.system_update_alt_rounded),
+                  label: Text(
+                    'v${model.availableVersion} GÜNCELLEMESİNİ İNDİR',
                   ),
                 ),
-                const Divider(height: 1),
-                SwitchListTile.adaptive(
-                  value: model.updateAlertsEnabled,
-                  onChanged: model.alertChanging
-                      ? null
-                      : (value) => _change(context, value, model.setUpdateAlertsEnabled),
-                  title: const Text('Companion güncelleme bildirimi'),
-                  subtitle: Text(
-                    model.updateAvailable
-                        ? 'v${model.availableVersion} GitHub’da hazır. Dokunarak indirme sayfasını aç.'
-                        : 'Uygulama açıldığında yeni beta sürümleri denetler.',
-                    style: const TextStyle(color: _soft, fontSize: 11),
-                  ),
-                ),
-                if (model.updateAvailable && model.availableVersionUrl != null) ...[
-                  const Divider(height: 1),
-                  ListTile(
-                    leading: const Icon(Icons.system_update_alt_rounded, color: _orange),
-                    title: Text('v${model.availableVersion} sürümünü indir'),
-                    trailing: const Icon(Icons.open_in_new_rounded, size: 18),
-                    onTap: () => launchUrl(
+              ),
+              if (model.availableApkUrl == null)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                  child: TextButton.icon(
+                    onPressed: () => launchUrl(
                       Uri.parse(model.availableVersionUrl!),
                       mode: LaunchMode.externalApplication,
                     ),
+                    icon: const Icon(Icons.open_in_new_rounded, size: 16),
+                    label: const Text('GitHub sürüm sayfasını aç'),
                   ),
-                ],
-              ],
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'İzin yalnız yukarıdaki anahtarlardan biri açıldığında istenir. Arka planda haber bildirimi için ayrıca Firebase/Play dağıtımı doğrulaması gerekir.',
-            style: TextStyle(color: _soft, fontSize: 11),
-          ),
-        ],
-      );
+                ),
+              const Padding(
+                padding: EdgeInsets.fromLTRB(16, 0, 16, 14),
+                child: Text(
+                  'İndirme tamamlanınca Android kurulum onayı gösterir. Güvenlik nedeniyle uygulama sessiz kurulum yapamaz.',
+                  style: TextStyle(color: _soft, fontSize: 11),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+      const SizedBox(height: 8),
+      const Text(
+        'İzin yalnız yukarıdaki anahtarlardan biri açıldığında istenir. Arka planda haber bildirimi için ayrıca Firebase/Play dağıtımı doğrulaması gerekir.',
+        style: TextStyle(color: _soft, fontSize: 11),
+      ),
+    ],
+  );
 }
 
 class TasksPage extends StatefulWidget {
@@ -1032,81 +1097,80 @@ class _BuildsPageState extends State<BuildsPage> {
       onRefresh: () => widget.model.refresh(),
       color: _orange,
       child: ListView(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
-      children: [
-        Text('BUILD KÜTÜPHANESİ', style: _eyebrow),
-        const SizedBox(height: 4),
-        const Text(
-          'Ajanını hazırla',
-          style: TextStyle(fontSize: 25, fontWeight: FontWeight.w800),
-        ),
-        const SizedBox(height: 15),
-        Row(
-          children: [
-            Expanded(
-              child: TextField(
-                decoration: const InputDecoration(
-                  prefixIcon: Icon(Icons.search),
-                  hintText: 'Build veya rol ara',
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
+        children: [
+          Text('BUILD KÜTÜPHANESİ', style: _eyebrow),
+          const SizedBox(height: 4),
+          const Text(
+            'Ajanını hazırla',
+            style: TextStyle(fontSize: 25, fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 15),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  decoration: const InputDecoration(
+                    prefixIcon: Icon(Icons.search),
+                    hintText: 'Build veya rol ara',
+                  ),
+                  onChanged: (value) => setState(() => query = value),
                 ),
-                onChanged: (value) => setState(() => query = value),
               ),
-            ),
-            if (widget.cloud.paired) ...[
-              const SizedBox(width: 8),
-              IconButton.filledTonal(
-                tooltip: 'Bulutla eşitle',
-                onPressed: widget.cloud.syncing ? null : _sync,
-                icon: widget.cloud.syncing
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.cloud_sync_rounded),
+              if (widget.cloud.paired) ...[
+                const SizedBox(width: 8),
+                IconButton.filledTonal(
+                  tooltip: 'Bulutla eşitle',
+                  onPressed: widget.cloud.syncing ? null : _sync,
+                  icon: widget.cloud.syncing
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.cloud_sync_rounded),
+                ),
+              ],
+            ],
+          ),
+          const SizedBox(height: 12),
+          SegmentedButton<int>(
+            segments: const [
+              ButtonSegment(
+                value: 0,
+                label: Text('Önerilen'),
+                icon: Icon(Icons.auto_awesome),
+              ),
+              ButtonSegment(
+                value: 1,
+                label: Text('Kaydettiklerim'),
+                icon: Icon(Icons.bookmark_outline),
               ),
             ],
-          ],
-        ),
-        const SizedBox(height: 12),
-        SegmentedButton<int>(
-          segments: const [
-            ButtonSegment(
-              value: 0,
-              label: Text('Önerilen'),
-              icon: Icon(Icons.auto_awesome),
-            ),
-            ButtonSegment(
-              value: 1,
-              label: Text('Kaydettiklerim'),
-              icon: Icon(Icons.bookmark_outline),
-            ),
-          ],
-          selected: {tab},
-          onSelectionChanged: (values) => setState(() => tab = values.first),
-        ),
-        const SizedBox(height: 14),
-        if (tab == 0)
-          if (meta.isEmpty)
+            selected: {tab},
+            onSelectionChanged: (values) => setState(() => tab = values.first),
+          ),
+          const SizedBox(height: 14),
+          if (tab == 0)
+            if (meta.isEmpty)
+              const _EmptyCard(
+                icon: Icons.search_off_rounded,
+                text: 'Aramaya uygun öneri bulunamadı.',
+              )
+            else
+              ...meta.map((build) => MetaBuildCard(data: build))
+          else if (saved.isEmpty)
             const _EmptyCard(
-              icon: Icons.search_off_rounded,
-              text: 'Aramaya uygun öneri bulunamadı.',
+              icon: Icons.bookmark_add_outlined,
+              text: 'Henüz build kaydetmedin. + düğmesiyle ilk build’ini oluştur.',
             )
           else
-            ...meta.map((build) => MetaBuildCard(data: build))
-        else if (saved.isEmpty)
-          const _EmptyCard(
-            icon: Icons.bookmark_add_outlined,
-            text:
-                'Henüz build kaydetmedin. + düğmesiyle ilk build’ini oluştur.',
-          )
-        else
-          ...saved.map(
-            (build) => SavedBuildCard(
-              data: build,
-              onDelete: () => _confirmDeleteBuild(context, build),
+            ...saved.map(
+              (build) => SavedBuildCard(
+                data: build,
+                onDelete: () => _confirmDeleteBuild(context, build),
+              ),
             ),
-          ),
         ],
       ),
     );
@@ -1718,7 +1782,9 @@ class _CloudPairPageState extends State<CloudPairPage> {
           ),
           FilledButton(
             onPressed: () => Navigator.pop(dialogContext, true),
-            style: FilledButton.styleFrom(backgroundColor: const Color(0xFFB3261E)),
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFFB3261E),
+            ),
             child: const Text('Hesabı sil'),
           ),
         ],
@@ -1728,7 +1794,11 @@ class _CloudPairPageState extends State<CloudPairPage> {
     final error = await widget.cloud.deleteAccount();
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(error ?? 'Silme talebi alındı. 24 saat içinde tamamlanacak.')),
+      SnackBar(
+        content: Text(
+          error ?? 'Silme talebi alındı. 24 saat içinde tamamlanacak.',
+        ),
+      ),
     );
     if (error == null) Navigator.of(context).pop();
   }
@@ -1740,7 +1810,9 @@ class _CloudPairPageState extends State<CloudPairPage> {
       appBar: AppBar(title: const Text('Bulut eşleştirmesi')),
       body: ListView(
         padding: const EdgeInsets.all(20),
-        children: widget.cloud.paired ? _connected(context) : _pairForm(context),
+        children: widget.cloud.paired
+            ? _connected(context)
+            : _pairForm(context),
       ),
     ),
   );
@@ -1758,24 +1830,35 @@ class _CloudPairPageState extends State<CloudPairPage> {
       controller: _code,
       textCapitalization: TextCapitalization.characters,
       maxLength: 8,
-      decoration: const InputDecoration(labelText: 'Eşleştirme kodu', hintText: 'ör. A1B2C3D4'),
+      decoration: const InputDecoration(
+        labelText: 'Eşleştirme kodu',
+        hintText: 'ör. A1B2C3D4',
+      ),
       onSubmitted: (_) => widget.cloud.pair(_code.text),
     ),
     const SizedBox(height: 12),
     FilledButton.icon(
-      onPressed: widget.cloud.pairing ? null : () => widget.cloud.pair(_code.text),
+      onPressed: widget.cloud.pairing
+          ? null
+          : () => widget.cloud.pair(_code.text),
       icon: widget.cloud.pairing
           ? const SizedBox(
               width: 18,
               height: 18,
-              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.white,
+              ),
             )
           : const Icon(Icons.link_rounded),
       label: const Text('Eşleştir'),
     ),
     if (widget.cloud.pairError != null) ...[
       const SizedBox(height: 14),
-      Text(widget.cloud.pairError!, style: const TextStyle(color: Color(0xFFFF8A80))),
+      Text(
+        widget.cloud.pairError!,
+        style: const TextStyle(color: Color(0xFFFF8A80)),
+      ),
     ],
     const SizedBox(height: 16),
     const _EmptyCard(
@@ -1809,13 +1892,17 @@ class _CloudPairPageState extends State<CloudPairPage> {
             const SizedBox(width: 10),
             Expanded(
               child: Text(
-                online ? 'Masaüstü çevrimiçi' : 'Masaüstü şu anda çevrimdışı görünüyor',
+                online
+                    ? 'Masaüstü çevrimiçi'
+                    : 'Masaüstü şu anda çevrimdışı görünüyor',
                 style: const TextStyle(fontWeight: FontWeight.w600),
               ),
             ),
             IconButton(
               tooltip: 'Yenile',
-              onPressed: widget.cloud.dashboardLoading ? null : widget.cloud.refreshDashboard,
+              onPressed: widget.cloud.dashboardLoading
+                  ? null
+                  : widget.cloud.refreshDashboard,
               icon: const Icon(Icons.refresh_rounded, size: 20),
             ),
           ],
@@ -1842,14 +1929,21 @@ class _CloudPairPageState extends State<CloudPairPage> {
           onChanged: widget.cloud.notificationChanging
               ? null
               : (enabled) async {
-                  final error = await widget.cloud.setNotificationsEnabled(enabled);
+                  final error = await widget.cloud.setNotificationsEnabled(
+                    enabled,
+                  );
                   if (!context.mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(error ?? (enabled
-                          ? 'Bildirimler etkinleştirildi.'
-                          : 'Bildirimler kapatıldı.')),
-                      backgroundColor: error == null ? null : const Color(0xFF7A2A1E),
+                      content: Text(
+                        error ??
+                            (enabled
+                                ? 'Bildirimler etkinleştirildi.'
+                                : 'Bildirimler kapatıldı.'),
+                      ),
+                      backgroundColor: error == null
+                          ? null
+                          : const Color(0xFF7A2A1E),
                     ),
                   );
                 },
@@ -1879,7 +1973,9 @@ class _CloudPairPageState extends State<CloudPairPage> {
       const SizedBox(height: 8),
       OutlinedButton.icon(
         onPressed: _deleteAccount,
-        style: OutlinedButton.styleFrom(foregroundColor: const Color(0xFFFF8A80)),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: const Color(0xFFFF8A80),
+        ),
         icon: const Icon(Icons.delete_forever_rounded),
         label: const Text('Hesabı ve tüm verileri sil'),
       ),

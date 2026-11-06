@@ -7,26 +7,48 @@ import 'package:http/http.dart' as http;
 const companionVersion = '0.1.4.1';
 
 class CompanionRelease {
-  const CompanionRelease({required this.version, required this.url});
+  const CompanionRelease({
+    required this.version,
+    required this.url,
+    this.apkUrl,
+  });
 
   final String version;
   final String url;
+
+  /// GitHub release içindeki imzalı Android APK'ya doğrudan HTTPS bağlantısı.
+  /// Varlık yoksa uygulama güvenle release sayfasına geri dönebilir.
+  final String? apkUrl;
 }
 
 /// GitHub'daki yalnız Companion ön-yayınlarını okur. Masaüstü `v9.x` yayınları
 /// bu kontrolün kapsamına girmez.
-Future<CompanionRelease?> fetchLatestCompanionRelease(http.Client client) async {
+Future<CompanionRelease?> fetchLatestCompanionRelease(
+  http.Client client,
+) async {
   final uri = Uri.https(
     'api.github.com',
     '/repos/FEDERALTURK/td2-loot-advisor/releases',
     {'per_page': '20'},
   );
-  final response = await client.get(uri, headers: const {
-    'Accept': 'application/vnd.github+json',
-    'User-Agent': 'TD2-Loot-Advisor-Companion/$companionVersion',
-  }).timeout(const Duration(seconds: 8));
+  final response = await client
+      .get(
+        uri,
+        headers: const {
+          'Accept': 'application/vnd.github+json',
+          'User-Agent': 'TD2-Loot-Advisor-Companion/$companionVersion',
+        },
+      )
+      .timeout(const Duration(seconds: 8));
   if (response.statusCode != 200) return null;
-  final decoded = jsonDecode(utf8.decode(response.bodyBytes));
+  return parseLatestCompanionRelease(
+    jsonDecode(utf8.decode(response.bodyBytes)),
+  );
+}
+
+/// Ağ katmanından ayrılmış sürüm seçimi. Böylece hem hatalı GitHub verisi hem
+/// doğrudan APK bağlantısı tekil testlerde doğrulanabilir.
+CompanionRelease? parseLatestCompanionRelease(dynamic decoded) {
   if (decoded is! List) return null;
   CompanionRelease? latest;
   for (final item in decoded) {
@@ -36,13 +58,38 @@ Future<CompanionRelease?> fetchLatestCompanionRelease(http.Client client) async 
     final version = tag.substring('companion-v'.length).split('-').first;
     if (!_validVersion(version)) continue;
     final url = '${item['html_url'] ?? ''}';
-    if (url.isEmpty) continue;
-    final candidate = CompanionRelease(version: version, url: url);
+    if (!_isSafeHttpsUrl(url)) continue;
+    final candidate = CompanionRelease(
+      version: version,
+      url: url,
+      apkUrl: _findApkUrl(item['assets']),
+    );
     if (latest == null || isNewerVersion(candidate.version, latest.version)) {
       latest = candidate;
     }
   }
   return latest;
+}
+
+String? _findApkUrl(dynamic assets) {
+  if (assets is! List) return null;
+  for (final asset in assets) {
+    if (asset is! Map) continue;
+    final name = '${asset['name'] ?? ''}';
+    final url = '${asset['browser_download_url'] ?? ''}';
+    if (!name.startsWith('TD2LootAdvisor_Companion_') ||
+        !name.toLowerCase().endsWith('.apk') ||
+        !_isSafeHttpsUrl(url)) {
+      continue;
+    }
+    return url;
+  }
+  return null;
+}
+
+bool _isSafeHttpsUrl(String value) {
+  final uri = Uri.tryParse(value);
+  return uri != null && uri.scheme == 'https' && uri.host.isNotEmpty;
 }
 
 bool isNewerVersion(String candidate, String installed) {

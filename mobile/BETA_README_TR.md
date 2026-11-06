@@ -6,6 +6,14 @@
 2. Dosyayı açın ve Android'in istediği durumda bu kaynaktan uygulama yükleme iznini verin.
 3. Uygulamayı başlatın. İlk kullanımda görev ve haber akışlarını yenilemek için internet bağlantısı gerekir.
 
+## Uygulama içinden güncelleme
+
+Yeni bir Companion beta sürümü yayımlandığında uygulama açılışta GitHub'daki
+yalnız `companion-v...` etiketlerini denetler. **İçerik ve Güncellemeler**
+kartındaki **Güncellemeyi indir** tuşu doğrudan imzalı APK indirmesini başlatır.
+İndirme tamamlandığında Android, mevcut uygulamanın üstüne kurulumu kullanıcıya
+onaylatır. Android güvenlik modeli nedeniyle sessiz/arka plan kurulumu yapılmaz.
+
 ## Beta kapsamı
 
 - Görevler, haberler ve önerilen build listeleri uygulama açılırken herkese açık proje JSON verilerinden yenilenir; son başarılı veri cihazda önbelleğe alınır, bağlantı olmadığında önbellek veya uygulamayla gelen başlangıç verileri kullanılır.
