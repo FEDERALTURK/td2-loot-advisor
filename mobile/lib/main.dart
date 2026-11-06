@@ -91,9 +91,46 @@ class _TD2CompanionAppState extends State<TD2CompanionApp> {
           ),
         ),
       ),
-      home: MainShell(model: model, cloud: cloud),
+      home: AnimatedBuilder(
+        animation: model,
+        builder: (context, _) => model.loading
+            ? const _SplashScreen()
+            : MainShell(model: model, cloud: cloud),
+      ),
     );
   }
+}
+
+class _SplashScreen extends StatelessWidget {
+  const _SplashScreen();
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    backgroundColor: _bg,
+    body: Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              color: _orange.withValues(alpha: .14),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: _orange.withValues(alpha: .6)),
+            ),
+            child: const Icon(Icons.hexagon_outlined, color: _orange, size: 32),
+          ),
+          const SizedBox(height: 18),
+          const SizedBox(
+            width: 22,
+            height: 22,
+            child: CircularProgressIndicator(strokeWidth: 2.4, color: _orange),
+          ),
+        ],
+      ),
+    ),
+  );
 }
 
 class CompanionModel extends ChangeNotifier {
@@ -121,7 +158,18 @@ class CompanionModel extends ChangeNotifier {
           .toString();
   List<Map<String, dynamic>> get tasks => _maps(tasksFeed['tasks']);
   List<Map<String, dynamic>> get news => _maps(newsFeed['items']);
-  List<Map<String, dynamic>> get builds => _maps(metaBuilds['builds']);
+
+  /// En yaygın/önerilen build'ler önce gelsin diye popülerliğe göre azalan
+  /// sıralanır; kaynak JSON'daki ham liste sırası güvenilir değil.
+  List<Map<String, dynamic>> get builds {
+    final list = _maps(metaBuilds['builds']);
+    list.sort((a, b) {
+      final pa = num.tryParse('${a['popularity'] ?? ''}') ?? -1;
+      final pb = num.tryParse('${b['popularity'] ?? ''}') ?? -1;
+      return pb.compareTo(pa);
+    });
+    return list;
+  }
   int get activeNews => news.where((e) => _isCurrent(e)).length;
   int get doneCount => completedTasks.length;
 
@@ -586,9 +634,11 @@ class OverviewPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 22),
-          const SectionTitle(
+          SectionTitle(
             title: 'MASAÜSTÜ EŞLEŞTİRMESİ',
-            trailing: 'SONRAKİ AŞAMA',
+            trailing: (model.desktopConnected || cloud.paired)
+                ? 'BAĞLI'
+                : 'SONRAKİ AŞAMA',
           ),
           const SizedBox(height: 10),
           _DesktopStatusCard(model: model),
@@ -753,7 +803,10 @@ class _BuildsPageState extends State<BuildsPage> {
         query.toLowerCase(),
       );
     }).toList();
-    return ListView(
+    return RefreshIndicator(
+      onRefresh: () => widget.model.refresh(),
+      color: _orange,
+      child: ListView(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
       children: [
         Text('BUILD KÜTÜPHANESİ', style: _eyebrow),
@@ -826,15 +879,44 @@ class _BuildsPageState extends State<BuildsPage> {
           ...saved.map(
             (build) => SavedBuildCard(
               data: build,
-              onDelete: () {
-                final id = '${build['id']}';
-                widget.model.deleteBuild(id);
-                if (widget.cloud.paired) widget.cloud.deleteBuildQuietly(id);
-              },
+              onDelete: () => _confirmDeleteBuild(context, build),
             ),
           ),
-      ],
+        ],
+      ),
     );
+  }
+
+  Future<void> _confirmDeleteBuild(
+    BuildContext context,
+    Map<String, dynamic> build,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Build’i sil'),
+        content: Text(
+          '"${build['name'] ?? 'Bu build'}" kalıcı olarak silinecek. Bu işlem geri alınamaz.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Vazgeç'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFFB3261E),
+            ),
+            child: const Text('Sil'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    final id = '${build['id']}';
+    widget.model.deleteBuild(id);
+    if (widget.cloud.paired) widget.cloud.deleteBuildQuietly(id);
   }
 }
 
