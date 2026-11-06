@@ -212,6 +212,11 @@ def test_excel_library_in_sync():
 def test_display_sync_helpers():
     """Oyunun gerçek boyutundan profil; ekran dışına taşan pencere; hangi monitörde."""
     import display
+    assert display.hdr_enabled("Off") is False
+    assert display.hdr_enabled(" on ") is True
+    assert display.hdr_enabled("unexpected legacy value") is None
+    assert display.hdr_enabled("") is None
+    assert display.hdr_enabled(None) is None
     for (w, h) in ((1920, 1080), (3440, 1440), (3840, 2160)):
         k, p = display.profile_for(w, h); assert k in display.PROFILES and not p.get("dynamic")
     for (w, h) in ((1680, 1050), (2880, 1800), (1280, 800), (1024, 768), (2560, 1600)):
