@@ -2,6 +2,15 @@
 
 Önemli kararların ve sürümlerin kısa, kronolojik özeti. Tam ayrıntı için `git log` ve `.github/release_notes.md`.
 
+## Açıklama yedeği iki parçayı okuyor (2026-11-05)
+
+- Kullanıcı sorusu: `descriptions_i18n.json` 510 KB tavanında, `_2` 207 KB; sorun mu? Boyut sorun değil: kalan 74 giriş
+  girerse `_2` tahminen ~330 KB olur, 510 KB sınırının altında kalır.
+- **Bulunan gerçek hata**: `app.py` → `desc_i18n()` önbellek yokken yalnız ilk parçayı okuyordu; ilk senkron başarılı
+  olana kadar (ör. çevrimdışı ilk açılış) `_2` içindeki 124 giriş İngilizce kalıyordu.
+- Düzeltme: `meta_sync.read_local_descriptions(folder)` iki parçayı `fetch_descriptions` ile aynı öncelikle birleştirir.
+- Test: `python tests/test_knowledge.py` → RESULT: PASS. Arayüzde elle denenmedi. Eski sürümler `_2`'yi okumaz; bu
+  ancak uygulama güncellenince çözülür.
 ## Üst yatay menü, dijital yağmur efekti, 3B radar + rastgele tespit noktaları (9.1.5.31, 2026-11-05)
 
 - Kullanıcı isteği: "Arkada bulunan haritanın dah 3 boyutlu ve gerçek olmasını saatin dönmesiyle tespit
