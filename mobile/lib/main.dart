@@ -4,9 +4,11 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'services/cloud_link.dart';
@@ -151,6 +153,9 @@ class CompanionModel extends ChangeNotifier {
   String? availableVersion;
   String? availableVersionUrl;
   String? availableApkUrl;
+  String? availableSha256Url;
+  bool downloadingUpdate = false;
+  double updateProgress = 0;
   DateTime? lastUpdateCheck;
   SharedPreferences? _prefs;
   Timer? _desktopPoll;
@@ -358,6 +363,7 @@ class CompanionModel extends ChangeNotifier {
       availableVersion = release.version;
       availableVersionUrl = release.url;
       availableApkUrl = release.apkUrl;
+      availableSha256Url = release.sha256Url;
       lastUpdateCheck = DateTime.now();
       await _prefs?.setInt('last_update_check_ms', lastUpdateCheck!.millisecondsSinceEpoch);
       if (updateAlertsEnabled && updateAvailable) {
@@ -380,6 +386,52 @@ class CompanionModel extends ChangeNotifier {
     } finally {
       client.close();
     }
+  }
+
+  Future<String?> downloadAndInstallUpdate() async {
+    final apkUrl = availableApkUrl;
+    if (apkUrl == null || downloadingUpdate) return 'APK bağlantısı bulunamadı.';
+    downloadingUpdate = true;
+    updateProgress = 0;
+    notifyListeners();
+    try {
+      final response = await http.get(Uri.parse(apkUrl)).timeout(const Duration(minutes: 3));
+      if (response.statusCode != 200 || response.bodyBytes.isEmpty) {
+        return 'APK indirilemedi (HTTP ${response.statusCode}).';
+      }
+      final expected = await _fetchChecksum();
+      final actual = sha256.convert(response.bodyBytes).toString();
+      if (expected != null && expected != actual) {
+        return 'APK doğrulaması başarısız; dosya kurulmadı.';
+      }
+      final directory = await getApplicationSupportDirectory();
+      final file = File('${directory.path}/TD2LootAdvisor_Companion_$availableVersion.apk');
+      await file.writeAsBytes(response.bodyBytes, flush: true);
+      await const MethodChannel('td2_companion/update').invokeMethod<bool>('installApk', {'path': file.path});
+      return null;
+    } catch (error) {
+      return 'Güncelleme indirilemedi: $error';
+    } finally {
+      downloadingUpdate = false;
+      updateProgress = 0;
+      notifyListeners();
+    }
+  }
+
+  Future<String?> _fetchChecksum() async {
+    final checksumUrl = availableSha256Url;
+    if (checksumUrl == null) return null;
+    try {
+      final text = await http.read(Uri.parse(checksumUrl)).timeout(const Duration(seconds: 20));
+      final apkName = 'TD2LootAdvisor_Companion_$availableVersion.apk';
+      for (final line in text.split(RegExp(r'\r?\n'))) {
+        final parts = line.trim().split(RegExp(r'\s+'));
+        if (parts.length >= 2 && parts.last.endsWith(apkName)) return parts.first.toLowerCase();
+      }
+    } catch (_) {
+      return null;
+    }
+    return null;
   }
 
   Future<String?> setNewsAlertsEnabled(bool enabled) => _setAlerts(
@@ -870,19 +922,14 @@ class _ContentAlertsCard extends StatelessWidget {
   }
 
   Future<void> _startUpdate(BuildContext context) async {
-    final raw = model.availableApkUrl ?? model.availableVersionUrl;
-    final uri = raw == null ? null : Uri.tryParse(raw);
-    if (uri == null || uri.scheme != 'https') return;
-    final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    final error = await model.downloadAndInstallUpdate();
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          opened
-              ? model.availableApkUrl != null
-                    ? 'APK indiriliyor. İndirme bitince Android kurulum onayını ver.'
-                    : 'GitHub sürüm sayfası açıldı. APK dosyasını indirip Android kurulum onayını ver.'
-              : 'İndirme bağlantısı açılamadı. Ağ bağlantını veya varsayılan tarayıcıyı kontrol et.',
+          error == null
+              ? 'APK indirildi ve Android kurulum onayı açıldı.'
+              : error,
         ),
       ),
     );
@@ -939,10 +986,12 @@ class _ContentAlertsCard extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
                 child: FilledButton.icon(
-                  onPressed: () => _startUpdate(context),
+                  onPressed: model.downloadingUpdate ? null : () => _startUpdate(context),
                   icon: const Icon(Icons.system_update_alt_rounded),
                   label: Text(
-                    'v${model.availableVersion} GÜNCELLEMESİNİ İNDİR',
+                    model.downloadingUpdate
+                        ? 'GÜNCELLEME İNDİRİLİYOR'
+                        : 'v${model.availableVersion} GÜNCELLEMESİNİ İNDİR',
                   ),
                 ),
               ),

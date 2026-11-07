@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 
 /// GitHub beta etiketi dört bileşene izin verir (ör. 0.1.4.1). Android'in
 /// package sürümü ise pubspec içinde üç bileşen + artan build numarasıdır.
-const companionVersion = '0.1.5';
+const companionVersion = '0.1.7';
 const updateCheckInterval = Duration(hours: 6);
 
 class CompanionRelease {
@@ -12,6 +12,7 @@ class CompanionRelease {
     required this.version,
     required this.url,
     this.apkUrl,
+    this.sha256Url,
   });
 
   final String version;
@@ -20,6 +21,7 @@ class CompanionRelease {
   /// GitHub release içindeki imzalı Android APK'ya doğrudan HTTPS bağlantısı.
   /// Varlık yoksa uygulama güvenle release sayfasına geri dönebilir.
   final String? apkUrl;
+  final String? sha256Url;
 }
 
 /// GitHub'daki yalnız Companion ön-yayınlarını okur. Masaüstü `v9.x` yayınları
@@ -64,6 +66,7 @@ CompanionRelease? parseLatestCompanionRelease(dynamic decoded) {
       version: version,
       url: url,
       apkUrl: _findApkUrl(item['assets']),
+      sha256Url: _findSha256Url(item['assets']),
     );
     if (latest == null || isNewerVersion(candidate.version, latest.version)) {
       latest = candidate;
@@ -84,6 +87,17 @@ String? _findApkUrl(dynamic assets) {
       continue;
     }
     return url;
+  }
+  return null;
+}
+
+String? _findSha256Url(dynamic assets) {
+  if (assets is! List) return null;
+  for (final asset in assets) {
+    if (asset is! Map) continue;
+    final name = '${asset['name'] ?? ''}'.toLowerCase();
+    final url = '${asset['browser_download_url'] ?? ''}';
+    if (name == 'sha256sums.sha256' && _isSafeHttpsUrl(url)) return url;
   }
   return null;
 }
