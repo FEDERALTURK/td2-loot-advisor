@@ -1,5 +1,13 @@
 ## TD2 Loot Advisor — Windows
 
+**9.1.5.34 — Faz 5 karar merkezi ve güncelleme denetimi**
+
+- Komuta Merkezi'ne kişisel hedeflerle son taranan eşyayı güvenli biçimde karşılaştıran karar merkezi eklendi.
+- Exotic, Named, Prototype ve kilitli eşyalar tam eşleşse bile REVIEW korumasında kalır; otomatik söküm kararı üretilmez.
+- Mobil Companion güncelleme denetimi kalıcı zaman damgasıyla altı saatte bir sınırlandırıldı.
+- Faz 4 hedef/farm planı ve Faz 5 karar merkezi testleri eklendi.
+
+
 **9.1.5.33 — Companion güvenlik ve cihaz yayını hazırlığı**
 
 - Mobil Companion bulut oturumu ve cihaz kimliği artık düz uygulama tercihleri yerine Android Keystore / iOS Keychain temelli güvenli depoda tutulur. Önceki beta kurulumlarının kayıtları güvenli biçimde taşınır; taşıma tamamlanmadan eski kayıt silinmez.

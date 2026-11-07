@@ -5,6 +5,8 @@ durumu ve kullanıcı hesabı/cihaz erişimi gerektiren açık adımları ayır�
 
 ## Bu çalışma alanında doğrulananlar
 
+- Güncelleme denetimi kalıcı zaman damgasıyla altı saatte bir sınırlandırılır; kullanıcı ayarı açık olsa bile her uygulama açılışında GitHub API çağrısı yapılmaz.
+
 - Flutter `3.47.8` ve Dart `3.13.7` ile `flutter analyze` temiz geçti.
 - `flutter test` geçti; başlangıç testi asenkron splash ekranını doğrulayacak
   şekilde güncellendi.

@@ -202,6 +202,10 @@ class CompanionModel extends ChangeNotifier {
           .toSet();
       newsAlertsEnabled = _prefs?.getBool('news_alerts_enabled') ?? false;
       updateAlertsEnabled = _prefs?.getBool('update_alerts_enabled') ?? false;
+      final lastUpdateMillis = _prefs?.getInt('last_update_check_ms');
+      if (lastUpdateMillis != null) {
+        lastUpdateCheck = DateTime.fromMillisecondsSinceEpoch(lastUpdateMillis);
+      }
       final rawBuilds = _prefs?.getStringList('saved_builds') ?? <String>[];
       savedBuilds = rawBuilds
           .map((row) {
@@ -346,6 +350,7 @@ class CompanionModel extends ChangeNotifier {
   }
 
   Future<void> checkForUpdate() async {
+    if (!isUpdateCheckDue(lastUpdateCheck)) return;
     final client = http.Client();
     try {
       final release = await fetchLatestCompanionRelease(client);
@@ -354,6 +359,7 @@ class CompanionModel extends ChangeNotifier {
       availableVersionUrl = release.url;
       availableApkUrl = release.apkUrl;
       lastUpdateCheck = DateTime.now();
+      await _prefs?.setInt('last_update_check_ms', lastUpdateCheck!.millisecondsSinceEpoch);
       if (updateAlertsEnabled && updateAvailable) {
         final notified = _prefs?.getString('notified_companion_version');
         if (notified != release.version) {

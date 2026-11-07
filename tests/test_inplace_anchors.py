@@ -18,6 +18,26 @@ def measure(pt):
 
 
 class InplaceTests(unittest.TestCase):
+    def test_callback_failure_does_not_leave_untracked_window(self):
+        import tkinter as tk
+        root = tk.Tk(); root.withdraw()
+        def fail(win):
+            raise RuntimeError("native hook unavailable")
+        renderer = overlay.InPlace(root, {"bg": "black", "fg": "white", "accent": "orange"},
+                                   on_window=fail, native_boxes=True)
+        try:
+            with self.assertRaises(RuntimeError):
+                renderer.show([{"x": 8, "y": 8, "w": 160, "h": 42, "pt": 10,
+                                "lines": ["Test"], "kind": "text"}],
+                              {"width": 220, "height": 90, "left": 0, "top": 0})
+            self.assertEqual(len(renderer._wins), 1)
+            win = renderer._wins[0]
+            renderer.hide()
+            self.assertFalse(win.winfo_exists())
+        finally:
+            renderer.hide()
+            root.destroy()
+
     def test_project_labels_remain_separate_source_rectangles(self):
         lines = [("Season Pass Project", (20, 20, 240, 40), .99),
                  ("DCD Headquarters", (20, 44, 210, 64), .99),

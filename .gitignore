@@ -26,6 +26,7 @@ private/
 tests/.stash_test.json
 vendor_cache.json
 stash.json
+targets.json
 drop_queue.json
 verdict_feedback.json
 verdict_feedback.json.tmp
@@ -57,3 +58,23 @@ translate_cache.json
 descriptions_cache.json
 models/
 cache/
+
+# Yerel oturum, ekran durumu ve kullanıcı yedekleri
+# Bunlar bilgisayara/kullanıcıya özgüdür; kaynak veya sürüm verisi değildir.
+sessions.json
+screen_states.json
+tasks_sent.json
+*.bak
+
+# Geçici test çıktıları
+tests/.fake_sub.png
+tests/.fake_sub_game.py
+tests/.translate_result.json
+
+# Ruflo / Codex kullanıcı ve çalışma zamanı verileri
+.codex/
+.claude-flow/data/
+.claude-flow/logs/
+.claude-flow/policy/
+.claude-flow/swarm/
+.swarm/

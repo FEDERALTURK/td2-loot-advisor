@@ -12,6 +12,13 @@ void main() {
     expect(isNewerVersion('beta', '0.1.4'), isFalse);
   });
 
+  test('update check is throttled but runs when no check exists', () {
+    final now = DateTime(2026, 11, 7, 12);
+    expect(isUpdateCheckDue(null, now: now), isTrue);
+    expect(isUpdateCheckDue(now.subtract(const Duration(hours: 5, minutes: 59)), now: now), isFalse);
+    expect(isUpdateCheckDue(now.subtract(const Duration(hours: 6)), now: now), isTrue);
+  });
+
   test('companion release selects the newest direct APK asset', () {
     final release = parseLatestCompanionRelease([
       {

@@ -1,0 +1,42 @@
+name: Build Companion APK
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ["companion-v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v5
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.47.8"
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+      - run: flutter build apk --release
+      - name: Rename APK
+        shell: bash
+        run: cp build/app/outputs/flutter-apk/app-release.apk "TD2LootAdvisor_Companion_${GITHUB_REF_NAME#companion-v}.apk"
+      - uses: actions/upload-artifact@v5
+        with:
+          name: TD2LootAdvisor-companion-apk
+          path: mobile/TD2LootAdvisor_Companion_*.apk
+      - name: Publish companion release
+        if: startsWith(github.ref, 'refs/tags/companion-v')
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: TD2 Loot Advisor Companion ${{ github.ref_name }}
+          prerelease: true
+          files: mobile/TD2LootAdvisor_Companion_*.apk

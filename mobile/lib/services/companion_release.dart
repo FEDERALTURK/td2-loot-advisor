@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 /// GitHub beta etiketi dört bileşene izin verir (ör. 0.1.4.1). Android'in
 /// package sürümü ise pubspec içinde üç bileşen + artan build numarasıdır.
 const companionVersion = '0.1.5';
+const updateCheckInterval = Duration(hours: 6);
 
 class CompanionRelease {
   const CompanionRelease({
@@ -100,6 +101,12 @@ bool isNewerVersion(String candidate, String installed) {
     if (a[index] != b[index]) return a[index] > b[index];
   }
   return false;
+}
+
+bool isUpdateCheckDue(DateTime? lastCheck, {DateTime? now}) {
+  if (lastCheck == null) return true;
+  final current = now ?? DateTime.now();
+  return current.difference(lastCheck) >= updateCheckInterval;
 }
 
 bool _validVersion(String value) => _parts(value) != null;
