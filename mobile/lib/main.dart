@@ -229,7 +229,7 @@ class CompanionModel extends ChangeNotifier {
     loading = false;
     notifyListeners();
     await refresh(quiet: true);
-    unawaited(checkForUpdate());
+    unawaited(checkForUpdate(force: true));
   }
 
   void _restoreContentCache() {
@@ -354,8 +354,8 @@ class CompanionModel extends ChangeNotifier {
     );
   }
 
-  Future<void> checkForUpdate() async {
-    if (!isUpdateCheckDue(lastUpdateCheck)) return;
+  Future<void> checkForUpdate({bool force = false}) async {
+    if (!force && !isUpdateCheckDue(lastUpdateCheck)) return;
     final client = http.Client();
     try {
       final release = await fetchLatestCompanionRelease(client);
@@ -402,8 +402,11 @@ class CompanionModel extends ChangeNotifier {
         return 'APK indirilemedi (HTTP ${response.statusCode}).';
       }
       final expected = await _fetchChecksum();
+      if (expected == null || !RegExp(r'^[a-f0-9]{64}$').hasMatch(expected)) {
+        return 'APK doğrulama bilgisi alınamadı. Lütfen tekrar deneyin.';
+      }
       final actual = sha256.convert(response.bodyBytes).toString();
-      if (expected != null && expected != actual) {
+      if (expected != actual) {
         return 'APK doğrulaması başarısız; dosya kurulmadı.';
       }
       final directory = await getApplicationSupportDirectory();
@@ -690,7 +693,7 @@ class _MainShellState extends State<MainShell> {
                     ),
                   ),
                   Text(
-                    'COMPANION  ·  BETA 0.1.5',
+                    'COMPANION  ·  BETA $companionVersion',
                     style: TextStyle(
                       fontSize: 9,
                       color: _soft,
@@ -2305,7 +2308,7 @@ Future<void> _newBuild(
 void _about(BuildContext context) => showAboutDialog(
   context: context,
   applicationName: 'TD2 Loot Advisor Companion',
-  applicationVersion: '0.1.5-beta (build 7)',
+  applicationVersion: '$companionVersion-beta',
   applicationIcon: const Icon(Icons.hexagon_outlined, color: _orange, size: 34),
   children: [
     const Text(
