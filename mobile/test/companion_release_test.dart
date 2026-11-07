@@ -35,11 +35,13 @@ void main() {
           },
           {
             'name': 'TD2LootAdvisor_Companion_0.1.4.1-beta.apk',
-            'browser_download_url': 'https://github.com/FEDERALTURK/td2-loot-advisor/releases/download/companion-v0.1.4.1-beta/TD2LootAdvisor_Companion_0.1.4.1-beta.apk',
+            'browser_download_url':
+                'https://github.com/FEDERALTURK/td2-loot-advisor/releases/download/companion-v0.1.4.1-beta/TD2LootAdvisor_Companion_0.1.4.1-beta.apk',
           },
           {
             'name': 'SHA256SUMS.sha256',
-            'browser_download_url': 'https://github.com/FEDERALTURK/td2-loot-advisor/releases/download/companion-v0.1.4.1-beta/SHA256SUMS.sha256',
+            'browser_download_url':
+                'https://github.com/FEDERALTURK/td2-loot-advisor/releases/download/companion-v0.1.4.1-beta/SHA256SUMS.sha256',
           },
         ],
       },

@@ -1,14 +1,14 @@
-import 'dart:convert';
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'services/cloud_link.dart';
@@ -395,7 +395,9 @@ class CompanionModel extends ChangeNotifier {
     updateProgress = 0;
     notifyListeners();
     try {
-      final response = await http.get(Uri.parse(apkUrl)).timeout(const Duration(minutes: 3));
+      final response = await http
+          .get(Uri.parse(apkUrl))
+          .timeout(const Duration(minutes: 3));
       if (response.statusCode != 200 || response.bodyBytes.isEmpty) {
         return 'APK indirilemedi (HTTP ${response.statusCode}).';
       }
@@ -405,9 +407,14 @@ class CompanionModel extends ChangeNotifier {
         return 'APK doğrulaması başarısız; dosya kurulmadı.';
       }
       final directory = await getApplicationSupportDirectory();
-      final file = File('${directory.path}/TD2LootAdvisor_Companion_$availableVersion.apk');
+      final file = File(
+        '${directory.path}/TD2LootAdvisor_Companion_$availableVersion.apk',
+      );
       await file.writeAsBytes(response.bodyBytes, flush: true);
-      await const MethodChannel('td2_companion/update').invokeMethod<bool>('installApk', {'path': file.path});
+      await const MethodChannel('td2_companion/update').invokeMethod<bool>(
+        'installApk',
+        {'path': file.path},
+      );
       return null;
     } catch (error) {
       return 'Güncelleme indirilemedi: $error';
@@ -422,11 +429,15 @@ class CompanionModel extends ChangeNotifier {
     final checksumUrl = availableSha256Url;
     if (checksumUrl == null) return null;
     try {
-      final text = await http.read(Uri.parse(checksumUrl)).timeout(const Duration(seconds: 20));
+      final text = await http
+          .read(Uri.parse(checksumUrl))
+          .timeout(const Duration(seconds: 20));
       final apkName = 'TD2LootAdvisor_Companion_$availableVersion.apk';
       for (final line in text.split(RegExp(r'\r?\n'))) {
         final parts = line.trim().split(RegExp(r'\s+'));
-        if (parts.length >= 2 && parts.last.endsWith(apkName)) return parts.first.toLowerCase();
+        if (parts.length >= 2 && parts.last.endsWith(apkName)) {
+          return parts.first.toLowerCase();
+        }
       }
     } catch (_) {
       return null;
