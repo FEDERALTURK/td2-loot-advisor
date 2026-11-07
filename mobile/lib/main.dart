@@ -938,9 +938,7 @@ class _ContentAlertsCard extends StatelessWidget {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          error == null
-              ? 'APK indirildi ve Android kurulum onayı açıldı.'
-              : error,
+          error ?? 'APK indirildi ve Android kurulum onayı açıldı.',
         ),
       ),
     );
