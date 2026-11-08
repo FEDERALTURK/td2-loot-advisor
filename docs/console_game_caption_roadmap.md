@@ -89,6 +89,18 @@ bölümlerdeki tahminlerimizi doğruluyor**, ek olarak şu somut gerçek detayla
 - **Xbox bağlantısı: yöntem sayfada belirtilmemiş**, doğrulanamadı — muhtemelen Xbox'ın resmi olmayan/
   yarı-resmi "Smartglass"/konsol yayın protokolü (topluluk projesi: `xbox-smartglass`) kullanılıyor,
   ama bu **doğrulanmadı, sadece varsayım**.
+- **Xbox için güncel bulgu (2026-11-08, "Xbox Series X/S için yapabilir miyiz?" sorusu üzerine
+  araştırıldı):** `xbox-smartglass-core-python` (OpenXbox) **arşivlenmiş** (2021, salt-okunur) ve sadece
+  kontrol komutlarını (açma/kapama, uygulama başlatma, Stump/Live-TV) kapsıyor — gerçek oyun görüntü/ses
+  akışını YAKALAMIYOR, bu yüzden bizim ihtiyacımıza uygun değil. Ama **`XStreaming`
+  (github: GiGanTe71/XStreaming, Geocld/XStreaming'in bir fork'u) tam aradığımız şey**: React
+  Native/TypeScript ile yazılmış, **MIT lisanslı**, "Xbox One ve Xbox Series S/X'ten video ve ses
+  akışı" özelliğini açıkça listeleyen, xCloud + ev içi konsol yayınını destekleyen açık kaynak bir
+  istemci. **MIT lisansı bizim projemizle (MIT) tam uyumlu** — PS5 tarafındaki GPL (`chiaki-ng`) riski
+  Xbox'ta yok. Xbox Live kimlik doğrulaması gerektiriyor (akışın tam detayı bu oturumda incelenmedi,
+  proje kendi "Auth" geliştirici dokümanına yönlendiriyor). **Sonuç: Xbox Series X|S entegrasyonu,
+  PS5'ten DAHA DÜŞÜK hukuki risklidir** — lisans uyumsuzluğu yok, sadece mühendislik işi var (React
+  Native/TS protokolünü inceleyip Flutter/Dart'a taşımak veya ayrı bir süreç/köprü olarak kullanmak).
 - **ASR YOK — önemli basitleştirme:** Uygulama oyunun sesini DİNLEMİYOR. "Çeviri için yalnız altyazı
   metni kullanılır" deniyor. "Sesli çeviri" dedikleri şey, OCR'la okunan altyazı metninin **çevirisini
   telefonun kendi metin-okuma (TTS) sesiyle okutması** — konuşma tanıma (ASR) değil. **Bu, önceki
@@ -292,12 +304,27 @@ zorunlu kılma.
 - [ ] Test: gerçek Xbox/PS5 + Remote Play ile uçtan uca doğrulama (sadece kod okuyarak doğrulanmış
       sayılmaz).
 
-### Faz 3 — Resmi olmayan Remote Play/Smartglass protokol entegrasyonu (yüksek risk, opsiyonel)
-- [ ] Faz 0'daki lisans netleşmesi tamamlanmadan BAŞLANMAZ.
-- [ ] gamecaptionapp'ın yaptığı gibi doğrudan telefon üzerinden PS5 Remote Play / Xbox konsol-yayın
-      protokolüne bağlanma — bu, Faz 1/2'nin aksine kullanıcının ayrıca bir Remote Play penceresi
-      açmasını gerektirmez (uygulama kendi içinde bağlanır), ama mühendislik + lisans maliyeti en yüksek
-      kalemdir. İkinci bir PSN/Microsoft hesabı bağlama akışı gerekir (gamecaptionapp'ın yaptığı gibi).
+### Faz 3 — Doğrudan protokol entegrasyonu (telefon içinden konsola bağlanma — artık ikiye ayrıldı)
+
+**3a. Xbox Series X|S — ORTA risk, lisans engeli YOK (2026-11-08 bulgusuyla öncelik verildi)**
+- [ ] `XStreaming` (MIT, github.com/GiGanTe71/XStreaming — Geocld/XStreaming fork'u) projesinin
+      protokol/Auth/Stream geliştirici dokümanlarını incelemek (bu oturumda sadece README okundu,
+      protokol detayına inilmedi).
+      **Doğrulanmadı**: incelenen sadece README; "Stream"/"Auth" dokümanlarının içeriği, Xbox Live
+      kimlik doğrulama akışının tam adımları ve XStreaming'in projemize nasıl entegre edileceği (ayrı
+      bir süreç/servis olarak mı, yoksa protokolü Dart'a taşıyarak mı) bir sonraki oturumda ayrıca
+      araştırılmalı.
+      MIT lisansı bizim projemizle (MIT) **uyumlu** — lisans engeli yok, sadece mühendislik: React
+      Native/TypeScript kodunun protokol mantığını anlayıp Flutter/Dart tarafına (mobil companion'a)
+      taşımak veya XStreaming'i ayrı bir arka plan süreci/köprü olarak kullanmak.
+- [ ] Xbox Live hesap bağlama akışı (OAuth) mobil companion'a eklenecek.
+- [ ] Gerçek bir Xbox Series S/X ile uçtan uca test: video+ses akışı geliyor mu, OCR bölgesi (altyazı)
+      sabit bir koordinatta mı yoksa her oyunda değişken mi.
+
+**3b. PS5 — YÜKSEK risk, lisans engeli VAR (bkz. §1.5)**
+- [ ] Faz 0'daki GPL/MIT lisans netleşmesi tamamlanmadan BAŞLANMAZ.
+- [ ] gamecaptionapp'ın yaptığı gibi ikinci bir PSN hesabı bağlama akışı + Remote Play protokolü
+      (resmi SDK yok, ters-mühendislik projelerine bağımlı — `chiaki-ng` GPL).
 
 ### Faz 4 — Capture kart desteği (Seçenek A, ileri kullanıcı, düşük öncelik)
 - [ ] Capture kartların PC'de bir "video capture device" (DirectShow/Media Foundation) olarak göründüğünü
