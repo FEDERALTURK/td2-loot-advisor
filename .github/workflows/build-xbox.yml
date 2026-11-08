@@ -20,6 +20,25 @@ jobs:
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
+      - name: Install UWP build tools workload (Windows SDK facade'leri için)
+        # windows-latest koşucusunun VS kurulumunda "Universal Windows
+        # Platform development" iş yükü varsayılan olarak YOK — bu olmadan
+        # Microsoft.NETCore.UniversalWindowsPlatform paketi bile System.String
+        # gibi temel .NET tiplerini çözemiyor (ilk 3 denemede gözlendi).
+        shell: pwsh
+        run: |
+          $vsPath = (& "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath)
+          Write-Host "VS install path: $vsPath"
+          & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vs_installer.exe" modify `
+            --installPath "$vsPath" `
+            --add Microsoft.VisualStudio.ComponentGroup.UWP.VC `
+            --add Microsoft.VisualStudio.Component.Windows10SDK.19041 `
+            --quiet --norestart --wait
+          if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne 3010) {
+            Write-Error "vs_installer modify başarısız (exit $LASTEXITCODE)"
+            exit $LASTEXITCODE
+          }
+
       - name: Restore NuGet packages (packages.config — klasik UWP projesi)
         run: nuget restore XboxCompanion.sln
         shell: cmd
