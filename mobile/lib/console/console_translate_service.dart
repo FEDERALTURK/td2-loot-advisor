@@ -14,11 +14,14 @@ import 'package:google_mlkit_translation/google_mlkit_translation.dart';
 enum TranslationModelStatus { unknown, checking, downloading, ready, error }
 
 class ConsoleTranslateService {
+  // Alan adları private (_) olduğu için bu adlandırılmış parametreler
+  // dışarıdan yalnızca varsayılan değerleriyle kullanılabilir (bkz.
+  // ConsoleCaptionPage — zaten hep varsayılanla çağrılıyor). Bilerek
+  // initializing-formal (`this._sourceLanguage`) kullanıldı.
   ConsoleTranslateService({
-    TranslateLanguage sourceLanguage = TranslateLanguage.english,
-    TranslateLanguage targetLanguage = TranslateLanguage.turkish,
-  }) : _sourceLanguage = sourceLanguage,
-       _targetLanguage = targetLanguage;
+    this._sourceLanguage = TranslateLanguage.english,
+    this._targetLanguage = TranslateLanguage.turkish,
+  });
 
   final TranslateLanguage _sourceLanguage;
   final TranslateLanguage _targetLanguage;

@@ -305,15 +305,29 @@ class _ConsoleCaptionPageState extends State<ConsoleCaptionPage>
         color: Colors.black.withValues(alpha: .78),
         borderRadius: BorderRadius.circular(10),
       ),
-      child: Text(
-        _translatedText ?? '',
-        textAlign: TextAlign.center,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 19,
-          fontWeight: FontWeight.w600,
-          height: 1.3,
-        ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (_sourceText != null && _sourceText != _translatedText)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Text(
+                _sourceText!,
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: _soft, fontSize: 12, height: 1.2),
+              ),
+            ),
+          Text(
+            _translatedText ?? '',
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 19,
+              fontWeight: FontWeight.w600,
+              height: 1.3,
+            ),
+          ),
+        ],
       ),
     ),
   );
