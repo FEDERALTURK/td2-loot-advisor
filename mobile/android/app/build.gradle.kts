@@ -102,6 +102,13 @@ android {
             } else {
                 signingConfigs.getByName("debug")
             }
+            // Konsol Modu'nun google_mlkit_text_recognition bağımlılığı R8 ile
+            // çakışıyor (kullanılmayan script seçenekleri için "Missing class"
+            // hatası) — proguard-rules.pro bunu -dontwarn ile gideriyor.
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
         }
     }
 }
