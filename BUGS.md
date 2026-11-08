@@ -60,6 +60,34 @@
 
 17. ✅ **v9.1.5.31 yayın derlemesi, `_sentencepiece` DLL hatasıyla iki kez art arda başarısız oldu — kök neden bulundu ve düzeltildi (2026-11-05).** GitHub Actions "Build Windows installer" iş akışının "Test - install silently and start the app" adımında, paketlenmiş `.exe` içindeki `--lt-check` komutu her iki denemede de aynı hatayla çöktü: `LT check: {"ok": false, "reason": "ImportError: DLL load failed while importing _sentencepiece: The specified module could not be found."}`. Kanıt: son 8 başarılı yayın derlemesinin hepsi (en sonuncusu 2026-11-04T20:27, v9.1.5.29) `sentencepiece-0.2.2` wheel'ini kullanmıştı; bu derleme ise `requirements.txt`'te sürüm sabitlenmediği için PyPI'ye tam o aralıkta (2026-11-05 sabahı) yüklenmiş olan **yeni `sentencepiece-0.2.3`** wheel'ini çekti — ve PyInstaller ile paketlenince native `_sentencepiece.pyd` yüklenemez hale geldi (0.2.2'de bu sorun hiç yoktu). Düzeltme: `requirements.txt`'teki `sentencepiece` satırı `sentencepiece==0.2.2` olarak sabitlendi (gerekçe satır içi yorumla belgelendi), böylece üst sınırsız bir gelecek PyPI yayını yeniden sessizce otomatik çekilmeyecek. Bu, uygulamanın kendi kodundaki (app.py/fx.py/ui_hud.py, üst-menü/radar değişiklikleri) bir regresyon DEĞİL — tamamen bağımsız, üçüncü taraf bir paket sürümü sorunuydu; aynı derlemede `test_stability_widgets.py` dahil tüm Windows-üstü testler ve paketlenmiş uygulamanın "UI ready" ile başlaması, DML probe'u sorunsuz geçmişti.
 
+18. **Mobil companion (`mobile/lib/main.dart`) uygulama içi deneyim/arayüz iyileştirmeleri (2026-11-06) — bu ortamda Flutter SDK'sı olmadığı için derlenmedi/test edilmedi, Windows PC'de doğrulama gerekli.** Kullanıcının isteği üzerine ("Uygulama içi deneyim/arayüz") dosya baştan sona okunarak 5 somut düzeltme/iyileştirme yapıldı:
+    - `CompanionModel.loading` bayrağı daha önce hiçbir yerde okunmuyordu — açılışta veri yüklenene kadar boş durum kartları (`"Görev verisi yok"` vb.) kısa süreliğine görünebiliyordu. Düzeltme: `TD2CompanionApp` artık `AnimatedBuilder` ile `model.loading` true olduğu sürece yeni bir `_SplashScreen` widget'ı gösteriyor, yükleme bitince `MainShell`'e geçiyor.
+    - `CompanionModel.builds` getter'ı, `meta_builds.json`'daki ham dizi sırasını (popülerliğe göre sıralı DEĞİL — doğrulama: ilk 5 build'in `popularity` değerleri 95, 85, 69, 70, 73) olduğu gibi döndürüyordu; ama "ÖNE ÇIKAN BUILD" (Overview) `builds.first`'ü, "Önerilen" sekmesi (Builds) de aynı sırayı kullanıyor. Düzeltme: getter artık `popularity` alanına göre (büyükten küçüğe, `num.tryParse` ile, eksik/geçersiz değerler en sona) sıralı liste döndürüyor.
+    - Kaydedilen bir build'i silme tek dokunuşla ve geri alınamaz şekilde (onay yok) yapılıyordu — `CloudPairPage._deleteAccount()`'taki hesap silme onay akışıyla tutarsızdı. Düzeltme: `BuildsPage` artık silmeden önce `CloudPairPage`'deki aynı stil/renk desenini (Vazgeç / kırmızı dolgulu "Sil") kullanan bir `AlertDialog` onayı gösteriyor (`_confirmDeleteBuild`).
+    - `BuildsPage`'de, `OverviewPage`/`TasksPage`/`NewsPage`'in aksine aşağı-çekip-yenileme (`RefreshIndicator`) yoktu — tutarsızlık giderildi, `BuildsPage`'in `ListView`'i de artık `RefreshIndicator(onRefresh: () => model.refresh(), ...)` ile sarılı.
+    - "MASAÜSTÜ EŞLEŞTİRMESİ" bölüm başlığındaki `trailing` etiketi her zaman sabit `'SONRAKİ AŞAMA'` ("sıradaki aşama") yazıyordu — kullanıcı zaten eşleşmiş/bağlıyken de yanıltıcıydı. Düzeltme: artık `model.desktopConnected || cloud.paired` doğruysa `'BAĞLI'`, değilse `'SONRAKİ AŞAMA'` gösteriyor (bu yüzden `const SectionTitle(...)` çağrısındaki `const` kaldırıldı).
+
+    **Doğrulama durumu**: Bu konteynerde Flutter/Dart SDK'sı kurulu değil (`which flutter dart` boş döner), dolayısıyla `flutter pub get`/`flutter analyze`/`flutter test`/`flutter build apk` hiçbiri çalıştırılamadı. Sözdizimi elle (satır satır okuma + tüm dosya üzerinde programatik parantez/süslü-parantez/köşeli-parantez dengeleme kontrolü) doğrulandı, Dart derleyicisiyle doğrulanmadı. **Windows PC'de (Flutter zaten kurulu) şu adımlar gerekli**: `flutter pub get && flutter analyze && flutter test`, ardından gerçek cihazda/emülatörde: splash ekranının açılışta kısa süre göründüğü, build listesinin popülerliğe göre azalan sıralandığı, bir build silinmeye çalışıldığında onay diyaloğu çıktığı, Builds sekmesinde aşağı çekince yenilemenin çalıştığı, ve eşleştirme sonrası "MASAÜSTÜ EŞLEŞTİRMESİ" etiketinin "BAĞLI"ya döndüğü gözle kontrol edilmeli.
+
+19. **P0 — GitHub beta kanalı debug imza anahtarıyla imzalanıyordu, düzeltildi (2026-11-08).**
+    Codex'in devir raporunda bulunan P0 risk: `build-mobile.yml` her CI çalışmasında farklı bir
+    geçici "debug" anahtarı kullanıyordu (ubuntu-latest runner'larda kalıcı debug.keystore yok),
+    bu da kullanıcıların mevcut APK üzerine güncelleme yapamamasına (imza uyuşmazlığı) yol
+    açıyordu. Düzeltme: `mobile/android/app/build.gradle.kts`'e Play yükleme anahtarından ayrı,
+    kalıcı bir "GitHub beta" imza yapılandırması (`githubBetaRelease` Gradle özelliği +
+    `beta-key.properties`) eklendi; `build-mobile.yml` artık bir GitHub Actions secret'ından
+    (`TD2_BETA_KEYSTORE_BASE64`/`TD2_BETA_KEYSTORE_PASSWORD`/`TD2_BETA_KEY_ALIAS`) kalıcı bir
+    keystore üretip onunla imzalıyor. Ayrıntı, secret ekleme adımları ve **önemli geriye dönük
+    etki** (önceki tüm beta APK'ları farklı anahtarlarla imzalıydı — kullanıcıların bu
+    düzeltmeden sonraki ilk sürümü tek seferlik kaldır-kur yapması gerekecek) için bkz.
+    `docs/mobile_beta_signing_tr.md`. **Güncelleme (2026-11-08):** Kullanıcı secret'ları GitHub'a
+    ekledi; `workflow_dispatch` ile gerçek bir CI çalışması tetiklendi (run 42502909839), üretilen
+    APK indirilip imza sertifikası (androguard, v2) çıkarıldı — SHA256 parmak izi, keystore
+    üretilirken alınan fingerprint'le birebir eşleşti. **P0 doğrulandı ve giderildi.**
+    **Hâlâ doğrulanmadı:** gerçek bir telefonda "eski APK kaldır → yeni kur → bir sonraki sürümü
+    üstüne güncelle" senaryosu (bu CI çalışması bir tag push değildi, public release
+    oluşmadı — onay gerektirecek bir sonraki gerçek `companion-v*` yayınında denenmeli).
+
 ## Bilinen test kapsamı boşlukları
 
 - `webbrowser`/except-closure hata sınıfı için statik AST taraması var (`tests/test_regression_crash_patterns.py`), ama gerçek Tk buton `invoke()` ile uçtan uca test yok.

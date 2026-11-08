@@ -1,0 +1,67 @@
+name: Build Companion APK
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ["companion-v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v5
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.47.8"
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+      - name: Decode beta signing keystore
+        env:
+          BETA_KEYSTORE_BASE64: ${{ secrets.TD2_BETA_KEYSTORE_BASE64 }}
+          BETA_KEYSTORE_PASSWORD: ${{ secrets.TD2_BETA_KEYSTORE_PASSWORD }}
+          BETA_KEY_ALIAS: ${{ secrets.TD2_BETA_KEY_ALIAS }}
+        run: |
+          if [ -z "$BETA_KEYSTORE_BASE64" ]; then
+            echo "::warning::TD2_BETA_KEYSTORE_BASE64 secret yok — bu build debug anahtarıyla imzalanacak (kullanıcılar eski APK üstüne güncelleyemeyebilir). Bkz. docs/mobile_beta_signing_tr.md."
+            echo "USE_BETA_SIGNING=false" >> "$GITHUB_ENV"
+          else
+            echo "$BETA_KEYSTORE_BASE64" | base64 -d > android/td2-companion-beta.jks
+            cat > android/beta-key.properties <<EOF
+          storeFile=td2-companion-beta.jks
+          storePassword=${BETA_KEYSTORE_PASSWORD}
+          keyAlias=${BETA_KEY_ALIAS}
+          keyPassword=${BETA_KEYSTORE_PASSWORD}
+          EOF
+            echo "USE_BETA_SIGNING=true" >> "$GITHUB_ENV"
+          fi
+      - run: flutter build apk --release --android-project-arg=githubBetaRelease=${{ env.USE_BETA_SIGNING }}
+      - name: Rename APK
+        shell: bash
+        run: |
+          cp build/app/outputs/flutter-apk/app-release.apk "TD2LootAdvisor_Companion_${GITHUB_REF_NAME#companion-v}.apk"
+          sha256sum "TD2LootAdvisor_Companion_${GITHUB_REF_NAME#companion-v}.apk" > SHA256SUMS.sha256
+      - uses: actions/upload-artifact@v5
+        with:
+          name: TD2LootAdvisor-companion-apk
+          path: |
+            mobile/TD2LootAdvisor_Companion_*.apk
+            mobile/SHA256SUMS.sha256
+      - name: Publish companion release
+        if: startsWith(github.ref, 'refs/tags/companion-v')
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: TD2 Loot Advisor Companion ${{ github.ref_name }}
+          prerelease: true
+          files: |
+            mobile/TD2LootAdvisor_Companion_*.apk
+            mobile/SHA256SUMS.sha256

@@ -9,6 +9,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'cloud_api.dart';
@@ -17,10 +18,14 @@ import 'push_registration.dart';
 const _kDeviceIdKey = 'cloud_device_id';
 const _kTokenKey = 'cloud_token';
 const _kRevisionsKey = 'cloud_build_revisions';
+const _kNotificationsOptInKey = 'cloud_notifications_opt_in';
 
 class CloudLinkModel extends ChangeNotifier {
-  CloudLinkModel({CloudApi? api}) : _api = api ?? CloudApi();
+  CloudLinkModel({CloudApi? api, FlutterSecureStorage? secureStore})
+      : _api = api ?? CloudApi(),
+        _secureStore = secureStore ?? const FlutterSecureStorage();
   final CloudApi _api;
+  final FlutterSecureStorage _secureStore;
 
   SharedPreferences? _prefs;
   Timer? _poll;
@@ -37,11 +42,13 @@ class CloudLinkModel extends ChangeNotifier {
   bool syncing = false;
   String? syncError;
   DateTime? lastSync;
+  bool notificationsEnabled = false;
+  bool notificationChanging = false;
 
   bool get paired => _token != null;
 
   /// Sunucunun bu telefon için verdiği cihaz kimliği (`device_id`).
-  /// Eşleştirme sonrası `SharedPreferences`'te saklanır; push bildirimi
+  /// Eşleştirme sonrası işletim sisteminin güvenli deposunda saklanır; push bildirimi
   /// token kaydı (`PUT /push-tokens`) gibi cihaza özgü istekler bunu kullanır.
   String? get deviceId => _deviceId;
 
@@ -49,12 +56,30 @@ class CloudLinkModel extends ChangeNotifier {
 
   Future<void> load() async {
     _prefs = await SharedPreferences.getInstance();
-    _deviceId = _prefs?.getString(_kDeviceIdKey);
-    _token = _prefs?.getString(_kTokenKey);
+    // v0.1.2'deki düz SharedPreferences değerlerini bir kez güvenli depoya
+    // taşı. Taşıma başarısız olursa eski değerleri silmeyiz; kullanıcı
+    // bağlantısını kaybetmeden sonraki açılışta yeniden denenir.
+    _deviceId = await _secureStore.read(key: _kDeviceIdKey);
+    _token = await _secureStore.read(key: _kTokenKey);
+    final legacyDeviceId = _prefs?.getString(_kDeviceIdKey);
+    final legacyToken = _prefs?.getString(_kTokenKey);
+    if (_deviceId == null && legacyDeviceId != null) {
+      await _secureStore.write(key: _kDeviceIdKey, value: legacyDeviceId);
+      _deviceId = legacyDeviceId;
+      await _prefs?.remove(_kDeviceIdKey);
+    }
+    if (_token == null && legacyToken != null) {
+      await _secureStore.write(key: _kTokenKey, value: legacyToken);
+      _token = legacyToken;
+      await _prefs?.remove(_kTokenKey);
+    }
+    notificationsEnabled = _prefs?.getBool(_kNotificationsOptInKey) ?? false;
     if (_token != null) {
       _startPolling();
       unawaited(refreshDashboard());
-      unawaited(registerPushTokenQuietly());
+      // Daha önce kullanıcı açıkça izin verdiyse token yenilemesini sessizce
+      // koru; bu yol yeni bir işletim sistemi izin penceresi açmaz.
+      if (notificationsEnabled) unawaited(registerPushTokenQuietly());
     }
   }
 
@@ -70,29 +95,68 @@ class CloudLinkModel extends ChangeNotifier {
   /// izin verilmemişse, Firebase henüz kurulu değilse (google-services.json
   /// eksik, bkz. docs/push_notifications_setup.md (depo köküne göre)) veya istek başarısız
   /// olursa sessizce hiçbir şey yapmaz — uygulamanın ana işlevi buna bağımlı
-  /// değil. Eşleştirme sonrası ve her uygulama açılışında (zaten eşleşmişse)
-  /// çağrılır; ayrıca token yenilenirse (ilk çağrıda abone olunur) otomatik
-  /// tekrar kaydeder.
-  Future<void> registerPushTokenQuietly() async {
+  /// değil. Yalnızca kullanıcı bildirim anahtarını açıkça etkinleştirdiğinde
+  /// çağrılır. Bu tercih açıksa sonraki açılışlarda token yenilemesi sessizce
+  /// korunur; ayrıca token yenilenirse otomatik tekrar kaydeder.
+  Future<String?> _registerPushToken() async {
     final token = _token;
     final deviceId = _deviceId;
-    if (token == null || deviceId == null) return;
+    if (token == null || deviceId == null) return 'Telefon buluta eşleştirilmemiş.';
     try {
       final pushToken = await PushRegistration.requestPermissionAndGetToken();
-      if (pushToken == null) return;
+      if (pushToken == null) return 'Bildirim izni verilmedi veya bildirim altyapısı hazır değil.';
       await _api.putPushToken(token, deviceId, pushToken);
       if (!_pushListenerStarted) {
         _pushListenerStarted = true;
         _pushTokenSub = PushRegistration.onTokenRefresh.listen((refreshed) async {
           final t = _token;
           final d = _deviceId;
-          if (t == null || d == null) return;
+          if (!notificationsEnabled || t == null || d == null) return;
           try {
             await _api.putPushToken(t, d, refreshed);
           } catch (_) {/* sessizce yut */}
         });
       }
-    } catch (_) {/* sessizce yut — push bildirimi olmadan da program tam çalışır */}
+      return null;
+    } catch (_) {
+      return 'Bildirim kaydı tamamlanamadı. Bağlantıyı ve izinleri kontrol et.';
+    }
+  }
+
+  Future<void> registerPushTokenQuietly() async {
+    if (!notificationsEnabled) return;
+    await _registerPushToken();
+  }
+
+  /// Bildirimler varsayılan olarak kapalıdır. Kullanıcı bu seçeneği açmadıkça
+  /// işletim sistemi izin penceresi ve push token kaydı başlatılmaz.
+  Future<String?> setNotificationsEnabled(bool enabled) async {
+    if (notificationChanging) return null;
+    notificationChanging = true;
+    notifyListeners();
+    try {
+      if (!enabled) {
+        if (_token != null && _deviceId != null) {
+          try {
+            await _api.deletePushToken(_token!, _deviceId!);
+          } catch (_) {/* Yerel tercih yine de kapatılır. */}
+        }
+        _pushTokenSub?.cancel();
+        _pushTokenSub = null;
+        _pushListenerStarted = false;
+        notificationsEnabled = false;
+        await _prefs?.setBool(_kNotificationsOptInKey, false);
+        return null;
+      }
+      final error = await _registerPushToken();
+      if (error != null) return error;
+      notificationsEnabled = true;
+      await _prefs?.setBool(_kNotificationsOptInKey, true);
+      return null;
+    } finally {
+      notificationChanging = false;
+      notifyListeners();
+    }
   }
 
   // ---------------------------------------------------------------- eşleştirme
@@ -110,11 +174,10 @@ class CloudLinkModel extends ChangeNotifier {
       final result = await _api.claimPairing(code, isIos: Platform.isIOS);
       _deviceId = result.deviceId;
       _token = result.token;
-      await _prefs?.setString(_kDeviceIdKey, result.deviceId);
-      await _prefs?.setString(_kTokenKey, result.token);
+      await _secureStore.write(key: _kDeviceIdKey, value: result.deviceId);
+      await _secureStore.write(key: _kTokenKey, value: result.token);
       _startPolling();
       await refreshDashboard();
-      unawaited(registerPushTokenQuietly());
       return true;
     } on CloudApiException catch (e) {
       pairError = _describe(e);
@@ -140,10 +203,15 @@ class CloudLinkModel extends ChangeNotifier {
     _poll = null;
     _deviceId = null;
     _token = null;
+    notificationsEnabled = false;
     dashboardState = null;
     pairError = null;
+    await _secureStore.delete(key: _kDeviceIdKey);
+    await _secureStore.delete(key: _kTokenKey);
+    // Eski beta kurulumundan kalmış olabilecek açık depolama anahtarları.
     await _prefs?.remove(_kDeviceIdKey);
     await _prefs?.remove(_kTokenKey);
+    await _prefs?.setBool(_kNotificationsOptInKey, false);
     notifyListeners();
   }
 

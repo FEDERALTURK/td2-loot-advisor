@@ -1,169 +1,9 @@
 {
  "schema": 1,
- "version": "2026-11-05.1",
- "updated": "2026-11-05T01:44:22Z",
+ "version": "2026-11-06.3",
+ "updated": "2026-11-06T19:33:08Z",
  "season": "Year 8 Season 3 – Red Horizon",
  "items": [
-  {
-   "id": "y8s3-red-moon-unleashed",
-   "kind": "event",
-   "start": "2026-10-15T08:00:00Z",
-   "end": "2026-11-03T08:00:00Z",
-   "url": "https://www.ubisoft.com/en-gb/game/the-division/the-division-2/news-updates/7uzKuy4iB0MtOJfsXAr3TO/tuy8s32-red-moon-unleashed-creator-collaboration-escalation-updates-more",
-   "source": "Ubisoft",
-   "title": {
-    "en": "Red Moon Unleashed",
-    "tr": "Kızıl Ay Serbest",
-    "de": "Red Moon Unleashed",
-    "fr": "Red Moon Unleashed",
-    "es": "Red Moon Unleashed",
-    "it": "Red Moon Unleashed",
-    "pt": "Red Moon Unleashed",
-    "pl": "Red Moon Unleashed",
-    "ru": "Red Moon Unleashed",
-    "nl": "Red Moon Unleashed"
-   },
-   "text": {
-    "en": "Seasonal event: Lunatic enemies, Moon Cultists, Revenant Bounties, Event Keys and event caches. Log in during the event to get the Bound Slasher Mask. Unused Event Keys are removed when it ends.",
-    "tr": "Sezon etkinliği: Lunatic düşmanlar, Moon Cultist'ler, Revenant Bounty'leri, Event Key'ler ve etkinlik sandıkları. Etkinlik süresince giriş yapan herkes Bound Slasher Mask alır. Bitince kullanılmayan Event Key'ler silinir.",
-    "de": "Saison-Event: Lunatic-Gegner, Moon Cultists, Revenant-Kopfgelder, Event-Schlüssel und Event-Caches. Wer sich während des Events einloggt, erhält die Bound Slasher Mask. Unbenutzte Event-Schlüssel verfallen am Ende.",
-    "fr": "Événement saisonnier : ennemis Lunatic, Moon Cultists, primes Revenant, clés d'événement et caches. Connectez-vous pendant l'événement pour obtenir le Bound Slasher Mask. Les clés non utilisées disparaissent à la fin.",
-    "es": "Evento de temporada: enemigos Lunatic, Moon Cultists, recompensas Revenant, llaves y alijos del evento. Conéctate durante el evento para recibir la Bound Slasher Mask. Las llaves sin usar se eliminan al terminar.",
-    "it": "Evento stagionale: nemici Lunatic, Moon Cultist, taglie Revenant, chiavi e casse evento. Accedi durante l'evento per ottenere la Bound Slasher Mask. Le chiavi non usate vengono rimosse alla fine.",
-    "pt": "Evento sazonal: inimigos Lunatic, Moon Cultists, recompensas Revenant, chaves e caixas do evento. Entre durante o evento para ganhar a Bound Slasher Mask. Chaves não usadas são removidas ao final.",
-    "pl": "Wydarzenie sezonowe: wrogowie Lunatic, Moon Cultists, zlecenia Revenant, klucze i skrzynie wydarzenia. Zaloguj się w trakcie, aby dostać Bound Slasher Mask. Niewykorzystane klucze znikają po zakończeniu.",
-    "ru": "Сезонное событие: враги Lunatic, Moon Cultists, награды Revenant, ключи и тайники события. Войдите в игру во время события, чтобы получить Bound Slasher Mask. Неиспользованные ключи удаляются в конце.",
-    "nl": "Seizoensevent: Lunatic-vijanden, Moon Cultists, Revenant-premies, eventsleutels en eventcaches. Log in tijdens het event voor het Bound Slasher Mask. Ongebruikte sleutels verdwijnen aan het einde."
-   }
-  },
-  {
-   "id": "y8s3-red-moon-rising",
-   "kind": "event",
-   "start": "2026-09-24T08:00:00Z",
-   "end": "2026-11-03T08:00:00Z",
-   "url": "https://www.ubisoft.com/en-gb/game/the-division/the-division-2/news-updates/3XY3PhLzRfbBPZ8cedURYO/tuy8s31-red-moon-rising-pvp-updates-rage-harvest",
-   "source": "Ubisoft",
-   "title": {
-    "en": "Red Moon Rising",
-    "tr": "Red Moon Rising",
-    "de": "Red Moon Rising",
-    "fr": "Red Moon Rising",
-    "es": "Red Moon Rising",
-    "it": "Red Moon Rising",
-    "pt": "Red Moon Rising",
-    "ru": "Red Moon Rising",
-    "pl": "Red Moon Rising",
-    "nl": "Red Moon Rising"
-   },
-   "text": {
-    "en": "PvE Dark Zone event ending on November 3: Black Tusk holds the area and time inside builds Red Moon Stacks with buffs and drawbacks. Its loot pools include Exotics, DZ Named items and Prototype gear, with the new Exotics Vertigo and Sarru.",
-    "tr": "3 Kasım'da biten PvE Dark Zone etkinliği: Bölgeyi Black Tusk tutuyor, içeride kaldıkça hem güçlendirme hem ceza getiren Red Moon Stack'ler birikiyor. Ganimette Exotic, DZ Named ve Prototype eşyalar var; yeni Exotic'ler Vertigo ve Sarru.",
-    "de": "PvE-Dark-Zone-Event bis zum 3. November: Black Tusk hält das Gebiet, und mit der Zeit baust du Red Moon Stacks mit Boni und Nachteilen auf. Die Beute umfasst Exotics, DZ-Named-Gegenstände und Prototype-Ausrüstung, darunter die neuen Exotics Vertigo und Sarru.",
-    "fr": "Événement Dark Zone PvE jusqu'au 3 novembre : Black Tusk tient la zone et rester à l'intérieur accumule des Red Moon Stacks, entre bonus et malus. Le butin compte des Exotics, des objets DZ Named et du matériel Prototype, dont les nouveaux Exotics Vertigo et Sarru.",
-    "es": "Evento PvE de la Dark Zone hasta el 3 de noviembre: Black Tusk controla la zona y permanecer dentro acumula Red Moon Stacks con ventajas y penalizaciones. El botín incluye Exotics, objetos DZ Named y equipo Prototype, con los nuevos Exotics Vertigo y Sarru.",
-    "it": "Evento PvE della Dark Zone fino al 3 novembre: Black Tusk controlla l'area e restare dentro accumula Red Moon Stacks con bonus e penalità. Il bottino comprende Exotics, oggetti DZ Named ed equipaggiamento Prototype, con i nuovi Exotics Vertigo e Sarru.",
-    "pt": "Evento PvE da Dark Zone até 3 de novembro: a Black Tusk controla a área e ficar lá dentro acumula Red Moon Stacks com bônus e penalidades. O saque inclui Exotics, itens DZ Named e equipamento Prototype, com os novos Exotics Vertigo e Sarru.",
-    "ru": "PvE-событие в Dark Zone до 3 ноября: зону держит Black Tusk, а со временем внутри копятся Red Moon Stacks с бонусами и штрафами. В добыче — Exotics, предметы DZ Named и снаряжение Prototype, включая новые Exotics Vertigo и Sarru.",
-    "pl": "Wydarzenie PvE w Dark Zone do 3 listopada: strefę trzyma Black Tusk, a pobyt w niej buduje Red Moon Stacks z premiami i karami. W łupach są Exotics, przedmioty DZ Named i sprzęt Prototype, w tym nowe Exotics Vertigo i Sarru.",
-    "nl": "PvE Dark Zone-evenement tot 3 november: Black Tusk houdt het gebied bezet en binnen blijven bouwt Red Moon Stacks op met voor- en nadelen. De buit bevat Exotics, DZ Named-items en Prototype-uitrusting, met de nieuwe Exotics Vertigo en Sarru."
-   }
-  },
-  {
-   "id": "y8s3-creator-collab",
-   "kind": "event",
-   "start": "2026-10-15T08:00:00Z",
-   "end": "2026-11-03T08:00:00Z",
-   "url": "https://www.ubisoft.com/en-gb/game/the-division/the-division-2/news-updates/7uzKuy4iB0MtOJfsXAr3TO/tuy8s32-red-moon-unleashed-creator-collaboration-escalation-updates-more",
-   "source": "Ubisoft",
-   "title": {
-    "en": "Creator Collaboration: PurePrime, SOLIDFPS, Widdz",
-    "tr": "İçerik üreticisi iş birliği: PurePrime, SOLIDFPS, Widdz",
-    "de": "Creator-Kollaboration: PurePrime, SOLIDFPS, Widdz",
-    "fr": "Collaboration créateurs : PurePrime, SOLIDFPS, Widdz",
-    "es": "Colaboración con creadores: PurePrime, SOLIDFPS, Widdz",
-    "it": "Collaborazione creator: PurePrime, SOLIDFPS, Widdz",
-    "pt": "Colaboração com criadores: PurePrime, SOLIDFPS, Widdz",
-    "pl": "Współpraca z twórcami: PurePrime, SOLIDFPS, Widdz",
-    "ru": "Коллаборация с авторами: PurePrime, SOLIDFPS, Widdz",
-    "nl": "Creator-samenwerking: PurePrime, SOLIDFPS, Widdz"
-   },
-   "text": {
-    "en": "Six-project chains per creator; one new project unlocks every day.",
-    "tr": "Her üretici için altı projelik zincir; her gün yeni bir proje açılır.",
-    "de": "Sechsteilige Projektketten pro Creator; jeden Tag wird ein neues Projekt freigeschaltet.",
-    "fr": "Chaînes de six projets par créateur ; un nouveau projet chaque jour.",
-    "es": "Cadenas de seis proyectos por creador; cada día se desbloquea uno nuevo.",
-    "it": "Catene di sei progetti per creator; ogni giorno se ne sblocca uno nuovo.",
-    "pt": "Cadeias de seis projetos por criador; um novo projeto libera a cada dia.",
-    "pl": "Łańcuchy sześciu projektów na twórcę; codziennie odblokowuje się nowy.",
-    "ru": "Цепочки из шести проектов для каждого автора; каждый день открывается новый.",
-    "nl": "Ketens van zes projecten per creator; elke dag komt er een nieuw project bij."
-   }
-  },
-  {
-   "id": "y8s3-vanguard-overdrive",
-   "kind": "event",
-   "start": "2026-10-27T08:00:00Z",
-   "end": "2026-11-03T08:00:00Z",
-   "url": "https://www.ubisoft.com/en-gb/game/the-division/the-division-2/news-updates/7uzKuy4iB0MtOJfsXAr3TO/tuy8s32-red-moon-unleashed-creator-collaboration-escalation-updates-more",
-   "source": "Ubisoft",
-   "title": {
-    "en": "Vanguard Overdrive",
-    "tr": "Vanguard Overdrive",
-    "de": "Vanguard Overdrive",
-    "fr": "Vanguard Overdrive",
-    "es": "Vanguard Overdrive",
-    "it": "Vanguard Overdrive",
-    "pt": "Vanguard Overdrive",
-    "pl": "Vanguard Overdrive",
-    "ru": "Vanguard Overdrive",
-    "nl": "Vanguard Overdrive"
-   },
-   "text": {
-    "en": "Global bonuses to reload speed, weapon swap, hazard protection, movement and armor.",
-    "tr": "Şarjör değiştirme, silah değiştirme, tehlike koruması, hareket ve zırhta genel bonuslar.",
-    "de": "Globale Boni auf Nachladen, Waffenwechsel, Gefahrenschutz, Bewegung und Panzerung.",
-    "fr": "Bonus globaux au rechargement, changement d'arme, protection contre les dangers, mouvement et armure.",
-    "es": "Bonificaciones globales a recarga, cambio de arma, protección contra peligros, movimiento y blindaje.",
-    "it": "Bonus globali a ricarica, cambio arma, protezione dai pericoli, movimento e armatura.",
-    "pt": "Bônus globais de recarga, troca de arma, proteção contra perigos, movimento e blindagem.",
-    "pl": "Globalne premie do przeładowania, zmiany broni, ochrony przed zagrożeniami, ruchu i pancerza.",
-    "ru": "Глобальные бонусы к перезарядке, смене оружия, защите от угроз, передвижению и броне.",
-    "nl": "Wereldwijde bonussen op herladen, wapenwissel, gevarenbescherming, beweging en pantser."
-   }
-  },
-  {
-   "id": "y8s3-3-maintenance",
-   "kind": "maintenance",
-   "start": "2026-11-03T08:00:00Z",
-   "end": "2026-11-03T15:30:00Z",
-   "url": "https://x.com/TheDivisionGame/status/2117291904853221819",
-   "source": "Ubisoft (The Division on X)",
-   "title": {
-    "en": "Maintenance: Title Update Y8S3.3",
-    "tr": "Bakım: Title Update Y8S3.3",
-    "de": "Wartung: Title Update Y8S3.3",
-    "fr": "Maintenance : Title Update Y8S3.3",
-    "es": "Mantenimiento: Title Update Y8S3.3",
-    "it": "Manutenzione: Title Update Y8S3.3",
-    "pt": "Manutenção: Title Update Y8S3.3",
-    "ru": "Техработы: Title Update Y8S3.3",
-    "pl": "Przerwa techniczna: Title Update Y8S3.3",
-    "nl": "Onderhoud: Title Update Y8S3.3"
-   },
-   "text": {
-    "en": "Servers went offline on Nov 3 at 08:00 UTC to install Title Update Y8S3.3 and Echoes of Central Park. The 6-hour estimate was extended by about 1.5 hours; maintenance ended around 15:30 UTC.",
-    "tr": "Sunucular 3 Kasım 08:00 UTC'de (TSİ 11:00) Title Update Y8S3.3 ve Echoes of Central Park için kapandı. Tahmini 6 saatlik süre yaklaşık 1,5 saat uzatıldı; bakım 15:30 UTC civarında bitti.",
-    "de": "Die Server gingen am 3. Nov. um 08:00 UTC für Title Update Y8S3.3 und Echoes of Central Park offline. Die geschätzten 6 Stunden wurden um rund 1,5 Stunden verlängert; die Wartung endete gegen 15:30 UTC.",
-    "fr": "Les serveurs ont été coupés le 3 nov. à 08:00 UTC pour installer Title Update Y8S3.3 et Echoes of Central Park. Les 6 heures prévues ont été prolongées d'environ 1 h 30 ; fin vers 15:30 UTC.",
-    "es": "Los servidores se desconectaron el 3 de nov. a las 08:00 UTC para instalar Title Update Y8S3.3 y Echoes of Central Park. Las 6 horas previstas se ampliaron cerca de 1,5 horas; acabó hacia las 15:30 UTC.",
-    "it": "I server sono andati offline il 3 nov. alle 08:00 UTC per installare Title Update Y8S3.3 ed Echoes of Central Park. Le 6 ore previste sono state estese di circa 1,5 ore; fine verso le 15:30 UTC.",
-    "pt": "Os servidores saíram do ar em 3 de nov. às 08:00 UTC para instalar Title Update Y8S3.3 e Echoes of Central Park. As 6 horas previstas foram estendidas em cerca de 1,5 hora; fim por volta das 15:30 UTC.",
-    "ru": "Серверы отключились 3 нояб. в 08:00 UTC для установки Title Update Y8S3.3 и Echoes of Central Park. Расчётные 6 часов продлили примерно на 1,5 часа; работы завершились около 15:30 UTC.",
-    "pl": "Serwery wyłączono 3 lis. o 08:00 UTC, by zainstalować Title Update Y8S3.3 i Echoes of Central Park. Szacowane 6 godzin wydłużono o około 1,5 godziny; koniec około 15:30 UTC.",
-    "nl": "De servers gingen op 3 nov. om 08:00 UTC offline voor Title Update Y8S3.3 en Echoes of Central Park. De geschatte 6 uur werd met zo'n 1,5 uur verlengd; einde rond 15:30 UTC."
-   }
-  },
   {
    "id": "y8s3-3-pc-performance-update",
    "kind": "patch",
@@ -255,6 +95,37 @@
     "ru": "Conflict: новая статистика в таблице счёта, новые Combat Marks, один Honor Mark за матч с XP и CCC и баланс PvP. Stretch Goals приостановлены на этот сезон для переработки. Исправления для Steel & Sons ACR, Protected Reload и пропавшего чертежа Harrier Pride.",
     "pl": "Conflict: nowe statystyki na tablicy wyników, nowe Combat Marks, jeden Honor Mark na mecz z XP i CCC oraz zmiany balansu PvP. Stretch Goals wstrzymane na ten sezon z powodu przebudowy. Poprawki Steel & Sons ACR, Protected Reload i brakującego planu Harrier Pride.",
     "nl": "Conflict: nieuwe scorebordstatistieken, nieuwe Combat Marks, één Honor Mark per match met XP en CCC, en PvP-balans. Stretch Goals pauzeren dit seizoen voor een herontwerp. Fixes voor Steel & Sons ACR, Protected Reload en de ontbrekende Harrier Pride-blauwdruk."
+   }
+  },
+  {
+   "id": "echoes-apex-protocol-gear-set",
+   "kind": "dlc",
+   "date": "2026-11-04T16:41:00Z",
+   "url": "https://www.destructoid.com/how-to-get-apex-protocol-gear-set-in-the-division-2/",
+   "source": "Destructoid",
+   "title": {
+    "en": "How to get the Apex Protocol gear set",
+    "tr": "Apex Protocol seti nasıl alınır",
+    "de": "So bekommst du das Gear Set Apex Protocol",
+    "fr": "Comment obtenir l'ensemble Apex Protocol",
+    "es": "Cómo conseguir el conjunto Apex Protocol",
+    "it": "Come ottenere il set Apex Protocol",
+    "pt": "Como obter o conjunto Apex Protocol",
+    "ru": "Как получить комплект Apex Protocol",
+    "pl": "Jak zdobyć zestaw Apex Protocol",
+    "nl": "Zo krijg je de gearset Apex Protocol"
+   },
+   "text": {
+    "en": "Destructoid names the DLC's new gear set: its pieces drop only from the five Guardian bosses in Central Park. 2 pieces give +10% Weapon Damage and +10% Skill Damage; 3 pieces +15% Weapon Handling and +15% Hazard Protection; 4 pieces Apex Engine. Ubisoft has not published these details.",
+    "tr": "Destructoid, DLC'nin yeni setinin adını veriyor: parçaları yalnızca Central Park'taki beş Guardian boss'tan düşüyor. 2 parça +%10 silah ve +%10 skill hasarı, 3 parça +%15 silah kontrolü ve +%15 tehlike koruması, 4 parça Apex Engine verir. Ubisoft bu ayrıntıları yayımlamadı.",
+    "de": "Destructoid nennt das neue Gear Set des DLC: Teile droppen nur von den fünf Guardian-Bossen im Central Park. 2 Teile: +10 % Waffen- und +10 % Skill-Schaden; 3 Teile: +15 % Waffenhandling und +15 % Gefahrenschutz; 4 Teile: Apex Engine. Von Ubisoft nicht veröffentlicht.",
+    "fr": "Destructoid nomme le nouvel ensemble du DLC : ses pièces viennent uniquement des cinq boss Guardian de Central Park. 2 pièces : +10 % de dégâts d'arme et de compétence ; 3 pièces : +15 % de maniement et de protection contre les dangers ; 4 pièces : Apex Engine. Détails non publiés par Ubisoft.",
+    "es": "Destructoid nombra el nuevo conjunto del DLC: sus piezas solo caen de los cinco jefes Guardian de Central Park. 2 piezas: +10 % de daño de arma y de habilidad; 3 piezas: +15 % de manejo y de protección contra peligros; 4 piezas: Apex Engine. Ubisoft no ha publicado estos datos.",
+    "it": "Destructoid indica il nuovo set del DLC: i pezzi cadono solo dai cinque boss Guardian di Central Park. 2 pezzi: +10% danni dell'arma e da abilità; 3 pezzi: +15% maneggevolezza e protezione dai pericoli; 4 pezzi: Apex Engine. Dettagli non pubblicati da Ubisoft.",
+    "pt": "A Destructoid dá o nome do novo conjunto do DLC: as peças caem só dos cinco chefes Guardian do Central Park. 2 peças: +10% de dano de arma e de habilidade; 3 peças: +15% de manuseio e de proteção contra perigos; 4 peças: Apex Engine. A Ubisoft não publicou esses detalhes.",
+    "ru": "Destructoid называет новый комплект DLC: его части выпадают только с пяти боссов Guardian в Central Park. 2 части: +10% урона оружия и умений; 3 части: +15% управления оружием и защиты от опасностей; 4 части: Apex Engine. Ubisoft эти данные не публиковала.",
+    "pl": "Destructoid podaje nazwę nowego zestawu z DLC: części wypadają tylko z pięciu bossów Guardian w Central Park. 2 części: +10% obrażeń broni i umiejętności; 3 części: +15% obsługi broni i ochrony przed zagrożeniami; 4 części: Apex Engine. Ubisoft tego nie opublikował.",
+    "nl": "Destructoid noemt de naam van de nieuwe DLC-gearset: onderdelen vallen alleen bij de vijf Guardian-bazen in Central Park. 2 stuks: +10% wapen- en skillschade; 3 stuks: +15% wapenhantering en gevarenbescherming; 4 stuks: Apex Engine. Niet gepubliceerd door Ubisoft."
    }
   },
   {

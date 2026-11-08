@@ -20,7 +20,7 @@ from collections import Counter
 from datetime import datetime, timedelta, timezone
 from difflib import SequenceMatcher, get_close_matches
 from pathlib import Path
-from tkinter import ttk, filedialog, messagebox
+from tkinter import ttk, filedialog, messagebox, simpledialog
 from td2app.ui import splash, ui_theme, ui_hud, ui_art, view3d, fx, bgvideo
 
 if "--dml-probe" in sys.argv:          # ekran kartı (DirectML) denemesi: ayrı süreçte, programın geri kalanı yüklenmeden
@@ -107,6 +107,8 @@ import gamedata
 import engine
 import display
 import ocr_backend
+import ocr_lab
+import review_queue
 import features
 import stash
 import intelligence
@@ -141,11 +143,14 @@ import itempolicy
 import performance
 import workqueue
 import game_assistant
+import game_runtime
 import diagnostics_center
+import target_planner
+import decision_center
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.1.5.31"
+APP_VERSION = "9.1.5.34"
 # "Bu oturumda ne kazandın?" özeti için kaba tahmin: bir eşyayı elle inceleyip
 # build'e göre karar vermenin (istatistikleri okuma + karşılaştırma) ortalama
 # süresi, saniye. Gerçek bir ölçüm değil — yalnızca arayüzde "tahmini" etiketiyle
@@ -165,6 +170,7 @@ BUNDLE = Path(getattr(sys, "_MEIPASS", BASE))
 ART_DIR = (BASE / "art") if (BASE / "art").exists() else (BUNDLE / "art")
 CFG_PATH, LOG_PATH, DEBUG_PATH, PROG_PATH = (BASE / n for n in ("builds.json", "loot_log.csv", "last_crop.png", "progress.json"))
 STASH_PATH = BASE / "stash.json"
+TARGETS_PATH = BASE / "targets.json"
 VENDOR_CACHE = BASE / "vendor_cache.json"
 DROPQ_PATH = BASE / "drop_queue.json"
 ACCOUNT_PATH = BASE / "account.dat"
@@ -190,6 +196,7 @@ def _test_browser(url):
 REPORTS_DIR = BASE / "reports"
 ISSUES_URL = "https://github.com/FEDERALTURK/td2-loot-advisor/issues/new"
 APPLOG_DIR = BASE / "logs"
+OCR_REVIEW_PATH = APPLOG_DIR / "ocr_review_queue.jsonl"
 APPLOG_PATH = APPLOG_DIR / "app.log"
 LOG_HEADER = ["time", "item", "verdict", "best_build", "score", "slot", "rarity"]
 ALL_SLOTS = ["Mask", "Backpack", "Chest", "Gloves", "Holster", "Kneepads", "Weapon", "Sidearm"]
@@ -1649,6 +1656,7 @@ class App:
             except Exception: continue
 
         self._perf_policy = performance.get_policy(stg)
+        self._runtime_plan = game_runtime.plan(stg)
         self.root._td2_suspend_animations = False
         self.root._td2_animation_multiplier = 1.0
         self.root.title(f"{APP_NAME} v{APP_VERSION}")
@@ -1775,7 +1783,9 @@ class App:
         if getattr(self, "_closing", False): return
         try:
             hidden = self.root.state() != "normal"
-            foreground = bool(getattr(self, "game_on", False) and game_active())
+            focused = game_active()
+            self._runtime_plan = game_runtime.plan(self.cfg["settings"], game_focused=focused, app_hidden=hidden)
+            foreground = bool(getattr(self, "game_on", False) and focused)
             self._perf_policy = performance.get_policy(self.cfg["settings"], foreground, hidden)
             self.root._td2_suspend_animations = self._perf_policy.suspend_animations
             self.root._td2_animation_multiplier = self._perf_policy.ui_animation_multiplier
@@ -2241,13 +2251,15 @@ class App:
         revision = getattr(self, "_lt_revision", 0)
         try:
             while not stop.is_set():
+                runtime = game_runtime.plan(self.cfg["settings"])
                 try:
                     if revision != getattr(self, "_lt_revision", 0):
                         prev = last = None; stable = 0
                         revision = getattr(self, "_lt_revision", 0)
                     area = self.lt_area()
                     st = self.cfg["settings"]
-                    if area and not (st.get("only_game_active", True) and not game_active()):
+                    runtime = game_runtime.plan(st, game_focused=game_active())
+                    if area and runtime.passive_translation:
                         h = g.thumb(area)
                         stable = stable + 1 if prev is not None and dist(h, prev) < AUTO_STABLE else 0
                         prev = h
@@ -2260,7 +2272,7 @@ class App:
                             self._queue_translation(area, revision=revision)
                 except Exception as e:
                     log.debug("live translate loop: %s", e)
-                stop.wait(self._policy().translation_poll_s)
+                stop.wait(max(self._policy().translation_poll_s, runtime.wait_s))
         finally:
             g.release()
 
@@ -2402,7 +2414,11 @@ class App:
         size = int(st.get("tr_font", 15)); mode = force_mode or st.get("tr_mode", "subtitle")
         log.info("Translation overlay: mode=%s pairs=%d area=%sx%s", mode, len(pairs), area.get("width"), area.get("height"))
         if mode == "inplace":
-            return self._lt_show_inplace(pairs, area)
+            try:
+                return self._lt_show_inplace(pairs, area)
+            except Exception:
+                log.exception("In-place translation rendering failed")
+                return self._lt_panel_fallback(pairs)
         sty = self.lt_style()
         w = self._lt_win = tk.Toplevel(self.root); w.overrideredirect(True)
         w.attributes("-topmost", True, "-alpha", float(st.get("tr_alpha", 0.9)))
@@ -2450,14 +2466,24 @@ class App:
             # OCR kutuları oyun alanı dışında kaldıysa boş siyah pencere bırakma.
             ip.hide()
             self._lt_inplace = None
-            return self._lt_show(pairs, area, 0, force_mode="screen")
+            return self._lt_panel_fallback(pairs)
         self._lt_win = ip.show(items, area)
         if self._lt_win is None:
             # A renderer can discard all lines after font measurement.  Do
             # not leave an empty transparent Toplevel above the game.
+            ip.hide()
             self._lt_inplace = None
-            return self._lt_show(pairs, area, 0, force_mode="screen")
+            return self._lt_panel_fallback(pairs)
         self._lt_job = self.root.after(int(float(st.get("tr_hide", 10)) * 1000), self._lt_hide)
+
+    def _lt_panel_fallback(self, pairs):
+        """Keep translated text accessible without opening another overlay."""
+        self._lt_hide()
+        text = "\n\n".join(tr for _, tr, _ in pairs if tr and tr.strip())
+        panel = getattr(self, "lt_out", None)
+        if panel is not None:
+            panel.config(text=text, fg=PAL["fg"])
+        self._lt_status(t("lt.panel_fallback"), "warning")
 
     def _lt_overlay_window(self, w):
         # Opak native kutular click-through olur, fakat layered olmaz: bu
@@ -3718,8 +3744,11 @@ class App:
 
     def api_state(self):
         st = dict(self.comp_state)
+        runtime = getattr(self, "_runtime_plan", game_runtime.plan(self.cfg["settings"]))
         return {"app": APP_NAME, "version": APP_VERSION, "running": self.running, "translate": self.tr_state()["translate"],
                 "game": {"running": self.game_on, "state": self.game_state, "learned": self.screen.learned()},
+                "runtime": {"state": runtime.state, "passive_capture": runtime.passive_capture,
+                            "passive_translation": runtime.passive_translation},
                 "last": {k: st.get(k) for k in ("verdict", "verdict_label", "best", "item", "note", "time")} if st.get("verdict") else None,
                 "build": st.get("build"), "session": self._session_brief(), "tier": self.ent.tier}
 
@@ -5110,6 +5139,15 @@ class App:
         except Exception:
             log.debug("library learn failed", exc_info=True)
         verdict = itempolicy.protect_verdict(item, color_hints(card, lines, item, verdict))
+        # OCR confidence is a review signal only. The queue is local and never
+        # turns an uncertain result into a destructive action.
+        try:
+            confidence = float(item.get("confidence") or 0) if isinstance(item, dict) else 0
+            if (not valid_item(item)) or item.get("partial") or confidence < LOW_CONF_WARN:
+                review_queue.add(OCR_REVIEW_PATH, text, item, verdict,
+                                 "partial or low-confidence OCR")
+        except Exception:
+            log.debug("OCR review queue failed", exc_info=True)
         sig = signature(item)
         if timings is not None: timings.record("ocr_total", ocr_seconds * 1000)
         if auto:
@@ -5630,9 +5668,11 @@ class App:
         idle = 0                                          # art arda kart bulunamayan dünya okumaları
         while not stop.is_set():
             policy = self._policy()
+            runtime = game_runtime.plan(self.cfg["settings"])
             try:
                 region = self.scan_area()
-                if region and self.cfg["settings"].get("only_game_active", True) and not game_active():
+                runtime = game_runtime.plan(self.cfg["settings"], game_focused=game_active())
+                if region and not runtime.passive_capture:
                     prev = None; stable = 0                     # oyun önde değil: okuma yapma
                 elif region:
                     smart = self.cfg["settings"].get("smart_scan", True)
@@ -5664,7 +5704,7 @@ class App:
                 msg = f"{type(e).__name__}: {e}"
                 if msg != self.last_err:
                     self.last_err = msg; self.results.put(("err", msg))
-            stop.wait(policy.scan_poll_s)
+            stop.wait(max(policy.scan_poll_s, runtime.wait_s))
 
     def poll(self):
         # Arka plan işlerinden çok sayıda sonuç aynı anda gelirse Tk ana
@@ -8081,6 +8121,7 @@ class App:
             x = timings.get(name, {})
             return f"{x.get('median_ms', 0):.0f} ms medyan / {x.get('p95_ms', 0):.0f} ms p95" if x else "veri yok"
         st = self.cfg.get("settings", {})
+        runtime = getattr(self, "_runtime_plan", game_runtime.plan(st))
         trans = self._translation_jobs.stats() if getattr(self, "_translation_jobs", None) else {}
         assistant = self._assistant_jobs.stats() if getattr(self, "_assistant_jobs", None) else {}
         try: game_found = bool(display.game_window())
@@ -8100,6 +8141,9 @@ class App:
             "ocr": [f"Motor: {getattr(OCR, 'name', 'yok')}", f"Son OCR: {stat('ocr_total')}", f"Son tarama: {stat('scan_total')}", f"OCR geçişi: {getattr(self, 'auto_passes', lambda: '?')()}", f"Durum: {'çalışıyor' if getattr(self, 'running', False) else 'durduruldu'}"],
             "ceviri": [f"Çeviri kuyruğu: active={trans.get('active', 0)} pending={trans.get('pending', 0)}", f"Çeviri ölçümü: {stat('translate_model')}", f"Canlı çeviri: {'açık' if st.get('tr_on') else 'kapalı'}"],
             "asistan": [f"Asistan kuyruğu: active={assistant.get('active', 0)} pending={assistant.get('pending', 0)}", f"AI sağlayıcı: {st.get('ai_provider', 'builtin')}"],
+            "oyun_yardimcisi": [f"Çalışma planı: {runtime.state}",
+                                 f"Pasif OCR taraması: {'açık' if runtime.passive_capture else 'beklemede'}",
+                                 f"Pasif canlı çeviri: {'açık' if runtime.passive_translation else 'beklemede'}"],
             "arayuz": [f"Tema: {st.get('ui_theme', 'isac')}", f"Animasyonlar: {'askıda' if getattr(self.root, '_td2_suspend_animations', False) else 'aktif'}", f"Fare izi overlay: {'aktif' if getattr(self, 'trail_fx', None) else 'kapalı/güvenli'}", f"Son hata: {self.last_err or 'yok'}"],
             "hatalar": [f"Kayıt sayısı: {len(getattr(self, '_diag_errors', []))}"] + [f"{x['time']}  {x['message']}" for x in getattr(self, '_diag_errors', [])[-10:]],
         }
@@ -8682,6 +8726,7 @@ class App:
         o3 = ttk.Frame(ob); o3.pack(fill="x", padx=8, pady=4)
         ttk.Button(o3, text=ui_theme.with_icon(t("ocr.calibrate"), "🎯"), command=self.auto_calibrate_ocr).pack(side="left")
         ttk.Button(o3, text=ui_theme.with_icon(t("ocr.preview"), "👁"), command=self.ocr_preview).pack(side="left", padx=8)
+        ttk.Button(o3, text="⚖ Motorları karşılaştır", command=self.ocr_lab_report).pack(side="left", padx=8)
         self.ocr_msg = ttk.Label(o3, text="", foreground=PAL["muted"]); self.ocr_msg.pack(side="left", padx=8)
         ttk.Label(ob, text=t("ocr.note_rapid") if OCR.name == "rapidocr" else t("ocr.note"), foreground=PAL["muted"],
                   wraplength=900, justify="left").pack(anchor="w", padx=12, pady=(0, 4))
@@ -8794,6 +8839,30 @@ class App:
         self.ocr_thr.set(th); self.ocr_scale_var.set(str(sc))
         self.ocr_msg.config(text=t("ocr.calib_done", thr=th, scale=sc, q=round(q, 1)))
         log.info("OCR auto-calibration: threshold=%s scale=%s quality=%.2f", th, sc, q)
+
+    def ocr_lab_report(self):
+        """Aynı son kartta kurulu OCR yollarını ölç; ağ veya oyun gerekmez."""
+        img = self._calib_image()
+        if img is None:
+            return messagebox.showinfo(APP_NAME, t("ocr.need_card"))
+        engines = {"rapidocr": lambda im: OCR.segments(im) if OCR and OCR.name == "rapidocr" else (_ for _ in ()).throw(RuntimeError("RapidOCR unavailable"))}
+        windows = self._winocr()
+        if windows.available:
+            engines["windows"] = windows.segments
+        try:
+            tess = ocr_backend.Engine("tesseract", tess_lang=self.cfg["settings"].get("ocr_lang", "eng"),
+                                      tess_config=ocr_config(self.cfg["settings"]), preprocess=gamedata.text_image)
+            engines["tesseract"] = tess.segments
+        except Exception as exc:
+            log.info("Tesseract lab unavailable: %s", exc)
+        report = ocr_lab.benchmark(img, engines)
+        out = APPLOG_DIR / "ocr_lab_latest.json"
+        APPLOG_DIR.mkdir(parents=True, exist_ok=True)
+        out.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+        lines = [f"{name}: " + (f"{data['elapsed_ms']} ms, güven {data['mean_confidence']:.2f}" if data.get("available") else "kullanılamıyor")
+                 for name, data in report["engines"].items()]
+        self.toast("OCR laboratuvarı: " + (report["winner"] or "uygun motor yok"))
+        messagebox.showinfo(APP_NAME, "\n".join(lines) + f"\n\nRapor: {out}")
 
     def ocr_preview(self):
         """Orijinal kart ↔ işlenmiş (siyah-beyaz) görüntü + OCR metni + tanınanlar; eşik kaydırıcısıyla canlı."""
@@ -9626,9 +9695,75 @@ class App:
         tools = ttk.Frame(parent); tools.pack(fill="x", padx=10, pady=6)
         ttk.Button(tools, text=t("command.search"), command=self._universal_search_window).pack(side="left")
         ttk.Button(tools, text=t("command.audit"), command=self._library_report_window).pack(side="left", padx=6)
+        ttk.Button(tools, text="🧭 Karar merkezi", command=self._decision_center_window).pack(side="left", padx=6)
+        target_box = ttk.LabelFrame(parent, text="🎯 Kişisel hedef ve farm planı")
+        target_box.pack(fill="x", padx=10, pady=(0, 6))
+        target_tools = ttk.Frame(target_box); target_tools.pack(fill="x", padx=6, pady=4)
+        ttk.Button(target_tools, text="＋ Hedef ekle", command=self._target_add).pack(side="left")
+        ttk.Button(target_tools, text="↻ Farm planını yenile", command=self.refresh_stash).pack(side="left", padx=6)
+        ttk.Label(target_tools, text="Yerel hedefler; eski/verisi belirsiz kaynaklar REVIEW olur.", foreground=PAL["muted"]).pack(side="left", padx=8)
+        self.target_tv = ttk.Treeview(target_box, columns=("name", "slot", "priority", "state"), show="headings", height=4)
+        for col, title, width in (("name", "Eşya", 230), ("slot", "Yuva", 120), ("priority", "Öncelik", 90), ("state", "Durum", 120)):
+            self.target_tv.heading(col, text=title); self.target_tv.column(col, width=width, anchor="w")
+        self.target_tv.pack(fill="x", padx=6, pady=(0, 5))
         self.command_txt = tk.Text(parent, bg=PAL["surface"], fg=PAL["fg"], relief="flat", wrap="word", font=(ui_theme.FONT, 11))
         self.command_txt.pack(fill="both", expand=True, padx=10, pady=10)
         ttk.Button(parent, text=t("command.refresh"), command=self.refresh_stash).pack(anchor="e", padx=10, pady=(0, 8))
+
+    def _target_add(self):
+        name = simpledialog.askstring(APP_NAME, "Eşya adı:", parent=self.root)
+        if not name or not name.strip():
+            return
+        slot = simpledialog.askstring(APP_NAME, "Yuva (ör. Weapon, Chest):", parent=self.root)
+        if not slot or not slot.strip():
+            return
+        attrs = simpledialog.askstring(APP_NAME, "Attribute adları (virgülle ayır; isteğe bağlı):", parent=self.root) or ""
+        current = target_planner.load_targets(TARGETS_PATH)
+        current.append(target_planner.normalize_target({"name": name.strip(), "slot": slot.strip(),
+                                                        "attributes": [x.strip() for x in attrs.split(",") if x.strip()]}))
+        target_planner.save_targets(TARGETS_PATH, current)
+        self._refresh_command(getattr(self, "stash", stash.Stash(STASH_PATH)).owned())
+
+    def _target_sources(self):
+        sources = []
+        week = self.vendor_week or {}
+        fetched = week.get("fetched", 0)
+        for item in week.get("items", []) or []:
+            row = dict(item) if isinstance(item, dict) else {}
+            row.update({"source": "vendor", "updated_at": fetched, "cadence": "weekly"})
+            sources.append(row)
+        for event, rows in (week.get("target_loot") or {}).items():
+            for row in rows or []:
+                for day in row.get("target_loot_by_day", []) or []:
+                    for name in day.get("target_loot", []) or []:
+                        sources.append({"source": "target_loot", "name": name, "slot": "", "event": event,
+                                        "updated_at": fetched, "cadence": "dated"})
+        for category, rows in (self.tasks.get("items", {}) or {}).items():
+            for task in rows or []:
+                if not isinstance(task, dict):
+                    continue
+                sources.append({"source": "task", "name": task.get("item") or task.get("name") or task.get("en") or task.get("title"),
+                                "slot": task.get("slot") or "", "attributes": task.get("attributes"),
+                                "updated_at": task.get("updated_at") or fetched, "cadence": task.get("period") or category})
+        return sources
+
+    def _refresh_targets(self, items=None):
+        if not getattr(self, "target_tv", None):
+            return
+        targets = target_planner.load_targets(TARGETS_PATH)
+        sources = self._target_sources()
+        matches = target_planner.match_targets(targets, sources)
+        self.target_tv.delete(*self.target_tv.get_children())
+        for target in targets:
+            rows = [x for x in matches if x["target"]["name_key"] == target["name_key"]]
+            state = "NO_MATCH" if not rows else rows[0]["status"]
+            self.target_tv.insert("", "end", values=(target["name"], target["slot"], target["priority"], state))
+        if getattr(self, "command_txt", None) and targets:
+            self.command_txt.insert("end", "\nKİŞİSEL HEDEF PLANI\n")
+            for row in matches:
+                name = row["target"]["name"]
+                detail = row["source"] or "kaynak bulunamadı"
+                self.command_txt.insert("end", f"• {name}: {row['status']} · {detail}\n")
 
     def _universal_search_window(self):
         w = tk.Toplevel(self.root); w.title(t("command.search")); w.geometry("760x500")
@@ -9656,6 +9791,17 @@ class App:
             for key in item.get('attrs', {}):
                 if key not in known: rows.append(t("command.unknown_attr", name=item.get('name'), key=key))
         messagebox.showinfo(t("command.audit"), '\n'.join(rows) or t("command.audit_ok"), parent=self.root)
+
+    def _decision_center_window(self):
+        if not self.last_scan:
+            return messagebox.showinfo(APP_NAME, "Önce bir eşya tarayın; son taranan eşya burada karşılaştırılır.", parent=self.root)
+        item, _results, _signature = self.last_scan
+        rows = decision_center.compare_item_to_targets(item, target_planner.load_targets(TARGETS_PATH))
+        summary = decision_center.farm_summary(rows)
+        text = [f"Eşya: {item.get('name', '?')}", f"Özet: {summary}", ""]
+        for row in rows:
+            text.append(f"• {row['target']['name']}: {row['recommendation']} · {row['status']} · {', '.join(row['reasons']) or 'eşleşme yok'}")
+        messagebox.showinfo("Karar merkezi", "\n".join(text), parent=self.root)
 
     def _refresh_command(self, items):
         if not getattr(self, "command_txt", None): return
@@ -9685,6 +9831,7 @@ class App:
                 if not row['routes']:
                     self.command_txt.insert("end", "    " + t("command.no_route") + "\n")
             self.command_txt.insert("end", "\n" + t("command.summary", protected=snap['protected'], duplicates=snap['duplicates'], library=len(snap['library'])) + "\n")
+        self._refresh_targets(items)
         self.command_txt.config(state="disabled")
 
     def _stash_rec_toggle(self):

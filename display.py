@@ -274,6 +274,23 @@ def _read_cfg(path):
     except OSError: return {}
 
 
+def hdr_enabled(value):
+    """HDR ayarını yalnızca doğrulanabilir açık/kapalı değerlerden çıkar.
+
+    Eski veya elle değiştirilmiş oyun ayar dosyalarında boş/bilinmeyen bir
+    değer görülebilir. Böyle bir durumda OCR sorununu HDR'ye bağlayıp yanlış
+    "HDR açık" uyarısı vermek yerine ``None`` döndürürüz.
+    """
+    if value is None:
+        return None
+    token = str(value).strip().lower()
+    if token in ("on", "1", "true", "enabled", "yes"):
+        return True
+    if token in ("off", "0", "false", "disabled", "no"):
+        return False
+    return None
+
+
 def read_game_settings(folder=None):
     """{'file', 'width', 'height', 'refresh', 'display_mode', 'hdr', 'language', 'view_scale', 'enlarge_ui', 'dx12'} ya da None.
     The Division 2: state.cfg (çözünürlük, pencere modu, HDR, dil), graphic settings.cfg (görüntü ölçeği),
@@ -292,11 +309,9 @@ def read_game_settings(folder=None):
         try: out["refresh"] = round(act["refresh-rate-numerator"] / max(1, act["refresh-rate-denominator"]))
         except (KeyError, TypeError): pass
         out["display_mode"] = ("Borderless" if act.get("fullscreen") else "Windowed") if windowed else "Fullscreen"
-        hdr = g.get("hdr")
-        # Ubisoft writes this as a quoted string (usually "Off").  Trim
-        # whitespace so a hand-edited/older state.cfg cannot become a false
-        # HDR-positive result.
-        out["hdr"] = None if hdr is None else str(hdr).strip().lower() not in ("off", "0", "false", "disabled", "no")
+        # Ubisoft genelde "Off" metnini yazar. Bilinmeyen bir değer HDR açık
+        # sayılmaz; yalnız kesin olumlu değerler uyarı üretmelidir.
+        out["hdr"] = hdr_enabled(g.get("hdr"))
         out["dx12"] = g.get("dx12")
         loc = st.get("localization", {})
         if isinstance(loc, dict) and "mainLanguage" in loc: out["language"] = loc["mainLanguage"]
@@ -329,7 +344,7 @@ def read_game_settings(folder=None):
     o = {k.lower(): v for k, v in out["options"].items()}
     out["display_mode"] = o.get("displaymode") or o.get("windowmode") or ("Windowed" if o.get("windowed") == "true" else None)
     hdr = next((v for k, v in o.items() if "hdr" in k), None)
-    out["hdr"] = None if hdr is None else str(hdr).strip().lower() in ("1", "true", "on", "enabled", "yes")
+    out["hdr"] = hdr_enabled(hdr)
     return out
 
 

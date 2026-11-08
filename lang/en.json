@@ -1,4 +1,5 @@
 {
+  "lt.panel_fallback": "Overlay unavailable. Translation is available in the panel and history.",
 "command.unknown_attr": "{name}: unknown attribute {key}",
 "command.audit_ok": "No unknown attribute keys found in builds or stash records.",
 "command.backup_ok": "Stash and builds backed up",

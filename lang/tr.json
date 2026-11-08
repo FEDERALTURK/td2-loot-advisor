@@ -1,4 +1,5 @@
 {
+  "lt.panel_fallback": "Overlay gösterilemedi. Çeviri panelde ve geçmişte mevcut.",
 "command.unknown_attr": "{name}: bilinmeyen attribute {key}",
 "command.audit_ok": "Build ve sandık kayıtlarında bilinmeyen attribute anahtarı bulunmadı.",
 "command.backup_ok": "Sandık ve build yedeği kaydedildi",

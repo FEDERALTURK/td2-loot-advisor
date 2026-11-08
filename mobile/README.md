@@ -2,12 +2,13 @@
 
 Flutter companion app for the TD2 Loot Advisor Windows application.
 
-## Beta 0.1.2
+## Beta 0.1.5 (Android package: 0.1.5+7)
 
 - Current game tasks, news and meta-build feeds with bundled offline data.
 - Local task progress and user-created build storage.
 - Android QR pairing with the Windows app's existing read-only Phone Companion server on the same private Wi-Fi.
-- No remote desktop commands, game memory access, mobile OCR, account system or cloud sync.
+- Optional cloud pairing and build sync; notification permission remains opt-in.
+- No game memory access, mobile OCR or remote game control.
 
 See [`../docs/mobile_companion_connection_tr.md`](../docs/mobile_companion_connection_tr.md) for the Turkish pairing and network guide.
 
@@ -18,7 +19,7 @@ Requires Flutter/Dart, a supported JDK and Android SDK for Android APK builds. i
 ```sh
 flutter pub get
 flutter analyze
-flutter build apk --release --build-name=0.1.2 --build-number=3
+flutter build apk --release --build-name=0.1.5 --build-number=7
 ```
 
 The Android APK output is `build/app/outputs/flutter-apk/app-release.apk`.

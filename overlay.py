@@ -207,6 +207,7 @@ class InPlace:
             # glyph inside narrow source rectangles (dark box, no text).
             ww, hh = max(24, int(it["w"])), max(14, int(it["h"]))
             w = tk.Toplevel(self.root)
+            self._wins.append(w)
             w.overrideredirect(True)
             w.attributes("-topmost", True)
             # app._lt_overlay_window uses this to keep the box click-through
@@ -229,7 +230,6 @@ class InPlace:
             w.update_idletasks()
             if self.on_window:
                 self.on_window(w)
-            self._wins.append(w)
         self.win = self._wins[0] if self._wins else None
         return self.win
 

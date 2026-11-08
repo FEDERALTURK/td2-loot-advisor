@@ -6,7 +6,7 @@ Bu belge Google Play üretim yayını için yerel AAB hazırlama adımlarını i
 
 - Uygulama kimliği: `com.federalturk.td2companion`
 - Android hedefi: API 36
-- Companion sürümü: `0.1.2+3`
+- Companion sürümü: `0.1.4+5`
 - Play Console'a APK değil Android App Bundle (`.aab`) yüklenir.
 - GitHub beta APK'ları debug anahtarıyla imzalanır. Bu imzalı APK'lar Play Console'a üretim sürümü olarak yüklenmemelidir.
 - Play App Signing'e katılın ve yalnızca yükleme anahtarını (upload key) yerel makinede saklayın. Keystore ve `key.properties` dosyasını Git'e, issue'lara veya mesajlara eklemeyin.
@@ -28,7 +28,7 @@ Bu belge Google Play üretim yayını için yerel AAB hazırlama adımlarını i
    cd mobile
    flutter pub get
    flutter analyze
-   flutter build appbundle --release --build-name=0.1.2 --build-number=3 --android-project-arg=playRelease=true
+   flutter build appbundle --release --build-name=0.1.4 --build-number=5 --android-project-arg=playRelease=true
    ```
 
 Çıktı: `mobile/build/app/outputs/bundle/release/app-release.aab`.
@@ -40,6 +40,7 @@ Bu belge Google Play üretim yayını için yerel AAB hazırlama adımlarını i
 - Play App Signing'i etkinleştirin ve ilk AAB'yi internal testing'e yükleyin.
 - Geliştirici kimliğinin doğrulandığını ve `com.federalturk.td2companion` paket adının hesaba kayıtlı olduğunu kontrol edin.
 - Gizlilik politikası URL'sini mağaza kaydına ekleyin. Uygulamanın Hakkında penceresindeki bağlantı aynı dosyaya gider.
+- Data safety formunda yerel QR bağlantısı, isteğe bağlı bulut eşleştirmesi/build senkronu ve yalnız kullanıcı etkinleştirirse işlenen bildirim belirteci doğru şekilde beyan edilmelidir. Uygulamanın gerçek davranışı ile `PRIVACY_POLICY_TR.md` arasındaki uyumu yüklemeden önce tekrar doğrulayın.
 - Data safety, reklam, hedef kitle ve içerik derecelendirmesi formlarını uygulamanın gerçek davranışına göre doldurun.
 - Mağaza başlığı, kısa/tam açıklama, 512×512 simge, 1024×500 özellik görseli ve telefon ekran görüntülerini hazırlayın.
 - Play Console geliştirici iletişim e-postasını sağlayın; mağaza iletişim bilgileri ve gizlilik politikasındaki destek kanalı birbiriyle tutarlı olmalı.
@@ -48,7 +49,7 @@ Bu belge Google Play üretim yayını için yerel AAB hazırlama adımlarını i
 
 ## Bu projede açık kalan yayın engelleri
 
-- `0.1.2` düzeltilmiş APK'nın HONOR Android 16 cihazında açıldığı doğrulanmalı.
+- `0.1.4+5` APK'nın HONOR Android 16 cihazında açıldığı doğrulanmalı.
 - Upload key sahibi/parolaları kullanıcı tarafından kurulmalı ve yedeklenmeli.
 - Play Console geliştirici hesabı ve uygulama kaydı kullanıcı tarafında tamamlanmalı.
 - Mağaza görselleri ve gerekli iletişim bilgileri tamamlanmalı.

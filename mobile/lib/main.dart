@@ -1,15 +1,19 @@
-import 'dart:convert';
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'services/cloud_link.dart';
+import 'services/companion_release.dart';
+import 'services/local_alerts.dart';
 
 const _bg = Color(0xFF090C12);
 const _panel = Color(0xFF121722);
@@ -91,9 +95,46 @@ class _TD2CompanionAppState extends State<TD2CompanionApp> {
           ),
         ),
       ),
-      home: MainShell(model: model, cloud: cloud),
+      home: AnimatedBuilder(
+        animation: model,
+        builder: (context, _) => model.loading
+            ? const _SplashScreen()
+            : MainShell(model: model, cloud: cloud),
+      ),
     );
   }
+}
+
+class _SplashScreen extends StatelessWidget {
+  const _SplashScreen();
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    backgroundColor: _bg,
+    body: Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              color: _orange.withValues(alpha: .14),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: _orange.withValues(alpha: .6)),
+            ),
+            child: const Icon(Icons.hexagon_outlined, color: _orange, size: 32),
+          ),
+          const SizedBox(height: 18),
+          const SizedBox(
+            width: 22,
+            height: 22,
+            child: CircularProgressIndicator(strokeWidth: 2.4, color: _orange),
+          ),
+        ],
+      ),
+    ),
+  );
 }
 
 class CompanionModel extends ChangeNotifier {
@@ -106,6 +147,16 @@ class CompanionModel extends ChangeNotifier {
   bool refreshing = false;
   String? refreshMessage;
   DateTime? lastRefresh;
+  bool newsAlertsEnabled = false;
+  bool updateAlertsEnabled = false;
+  bool alertChanging = false;
+  String? availableVersion;
+  String? availableVersionUrl;
+  String? availableApkUrl;
+  String? availableSha256Url;
+  bool downloadingUpdate = false;
+  double updateProgress = 0;
+  DateTime? lastUpdateCheck;
   SharedPreferences? _prefs;
   Timer? _desktopPoll;
   String? _desktopToken;
@@ -121,9 +172,24 @@ class CompanionModel extends ChangeNotifier {
           .toString();
   List<Map<String, dynamic>> get tasks => _maps(tasksFeed['tasks']);
   List<Map<String, dynamic>> get news => _maps(newsFeed['items']);
-  List<Map<String, dynamic>> get builds => _maps(metaBuilds['builds']);
+
+  /// En yaygın/önerilen build'ler önce gelsin diye popülerliğe göre azalan
+  /// sıralanır; kaynak JSON'daki ham liste sırası güvenilir değil.
+  List<Map<String, dynamic>> get builds {
+    final list = _maps(metaBuilds['builds']);
+    list.sort((a, b) {
+      final pa = num.tryParse('${a['popularity'] ?? ''}') ?? -1;
+      final pb = num.tryParse('${b['popularity'] ?? ''}') ?? -1;
+      return pb.compareTo(pa);
+    });
+    return list;
+  }
+
   int get activeNews => news.where((e) => _isCurrent(e)).length;
   int get doneCount => completedTasks.length;
+  bool get updateAvailable =>
+      availableVersion != null &&
+      isNewerVersion(availableVersion!, companionVersion);
 
   Future<void> load() async {
     try {
@@ -136,8 +202,15 @@ class CompanionModel extends ChangeNotifier {
       newsFeed = loaded[1];
       metaBuilds = loaded[2];
       _prefs = await SharedPreferences.getInstance();
+      _restoreContentCache();
       completedTasks = (_prefs?.getStringList('completed_tasks') ?? <String>[])
           .toSet();
+      newsAlertsEnabled = _prefs?.getBool('news_alerts_enabled') ?? false;
+      updateAlertsEnabled = _prefs?.getBool('update_alerts_enabled') ?? false;
+      final lastUpdateMillis = _prefs?.getInt('last_update_check_ms');
+      if (lastUpdateMillis != null) {
+        lastUpdateCheck = DateTime.fromMillisecondsSinceEpoch(lastUpdateMillis);
+      }
       final rawBuilds = _prefs?.getStringList('saved_builds') ?? <String>[];
       savedBuilds = rawBuilds
           .map((row) {
@@ -156,7 +229,43 @@ class CompanionModel extends ChangeNotifier {
     loading = false;
     notifyListeners();
     await refresh(quiet: true);
+    unawaited(checkForUpdate(force: true));
   }
+
+  void _restoreContentCache() {
+    final cachedTasks = _cachedFeed('cached_tasks_feed', 'tasks');
+    final cachedNews = _cachedFeed('cached_news_feed', 'items');
+    final cachedBuilds = _cachedFeed('cached_meta_builds', 'builds');
+    if (cachedTasks != null) tasksFeed = cachedTasks;
+    if (cachedNews != null) newsFeed = cachedNews;
+    if (cachedBuilds != null) metaBuilds = cachedBuilds;
+  }
+
+  Map<String, dynamic>? _cachedFeed(String key, String listKey) {
+    final raw = _prefs?.getString(key);
+    if (raw == null) return null;
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is Map &&
+          decoded[listKey] is List &&
+          (decoded[listKey] as List).isNotEmpty) {
+        return Map<String, dynamic>.from(decoded);
+      }
+    } catch (_) {
+      // Bozuk önbellek, uygulamanın paketle gelen güvenli verisini engellemez.
+    }
+    return null;
+  }
+
+  Future<void> _saveFeed(String key, Map<String, dynamic> feed) async {
+    await _prefs?.setString(key, jsonEncode(feed));
+  }
+
+  Set<String> _newsIds(Map<String, dynamic> feed) =>
+      _maps(feed['items'])
+          .map((item) => '${item['id'] ?? item['url'] ?? item['title'] ?? ''}')
+          .where((id) => id.isNotEmpty)
+          .toSet();
 
   Future<Map<String, dynamic>> _asset(String path) async {
     final text = await rootBundle.loadString(path);
@@ -198,25 +307,190 @@ class CompanionModel extends ChangeNotifier {
       _fetch('meta_builds.json'),
     ]);
     var changed = false;
+    final beforeNews = _newsIds(newsFeed);
     if (results[0]?['tasks'] is List &&
         (results[0]!['tasks'] as List).isNotEmpty) {
       tasksFeed = results[0]!;
+      await _saveFeed('cached_tasks_feed', tasksFeed);
       changed = true;
     }
     if (results[1]?['items'] is List &&
         (results[1]!['items'] as List).isNotEmpty) {
       newsFeed = results[1]!;
+      await _saveFeed('cached_news_feed', newsFeed);
       changed = true;
     }
     if (results[2]?['builds'] is List &&
         (results[2]!['builds'] as List).isNotEmpty) {
       metaBuilds = results[2]!;
+      await _saveFeed('cached_meta_builds', metaBuilds);
       changed = true;
     }
+    if (results[1] != null) await _notifyNewNews(beforeNews);
     refreshing = false;
     lastRefresh = DateTime.now();
     if (!changed) refreshMessage = 'Çevrimdışı içerik gösteriliyor';
     notifyListeners();
+  }
+
+  Future<void> _notifyNewNews(Set<String> beforeNews) async {
+    final current = _newsIds(newsFeed);
+    final remembered = (_prefs?.getStringList('known_news_ids') ?? <String>[])
+        .toSet();
+    final baseline = remembered.isEmpty ? beforeNews : remembered;
+    final fresh = current.difference(baseline);
+    await _prefs?.setStringList('known_news_ids', current.toList());
+    if (!newsAlertsEnabled || fresh.isEmpty) return;
+    final item = news.firstWhere(
+      (row) =>
+          fresh.contains('${row['id'] ?? row['url'] ?? row['title'] ?? ''}'),
+      orElse: () => <String, dynamic>{},
+    );
+    final title = '${item['title'] ?? 'Yeni TD2 haberi'}';
+    await LocalAlerts.show(
+      id: 2201,
+      title: 'Yeni Division haberi',
+      body: title,
+    );
+  }
+
+  Future<void> checkForUpdate({bool force = false}) async {
+    if (!force && !isUpdateCheckDue(lastUpdateCheck)) return;
+    final client = http.Client();
+    try {
+      final release = await fetchLatestCompanionRelease(client);
+      if (release == null) return;
+      availableVersion = release.version;
+      availableVersionUrl = release.url;
+      availableApkUrl = release.apkUrl;
+      availableSha256Url = release.sha256Url;
+      lastUpdateCheck = DateTime.now();
+      await _prefs?.setInt('last_update_check_ms', lastUpdateCheck!.millisecondsSinceEpoch);
+      if (updateAlertsEnabled && updateAvailable) {
+        final notified = _prefs?.getString('notified_companion_version');
+        if (notified != release.version) {
+          await LocalAlerts.show(
+            id: 2202,
+            title: 'Companion güncellemesi hazır',
+            body: 'v${release.version} indirilmeye hazır.',
+          );
+          await _prefs?.setString(
+            'notified_companion_version',
+            release.version,
+          );
+        }
+      }
+      notifyListeners();
+    } catch (_) {
+      // Güncelleme denetimi içerik veya uygulama açılışını engellemez.
+    } finally {
+      client.close();
+    }
+  }
+
+  Future<String?> downloadAndInstallUpdate() async {
+    final apkUrl = availableApkUrl;
+    if (apkUrl == null || downloadingUpdate) return 'APK bağlantısı bulunamadı.';
+    downloadingUpdate = true;
+    updateProgress = 0;
+    notifyListeners();
+    try {
+      final response = await http
+          .get(Uri.parse(apkUrl))
+          .timeout(const Duration(minutes: 3));
+      if (response.statusCode != 200 || response.bodyBytes.isEmpty) {
+        return 'APK indirilemedi (HTTP ${response.statusCode}).';
+      }
+      final expected = await _fetchChecksum();
+      if (expected == null || !RegExp(r'^[a-f0-9]{64}$').hasMatch(expected)) {
+        return 'APK doğrulama bilgisi alınamadı. Lütfen tekrar deneyin.';
+      }
+      final actual = sha256.convert(response.bodyBytes).toString();
+      if (expected != actual) {
+        return 'APK doğrulaması başarısız; dosya kurulmadı.';
+      }
+      final directory = await getApplicationSupportDirectory();
+      final file = File(
+        '${directory.path}/TD2LootAdvisor_Companion_$availableVersion.apk',
+      );
+      await file.writeAsBytes(response.bodyBytes, flush: true);
+      await const MethodChannel('td2_companion/update').invokeMethod<bool>(
+        'installApk',
+        {'path': file.path},
+      );
+      return null;
+    } catch (error) {
+      return 'Güncelleme indirilemedi: $error';
+    } finally {
+      downloadingUpdate = false;
+      updateProgress = 0;
+      notifyListeners();
+    }
+  }
+
+  Future<String?> _fetchChecksum() async {
+    final checksumUrl = availableSha256Url;
+    if (checksumUrl == null) return null;
+    try {
+      final text = await http
+          .read(Uri.parse(checksumUrl))
+          .timeout(const Duration(seconds: 20));
+      final apkName = 'TD2LootAdvisor_Companion_$availableVersion.apk';
+      for (final line in text.split(RegExp(r'\r?\n'))) {
+        final parts = line.trim().split(RegExp(r'\s+'));
+        if (parts.length >= 2 && parts.last.endsWith(apkName)) {
+          return parts.first.toLowerCase();
+        }
+      }
+    } catch (_) {
+      return null;
+    }
+    return null;
+  }
+
+  Future<String?> setNewsAlertsEnabled(bool enabled) => _setAlerts(
+    enabled: enabled,
+    preferenceKey: 'news_alerts_enabled',
+    news: true,
+  );
+
+  Future<String?> setUpdateAlertsEnabled(bool enabled) => _setAlerts(
+    enabled: enabled,
+    preferenceKey: 'update_alerts_enabled',
+    news: false,
+  );
+
+  Future<String?> _setAlerts({
+    required bool enabled,
+    required String preferenceKey,
+    required bool news,
+  }) async {
+    if (alertChanging) return null;
+    alertChanging = true;
+    notifyListeners();
+    try {
+      if (enabled) {
+        final granted = await LocalAlerts.requestPermission();
+        if (!granted) return 'Bildirim izni verilmedi.';
+      }
+      if (news) {
+        newsAlertsEnabled = enabled;
+        if (enabled) {
+          await _prefs?.setStringList(
+            'known_news_ids',
+            _newsIds(newsFeed).toList(),
+          );
+        }
+      } else {
+        updateAlertsEnabled = enabled;
+      }
+      await _prefs?.setBool(preferenceKey, enabled);
+      if (enabled && !news) unawaited(checkForUpdate());
+      return null;
+    } finally {
+      alertChanging = false;
+      notifyListeners();
+    }
   }
 
   Future<void> toggleTask(String id) async {
@@ -311,7 +585,7 @@ class CompanionModel extends ChangeNotifier {
       final response = await http
           .get(
             endpoint,
-            headers: const {'User-Agent': 'TD2-Loot-Advisor-Companion/0.1.2'},
+            headers: const {'User-Agent': 'TD2-Loot-Advisor-Companion/0.1.5'},
           )
           .timeout(const Duration(seconds: 4));
       if (response.statusCode != 200) {
@@ -419,7 +693,7 @@ class _MainShellState extends State<MainShell> {
                     ),
                   ),
                   Text(
-                    'COMPANION  ·  BETA 0.1.2',
+                    'COMPANION  ·  BETA $companionVersion',
                     style: TextStyle(
                       fontSize: 9,
                       color: _soft,
@@ -586,14 +860,18 @@ class OverviewPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 22),
-          const SectionTitle(
+          SectionTitle(
             title: 'MASAÜSTÜ EŞLEŞTİRMESİ',
-            trailing: 'SONRAKİ AŞAMA',
+            trailing: (model.desktopConnected || cloud.paired)
+                ? 'BAĞLI'
+                : 'SONRAKİ AŞAMA',
           ),
           const SizedBox(height: 10),
           _DesktopStatusCard(model: model),
           const SizedBox(height: 10),
           _CloudStatusCard(cloud: cloud),
+          const SizedBox(height: 22),
+          _ContentAlertsCard(model: model),
           const SizedBox(height: 22),
           SectionTitle(
             title: 'AKTİF ETKİNLİKLER',
@@ -630,6 +908,135 @@ class OverviewPage extends StatelessWidget {
       ),
     );
   }
+}
+
+class _ContentAlertsCard extends StatelessWidget {
+  const _ContentAlertsCard({required this.model});
+
+  final CompanionModel model;
+
+  Future<void> _change(
+    BuildContext context,
+    bool enabled,
+    Future<String?> Function(bool) apply,
+  ) async {
+    final error = await apply(enabled);
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          error ??
+              (enabled
+                  ? 'Bildirimler etkinleştirildi.'
+                  : 'Bildirimler kapatıldı.'),
+        ),
+        backgroundColor: error == null ? null : const Color(0xFF7A2A1E),
+      ),
+    );
+  }
+
+  Future<void> _startUpdate(BuildContext context) async {
+    final error = await model.downloadAndInstallUpdate();
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          error ?? 'APK indirildi ve Android kurulum onayı açıldı.',
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      SectionTitle(
+        title: 'İÇERİK VE GÜNCELLEMELER',
+        trailing: model.updateAvailable
+            ? 'v${model.availableVersion} HAZIR'
+            : 'OTOMATİK KONTROL',
+      ),
+      const SizedBox(height: 10),
+      Container(
+        decoration: BoxDecoration(
+          color: _panel,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: Colors.white10),
+        ),
+        child: Column(
+          children: [
+            SwitchListTile.adaptive(
+              value: model.newsAlertsEnabled,
+              onChanged: model.alertChanging
+                  ? null
+                  : (value) =>
+                        _change(context, value, model.setNewsAlertsEnabled),
+              title: const Text('Yeni haber bildirimleri'),
+              subtitle: const Text(
+                'Uygulama açıkken yeni TD2 haberi bulunursa bildirir.',
+                style: TextStyle(color: _soft, fontSize: 11),
+              ),
+            ),
+            const Divider(height: 1),
+            SwitchListTile.adaptive(
+              value: model.updateAlertsEnabled,
+              onChanged: model.alertChanging
+                  ? null
+                  : (value) =>
+                        _change(context, value, model.setUpdateAlertsEnabled),
+              title: const Text('Companion güncelleme bildirimi'),
+              subtitle: Text(
+                model.updateAvailable
+                    ? 'v${model.availableVersion} hazır. Tek tuşla APK indirmeyi başlat.'
+                    : 'Uygulama açıldığında yeni beta sürümleri denetler.',
+                style: const TextStyle(color: _soft, fontSize: 11),
+              ),
+            ),
+            if (model.updateAvailable && model.availableVersionUrl != null) ...[
+              const Divider(height: 1),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
+                child: FilledButton.icon(
+                  onPressed: model.downloadingUpdate ? null : () => _startUpdate(context),
+                  icon: const Icon(Icons.system_update_alt_rounded),
+                  label: Text(
+                    model.downloadingUpdate
+                        ? 'GÜNCELLEME İNDİRİLİYOR'
+                        : 'v${model.availableVersion} GÜNCELLEMESİNİ İNDİR',
+                  ),
+                ),
+              ),
+              if (model.availableApkUrl == null)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                  child: TextButton.icon(
+                    onPressed: () => launchUrl(
+                      Uri.parse(model.availableVersionUrl!),
+                      mode: LaunchMode.externalApplication,
+                    ),
+                    icon: const Icon(Icons.open_in_new_rounded, size: 16),
+                    label: const Text('GitHub sürüm sayfasını aç'),
+                  ),
+                ),
+              const Padding(
+                padding: EdgeInsets.fromLTRB(16, 0, 16, 14),
+                child: Text(
+                  'İndirme tamamlanınca Android kurulum onayı gösterir. Güvenlik nedeniyle uygulama sessiz kurulum yapamaz.',
+                  style: TextStyle(color: _soft, fontSize: 11),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+      const SizedBox(height: 8),
+      const Text(
+        'İzin yalnız yukarıdaki anahtarlardan biri açıldığında istenir. Arka planda haber bildirimi için ayrıca Firebase/Play dağıtımı doğrulaması gerekir.',
+        style: TextStyle(color: _soft, fontSize: 11),
+      ),
+    ],
+  );
 }
 
 class TasksPage extends StatefulWidget {
@@ -753,88 +1160,119 @@ class _BuildsPageState extends State<BuildsPage> {
         query.toLowerCase(),
       );
     }).toList();
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
-      children: [
-        Text('BUILD KÜTÜPHANESİ', style: _eyebrow),
-        const SizedBox(height: 4),
-        const Text(
-          'Ajanını hazırla',
-          style: TextStyle(fontSize: 25, fontWeight: FontWeight.w800),
-        ),
-        const SizedBox(height: 15),
-        Row(
-          children: [
-            Expanded(
-              child: TextField(
-                decoration: const InputDecoration(
-                  prefixIcon: Icon(Icons.search),
-                  hintText: 'Build veya rol ara',
+    return RefreshIndicator(
+      onRefresh: () => widget.model.refresh(),
+      color: _orange,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
+        children: [
+          Text('BUILD KÜTÜPHANESİ', style: _eyebrow),
+          const SizedBox(height: 4),
+          const Text(
+            'Ajanını hazırla',
+            style: TextStyle(fontSize: 25, fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 15),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  decoration: const InputDecoration(
+                    prefixIcon: Icon(Icons.search),
+                    hintText: 'Build veya rol ara',
+                  ),
+                  onChanged: (value) => setState(() => query = value),
                 ),
-                onChanged: (value) => setState(() => query = value),
               ),
-            ),
-            if (widget.cloud.paired) ...[
-              const SizedBox(width: 8),
-              IconButton.filledTonal(
-                tooltip: 'Bulutla eşitle',
-                onPressed: widget.cloud.syncing ? null : _sync,
-                icon: widget.cloud.syncing
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.cloud_sync_rounded),
+              if (widget.cloud.paired) ...[
+                const SizedBox(width: 8),
+                IconButton.filledTonal(
+                  tooltip: 'Bulutla eşitle',
+                  onPressed: widget.cloud.syncing ? null : _sync,
+                  icon: widget.cloud.syncing
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.cloud_sync_rounded),
+                ),
+              ],
+            ],
+          ),
+          const SizedBox(height: 12),
+          SegmentedButton<int>(
+            segments: const [
+              ButtonSegment(
+                value: 0,
+                label: Text('Önerilen'),
+                icon: Icon(Icons.auto_awesome),
+              ),
+              ButtonSegment(
+                value: 1,
+                label: Text('Kaydettiklerim'),
+                icon: Icon(Icons.bookmark_outline),
               ),
             ],
-          ],
-        ),
-        const SizedBox(height: 12),
-        SegmentedButton<int>(
-          segments: const [
-            ButtonSegment(
-              value: 0,
-              label: Text('Önerilen'),
-              icon: Icon(Icons.auto_awesome),
-            ),
-            ButtonSegment(
-              value: 1,
-              label: Text('Kaydettiklerim'),
-              icon: Icon(Icons.bookmark_outline),
-            ),
-          ],
-          selected: {tab},
-          onSelectionChanged: (values) => setState(() => tab = values.first),
-        ),
-        const SizedBox(height: 14),
-        if (tab == 0)
-          if (meta.isEmpty)
+            selected: {tab},
+            onSelectionChanged: (values) => setState(() => tab = values.first),
+          ),
+          const SizedBox(height: 14),
+          if (tab == 0)
+            if (meta.isEmpty)
+              const _EmptyCard(
+                icon: Icons.search_off_rounded,
+                text: 'Aramaya uygun öneri bulunamadı.',
+              )
+            else
+              ...meta.map((build) => MetaBuildCard(data: build))
+          else if (saved.isEmpty)
             const _EmptyCard(
-              icon: Icons.search_off_rounded,
-              text: 'Aramaya uygun öneri bulunamadı.',
+              icon: Icons.bookmark_add_outlined,
+              text: 'Henüz build kaydetmedin. + düğmesiyle ilk build’ini oluştur.',
             )
           else
-            ...meta.map((build) => MetaBuildCard(data: build))
-        else if (saved.isEmpty)
-          const _EmptyCard(
-            icon: Icons.bookmark_add_outlined,
-            text:
-                'Henüz build kaydetmedin. + düğmesiyle ilk build’ini oluştur.',
-          )
-        else
-          ...saved.map(
-            (build) => SavedBuildCard(
-              data: build,
-              onDelete: () {
-                final id = '${build['id']}';
-                widget.model.deleteBuild(id);
-                if (widget.cloud.paired) widget.cloud.deleteBuildQuietly(id);
-              },
+            ...saved.map(
+              (build) => SavedBuildCard(
+                data: build,
+                onDelete: () => _confirmDeleteBuild(context, build),
+              ),
             ),
-          ),
-      ],
+        ],
+      ),
     );
+  }
+
+  Future<void> _confirmDeleteBuild(
+    BuildContext context,
+    Map<String, dynamic> build,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Build’i sil'),
+        content: Text(
+          '"${build['name'] ?? 'Bu build'}" kalıcı olarak silinecek. Bu işlem geri alınamaz.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Vazgeç'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFFB3261E),
+            ),
+            child: const Text('Sil'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    final id = '${build['id']}';
+    widget.model.deleteBuild(id);
+    if (widget.cloud.paired) widget.cloud.deleteBuildQuietly(id);
   }
 }
 
@@ -1411,7 +1849,9 @@ class _CloudPairPageState extends State<CloudPairPage> {
           ),
           FilledButton(
             onPressed: () => Navigator.pop(dialogContext, true),
-            style: FilledButton.styleFrom(backgroundColor: const Color(0xFFB3261E)),
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFFB3261E),
+            ),
             child: const Text('Hesabı sil'),
           ),
         ],
@@ -1421,7 +1861,11 @@ class _CloudPairPageState extends State<CloudPairPage> {
     final error = await widget.cloud.deleteAccount();
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(error ?? 'Silme talebi alındı. 24 saat içinde tamamlanacak.')),
+      SnackBar(
+        content: Text(
+          error ?? 'Silme talebi alındı. 24 saat içinde tamamlanacak.',
+        ),
+      ),
     );
     if (error == null) Navigator.of(context).pop();
   }
@@ -1433,7 +1877,9 @@ class _CloudPairPageState extends State<CloudPairPage> {
       appBar: AppBar(title: const Text('Bulut eşleştirmesi')),
       body: ListView(
         padding: const EdgeInsets.all(20),
-        children: widget.cloud.paired ? _connected(context) : _pairForm(context),
+        children: widget.cloud.paired
+            ? _connected(context)
+            : _pairForm(context),
       ),
     ),
   );
@@ -1451,24 +1897,35 @@ class _CloudPairPageState extends State<CloudPairPage> {
       controller: _code,
       textCapitalization: TextCapitalization.characters,
       maxLength: 8,
-      decoration: const InputDecoration(labelText: 'Eşleştirme kodu', hintText: 'ör. A1B2C3D4'),
+      decoration: const InputDecoration(
+        labelText: 'Eşleştirme kodu',
+        hintText: 'ör. A1B2C3D4',
+      ),
       onSubmitted: (_) => widget.cloud.pair(_code.text),
     ),
     const SizedBox(height: 12),
     FilledButton.icon(
-      onPressed: widget.cloud.pairing ? null : () => widget.cloud.pair(_code.text),
+      onPressed: widget.cloud.pairing
+          ? null
+          : () => widget.cloud.pair(_code.text),
       icon: widget.cloud.pairing
           ? const SizedBox(
               width: 18,
               height: 18,
-              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.white,
+              ),
             )
           : const Icon(Icons.link_rounded),
       label: const Text('Eşleştir'),
     ),
     if (widget.cloud.pairError != null) ...[
       const SizedBox(height: 14),
-      Text(widget.cloud.pairError!, style: const TextStyle(color: Color(0xFFFF8A80))),
+      Text(
+        widget.cloud.pairError!,
+        style: const TextStyle(color: Color(0xFFFF8A80)),
+      ),
     ],
     const SizedBox(height: 16),
     const _EmptyCard(
@@ -1502,13 +1959,17 @@ class _CloudPairPageState extends State<CloudPairPage> {
             const SizedBox(width: 10),
             Expanded(
               child: Text(
-                online ? 'Masaüstü çevrimiçi' : 'Masaüstü şu anda çevrimdışı görünüyor',
+                online
+                    ? 'Masaüstü çevrimiçi'
+                    : 'Masaüstü şu anda çevrimdışı görünüyor',
                 style: const TextStyle(fontWeight: FontWeight.w600),
               ),
             ),
             IconButton(
               tooltip: 'Yenile',
-              onPressed: widget.cloud.dashboardLoading ? null : widget.cloud.refreshDashboard,
+              onPressed: widget.cloud.dashboardLoading
+                  ? null
+                  : widget.cloud.refreshDashboard,
               icon: const Icon(Icons.refresh_rounded, size: 20),
             ),
           ],
@@ -1521,6 +1982,45 @@ class _CloudPairPageState extends State<CloudPairPage> {
           style: const TextStyle(color: _soft, fontSize: 12),
         ),
       ],
+      const SizedBox(height: 18),
+      const Text('BİLDİRİMLER', style: _eyebrow),
+      const SizedBox(height: 8),
+      Container(
+        decoration: BoxDecoration(
+          color: _panel,
+          borderRadius: BorderRadius.circular(17),
+          border: Border.all(color: Colors.white10),
+        ),
+        child: SwitchListTile.adaptive(
+          value: widget.cloud.notificationsEnabled,
+          onChanged: widget.cloud.notificationChanging
+              ? null
+              : (enabled) async {
+                  final error = await widget.cloud.setNotificationsEnabled(
+                    enabled,
+                  );
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        error ??
+                            (enabled
+                                ? 'Bildirimler etkinleştirildi.'
+                                : 'Bildirimler kapatıldı.'),
+                      ),
+                      backgroundColor: error == null
+                          ? null
+                          : const Color(0xFF7A2A1E),
+                    ),
+                  );
+                },
+          title: const Text('Masaüstü tarama bildirimleri'),
+          subtitle: const Text(
+            'Yalnızca açarsan izin istenir ve bu cihazın bildirim belirteci kaydedilir.',
+            style: TextStyle(color: _soft, fontSize: 11),
+          ),
+        ),
+      ),
       const SizedBox(height: 22),
       OutlinedButton.icon(
         onPressed: () => widget.cloud.unpair(),
@@ -1540,7 +2040,9 @@ class _CloudPairPageState extends State<CloudPairPage> {
       const SizedBox(height: 8),
       OutlinedButton.icon(
         onPressed: _deleteAccount,
-        style: OutlinedButton.styleFrom(foregroundColor: const Color(0xFFFF8A80)),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: const Color(0xFFFF8A80),
+        ),
         icon: const Icon(Icons.delete_forever_rounded),
         label: const Text('Hesabı ve tüm verileri sil'),
       ),
@@ -1806,7 +2308,7 @@ Future<void> _newBuild(
 void _about(BuildContext context) => showAboutDialog(
   context: context,
   applicationName: 'TD2 Loot Advisor Companion',
-  applicationVersion: '0.1.2-beta',
+  applicationVersion: '$companionVersion-beta',
   applicationIcon: const Icon(Icons.hexagon_outlined, color: _orange, size: 34),
   children: [
     const Text(

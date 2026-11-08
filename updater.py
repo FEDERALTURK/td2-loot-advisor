@@ -35,7 +35,15 @@ SOURCE_ALLOW = [r"[^/]+\.py", r"lang/[^/]+\.json", r"meta/(game_data|meta_builds
                 r"scripts/[^/]+", r"icon/[^/]+", r"server/[^/]+", r"tests/[^/]+(/[^/]+)?",
                 r"requirements[^/]*\.txt", r"README[^/]*\.md", r"LICENSE"]
 # Hiçbir koşulda yazılmaz (beyaz listeye uysa bile)
-NEVER = {"builds.json", "stash.json", "progress.json", "tasks.json", "loot_log.csv", "drop_queue.json", "learned_library.json"}
+# Kullanıcıya/cihaza ait durum verileri kaynak güncellemesinde hiçbir koşulda
+# değiştirilemez. SOURCE_ALLOW bugün bu kök JSON dosyalarının çoğunu zaten
+# kapsamıyor; yine de bu liste savunma katmanıdır ve ileride izin listesi
+# genişletilirse kişisel oturum/öğrenilmiş ekran verisini korur.
+NEVER = {
+    "builds.json", "stash.json", "progress.json", "tasks.json", "loot_log.csv",
+    "drop_queue.json", "learned_library.json", "sessions.json", "screen_states.json",
+    "tasks_sent.json", "verdict_feedback.json", "verdict_feedback.json.tmp",
+}
 
 
 def parse_version(v):

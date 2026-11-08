@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "version": "2026-11-04.1",
-  "updated": "2026-11-04T01:52:55Z",
+  "version": "2026-11-06.1",
+  "updated": "2026-11-06T01:49:22Z",
   "season": "Year 8 Season 3 – Red Horizon",
   "resets": {
     "daily_hour_utc": 8,
@@ -318,6 +318,37 @@
       }
     },
     {
+      "id": "y8s3-scout11-bt-activities",
+      "cat": "manhunt",
+      "source": {
+        "url": "https://www.destructoid.com/the-division-2-y8s3-red-horizon-week-11-manhunt-hvt-scout-11-solutions/"
+      },
+      "text": {
+        "en": "Manhunt Scout 11: complete 3 Black Tusk Living World Activities",
+        "tr": "Manhunt Scout 11: 3 Black Tusk Living World etkinliği bitir",
+        "de": "Manhunt Scout 11: 3 Black-Tusk-Living-World-Aktivitäten abschließen",
+        "fr": "Traque Éclaireur 11 : terminez 3 activités Living World Black Tusk",
+        "es": "Cacería Explorador 11: completa 3 actividades Living World de Black Tusk",
+        "it": "Caccia Esploratore 11: completa 3 attività Living World di Black Tusk",
+        "pt": "Caçada Batedor 11: conclua 3 atividades Living World de Black Tusk",
+        "ru": "Охота, Разведчик 11: выполните 3 активности Living World фракции Black Tusk",
+        "pl": "Obława, Zwiadowca 11: ukończ 3 aktywności Living World Black Tusk",
+        "nl": "Manhunt Verkenner 11: voltooi 3 Black Tusk Living World-activiteiten"
+      },
+      "how": {
+        "en": "Any three activities count on any difficulty, as long as Black Tusk runs them. Check the map for activity icons of that faction. This step and the Invaded mission open the Higgins Bounty.",
+        "tr": "Black Tusk'a ait olduğu sürece herhangi üç etkinlik, her zorlukta sayılır. Haritada bu grubun etkinlik simgelerine bak. Bu adım ve Invaded görevi Higgins Bounty'sini açar.",
+        "de": "Beliebige drei Aktivitäten auf jeder Schwierigkeit zählen, solange Black Tusk sie kontrolliert. Suche auf der Karte die Symbole dieser Fraktion. Dieser Schritt und die Invaded-Mission schalten den Higgins-Bounty frei.",
+        "fr": "Trois activités au choix comptent, quelle que soit la difficulté, si elles sont tenues par Black Tusk. Repérez leurs icônes sur la carte. Cette étape et la mission Invaded débloquent le Bounty de Higgins.",
+        "es": "Valen tres actividades cualesquiera en cualquier dificultad, siempre que sean de Black Tusk. Busca sus iconos en el mapa. Este paso y la misión Invaded abren el Bounty de Higgins.",
+        "it": "Valgono tre attività qualsiasi a qualunque difficoltà, purché di Black Tusk. Cerca le loro icone sulla mappa. Questo passo e la missione Invaded sbloccano il Bounty di Higgins.",
+        "pt": "Valem três atividades quaisquer em qualquer dificuldade, desde que sejam de Black Tusk. Procure os ícones dessa facção no mapa. Este passo e a missão Invaded liberam o Bounty de Higgins.",
+        "ru": "Засчитываются любые три активности на любой сложности, если их контролирует Black Tusk. Ищите значки этой фракции на карте. Этот шаг и миссия Invaded открывают Bounty на Higgins.",
+        "pl": "Liczą się dowolne trzy aktywności na każdym poziomie trudności, o ile należą do Black Tusk. Szukaj ich ikon na mapie. Ten krok i misja Invaded odblokowują Bounty na Higginsa.",
+        "nl": "Elke drie activiteiten tellen, op elke moeilijkheidsgraad, zolang Black Tusk ze beheert. Zoek de iconen van die factie op de kaart. Deze stap en de Invaded-missie ontgrendelen de Higgins-Bounty."
+      }
+    },
+    {
       "id": "y8s3-scout11-invaded",
       "cat": "manhunt",
       "source": {
@@ -563,6 +594,285 @@
         "ru": "Запустите миссию на сложности Story, чтобы враги падали с одного-двух выстрелов, возьмите пистолет с большим магазином и цельтесь в голову. Перезаряжайтесь только после третьего убийства.",
         "pl": "Uruchom misję na poziomie Story, by wrogowie padali po jednym-dwóch strzałach, użyj pistoletu z dużym magazynkiem i celuj w głowę. Przeładuj dopiero po trzecim zabójstwie.",
         "nl": "Start een missie op Story zodat vijanden na één of twee schoten vallen, gebruik een pistool met groot magazijn en mik op het hoofd. Herlaad pas na de derde kill."
+      }
+    },
+    {
+      "id": "y8s3-journey-m6-overheal-3",
+      "cat": "journey",
+      "source": {
+        "url": "https://grindout.com/division-2/guides/season-journey-missions"
+      },
+      "text": {
+        "en": "Red Horizon Journey – Mission 6: remove the Achilles' Heal Overheal from 3 different enemies at the same time",
+        "tr": "Red Horizon Yolculuğu – Görev 6: 3 farklı düşmandaki Achilles' Heal Overheal'ını aynı anda kaldır",
+        "de": "Red Horizon Reise – Mission 6: den Achilles'-Heal-Overheal bei 3 verschiedenen Gegnern gleichzeitig entfernen",
+        "fr": "Parcours Red Horizon – Mission 6 : retirer l'Overheal d'Achilles' Heal à 3 ennemis différents en même temps",
+        "es": "Recorrido Red Horizon – Misión 6: quita el Overheal de Achilles' Heal a 3 enemigos distintos a la vez",
+        "it": "Percorso Red Horizon – Missione 6: rimuovi l'Overheal di Achilles' Heal a 3 nemici diversi contemporaneamente",
+        "pt": "Jornada Red Horizon – Missão 6: remova o Overheal de Achilles' Heal de 3 inimigos diferentes ao mesmo tempo",
+        "ru": "Путешествие Red Horizon – Миссия 6: снимите Overheal от Achilles' Heal с 3 разных врагов одновременно",
+        "pl": "Podróż Red Horizon – Misja 6: usuń Overheal z Achilles' Heal 3 różnym wrogom jednocześnie",
+        "nl": "Red Horizon-reis – Missie 6: verwijder de Achilles' Heal-Overheal bij 3 verschillende vijanden tegelijk"
+      },
+      "how": {
+        "en": "Use a build with a large Incendiary grenade radius and run Bank Headquarters on Story. Find an Achilles' Heal enemy with Scanner Pulse, then throw the grenade into the group around it.",
+        "tr": "Incendiary el bombası yarıçapı büyük bir build kullan, Bank Headquarters'ı Story'de oyna. Scanner Pulse ile Achilles' Heal'lı düşmanı bul, bombayı onun çevresindeki gruba at.",
+        "de": "Nutze einen Build mit großem Incendiary-Granaten-Radius und spiele Bank Headquarters auf Story. Finde mit Scanner Pulse einen Achilles'-Heal-Gegner und wirf die Granate in die Gruppe um ihn.",
+        "fr": "Prenez un build à grand rayon de grenade Incendiary et lancez Bank Headquarters en Histoire. Trouvez un ennemi Achilles' Heal avec Scanner Pulse, puis lancez la grenade sur son groupe.",
+        "es": "Usa una build con gran radio de granada Incendiary y juega Bank Headquarters en Historia. Localiza un enemigo con Achilles' Heal con Scanner Pulse y lanza la granada a su grupo.",
+        "it": "Usa una build con ampio raggio delle granate Incendiary e gioca Bank Headquarters a Storia. Trova un nemico con Achilles' Heal con Scanner Pulse e lancia la granata sul suo gruppo.",
+        "pt": "Use uma build com grande raio de granada Incendiary e jogue Bank Headquarters na História. Ache um inimigo com Achilles' Heal usando Scanner Pulse e jogue a granada no grupo dele.",
+        "ru": "Возьмите билд с большим радиусом гранаты Incendiary и запустите Bank Headquarters на Story. Найдите врага с Achilles' Heal через Scanner Pulse и бросьте гранату в его группу.",
+        "pl": "Użyj buildu z dużym promieniem granatu Incendiary i zagraj Bank Headquarters na Story. Znajdź wroga z Achilles' Heal za pomocą Scanner Pulse i rzuć granat w jego grupę.",
+        "nl": "Gebruik een build met een grote Incendiary-granaatradius en speel Bank Headquarters op Story. Zoek een Achilles' Heal-vijand met Scanner Pulse en gooi de granaat in zijn groep."
+      }
+    },
+    {
+      "id": "y8s3-journey-m6-thousand-cuts",
+      "cat": "journey",
+      "source": {
+        "url": "https://grindout.com/division-2/guides/season-journey-missions"
+      },
+      "text": {
+        "en": "Red Horizon Journey – Mission 6: kill Thousand Cuts enemies while at max stacks",
+        "tr": "Red Horizon Yolculuğu – Görev 6: azami yığındayken Thousand Cuts düşmanları öldür",
+        "de": "Red Horizon Reise – Mission 6: Thousand-Cuts-Gegner bei maximalen Stapeln töten",
+        "fr": "Parcours Red Horizon – Mission 6 : tuer des ennemis Thousand Cuts au maximum de charges",
+        "es": "Recorrido Red Horizon – Misión 6: mata enemigos Thousand Cuts con el máximo de acumulaciones",
+        "it": "Percorso Red Horizon – Missione 6: uccidi nemici Thousand Cuts al massimo degli accumuli",
+        "pt": "Jornada Red Horizon – Missão 6: elimine inimigos Thousand Cuts no máximo de acúmulos",
+        "ru": "Путешествие Red Horizon – Миссия 6: убивайте врагов Thousand Cuts при максимуме зарядов",
+        "pl": "Podróż Red Horizon – Misja 6: zabijaj wrogów Thousand Cuts przy maksymalnych ładunkach",
+        "nl": "Red Horizon-reis – Missie 6: dood Thousand Cuts-vijanden bij maximale stapels"
+      },
+      "how": {
+        "en": "Wear a tough build, ideally all blue cores, and run Viewpoint Museum on Story. Find a Thousand Cuts enemy, let it shoot you until the debuff bar is full, then kill it. Repeat as needed.",
+        "tr": "Dayanıklı bir build giy, tercihen tamamen mavi çekirdek, ve Viewpoint Museum'u Story'de oyna. Thousand Cuts düşmanı bul, zayıflatma çubuğu dolana dek sana ateş etsin, sonra öldür. Gerekirse tekrarla.",
+        "de": "Trage einen robusten Build, am besten nur blaue Kerne, und spiele Viewpoint Museum auf Story. Lass dich von einem Thousand-Cuts-Gegner beschießen, bis die Debuff-Leiste voll ist, dann töte ihn. Bei Bedarf wiederholen.",
+        "fr": "Prenez un build solide, idéalement tout en cœurs bleus, et lancez Viewpoint Museum en Histoire. Laissez un ennemi Thousand Cuts vous tirer dessus jusqu'à remplir la barre de malus, puis tuez-le. Répétez.",
+        "es": "Lleva una build resistente, mejor con todos los núcleos azules, y juega Viewpoint Museum en Historia. Deja que un enemigo Thousand Cuts te dispare hasta llenar la barra de penalización y mátalo. Repite.",
+        "it": "Usa una build resistente, meglio tutta a nuclei blu, e gioca Viewpoint Museum a Storia. Lascia che un nemico Thousand Cuts ti spari finché la barra del malus è piena, poi uccidilo. Ripeti.",
+        "pt": "Use uma build resistente, de preferência só com núcleos azuis, e jogue Viewpoint Museum na História. Deixe um inimigo Thousand Cuts atirar em você até encher a barra de penalidade e elimine-o. Repita.",
+        "ru": "Возьмите живучий билд, лучше только с синими ядрами, и запустите Viewpoint Museum на Story. Дайте врагу Thousand Cuts стрелять в вас, пока шкала дебаффа не заполнится, затем убейте его. Повторяйте.",
+        "pl": "Załóż wytrzymały build, najlepiej same niebieskie rdzenie, i zagraj Viewpoint Museum na Story. Pozwól wrogowi Thousand Cuts strzelać do siebie, aż pasek osłabienia się zapełni, potem go zabij. Powtarzaj.",
+        "nl": "Draag een stevige build, liefst alleen blauwe cores, en speel Viewpoint Museum op Story. Laat een Thousand Cuts-vijand op je schieten tot de debuffbalk vol is en dood hem dan. Herhaal."
+      }
+    },
+    {
+      "id": "y8s3-journey-m6-gauge-60s",
+      "cat": "journey",
+      "source": {
+        "url": "https://grindout.com/division-2/guides/season-journey-missions"
+      },
+      "text": {
+        "en": "Red Horizon Journey – Mission 6: keep the Pressure Gauge above 90% for 60 seconds in combat without going into cover",
+        "tr": "Red Horizon Yolculuğu – Görev 6: siper almadan savaşta Pressure Gauge'u 60 saniye %90'ın üstünde tut",
+        "de": "Red Horizon Reise – Mission 6: Pressure Gauge im Kampf 60 Sekunden über 90 % halten, ohne in Deckung zu gehen",
+        "fr": "Parcours Red Horizon – Mission 6 : garder la Pressure Gauge au-dessus de 90 % pendant 60 s en combat, sans se mettre à couvert",
+        "es": "Recorrido Red Horizon – Misión 6: mantén la Pressure Gauge por encima del 90 % durante 60 s en combate sin ir a cobertura",
+        "it": "Percorso Red Horizon – Missione 6: tieni la Pressure Gauge sopra il 90% per 60 s in combattimento senza andare in copertura",
+        "pt": "Jornada Red Horizon – Missão 6: mantenha a Pressure Gauge acima de 90% por 60 s em combate sem ir para a cobertura",
+        "ru": "Путешествие Red Horizon – Миссия 6: держите Pressure Gauge выше 90% 60 секунд в бою, не уходя в укрытие",
+        "pl": "Podróż Red Horizon – Misja 6: utrzymaj Pressure Gauge powyżej 90% przez 60 s w walce bez wchodzenia za osłonę",
+        "nl": "Red Horizon-reis – Missie 6: houd de Pressure Gauge 60 seconden boven 90% in gevecht zonder dekking te zoeken"
+      },
+      "how": {
+        "en": "Any build works. Equip Flow Regulator, Throttle Valve and Vacuum Seal, reach 90% in a fight, then stay out of cover for a full minute.",
+        "tr": "Her build olur. Flow Regulator, Throttle Valve ve Vacuum Seal tak, savaşta %90'a ulaş, sonra tam bir dakika siper almadan kal.",
+        "de": "Jeder Build geht. Rüste Flow Regulator, Throttle Valve und Vacuum Seal aus, erreiche im Kampf 90 % und bleibe eine volle Minute außerhalb der Deckung.",
+        "fr": "Tout build convient. Équipez Flow Regulator, Throttle Valve et Vacuum Seal, atteignez 90 % en combat, puis restez une minute hors couvert.",
+        "es": "Vale cualquier build. Equipa Flow Regulator, Throttle Valve y Vacuum Seal, llega al 90 % en combate y aguanta un minuto sin cobertura.",
+        "it": "Va bene qualsiasi build. Equipaggia Flow Regulator, Throttle Valve e Vacuum Seal, arriva al 90% in combattimento e resta un minuto fuori copertura.",
+        "pt": "Qualquer build serve. Equipe Flow Regulator, Throttle Valve e Vacuum Seal, chegue a 90% em combate e fique um minuto fora da cobertura.",
+        "ru": "Подойдёт любой билд. Экипируйте Flow Regulator, Throttle Valve и Vacuum Seal, наберите 90% в бою и целую минуту оставайтесь вне укрытия.",
+        "pl": "Każdy build się nadaje. Załóż Flow Regulator, Throttle Valve i Vacuum Seal, osiągnij 90% w walce i przez pełną minutę pozostań poza osłoną.",
+        "nl": "Elke build werkt. Rust Flow Regulator, Throttle Valve en Vacuum Seal uit, bereik 90% in een gevecht en blijf een volle minuut uit dekking."
+      }
+    },
+    {
+      "id": "y8s3-journey-m6-three-status",
+      "cat": "journey",
+      "source": {
+        "url": "https://grindout.com/division-2/guides/season-journey-missions"
+      },
+      "text": {
+        "en": "Red Horizon Journey – Mission 6: kill an enemy affected by at least 3 different status effects",
+        "tr": "Red Horizon Yolculuğu – Görev 6: en az 3 farklı durum etkisi altındaki bir düşmanı öldür",
+        "de": "Red Horizon Reise – Mission 6: einen Gegner mit mindestens 3 verschiedenen Statuseffekten töten",
+        "fr": "Parcours Red Horizon – Mission 6 : tuer un ennemi affecté par au moins 3 effets d'état différents",
+        "es": "Recorrido Red Horizon – Misión 6: mata a un enemigo afectado por al menos 3 efectos de estado distintos",
+        "it": "Percorso Red Horizon – Missione 6: uccidi un nemico colpito da almeno 3 effetti di stato diversi",
+        "pt": "Jornada Red Horizon – Missão 6: elimine um inimigo afetado por pelo menos 3 efeitos de status diferentes",
+        "ru": "Путешествие Red Horizon – Миссия 6: убейте врага минимум с 3 разными эффектами состояния",
+        "pl": "Podróż Red Horizon – Misja 6: zabij wroga objętego co najmniej 3 różnymi efektami statusu",
+        "nl": "Red Horizon-reis – Missie 6: dood een vijand met minstens 3 verschillende statuseffecten"
+      },
+      "how": {
+        "en": "Equip Banshee (Disorient), Riot Foam Launcher (Ensnare) and an Incendiary grenade (Burn). Apply all three to one enemy in quick succession, then finish it.",
+        "tr": "Banshee (Disorient), Riot Foam Launcher (Ensnare) ve Incendiary el bombası (Burn) tak. Üçünü hızla aynı düşmana uygula, sonra öldür.",
+        "de": "Rüste Banshee (Disorient), Riot Foam Launcher (Ensnare) und eine Incendiary-Granate (Burn) aus. Wende alle drei kurz nacheinander auf einen Gegner an und erledige ihn.",
+        "fr": "Équipez Banshee (Disorient), Riot Foam Launcher (Ensnare) et une grenade Incendiary (Burn). Appliquez les trois à un ennemi à la suite, puis achevez-le.",
+        "es": "Equipa Banshee (Disorient), Riot Foam Launcher (Ensnare) y una granada Incendiary (Burn). Aplica los tres a un enemigo seguidos y remátalo.",
+        "it": "Equipaggia Banshee (Disorient), Riot Foam Launcher (Ensnare) e una granata Incendiary (Burn). Applica tutti e tre a un nemico in rapida successione e finiscilo.",
+        "pt": "Equipe Banshee (Disorient), Riot Foam Launcher (Ensnare) e uma granada Incendiary (Burn). Aplique os três em um inimigo em sequência rápida e elimine-o.",
+        "ru": "Экипируйте Banshee (Disorient), Riot Foam Launcher (Ensnare) и гранату Incendiary (Burn). Быстро наложите все три эффекта на одного врага и добейте его.",
+        "pl": "Załóż Banshee (Disorient), Riot Foam Launcher (Ensnare) i granat Incendiary (Burn). Nałóż wszystkie trzy na jednego wroga w szybkiej kolejności i dobij go.",
+        "nl": "Rust Banshee (Disorient), Riot Foam Launcher (Ensnare) en een Incendiary-granaat (Burn) uit. Pas alle drie snel achter elkaar toe op één vijand en maak hem af."
+      }
+    },
+    {
+      "id": "y8s3-journey-m7-extract-4",
+      "cat": "journey",
+      "source": {
+        "url": "https://grindout.com/division-2/guides/season-journey-missions"
+      },
+      "text": {
+        "en": "Red Horizon Journey – Mission 7: extract at least 4 items at once from any Dark Zone",
+        "tr": "Red Horizon Yolculuğu – Görev 7: herhangi bir Dark Zone'dan tek seferde en az 4 eşya çıkar",
+        "de": "Red Horizon Reise – Mission 7: mindestens 4 Gegenstände auf einmal aus einer Dark Zone extrahieren",
+        "fr": "Parcours Red Horizon – Mission 7 : extraire au moins 4 objets d'un coup depuis n'importe quelle Dark Zone",
+        "es": "Recorrido Red Horizon – Misión 7: extrae al menos 4 objetos a la vez de cualquier Dark Zone",
+        "it": "Percorso Red Horizon – Missione 7: estrai almeno 4 oggetti in una volta da una Dark Zone qualsiasi",
+        "pt": "Jornada Red Horizon – Missão 7: extraia pelo menos 4 itens de uma vez de qualquer Dark Zone",
+        "ru": "Путешествие Red Horizon – Миссия 7: эвакуируйте минимум 4 предмета за раз из любой Dark Zone",
+        "pl": "Podróż Red Horizon – Misja 7: ewakuuj naraz co najmniej 4 przedmioty z dowolnej Dark Zone",
+        "nl": "Red Horizon-reis – Missie 7: extraheer minstens 4 items tegelijk uit een Dark Zone"
+      },
+      "how": {
+        "en": "PvE or PvP Dark Zone both count. Collect at least 4 contaminated items, then call a single extraction with all of them on you.",
+        "tr": "PvE ya da PvP Dark Zone fark etmez. En az 4 kirlenmiş eşya topla, sonra hepsi üzerindeyken tek bir tahliye çağır.",
+        "de": "PvE- und PvP-Dark-Zone zählen beide. Sammle mindestens 4 kontaminierte Gegenstände und rufe mit allen eine einzige Extraktion.",
+        "fr": "Dark Zone PvE ou PvP, les deux comptent. Ramassez au moins 4 objets contaminés, puis lancez une seule extraction en les ayant tous sur vous.",
+        "es": "Vale la Dark Zone PvE o PvP. Reúne al menos 4 objetos contaminados y pide una sola extracción con todos encima.",
+        "it": "Vale sia la Dark Zone PvE sia PvP. Raccogli almeno 4 oggetti contaminati e chiama una sola estrazione con tutti addosso.",
+        "pt": "Vale a Dark Zone PvE ou PvP. Colete pelo menos 4 itens contaminados e chame uma única extração com todos com você.",
+        "ru": "Подходит и PvE, и PvP Dark Zone. Соберите минимум 4 заражённых предмета и вызовите одну эвакуацию, держа их все при себе.",
+        "pl": "Liczy się Dark Zone PvE i PvP. Zbierz co najmniej 4 skażone przedmioty i wezwij jedną ewakuację, mając je wszystkie przy sobie.",
+        "nl": "PvE- en PvP-Dark Zone tellen allebei. Verzamel minstens 4 besmette items en roep één extractie op met ze allemaal bij je."
+      }
+    },
+    {
+      "id": "y8s3-journey-m7-cleaner-retaliations",
+      "cat": "journey",
+      "source": {
+        "url": "https://grindout.com/division-2/guides/season-journey-missions"
+      },
+      "text": {
+        "en": "Red Horizon Journey – Mission 7: complete 2 Cleaner Retaliations",
+        "tr": "Red Horizon Yolculuğu – Görev 7: 2 Cleaner Retaliation bitir",
+        "de": "Red Horizon Reise – Mission 7: 2 Cleaner-Retaliations abschließen",
+        "fr": "Parcours Red Horizon – Mission 7 : terminer 2 Retaliations Cleaners",
+        "es": "Recorrido Red Horizon – Misión 7: completa 2 Retaliations de Cleaners",
+        "it": "Percorso Red Horizon – Missione 7: completa 2 Retaliation dei Cleaners",
+        "pt": "Jornada Red Horizon – Missão 7: conclua 2 Retaliations dos Cleaners",
+        "ru": "Путешествие Red Horizon – Миссия 7: выполните 2 Retaliation против Cleaners",
+        "pl": "Podróż Red Horizon – Misja 7: ukończ 2 Retaliation Cleaners",
+        "nl": "Red Horizon-reis – Missie 7: voltooi 2 Cleaner-Retaliations"
+      },
+      "how": {
+        "en": "Abandon any other active Retaliation, build up the Cleaner one, then activate and finish it once its charge bar is full. Do this twice.",
+        "tr": "Etkin diğer Retaliation'ları bırak, Cleaner olanı ilerlet, şarj çubuğu dolunca başlatıp bitir. Bunu iki kez yap.",
+        "de": "Brich andere aktive Retaliations ab, baue die Cleaner-Retaliation auf, aktiviere und beende sie, sobald die Ladeleiste voll ist. Zweimal wiederholen.",
+        "fr": "Abandonnez les autres Retaliations actives, progressez sur celle des Cleaners, puis activez-la et terminez-la quand sa barre est pleine. À faire deux fois.",
+        "es": "Abandona las demás Retaliations activas, avanza la de Cleaners y actívala y complétala cuando su barra esté llena. Hazlo dos veces.",
+        "it": "Abbandona le altre Retaliation attive, fai avanzare quella dei Cleaners, poi attivala e completala quando la barra è piena. Fallo due volte.",
+        "pt": "Abandone outras Retaliations ativas, avance a dos Cleaners e ative e conclua quando a barra encher. Faça isso duas vezes.",
+        "ru": "Отмените другие активные Retaliation, прокачайте Cleaner, затем активируйте и завершите, когда шкала заполнится. Сделайте это дважды.",
+        "pl": "Porzuć inne aktywne Retaliation, rozwiń tę Cleaners, a gdy pasek się zapełni, aktywuj ją i ukończ. Zrób to dwa razy.",
+        "nl": "Breek andere actieve Retaliations af, bouw de Cleaner-versie op en activeer en voltooi die zodra de laadbalk vol is. Doe dit twee keer."
+      }
+    },
+    {
+      "id": "y8s3-journey-m7-burn-5-3s",
+      "cat": "journey",
+      "source": {
+        "url": "https://grindout.com/division-2/guides/season-journey-missions"
+      },
+      "text": {
+        "en": "Red Horizon Journey – Mission 7: apply Burn to 5 enemies within 3 seconds",
+        "tr": "Red Horizon Yolculuğu – Görev 7: 3 saniye içinde 5 düşmana Burn uygula",
+        "de": "Red Horizon Reise – Mission 7: Burn innerhalb von 3 Sekunden auf 5 Gegner anwenden",
+        "fr": "Parcours Red Horizon – Mission 7 : appliquer Burn à 5 ennemis en 3 secondes",
+        "es": "Recorrido Red Horizon – Misión 7: aplica Burn a 5 enemigos en 3 segundos",
+        "it": "Percorso Red Horizon – Missione 7: applica Burn a 5 nemici entro 3 secondi",
+        "pt": "Jornada Red Horizon – Missão 7: aplique Burn a 5 inimigos em 3 segundos",
+        "ru": "Путешествие Red Horizon – Миссия 7: наложите Burn на 5 врагов за 3 секунды",
+        "pl": "Podróż Red Horizon – Misja 7: nałóż Burn na 5 wrogów w ciągu 3 sekund",
+        "nl": "Red Horizon-reis – Missie 7: pas Burn toe op 5 vijanden binnen 3 seconden"
+      },
+      "how": {
+        "en": "Use an Incendiary grenade with the Atomize augment for extra radius and run Bank Headquarters on Story. Eclipse Protocol with a Firestarter Chem Launcher is a more reliable option.",
+        "tr": "Atomize augment'iyle yarıçapı artırılmış Incendiary el bombası kullan, Bank Headquarters'ı Story'de oyna. Eclipse Protocol ile Firestarter Chem Launcher daha güvenilir bir seçenektir.",
+        "de": "Nutze eine Incendiary-Granate mit dem Atomize-Augment für mehr Radius und spiele Bank Headquarters auf Story. Eclipse Protocol mit Firestarter Chem Launcher ist die zuverlässigere Option.",
+        "fr": "Prenez une grenade Incendiary avec l'augment Atomize pour plus de rayon et lancez Bank Headquarters en Histoire. Eclipse Protocol avec un Firestarter Chem Launcher est plus fiable.",
+        "es": "Usa una granada Incendiary con el aumento Atomize para más radio y juega Bank Headquarters en Historia. Eclipse Protocol con Firestarter Chem Launcher es más fiable.",
+        "it": "Usa una granata Incendiary con l'augment Atomize per un raggio maggiore e gioca Bank Headquarters a Storia. Eclipse Protocol con Firestarter Chem Launcher è più affidabile.",
+        "pt": "Use uma granada Incendiary com o aprimoramento Atomize para mais raio e jogue Bank Headquarters na História. Eclipse Protocol com Firestarter Chem Launcher é mais confiável.",
+        "ru": "Используйте гранату Incendiary с аугментом Atomize для большего радиуса и запустите Bank Headquarters на Story. Eclipse Protocol с Firestarter Chem Launcher надёжнее.",
+        "pl": "Użyj granatu Incendiary z augmentem Atomize dla większego promienia i zagraj Bank Headquarters na Story. Eclipse Protocol z Firestarter Chem Launcher jest pewniejszy.",
+        "nl": "Gebruik een Incendiary-granaat met de Atomize-augment voor extra radius en speel Bank Headquarters op Story. Eclipse Protocol met Firestarter Chem Launcher is betrouwbaarder."
+      }
+    },
+    {
+      "id": "y8s3-journey-m7-achilles-tanks",
+      "cat": "journey",
+      "source": {
+        "url": "https://grindout.com/division-2/guides/season-journey-missions"
+      },
+      "text": {
+        "en": "Red Horizon Journey – Mission 7: eliminate Tanks under the effect of Achilles' Heal",
+        "tr": "Red Horizon Yolculuğu – Görev 7: Achilles' Heal etkisindeki Tank'ları öldür",
+        "de": "Red Horizon Reise – Mission 7: Tanks unter dem Effekt von Achilles' Heal ausschalten",
+        "fr": "Parcours Red Horizon – Mission 7 : éliminer des Tanks sous l'effet d'Achilles' Heal",
+        "es": "Recorrido Red Horizon – Misión 7: elimina Tanks bajo el efecto de Achilles' Heal",
+        "it": "Percorso Red Horizon – Missione 7: elimina Tank sotto l'effetto di Achilles' Heal",
+        "pt": "Jornada Red Horizon – Missão 7: elimine Tanks sob o efeito de Achilles' Heal",
+        "ru": "Путешествие Red Horizon – Миссия 7: уничтожьте Tank под действием Achilles' Heal",
+        "pl": "Podróż Red Horizon – Misja 7: wyeliminuj Tanki pod działaniem Achilles' Heal",
+        "nl": "Red Horizon-reis – Missie 7: schakel Tanks uit onder het effect van Achilles' Heal"
+      },
+      "how": {
+        "en": "Run DCD Headquarters on Story, where a Tank always spawns at one spot. Kill it only if it shows the Achilles' Heal icon above its head; if not, restart the mission and try again.",
+        "tr": "DCD Headquarters'ı Story'de oyna; bir noktada her zaman Tank çıkar. Yalnızca başının üstünde Achilles' Heal simgesi varsa öldür; yoksa görevi yeniden başlat.",
+        "de": "Spiele DCD Headquarters auf Story, dort erscheint an einer Stelle immer ein Tank. Töte ihn nur, wenn das Achilles'-Heal-Symbol über seinem Kopf steht; sonst die Mission neu starten.",
+        "fr": "Lancez DCD Headquarters en Histoire : un Tank apparaît toujours au même endroit. Tuez-le seulement s'il affiche l'icône Achilles' Heal au-dessus de la tête ; sinon relancez la mission.",
+        "es": "Juega DCD Headquarters en Historia: siempre aparece un Tank en un punto. Mátalo solo si tiene el icono de Achilles' Heal sobre la cabeza; si no, reinicia la misión.",
+        "it": "Gioca DCD Headquarters a Storia: in un punto compare sempre un Tank. Uccidilo solo se ha l'icona Achilles' Heal sopra la testa; altrimenti riavvia la missione.",
+        "pt": "Jogue DCD Headquarters na História: um Tank sempre aparece em um ponto. Elimine-o só se tiver o ícone de Achilles' Heal sobre a cabeça; se não, reinicie a missão.",
+        "ru": "Запустите DCD Headquarters на Story: в одной точке всегда появляется Tank. Убивайте его только со значком Achilles' Heal над головой; иначе перезапустите миссию.",
+        "pl": "Zagraj DCD Headquarters na Story: w jednym miejscu zawsze pojawia się Tank. Zabij go tylko z ikoną Achilles' Heal nad głową; w przeciwnym razie zrestartuj misję.",
+        "nl": "Speel DCD Headquarters op Story: op één plek verschijnt altijd een Tank. Dood hem alleen als het Achilles' Heal-icoon boven zijn hoofd staat; zo niet, herstart de missie."
+      }
+    },
+    {
+      "id": "y8s3-journey-m8-finale",
+      "cat": "journey",
+      "source": {
+        "url": "https://grindout.com/division-2/guides/season-journey-missions"
+      },
+      "text": {
+        "en": "Red Horizon Journey – Mission 8: complete Journey Missions 1 to 7 (rewards: SHD XP, Season Pass XP, 2 Exotic Caches)",
+        "tr": "Red Horizon Yolculuğu – Görev 8: Yolculuk Görevleri 1-7'yi bitir (ödüller: SHD XP, Season Pass XP, 2 Exotic Cache)",
+        "de": "Red Horizon Reise – Mission 8: Reise-Missionen 1 bis 7 abschließen (Belohnung: SHD-XP, Season-Pass-XP, 2 Exotic Caches)",
+        "fr": "Parcours Red Horizon – Mission 8 : terminer les missions 1 à 7 du Parcours (récompenses : XP SHD, XP Season Pass, 2 Exotic Caches)",
+        "es": "Recorrido Red Horizon – Misión 8: completa las misiones 1 a 7 del Recorrido (recompensas: XP SHD, XP de Season Pass, 2 Exotic Caches)",
+        "it": "Percorso Red Horizon – Missione 8: completa le missioni da 1 a 7 del Percorso (ricompense: XP SHD, XP Season Pass, 2 Exotic Cache)",
+        "pt": "Jornada Red Horizon – Missão 8: conclua as missões 1 a 7 da Jornada (recompensas: XP SHD, XP do Season Pass, 2 Exotic Caches)",
+        "ru": "Путешествие Red Horizon – Миссия 8: завершите миссии 1–7 Путешествия (награды: опыт SHD, опыт Season Pass, 2 Exotic Cache)",
+        "pl": "Podróż Red Horizon – Misja 8: ukończ misje 1-7 Podróży (nagrody: XP SHD, XP Season Pass, 2 Exotic Cache)",
+        "nl": "Red Horizon-reis – Missie 8: voltooi reis-missies 1 t/m 7 (beloningen: SHD XP, Season Pass XP, 2 Exotic Caches)"
+      },
+      "how": {
+        "en": "This mission has no objectives of its own. It finishes itself once Journey Missions 1 to 7 are done, so work through any open objectives from those missions.",
+        "tr": "Bu görevin kendi hedefi yoktur. Yolculuk Görevleri 1-7 bitince tamamlanır; o görevlerde kalan hedefleri bitir.",
+        "de": "Diese Mission hat keine eigenen Ziele. Sie ist erledigt, sobald die Reise-Missionen 1 bis 7 fertig sind; schließe also deren offene Ziele ab.",
+        "fr": "Cette mission n'a pas d'objectifs propres. Elle se termine une fois les missions 1 à 7 faites : finissez leurs objectifs restants.",
+        "es": "Esta misión no tiene objetivos propios. Se completa al terminar las misiones 1 a 7, así que acaba los objetivos pendientes de esas misiones.",
+        "it": "Questa missione non ha obiettivi propri. Si completa finite le missioni da 1 a 7, quindi porta a termine i loro obiettivi rimasti.",
+        "pt": "Esta missão não tem objetivos próprios. Ela termina quando as missões 1 a 7 estiverem feitas, então conclua os objetivos restantes delas.",
+        "ru": "У этой миссии нет своих целей. Она завершается после миссий 1–7, поэтому закройте оставшиеся цели в них.",
+        "pl": "Ta misja nie ma własnych celów. Kończy się po ukończeniu misji 1-7, więc dokończ ich pozostałe cele.",
+        "nl": "Deze missie heeft geen eigen doelen. Ze is klaar zodra reis-missies 1 t/m 7 af zijn, dus rond de openstaande doelen daarvan af."
       }
     },
     {

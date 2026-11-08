@@ -1,10 +1,12 @@
 # Mobil push bildirimi — kalan kurulum adımı
 
 Bağlam: `server/mobile.js` push gönderimi tamamen hazır (Android/FCM canlı,
-iOS/APNs kodu hazır — bkz. `mobile_companion_roadmap.md`). Flutter uygulaması
-artık `PUT /v1/mobile/push-tokens/{id}` ucunu çağırıyor (eşleştirme sonrası ve
-her açılışta, zaten eşleşmişse) — bkz. `mobile/lib/services/push_registration.dart`
-ve `mobile/lib/services/cloud_link.dart`. **Tek eksik parça**: Android projesine
+iOS/APNs kodu hazır — bkz. `mobile_companion_roadmap.md`). Flutter uygulaması,
+kullanıcı Bulut eşleştirmesi ekranındaki **Masaüstü tarama bildirimleri**
+anahtarını açıkça etkinleştirdiğinde `PUT /v1/mobile/push-tokens/{id}` ucunu
+çağırır. Uygulama açılışında veya yalnızca eşleştirme yapıldığı için izin
+penceresi açılmaz — bkz. `mobile/lib/services/push_registration.dart` ve
+`mobile/lib/services/cloud_link.dart`. **Tek eksik parça**: Android projesine
 gerçek bir Firebase yapılandırma dosyası (`google-services.json`) eklenmesi.
 Bu dosya olmadan `Firebase.initializeApp()` sessizce başarısız olur (uygulama
 çökmez, push bildirimi kaydı atlanır — bkz. `push_registration.dart`'taki
@@ -41,8 +43,10 @@ tek satırın yorumunu kaldırmak + 5. maddedeki doğrulama.
      hazır, dokunmana gerek yok.)
 5. `flutter pub get` (yeni eklenen `firebase_core`/`firebase_messaging`
    paketlerini çeker), sonra `flutter build apk --debug` (veya `flutter run`)
-   ile gerçek cihazda/emülatörde dene — "Bildirime izin ver" istemi çıkmalı,
-   ardından uygulama arka planda sunucuya kaydolmalı (log yok; sessiz).
+   ile gerçek cihazda/emülatörde dene. Telefonu bulutla eşleştir, ardından
+   Bulut eşleştirmesi ekranındaki **Masaüstü tarama bildirimleri** anahtarını
+   aç — "Bildirime izin ver" istemi yalnız bu anda çıkmalı; izin sonrası cihaz
+   tokenı alınmalıdır.
 6. Doğrulama: telefon eşleştir → masaüstünde bir `scan_result` olayı tetikle
    (örn. bir eşya tara) → telefona FCM bildirimi gelmeli. Sunucu tarafında
    `PUT /push-tokens` yanıtındaki `delivery` alanı `"available"` dönüyorsa
