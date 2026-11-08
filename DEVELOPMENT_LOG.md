@@ -2,6 +2,82 @@
 
 Önemli kararların ve sürümlerin kısa, kronolojik özeti. Tam ayrıntı için `git log` ve `.github/release_notes.md`.
 
+## GAMLETSOL — TV/konsol sesi canlı çeviri, yeni bağımsız uygulama (2026-11-09)
+
+- Kullanıcı, "game caption" tarzı uygulamaların TV/konsol sesini telefon
+  mikrofonuyla dinleyip altyazıya çevirebildiğini belirtti ve bunun mevcut
+  `mobile/` companion'a mı yoksa ayrı bir uygulamaya mı ekleneceğini sordu.
+  Mekanizma araştırıldı: Google'ın "Live Caption" özelliği telefonun KENDİ
+  çalan sesini yakalıyor (research.google/blog doğrulandı — mikrofon/oda
+  sesi değil); kullanıcının istediği "TV/konsol sesini mikrofonla dinleme"
+  davranışı Google "Live Transcribe" / Translate'in "Transcribe" moduna
+  benziyor (mikrofon → ASR → çeviri).
+- İki netleştirici soru soruldu (kapsam: mevcut uygulamaya mı ekle yoksa ayrı
+  uygulama mı; STT/çeviri motoru: bulut mu cihaz-üstü mü). Kullanıcı **ayrı,
+  bağımsız bir uygulama** ("GAMLETSOL" — Game Translate Console kısaltması)
+  ve **bulut API** (Google Cloud) seçti.
+- **Yeni proje**: `gamletsol/` (repo köküne, `mobile/`'dan tamamen ayrı
+  Flutter uygulaması, paket adı `com.federalturk.gamletsol`). Android
+  Gradle iskeleti `mobile/android`'den esinlenilip sadeleştirildi (beta/Play
+  imzalama YOK, sadece debug imzalı CI doğrulaması).
+- **Mimari**: `record` paketi (`startStream`, LINEAR16/PCM16/16kHz/mono —
+  WAV başlığı gerekmiyor) ile mikrofon yakalama → ~4 saniyelik parçalar
+  halinde Google Cloud Speech-to-Text REST (`v1/speech:recognize`) → Google
+  Cloud Translation API v2 (`language/translate/v2`) → canlı altyazı ekranı.
+  API anahtarı `flutter_secure_storage` ile cihazda saklanıyor, asla koda/
+  loga yazılmıyor (AGENTS.md madde 3).
+- **Kök neden odaklı doğrulama** (bu kum havuzunda Flutter SDK kurulu değil,
+  `mobile/` ile aynı durum): her dış API çağrısının İSTEK/YANIT şeması
+  (`record` paketinin `AudioRecorder`/`RecordConfig` API'si, Google Speech
+  `speech:recognize` uç noktası, Google Translate v2 uç noktası,
+  `DropdownButtonFormField.initialValue`, `ThemeData.cardTheme`'in
+  `CardThemeData` tipi) resmi dokümantasyondan TEK TEK doğrulandı — Xbox
+  Companion UWP işindeki tahmin-ve-dene hatasından ders çıkarılarak. Tüm
+  yeni `.dart` dosyalarında parantez/süslü-parantez dengesi programatik
+  olarak kontrol edildi.
+- **Doğrulama durumu (dürüstlük notu)**: `.github/workflows/build-gamletsol.yml`
+  (`flutter analyze` + `flutter test` + `flutter build apk --debug`,
+  ubuntu-latest) tetiklendi — CI sonucu bu commit'ten SONRA doğrulanacak.
+  Gerçek bir Google Cloud API anahtarıyla uçtan uca davranış (mikrofon →
+  STT → çeviri) HİÇ denenmedi — bkz. `gamletsol/README.md` "Bilinen
+  sınırlamalar" ve "Doğrulama durumu".
+
+## Xbox Companion — statik referans UWP uygulaması, CI derleme teşhisi (2026-11-08/09)
+
+- Kullanıcının Microsoft Partner Center kaydı olduğunu belirtmesi üzerine,
+  önce ayrı bir Xbox/UWP uygulaması başlatılması, sonra (Xbox'ta üçüncü
+  taraf ekran-üstü-overlay/canlı-OCR için resmi bir API bulunmadığı
+  araştırmayla doğrulandıktan sonra) kapsamın **statik referans uygulaması**
+  (10 dilde görev/build verisi, canlı OCR/overlay YOK) olarak sınırlanması
+  kullanıcı onayıyla kararlaştırıldı.
+- `xbox-companion/` (klasik UWP, C#, `Windows.UI.Xaml` — WinUI3/Windows App
+  SDK DEĞİL, Xbox konsolları bunu desteklemiyor) sıfırdan yazıldı; bu kum
+  havuzunda Windows/MSBuild/UWP araç zinciri yok, tek doğrulama yolu
+  `.github/workflows/build-xbox.yml` (windows-latest).
+- **CI derleme teşhisi (5 deneme, kanıta dayalı, tahmin değil)**:
+  1. `PackageReference` ile WinRT (`Windows.*`) ad alanları çözülemedi.
+  2. `packages.config`'e geçildi — kısmen düzeldi ama TEMEL .NET tipleri
+     (`System.String` vb.) bile çözülemedi.
+  3. "VS UWP iş yükü eksik" varsayımıyla `vs_installer modify` eklendi —
+     işe yaramadı (çağırma operatörü muhtemelen gerçek süreci beklemedi).
+  4. **Kök neden bulundu**: `Microsoft.NETCore.UniversalWindowsPlatform`
+     6.2.14 paketinin `.nupkg`'si indirilip incelendi — paketin
+     `.props`/`.targets` dosyaları HİÇBİR referans derlemesi bağlamıyor
+     (doğrulandı, içerik boş/işlevsiz). `packages.config` kurulumunda bu
+     referansları normalde gerçek Visual Studio/NuGet istemcisi csproj'a
+     otomatik yazar — bu proje elle yazıldığı için bu adım hiç olmadı.
+     Paketin `ref/uap10.0.15138/` klasöründeki 153 facade DLL'i (mscorlib,
+     System.Runtime vb.) için `<Reference>` girdileri üretilip csproj'a
+     eklendi (commit `186f12d`) → temel .NET tipleri TAMAMEN çözüldü.
+  5. Kalan tek hata sınıfı artık yalnızca `Windows.*` (WinRT) ad alanları —
+     bunun kaynağı NuGet paketi değil, doğrudan Windows SDK'nın
+     `Windows.winmd` metadata dosyası. Teşhis + `Start-Process -Wait
+     -PassThru` ile gerçek kurulum bekleme eklendi (commit `2716d2e`) —
+     sonuç bu günlüğün yazıldığı sırada henüz CI'da bekleniyor.
+- **Dürüstlük notu**: Bu proje hiçbir noktada gerçek bir Xbox konsoluna
+  veya Partner Center'a karşı denenmedi; `Package.appxmanifest`'teki
+  Identity/Publisher alanları yer tutucu. Bkz. `xbox-companion/README.md`.
+
 ## Xbox doğrudan bağlantı — kimlik doğrulama akışı (deneysel, Faz 3a alt-aşama 1, mobil, 2026-11-08)
 
 - Kullanıcı, elinde test edecek gerçek bir Xbox Series X/S olmadığını ve "haftalarca kod

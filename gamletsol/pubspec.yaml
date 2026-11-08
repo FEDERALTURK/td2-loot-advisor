@@ -1,0 +1,34 @@
+name: gamletsol
+description: "GAMLETSOL — TV/konsol sesini mikrofonla dinleyip canlı altyazıya çeviren bağımsız uygulama (Kaivolt)."
+publish_to: 'none'
+
+# TD2 Loot Advisor'ın mobil companion'ından (mobile/) bağımsız, ayrı bir
+# uygulama. Kullanıcının isteği üzerine "GAMLETSOL" (Game Translate Console
+# kısaltması) adıyla ayrı paket/mağaza girişi olarak başlatıldı (2026-11-09).
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.13.7
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  http: ^1.6.0
+  # Mikrofon kaydı: ham PCM16 akışı (startStream) Google Cloud Speech-to-Text
+  # REST API'sine LINEAR16 kodlamasıyla doğrudan gönderilebiliyor — ayrıca bir
+  # WAV başlığı yazmaya gerek yok.
+  record: ^7.1.2
+  # Bulut API anahtarı (Google Cloud) düz tercih dosyasında DEĞİL, Android
+  # Keystore / iOS Keychain tabanlı güvenli depoda tutulur (AGENTS.md madde 3
+  # ve genel "sırları koda/loglara yazma" ilkesiyle uyumlu).
+  flutter_secure_storage: ^10.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
