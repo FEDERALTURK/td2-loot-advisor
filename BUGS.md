@@ -80,9 +80,13 @@
     keystore üretip onunla imzalıyor. Ayrıntı, secret ekleme adımları ve **önemli geriye dönük
     etki** (önceki tüm beta APK'ları farklı anahtarlarla imzalıydı — kullanıcıların bu
     düzeltmeden sonraki ilk sürümü tek seferlik kaldır-kur yapması gerekecek) için bkz.
-    `docs/mobile_beta_signing_tr.md`. **Doğrulanmadı:** secret'lar henüz GitHub'a eklenmedi
-    (bu oturumun o API'ye erişimi yok, kullanıcı eklemeli), gerçek bir CI çalışması ve gerçek
-    cihazda kaldır-kur-güncelle senaryosu test edilmedi.
+    `docs/mobile_beta_signing_tr.md`. **Güncelleme (2026-11-08):** Kullanıcı secret'ları GitHub'a
+    ekledi; `workflow_dispatch` ile gerçek bir CI çalışması tetiklendi (run 42502909839), üretilen
+    APK indirilip imza sertifikası (androguard, v2) çıkarıldı — SHA256 parmak izi, keystore
+    üretilirken alınan fingerprint'le birebir eşleşti. **P0 doğrulandı ve giderildi.**
+    **Hâlâ doğrulanmadı:** gerçek bir telefonda "eski APK kaldır → yeni kur → bir sonraki sürümü
+    üstüne güncelle" senaryosu (bu CI çalışması bir tag push değildi, public release
+    oluşmadı — onay gerektirecek bir sonraki gerçek `companion-v*` yayınında denenmeli).
 
 ## Bilinen test kapsamı boşlukları
 

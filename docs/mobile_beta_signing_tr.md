@@ -72,11 +72,18 @@ demek oluyor ki:
 
 - [Doğrulandı] `build.gradle.kts` değişikliği, mevcut `playRelease` desenine
   birebir simetrik şekilde yazıldı — aynı `require(...)` güvenlik kontrolleri var.
-- [Doğrulanmadı — bu ortamda Flutter SDK'sı yok] `flutter build apk --release
-  --android-project-arg=githubBetaRelease=true` komutu gerçekten çalıştırılmadı.
-  Secret'lar eklendikten sonra GitHub Actions'ın gerçek bir `companion-v*`
-  etiketiyle (veya `workflow_dispatch` ile) çalıştırılıp APK'nın imzalı
-  çıktığının (`apksigner verify --print-certs`) doğrulanması gerekiyor.
+- [Doğrulandı — 2026-11-08] Secret'lar GitHub'a eklendikten sonra
+  `workflow_dispatch` ile gerçek bir CI çalışması tetiklendi
+  (run 42502909839): "Decode beta signing keystore" adımı `USE_BETA_SIGNING=true`
+  üretti, `flutter build apk --release --android-project-arg=githubBetaRelease=true`
+  başarıyla tamamlandı. Üretilen APK indirilip `androguard` ile v2 imza
+  sertifikası çıkarıldı — SHA256 parmak izi
+  `B1:FD:54:C8:72:76:E9:75:3F:CB:AF:4B:6D:93:F0:01:0A:D9:D3:FD:D9:38:06:E0:46:2C:78:67:A5:EA:0F:BA`,
+  bu da aynı oturumda `keytool` ile keystore üretilirken alınan fingerprint'le
+  birebir eşleşiyor. **Yani CI artık her çalışmada aynı kalıcı anahtarla
+  imzalıyor — P0 giderildi.** (Not: bu test çalışması bir tag push değil
+  `workflow_dispatch` olduğu için "Publish companion release" adımı koşullu
+  olarak atlandı, hiçbir public release/tag oluşmadı.)
 - [Doğrulanmadı] Gerçek bir telefonda "eski APK kaldır → yeni kur → bir sonraki
   sürümü üstüne güncelle" senaryosu denenmedi — bu, Codex'in raporundaki en
   riskli, test edilmemiş adımla aynı, sadece imza artık kalıcı.
