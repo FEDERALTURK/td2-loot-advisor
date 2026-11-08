@@ -43,6 +43,29 @@ kuruludur, sadece ilk adımda (girdi) farklılaşırlar:
   `trscreen.py` (yerinde veya köşe overlay gösterimi). Yani OCR+çeviri+overlay "motoru" sıfırdan
   yazılmayacak — zaten var, ileride sadece GİRDİ kaynağını değiştireceğiz.
 
+### 1.4 Xbox'ın kendi resmi "Game Caption" API'si (XClosedCaption / XAccessibility)
+Kullanıcının "Game Caption uygulaması tarzında olacak" talebi üzerine ayrıca araştırıldı: Xbox'ta
+**gerçekten "Game Caption" adında resmi bir sistem var**, ama bu genel-amaçlı bir uygulama değil, Xbox
+GDK'nın (`XAccessibility` ad alanı, `XClosedCaptionSetEnabled`/`XClosedCaptionGetProperties` fonksiyonları)
+sunduğu bir **geliştirici API'si**:
+- **Nasıl çalışır:** Oyunu yapan stüdyo, kendi oyununa bu API'yi entegre eder; API konsolun sistem
+  genelindeki altyazı tercihlerini (font, boyut, arka plan kutusu, konum, hoparlör rengi) oyuna bildirir,
+  oyun da kendi altyazısını BUNA UYGUN RENDER EDER. Yani metni Xbox üretmiyor — **oyunun kendisi altyazıyı
+  biliyor ve çiziyor**, Xbox sadece "nasıl görünsün" tercihini merkezi olarak yönetiyor.
+- **Bizim için sonucu:** Bu API'ye DIŞARIDAN bağlanamayız — kendi oyunumuz olmadığı ve üçüncü parti
+  oyunların koduna müdahale etmediğimiz için (projenin "oyuna dokunmaz" ilkesi) bu API'yi kullanamayız.
+  Yani "Game Caption" adıyla andığın şey işlevsel olarak bize **kapalı bir sistem**; biz kendi OCR/ASR
+  tabanlı bağımsız overlay'imizi üretmek zorundayız (yukarıdaki Bölüm 3).
+- **Alınacak tek şey — görsel/UX kuralı:** Xbox'ın resmi altyazı stil kılavuzu (XAccessibility
+  Guidelines) net bir görsel dil tanımlıyor: ekranın altında yarı saydam siyah kutu, okunaklı
+  büyük/orta/küçük font seçeneği, gerekirse konuşmacı adı/rengi etiketi. **Kendi overlay'imizin (Faz 1-2)
+  varsayılan görünümünü bu kurala benzer tasarlayacağız** — kullanıcı konsollarda gördüğü yerel altyazı
+  stiline aşina olduğu için, bizim overlay'imiz de "resmi bir Xbox/PS özelliği" gibi hissettirecek, ama
+  mühendislik olarak tamamen bağımsız (kendi OCR/ASR + çeviri + çizim) kalacak.
+- **Kaynak:** [Xbox XAccessibility üye listesi](https://devdocs.xbox.com/reference/system/xaccessibility/xaccessibility_members.md),
+  [XClosedCaptionSetEnabled referansı](https://devdocs.xbox.com/reference/system/xaccessibility/functions/xclosedcaptionsetenabled.md),
+  [Xbox Accessibility Guidelines](https://devdocs.xbox.com/gaming/accessibility/xbox-accessibility-guidelines/104)
+
 ### Genel çıkarım
 Üç yaklaşımın hepsinde aynı iki alt sistem var: **(A) konuşma-tanıma (ASR) hattı** (ses varsa) ve
 **(B) OCR hattı** (ekranda yazı varsa — diyalog altyazısı, görev metni, menü). Hangisinin kullanılacağı
@@ -177,6 +200,9 @@ zorunlu kılma.
 - [ ] Mevcut `livetranslate.py`/`overlay.py` hattını bu akışa bağla (EN→TR, yerinde veya köşe overlay).
 - [ ] Ayarlar'da yeni bir "Konsol Modu" sekmesi/aç-kapa: kullanıcı "Xbox" veya "PlayStation" seçer, uygulama
       ilgili pencereyi arar.
+- [ ] Overlay'in varsayılan görünümü Xbox'ın resmi altyazı stiline benzetilecek (bkz. §1.4): ekranın
+      altında yarı saydam siyah kutu, 3 font boyutu seçeneği (küçük/orta/büyük), isteğe bağlı konuşmacı
+      etiketi — mevcut `overlay.py`'deki köşe/yerinde modlarına ek bir üçüncü "alt bant" modu olarak.
 - [ ] Test: en az 2-3 farklı oyunda (altyazılı diyalog içeren) gerçek Xbox/PS5 + Remote Play ile uçtan uca
       doğrulama — **gerçek konsol ve gerçek Remote Play penceresiyle, bu görevi sadece kod okuyarak
       "doğrulanmış" saymayın.**
