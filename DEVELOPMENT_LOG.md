@@ -30,10 +30,17 @@
   modeli indirme, pil/performans). Ayrıntı ve bilinçli MVP basitleştirmeleri (periyodik `takePicture()`
   vs canlı kare akışı, hizalama kutusunun OCR'ı kırpmaması) için `docs/console_game_caption_roadmap.md`
   Faz 1 bölümüne bakın.
-- **Bekleyen**: Henüz commit/push edilmedi. Commit/push kod+doküman işi olduğu için (AGENTS.md madde 6)
-  ayrı onay gerektirmiyor, ama CI'nin `flutter analyze`/`flutter test` adımlarının gerçekten geçip
-  geçmediği push sonrası izlenmeli — bu paketler eklendiğinde bilinmeyen bir derleme hatası çıkma
-  ihtimali gerçek ve göz ardı edilmemeli.
+- **CI doğrulaması (aynı gün)**: Push sonrası `workflow_dispatch` ile 3 deneme yapıldı. İlk ikisi gerçek
+  hatalar buldu ve düzeltildi: (1) `flutter analyze` 3 lint uyarısı (unused_field,
+  prefer_initializing_formals×2); (2) release APK derlemesi R8'de "Missing class" hatasıyla patladı
+  (`google_mlkit_text_recognition`'ın kullanılmayan script sınıflarına referansı —
+  `android/app/proguard-rules.pro` ile `-dontwarn` kuralları eklenerek giderildi). **Üçüncü deneme (run
+  42514233449) tamamen yeşil**: analyze/test/gerçek APK derlemesi hepsi geçti. Ayrıntı:
+  `docs/console_game_caption_roadmap.md` Faz 1 "Durum" bölümü.
+- **Bekleyen**: Kod artık derleniyor (kanıtlanmış), ama **sıfır gerçek cihaz testi** kalıyor — kamera
+  izni akışı, OCR doğruluğu, çeviri modeli indirme, pil/performans hiçbiri henüz denenmedi. Bu özellik
+  bir `companion-v*` public sürümüne dahil edilmeden önce en az bir gerçek telefonda uçtan uca
+  doğrulanmalı.
 
 ## Mobil companion v0.1.9 — imza sürekliliği P0 düzeltmesiyle ilk yayın (0.1.9, 2026-11-08)
 

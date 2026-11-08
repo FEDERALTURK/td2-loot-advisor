@@ -282,14 +282,23 @@ zorunlu kılma.
 
 ### Faz 1 — MVP: Mobil companion'da kamera modu (Seçenek C — en düşük risk, platform bağımsız)
 
-**Durum (2026-11-08): Kod yazıldı, `main`'e commit edilmedi/push edilmedi henüz, SIFIR gerçek cihaz
-testi.** Bu konteynerde Flutter SDK kurulu değil — ne `flutter pub get` ne `flutter analyze/test` ne de
-gerçek bir derleme çalıştırılabildi. Kullanılan API'ler (bkz. altta) `google_ml_kit_flutter` ve
-`flutter/packages` (camera) depolarının gerçek kaynak kodu klonlanıp tek tek doğrulandı (metod imzaları,
-enum/alan adları birebir kontrol edildi) — ama bu yalnız "API doğru çağrılıyor" seviyesinde bir
-doğrulamadır, **"gerçekten derleniyor ve telefonda çalışıyor" DEĞİL**. CI'nin `flutter analyze`/
-`flutter test` adımları bir sonraki push'ta bunu kısmen doğrulayacak; gerçek cihaz (kamera izni akışı,
-OCR doğruluğu, çeviri modeli indirme, performans) testi mutlaka gerekiyor.
+**Durum (2026-11-08): Kod `main`'e push edildi, CI'de gerçek derleme doğrulandı — ama HÂLÂ SIFIR gerçek
+cihaz testi.** Bu konteynerde Flutter SDK kurulu olmadığı için kod önce yalnızca kaynak-koddan statik
+olarak doğrulanmıştı (API imzaları `google_ml_kit_flutter` deposundan). Push sonrası `workflow_dispatch`
+ile CI'de üç deneme yapıldı — ilk ikisi gerçek hatalar buldu, üçüncüsü tamamen yeşil oldu:
+1. (run 42513347058) `flutter analyze`: 3 lint uyarısı (`unused_field`, 2× `prefer_initializing_formals`)
+   — düzeltildi.
+2. (run 42513566679) `flutter analyze`/`flutter test` geçti ama release APK derlemesi R8'de patladı:
+   `google_mlkit_text_recognition`, yalnız Latin script kullansak bile kodunda TÜM scriptlerin (Çince/
+   Devanagari/Japonca/Korece) sınıflarına referans veriyor; bu scriptlerin ayrı native kütüphaneleri
+   bağımlılık olarak eklenmediği için "Missing class" hatası verdi. `android/app/proguard-rules.pro`
+   (`-dontwarn` kuralları) eklenerek düzeltildi.
+3. (run 42514233449) **Tüm adımlar yeşil**: `flutter analyze`, `flutter test`, gerçek
+   `flutter build apk --release` (R8/minify dahil) başarıyla tamamlandı, APK artifact olarak yüklendi.
+
+Yani kod artık gerçekten **derleniyor** (statik analiz + gerçek APK üretimi kanıtlandı) — ama bu hâlâ
+"telefonda gerçekten çalışıyor" anlamına GELMİYOR: kamera izni akışı, OCR doğruluğu, çeviri modeli
+indirme, pil/performans — hiçbiri gerçek bir cihazda denenmedi. Bir sonraki adım budur.
 
 - [x] `mobile/lib/console/console_caption_page.dart` + `console_translate_service.dart`: yeni "Konsol"
       sekmesi (bottom nav'a 5. öğe olarak eklendi, `main.dart`). Kamera önizleme + yeşil hizalama kutusu
