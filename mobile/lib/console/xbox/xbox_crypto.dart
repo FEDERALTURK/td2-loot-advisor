@@ -95,8 +95,8 @@ XboxJwtKeys generateXboxJwtKeys() {
     _secureRandom(),
   ));
   final pair = keyGen.generateKeyPair();
-  final priv = pair.privateKey as ECPrivateKey;
-  final pub = pair.publicKey as ECPublicKey;
+  final priv = pair.privateKey;
+  final pub = pair.publicKey;
 
   final x = pub.Q!.x!.toBigInteger()!;
   final y = pub.Q!.y!.toBigInteger()!;
