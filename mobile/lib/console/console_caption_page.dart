@@ -22,6 +22,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 
 import 'console_translate_service.dart';
 import 'tv_cast_service.dart';
+import 'xbox/xbox_login_page.dart';
 
 const _bg = Color(0xFF090C12);
 const _panel = Color(0xFF121722);
@@ -258,6 +259,13 @@ class _ConsoleCaptionPageState extends State<ConsoleCaptionPage>
     appBar: AppBar(
       title: const Text('Konsol Modu'),
       actions: [
+        IconButton(
+          tooltip: 'Xbox\'a bağlan (deneysel)',
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const XboxLoginPage()),
+          ),
+          icon: const Icon(Icons.videogame_asset_rounded),
+        ),
         IconButton(
           tooltip: 'Nasıl çalışır?',
           onPressed: () => _showInfo(context),

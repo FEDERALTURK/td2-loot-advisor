@@ -62,6 +62,13 @@ dependencies:
   # olarak göstermek için. Sunucunun kendisi dart:io HttpServer ile yazıldı,
   # ek bağımlılık gerekmedi — bu paket yalnız QR GÖRSELİNİ üretir.
   qr_flutter: ^4.1.0
+  # Xbox doğrudan bağlantı (deneysel, bkz. docs/console_game_caption_roadmap.md
+  # §Xbox Doğrudan Bağlantı): Xbox Live kimlik doğrulama akışı özel bir ECDSA
+  # P-256 imzalama şeması kullanıyor (ham IEEE-P1363 r||s formatı, DER değil).
+  # Dart'ın resmi `crypto` paketi ECDSA desteklemiyor; pointycastle saf-Dart,
+  # uzun süredir bakımı yapılan standart seçenek — kaynağı klonlanıp
+  # ECDSASigner/ECKeyGenerator API'leri doğrulandı.
+  pointycastle: ^4.0.0
 
 dev_dependencies:
   flutter_test:
