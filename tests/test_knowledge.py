@@ -91,11 +91,25 @@ finally:
 # önbellek yokken yerel yedek de iki parçayı okur
 with tempfile.TemporaryDirectory() as _d:
     _dir = Path(_d)
-    (_dir / meta_sync.DESC_FILES[0]).write_text(json.dumps({"items": {"A": {"tr": "ilk"}}}), encoding="utf-8")
+    (_dir / meta_sync.DESC_FILES[0]).write_text(json.dumps({"schema": 1, "items": {"A": {"tr": "ilk"}}}), encoding="utf-8")
     ok(set(meta_sync.read_local_descriptions(_dir)) == {"A"}, "yerel: ikinci parça yoksa ilk parça yeter")
-    (_dir / meta_sync.DESC_FILES[1]).write_text(json.dumps({"items": {"A": {"tr": "ikinci"}, "B": {"tr": "b"}}}), encoding="utf-8")
+    (_dir / meta_sync.DESC_FILES[1]).write_text(json.dumps({"schema": 1, "items": {"A": {"tr": "ikinci"}, "B": {"tr": "b"}}}), encoding="utf-8")
     _local = meta_sync.read_local_descriptions(_dir)
     ok(set(_local) == {"A", "B"} and _local["A"]["tr"] == "ilk", "yerel: parçalar birleşti, ilk parça öncelikli")
+    _cache = _dir / "descriptions_cache.json"
+    _cache.write_text(json.dumps({"items": {"A": {"tr": "önbellek"}}}), encoding="utf-8")
+    _all = meta_sync.load_descriptions(_cache, (_dir,))
+    ok(_all["A"]["tr"] == "önbellek" and "B" in _all, "eski tek parçalı önbellek ikinci parçayı gizlemez")
+    _cache.write_text("{bozuk", encoding="utf-8")
+    ok(set(meta_sync.load_descriptions(_cache, (_dir,))) == {"A", "B"}, "bozuk önbellekte paket parçaları kullanılır")
+    (_dir / meta_sync.DESC_FILES[1]).write_text(json.dumps({"items": []}), encoding="utf-8")
+    ok(set(meta_sync.read_local_descriptions(_dir)) == {"A"}, "yerel: bozuk ikinci parça atlanır")
+    (_dir / meta_sync.DESC_FILES[0]).write_text(json.dumps({"schema": 1, "items": []}), encoding="utf-8")
+    try:
+        meta_sync.read_local_descriptions(_dir); ok(False, "yerel: bozuk ilk parça reddedilir")
+    except ValueError:
+        ok(True, "yerel: bozuk ilk parça reddedilir")
+    (_dir / meta_sync.DESC_FILES[0]).write_text(json.dumps({"schema": 1, "items": {"A": {"tr": "ilk"}}}), encoding="utf-8")
     (_dir / meta_sync.DESC_FILES[0]).unlink()
     try:
         meta_sync.read_local_descriptions(_dir); ok(False, "yerel: ilk parça zorunlu")

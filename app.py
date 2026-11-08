@@ -3049,13 +3049,7 @@ class App:
     # --- açıklama çevirileri (10 dil, günlük akıştan) ve kullanıcının eklediği diller için yapay zekâ çevirisi
     def desc_i18n(self):
         if getattr(self, "_desc_i18n", None) is None:
-            self._desc_i18n = {}
-            try:
-                self._desc_i18n = json.loads(DESC_CACHE.read_text(encoding="utf-8")).get("items", {})
-            except Exception:
-                for folder_ in (BASE / "meta", BUNDLE / "meta"):
-                    try: self._desc_i18n = meta_sync.read_local_descriptions(folder_); break
-                    except Exception: continue
+            self._desc_i18n = meta_sync.load_descriptions(DESC_CACHE, (BASE / "meta", BUNDLE / "meta"))
         return self._desc_i18n
 
     def _desc_sync(self):
