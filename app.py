@@ -3075,10 +3075,7 @@ class App:
     # --- açıklama çevirileri (10 dil, günlük akıştan) ve kullanıcının eklediği diller için yapay zekâ çevirisi
     def desc_i18n(self):
         if getattr(self, "_desc_i18n", None) is None:
-            self._desc_i18n = {}
-            for p_ in (DESC_CACHE, BASE / "meta" / "descriptions_i18n.json", BUNDLE / "meta" / "descriptions_i18n.json"):
-                try: self._desc_i18n = json.loads(p_.read_text(encoding="utf-8")).get("items", {}); break
-                except Exception: continue
+            self._desc_i18n = meta_sync.load_descriptions(DESC_CACHE, (BASE / "meta", BUNDLE / "meta"))
         return self._desc_i18n
 
     def _desc_sync(self):

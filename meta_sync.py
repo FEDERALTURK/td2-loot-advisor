@@ -368,6 +368,49 @@ def run_tasks(cfg, cache_path, app_version="", force=False):
 DESC_FILES = ("descriptions_i18n.json", "descriptions_i18n_2.json")
 
 
+def read_local_descriptions(folder):
+    """Klasördeki açıklama parçalarını birleştirir (önbellek henüz yokken yedek). İlk parça zorunlu.
+
+    `fetch_descriptions` ile aynı denetim ve öncelik: ortak bir ad varsa ilk parça geçerlidir.
+    """
+    base = json.loads((folder / DESC_FILES[0]).read_text(encoding="utf-8"))
+    if base.get("schema") != SCHEMA or not isinstance(base.get("items"), dict):
+        raise ValueError("bad description file")
+    items = {}
+    for name in DESC_FILES[1:]:
+        try:
+            part = json.loads((folder / name).read_text(encoding="utf-8"))
+            if part.get("schema") != SCHEMA or not isinstance(part.get("items"), dict):
+                raise ValueError("bad description shard")
+            items.update(part["items"])
+        except Exception as e:
+            log.debug("Local description shard %s skipped: %s", name, e)
+    items.update(base["items"])
+    return items
+
+
+def load_descriptions(cache_path, folders):
+    """Uygulamanın kullandığı çeviriler: paketteki parçalar + üstüne indirilen önbellek.
+
+    Önbellek (sunucudan, daha yeni) çakışan adlarda geçerlidir; eski, tek parçalı bir önbellek ise
+    paketteki ikinci parçanın girişlerini gizlemez.
+    """
+    items = {}
+    for folder in folders:
+        try:
+            items = read_local_descriptions(folder)
+            break
+        except Exception as e:
+            log.debug("Local descriptions in %s skipped: %s", folder, e)
+    try:
+        cached = json.loads(cache_path.read_text(encoding="utf-8")).get("items")
+        if isinstance(cached, dict):
+            items = {**items, **cached}
+    except Exception as e:
+        log.debug("Description cache skipped: %s", e)
+    return items
+
+
 def fetch_descriptions(builds_setting, app_version="", previous=None):
     """Açıklama çevirilerini parçalardan birleştirir. İlk parça zorunlu, ikincisi henüz olmayabilir.
 
