@@ -109,6 +109,29 @@ bölümlerdeki tahminlerimizi doğruluyor**, ek olarak şu somut gerçek detayla
   deneme. Bizim projenin "ücretsiz/açık kaynak" ilkesiyle örtüşmüyor — bu bölüm bilgi amaçlı, kopyalama
   hedefi değil.
 
+### 1.6 Kullanıcıdan gelen ek açıklama (uygulamanın kendi tanıtım metni, doğrudan doğrulanmadı)
+Kullanıcı uygulamanın kendi tanıtım/FAQ metnini aktardı; bu bölümdeki bilgiler **benim tarafımdan ayrıca
+web'den bağımsız doğrulanmadı**, kullanıcının verdiği metne dayanıyor — yukarıdaki (§1.5, benim doğrudan
+sitesinden okuduğum) bulgularla çakışmayan, onu TAMAMLAYAN noktalar:
+
+- **"Akıllı Dublaj" (yeni detay):** Sadece çeviriyi sesli okumanın (TTS) ötesinde, "Türkçe seslendirme ile
+  oynama" deniyor — bu, tek düz bir TTS sesinden daha ileri bir vaat (muhtemelen karaktere özel ses/ton
+  ayrımı veya en azından daha "doğal" bir TTS motoru). **Gerçek teknik uygulaması doğrulanmadı** — bizim
+  planımızda bu, Faz 1'deki basit TTS-okumanın isteğe bağlı bir ileri seviye versiyonu olarak not edilebilir
+  ama MVP kapsamına alınmamalı.
+- **PS5 bağlantısı için "uzaktan bağlantı" seçeneği de var deniyor** (sadece aynı Wi-Fi değil). Bu,
+  §1.5'te doğruladığım "PS5 tamamen açık olmalı ve telefonla aynı ağa bağlı olmalı" ifadesiyle tam
+  örtüşmüyor olabilir — ya PS5'in kendi "uzaktan oynama" özelliğinin internet üzerinden de çalıştığı
+  kastediliyor (Sony Remote Play zaten hem LAN hem internet üzerinden çalışabilir, bu durumda çelişki
+  yok) ya da ek bir detay kaçırılmış. **Netleştirilmedi, bizim planımızı değiştirmiyor** (Faz 3 zaten
+  Remote Play protokolünü kapsıyor).
+- **Samsung Smart TV (2019+) doğrudan uygulama mağazasından kurulabiliyor** — önceki taramamda "Samsung
+  için telefon üzerinden kurulum" şeklinde bir ayrım görünmüştü; kullanıcının metni bunu daha basit
+  (doğrudan TV mağazasından) olarak anlatıyor. Küçük bir tutarsızlık, bizim TV modu planımızı (Faz 5)
+  etkilemiyor.
+- **Kullanım akışı (3 adım: altyazıyı aç → bağlantıyı kur → anlık çeviri/seslendirme)** zaten bizim Faz 1
+  tasarımımızla uyumlu, yeni bir gereksinim eklemiyor.
+
 **Sonuç — plan güncellemesi:** Yukarıdaki bulgular ışığında Bölüm 5'teki fazlar şu şekilde revize edildi:
 kamera modu (eski Faz 4) gerçek MVP olarak ÖNE alındı ve mobil companion'a taşındı; ASR fazı (eski Faz 2)
 TTS-okuma ile değiştirildi (çok daha basit); Remote Play/Smartglass entegrasyonu açık lisans/hukuki
