@@ -25,6 +25,26 @@ if (usePlaySigning) {
     }
 }
 
+// GitHub beta kanalı: her CI çalışmasının farklı bir Gradle "debug" anahtarıyla
+// imzalamasını (ve dolayısıyla kullanıcıların eski APK üstüne güncelleyememesini)
+// önlemek için kalıcı, özel bir "beta" anahtarı kullanılır. Bu, Play yükleme
+// anahtarından (playSigning) tamamen ayrıdır — iki dağıtım kanalı birbirinin
+// anahtarını paylaşmaz. Bkz. docs/mobile_beta_signing_tr.md.
+val betaSigningFile = rootProject.file("beta-key.properties")
+val useBetaSigning = providers.gradleProperty("githubBetaRelease").orNull == "true"
+val betaSigningProperties = Properties()
+if (useBetaSigning) {
+    require(betaSigningFile.isFile) {
+        "GitHub beta signing requested, but android/beta-key.properties is missing. See docs/mobile_beta_signing_tr.md."
+    }
+    betaSigningFile.inputStream().use { betaSigningProperties.load(it) }
+    listOf("storeFile", "storePassword", "keyAlias", "keyPassword").forEach { key ->
+        require(!betaSigningProperties.getProperty(key).isNullOrBlank()) {
+            "Beta signing property '$key' is missing in android/beta-key.properties."
+        }
+    }
+}
+
 android {
     namespace = "com.federalturk.td2companion"
     compileSdk = 36
@@ -61,13 +81,24 @@ android {
                 keyPassword = playSigningProperties.getProperty("keyPassword")
             }
         }
+        if (useBetaSigning) {
+            create("githubBetaRelease") {
+                storeFile = rootProject.file(betaSigningProperties.getProperty("storeFile"))
+                storePassword = betaSigningProperties.getProperty("storePassword")
+                keyAlias = betaSigningProperties.getProperty("keyAlias")
+                keyPassword = betaSigningProperties.getProperty("keyPassword")
+            }
+        }
     }
 
     buildTypes {
         release {
-            // GitHub beta builds stay debug-signed; Play builds require explicit opt-in and a private upload key.
+            // Öncelik: Play yükleme anahtarı > kalıcı GitHub beta anahtarı > yerel/geçici
+            // debug anahtarı (sadece dağıtılmayan yerel denemeler için — bkz. yukarıdaki not).
             signingConfig = if (usePlaySigning) {
                 signingConfigs.getByName("playRelease")
+            } else if (useBetaSigning) {
+                signingConfigs.getByName("githubBetaRelease")
             } else {
                 signingConfigs.getByName("debug")
             }

@@ -69,6 +69,21 @@
 
     **Doğrulama durumu**: Bu konteynerde Flutter/Dart SDK'sı kurulu değil (`which flutter dart` boş döner), dolayısıyla `flutter pub get`/`flutter analyze`/`flutter test`/`flutter build apk` hiçbiri çalıştırılamadı. Sözdizimi elle (satır satır okuma + tüm dosya üzerinde programatik parantez/süslü-parantez/köşeli-parantez dengeleme kontrolü) doğrulandı, Dart derleyicisiyle doğrulanmadı. **Windows PC'de (Flutter zaten kurulu) şu adımlar gerekli**: `flutter pub get && flutter analyze && flutter test`, ardından gerçek cihazda/emülatörde: splash ekranının açılışta kısa süre göründüğü, build listesinin popülerliğe göre azalan sıralandığı, bir build silinmeye çalışıldığında onay diyaloğu çıktığı, Builds sekmesinde aşağı çekince yenilemenin çalıştığı, ve eşleştirme sonrası "MASAÜSTÜ EŞLEŞTİRMESİ" etiketinin "BAĞLI"ya döndüğü gözle kontrol edilmeli.
 
+19. **P0 — GitHub beta kanalı debug imza anahtarıyla imzalanıyordu, düzeltildi (2026-11-08).**
+    Codex'in devir raporunda bulunan P0 risk: `build-mobile.yml` her CI çalışmasında farklı bir
+    geçici "debug" anahtarı kullanıyordu (ubuntu-latest runner'larda kalıcı debug.keystore yok),
+    bu da kullanıcıların mevcut APK üzerine güncelleme yapamamasına (imza uyuşmazlığı) yol
+    açıyordu. Düzeltme: `mobile/android/app/build.gradle.kts`'e Play yükleme anahtarından ayrı,
+    kalıcı bir "GitHub beta" imza yapılandırması (`githubBetaRelease` Gradle özelliği +
+    `beta-key.properties`) eklendi; `build-mobile.yml` artık bir GitHub Actions secret'ından
+    (`TD2_BETA_KEYSTORE_BASE64`/`TD2_BETA_KEYSTORE_PASSWORD`/`TD2_BETA_KEY_ALIAS`) kalıcı bir
+    keystore üretip onunla imzalıyor. Ayrıntı, secret ekleme adımları ve **önemli geriye dönük
+    etki** (önceki tüm beta APK'ları farklı anahtarlarla imzalıydı — kullanıcıların bu
+    düzeltmeden sonraki ilk sürümü tek seferlik kaldır-kur yapması gerekecek) için bkz.
+    `docs/mobile_beta_signing_tr.md`. **Doğrulanmadı:** secret'lar henüz GitHub'a eklenmedi
+    (bu oturumun o API'ye erişimi yok, kullanıcı eklemeli), gerçek bir CI çalışması ve gerçek
+    cihazda kaldır-kur-güncelle senaryosu test edilmedi.
+
 ## Bilinen test kapsamı boşlukları
 
 - `webbrowser`/except-closure hata sınıfı için statik AST taraması var (`tests/test_regression_crash_patterns.py`), ama gerçek Tk buton `invoke()` ile uçtan uca test yok.

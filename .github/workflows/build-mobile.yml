@@ -24,7 +24,26 @@ jobs:
       - run: flutter pub get
       - run: flutter analyze
       - run: flutter test
-      - run: flutter build apk --release
+      - name: Decode beta signing keystore
+        env:
+          BETA_KEYSTORE_BASE64: ${{ secrets.TD2_BETA_KEYSTORE_BASE64 }}
+          BETA_KEYSTORE_PASSWORD: ${{ secrets.TD2_BETA_KEYSTORE_PASSWORD }}
+          BETA_KEY_ALIAS: ${{ secrets.TD2_BETA_KEY_ALIAS }}
+        run: |
+          if [ -z "$BETA_KEYSTORE_BASE64" ]; then
+            echo "::warning::TD2_BETA_KEYSTORE_BASE64 secret yok — bu build debug anahtarıyla imzalanacak (kullanıcılar eski APK üstüne güncelleyemeyebilir). Bkz. docs/mobile_beta_signing_tr.md."
+            echo "USE_BETA_SIGNING=false" >> "$GITHUB_ENV"
+          else
+            echo "$BETA_KEYSTORE_BASE64" | base64 -d > android/td2-companion-beta.jks
+            cat > android/beta-key.properties <<EOF
+          storeFile=td2-companion-beta.jks
+          storePassword=${BETA_KEYSTORE_PASSWORD}
+          keyAlias=${BETA_KEY_ALIAS}
+          keyPassword=${BETA_KEYSTORE_PASSWORD}
+          EOF
+            echo "USE_BETA_SIGNING=true" >> "$GITHUB_ENV"
+          fi
+      - run: flutter build apk --release --android-project-arg=githubBetaRelease=${{ env.USE_BETA_SIGNING }}
       - name: Rename APK
         shell: bash
         run: |
