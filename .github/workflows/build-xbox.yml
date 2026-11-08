@@ -51,15 +51,30 @@ jobs:
           # karakterleri yola karışıp "geçersiz parametre" (exit 87) hatasına
           # yol açtı (kanıtlandı — bkz. DEVELOPMENT_LOG.md). Burada ham
           # (tırnaksız) string geçiliyor.
+          # Tırnaklama düzeltmesi exit 87'yi çözmedi (ikinci deneme, aynı
+          # hata) -- bu, bileşen ID'sinden kaynaklanıyor olabilir.
+          # "Microsoft.VisualStudio.ComponentGroup.UWP.VC" bir alt-bileşen
+          # grubu; resmi "Universal Windows Platform development" İŞ YÜKÜ
+          # (workload) kimliği olan Microsoft.VisualStudio.Workload.Universal
+          # ile deneniyor (Microsoft'un vs_buildtools.exe örneklerinde
+          # standart ID).
+          $logPath = "$env:RUNNER_TEMP\vs_installer_modify.log"
           $proc = Start-Process -FilePath $installer -ArgumentList @(
             "modify",
             "--installPath", $vsPath,
-            "--add", "Microsoft.VisualStudio.ComponentGroup.UWP.VC",
+            "--add", "Microsoft.VisualStudio.Workload.Universal",
             "--add", "Microsoft.VisualStudio.Component.Windows10SDK.19041",
-            "--quiet", "--norestart", "--wait"
+            "--quiet", "--norestart", "--wait",
+            "--log", $logPath
           ) -Wait -PassThru -NoNewWindow
           Write-Host "vs_installer exit code: $($proc.ExitCode)"
           if ($proc.ExitCode -ne 0 -and $proc.ExitCode -ne 3010) {
+            Write-Host "--- vs_installer log ($logPath) ---"
+            if (Test-Path $logPath) {
+              Get-Content $logPath -Tail 100
+            } else {
+              Write-Host "(log dosyası oluşmadı)"
+            }
             Write-Error "vs_installer modify başarısız (exit $($proc.ExitCode))"
             exit $proc.ExitCode
           }
