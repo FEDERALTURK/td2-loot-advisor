@@ -281,20 +281,45 @@ zorunlu kılma.
       netleştirilmeli. Bu netleşmeden Remote Play fazına (Faz 3) başlanmamalı.
 
 ### Faz 1 — MVP: Mobil companion'da kamera modu (Seçenek C — en düşük risk, platform bağımsız)
-- [ ] `mobile/` Flutter app'e yeni bir sekme/mod: kamera önizleme + OCR hizalama rehberi (gamecaptionapp
-      tarzı "yeşil kutu" — kullanıcı altyazının kutunun içinde kaldığından emin olur).
-- [ ] OCR: cihaz-üstü (gizlilik ilkesiyle uyumlu — ekran görüntüsü sunucuya gitmez, sadece OCR çıktısı
-      metni çeviri için kullanılır, aynı gamecaptionapp'ın yaptığı gibi).
-- [ ] Çeviri: masaüstündeki `livetranslate.py` motor seçenekleriyle aynı sağlayıcı listesini mobilde de
-      sun (zaten masaüstü 10 dilli; mobil bunu kalıtmalı, yeniden icat etmemeli).
-- [ ] Sesli okuma (TTS): OCR+çeviri çıktısını telefonun yerel metin-okuma sesiyle okut — **ASR YOK**,
-      sadece zaten elde var olan çeviri metnini sesli okuma (§1.5'teki basitleştirme).
-- [ ] Overlay görünümü Xbox'ın resmi altyazı stiline benzetilecek (bkz. §1.4): yarı saydam siyah kutu,
-      font boyutu seçenekleri.
-- [ ] Bu modu PC için de öner (kamera telefonla, monitöre doğrultularak) — tek kod tabanıyla hem konsol
-      hem PC hem de başka bir cihazı (TV, taşınabilir konsol) kapsar, ek entegrasyon gerekmez.
-- [ ] Test: gerçek bir telefonla gerçek bir TV/monitör ekranına karşı, en az 2-3 farklı oyunla uçtan uca
-      doğrulama.
+
+**Durum (2026-11-08): Kod yazıldı, `main`'e commit edilmedi/push edilmedi henüz, SIFIR gerçek cihaz
+testi.** Bu konteynerde Flutter SDK kurulu değil — ne `flutter pub get` ne `flutter analyze/test` ne de
+gerçek bir derleme çalıştırılabildi. Kullanılan API'ler (bkz. altta) `google_ml_kit_flutter` ve
+`flutter/packages` (camera) depolarının gerçek kaynak kodu klonlanıp tek tek doğrulandı (metod imzaları,
+enum/alan adları birebir kontrol edildi) — ama bu yalnız "API doğru çağrılıyor" seviyesinde bir
+doğrulamadır, **"gerçekten derleniyor ve telefonda çalışıyor" DEĞİL**. CI'nin `flutter analyze`/
+`flutter test` adımları bir sonraki push'ta bunu kısmen doğrulayacak; gerçek cihaz (kamera izni akışı,
+OCR doğruluğu, çeviri modeli indirme, performans) testi mutlaka gerekiyor.
+
+- [x] `mobile/lib/console/console_caption_page.dart` + `console_translate_service.dart`: yeni "Konsol"
+      sekmesi (bottom nav'a 5. öğe olarak eklendi, `main.dart`). Kamera önizleme + yeşil hizalama kutusu
+      (gamecaptionapp tarzı, ama OCR'ı bu kutuyla sınırlamıyor — tüm kare okunuyor, bkz. §1.5 notu ve
+      kod içi yorum: geometrik kırpma/rotasyon hesapları cihazda doğrulanamadığı için kasıtlı olarak MVP
+      kapsamı dışında bırakıldı, risk notu altta).
+- [x] OCR: cihaz-üstü, `google_mlkit_text_recognition` (`TextRecognizer`, Latin script) — ekran görüntüsü
+      hiçbir sunucuya gitmiyor, yalnız OCR çıktısı metni çeviri adımına geçiyor.
+- [x] Çeviri: masaüstündeki gibi EN→TR, ama farklı motor — `google_mlkit_translation`
+      (`OnDeviceTranslator`), cihaz-üstü, model bir kerelik indirilip sonra tamamen çevrimdışı çalışıyor.
+      **Not:** masaüstünün `livetranslate.py` çoklu-motor/10-dil altyapısı mobilde YENİDEN KULLANILMADI
+      (farklı platform/dil — Python motoru mobilde çalışmaz); bu, önceki plandan bilinçli bir sapma.
+- [x] Sesli okuma (TTS): `flutter_tts`, yalnızca çevrilmiş metin değiştiğinde okunuyor (aynı altyazıyı
+      tekrar tekrar okumaz). **ASR YOK** (plana uygun, §1.5).
+- [x] Overlay görünümü Xbox'ın resmi altyazı stiline benzetildi (bkz. §1.4): alt kısımda yarı saydam
+      siyah kutu, büyük okunaklı font — ama font boyutu seçeneği henüz YOK (MVP kapsamı dışı bırakıldı).
+- [x] Aynı kod PC/monitör için de çalışır (kamera telefonla her ekrana doğrultulabilir) — ek entegrasyon
+      gerekmedi, platman gereği zaten platform bağımsız.
+- [ ] **Test: YAPILMADI.** Gerçek bir telefonla gerçek bir TV/monitör ekranına karşı, en az 2-3 farklı
+      oyunla uçtan uca doğrulama hâlâ gerekiyor — bir sonraki adım budur.
+
+**Bilinçli MVP basitleştirmeleri (riskler, cihaz testinde ortaya çıkabilir):**
+- Canlı kare akışı (`startImageStream`) yerine periyodik `takePicture()` (1.6 sn) kullanıldı — YUV/BGRA
+  piksel-formatı ve sensör-rotasyonu dönüşümünü cihazda doğrulamadan doğru yazamayacağımız için bilinçli
+  bir risk/karmaşıklık takası. Sonuç: biraz daha yüksek gecikme, ama çok daha az "cihazda patlama" riski.
+- Yeşil hizalama kutusu OCR'ı kırpmıyor, yalnız kullanıcıya görsel rehberlik ediyor — ekranda kutunun
+  dışında başka metin varsa (HUD, menü) o da OCR'a karışabilir. Gerçek cihaz testinde gerekiyorsa
+  bölgesel kırpma ayrı bir iyileştirme olarak eklenebilir.
+- Çeviri modeli indirme boyutu (~30 MB, EN+TR) tahmini — ML Kit'in resmi sayfasından alınan yaklaşık
+  değer, bu oturumda ölçülmedi.
 
 ### Faz 2 — PC masaüstünde Remote Play penceresi okuma (Seçenek B, ikincil rota)
 - [ ] Pencere algılama: başlığına göre Xbox/PS Remote Play penceresini bul, bölgesini al.

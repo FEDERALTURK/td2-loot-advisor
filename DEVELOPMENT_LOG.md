@@ -2,6 +2,39 @@
 
 Önemli kararların ve sürümlerin kısa, kronolojik özeti. Tam ayrıntı için `git log` ve `.github/release_notes.md`.
 
+## Konsol Modu — gamecaptionapp tarzı kamera modu, Faz 1 MVP kodu (mobil, 2026-11-08)
+
+- Kullanıcı isteği: "Xbox Series X/S'de çalışan ve gamecaptionapp gibi çalışan bir uygulama
+  geliştirelim" → netleştirme sorusunda kullanıcı "gamecaptionapp'ın aynısı, aynı mantıkla" dedi. Bu,
+  yol haritasındaki (`docs/console_game_caption_roadmap.md`) Faz 1'e (mobil kamera modu — platform
+  bağımsız, Xbox/PS/PC hepsinde aynı anda çalışır) karşılık geliyor; Faz 3a (doğrudan Xbox protokolü,
+  XStreaming) DEĞİL — gamecaptionapp'ın kendisi de birincil modunda ("herhangi bir konsol/bilgisayar/
+  film/dizide çalışır") bu mantığı kullanıyor.
+- **Yeni dosyalar**: `mobile/lib/console/console_caption_page.dart` (kamera önizleme + yeşil hizalama
+  kutusu + Xbox-stili alt altyazı kutusu + TTS aç/kapa + başlat/durdur düğmesi),
+  `mobile/lib/console/console_translate_service.dart` (OCR + çeviri servisi, cihaz-üstü).
+- **Yeni bağımlılıklar** (`mobile/pubspec.yaml`): `camera ^0.12.2`, `google_mlkit_text_recognition
+  ^1.0.1`, `google_mlkit_translation ^1.0.1`, `flutter_tts ^4.2.5`. Gerçek versiyon numaraları
+  pub.dev'den sorgulanarak alındı (tahmin edilmedi); her paketin kullanılan API'si (metod imzaları,
+  enum alanları) `flutter-ml/google_ml_kit_flutter` deposu klonlanıp kaynağından tek tek doğrulandı.
+- **Mimari**: tamamı cihaz-üstü (AGENTS.md madde 3 ile uyumlu — ekran/OCR verisi hiçbir sunucuya
+  gitmiyor). ASR yok, yalnız ekrandaki yazı okunuyor (gamecaptionapp'ın kendi tanımladığı basitleştirme,
+  bkz. yol haritası §1.5). `main.dart`'a "Konsol" adında 5. bir alt sekme eklendi.
+  `android/app/src/main/AndroidManifest.xml`'e `CAMERA` izni + isteğe bağlı kamera donanım özellikleri,
+  `ios/Runner/Info.plist`'teki `NSCameraUsageDescription` iki kullanım amacını (QR eşleştirme + Konsol
+  Modu) kapsayacak şekilde güncellendi.
+- **Doğrulama durumu — ÖNEMLİ, dürüstçe belirtilmeli**: Bu konteynerde Flutter SDK YOK — `flutter pub
+  get`, `flutter analyze`, `flutter test`, gerçek derleme hiçbiri çalıştırılamadı. Yazılan kod, ilgili
+  paketlerin gerçek kaynak kodu klonlanıp API imzaları tek tek karşılaştırılarak "doğru çağrılıyor" (statik)
+  seviyesinde doğrulandı — ama **sıfır gerçek cihaz testi** (kamera izni akışı, OCR doğruluğu, çeviri
+  modeli indirme, pil/performans). Ayrıntı ve bilinçli MVP basitleştirmeleri (periyodik `takePicture()`
+  vs canlı kare akışı, hizalama kutusunun OCR'ı kırpmaması) için `docs/console_game_caption_roadmap.md`
+  Faz 1 bölümüne bakın.
+- **Bekleyen**: Henüz commit/push edilmedi. Commit/push kod+doküman işi olduğu için (AGENTS.md madde 6)
+  ayrı onay gerektirmiyor, ama CI'nin `flutter analyze`/`flutter test` adımlarının gerçekten geçip
+  geçmediği push sonrası izlenmeli — bu paketler eklendiğinde bilinmeyen bir derleme hatası çıkma
+  ihtimali gerçek ve göz ardı edilmemeli.
+
 ## Mobil companion v0.1.9 — imza sürekliliği P0 düzeltmesiyle ilk yayın (0.1.9, 2026-11-08)
 
 - Kullanıcı isteği: Codex'in PC kopyasında yaptığı çalışmanın devir raporu (`CODEX_DEVIR_RAPORU.md`)

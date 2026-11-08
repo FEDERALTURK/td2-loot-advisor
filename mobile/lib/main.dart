@@ -11,6 +11,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'console/console_caption_page.dart';
 import 'services/cloud_link.dart';
 import 'services/companion_release.dart';
 import 'services/local_alerts.dart';
@@ -658,6 +659,7 @@ class _MainShellState extends State<MainShell> {
       TasksPage(model: widget.model),
       BuildsPage(model: widget.model, cloud: widget.cloud),
       NewsPage(model: widget.model),
+      const ConsoleCaptionPage(),
     ];
     return AnimatedBuilder(
       animation: Listenable.merge([widget.model, widget.cloud]),
@@ -757,6 +759,10 @@ class _MainShellState extends State<MainShell> {
             NavigationDestination(
               icon: Icon(Icons.newspaper_rounded),
               label: 'Haberler',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.live_tv_rounded),
+              label: 'Konsol',
             ),
           ],
         ),

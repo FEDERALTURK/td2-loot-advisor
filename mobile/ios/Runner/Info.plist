@@ -25,7 +25,7 @@
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>NSCameraUsageDescription</key>
-	<string>Kamera, Windows programının Telefon Arkadaşı QR kodunu güvenli yerel bağlantı için tarar.</string>
+	<string>Kamera; Windows programının Telefon Arkadaşı QR kodunu taramak ve Konsol Modu'nda TV/monitör ekranındaki metni okuyup çevirmek için kullanılır. Görüntü hiçbir sunucuya gönderilmez.</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UIApplicationSceneManifest</key>

@@ -51,6 +51,13 @@ dependencies:
   # Uygulama çalışırken yeni haber/sürüm bildirimi için yerel Android bildirimi.
   # İzin yalnız kullanıcı ilgili anahtarı açarsa istenir.
   flutter_local_notifications: ^19.5.0
+  # Konsol Modu (bkz. docs/console_game_caption_roadmap.md, Faz 1): telefonun
+  # arka kamerasıyla TV/monitör ekranını okuyup Türkçeye çeviren "game caption"
+  # tarzı mod. Hepsi cihaz üstünde çalışır — görüntü hiçbir sunucuya gitmez.
+  camera: ^0.12.2
+  google_mlkit_text_recognition: ^1.0.1
+  google_mlkit_translation: ^1.0.1
+  flutter_tts: ^4.2.5
 
 dev_dependencies:
   flutter_test:
