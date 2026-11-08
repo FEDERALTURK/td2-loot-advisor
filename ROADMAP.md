@@ -8,13 +8,54 @@ Konsol (Xbox/PS5/PS4) yakalama + canlı çeviri fikri için araştırma ve yol h
 | Bileşen | Durum |
 |---|---|
 | Windows masaüstü uygulaması | Canlı, **`v9.1.5.32`** (2026-11-06, GitHub Release yayınlandı 18:54 UTC, `build-installer`/`service-check`/`account-check`/`translate-check`/`stability-check` hepsi `success`). Değişiklik: `display.py`'ye `hdr_enabled()` yardımcı fonksiyonu eklendi — HDR algısı artık yalnızca kesin "açık"/"kapalı" değerlerinden çıkarılıyor, eski/elle değiştirilmiş veya bilinmeyen bir `state.cfg` değeri artık yanlışlıkla "HDR açık" uyarısı üretmiyor (`tests/test_core.py`'a 5 yeni assert). **Bu oturumda yeni, doğrulanmış bir CI regresyonu bulundu**: `Info check` iş akışı (`tests/test_knowledge.py`) 2026-11-06 13:34'teki otomatik "Feeds" senkronundan beri `main`'de **kırmızı**. Kök neden: test, 3 gün önce biten bir haber olayının kimliğini (`y8s3-red-moon-unleashed`) `meta/news_feed.json`'da hep var olacak sabit veri gibi varsayıyor (`assert st["y8s3-red-moon-unleashed"] == "live"`), ama Feeds botu tam olarak "3 günden eski biten olayları" otomatik olarak bu dosyadan siliyor (bugünkü commit mesajı: "Removed events that ended 2026-11-03") — test artık `KeyError: 'y8s3-red-moon-unleashed'` ile çöküyor. Uygulama kodunda bir regresyon değil (HDR değişikliğiyle ilgisiz), test fixture'ının canlı/değişken veriye bağımlı olmasından kaynaklanıyor; GitHub Actions'ta doğrulandı (run `42226626507` ve `42273566998`, ikisi de `failure`). Düzeltme bu oturumun kapsamı dışında bırakıldı, ayrıntı aşağıda "Diğer açık kalemler"de. Önceki not hâlâ geçerli: `v9.1.5.25`-`v9.1.5.31` arasındaki birçok görsel değişiklik gerçek Windows'ta kullanıcı tarafından henüz gözle teyit edilmedi (bkz. `BUGS.md` #11-16). `main`'e henüz birleştirilmemiş bir **draft PR** var: [#3](https://github.com/FEDERALTURK/td2-loot-advisor/pull/3) "açıklama yedeği iki parçayı da okuyor" (`fix/desc-offline-fallback`, hâlâ taslak, `mergeable_state: unstable`, 2026-11-05'ten beri değişmedi) — bu oturum dokunmadı. |
-| Mobil companion (Flutter) | **Faz 3 devam ediyor: push-token kaydı kodu yazıldı**, kullanıcı tarafında tek adım (gradle `google-services` satırı + `flutter pub get`/build doğrulaması) hâlâ bekliyor — bu, dünden bu yana değişmedi. **Yeni (2026-11-06): uygulama içi deneyim/arayüz iyileştirmeleri** (`mobile/lib/main.dart`) — açılışta boş kart flaşını önleyen bir splash ekranı, build listesinin artık ham JSON sırası yerine popülerliğe göre azalan sıralanması, build silmeden önce onay diyaloğu (hesap silme akışıyla aynı desen), Builds sekmesine aşağı-çekip-yenileme, ve "MASAÜSTÜ EŞLEŞTİRMESİ" etiketinin bağlantı durumuna göre dinamik olması (BAĞLI/SONRAKİ AŞAMA). Bu değişiklikler faz kapısını ilerletmiyor (push-token/Faz 4 doğrulaması hâlâ aynı yerde), sadece mevcut özelliklerin cilası; **bu ortamda Flutter SDK'sı olmadığı için derlenmedi/test edilmedi** (BUGS.md #18), Windows PC'de doğrulama gerekiyor. Gerçek cihaz/Play doğrulaması (Faz 4) hâlâ bekliyor. |
+| Mobil companion (Flutter) | **`companion-v0.1.9` gerçek GitHub Release'e yayınlandı (2026-11-08)** — Codex'in devir raporunda bulunan P0 (her CI çalışması farklı geçici debug anahtarıyla imzalıyordu, kullanıcılar APK üstüne güncelleyemiyordu) kalıcı bir "GitHub beta" imza yapılandırmasıyla düzeltildi; yayınlanan APK'nin imza sertifikası androguard ile indirilip tekrar çıkarıldı, keystore fingerprint'iyle birebir eşleşti (`BUGS.md` #19). **Aynı gün, yeni "Konsol Modu" (Faz 1 MVP) eklendi**: telefon kamerasıyla TV/monitör ekranını okuyup cihaz-üstü OCR+çeviriyle Xbox-stili altyazı gösteren, platform bağımsız bir sekme (`docs/console_game_caption_roadmap.md` §1.5/Faz 1). İlk commit Flutter SDK'sız bir ortamda yazılmıştı ve CI'de gerçekten 3 ardışık hata verdi — `flutter analyze` (3 lint uyarısı, düzeltildi), ardından release APK derlemesinde R8 "Missing class" hatası (ML Kit'in kullanılmayan script sınıfları için eksik `-dontwarn` kuralları, düzeltildi) — üçüncü `workflow_dispatch` denemesi (run `42514233449`) tamamen yeşil: `flutter analyze`/`flutter test`/gerçek release APK derlemesi hepsi geçti. **Hâlâ sıfır gerçek cihaz testi** (kamera izni akışı, OCR doğruluğu, çeviri modeli indirme, pil etkisi) — bu otomatik oturum da dahil hiçbir AI oturumu fiziksel bir Android/iOS cihazda denemedi. Push-token/Faz 4 adımı (kullanıcı PC'sinde gradle `google-services` satırının açılması) hâlâ aynı yerde bekliyor, değişmedi. |
 | Topluluk sunucusu (Cloudflare Worker) | Canlı. Mobil uçlar (eşleştirme, build senkronu, cihaz listesi/iptali, hesap silme) production'da. |
 | Lisans/telif (mx-division-builds) | **Çözüldü (2026-11-04, kullanıcı kararı).** `recal_advisor` ücretsiz yapıldı — artık ticari bir özelliğin arkasında değil, gri alan ortadan kalktı. [issue #153](https://github.com/mxswat/mx-division-builds/issues/153) kibarlık/şeffaflık amacıyla açık bırakıldı, yanıt gelirse not düşülecek ama artık engelleyici değil. |
 | Kod imzalama (SignPath) | **Reddedildi (2026-11-03).** Foundation (ücretsiz OSS) programı, GitHub yıldız/fork/katkıcı sayısı, dış makale/referans ve kurumsal destek gibi "kamuya görünürlük" sinyalleri yeterli olmadığı için onaylanmadı — proje kalitesiyle ilgisiz, tamamen görünürlük eşiği meselesi. Görünürlük arttıkça yeniden başvurulabilir; alternatif olarak ücretli SignPath aboneliği veya başka bir imzalama sağlayıcısı (ör. Azure Trusted Signing ~$9.99/ay — ABD/Kanada kökenli kuruluş şartı bildirilen yorumlar var, Türkiye'den uygunluk doğrulanmalı) değerlendirilebilir. |
 | Web sitesi (`web/`) | **Yayında (2026-11-03):** https://td2-loot-advisor.pages.dev — Cloudflare Pages'e GitHub bağlantısıyla yayınlandı, `td2-stats` Worker'ı da Cloudflare Workers Builds ile `main`'e bağlandı (otomatik CI/CD). Taktik HUD görsel kimliği eklendi. Geriye kalan: Gumroad ürünü (kullanıcı tarafı). Bkz. aşağıda ve `web/README.md`. |
 
-## Şu an aktif: Masaüstü özellik/sağlamlaştırma döngüsü + mobil push bildirimi kaydı (Faz 3'ün son parçası)
+## Şu an aktif: Mobil companion — "Konsol Modu" (Faz 1 MVP) CI'de yeşile çekildi, gerçek cihaz testi bekliyor
+
+**2026-11-08**, aynı Claude oturumu (session `019puJcpmi1mPj3qdczCYr6K`) tek bir gün içinde üç ardışık iş
+yaptı: (1) `companion-v0.1.9`'u P0 imza-sürekliliği düzeltmesiyle gerçek bir public GitHub Release'e
+yayınladı (yukarıdaki tabloya ve `BUGS.md` #19'a bakın), (2) yeni "Konsol Modu" özelliğini (gamecaptionapp
+tarzı, platform bağımsız kamera-altyazı modu) yazdı, (3) bu özelliği push ettikten sonra tetiklenen CI'nin
+gerçekten kırmızı döndüğünü görüp, **kendi kendini düzelten bir döngüyle** (`workflow_dispatch` ile tekrar
+tekrar tetikleyip job log'larını okuyarak) iki ayrı gerçek hatayı sırayla kapattı:
+
+1. **`flutter analyze` kırmızı** (run `42513347058`) — `console_caption_page.dart`'ta okunmayan bir alan
+   (`unused_field`) ve `console_translate_service.dart`'ın constructor'ında initializing-formal kullanılmaması
+   (`prefer_initializing_formals` ×2). Düzeltme (`e97d88c`): alan silinmek yerine gerçekten kullanıldı
+   (altyazı kutusunda orijinal İngilizce metin artık ikinci, soluk bir satır olarak gösteriliyor) ve
+   constructor `this._sourceLanguage`/`this._targetLanguage` ile sadeleştirildi.
+2. **Release APK derlemesi R8'de patladı** (run `42513566679`, `flutter analyze`/`test` geçti ama
+   `assembleRelease`/R8 adımı "Missing class" hatası verdi) — `google_mlkit_text_recognition`, sadece Latin
+   script kullansak da desteklediği TÜM scriptlerin (Çince/Devanagari/Japonca/Korece) sınıflarına koşulsuz
+   referans veriyor; bu scriptlerin native kütüphaneleri bağımlılık olarak eklenmediği için R8 onları
+   bulamıyordu. Düzeltme (`22531bd`): `android/app/proguard-rules.pro` eklendi (kullanılmayan script
+   sınıfları için `-dontwarn`), `build.gradle.kts`'in release buildType'ına bağlandı.
+3. **Üçüncü deneme (run `42514233449`) tamamen yeşil**: `flutter analyze` → "No issues found!",
+   `flutter test` → 4/4 PASS, gerçek `flutter build apk --release` (R8/minify dahil) başarıyla tamamlandı.
+   Sonuç `DEVELOPMENT_LOG.md` ve `docs/console_game_caption_roadmap.md`'ye işlendi (`d407120`).
+
+**Bu otomatik günlük durum oturumunun kendi katkısı**: Yukarıdaki üç düzeltmenin hepsi bu oturum main'i
+`git pull` ettiğinde zaten origin'deydi (başka/aynı oturum eşzamanlı çalışıyordu) — bu oturum onları
+tekrar yazmadı, sadece gerçek bir Flutter SDK'sı (`3.47.9-stable`, resmî Google kanalından) bu konteynere
+indirip kurarak **bağımsız olarak doğruladı** (`flutter analyze` → "No issues found!", `flutter test` →
+4/4 PASS — bu projenin mobil tarafında ilk kez bir AI oturumu gerçek Flutter araç zincirini bu bulut
+ortamında çalıştırdı, önceki tüm oturumlar "Flutter SDK yok" notuyla yalnızca statik inceleme yapmıştı).
+Bu doğrulama sırasında ayrı, gerçek bir boşluk bulundu ve düzeltildi: `mobile/pubspec.lock`, `pubspec.yaml`'a
+4 gün önce eklenen 12 yeni paketi (camera/google_mlkit_*/flutter_tts zinciri) hiç içermiyordu — CI bunu
+her çalışmada `flutter pub get` ile taze çözüyordu ama repodaki kilit dosyası hâlâ eskiydi; gerçek
+`flutter pub get` çıktısıyla yeniden üretilip commit edildi (`85f2f50`).
+
+**Hâlâ açık/bekleyen**: Konsol Modu'nda sıfır gerçek cihaz testi (kamera izni, OCR doğruluğu, çeviri modeli
+indirme, pil etkisi — CI yalnızca derlemenin/analiz'in geçtiğini kanıtlıyor, "telefonda gerçekten çalışıyor"
+değil); mobil push-token/Faz 4 adımı (kullanıcı PC'sinde gradle satırı) aynı yerde duruyor; aşağıdaki
+"Diğer açık kalemler" bölümündeki tüm kullanıcı kararları (SignPath, Gumroad, PR #3 birleştirme, eski dal
+temizliği, `test_knowledge.py` KeyError düzeltmesi) değişmedi.
+
+## Önceki tur: Masaüstü özellik/sağlamlaştırma döngüsü + mobil push bildirimi kaydı (Faz 3'ün son parçası)
 
 2026-11-04/05'te iki paralel iş hattı ilerledi: masaüstü özellik/sağlamlaştırma döngüsü (`v9.1.5.21` → `v9.1.5.31`,
 en son üç sürüm — çeviri genelleştirme, tema sıfırlama, üst nav/radar — ve ardından bir bağımlılık regresyonu
@@ -297,3 +338,39 @@ başarıyla yüklendi, konsol hatası yok).
   ama yine de bu oturumun görev tanımı dışında bırakıldı); mevcut bekleyen kullanıcı kararları (SignPath,
   Gumroad, eski dalların temizliği, Apple Developer Program ödemesi, mobil gradle adımı, PR #3 birleştirme
   kararı) aynen duruyor. Değişen dosya: yalnızca `ROADMAP.md`.
+
+- **2026-11-08 (otomatik günlük durum güncellemesi — zamanlanmış görev):** Bu oturum **gerçek bir kod
+  değişikliği de yaptı** (sadece durum güncellemesi değil) — ayrıntı aşağıda. `git fetch`/`checkout main`
+  ile depo `main`'e hizalandı (daha önce detached HEAD'teydi, `origin/main` ile birebir aynı noktaydaydı,
+  rebase gerekmedi). Son 24 saatteki commit'ler tek tek incelendi: `console_capture_translation_roadmap.md`/
+  `console_game_caption_roadmap.md` araştırma turu, "Konsol Modu" (Faz 1 MVP) özelliği, `companion-v0.1.9`
+  gerçek yayını (P0 imza-sürekliliği düzeltmesiyle), ve ardından **aynı gün, aynı oturumun** Konsol Modu'nu
+  push ettikten sonra CI'de gerçekten yakaladığı iki hatayı (lint + R8 missing-class) kendi kendine
+  düzeltip üçüncü denemede tam yeşile çektiği commit zinciri (`e97d88c`, `22531bd`, `d407120`) — bunların
+  hepsi yukarıdaki "Şu an aktif" bölümüne işlendi. **Bu oturum sırasında o zincirle eşzamanlı çalışılıyordu**:
+  bu oturum da bağımsız olarak aynı `flutter analyze` kırmızısını (run `42513347058`) GitHub Actions
+  job log'undan okuyup kendi düzeltmesini yazmıştı, ama `git fetch` sırasında origin'de aynı sorunu çözen
+  (ve `_sourceText` alanını silmek yerine gerçekten kullanan, daha iyi) bir commit (`e97d88c`) bulununca
+  **kendi redundant/çakışan commit'i `git reset --hard origin/main` ile bırakıldı** — iki ayrı oturumun
+  aynı satırları farklı şekilde değiştirip çakışma yaratması yerine, tek doğru kaynak (origin) esas alındı.
+  Bu oturumun kendi, çakışmayan katkısı: (1) gerçek bir Flutter SDK'sı (`3.47.9-stable`) bu bulut ortamına
+  **ilk kez** indirilip kuruldu ve `flutter analyze`/`flutter test` gerçekten çalıştırılıp mevcut `main`
+  HEAD'inin (o an `d407120`) temiz olduğu bağımsız olarak doğrulandı — önceki tüm mobil commit'ler
+  "Flutter SDK yok" notuyla yalnızca statik inceleme yapmıştı; (2) bu doğrulama sırasında ayrı, gerçek bir
+  boşluk bulundu: `mobile/pubspec.lock`, 4 gün önce `pubspec.yaml`'a eklenen 12 yeni pakedi (camera/
+  google_mlkit_*/flutter_tts) hiç içermiyordu (CI bunu her çalışmada taze çözüyordu ama kilit dosyası
+  commit edilmemişti) — gerçek `flutter pub get` çıktısıyla yeniden üretilip commit edildi (`85f2f50`,
+  tek dosya, sıfır davranış değişikliği, `flutter analyze` sonrasında da temiz). GitHub kontrol edildi:
+  `federalturk/td2-loot-advisor`'da 0 açık issue, **hâlâ 1 açık (taslak) PR** — [#3](https://github.com/FEDERALTURK/td2-loot-advisor/pull/3):
+  sahibi tarafından `main`'in son hâliyle güncellenmiş ve Cubic code-review'un iki bulgusu (`desc_i18n()`'in
+  artık `meta_sync.load_descriptions` kullanması, bozuk parça denetimi) `8ee174b` ile kapatılmış, ama PR
+  hâlâ **taslak**, `mergeable_state: unknown` (son API yanıtı), ve kendi yorumunda `tests/test_knowledge.py`'nin
+  (yukarıdaki, günlerdir bilinen `KeyError: 'y8s3-red-moon-unleashed'` sorunu) hem `main`'de hem bu PR'da
+  kırmızı kaldığını tekrar doğrulamış — **birleştirme kararı hâlâ kullanıcıya bırakıldı, bu oturum
+  dokunmadı**. Büyük/riskli bir karar gerektiren yeni bir şey bulunmadı; yapılan tek kod değişikliği
+  (pubspec.lock kilitleme) tek dosyalık, geri alınabilir, davranış değiştirmeyen bir düzeltmeydi ve
+  AGENTS.md madde 6'daki "kod yazımı/commit/push" serbestliği kapsamında kaldı (release/tag/APK yayını
+  YAPILMADI). Mevcut bekleyen kullanıcı kararları (SignPath, Gumroad, eski dalların temizliği, Apple
+  Developer Program ödemesi, mobil gradle adımı, PR #3 birleştirme kararı, `test_knowledge.py` düzeltmesi)
+  aynen duruyor. Değişen dosyalar: `ROADMAP.md` (bu güncelleme) + `mobile/pubspec.lock` (kilit yenileme,
+  ayrı commit).
