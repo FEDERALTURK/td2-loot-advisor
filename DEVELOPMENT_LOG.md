@@ -2,6 +2,22 @@
 
 Önemli kararların ve sürümlerin kısa, kronolojik özeti. Tam ayrıntı için `git log` ve `.github/release_notes.md`.
 
+## GAMLETSOL kendi deposuna ayrıldı (2026-11-09)
+
+- Kullanıcı isteğiyle, bu depoda scaffold edilen GAMLETSOL (bkz. alttaki
+  giriş) kendi bağımsız GitHub reposuna taşındı: **github.com/FEDERALTURK/gamletsol**.
+  Bu depodaki `gamletsol/` klasörü ve `.github/workflows/build-gamletsol.yml`
+  kaldırıldı — artık tek kaynak yeni repo. İlk commit oradaki
+  `1fe0243` — bu depodaki son hâlin (`3bd4aea`) birebir kopyası, yalnızca
+  TD2'ye özgü çapraz referanslar (mobile/ karşılaştırması, pubspec açıklaması)
+  bağımsız bir proje olacak şekilde güncellendi.
+- Bu kararın gerekçesi: GAMLETSOL, TD2 Loot Advisor ile kod/mağaza/yayın
+  açısından hiçbir bağımlılığı olmayan, tamamen ayrı bir ürün — ayrı depo
+  bunu kod seviyesinde netleştiriyor. Yeni sohbet/claude.ai projesi açmak
+  kullanıcının kendisinin yapması gereken bir adım (bu oturum yeni bir
+  claude.ai sohbeti/projesi başlatamıyor); bunun için kullanıcıya yapıştırması
+  için kısa bir devir özeti verildi.
+
 ## GAMLETSOL — TV/konsol sesi canlı çeviri, yeni bağımsız uygulama (2026-11-09)
 
 - Kullanıcı, "game caption" tarzı uygulamaların TV/konsol sesini telefon
