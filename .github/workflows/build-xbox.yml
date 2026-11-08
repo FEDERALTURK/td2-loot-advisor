@@ -43,10 +43,17 @@ jobs:
         run: |
           $vsPath = (& "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath)
           $installer = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vs_installer.exe"
-          Write-Host "Calling: $installer modify --installPath `"$vsPath`" --add Microsoft.VisualStudio.ComponentGroup.UWP.VC --add Microsoft.VisualStudio.Component.Windows10SDK.19041"
+          Write-Host "Calling: $installer modify --installPath $vsPath --add Microsoft.VisualStudio.ComponentGroup.UWP.VC --add Microsoft.VisualStudio.Component.Windows10SDK.19041"
+          # ÖNEMLİ DÜZELTME: Önceki denemede --installPath değerine elle
+          # tırnak (`"$vsPath`") eklenmişti — Start-Process -ArgumentList
+          # zaten her dizi elemanını kendi başına bir argüman olarak iletir
+          # ve gerektiğinde kendi tırnaklamasını yapar; elle eklenen tırnak
+          # karakterleri yola karışıp "geçersiz parametre" (exit 87) hatasına
+          # yol açtı (kanıtlandı — bkz. DEVELOPMENT_LOG.md). Burada ham
+          # (tırnaksız) string geçiliyor.
           $proc = Start-Process -FilePath $installer -ArgumentList @(
             "modify",
-            "--installPath", "`"$vsPath`"",
+            "--installPath", $vsPath,
             "--add", "Microsoft.VisualStudio.ComponentGroup.UWP.VC",
             "--add", "Microsoft.VisualStudio.Component.Windows10SDK.19041",
             "--quiet", "--norestart", "--wait"
