@@ -18,8 +18,10 @@ import 'dart:async';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 import 'console_translate_service.dart';
+import 'tv_cast_service.dart';
 
 const _bg = Color(0xFF090C12);
 const _panel = Color(0xFF121722);
@@ -47,6 +49,7 @@ class _ConsoleCaptionPageState extends State<ConsoleCaptionPage>
 
   final _service = ConsoleTranslateService();
   final _tts = FlutterTts();
+  final _tvCast = TvCastService();
 
   bool _scanning = false;
   bool _busy = false;
@@ -56,6 +59,7 @@ class _ConsoleCaptionPageState extends State<ConsoleCaptionPage>
   String? _translatedText;
   bool _ttsEnabled = false;
   String? _lastSpoken;
+  bool _tvCastBusy = false;
 
   @override
   void initState() {
@@ -156,6 +160,7 @@ class _ConsoleCaptionPageState extends State<ConsoleCaptionPage>
           _sourceText = source;
           _translatedText = translated;
         });
+        if (_tvCast.isRunning) _tvCast.updateCaption(translated);
         if (_ttsEnabled && translated.isNotEmpty && translated != _lastSpoken) {
           _lastSpoken = translated;
           unawaited(_tts.speak(translated));
@@ -178,8 +183,74 @@ class _ConsoleCaptionPageState extends State<ConsoleCaptionPage>
     _controller?.dispose();
     _service.dispose();
     _tts.stop();
+    _tvCast.stop();
     super.dispose();
   }
+
+  Future<void> _toggleTvCast() async {
+    if (_tvCast.isRunning) {
+      await _tvCast.stop();
+      if (mounted) setState(() {});
+      return;
+    }
+    setState(() => _tvCastBusy = true);
+    final url = await _tvCast.start();
+    if (!mounted) return;
+    setState(() => _tvCastBusy = false);
+    if (url == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Yerel ağ sunucusu başlatılamadı. Telefon Wi-Fi\'ye bağlı mı kontrol edin.',
+          ),
+        ),
+      );
+      return;
+    }
+    setState(() {});
+    if (!mounted) return;
+    _showTvCastDialog(url);
+  }
+
+  void _showTvCastDialog(String url) => showDialog<void>(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      title: const Text('TV\'de görün'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text(
+            'TV\'nizin (veya aynı Wi-Fi\'deki başka bir cihazın) tarayıcısından '
+            'aşağıdaki adresi açın. Çeviri orada büyük fontla, canlı olarak '
+            'güncellenir.\n\n'
+            'Not: TV tarayıcısı kamerayla QR okutamıyorsa adresi uzaktan '
+            'kumandayla elle yazabilirsiniz.',
+            style: TextStyle(color: _soft, fontSize: 13, height: 1.4),
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: QrImageView(data: url, size: 180),
+          ),
+          const SizedBox(height: 12),
+          SelectableText(
+            url,
+            style: const TextStyle(fontWeight: FontWeight.w700),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext),
+          child: const Text('Kapat'),
+        ),
+      ],
+    ),
+  );
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -355,17 +426,38 @@ class _ConsoleCaptionPageState extends State<ConsoleCaptionPage>
             ),
           ],
         ),
-        const SizedBox(height: 4),
-        SizedBox(
-          width: double.infinity,
-          child: FilledButton.icon(
-            onPressed: _controller == null ? null : _toggleScanning,
-            style: FilledButton.styleFrom(
-              backgroundColor: _scanning ? const Color(0xFFB3261E) : _orange,
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: _tvCastBusy ? null : _toggleTvCast,
+                icon: _tvCastBusy
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Icon(
+                        _tvCast.isRunning
+                            ? Icons.cast_connected_rounded
+                            : Icons.cast_rounded,
+                      ),
+                label: Text(_tvCast.isRunning ? 'TV yayınını durdur' : 'TV\'de görün'),
+              ),
             ),
-            icon: Icon(_scanning ? Icons.stop_rounded : Icons.play_arrow_rounded),
-            label: Text(_scanning ? 'Taramayı durdur' : 'Taramayı başlat'),
-          ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: FilledButton.icon(
+                onPressed: _controller == null ? null : _toggleScanning,
+                style: FilledButton.styleFrom(
+                  backgroundColor: _scanning ? const Color(0xFFB3261E) : _orange,
+                ),
+                icon: Icon(_scanning ? Icons.stop_rounded : Icons.play_arrow_rounded),
+                label: Text(_scanning ? 'Durdur' : 'Taramayı başlat'),
+              ),
+            ),
+          ],
         ),
       ],
     ),

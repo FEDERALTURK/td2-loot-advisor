@@ -58,6 +58,10 @@ dependencies:
   google_mlkit_text_recognition: ^1.0.1
   google_mlkit_translation: ^1.0.1
   flutter_tts: ^4.2.5
+  # "TV'de görün" modu (Faz 5): çeviriyi gösteren yerel sayfanın adresini QR
+  # olarak göstermek için. Sunucunun kendisi dart:io HttpServer ile yazıldı,
+  # ek bağımlılık gerekmedi — bu paket yalnız QR GÖRSELİNİ üretir.
+  qr_flutter: ^4.1.0
 
 dev_dependencies:
   flutter_test:
