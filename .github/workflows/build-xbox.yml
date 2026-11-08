@@ -20,10 +20,10 @@ jobs:
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
-      - name: Restore + Build (Release|x64, derleme doğrulaması — paketleme yok)
-        # NuGet'in PackageReference restore'u (nuget.exe restore DEĞİL, /restore
-        # anahtarıyla MSBuild'in kendi restore hedefi) — Microsoft.NETCore.
-        # UniversalWindowsPlatform paketinin (WinRT projeksiyon winmd'leri)
-        # gerçekten indirilip referans edildiğini garanti eder.
-        run: msbuild XboxCompanion.sln /restore /p:Configuration=Release /p:Platform=x64 /p:AppxBundle=Never /p:UapAppxPackageBuildMode=SideloadOnly /v:minimal
+      - name: Restore NuGet packages (packages.config — klasik UWP projesi)
+        run: nuget restore XboxCompanion.sln
+        shell: cmd
+
+      - name: Build (Release|x64, derleme doğrulaması — paketleme yok)
+        run: msbuild XboxCompanion.sln /p:Configuration=Release /p:Platform=x64 /p:AppxBundle=Never /p:UapAppxPackageBuildMode=SideloadOnly /v:minimal
         shell: cmd
