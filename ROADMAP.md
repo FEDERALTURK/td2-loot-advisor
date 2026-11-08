@@ -1,6 +1,7 @@
 # Yol Haritası
 
 Bu dosya her gün güncellenir (bkz. en alt — otomatik günlük görev). Ayrıntılı mobil plan: `docs/mobile_companion_roadmap.md`.
+Konsol (Xbox/PS5/PS4) yakalama + canlı çeviri fikri için araştırma ve yol haritası: `docs/console_capture_translation_roadmap.md` (**kod yazılmadı, kullanıcının fiziksel capture card edinmesi ve kendi PC'sinde test etmesi gerekiyor**).
 
 ## Genel durum (özet)
 
