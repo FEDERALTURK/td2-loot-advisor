@@ -2,6 +2,36 @@
 
 Önemli kararların ve sürümlerin kısa, kronolojik özeti. Tam ayrıntı için `git log` ve `.github/release_notes.md`.
 
+## Xbox doğrudan bağlantı — kimlik doğrulama akışı (deneysel, Faz 3a alt-aşama 1, mobil, 2026-11-08)
+
+- Kullanıcı, elinde test edecek gerçek bir Xbox Series X/S olmadığını ve "haftalarca kod
+  yazıp hiç çalışmıyor ile karşılaşma" riskini açıkça kabul ettiğini belirterek koda
+  başlanmasını istedi. Kapsam bilinçli olarak ikiye bölündü (bkz. `docs/console_game_caption_roadmap.md`
+  §3a): (1) kimlik doğrulama + konsol listesi — bu commit'te tamamlandı; (2) gerçek WebRTC
+  ekran/ses akışı — henüz başlanmadı, çok daha büyük ve ayrı bir aşama.
+- **Kaynak doğrulama**: XStreaming (MIT, github.com/GiGanTe71/XStreaming) `docs/1.Auth.md`
+  (850 satır) ve `docs/2.Web.md` (214 satır) tamamen okunup protokol satır satır doğrulandı
+  (tahmin edilmedi); `docs/3.Stream.md` (362 satır) da okundu, WebRTC aşaması için referans.
+  `pointycastle`'ın gerçek kaynağı (bcgit/pc-dart) klonlanıp `ECDSASigner`/`ECKeyGenerator`
+  API'leri (IEEE-P1363 ham imza desteği dahil) doğrulandı.
+- **Yeni dosyalar**: `mobile/lib/console/xbox/xbox_crypto.dart` (EC P-256 anahtar üretimi +
+  özel ikili istek imzalama), `xbox_token_store.dart` (flutter_secure_storage üzerinde
+  userToken/sisuToken/jwtKeys saklama), `xbox_auth_service.dart` (device token → PKCE →
+  SisuAuthentication → kullanıcı elle yönlendirme adresi yapıştırır → authenticateUserUsingCode
+  → SisuAuthorization → XSTS web+streaming → xhome akış belirteci), `xbox_console_service.dart`
+  (hesaba kayıtlı konsol listesi), `xbox_login_page.dart` (deneysel giriş+liste ekranı, Konsol
+  Modu app bar'ından erişilir). `pubspec.yaml`'a `pointycastle: ^4.0.0` eklendi.
+- **CI doğrulaması**: run 42517628850 `flutter analyze` 2 `unnecessary_cast` uyarısıyla
+  FAILED → `xbox_crypto.dart`'ta `ECKeyGenerator.generateKeyPair()`'ın zaten
+  `AsymmetricKeyPair<ECPublicKey, ECPrivateKey>` döndürdüğü (kaynaktan doğrulandı) fark
+  edilip gereksiz `as` dönüşümleri kaldırıldı → run 42517746084 tamamen YEŞİL (analyze, test,
+  gerçek `flutter build apk --release`).
+- **Dürüstlük notu (önemli)**: Yukarıdaki CI başarısı SADECE kodun derlendiğini kanıtlar.
+  Hiçbir adım gerçek bir Microsoft hesabına veya Xbox konsoluna karşı ÇALIŞTIRILMADI — bu kum
+  havuzunda interaktif Microsoft girişi yapılamıyor, kullanıcının da test edecek bir Xbox'ı
+  yok. "Çalışıyor" iddiası yapılmadı; "protokolle bayt-bayt eşleşecek şekilde yazıldı ve
+  derleniyor, ama gerçek sunucuya karşı doğrulanmadı" iddiası yapıldı.
+
 ## Konsol Modu — gamecaptionapp tarzı kamera modu, Faz 1 MVP kodu (mobil, 2026-11-08)
 
 - Kullanıcı isteği: "Xbox Series X/S'de çalışan ve gamecaptionapp gibi çalışan bir uygulama

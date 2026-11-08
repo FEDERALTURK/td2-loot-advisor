@@ -341,19 +341,53 @@ indirme, pil/performans — hiçbiri gerçek bir cihazda denenmedi. Bir sonraki 
 ### Faz 3 — Doğrudan protokol entegrasyonu (telefon içinden konsola bağlanma — artık ikiye ayrıldı)
 
 **3a. Xbox Series X|S — ORTA risk, lisans engeli YOK (2026-11-08 bulgusuyla öncelik verildi)**
-- [ ] `XStreaming` (MIT, github.com/GiGanTe71/XStreaming — Geocld/XStreaming fork'u) projesinin
-      protokol/Auth/Stream geliştirici dokümanlarını incelemek (bu oturumda sadece README okundu,
-      protokol detayına inilmedi).
-      **Doğrulanmadı**: incelenen sadece README; "Stream"/"Auth" dokümanlarının içeriği, Xbox Live
-      kimlik doğrulama akışının tam adımları ve XStreaming'in projemize nasıl entegre edileceği (ayrı
-      bir süreç/servis olarak mı, yoksa protokolü Dart'a taşıyarak mı) bir sonraki oturumda ayrıca
-      araştırılmalı.
-      MIT lisansı bizim projemizle (MIT) **uyumlu** — lisans engeli yok, sadece mühendislik: React
-      Native/TypeScript kodunun protokol mantığını anlayıp Flutter/Dart tarafına (mobil companion'a)
-      taşımak veya XStreaming'i ayrı bir arka plan süreci/köprü olarak kullanmak.
-- [ ] Xbox Live hesap bağlama akışı (OAuth) mobil companion'a eklenecek.
-- [ ] Gerçek bir Xbox Series S/X ile uçtan uca test: video+ses akışı geliyor mu, OCR bölgesi (altyazı)
-      sabit bir koordinatta mı yoksa her oyunda değişken mi.
+
+**Durum (2026-11-08):** Kullanıcı, elinde test edilecek gerçek bir Xbox Series X/S
+olmadığını belirtti ve "haftalarca kod yazıp sonunda hiç çalışmıyor ile karşılaşma"
+riskini açıkça kabul ederek koda başlanmasını istedi (`AskUserQuestion` → "Kod
+yazmaya başla, riski kabul ediyorum"). Buna göre ilerlendi, ama kapsam ikiye
+bölündü:
+
+- [x] **Alt-aşama 1 — Kimlik doğrulama + konsol listesi (TAMAMLANDI, test EDİLMEDİ).**
+      `XStreaming` (MIT, github.com/GiGanTe71/XStreaming) projesinin
+      `docs/1.Auth.md` (850 satır) ve `docs/2.Web.md` (214 satır) belgeleri
+      satır satır okunup doğrulandı (tahmin edilmedi). Elde edilen Dart kodu
+      (`mobile/lib/console/xbox/`):
+      - `xbox_crypto.dart`: EC P-256 anahtar üretimi + Xbox Live'ın özel ikili
+        imzalama şeması (IEEE-P1363 ham r||s, standart DER değil).
+        `pointycastle`'ın gerçek kaynağı (bcgit/pc-dart) klonlanıp
+        `ECDSASigner`/`ECKeyGenerator` API'leri doğrulandı (tahmin edilmedi).
+      - `xbox_token_store.dart`: userToken/sisuToken/jwtKeys `flutter_secure_storage`
+        üzerinde (Android Keystore/iOS Keychain) saklanır.
+      - `xbox_auth_service.dart`: device token → PKCE → SisuAuthentication →
+        (kullanıcı sistem tarayıcısında Microsoft hesabıyla giriş yapıp
+        yönlendirme adresini ELLE yapıştırır — WebView+özel URL şeması
+        yakalama bu ilk sürümde bilinçli olarak basitleştirildi) →
+        authenticateUserUsingCode → SisuAuthorization → XSTS (webToken +
+        streamingToken) → xhome akış belirteci (gsToken + bölgesel baseUri).
+      - `xbox_console_service.dart`: hesaba kayıtlı Xbox konsollarının listesi
+        (§2.1).
+      - `xbox_login_page.dart`: deneysel giriş + konsol listesi ekranı,
+        Konsol Modu'nun app bar'ından (🎮 simgesi) açılır.
+      **Doğrulama durumu:** Gerçek CI derlemesiyle (3 koşu, 1 lint düzeltmesi,
+      sonunda yeşil — run 42517746084) kodun derlendiği KANITLANDI. Ancak
+      hiçbir adım gerçek bir Microsoft hesabına/Xbox konsoluna karşı
+      ÇALIŞTIRILMADI — bu kum havuzunda interaktif Microsoft girişi yapılamıyor
+      ve kullanıcının test edecek bir Xbox'ı yok. İlk gerçek denemede küçük
+      sürpriz hatalar (sunucu tarafı bir alan/başlık farkı vb.) çıkması olası;
+      bu durumda AGENTS.md madde 10'daki sistematik hata ayıklama uygulanmalı.
+- [ ] **Alt-aşama 2 — Gerçek ekran/ses akışı (WebRTC, BAŞLANMADI).**
+      `docs/3.Stream.md` (362 satır) okundu ve protokolü doğrulandı: oturum
+      başlatma (`POST .../sessions/home/play`) → durum yoklama → SDP
+      teklif/yanıt değişimi (polling) → ICE adayı değişimi (polling) →
+      `flutter_webrtc` (veya benzeri) ile gerçek medya bağlantısı kurma,
+      video/ses kod çözme, denetleyici girdisini (`input` veri kanalı,
+      sürüm 1-8) karşıya aktarma. Bu, Alt-aşama 1'den TAMAMEN AYRI ve çok
+      daha büyük bir mühendislik yükü — muhtemelen haftalarca sürer, yeni bir
+      WebRTC bağımlılığı gerektirir ve gerçek bir Xbox Series X/S olmadan asla
+      güvenilir şekilde doğrulanamaz. Kullanıcıya bu ayrım açıkça bildirildi;
+      "Xbox'a bağlan" ekranı şu an SADECE giriş+konsol listesi yapıyor, GERÇEK
+      OYUN GÖRÜNTÜSÜ GETİRMİYOR.
 
 **3b. PS5 — YÜKSEK risk, lisans engeli VAR (bkz. §1.5)**
 - [ ] Faz 0'daki GPL/MIT lisans netleşmesi tamamlanmadan BAŞLANMAZ.
