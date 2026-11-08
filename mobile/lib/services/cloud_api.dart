@@ -9,6 +9,8 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import 'companion_release.dart';
+
 /// Worker'ın canlı adresi (server/wrangler.toml → PUBLIC_URL ile aynı).
 const String kCloudApiBase = 'https://td2-stats.td2loot.workers.dev';
 
@@ -45,7 +47,7 @@ class CloudApi {
   CloudApi({http.Client? client}) : _client = client ?? http.Client();
   final http.Client _client;
 
-  static const _userAgent = 'TD2-Loot-Advisor-Companion/0.1.5';
+  static const _userAgent = 'TD2-Loot-Advisor-Companion/$companionVersion';
   static const _timeout = Duration(seconds: 8);
 
   Uri _uri(String path) => Uri.parse('$kCloudApiBase$path');

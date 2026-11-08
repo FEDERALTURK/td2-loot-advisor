@@ -585,7 +585,7 @@ class CompanionModel extends ChangeNotifier {
       final response = await http
           .get(
             endpoint,
-            headers: const {'User-Agent': 'TD2-Loot-Advisor-Companion/0.1.5'},
+            headers: {'User-Agent': 'TD2-Loot-Advisor-Companion/$companionVersion'},
           )
           .timeout(const Duration(seconds: 4));
       if (response.statusCode != 200) {

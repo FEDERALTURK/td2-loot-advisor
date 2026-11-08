@@ -2,6 +2,34 @@
 
 Önemli kararların ve sürümlerin kısa, kronolojik özeti. Tam ayrıntı için `git log` ve `.github/release_notes.md`.
 
+## Mobil companion v0.1.9 — imza sürekliliği P0 düzeltmesiyle ilk yayın (0.1.9, 2026-11-08)
+
+- Kullanıcı isteği: Codex'in PC kopyasında yaptığı çalışmanın devir raporu (`CODEX_DEVIR_RAPORU.md`)
+  incelendi; raporun P0 olarak işaretlediği "GitHub Actions her çalışmada farklı bir geçici debug anahtarıyla
+  imzalıyor, bu yüzden kullanıcılar eski APK üstüne güncelleyemiyor" sorunu doğrulanıp giderildi, ardından
+  kullanıcı bu düzeltmeyle birlikte yeni bir companion sürümü hazırlanmasını istedi ("evet").
+- **İmza sürekliliği P0 düzeltmesi** (ayrıntı: `docs/mobile_beta_signing_tr.md`, `BUGS.md` #19):
+  `mobile/android/app/build.gradle.kts`'e Play yükleme anahtarından tamamen ayrı, kalıcı bir
+  `githubBetaRelease` imzalama yapılandırması eklendi (`beta-key.properties`, `.gitignore`'da);
+  `.github/workflows/build-mobile.yml`'e bu anahtarı `TD2_BETA_KEYSTORE_BASE64`/`_PASSWORD`/`_ALIAS`
+  secret'larından çözen bir adım eklendi. Gerçek bir `workflow_dispatch` CI çalışmasıyla (run 42502909839)
+  doğrulandı: üretilen APK'nin v2 imza sertifikası (androguard), oluşturulan keystore'un kendi
+  fingerprint'iyle (SHA256 `B1:FD:...:BA`) birebir eşleşti — **P0 doğrulandı ve giderildi.**
+- **P2 düzeltmesi (yan ürün)**: `lib/main.dart` ve `lib/services/cloud_api.dart`'taki sabit kodlanmış
+  eski `'TD2-Loot-Advisor-Companion/0.1.5'` User-Agent dizeleri, zaten var olan tek doğruluk kaynağı
+  `lib/services/companion_release.dart`'taki `companionVersion` sabitine yönlendirildi (`cloud_api.dart`'a
+  yeni `import 'companion_release.dart';` eklendi). Artık sürüm numarası yalnızca tek bir yerde değişiyor.
+- **Sürüm artışı**: `mobile/pubspec.yaml` `0.1.8+10` → `0.1.9+11`; `companionVersion` `'0.1.8'` →
+  `'0.1.9'`. `grep -rn "0\.1\.8" mobile/lib mobile/test` boş döndü (kalan eski referans yok).
+- **Doğrulama**: Dart/Flutter derleyicisi bu konteynerde yok — değişiklikler statik olarak (import zinciri,
+  sabit kullanım yerleri) doğrulandı; gerçek derleme doğrulaması `build-mobile.yml` CI'sinin
+  `flutter build apk --release` adımında (tag push ile tetiklenince) gerçekleşecek.
+- **Önemli göç notu**: Bu, P0 düzeltmesinden sonraki İLK yayın. Telefonlarda zaten kurulu olan eski beta
+  APK'nin üzerine bu sürüm imza uyuşmazlığından dolayı kurulamayabilir — kullanıcıların bir kez elle
+  kaldır/yeniden kur yapması gerekir; bundan sonraki sürümler normal şekilde zincirlenecek.
+- **Bekleyen**: `companion-v0.1.9` public tag/release, AGENTS.md'nin zorunlu yayın onayı sorusu
+  kullanıcıya sorulup açık "Evet" alınmadan oluşturulmayacak.
+
 ## Üst yatay menü, dijital yağmur efekti, 3B radar + rastgele tespit noktaları (9.1.5.31, 2026-11-05)
 
 - Kullanıcı isteği: "Arkada bulunan haritanın dah 3 boyutlu ve gerçek olmasını saatin dönmesiyle tespit
