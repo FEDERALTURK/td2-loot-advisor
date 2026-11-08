@@ -27,8 +27,19 @@
 - **Önemli göç notu**: Bu, P0 düzeltmesinden sonraki İLK yayın. Telefonlarda zaten kurulu olan eski beta
   APK'nin üzerine bu sürüm imza uyuşmazlığından dolayı kurulamayabilir — kullanıcıların bir kez elle
   kaldır/yeniden kur yapması gerekir; bundan sonraki sürümler normal şekilde zincirlenecek.
-- **Bekleyen**: `companion-v0.1.9` public tag/release, AGENTS.md'nin zorunlu yayın onayı sorusu
-  kullanıcıya sorulup açık "Evet" alınmadan oluşturulmayacak.
+- **Yayınlandı (2026-11-08)**: AGENTS.md'nin zorunlu yayın onayı sorusu kullanıcıya soruldu, açık
+  "Evet" alındı. Bu ortamın proxy'si hem `git push` ile tag push'u hem de GitHub API üzerinden tag
+  oluşturmayı kalıcı olarak engellediği için (`403: Write access ... not permitted through this proxy`,
+  tekrar denemekle çözülmedi), kullanıcı tag'i kendi GitHub web arayüzünden (Releases → New release →
+  tag `companion-v0.1.9`, target `main`) oluşturup "Publish release"e tıkladı. Bu, CI'yi tag-push
+  yoluyla tetikledi (run 42511119543): build + imzalama + **gerçek "Publish companion release" adımı
+  bu kez çalışıp** `TD2LootAdvisor_Companion_0.1.9.apk` + `SHA256SUMS.sha256`'yı
+  `https://github.com/FEDERALTURK/td2-loot-advisor/releases/tag/companion-v0.1.9` adresine ekledi
+  (companion kanalı kasıtlı olarak her zaman `prerelease: true` işaretli — bkz.
+  `build-mobile.yml`'deki `Publish companion release` adımı). Yayınlanan APK GitHub'dan indirilip
+  androguard ile v2 imza sertifikası tekrar çıkarıldı — fingerprint yine
+  `B1:FD:...:BA` ile birebir eşleşti. **P0 düzeltmesi artık gerçek bir public yayında da kanıtlandı**
+  (ayrıntı: `docs/mobile_beta_signing_tr.md`).
 
 ## Üst yatay menü, dijital yağmur efekti, 3B radar + rastgele tespit noktaları (9.1.5.31, 2026-11-05)
 

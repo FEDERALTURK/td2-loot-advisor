@@ -84,6 +84,18 @@ demek oluyor ki:
   imzalıyor — P0 giderildi.** (Not: bu test çalışması bir tag push değil
   `workflow_dispatch` olduğu için "Publish companion release" adımı koşullu
   olarak atlandı, hiçbir public release/tag oluşmadı.)
+- [Doğrulandı — 2026-11-08] İlk gerçek yayın da aynı şekilde doğrulandı:
+  `companion-v0.1.9` tag'i push edilip CI tag-tetiklemesiyle çalıştı (run
+  42511119543), "Publish companion release" adımı bu kez gerçekten çalışıp
+  `TD2LootAdvisor_Companion_0.1.9.apk`'yi GitHub Release'e ekledi. Yayınlanan
+  bu APK GitHub'dan indirilip tekrar `androguard` ile v2 imza sertifikası
+  çıkarıldı — SHA256 parmak izi yine
+  `B1:FD:54:C8:72:76:E9:75:3F:CB:AF:4B:6D:93:F0:01:0A:D9:D3:FD:D9:38:06:E0:46:2C:78:67:A5:EA:0F:BA`
+  ile birebir eşleşti. **P0 düzeltmesi artık gerçek bir public yayında da
+  kanıtlandı.** Hâlâ doğrulanmayan tek şey: bir telefonda önceki (düzeltme
+  öncesi) beta APK'nin üzerine bu sürümün kurulma denemesi — beklenen
+  davranış (ilk seferde imza uyuşmazlığı, kaldır/yeniden kur sonrası normal
+  çalışma) henüz gerçek bir cihazda gözlemlenmedi.
 - [Doğrulanmadı] Gerçek bir telefonda "eski APK kaldır → yeni kur → bir sonraki
   sürümü üstüne güncelle" senaryosu denenmedi — bu, Codex'in raporundaki en
   riskli, test edilmemiş adımla aynı, sadece imza artık kalıcı.

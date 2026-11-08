@@ -84,9 +84,14 @@
     ekledi; `workflow_dispatch` ile gerçek bir CI çalışması tetiklendi (run 42502909839), üretilen
     APK indirilip imza sertifikası (androguard, v2) çıkarıldı — SHA256 parmak izi, keystore
     üretilirken alınan fingerprint'le birebir eşleşti. **P0 doğrulandı ve giderildi.**
-    **Hâlâ doğrulanmadı:** gerçek bir telefonda "eski APK kaldır → yeni kur → bir sonraki sürümü
-    üstüne güncelle" senaryosu (bu CI çalışması bir tag push değildi, public release
-    oluşmadı — onay gerektirecek bir sonraki gerçek `companion-v*` yayınında denenmeli).
+    **Güncelleme (2026-11-08, gerçek yayın):** `companion-v0.1.9` tag'i kullanıcı tarafından
+    GitHub web arayüzünden push edildi, CI tag-tetiklemesiyle çalıştı (run 42511119543) ve
+    "Publish companion release" adımı gerçekten yürüyüp APK'yı public release'e ekledi. Yayınlanan
+    bu APK tekrar indirilip aynı şekilde doğrulandı — fingerprint yine birebir eşleşti. **P0
+    düzeltmesi artık gerçek bir public yayında da kanıtlandı.**
+    **Hâlâ doğrulanmadı:** gerçek bir telefonda "eski (düzeltme öncesi) APK'yı kaldır → bu sürümü
+    kur → bir sonraki sürümü üstüne güncelle" senaryosu — bu adım yalnızca bir kullanıcının
+    gerçek cihazında denenebilir.
 
 ## Bilinen test kapsamı boşlukları
 
