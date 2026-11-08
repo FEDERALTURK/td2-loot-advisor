@@ -66,6 +66,56 @@ sunduğu bir **geliştirici API'si**:
   [XClosedCaptionSetEnabled referansı](https://devdocs.xbox.com/reference/system/xaccessibility/functions/xclosedcaptionsetenabled.md),
   [Xbox Accessibility Guidelines](https://devdocs.xbox.com/gaming/accessibility/xbox-accessibility-guidelines/104)
 
+### 1.5 Gerçek emsal: gamecaptionapp.com ("Game Caption" mobil uygulaması)
+Kullanıcının kastettiği uygulama bu — gerçek, yayında, ücretli bir mobil uygulama (iOS + Android,
+`gamecaptionapp.com`). Sayfası ve destek sayfası (`/support.html`) incelendi; mimarisi **önceki
+bölümlerdeki tahminlerimizi doğruluyor**, ek olarak şu somut gerçek detayları veriyor:
+
+- **Bu bir PC uygulaması değil, bir TELEFON uygulaması.** PC desteği yok — PC'de sadece kamera modu
+  kullanılabilir ("bilgisayarda... herhangi bir konsol, bilgisayar, film veya dizide çalışır").
+  **Önemli strateji çıkarımı:** Bizim de bu işlevi PC masaüstü uygulamasına değil, zaten var olan
+  `mobile/` (Flutter) companion uygulamasına eklemek daha doğru eşleşme olur.
+- **PS5 bağlantısı = resmi Sony Remote Play, doğrulandı (destek sayfasından birebir alıntı):**
+  "PS5 tamamen açık olmalı ve telefonla aynı ağa bağlı olmalı", "PS5'te Uzaktan Oynama açık olmalı",
+  "Game Caption'ı ikinci bir PSN hesabıyla bağlayın, kumandada kendi ana hesabınızı seçin." — Bu, bizim
+  Bölüm 3 / Seçenek B'deki tahminimizle **tam örtüşüyor**: resmi Remote Play protokolü, ikinci (yardımcı)
+  bir PSN hesabı üzerinden bağlanıyor, ana hesap kumandada kalıyor.
+- **Mühendislik riski (yeni bulgu):** Sony'nin Remote Play protokolüne resmi/genel bir "üçüncü parti
+  SDK"sı yok — bu tür entegrasyonlar genelde ya Sony ile özel ortaklık ya da **açık kaynak
+  ters-mühendislik projeleri** (örn. `chiaki`/`chiaki-ng`, GPL lisanslı, PS Remote Play protokolünü
+  bağımsızca uygulayan topluluk projeleri) üzerinden yapılır. Hangisini `gamecaptionapp.com`'un
+  kullandığı **doğrulanamadı** — ama bu bizim için önemli bir **lisans/hukuki araştırma kalemi**:
+  `chiaki-ng` GPL'dir, projemize (MIT) doğrudan kod olarak gömülürse lisans uyumu ayrıca incelenmeli.
+- **Xbox bağlantısı: yöntem sayfada belirtilmemiş**, doğrulanamadı — muhtemelen Xbox'ın resmi olmayan/
+  yarı-resmi "Smartglass"/konsol yayın protokolü (topluluk projesi: `xbox-smartglass`) kullanılıyor,
+  ama bu **doğrulanmadı, sadece varsayım**.
+- **ASR YOK — önemli basitleştirme:** Uygulama oyunun sesini DİNLEMİYOR. "Çeviri için yalnız altyazı
+  metni kullanılır" deniyor. "Sesli çeviri" dedikleri şey, OCR'la okunan altyazı metninin **çevirisini
+  telefonun kendi metin-okuma (TTS) sesiyle okutması** — konuşma tanıma (ASR) değil. **Bu, önceki
+  mesajımdaki Faz 2'yi (ASR entegrasyonu) gereksiz kılıyor** — çok daha basit bir TTS okuma adımı
+  yeterli, hem de TD2 Loot Advisor'da zaten `speech.py`/`voicepack.py` (Sesli Asistan modülü) içinde
+  ses altyapısı mevcut, oradan TTS kısmı yeniden kullanılabilir.
+- **Kamera modu, bizim Seçenek C ile birebir aynı:** "Kamera modunda telefonu sabitleyin ve ekrandaki
+  yansımayı azaltın", "altyazının yeşil kutunun içinde olduğundan emin olun" (OCR bölgesi hizalama
+  rehberi). Bu, **platform bağımsız, en az mühendislik riskiyle çalışan, tüm konsol+PC'yi aynı anda
+  kapsayan tek mod** — rakip de bunu "her şeyle çalışır" olarak pazarlıyor.
+- **TV modu (ek, bizim planımızda yoktu):** Telefon OCR+çeviriyi yapıyor, sonucu aynı ağdaki bir TV
+  uygulamasına (Android TV/Google TV native app, Samsung/LG için ayrı yöntemler) QR ile eşleştirip
+  gönderiyor — telefonun küçük ekranına bakmak zorunda kalmadan büyük ekranda altyazı görme. Bizim
+  mobil companion'ımızda da ucuz bir ek olabilir (zaten yerel ağ QR eşleştirme altyapımız var —
+  `companion.py`'nin masaüstü-telefon QR eşleştirmesiyle aynı mantık, LAN içinde telefon-TV'ye
+  genişletilebilir).
+- **İş modeli:** Günlük kota + aylık/yıllık abonelik (Premium AI / Professional), tek seferlik ücretsiz
+  deneme. Bizim projenin "ücretsiz/açık kaynak" ilkesiyle örtüşmüyor — bu bölüm bilgi amaçlı, kopyalama
+  hedefi değil.
+
+**Sonuç — plan güncellemesi:** Yukarıdaki bulgular ışığında Bölüm 5'teki fazlar şu şekilde revize edildi:
+kamera modu (eski Faz 4) gerçek MVP olarak ÖNE alındı ve mobil companion'a taşındı; ASR fazı (eski Faz 2)
+TTS-okuma ile değiştirildi (çok daha basit); Remote Play/Smartglass entegrasyonu açık lisans/hukuki
+riskiyle birlikte ayrı, daha sonraki bir faz olarak işaretlendi. Güncel sıralama Bölüm 5'te.
+
+**Kaynaklar:** [gamecaptionapp.com](https://gamecaptionapp.com/), [gamecaptionapp.com/support.html](https://gamecaptionapp.com/support.html), [gamecaptionapp.com/en/](https://gamecaptionapp.com/en/)
+
 ### Genel çıkarım
 Üç yaklaşımın hepsinde aynı iki alt sistem var: **(A) konuşma-tanıma (ASR) hattı** (ses varsa) ve
 **(B) OCR hattı** (ekranda yazı varsa — diyalog altyazısı, görev metni, menü). Hangisinin kullanılacağı
@@ -180,63 +230,62 @@ zorunlu kılma.
 
 ---
 
-## 5. Aşamalı Yol Haritası
+## 5. Aşamalı Yol Haritası (gamecaptionapp.com bulgularıyla güncellendi, §1.5)
 
 ### Faz 0 — Doğrulama (kod yazmadan önce)
-- [ ] Xbox "Stream"/"Oyunumu Yayınla" ve PS Remote Play uygulamalarını gerçek bir Xbox Series S/X ve
-      PS4/PS5 ile test et: pencere başlığı/HWND'si ne, gecikme ne kadar, ses PC'nin sistem sesine
-      gerçekten düşüyor mu (bazı remote-play istemcileri sesi kendi dahili oynatıcısında tutabilir,
-      WASAPI loopback'e görünmeyebilir — bu DOĞRULANMALI).
-- [ ] `faster-whisper` (veya benzeri offline ASR) için CPU-only makinede gerçek zamanlı performansı ölç
-      (gecikme, CPU kullanımı) — kullanıcının donanımı GPU'suz olabilir.
-- [ ] Hukuki/ToS kontrolü: Xbox/PlayStation'ın Remote Play/Stream özelliklerini üçüncü parti bir
-      uygulamanın ekran+ses okuması için kullanmanın hizmet şartlarına aykırı bir tarafı var mı
-      (muhtemelen yok — bu tamamen kullanıcının kendi ekranını/sesini okumak, normal bir ekran kaydı/OCR
-      aracından farksız — ama doğrulanmalı, kesin değil).
+- [ ] Mevcut mobil companion'ın (Flutter) kamera/OCR için hangi paketleri kullanabileceğini araştır
+      (Google ML Kit Text Recognition — ücretsiz, cihaz-üstü, Android+iOS; alternatif: platform tarafı
+      Tesseract binding). Gerçek bir telefon ile gerçek bir TV/monitör ekranına karşı OCR doğruluğunu
+      test et (parlama, açı, uzaklık değişkenleriyle).
+- [ ] PC/masaüstü rotası (Remote Play penceresi okuma) için: Xbox "Stream" ve PS Remote Play
+      uygulamalarını gerçek bir Xbox Series S/X ve PS4/PS5 ile test et — pencere başlığı/HWND'si ne,
+      gecikme ne kadar.
+- [ ] Hukuki/lisans kontrolü: Remote Play protokolüne resmi SDK yoksa (bkz. §1.5), ters-mühendislik
+      açık kaynak projelerinin (örn. `chiaki-ng`, GPL) lisansının MIT lisanslı TD2 Loot Advisor'a nasıl
+      entegre edilebileceği (ayrı süreç/binary olarak çağırma vs. kod gömme — lisans etkisi farklı)
+      netleştirilmeli. Bu netleşmeden Remote Play fazına (Faz 3) başlanmamalı.
 
-### Faz 1 — MVP: PC üzerinden Remote Play penceresi okuma (Seçenek B)
+### Faz 1 — MVP: Mobil companion'da kamera modu (Seçenek C — en düşük risk, platform bağımsız)
+- [ ] `mobile/` Flutter app'e yeni bir sekme/mod: kamera önizleme + OCR hizalama rehberi (gamecaptionapp
+      tarzı "yeşil kutu" — kullanıcı altyazının kutunun içinde kaldığından emin olur).
+- [ ] OCR: cihaz-üstü (gizlilik ilkesiyle uyumlu — ekran görüntüsü sunucuya gitmez, sadece OCR çıktısı
+      metni çeviri için kullanılır, aynı gamecaptionapp'ın yaptığı gibi).
+- [ ] Çeviri: masaüstündeki `livetranslate.py` motor seçenekleriyle aynı sağlayıcı listesini mobilde de
+      sun (zaten masaüstü 10 dilli; mobil bunu kalıtmalı, yeniden icat etmemeli).
+- [ ] Sesli okuma (TTS): OCR+çeviri çıktısını telefonun yerel metin-okuma sesiyle okut — **ASR YOK**,
+      sadece zaten elde var olan çeviri metnini sesli okuma (§1.5'teki basitleştirme).
+- [ ] Overlay görünümü Xbox'ın resmi altyazı stiline benzetilecek (bkz. §1.4): yarı saydam siyah kutu,
+      font boyutu seçenekleri.
+- [ ] Bu modu PC için de öner (kamera telefonla, monitöre doğrultularak) — tek kod tabanıyla hem konsol
+      hem PC hem de başka bir cihazı (TV, taşınabilir konsol) kapsar, ek entegrasyon gerekmez.
+- [ ] Test: gerçek bir telefonla gerçek bir TV/monitör ekranına karşı, en az 2-3 farklı oyunla uçtan uca
+      doğrulama.
+
+### Faz 2 — PC masaüstünde Remote Play penceresi okuma (Seçenek B, ikincil rota)
 - [ ] Pencere algılama: başlığına göre Xbox/PS Remote Play penceresini bul, bölgesini al.
 - [ ] Mevcut `ocr_backend.py`'yi bu bölgeye yönlendir (mevcut tarama mantığı aynı, sadece kaynak farklı).
-- [ ] Mevcut `livetranslate.py`/`overlay.py` hattını bu akışa bağla (EN→TR, yerinde veya köşe overlay).
-- [ ] Ayarlar'da yeni bir "Konsol Modu" sekmesi/aç-kapa: kullanıcı "Xbox" veya "PlayStation" seçer, uygulama
-      ilgili pencereyi arar.
-- [ ] Overlay'in varsayılan görünümü Xbox'ın resmi altyazı stiline benzetilecek (bkz. §1.4): ekranın
-      altında yarı saydam siyah kutu, 3 font boyutu seçeneği (küçük/orta/büyük), isteğe bağlı konuşmacı
-      etiketi — mevcut `overlay.py`'deki köşe/yerinde modlarına ek bir üçüncü "alt bant" modu olarak.
-- [ ] Test: en az 2-3 farklı oyunda (altyazılı diyalog içeren) gerçek Xbox/PS5 + Remote Play ile uçtan uca
-      doğrulama — **gerçek konsol ve gerçek Remote Play penceresiyle, bu görevi sadece kod okuyarak
-      "doğrulanmış" saymayın.**
+- [ ] Mevcut `livetranslate.py`/`overlay.py` hattını bu akışa bağla.
+- [ ] Ayarlar'da yeni bir "Konsol Modu" sekmesi/aç-kapa.
+- [ ] Test: gerçek Xbox/PS5 + Remote Play ile uçtan uca doğrulama (sadece kod okuyarak doğrulanmış
+      sayılmaz).
 
-### Faz 2 — Sesli diyalog desteği (ASR)
-- [ ] `faster-whisper` (ya da Faz 0'da seçilen motor) entegrasyonu: sistem sesinden (WASAPI loopback)
-      canlı ses alıp küçük parçalar (örn. 3-5 sn) halinde metne çevirme.
-- [ ] ASR çıktısını mevcut `livetranslate.py` çeviri hattına besleme (OCR çıktısıyla aynı pipeline).
-- [ ] Gecikme/doğruluk dengesini ayarlama (parça boyutu, model boyutu — tiny/base/small Whisper
-      varyantları arasında denge).
-- [ ] UI: OCR-altyazı modundan ASR-konuşma moduna otomatik/manuel geçiş (bazı oyunlarda ikisi birlikte de
-      olabilir — çakışma/öncelik kuralı gerekir).
+### Faz 3 — Resmi olmayan Remote Play/Smartglass protokol entegrasyonu (yüksek risk, opsiyonel)
+- [ ] Faz 0'daki lisans netleşmesi tamamlanmadan BAŞLANMAZ.
+- [ ] gamecaptionapp'ın yaptığı gibi doğrudan telefon üzerinden PS5 Remote Play / Xbox konsol-yayın
+      protokolüne bağlanma — bu, Faz 1/2'nin aksine kullanıcının ayrıca bir Remote Play penceresi
+      açmasını gerektirmez (uygulama kendi içinde bağlanır), ama mühendislik + lisans maliyeti en yüksek
+      kalemdir. İkinci bir PSN/Microsoft hesabı bağlama akışı gerekir (gamecaptionapp'ın yaptığı gibi).
 
-### Faz 3 — Capture kart desteği (Seçenek A, ileri kullanıcı)
+### Faz 4 — Capture kart desteği (Seçenek A, ileri kullanıcı, düşük öncelik)
 - [ ] Capture kartların PC'de bir "video capture device" (DirectShow/Media Foundation) olarak göründüğünü
-      doğrula, bu akışı OpenCV/`mss` yerine uygun bir API ile okuma.
-- [ ] Remote Play'den farklı olarak gerçek HDMI gecikmesi/renk profili farklarını hesaba kat (OCR eşik
-      ayarı gerekebilir).
+      doğrula, bu akışı uygun bir API ile okuma.
 - [ ] Dokümantasyon: hangi capture kartlar test edildi, hangi ayarlarla.
 
-### Faz 4 — Mobil kamera modu (Seçenek C, mobil companion'a ek)
-- [ ] `mobile/` Flutter app'e "Konsol Ekranı Oku" sekmesi: kamera önizleme + kare yakalama.
-- [ ] OCR: telefon üstünde (ör. Google ML Kit / Tesseract mobil) veya PC'ye gönderip orada işleme —
-      gizlilik ve gecikme dengesine göre karar verilmeli (yerel OCR tercih edilir).
-- [ ] Çeviri: mevcut bulut çeviri motorlarından biri (zaten masaüstünde kullanılanlarla aynı sağlayıcı
-      seçeneklerini mobilde de sun).
-- [ ] Bu modu açıkça "deneme/düşük doğruluk" olarak etiketle — kullanıcı beklentisini yönet.
-
-### Faz 5 — Cilalama ve yayın
-- [ ] Performans profili (CPU/GPU kullanımı, pil etkisi mobilde).
-- [ ] Çoklu dil: şu an yerel motor sadece EN→TR; bulut motor seçenekleriyle diğer hedef diller de konsol
-      modunda desteklenmeli (masaüstü zaten 10 dilli; konsol modu bunu kalıtmalı, yeniden icat etmemeli).
-- [ ] README/BUGS/ROADMAP güncellemesi, kullanıcıya hangi konsol+hangi yöntemde ne kadar doğruluk
-      bekleyeceğini anlatan bir kurulum kılavuzu (`docs/console_mode_setup_tr.md` gibi).
+### Faz 5 — TV modu ve cilalama
+- [ ] Mobil companion'ın OCR+çeviri sonucunu yerel ağdaki bir TV'ye QR eşleştirmeyle gösterme (mevcut
+      `companion.py` masaüstü-telefon QR eşleştirme mantığının telefon-TV'ye genişletilmesi).
+- [ ] Performans profili (pil etkisi, OCR döngü sıklığı).
+- [ ] README/BUGS/ROADMAP güncellemesi, kurulum kılavuzu (`docs/console_mode_setup_tr.md`).
 
 ---
 
@@ -251,3 +300,11 @@ zorunlu kılma.
   çalışacağı — gerçek ölçüm yapılmadı, Faz 0'da ölçülmeli.
 - **Kapsam dışı (şimdilik):** Konsolun kendi arayüzüne (dashboard, oyun dışı menüler) çeviri — bu yol
   haritası sadece OYUN İÇİ metin/ses için; konsol dashboard'u ayrı ve daha az öncelikli bir hedef.
+- **Doğrulanmadı (yeni, §1.5'ten):** `gamecaptionapp.com`'un Xbox bağlantısını ve PS5 Remote Play
+  entegrasyonunu tam olarak hangi teknik yolla (resmi SDK mı, ters-mühendislik mi) yaptığı kamu
+  sayfalarından çıkarılamadı — Faz 3'e geçmeden önce bu ayrıca araştırılmalı, resmi sayfanın iddiaları
+  kesin teknik gerçeklik olarak alınmamalı.
+- **Lisans riski (yeni, §1.5'ten):** Açık kaynak Remote Play ters-mühendislik projeleri (örn.
+  `chiaki-ng`) GPL lisanslıdır; TD2 Loot Advisor MIT lisanslıdır. Bu ikisinin nasıl bir arada
+  kullanılabileceği (ayrı süreç mi, kod gömme mi) bir hukuk/lisans uzmanı görüşü gerektirebilir —
+  Claude bu konuda kesin hukuki tavsiye veremez, kullanıcı gerekirse bağımsızca doğrulamalı.
