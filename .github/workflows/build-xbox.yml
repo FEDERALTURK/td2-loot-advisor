@@ -20,24 +20,44 @@ jobs:
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
-      - name: Install UWP build tools workload (Windows SDK facade'leri için)
-        # windows-latest koşucusunun VS kurulumunda "Universal Windows
-        # Platform development" iş yükü varsayılan olarak YOK — bu olmadan
-        # Microsoft.NETCore.UniversalWindowsPlatform paketi bile System.String
-        # gibi temel .NET tiplerini çözemiyor (ilk 3 denemede gözlendi).
+      - name: Windows SDK / UWP metadata durumunu teşhis et (Windows.winmd var mı?)
+        # Önceki 4 CI denemesinde System.String gibi temel BCL tiplerinin
+        # çözülememesi ayrı bir sorundu (facade Reference eksikliği — bkz.
+        # commit 186f12d, kök neden bulundu ve düzeltildi). Bu adım, Windows.*
+        # (WinRT) ad alanlarının kaynağı olan Windows.winmd'nin koşucuda zaten
+        # var olup olmadığını kanıtla doğruluyor — tahmin yok.
+        shell: pwsh
+        run: |
+          Write-Host "--- Windows Kits\10\UnionMetadata ---"
+          Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\UnionMetadata" -ErrorAction SilentlyContinue | Format-Table Name
+          Write-Host "--- Windows Kits\10\Platforms\UAP ---"
+          Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\Platforms\UAP" -ErrorAction SilentlyContinue -Recurse -Filter "*.winmd" | Select-Object -First 20 FullName
+          Write-Host "--- VS kurulu bileşenler (UWP ile ilgili) ---"
+          $vsPath = (& "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath)
+          & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products '*' -property "packages" 2>$null |
+            Select-String -Pattern "UWP|Windows10SDK|Windows11SDK" | Select-Object -First 30
+          Write-Host "VS install path: $vsPath"
+
+      - name: UWP/Windows SDK bileşenini kur (eksikse)
         shell: pwsh
         run: |
           $vsPath = (& "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath)
-          Write-Host "VS install path: $vsPath"
-          & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vs_installer.exe" modify `
-            --installPath "$vsPath" `
-            --add Microsoft.VisualStudio.ComponentGroup.UWP.VC `
-            --add Microsoft.VisualStudio.Component.Windows10SDK.19041 `
-            --quiet --norestart --wait
-          if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne 3010) {
-            Write-Error "vs_installer modify başarısız (exit $LASTEXITCODE)"
-            exit $LASTEXITCODE
+          $installer = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vs_installer.exe"
+          Write-Host "Calling: $installer modify --installPath `"$vsPath`" --add Microsoft.VisualStudio.ComponentGroup.UWP.VC --add Microsoft.VisualStudio.Component.Windows10SDK.19041"
+          $proc = Start-Process -FilePath $installer -ArgumentList @(
+            "modify",
+            "--installPath", "`"$vsPath`"",
+            "--add", "Microsoft.VisualStudio.ComponentGroup.UWP.VC",
+            "--add", "Microsoft.VisualStudio.Component.Windows10SDK.19041",
+            "--quiet", "--norestart", "--wait"
+          ) -Wait -PassThru -NoNewWindow
+          Write-Host "vs_installer exit code: $($proc.ExitCode)"
+          if ($proc.ExitCode -ne 0 -and $proc.ExitCode -ne 3010) {
+            Write-Error "vs_installer modify başarısız (exit $($proc.ExitCode))"
+            exit $proc.ExitCode
           }
+          Write-Host "--- Kurulumdan SONRA Windows Kits\10\UnionMetadata ---"
+          Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\UnionMetadata" -ErrorAction SilentlyContinue | Format-Table Name
 
       - name: Restore NuGet packages (packages.config — klasik UWP projesi)
         run: nuget restore XboxCompanion.sln
