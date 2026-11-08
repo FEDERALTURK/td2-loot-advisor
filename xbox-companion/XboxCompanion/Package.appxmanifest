@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  NOT: Identity/Publisher alanları burada YER TUTUCUDUR. Gerçek Microsoft
+  Partner Center gönderimi için şu adımlar GEREKLİDİR (kullanıcı tarafından,
+  Claude hesap/kimlik rezervasyonu yapamaz — bkz. AGENTS.md madde 21):
+    1. Partner Center'da uygulama adı rezerve et (örn. "TD2 Loot Advisor
+       Companion").
+    2. Partner Center'ın verdiği gerçek Package/Identity/Name ve Publisher
+       (CN=...) değerlerini buraya, Visual Studio'nun "Store ilişkilendirme"
+       sihirbazıyla (Project → Publish → Associate App with the Store)
+       otomatik yazdır — yer tutucu değerlerle GERÇEK YAYIN YAPILAMAZ.
+    3. Gerçek imzalama sertifikası Partner Center/Store tarafından
+       sağlanır — bu repodaki XboxCompanion_TemporaryKey.pfx yalnızca
+       YEREL GELİŞTİRME/CI DERLEME testi için üretilmiş, kendi kendine
+       imzalı bir test sertifikasıdır; mağazaya YÜKLENMEMELİDİR.
+-->
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  IgnorableNamespaces="uap mp rescap">
+
+  <Identity
+    Name="Kaivolt.TD2LootAdvisorXboxCompanion"
+    Publisher="CN=TD2LootAdvisorXboxCompanion"
+    Version="0.1.0.0" />
+
+  <mp:PhoneIdentity PhoneProductId="8f3b9f2e-6e9e-4e3e-9e3e-3e6e8f3b9f2e" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
+
+  <Properties>
+    <DisplayName>TD2 Loot Advisor Companion</DisplayName>
+    <PublisherDisplayName>Kaivolt</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+  </Properties>
+
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Universal" MinVersion="10.0.17763.0" MaxVersionTested="10.0.19041.0" />
+  </Dependencies>
+
+  <Resources>
+    <Resource Language="tr-TR" />
+    <Resource Language="en-US" />
+  </Resources>
+
+  <Applications>
+    <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="XboxCompanion.App">
+      <uap:VisualElements
+        DisplayName="TD2 Loot Advisor Companion"
+        Square150x150Logo="Assets\Square150x150Logo.png"
+        Square44x44Logo="Assets\Square44x44Logo.png"
+        Description="The Division 2 için build kuralları ve görev çevirileri — Xbox'ta ayrıca açılan statik referans uygulaması (canlı ekran okuma/overlay İÇERMEZ)."
+        BackgroundColor="#090C12">
+        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" />
+        <uap:SplashScreen Image="Assets\SplashScreen.png" BackgroundColor="#090C12" />
+      </uap:VisualElements>
+    </Application>
+  </Applications>
+
+  <Capabilities>
+    <!-- Yalnızca ileride isteğe bağlı bir "verileri güncelle" özelliği için;
+         şu an uygulama yalnız pakete gömülü JSON'ları okuyor, ağ çağrısı
+         YAPMIYOR. -->
+    <Capability Name="internetClient" />
+  </Capabilities>
+</Package>

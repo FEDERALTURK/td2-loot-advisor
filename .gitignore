@@ -78,3 +78,11 @@ tests/.translate_result.json
 .claude-flow/policy/
 .claude-flow/swarm/
 .swarm/
+
+# Xbox Companion (UWP, xbox-companion/) — derleme çıktıları ve VS kullanıcı dosyaları
+xbox-companion/**/bin/
+xbox-companion/**/obj/
+xbox-companion/**/AppPackages/
+xbox-companion/**/BundleArtifacts/
+xbox-companion/*.user
+xbox-companion/.vs/

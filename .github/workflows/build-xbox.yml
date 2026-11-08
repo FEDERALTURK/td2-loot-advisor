@@ -1,0 +1,29 @@
+name: Build Xbox Companion (UWP)
+
+# NOT: Bu, xbox-companion/ içindeki klasik UWP projesinin GERÇEK MSBuild ile
+# derlendiğini doğrulayan TEK yol — bu proje bir Linux kum havuzunda, hiçbir
+# Windows/UWP araç zinciri olmadan yazıldı (bkz. xbox-companion/README.md
+# "Doğrulama durumu"). Bu workflow yalnız DERLEME doğrular; paketleme/imzalama
+# (MSIX/APPX üretimi) veya gerçek bir Xbox'a dağıtım YAPMAZ.
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: xbox-companion
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Restore NuGet packages
+        run: nuget restore XboxCompanion.sln
+        shell: cmd
+
+      - name: Build (Release|x64, derleme doğrulaması — paketleme yok)
+        run: msbuild XboxCompanion.sln /p:Configuration=Release /p:Platform=x64 /p:AppxBundle=Never /p:UapAppxPackageBuildMode=SideloadOnly /v:minimal
+        shell: cmd
