@@ -7,14 +7,57 @@ Konsol (Xbox/PS5/PS4) yakalama + canlı çeviri fikri için araştırma ve yol h
 
 | Bileşen | Durum |
 |---|---|
-| Windows masaüstü uygulaması | Canlı, **`v9.1.5.32`** (2026-11-06, GitHub Release yayınlandı 18:54 UTC, `build-installer`/`service-check`/`account-check`/`translate-check`/`stability-check` hepsi `success`). Değişiklik: `display.py`'ye `hdr_enabled()` yardımcı fonksiyonu eklendi — HDR algısı artık yalnızca kesin "açık"/"kapalı" değerlerinden çıkarılıyor, eski/elle değiştirilmiş veya bilinmeyen bir `state.cfg` değeri artık yanlışlıkla "HDR açık" uyarısı üretmiyor (`tests/test_core.py`'a 5 yeni assert). **Bu oturumda yeni, doğrulanmış bir CI regresyonu bulundu**: `Info check` iş akışı (`tests/test_knowledge.py`) 2026-11-06 13:34'teki otomatik "Feeds" senkronundan beri `main`'de **kırmızı**. Kök neden: test, 3 gün önce biten bir haber olayının kimliğini (`y8s3-red-moon-unleashed`) `meta/news_feed.json`'da hep var olacak sabit veri gibi varsayıyor (`assert st["y8s3-red-moon-unleashed"] == "live"`), ama Feeds botu tam olarak "3 günden eski biten olayları" otomatik olarak bu dosyadan siliyor (bugünkü commit mesajı: "Removed events that ended 2026-11-03") — test artık `KeyError: 'y8s3-red-moon-unleashed'` ile çöküyor. Uygulama kodunda bir regresyon değil (HDR değişikliğiyle ilgisiz), test fixture'ının canlı/değişken veriye bağımlı olmasından kaynaklanıyor; GitHub Actions'ta doğrulandı (run `42226626507` ve `42273566998`, ikisi de `failure`). Düzeltme bu oturumun kapsamı dışında bırakıldı, ayrıntı aşağıda "Diğer açık kalemler"de. Önceki not hâlâ geçerli: `v9.1.5.25`-`v9.1.5.31` arasındaki birçok görsel değişiklik gerçek Windows'ta kullanıcı tarafından henüz gözle teyit edilmedi (bkz. `BUGS.md` #11-16). `main`'e henüz birleştirilmemiş bir **draft PR** var: [#3](https://github.com/FEDERALTURK/td2-loot-advisor/pull/3) "açıklama yedeği iki parçayı da okuyor" (`fix/desc-offline-fallback`, hâlâ taslak, `mergeable_state: unstable`, 2026-11-05'ten beri değişmedi) — bu oturum dokunmadı. |
+| Windows masaüstü uygulaması | Canlı, **`v9.1.5.32`** (2026-11-06, GitHub Release yayınlandı 18:54 UTC, `build-installer`/`service-check`/`account-check`/`translate-check`/`stability-check` hepsi `success`). Değişiklik: `display.py`'ye `hdr_enabled()` yardımcı fonksiyonu eklendi — HDR algısı artık yalnızca kesin "açık"/"kapalı" değerlerinden çıkarılıyor, eski/elle değiştirilmiş veya bilinmeyen bir `state.cfg` değeri artık yanlışlıkla "HDR açık" uyarısı üretmiyor (`tests/test_core.py`'a 5 yeni assert). **Bu oturumda yeni, doğrulanmış bir CI regresyonu bulundu**: `Info check` iş akışı (`tests/test_knowledge.py`) 2026-11-06 13:34'teki otomatik "Feeds" senkronundan beri `main`'de **kırmızı**. Kök neden: test, 3 gün önce biten bir haber olayının kimliğini (`y8s3-red-moon-unleashed`) `meta/news_feed.json`'da hep var olacak sabit veri gibi varsayıyor (`assert st["y8s3-red-moon-unleashed"] == "live"`), ama Feeds botu tam olarak "3 günden eski biten olayları" otomatik olarak bu dosyadan siliyor (bugünkü commit mesajı: "Removed events that ended 2026-11-03") — test artık `KeyError: 'y8s3-red-moon-unleashed'` ile çöküyor. Uygulama kodunda bir regresyon değil (HDR değişikliğiyle ilgisiz), test fixture'ının canlı/değişken veriye bağımlı olmasından kaynaklanıyor; GitHub Actions'ta doğrulandı (run `42226626507` ve `42273566998`, ikisi de `failure`). Düzeltme bu oturumun kapsamı dışında bırakıldı, ayrıntı aşağıda "Diğer açık kalemler"de. Önceki not hâlâ geçerli: `v9.1.5.25`-`v9.1.5.31` arasındaki birçok görsel değişiklik gerçek Windows'ta kullanıcı tarafından henüz gözle teyit edilmedi (bkz. `BUGS.md` #11-16). `main`'e henüz birleştirilmemiş bir **draft PR** var: [#3](https://github.com/FEDERALTURK/td2-loot-advisor/pull/3) "açıklama yedeği iki parçayı da okuyor" (`fix/desc-offline-fallback`, hâlâ taslak, `mergeable_state: unstable`, 2026-11-05'ten beri değişmedi) — bu oturum dokunmadı. **Güncelleme (2026-11-09, otomatik durum oturumu):** `Info check`/`tests/test_knowledge.py` aynı `KeyError: 'y8s3-red-moon-unleashed'` ile hâlâ kırmızı (GitHub Actions run `42580288876`, bugünkü otomatik "Feeds" commit'i `93deaa0` üzerinde, doğrulandı) — düzeltme hâlâ yapılmadı, aşağıdaki "Diğer açık kalemler"de duruyor. PR #3'ün `mergeable_state` alanı artık `unstable` değil, **`dirty`** (gerçek çakışma — `main` 2026-11-05'ten beri çok ilerledi, PR'ın temel aldığı commit eski kaldı); birleştirilmeden önce dal sahibinin `main` üzerine rebase etmesi gerekecek. |
 | Mobil companion (Flutter) | **`companion-v0.1.9` gerçek GitHub Release'e yayınlandı (2026-11-08)** — Codex'in devir raporunda bulunan P0 (her CI çalışması farklı geçici debug anahtarıyla imzalıyordu, kullanıcılar APK üstüne güncelleyemiyordu) kalıcı bir "GitHub beta" imza yapılandırmasıyla düzeltildi; yayınlanan APK'nin imza sertifikası androguard ile indirilip tekrar çıkarıldı, keystore fingerprint'iyle birebir eşleşti (`BUGS.md` #19). **Aynı gün, yeni "Konsol Modu" (Faz 1 MVP) eklendi**: telefon kamerasıyla TV/monitör ekranını okuyup cihaz-üstü OCR+çeviriyle Xbox-stili altyazı gösteren, platform bağımsız bir sekme (`docs/console_game_caption_roadmap.md` §1.5/Faz 1). İlk commit Flutter SDK'sız bir ortamda yazılmıştı ve CI'de gerçekten 3 ardışık hata verdi — `flutter analyze` (3 lint uyarısı, düzeltildi), ardından release APK derlemesinde R8 "Missing class" hatası (ML Kit'in kullanılmayan script sınıfları için eksik `-dontwarn` kuralları, düzeltildi) — üçüncü `workflow_dispatch` denemesi (run `42514233449`) tamamen yeşil: `flutter analyze`/`flutter test`/gerçek release APK derlemesi hepsi geçti. **Hâlâ sıfır gerçek cihaz testi** (kamera izni akışı, OCR doğruluğu, çeviri modeli indirme, pil etkisi) — bu otomatik oturum da dahil hiçbir AI oturumu fiziksel bir Android/iOS cihazda denemedi. Push-token/Faz 4 adımı (kullanıcı PC'sinde gradle `google-services` satırının açılması) hâlâ aynı yerde bekliyor, değişmedi. |
 | Topluluk sunucusu (Cloudflare Worker) | Canlı. Mobil uçlar (eşleştirme, build senkronu, cihaz listesi/iptali, hesap silme) production'da. |
 | Lisans/telif (mx-division-builds) | **Çözüldü (2026-11-04, kullanıcı kararı).** `recal_advisor` ücretsiz yapıldı — artık ticari bir özelliğin arkasında değil, gri alan ortadan kalktı. [issue #153](https://github.com/mxswat/mx-division-builds/issues/153) kibarlık/şeffaflık amacıyla açık bırakıldı, yanıt gelirse not düşülecek ama artık engelleyici değil. |
 | Kod imzalama (SignPath) | **Reddedildi (2026-11-03).** Foundation (ücretsiz OSS) programı, GitHub yıldız/fork/katkıcı sayısı, dış makale/referans ve kurumsal destek gibi "kamuya görünürlük" sinyalleri yeterli olmadığı için onaylanmadı — proje kalitesiyle ilgisiz, tamamen görünürlük eşiği meselesi. Görünürlük arttıkça yeniden başvurulabilir; alternatif olarak ücretli SignPath aboneliği veya başka bir imzalama sağlayıcısı (ör. Azure Trusted Signing ~$9.99/ay — ABD/Kanada kökenli kuruluş şartı bildirilen yorumlar var, Türkiye'den uygunluk doğrulanmalı) değerlendirilebilir. |
 | Web sitesi (`web/`) | **Yayında (2026-11-03):** https://td2-loot-advisor.pages.dev — Cloudflare Pages'e GitHub bağlantısıyla yayınlandı, `td2-stats` Worker'ı da Cloudflare Workers Builds ile `main`'e bağlandı (otomatik CI/CD). Taktik HUD görsel kimliği eklendi. Geriye kalan: Gumroad ürünü (kullanıcı tarafı). Bkz. aşağıda ve `web/README.md`. |
+| Xbox Companion (`xbox-companion/`, UWP, **DENEYSEL**) | **Yeni, 2026-11-08/09 — CI hâlâ KIRMIZI, 8 ardışık `workflow_dispatch` denemesinin hepsi başarısız.** Xbox'ta canlı OCR/overlay için resmi bir API olmadığı araştırmayla doğrulandıktan sonra kapsam "statik referans uygulaması"na (pakete gömülü JSON'dan 10 dilde görev çevirisi + popüler build özeti, canlı tarama YOK) daraltıldı. Klasik (SDK-style olmayan) UWP projesinin WinRT/facade derleme referanslarını CI'da çözme sorunuyla 8 farklı commit boyunca uğraşıldı (`packages.config`'e geçiş, 153 facade DLL'in elle `<Reference>` olarak eklenmesi, VS UWP iş yükü kurulumu, `Start-Process` ile gerçek bekleme, argüman tırnaklama düzeltmesi, iş yükü ID değişikliği) — **en son deneme de dahil (run `42526572150`, commit `2439850`) hâlâ `failure`**. Kök neden tam olarak kapatılmadı; bir sonraki oturumun job log'unu (artık hata durumunda `vs_installer`'in kendi `--log` çıktısı da yazdırılıyor) okuyup devam etmesi gerekiyor. Gerçek bir Xbox konsolunda hiç denenmedi. |
+| GAMLETSOL (ayrı uygulama) | **Bu depodan çıkarıldı (2026-11-09).** TV/konsol sesini mikrofonla dinleyip Google Cloud Speech-to-Text + Translation API ile canlı altyazı gösteren, td2-loot-advisor'dan tamamen bağımsız bir Flutter MVP'si olarak yazıldı, CI'da bir kez başarıyla derlendi (`Build GAMLETSOL APK`, run `42524145942`, `success`), ardından kullanıcı/oturum kararıyla kendi deposuna (`FEDERALTURK/gamletsol`) taşındı. Bu depoda artık `gamletsol/` dizini yok; ileri takip o depoda yapılmalı. |
 
-## Şu an aktif: Mobil companion — "Konsol Modu" (Faz 1 MVP) CI'de yeşile çekildi, gerçek cihaz testi bekliyor
+## Şu an aktif: Xbox platformu çalışması — Companion UWP CI'de 8 denemedir kırmızı, mobil doğrudan-bağlantı kimlik doğrulaması test edilmeden duruyor
+
+**2026-11-08/09**, Konsol Modu'nun (aşağıdaki "Önceki tur"a bakın) `main`'e tam yeşil olarak girmesinin
+ardından aynı/başka bir oturum zinciri Xbox platformuna odaklandı — iki ayrı, birbirinden bağımsız iş koluyla:
+
+1. **Mobil companion içinde Xbox doğrudan bağlantı (Faz 3a, alt-aşama 1) — kod yazıldı, hiç çalıştırılmadı.**
+   Kullanıcı elinde test edilecek gerçek bir Xbox Series X/S olmadığını belirtip riski kabul ederek koda
+   başlanmasını istedi. `XStreaming` (MIT) projesinin kimlik doğrulama belgeleri satır satır doğrulanarak
+   `mobile/lib/console/xbox/` altına EC P-256 imzalama (`xbox_crypto.dart`), token saklama
+   (`xbox_token_store.dart`), PKCE/SisuAuthentication/XSTS zinciri (`xbox_auth_service.dart`), konsol listesi
+   (`xbox_console_service.dart`) ve bir giriş ekranı (`xbox_login_page.dart`) yazıldı. CI'da gerçekten
+   derlendiği kanıtlandı (3 koşu, 1 lint düzeltmesi, run `42517746084` yeşil) ama **hiçbir adım gerçek bir
+   Microsoft hesabına/Xbox konsoluna karşı çalıştırılmadı** — bu kum havuzunda interaktif Microsoft girişi
+   yapılamıyor. Gerçek ekran/ses akışı (WebRTC, `docs/console_game_caption_roadmap.md` Faz 3a alt-aşama 2)
+   **BAŞLANMADI** — "Xbox'a bağlan" ekranı şu an sadece giriş + konsol listesi yapıyor, oyun görüntüsü
+   getirmiyor. Ayrıntı: `docs/console_game_caption_roadmap.md` §Faz 3.
+2. **Xbox Companion — ayrı, statik bir UWP referans uygulaması (`xbox-companion/`, DENEYSEL) — CI'da 8
+   ardışık denemedir kırmızı, henüz hiç yeşile çekilemedi.** Xbox'ta üçüncü taraf bir uygulamanın başka bir
+   oyunun ekranını okuduğuna/üstüne overlay koyduğuna dair resmi bir API olmadığı doğrulandıktan sonra kapsam
+   bilinçli olarak "pakete gömülü JSON'dan 10 dilde görev çevirisi + popüler build özeti" ile sınırlandı
+   (canlı OCR/overlay YOK). Ama klasik (SDK-style olmayan) UWP proje formatının WinRT/.NET facade derleme
+   referanslarını CI runner'ında (Windows SDK'nin otomatik kurulu olmadığı bir ortamda) çözme sorunu 8
+   ayrı commit'te sırayla ele alındı — her biri bir öncekinin bulduğu yeni hata sınıfını kapatmaya çalıştı
+   (`PackageReference`→`packages.config` geçişi, 153 facade DLL'in csproj'a elle `<Reference>` olarak
+   eklenmesi, VS UWP iş yükü kurulumu, `Start-Process -Wait` ile gerçek bekleme, `vs_installer` argüman
+   tırnaklama hatası, iş yükü bileşen ID'si değişikliği + hata log'u okuma) — **en son deneme de dahil
+   (GitHub Actions run `42526572150`, commit `2439850`, `workflow_dispatch`) hâlâ `failure`**. Kök neden
+   henüz kesin kapatılmadı; bir sonraki oturumun artık hata durumunda yazdırılan `vs_installer --log`
+   çıktısını okuyup AGENTS.md madde 10'daki sistematik hata ayıklamayla devam etmesi gerekiyor.
+
+**Bu otomatik günlük durum oturumunun kendi katkısı (2026-11-09): kod değişikliği YAPILMADI, sadece
+doğrulama + ROADMAP senkronu.** Repo `origin/main`'e hizalandı (bu oturumun yerel `main` dal işaretçisi
+4 gün önceki bir noktada kalmıştı — önceki bir oturumun rebase+force-push'ı yüzünden `git fetch` "forced
+update" bildirdi; `git reset --hard origin/main` ile hizalandı, içerik kaybı YOK — yerel tarafın tek
+"kendine özgü" commit'i olan `sentencepiece==0.2.2` sabitlemesi `origin/main`'de de aynen duruyor, kontrol
+edildi). Son 24 saatteki commit'ler (`git log --since="24 hours ago"`) tek tek okundu, GitHub'daki açık
+PR (#3, tek), 0 açık issue, ve son ~20 workflow run'ın durumu (`actions_list`) kontrol edildi — yukarıdaki
+iki Xbox bulgusu ve `GAMLETSOL`'un ayrı depoya taşınması (genel durum tablosuna eklendi) bu taramadan
+çıktı. `tests/test_knowledge.py` KeyError'ı bugünkü "Feeds" commit'inde (`93deaa0`) yeniden test edildi,
+hâlâ aynı hatayla kırmızı (değişmedi). Büyük/riskli, kullanıcı onayı gerektiren yeni bir karar bulunmadı.
+
+## Önceki tur: Mobil companion — "Konsol Modu" (Faz 1 MVP) CI'de yeşile çekildi, gerçek cihaz testi bekliyor
 
 **2026-11-08**, aynı Claude oturumu (session `019puJcpmi1mPj3qdczCYr6K`) tek bir gün içinde üç ardışık iş
 yaptı: (1) `companion-v0.1.9`'u P0 imza-sürekliliği düzeltmesiyle gerçek bir public GitHub Release'e
@@ -374,3 +417,26 @@ başarıyla yüklendi, konsol hatası yok).
   Developer Program ödemesi, mobil gradle adımı, PR #3 birleştirme kararı, `test_knowledge.py` düzeltmesi)
   aynen duruyor. Değişen dosyalar: `ROADMAP.md` (bu güncelleme) + `mobile/pubspec.lock` (kilit yenileme,
   ayrı commit).
+
+- **2026-11-09 (otomatik günlük durum güncellemesi — zamanlanmış görev): sadece durum güncellemesi, kod
+  değişikliği yok.** Depo `origin/main`'e (`93deaa0`) hizalandı — bu oturumun yerel `main` dal işaretçisi
+  4 gün önceki bir noktada (`d34fe38`, 2026-11-05) kalmıştı ve `git fetch` origin için "forced update"
+  bildirdi (önceki bir oturumun rebase+force-push'ı); `git reset --hard origin/main` ile hizalandı,
+  içerik kaybı doğrulandı YOK (yerel tarafın `sentencepiece==0.2.2` sabitlemesi gibi tek dosyalık
+  düzeltmeleri `origin/main`'de de aynen mevcut, farklı commit hash'leriyle). Son 24 saatteki commit'ler,
+  GitHub'daki açık PR/issue listesi ve son ~20 workflow run incelendi. Bulunanlar (hepsi yukarıdaki
+  "Genel durum" tablosuna ve yeni "Şu an aktif" bölümüne işlendi): (1) **Xbox Companion (UWP, deneysel)**
+  yeni bir bileşen olarak eklenmiş ama CI'da 8 ardışık `workflow_dispatch` denemesinin hepsi (en sonuncusu
+  dahil, run `42526572150`) `failure` — WinRT/facade derleme referansları sorunu hâlâ çözülmedi; (2)
+  **mobil companion'a Xbox doğrudan bağlantı kimlik doğrulama akışı (Faz 3a alt-aşama 1)** eklendi, CI'da
+  derlendiği kanıtlandı ama gerçek bir Microsoft hesabı/Xbox'a karşı hiç çalıştırılmadı; (3) **GAMLETSOL**
+  (TV/konsol sesi canlı çeviri, ayrı Flutter MVP'si) bir kez CI'da başarıyla derlendi, ardından kendi
+  deposuna (`FEDERALTURK/gamletsol`) taşındı — bu depoda artık yok; (4) **`tests/test_knowledge.py`
+  KeyError'ı** (`y8s3-red-moon-unleashed`, 2026-11-06'dan beri bilinen) bugünkü "Feeds" commit'inde
+  (`93deaa0`) yeniden doğrulandı, **hâlâ aynı hatayla kırmızı** (run `42580288876`) — düzeltme bu oturumun
+  kapsamı dışında bırakıldı; (5) **PR #3** hâlâ açık/taslak, dokunulmadı, ama `mergeable_state` artık
+  `unstable` değil **`dirty`** (gerçek çakışma, `main`'e göre rebase gerekiyor). Büyük/riskli, kullanıcı
+  onayı gerektiren yeni bir karar bulunmadı — mevcut bekleyen kullanıcı kararları (SignPath, Gumroad, eski
+  dalların temizliği, Apple Developer Program ödemesi, mobil gradle adımı, PR #3 birleştirme/rebase,
+  `test_knowledge.py` düzeltmesi, Xbox Companion CI kök nedeni) aynen duruyor. Değişen dosya: yalnızca
+  `ROADMAP.md`.
