@@ -1,9 +1,41 @@
 {
  "schema": 1,
- "version": "2026-11-06.3",
- "updated": "2026-11-06T19:33:08Z",
+ "version": "2026-11-09.1",
+ "updated": "2026-11-09T07:34:33Z",
  "season": "Year 8 Season 3 – Red Horizon",
  "items": [
+  {
+   "id": "shd-xp-weekend-2026-11",
+   "kind": "event",
+   "start": "2026-11-06T18:00:00Z",
+   "end": "2026-11-10T08:00:00Z",
+   "url": "https://x.com/TheDivisionGame/status/2118765359775834282",
+   "source": "Ubisoft (The Division X account)",
+   "title": {
+    "en": "SHD XP Weekend: 6x SHD levels",
+    "tr": "SHD XP Hafta Sonu: 6 kat SHD seviyesi",
+    "de": "SHD-XP-Wochenende: 6-fache SHD-Level",
+    "fr": "Week-end XP SHD : niveaux SHD x6",
+    "es": "Fin de semana de XP SHD: niveles SHD x6",
+    "it": "Weekend XP SHD: livelli SHD x6",
+    "pt": "Fim de semana de XP SHD: níveis SHD 6x",
+    "ru": "Выходные опыта SHD: уровни SHD x6",
+    "pl": "Weekend XP SHD: poziomy SHD x6",
+    "nl": "SHD XP-weekend: 6x SHD-levels"
+   },
+   "text": {
+    "en": "Until Nov 10: for the first time, SHD levels are earned 6 times faster. Just play during the event; no extra rewards or requirements were announced. End time not stated officially; shown here as the Tuesday reset (08:00 UTC).",
+    "tr": "10 Kasım'a kadar: ilk kez SHD seviyeleri 6 kat hızlı kazanılıyor. Etkinlik süresince oynaman yeterli; ek ödül veya koşul duyurulmadı. Bitiş saati resmî olarak belirtilmedi; burada salı sıfırlaması (08:00 UTC) gösteriliyor.",
+    "de": "Bis 10. Nov.: Zum ersten Mal steigen SHD-Level 6-mal schneller. Spiel einfach während des Events; zusätzliche Belohnungen oder Bedingungen wurden nicht genannt. Endzeit nicht offiziell angegeben; hier als Dienstag-Reset (08:00 UTC).",
+    "fr": "Jusqu'au 10 nov. : pour la première fois, les niveaux SHD montent 6 fois plus vite. Il suffit de jouer pendant l'événement ; aucune récompense ni condition supplémentaire annoncée. Heure de fin non précisée ; indiquée ici au reset du mardi (08:00 UTC).",
+    "es": "Hasta el 10 de nov.: por primera vez, los niveles SHD se ganan 6 veces más rápido. Solo juega durante el evento; no se anunciaron recompensas ni requisitos extra. Hora de fin no indicada oficialmente; aquí se muestra el reinicio del martes (08:00 UTC).",
+    "it": "Fino al 10 nov.: per la prima volta i livelli SHD si ottengono 6 volte più in fretta. Basta giocare durante l'evento; nessuna ricompensa o requisito extra annunciato. Orario di fine non indicato; qui mostrato al reset del martedì (08:00 UTC).",
+    "pt": "Até 10 de nov.: pela primeira vez, os níveis SHD sobem 6 vezes mais rápido. Basta jogar durante o evento; não foram anunciadas recompensas ou requisitos extras. Horário de término não informado; aqui consta o reset de terça (08:00 UTC).",
+    "ru": "До 10 нояб.: впервые уровни SHD набираются в 6 раз быстрее. Достаточно играть во время события; дополнительных наград или условий не объявлено. Время окончания официально не указано; здесь — сброс во вторник (08:00 UTC).",
+    "pl": "Do 10 lis.: po raz pierwszy poziomy SHD zdobywa się 6 razy szybciej. Wystarczy grać w trakcie wydarzenia; nie ogłoszono dodatkowych nagród ani warunków. Godzina końca nie została podana; tu pokazano reset we wtorek (08:00 UTC).",
+    "nl": "Tot 10 nov.: voor het eerst stijg je 6 keer sneller in SHD-level. Speel gewoon tijdens het event; extra beloningen of voorwaarden zijn niet aangekondigd. Eindtijd niet officieel vermeld; hier als dinsdagreset (08:00 UTC)."
+   }
+  },
   {
    "id": "y8s3-3-pc-performance-update",
    "kind": "patch",
