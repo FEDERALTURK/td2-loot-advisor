@@ -440,3 +440,24 @@ başarıyla yüklendi, konsol hatası yok).
   dalların temizliği, Apple Developer Program ödemesi, mobil gradle adımı, PR #3 birleştirme/rebase,
   `test_knowledge.py` düzeltmesi, Xbox Companion CI kök nedeni) aynen duruyor. Değişen dosya: yalnızca
   `ROADMAP.md`.
+
+- **2026-11-10 (otomatik günlük durum güncellemesi — zamanlanmış görev): sadece durum güncellemesi, kod
+  değişikliği yok.** Depo `/home/claude/td2-loot-advisor`'da önceden klonlu bulundu, `HEAD` detached state'te
+  (önceki bir oturumun bıraktığı hâliyle) ama zaten `origin/main`'in tam ucundaydı; `git fetch` yine bir
+  "forced update" bildirdi (yerel `main` dal işaretçisi hâlâ 2026-11-05 tarihli `d34fe38`'de donmuştu,
+  gerçek içerikle ilgisi yoktu), `git checkout -B main origin/main` ile dal işaretçisi gerçek konuma
+  (`aadc88b`) hizalandı — fark/kayıp yok, detached HEAD zaten doğru commit'teydi. Son 24 saatteki commit'ler
+  yalnızca iki otomatik "Feeds" bot commit'i (`65b3dc7` 01:40, `aadc88b` 13:33) — her ikisi de tek dosyayı
+  (`meta/news_feed.json`, haber senkronu) değiştiriyor, uygulama kodunda/dokümantasyonda hiçbir değişiklik
+  yok. GitHub kontrol edildi: `federalturk/td2-loot-advisor`'da **0 açık issue**, **hâlâ 1 açık (taslak)
+  PR** — [#3](https://github.com/FEDERALTURK/td2-loot-advisor/pull/3), `updated_at` 2026-11-08'den beri
+  değişmedi, `mergeable_state` hâlâ `dirty` (rebase edilmemiş) — dokunulmadı. `federalturk/td2-loot-advisor-reports`'ta
+  yalnızca bilinen [#4](https://github.com/federalturk/td2-loot-advisor-reports/issues/4) açık, yeni bir şey
+  yok. Son ~20 workflow run incelendi: `Info check` iş akışı bugünkü her iki "Feeds" commit'inde de
+  (run `42737408332`, run `42825672656`) **aynı `KeyError: 'y8s3-red-moon-unleashed'` ile hâlâ kırmızı** —
+  kök neden değişmedi, düzeltme hâlâ bu oturumun kapsamı dışında bırakıldı. **Xbox Companion (UWP) CI'de
+  2026-11-08'den beri yeni bir `workflow_dispatch` denemesi yapılmadı** — hâlâ 8 ardışık başarısız denemede
+  duruyor (en sonuncusu run `42526572150`), kök neden kapatılmadı. Büyük/riskli, kullanıcı onayı gerektiren
+  yeni bir karar bulunmadı — mevcut bekleyen kullanıcı kararları (SignPath, Gumroad, eski dalların temizliği,
+  Apple Developer Program ödemesi, mobil gradle adımı, PR #3 birleştirme/rebase, `test_knowledge.py`
+  düzeltmesi, Xbox Companion CI kök nedeni) aynen duruyor. Değişen dosya: yalnızca `ROADMAP.md`.
