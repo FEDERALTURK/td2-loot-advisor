@@ -1,9 +1,41 @@
 {
  "schema": 1,
- "version": "2026-11-09.1",
- "updated": "2026-11-09T07:34:33Z",
+ "version": "2026-11-10.1",
+ "updated": "2026-11-10T01:39:58Z",
  "season": "Year 8 Season 3 – Red Horizon",
  "items": [
+  {
+   "id": "echoes-event-pass-2026-11",
+   "kind": "event",
+   "start": "2026-11-10T08:00:00Z",
+   "end": "2026-11-24T08:00:00Z",
+   "url": "https://www.ubisoft.com/en-us/game/the-division/the-division-2/news-updates/3kST0nQsp0klDZlR2vAI0F/the-division-2-echoes-of-central-park-event-pass",
+   "source": "Ubisoft",
+   "title": {
+    "en": "Echoes of Central Park Event Pass",
+    "tr": "Echoes of Central Park Etkinlik Bileti",
+    "de": "Echoes of Central Park Event-Pass",
+    "fr": "Passe d'événement Echoes of Central Park",
+    "es": "Pase de evento Echoes of Central Park",
+    "it": "Pass evento Echoes of Central Park",
+    "pt": "Passe de evento Echoes of Central Park",
+    "ru": "Пропуск события Echoes of Central Park",
+    "pl": "Przepustka wydarzenia Echoes of Central Park",
+    "nl": "Echoes of Central Park-eventpas"
+   },
+   "text": {
+    "en": "Event Pass from November 10 to 24. The free track has the Mire and Thorn masks and weapon skins, the Guardian outfit and 2 Named Item Caches. The premium track (1000 VC) adds more masks and skins, the Rick vest and mask, 2 Exotic Caches and other caches.",
+    "tr": "10-24 Kasım arası Etkinlik Bileti. Ücretsiz yolda Mire ve Thorn maskeleri ile silah kaplamaları, Guardian kıyafeti ve 2 Named Item Cache var. Premium yol (1000 VC) ek maske ve kaplamalar, Rick yeleği ve maskesi, 2 Exotic Cache ve başka sandıklar ekliyor.",
+    "de": "Event-Pass vom 10. bis 24. November. Die kostenlose Stufe bietet die Mire- und Thorn-Masken und Waffenskins, das Guardian-Outfit und 2 Named Item Caches. Die Premium-Stufe (1000 VC) bringt weitere Masken und Skins, Weste und Maske Rick, 2 Exotic Caches und weitere Caches.",
+    "fr": "Passe d'événement du 10 au 24 novembre. La voie gratuite offre les masques et skins d'arme Mire et Thorn, la tenue Guardian et 2 Named Item Caches. La voie premium (1000 VC) ajoute d'autres masques et skins, le gilet et le masque Rick, 2 Exotic Caches et d'autres caches.",
+    "es": "Pase de evento del 10 al 24 de noviembre. La vía gratuita trae las máscaras y aspectos de arma Mire y Thorn, el atuendo Guardian y 2 Named Item Caches. La vía premium (1000 VC) suma más máscaras y aspectos, el chaleco y la máscara Rick, 2 Exotic Caches y otros alijos.",
+    "it": "Pass evento dal 10 al 24 novembre. Il percorso gratuito include maschere e skin per armi Mire e Thorn, l'outfit Guardian e 2 Named Item Cache. Il percorso premium (1000 VC) aggiunge altre maschere e skin, giubbotto e maschera Rick, 2 Exotic Cache e altre casse.",
+    "pt": "Passe de evento de 10 a 24 de novembro. A trilha gratuita traz as máscaras e skins de arma Mire e Thorn, o traje Guardian e 2 Named Item Caches. A trilha premium (1000 VC) soma mais máscaras e skins, o colete e a máscara Rick, 2 Exotic Caches e outros caches.",
+    "ru": "Пропуск события с 10 по 24 ноября. В бесплатной ветке — маски и облики оружия Mire и Thorn, костюм Guardian и 2 Named Item Cache. Премиум-ветка (1000 VC) добавляет другие маски и облики, жилет и маску Rick, 2 Exotic Cache и другие тайники.",
+    "pl": "Przepustka wydarzenia od 10 do 24 listopada. Darmowa ścieżka daje maski i skórki broni Mire i Thorn, strój Guardian oraz 2 Named Item Cache. Ścieżka premium (1000 VC) dodaje kolejne maski i skórki, kamizelkę i maskę Rick, 2 Exotic Cache i inne skrzynki.",
+    "nl": "Eventpas van 10 tot 24 november. Het gratis spoor bevat de Mire- en Thorn-maskers en wapenskins, de Guardian-outfit en 2 Named Item Caches. Het premiumspoor (1000 VC) voegt meer maskers en skins, het Rick-vest en -masker, 2 Exotic Caches en andere caches toe."
+   }
+  },
   {
    "id": "shd-xp-weekend-2026-11",
    "kind": "event",
