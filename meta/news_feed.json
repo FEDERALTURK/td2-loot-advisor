@@ -1,9 +1,41 @@
 {
  "schema": 1,
- "version": "2026-11-10.1",
- "updated": "2026-11-10T01:39:58Z",
+ "version": "2026-11-10.2",
+ "updated": "2026-11-10T13:33:41Z",
  "season": "Year 8 Season 3 – Red Horizon",
  "items": [
+  {
+   "id": "maint-2026-11-10-crossplay-infra",
+   "kind": "maintenance",
+   "start": "2026-11-10T08:30:00Z",
+   "end": "2026-11-10T13:30:00Z",
+   "url": "https://x.com/TheDivisionGame/status/2119844969787584996",
+   "source": "Ubisoft (@TheDivisionGame)",
+   "title": {
+    "en": "Maintenance: crossplay infrastructure (Nov 10)",
+    "tr": "Bakım: crossplay altyapısı (10 Kasım)",
+    "de": "Wartung: Crossplay-Infrastruktur (10. Nov.)",
+    "fr": "Maintenance : infrastructure crossplay (10 nov.)",
+    "es": "Mantenimiento: infraestructura de crossplay (10 nov.)",
+    "it": "Manutenzione: infrastruttura crossplay (10 nov.)",
+    "pt": "Manutenção: infraestrutura de crossplay (10 nov.)",
+    "ru": "Техработы: инфраструктура кроссплея (10 нояб.)",
+    "pl": "Przerwa techniczna: infrastruktura crossplay (10 lis.)",
+    "nl": "Onderhoud: crossplay-infrastructuur (10 nov.)"
+   },
+   "text": {
+    "en": "Servers go down on Tuesday, Nov 10 at 08:30 UTC for about 5 hours. The work prepares the infrastructure for the next step of the Crossplay rollout; no new content is announced.",
+    "tr": "Sunucular 10 Kasım Salı 08:30 UTC'de yaklaşık 5 saatliğine kapanıyor. Çalışma, Crossplay geçişinin sonraki adımı için altyapıyı hazırlıyor; yeni içerik duyurulmadı.",
+    "de": "Die Server sind am Dienstag, 10. Nov., ab 08:30 UTC für etwa 5 Stunden offline. Die Arbeiten bereiten die Infrastruktur auf die nächste Stufe des Crossplay-Rollouts vor; neue Inhalte sind nicht angekündigt.",
+    "fr": "Les serveurs sont coupés le mardi 10 nov. à 08:30 UTC pendant environ 5 heures. L'opération prépare l'infrastructure pour la prochaine étape du déploiement du Crossplay ; aucun nouveau contenu n'est annoncé.",
+    "es": "Los servidores se apagan el martes 10 de nov. a las 08:30 UTC durante unas 5 horas. El trabajo prepara la infraestructura para la siguiente fase del despliegue de Crossplay; no se anuncia contenido nuevo.",
+    "it": "I server vanno offline martedì 10 nov. alle 08:30 UTC per circa 5 ore. L'intervento prepara l'infrastruttura per la prossima fase del rilascio del Crossplay; non è annunciato nuovo contenuto.",
+    "pt": "Os servidores ficam offline na terça, 10 de nov., às 08:30 UTC por cerca de 5 horas. O trabalho prepara a infraestrutura para a próxima etapa da implementação do Crossplay; nenhum conteúdo novo foi anunciado.",
+    "ru": "Серверы отключаются во вторник, 10 ноября, в 08:30 UTC примерно на 5 часов. Работы готовят инфраструктуру к следующему этапу запуска Crossplay; нового контента не заявлено.",
+    "pl": "Serwery będą wyłączone we wtorek 10 lis. od 08:30 UTC przez około 5 godzin. Prace przygotowują infrastrukturę do kolejnego etapu wdrażania Crossplay; nie zapowiedziano nowej zawartości.",
+    "nl": "De servers gaan dinsdag 10 nov. om 08:30 UTC ongeveer 5 uur offline. Het werk bereidt de infrastructuur voor op de volgende stap van de Crossplay-uitrol; er is geen nieuwe content aangekondigd."
+   }
+  },
   {
    "id": "echoes-event-pass-2026-11",
    "kind": "event",
