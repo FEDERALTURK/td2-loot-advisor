@@ -1,9 +1,41 @@
 {
  "schema": 1,
- "version": "2026-11-10.2",
- "updated": "2026-11-10T13:33:41Z",
+ "version": "2026-11-11.1",
+ "updated": "2026-11-11T01:34:36Z",
  "season": "Year 8 Season 3 – Red Horizon",
  "items": [
+  {
+   "id": "echoes-event-pass-twitch-drops-2026-11",
+   "kind": "community",
+   "start": "2026-11-10T08:00:00Z",
+   "end": "2026-11-17T08:00:00Z",
+   "url": "https://www.ubisoft.com/en-us/game/the-division/the-division-2/news-updates/5jeY7kzIeBLvfHja0iBIuX/the-division-2-echoes-of-central-park-event-pass-twitch-drops",
+   "source": "Ubisoft",
+   "title": {
+    "en": "Event Pass Twitch Drops (Nov 10–17)",
+    "tr": "Etkinlik Bileti Twitch Drop'ları (10-17 Kasım)",
+    "de": "Event-Pass: Twitch Drops (10.–17. Nov.)",
+    "fr": "Drops Twitch du Passe d'événement (10–17 nov.)",
+    "es": "Drops de Twitch del Pase de evento (10–17 nov.)",
+    "it": "Drop di Twitch del Pass evento (10–17 nov.)",
+    "pt": "Drops da Twitch do Passe de evento (10–17 nov.)",
+    "ru": "Дропы Twitch пропуска события (10–17 нояб.)",
+    "pl": "Dropy z Twitcha – przepustka wydarzenia (10–17 lis.)",
+    "nl": "Twitch Drops van de eventpas (10–17 nov.)"
+   },
+   "text": {
+    "en": "Nov 10–17: watch drop-enabled The Division 2 streams on Twitch (time adds up across channels): 30 min Gnarled Arm Patch, 1 h Named Cache, 2 h Wrong Path Arm Patch, 3 h Exotic Cache, 4 h The Block Weapon Skin. Link Twitch and your platforms to Ubisoft Connect, then claim on Twitch.",
+    "tr": "10-17 Kasım: Twitch'te drop açık The Division 2 yayınlarını izle (süre kanallar arasında toplanır): 30 dk Gnarled Arm Patch, 1 sa Named Cache, 2 sa Wrong Path Arm Patch, 3 sa Exotic Cache, 4 sa The Block Weapon Skin. Twitch ve platform hesaplarını Ubisoft Connect'e bağla, ödülleri Twitch'ten al.",
+    "de": "10.–17. Nov.: Schau auf Twitch Streams von The Division 2 mit Drops (Zeit zählt kanalübergreifend): 30 Min. Gnarled Arm Patch, 1 Std. Named Cache, 2 Std. Wrong Path Arm Patch, 3 Std. Exotic Cache, 4 Std. Waffenskin The Block. Twitch und Plattformen mit Ubisoft Connect verknüpfen, dann auf Twitch abholen.",
+    "fr": "10–17 nov. : regardez sur Twitch des streams The Division 2 avec drops (le temps se cumule entre chaînes) : 30 min Gnarled Arm Patch, 1 h Named Cache, 2 h Wrong Path Arm Patch, 3 h Exotic Cache, 4 h skin d'arme The Block. Liez Twitch et vos plateformes à Ubisoft Connect, puis récupérez sur Twitch.",
+    "es": "10–17 nov.: mira en Twitch directos de The Division 2 con drops (el tiempo se suma entre canales): 30 min Gnarled Arm Patch, 1 h Named Cache, 2 h Wrong Path Arm Patch, 3 h Exotic Cache, 4 h aspecto de arma The Block. Vincula Twitch y tus plataformas a Ubisoft Connect y reclama en Twitch.",
+    "it": "10–17 nov.: guarda su Twitch le dirette di The Division 2 con drop (il tempo si somma tra i canali): 30 min Gnarled Arm Patch, 1 h Named Cache, 2 h Wrong Path Arm Patch, 3 h Exotic Cache, 4 h skin arma The Block. Collega Twitch e le piattaforme a Ubisoft Connect, poi riscatta su Twitch.",
+    "pt": "10–17 nov.: assista na Twitch a transmissões de The Division 2 com drops (o tempo soma entre canais): 30 min Gnarled Arm Patch, 1 h Named Cache, 2 h Wrong Path Arm Patch, 3 h Exotic Cache, 4 h skin de arma The Block. Vincule a Twitch e suas plataformas ao Ubisoft Connect e resgate na Twitch.",
+    "ru": "10–17 нояб.: смотрите на Twitch стримы The Division 2 с дропами (время суммируется по каналам): 30 мин — Gnarled Arm Patch, 1 ч — Named Cache, 2 ч — Wrong Path Arm Patch, 3 ч — Exotic Cache, 4 ч — скин оружия The Block. Привяжите Twitch и платформы к Ubisoft Connect и заберите награды на Twitch.",
+    "pl": "10–17 lis.: oglądaj na Twitchu transmisje The Division 2 z dropami (czas sumuje się między kanałami): 30 min Gnarled Arm Patch, 1 h Named Cache, 2 h Wrong Path Arm Patch, 3 h Exotic Cache, 4 h skórka broni The Block. Połącz Twitcha i platformy z Ubisoft Connect, potem odbierz na Twitchu.",
+    "nl": "10–17 nov.: kijk op Twitch naar The Division 2-streams met drops (tijd telt over kanalen op): 30 min Gnarled Arm Patch, 1 u Named Cache, 2 u Wrong Path Arm Patch, 3 u Exotic Cache, 4 u wapenskin The Block. Koppel Twitch en je platforms aan Ubisoft Connect en claim op Twitch."
+   }
+  },
   {
    "id": "maint-2026-11-10-crossplay-infra",
    "kind": "maintenance",
