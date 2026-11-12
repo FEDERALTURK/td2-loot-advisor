@@ -1,7 +1,7 @@
 {
  "schema": 1,
- "version": "2026-11-11.1",
- "updated": "2026-11-11T01:34:36Z",
+ "version": "2026-11-12.1",
+ "updated": "2026-11-12T07:34:18Z",
  "season": "Year 8 Season 3 – Red Horizon",
  "items": [
   {
@@ -34,6 +34,38 @@
     "ru": "10–17 нояб.: смотрите на Twitch стримы The Division 2 с дропами (время суммируется по каналам): 30 мин — Gnarled Arm Patch, 1 ч — Named Cache, 2 ч — Wrong Path Arm Patch, 3 ч — Exotic Cache, 4 ч — скин оружия The Block. Привяжите Twitch и платформы к Ubisoft Connect и заберите награды на Twitch.",
     "pl": "10–17 lis.: oglądaj na Twitchu transmisje The Division 2 z dropami (czas sumuje się między kanałami): 30 min Gnarled Arm Patch, 1 h Named Cache, 2 h Wrong Path Arm Patch, 3 h Exotic Cache, 4 h skórka broni The Block. Połącz Twitcha i platformy z Ubisoft Connect, potem odbierz na Twitchu.",
     "nl": "10–17 nov.: kijk op Twitch naar The Division 2-streams met drops (tijd telt over kanalen op): 30 min Gnarled Arm Patch, 1 u Named Cache, 2 u Wrong Path Arm Patch, 3 u Exotic Cache, 4 u wapenskin The Block. Koppel Twitch en je platforms aan Ubisoft Connect en claim op Twitch."
+   }
+  },
+  {
+   "id": "maint-2026-11-12-pc-crossplay-migration",
+   "kind": "maintenance",
+   "start": "2026-11-12T08:30:00Z",
+   "end": "2026-11-12T14:30:00Z",
+   "url": "https://x.com/TheDivisionGame/status/2120562197344460892",
+   "source": "Ubisoft (@TheDivisionGame)",
+   "title": {
+    "en": "Maintenance: PC moves to Crossplay servers (Nov 12)",
+    "tr": "Bakım: PC, Crossplay sunucularına geçiyor (12 Kasım)",
+    "de": "Wartung: PC wechselt auf Crossplay-Server (12. Nov.)",
+    "fr": "Maintenance : le PC passe sur les serveurs Crossplay (12 nov.)",
+    "es": "Mantenimiento: PC pasa a los servidores de Crossplay (12 nov.)",
+    "it": "Manutenzione: il PC passa ai server Crossplay (12 nov.)",
+    "pt": "Manutenção: PC migra para os servidores de Crossplay (12 nov.)",
+    "ru": "Техработы: ПК переходит на серверы Crossplay (12 нояб.)",
+    "pl": "Przerwa techniczna: PC przechodzi na serwery Crossplay (12 lis.)",
+    "nl": "Onderhoud: pc verhuist naar Crossplay-servers (12 nov.)"
+   },
+   "text": {
+    "en": "Servers go down on Thursday, Nov 12 at 08:30 UTC for about 6 hours. PC players are moved to the new Crossplay servers, with general stability improvements and fixes included.",
+    "tr": "Sunucular 12 Kasım Perşembe 08:30 UTC'de yaklaşık 6 saatliğine kapanıyor. PC oyuncuları yeni Crossplay sunucularına taşınıyor; genel kararlılık iyileştirmeleri ve düzeltmeler de geliyor.",
+    "de": "Die Server sind am Donnerstag, 12. Nov., ab 08:30 UTC für etwa 6 Stunden offline. PC-Spieler werden auf die neuen Crossplay-Server verlegt; dazu kommen allgemeine Stabilitätsverbesserungen und Fehlerbehebungen.",
+    "fr": "Les serveurs sont coupés le jeudi 12 nov. à 08:30 UTC pendant environ 6 heures. Les joueurs PC sont transférés vers les nouveaux serveurs Crossplay, avec des améliorations de stabilité et des correctifs.",
+    "es": "Los servidores se apagan el jueves 12 de nov. a las 08:30 UTC durante unas 6 horas. Los jugadores de PC pasan a los nuevos servidores de Crossplay, junto con mejoras de estabilidad y correcciones.",
+    "it": "I server vanno offline giovedì 12 nov. alle 08:30 UTC per circa 6 ore. I giocatori PC vengono spostati sui nuovi server Crossplay, con miglioramenti generali di stabilità e correzioni.",
+    "pt": "Os servidores ficam offline na quinta, 12 de nov., às 08:30 UTC por cerca de 6 horas. Os jogadores de PC passam para os novos servidores de Crossplay, com melhorias gerais de estabilidade e correções.",
+    "ru": "Серверы отключаются в четверг, 12 ноября, в 08:30 UTC примерно на 6 часов. Игроков на ПК переносят на новые серверы Crossplay; также будут общие улучшения стабильности и исправления.",
+    "pl": "Serwery będą wyłączone w czwartek 12 lis. od 08:30 UTC przez około 6 godzin. Gracze PC zostaną przeniesieni na nowe serwery Crossplay; dojdą też ogólne poprawki stabilności i błędów.",
+    "nl": "De servers gaan donderdag 12 nov. om 08:30 UTC ongeveer 6 uur offline. Pc-spelers worden naar de nieuwe Crossplay-servers verplaatst, samen met algemene stabiliteitsverbeteringen en fixes."
    }
   },
   {
@@ -513,28 +545,28 @@
    "url": "https://www.ubisoft.com/en-us/game/the-division/the-division-2/news-updates/7L8TlD1Hv0XC1prOD8mdte/tuy8s33-crossplay-rollout-conflict-improvements-more",
    "source": "Ubisoft",
    "title": {
-    "en": "Crossplay rollout: Nov 3, 10 and 17",
-    "tr": "Crossplay takvimi: 3, 10 ve 17 Kasım",
-    "de": "Crossplay-Rollout: 3., 10. und 17. Nov.",
-    "fr": "Déploiement du crossplay : 3, 10 et 17 nov.",
-    "es": "Despliegue de crossplay: 3, 10 y 17 de nov.",
-    "it": "Arrivo del crossplay: 3, 10 e 17 nov.",
-    "pt": "Implantação do crossplay: 3, 10 e 17 de nov.",
-    "ru": "Запуск кроссплея: 3, 10 и 17 ноября",
-    "pl": "Wdrażanie crossplay: 3, 10 i 17 listopada",
-    "nl": "Crossplay-uitrol: 3, 10 en 17 nov."
+    "en": "Crossplay rollout: Nov 3, 12 and 17",
+    "tr": "Crossplay takvimi: 3, 12 ve 17 Kasım",
+    "de": "Crossplay-Rollout: 3., 12. und 17. Nov.",
+    "fr": "Déploiement du crossplay : 3, 12 et 17 nov.",
+    "es": "Despliegue de crossplay: 3, 12 y 17 de nov.",
+    "it": "Arrivo del crossplay: 3, 12 e 17 nov.",
+    "pt": "Implantação do crossplay: 3, 12 e 17 de nov.",
+    "ru": "Запуск кроссплея: 3, 12 и 17 ноября",
+    "pl": "Wdrażanie crossplay: 3, 12 i 17 listopada",
+    "nl": "Crossplay-uitrol: 3, 12 en 17 nov."
    },
    "text": {
-    "en": "Nov 3: icons and interface changes only. Nov 10: PC moves to new servers and PC leaderboards reset. Nov 17: PlayStation and Xbox move and cross-platform play goes live. Leaderboards stay hidden until then. Clan size rises from 50 to 100.",
-    "tr": "3 Kasım: yalnız simgeler ve arayüz değişiklikleri. 10 Kasım: PC yeni sunuculara geçer, PC sıralamaları sıfırlanır. 17 Kasım: PlayStation ve Xbox geçer, platformlar arası oyun başlar. Sıralamalar o güne kadar gizli. Klan sınırı 50'den 100'e çıkıyor.",
-    "de": "3. Nov.: nur Icons und Oberflächenänderungen. 10. Nov.: PC wechselt auf neue Server, PC-Bestenlisten werden zurückgesetzt. 17. Nov.: PlayStation und Xbox wechseln, plattformübergreifendes Spielen startet. Bestenlisten bleiben bis dahin verborgen. Clan-Limit steigt von 50 auf 100.",
-    "fr": "3 nov. : icônes et interface uniquement. 10 nov. : le PC passe sur les nouveaux serveurs et ses classements sont réinitialisés. 17 nov. : PlayStation et Xbox migrent, le jeu multiplateforme démarre. Classements masqués jusque-là. Les clans passent de 50 à 100 membres.",
-    "es": "3 de nov.: solo iconos y cambios de interfaz. 10 de nov.: PC pasa a los nuevos servidores y se reinician sus clasificaciones. 17 de nov.: PlayStation y Xbox migran y empieza el juego cruzado. Clasificaciones ocultas hasta entonces. Los clanes suben de 50 a 100 miembros.",
-    "it": "3 nov.: solo icone e modifiche all'interfaccia. 10 nov.: il PC passa ai nuovi server e le sue classifiche si azzerano. 17 nov.: PlayStation e Xbox migrano e parte il gioco multipiattaforma. Classifiche nascoste fino ad allora. I clan passano da 50 a 100 membri.",
-    "pt": "3 de nov.: apenas ícones e mudanças de interface. 10 de nov.: PC vai para os novos servidores e seus placares são zerados. 17 de nov.: PlayStation e Xbox migram e o jogo cruzado começa. Placares ocultos até lá. Clãs sobem de 50 para 100 membros.",
-    "ru": "3 ноября: только значки и изменения интерфейса. 10 ноября: ПК переходит на новые серверы, таблицы лидеров ПК сбрасываются. 17 ноября: переходят PlayStation и Xbox, запускается кроссплей. До этого таблицы лидеров скрыты. Лимит клана вырастет с 50 до 100.",
-    "pl": "3 listopada: tylko ikony i zmiany interfejsu. 10 listopada: PC przechodzi na nowe serwery, a rankingi PC są resetowane. 17 listopada: PlayStation i Xbox przechodzą, startuje gra międzyplatformowa. Do tego czasu rankingi są ukryte. Limit klanu rośnie z 50 do 100.",
-    "nl": "3 nov.: alleen iconen en interfacewijzigingen. 10 nov.: pc gaat naar nieuwe servers en pc-ranglijsten worden gereset. 17 nov.: PlayStation en Xbox verhuizen en cross-platform spelen start. Ranglijsten blijven tot dan verborgen. Clans groeien van 50 naar 100 leden."
+    "en": "Nov 3: icons and interface changes only. Nov 12: PC moves to new servers and PC leaderboards reset. Nov 17: PlayStation and Xbox move and cross-platform play goes live. Leaderboards stay hidden until then. Clan size rises from 50 to 100.",
+    "tr": "3 Kasım: yalnız simgeler ve arayüz değişiklikleri. 12 Kasım: PC yeni sunuculara geçer, PC sıralamaları sıfırlanır. 17 Kasım: PlayStation ve Xbox geçer, platformlar arası oyun başlar. Sıralamalar o güne kadar gizli. Klan sınırı 50'den 100'e çıkıyor.",
+    "de": "3. Nov.: nur Icons und Oberflächenänderungen. 12. Nov.: PC wechselt auf neue Server, PC-Bestenlisten werden zurückgesetzt. 17. Nov.: PlayStation und Xbox wechseln, plattformübergreifendes Spielen startet. Bestenlisten bleiben bis dahin verborgen. Clan-Limit steigt von 50 auf 100.",
+    "fr": "3 nov. : icônes et interface uniquement. 12 nov. : le PC passe sur les nouveaux serveurs et ses classements sont réinitialisés. 17 nov. : PlayStation et Xbox migrent, le jeu multiplateforme démarre. Classements masqués jusque-là. Les clans passent de 50 à 100 membres.",
+    "es": "3 de nov.: solo iconos y cambios de interfaz. 12 de nov.: PC pasa a los nuevos servidores y se reinician sus clasificaciones. 17 de nov.: PlayStation y Xbox migran y empieza el juego cruzado. Clasificaciones ocultas hasta entonces. Los clanes suben de 50 a 100 miembros.",
+    "it": "3 nov.: solo icone e modifiche all'interfaccia. 12 nov.: il PC passa ai nuovi server e le sue classifiche si azzerano. 17 nov.: PlayStation e Xbox migrano e parte il gioco multipiattaforma. Classifiche nascoste fino ad allora. I clan passano da 50 a 100 membri.",
+    "pt": "3 de nov.: apenas ícones e mudanças de interface. 12 de nov.: PC vai para os novos servidores e seus placares são zerados. 17 de nov.: PlayStation e Xbox migram e o jogo cruzado começa. Placares ocultos até lá. Clãs sobem de 50 para 100 membros.",
+    "ru": "3 ноября: только значки и изменения интерфейса. 12 ноября: ПК переходит на новые серверы, таблицы лидеров ПК сбрасываются. 17 ноября: переходят PlayStation и Xbox, запускается кроссплей. До этого таблицы лидеров скрыты. Лимит клана вырастет с 50 до 100.",
+    "pl": "3 listopada: tylko ikony i zmiany interfejsu. 12 listopada: PC przechodzi na nowe serwery, a rankingi PC są resetowane. 17 listopada: PlayStation i Xbox przechodzą, startuje gra międzyplatformowa. Do tego czasu rankingi są ukryte. Limit klanu rośnie z 50 do 100.",
+    "nl": "3 nov.: alleen iconen en interfacewijzigingen. 12 nov.: pc gaat naar nieuwe servers en pc-ranglijsten worden gereset. 17 nov.: PlayStation en Xbox verhuizen en cross-platform spelen start. Ranglijsten blijven tot dan verborgen. Clans groeien van 50 naar 100 leden."
    }
   },
   {
