@@ -1,7 +1,7 @@
 {
  "schema": 1,
- "version": "2026-11-12.1",
- "updated": "2026-11-12T07:34:18Z",
+ "version": "2026-11-12.2",
+ "updated": "2026-11-12T13:33:24Z",
  "season": "Year 8 Season 3 – Red Horizon",
  "items": [
   {
@@ -443,37 +443,6 @@
     "ru": "Получите ссылку на сайте Friend Referral через аккаунт Ubisoft. Друг должен сыграть не менее 2 часов, чтобы приглашение засчиталось. За первое приглашение вы получите Cyclops Outfit, за второе — Esprit de Corps; приглашённый друг получит Frenzied Outfit.",
     "pl": "Pobierz link ze strony Friend Referral za pomocą konta Ubisoft. Znajomy musi zagrać co najmniej 2 godziny, by się liczyło. Za pierwsze zaproszenie dostajesz Cyclops Outfit, za drugie Esprit de Corps; zaproszony znajomy dostaje Frenzied Outfit.",
     "nl": "Haal je link op de Friend Referral-website met een Ubisoft-account. Een vriend moet minstens 2 uur spelen om mee te tellen. Je krijgt de Cyclops Outfit voor de eerste verwijzing en Esprit de Corps voor de tweede; de uitgenodigde vriend krijgt de Frenzied Outfit."
-   }
-  },
-  {
-   "id": "tu-y8s3-2",
-   "kind": "patch",
-   "date": "2026-10-13T08:00:00Z",
-   "url": "https://www.ubisoft.com/en-gb/game/the-division/the-division-2/news-updates/7uzKuy4iB0MtOJfsXAr3TO/tuy8s32-red-moon-unleashed-creator-collaboration-escalation-updates-more",
-   "source": "Ubisoft",
-   "title": {
-    "en": "Title Update Y8S3.2",
-    "tr": "Güncelleme Y8S3.2",
-    "de": "Title Update Y8S3.2",
-    "fr": "Mise à jour Y8S3.2",
-    "es": "Actualización Y8S3.2",
-    "it": "Aggiornamento Y8S3.2",
-    "pt": "Atualização Y8S3.2",
-    "pl": "Aktualizacja Y8S3.2",
-    "ru": "Обновление Y8S3.2",
-    "nl": "Title Update Y8S3.2"
-   },
-   "text": {
-    "en": "Escalation no longer consumes tokens to start (you need the tier's minimum balance). Conflict: new Prometheus Terminal with CCC currency, rank cap 200. Rifles and Marksman Rifles get 20% more ammo. Movement speed bonuses capped at 20%. New named Classic M1A: Lichtenberg.",
-    "tr": "Escalation başlatmak artık token harcamıyor (kademenin en az bakiyesi gerekiyor). Conflict: CCC para birimiyle yeni Prometheus Terminal, rütbe sınırı 200. Rifle ve Marksman Rifle'lara %20 fazla mermi. Hareket hızı bonusları %20 ile sınırlandı. Yeni adlı Classic M1A: Lichtenberg.",
-    "de": "Escalation verbraucht beim Start keine Token mehr (Mindeststand der Stufe nötig). Conflict: neues Prometheus-Terminal mit CCC-Währung, Rangobergrenze 200. Gewehre und Präzisionsgewehre erhalten 20 % mehr Munition. Bewegungsboni auf 20 % begrenzt. Neues benanntes Classic M1A: Lichtenberg.",
-    "fr": "L'Escalade ne consomme plus de jetons au lancement (solde minimum du palier requis). Conflict : nouveau Terminal Prometheus avec la monnaie CCC, rang max 200. Fusils et fusils de précision : +20 % de munitions. Bonus de vitesse plafonnés à 20 %. Nouveau Classic M1A nommé : Lichtenberg.",
-    "es": "Escalada ya no gasta fichas al empezar (se necesita el saldo mínimo del nivel). Conflict: nueva Terminal Prometheus con moneda CCC, rango máximo 200. Rifles y rifles de tirador: 20 % más de munición. Bonificaciones de velocidad limitadas al 20 %. Nuevo Classic M1A con nombre: Lichtenberg.",
-    "it": "L'Escalation non consuma più gettoni all'avvio (serve il saldo minimo del livello). Conflict: nuovo Terminale Prometheus con valuta CCC, grado massimo 200. Fucili e fucili di precisione: +20% munizioni. Bonus velocità limitati al 20%. Nuovo Classic M1A con nome: Lichtenberg.",
-    "pt": "Escalation não gasta mais tokens para começar (é preciso o saldo mínimo do nível). Conflict: novo Terminal Prometheus com moeda CCC, patente máxima 200. Rifles e rifles de precisão: 20% mais munição. Bônus de velocidade limitados a 20%. Novo Classic M1A nomeado: Lichtenberg.",
-    "pl": "Escalation nie zużywa już żetonów przy starcie (wymagane minimalne saldo poziomu). Conflict: nowy Terminal Prometheus z walutą CCC, limit rangi 200. Karabiny i karabiny wyborowe: +20% amunicji. Premie do szybkości ruchu ograniczone do 20%. Nowy nazwany Classic M1A: Lichtenberg.",
-    "ru": "Эскалация больше не тратит жетоны при запуске (нужен минимальный баланс уровня). Conflict: новый терминал Prometheus с валютой CCC, предел ранга 200. Винтовки и марксманские винтовки: +20% патронов. Бонусы скорости ограничены 20%. Новый именной Classic M1A: Lichtenberg.",
-    "nl": "Escalation verbruikt geen tokens meer bij de start (minimumsaldo van de tier nodig). Conflict: nieuwe Prometheus Terminal met CCC-valuta, rangplafond 200. Geweren en precisiegeweren: 20% meer munitie. Bewegingsbonussen beperkt tot 20%. Nieuwe benoemde Classic M1A: Lichtenberg."
    }
   },
   {
