@@ -511,3 +511,31 @@ başarıyla yüklendi, konsol hatası yok).
   kullanıcı kararları (SignPath, Gumroad, eski dalların temizliği, Apple Developer Program ödemesi, mobil
   gradle adımı, PR #3 birleştirme/rebase, `test_knowledge.py` düzeltmesi, Xbox Companion CI kök nedeni)
   aynen duruyor. Değişen dosya: yalnızca `ROADMAP.md`.
+
+- **2026-11-13 (otomatik günlük durum güncellemesi — zamanlanmış görev): sadece durum güncellemesi, kod
+  değişikliği yok.** Depo `/home/claude/td2-loot-advisor`'da önceden klonlu bulundu, `HEAD` yine detached
+  state'te (önceki bir oturumun bıraktığı hâliyle) ama zaten `origin/main`'in (`cffbc40`) tam ucundaydı;
+  `git checkout main` + fast-forward (`916e782` → `cffbc40`, çakışma yok, 2 dosya: `ROADMAP.md` +
+  `meta/news_feed.json`) ile dal işaretçisi gerçek konuma hizalandı. Son 24 saatteki commit'ler
+  (`git log --since="24 hours ago"`) yalnızca iki otomatik "Feeds" bot commit'i (`be94770` 01:39,
+  `cffbc40` 13:35) — her ikisi de tek dosyayı (`meta/news_feed.json`, haber senkronu) değiştiriyor;
+  `HANDOFF.md` (2026-11-07), `BUGS.md` (2026-11-08) ve `docs/mobile_companion_roadmap.md` (2026-11-07)
+  son değişiklik tarihleri `git log -1 -- <dosya>` ile kontrol edildi — hiçbiri bugün değişmedi, uygulama
+  kodunda/dokümantasyonda hiçbir değişiklik yok. GitHub kontrol edildi: `federalturk/td2-loot-advisor`'da
+  **0 açık issue**, **hâlâ 1 açık (taslak) PR** — [#3](https://github.com/FEDERALTURK/td2-loot-advisor/pull/3),
+  `updated_at` 2026-11-08'den beri değişmedi (yeni yorum yok), `mergeable_state` hâlâ `unknown`, dokunulmadı.
+  `federalturk/td2-loot-advisor-reports`'ta yalnızca bilinen
+  [#4](https://github.com/federalturk/td2-loot-advisor-reports/issues/4) açık (`updated_at` 2026-10-31'den
+  beri değişmedi), yeni bir şey yok. `Info check` iş akışının bugünkü her iki "Feeds" commit'indeki çalışması
+  (run `43346524965`, run `43435002267`) job log'u satır satır okunarak doğrulandı: **aynı
+  `KeyError: 'y8s3-red-moon-unleashed'` ile hâlâ kırmızı** (`tests/test_knowledge.py:57`), hata mesajı/satırı
+  2026-11-06'dan beri birebir aynı — kök neden (test, Feeds botunun 3 günden eski biten haber olaylarını
+  `meta/news_feed.json`'dan kalıcı olarak sildiğini hesaba katmayan, sabit bir haber ID'sine bağımlı fixture
+  kullanması) değişmedi, düzeltme hâlâ bu oturumun kapsamı dışında bırakıldı. **Xbox Companion (UWP) CI'de
+  2026-11-08'den beri (`run 42526572150`) yeni bir `workflow_dispatch` denemesi yapılmadı** — hâlâ aynı 8
+  ardışık başarısız denemede duruyor, kök neden kapatılmadı. **`Build Companion APK` iş akışında da
+  2026-11-08'den beri (`run 42517746084`, `success`) yeni bir çalışma yok** — mobil tarafta (Konsol Modu,
+  Xbox doğrudan bağlantı) yeni bir CI etkinliği yok. Büyük/riskli, kullanıcı onayı gerektiren yeni bir karar
+  bulunmadı — mevcut bekleyen kullanıcı kararları (SignPath, Gumroad, eski dalların temizliği, Apple
+  Developer Program ödemesi, mobil gradle adımı, PR #3 birleştirme/rebase, `test_knowledge.py` düzeltmesi,
+  Xbox Companion CI kök nedeni) aynen duruyor. Değişen dosya: yalnızca `ROADMAP.md`.
