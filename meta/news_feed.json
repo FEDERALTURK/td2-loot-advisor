@@ -1,7 +1,7 @@
 {
  "schema": 1,
- "version": "2026-11-13.1",
- "updated": "2026-11-13T01:39:09Z",
+ "version": "2026-11-13.2",
+ "updated": "2026-11-13T13:34:46Z",
  "season": "Year 8 Season 3 – Red Horizon",
  "items": [
   {
@@ -100,38 +100,6 @@
    }
   },
   {
-   "id": "maint-2026-11-10-crossplay-infra",
-   "kind": "maintenance",
-   "start": "2026-11-10T08:30:00Z",
-   "end": "2026-11-10T13:30:00Z",
-   "url": "https://x.com/TheDivisionGame/status/2119844969787584996",
-   "source": "Ubisoft (@TheDivisionGame)",
-   "title": {
-    "en": "Maintenance: crossplay infrastructure (Nov 10)",
-    "tr": "Bakım: crossplay altyapısı (10 Kasım)",
-    "de": "Wartung: Crossplay-Infrastruktur (10. Nov.)",
-    "fr": "Maintenance : infrastructure crossplay (10 nov.)",
-    "es": "Mantenimiento: infraestructura de crossplay (10 nov.)",
-    "it": "Manutenzione: infrastruttura crossplay (10 nov.)",
-    "pt": "Manutenção: infraestrutura de crossplay (10 nov.)",
-    "ru": "Техработы: инфраструктура кроссплея (10 нояб.)",
-    "pl": "Przerwa techniczna: infrastruktura crossplay (10 lis.)",
-    "nl": "Onderhoud: crossplay-infrastructuur (10 nov.)"
-   },
-   "text": {
-    "en": "Servers go down on Tuesday, Nov 10 at 08:30 UTC for about 5 hours. The work prepares the infrastructure for the next step of the Crossplay rollout; no new content is announced.",
-    "tr": "Sunucular 10 Kasım Salı 08:30 UTC'de yaklaşık 5 saatliğine kapanıyor. Çalışma, Crossplay geçişinin sonraki adımı için altyapıyı hazırlıyor; yeni içerik duyurulmadı.",
-    "de": "Die Server sind am Dienstag, 10. Nov., ab 08:30 UTC für etwa 5 Stunden offline. Die Arbeiten bereiten die Infrastruktur auf die nächste Stufe des Crossplay-Rollouts vor; neue Inhalte sind nicht angekündigt.",
-    "fr": "Les serveurs sont coupés le mardi 10 nov. à 08:30 UTC pendant environ 5 heures. L'opération prépare l'infrastructure pour la prochaine étape du déploiement du Crossplay ; aucun nouveau contenu n'est annoncé.",
-    "es": "Los servidores se apagan el martes 10 de nov. a las 08:30 UTC durante unas 5 horas. El trabajo prepara la infraestructura para la siguiente fase del despliegue de Crossplay; no se anuncia contenido nuevo.",
-    "it": "I server vanno offline martedì 10 nov. alle 08:30 UTC per circa 5 ore. L'intervento prepara l'infrastruttura per la prossima fase del rilascio del Crossplay; non è annunciato nuovo contenuto.",
-    "pt": "Os servidores ficam offline na terça, 10 de nov., às 08:30 UTC por cerca de 5 horas. O trabalho prepara a infraestrutura para a próxima etapa da implementação do Crossplay; nenhum conteúdo novo foi anunciado.",
-    "ru": "Серверы отключаются во вторник, 10 ноября, в 08:30 UTC примерно на 5 часов. Работы готовят инфраструктуру к следующему этапу запуска Crossplay; нового контента не заявлено.",
-    "pl": "Serwery będą wyłączone we wtorek 10 lis. od 08:30 UTC przez około 5 godzin. Prace przygotowują infrastrukturę do kolejnego etapu wdrażania Crossplay; nie zapowiedziano nowej zawartości.",
-    "nl": "De servers gaan dinsdag 10 nov. om 08:30 UTC ongeveer 5 uur offline. Het werk bereidt de infrastructuur voor op de volgende stap van de Crossplay-uitrol; er is geen nieuwe content aangekondigd."
-   }
-  },
-  {
    "id": "echoes-event-pass-2026-11",
    "kind": "event",
    "start": "2026-11-10T08:00:00Z",
@@ -161,38 +129,6 @@
     "ru": "Пропуск события с 10 по 24 ноября. В бесплатной ветке — маски и облики оружия Mire и Thorn, костюм Guardian и 2 Named Item Cache. Премиум-ветка (1000 VC) добавляет другие маски и облики, жилет и маску Rick, 2 Exotic Cache и другие тайники.",
     "pl": "Przepustka wydarzenia od 10 do 24 listopada. Darmowa ścieżka daje maski i skórki broni Mire i Thorn, strój Guardian oraz 2 Named Item Cache. Ścieżka premium (1000 VC) dodaje kolejne maski i skórki, kamizelkę i maskę Rick, 2 Exotic Cache i inne skrzynki.",
     "nl": "Eventpas van 10 tot 24 november. Het gratis spoor bevat de Mire- en Thorn-maskers en wapenskins, de Guardian-outfit en 2 Named Item Caches. Het premiumspoor (1000 VC) voegt meer maskers en skins, het Rick-vest en -masker, 2 Exotic Caches en andere caches toe."
-   }
-  },
-  {
-   "id": "shd-xp-weekend-2026-11",
-   "kind": "event",
-   "start": "2026-11-06T18:00:00Z",
-   "end": "2026-11-10T08:00:00Z",
-   "url": "https://x.com/TheDivisionGame/status/2118765359775834282",
-   "source": "Ubisoft (The Division X account)",
-   "title": {
-    "en": "SHD XP Weekend: 6x SHD levels",
-    "tr": "SHD XP Hafta Sonu: 6 kat SHD seviyesi",
-    "de": "SHD-XP-Wochenende: 6-fache SHD-Level",
-    "fr": "Week-end XP SHD : niveaux SHD x6",
-    "es": "Fin de semana de XP SHD: niveles SHD x6",
-    "it": "Weekend XP SHD: livelli SHD x6",
-    "pt": "Fim de semana de XP SHD: níveis SHD 6x",
-    "ru": "Выходные опыта SHD: уровни SHD x6",
-    "pl": "Weekend XP SHD: poziomy SHD x6",
-    "nl": "SHD XP-weekend: 6x SHD-levels"
-   },
-   "text": {
-    "en": "Until Nov 10: for the first time, SHD levels are earned 6 times faster. Just play during the event; no extra rewards or requirements were announced. End time not stated officially; shown here as the Tuesday reset (08:00 UTC).",
-    "tr": "10 Kasım'a kadar: ilk kez SHD seviyeleri 6 kat hızlı kazanılıyor. Etkinlik süresince oynaman yeterli; ek ödül veya koşul duyurulmadı. Bitiş saati resmî olarak belirtilmedi; burada salı sıfırlaması (08:00 UTC) gösteriliyor.",
-    "de": "Bis 10. Nov.: Zum ersten Mal steigen SHD-Level 6-mal schneller. Spiel einfach während des Events; zusätzliche Belohnungen oder Bedingungen wurden nicht genannt. Endzeit nicht offiziell angegeben; hier als Dienstag-Reset (08:00 UTC).",
-    "fr": "Jusqu'au 10 nov. : pour la première fois, les niveaux SHD montent 6 fois plus vite. Il suffit de jouer pendant l'événement ; aucune récompense ni condition supplémentaire annoncée. Heure de fin non précisée ; indiquée ici au reset du mardi (08:00 UTC).",
-    "es": "Hasta el 10 de nov.: por primera vez, los niveles SHD se ganan 6 veces más rápido. Solo juega durante el evento; no se anunciaron recompensas ni requisitos extra. Hora de fin no indicada oficialmente; aquí se muestra el reinicio del martes (08:00 UTC).",
-    "it": "Fino al 10 nov.: per la prima volta i livelli SHD si ottengono 6 volte più in fretta. Basta giocare durante l'evento; nessuna ricompensa o requisito extra annunciato. Orario di fine non indicato; qui mostrato al reset del martedì (08:00 UTC).",
-    "pt": "Até 10 de nov.: pela primeira vez, os níveis SHD sobem 6 vezes mais rápido. Basta jogar durante o evento; não foram anunciadas recompensas ou requisitos extras. Horário de término não informado; aqui consta o reset de terça (08:00 UTC).",
-    "ru": "До 10 нояб.: впервые уровни SHD набираются в 6 раз быстрее. Достаточно играть во время события; дополнительных наград или условий не объявлено. Время окончания официально не указано; здесь — сброс во вторник (08:00 UTC).",
-    "pl": "Do 10 lis.: po raz pierwszy poziomy SHD zdobywa się 6 razy szybciej. Wystarczy grać w trakcie wydarzenia; nie ogłoszono dodatkowych nagród ani warunków. Godzina końca nie została podana; tu pokazano reset we wtorek (08:00 UTC).",
-    "nl": "Tot 10 nov.: voor het eerst stijg je 6 keer sneller in SHD-level. Speel gewoon tijdens het event; extra beloningen of voorwaarden zijn niet aangekondigd. Eindtijd niet officieel vermeld; hier als dinsdagreset (08:00 UTC)."
    }
   },
   {
@@ -411,38 +347,6 @@
     "ru": "Отвечайте на Calls for Backup, чтобы получать Shepherd Ranks. Шесть проектов, открытых с первого дня, требуют по одному рангу и дают 10 Exotic Components и 700 000 XP. Первые пять добавляют Reconstructed Cache, последний — именной Mk16 Malinois.",
     "pl": "Odpowiadaj na Calls for Backup, by zdobywać Shepherd Ranks. Sześć projektów, wszystkie otwarte od pierwszego dnia, wymaga po jednej randze i daje 10 Exotic Components oraz 700 000 XP. Pierwsze pięć dodaje Reconstructed Cache, ostatni nazwany Mk16 Malinois.",
     "nl": "Beantwoord Calls for Backup om Shepherd Ranks te verdienen. Zes projecten, allemaal open vanaf dag één, vragen elk één rank en geven 10 Exotic Components en 700.000 XP. De eerste vijf geven ook een Reconstructed Cache, de laatste de benoemde Mk16 Malinois."
-   }
-  },
-  {
-   "id": "echoes-launch-twitch-drops",
-   "kind": "community",
-   "start": "2026-11-03T08:00:00Z",
-   "end": "2026-11-10T08:00:00Z",
-   "url": "https://www.ubisoft.com/en-us/game/the-division/the-division-2/news-updates/5EEgwKS6kDqyvUFo5PJYsB/the-division-2-drops-da-twitch-do-lanamento-de-ecos-do-central-park",
-   "source": "Ubisoft",
-   "title": {
-    "en": "Echoes of Central Park Twitch Drops",
-    "tr": "Echoes of Central Park Twitch Drop'ları",
-    "de": "Echoes of Central Park: Twitch Drops",
-    "fr": "Drops Twitch d'Echoes of Central Park",
-    "es": "Drops de Twitch de Echoes of Central Park",
-    "it": "Drop di Twitch di Echoes of Central Park",
-    "pt": "Drops da Twitch de Echoes of Central Park",
-    "ru": "Дропы Twitch: Echoes of Central Park",
-    "pl": "Dropy z Twitcha: Echoes of Central Park",
-    "nl": "Echoes of Central Park Twitch Drops"
-   },
-   "text": {
-    "en": "Nov 3–10: watch drop-enabled The Division 2 streams on Twitch: 30 min Central Park Arm Patch, 1 h Named Cache, 2 h Bird Skull Backpack Trophy, 3 h Exotic Cache, 4 h Outfit Token. Link Twitch and your platforms to Ubisoft Connect, then claim drops on Twitch.",
-    "tr": "3-10 Kasım: Twitch'te drop açık The Division 2 yayınlarını izle: 30 dk Central Park Arm Patch, 1 sa Named Cache, 2 sa Bird Skull Backpack Trophy, 3 sa Exotic Cache, 4 sa Outfit Token. Twitch ve platform hesaplarını Ubisoft Connect'e bağla; ödülleri Twitch'ten al.",
-    "de": "3.–10. Nov.: Schau auf Twitch Streams von The Division 2 mit aktivierten Drops: 30 Min. Central Park Arm Patch, 1 Std. Named Cache, 2 Std. Bird Skull Backpack Trophy, 3 Std. Exotic Cache, 4 Std. Outfit Token. Verknüpfe Twitch und deine Plattformen mit Ubisoft Connect und hole die Drops auf Twitch ab.",
-    "fr": "Du 3 au 10 nov. : regardez sur Twitch des streams The Division 2 avec drops activés : 30 min Central Park Arm Patch, 1 h Named Cache, 2 h Bird Skull Backpack Trophy, 3 h Exotic Cache, 4 h Outfit Token. Liez Twitch et vos plateformes à Ubisoft Connect, puis récupérez les drops sur Twitch.",
-    "es": "Del 3 al 10 de nov.: mira en Twitch directos de The Division 2 con drops activados: 30 min Central Park Arm Patch, 1 h Named Cache, 2 h Bird Skull Backpack Trophy, 3 h Exotic Cache, 4 h Outfit Token. Vincula Twitch y tus plataformas a Ubisoft Connect y reclama los drops en Twitch.",
-    "it": "Dal 3 al 10 nov.: guarda su Twitch le dirette di The Division 2 con drop attivi: 30 min Central Park Arm Patch, 1 h Named Cache, 2 h Bird Skull Backpack Trophy, 3 h Exotic Cache, 4 h Outfit Token. Collega Twitch e le tue piattaforme a Ubisoft Connect e riscatta i drop su Twitch.",
-    "pt": "De 3 a 10 de nov.: assista na Twitch a transmissões de The Division 2 com drops ativos: 30 min Central Park Arm Patch, 1 h Named Cache, 2 h Bird Skull Backpack Trophy, 3 h Exotic Cache, 4 h Outfit Token. Vincule a Twitch e suas plataformas à Ubisoft Connect e resgate os drops na Twitch.",
-    "ru": "3–10 ноября: смотрите на Twitch трансляции The Division 2 с включёнными дропами: 30 мин — Central Park Arm Patch, 1 ч — Named Cache, 2 ч — Bird Skull Backpack Trophy, 3 ч — Exotic Cache, 4 ч — Outfit Token. Привяжите Twitch и свои платформы к Ubisoft Connect и забирайте дропы на Twitch.",
-    "pl": "3–10 lis.: oglądaj na Twitchu transmisje The Division 2 z włączonymi dropami: 30 min Central Park Arm Patch, 1 godz. Named Cache, 2 godz. Bird Skull Backpack Trophy, 3 godz. Exotic Cache, 4 godz. Outfit Token. Połącz Twitcha i swoje platformy z Ubisoft Connect, a dropy odbierz na Twitchu.",
-    "nl": "3–10 nov.: kijk op Twitch naar streams van The Division 2 met drops: 30 min Central Park Arm Patch, 1 u Named Cache, 2 u Bird Skull Backpack Trophy, 3 u Exotic Cache, 4 u Outfit Token. Koppel Twitch en je platforms aan Ubisoft Connect en claim de drops op Twitch."
    }
   },
   {
