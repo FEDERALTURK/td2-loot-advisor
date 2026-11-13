@@ -1,9 +1,40 @@
 {
  "schema": 1,
- "version": "2026-11-12.2",
- "updated": "2026-11-12T13:33:24Z",
+ "version": "2026-11-13.1",
+ "updated": "2026-11-13T01:39:09Z",
  "season": "Year 8 Season 3 – Red Horizon",
  "items": [
+  {
+   "id": "y8s4-pts-announced-2026-11",
+   "kind": "community",
+   "date": "2026-11-12T17:00:00Z",
+   "url": "https://x.com/TheDivisionGame/status/2120199814763761834",
+   "source": "Ubisoft (X)",
+   "title": {
+    "en": "Year 8 Season 4 Public Test announced (PC)",
+    "tr": "Year 8 Season 4 Açık Testi duyuruldu (PC)",
+    "de": "Public Test für Year 8 Season 4 angekündigt (PC)",
+    "fr": "Test public de Year 8 Season 4 annoncé (PC)",
+    "es": "Anunciada la prueba pública de Year 8 Season 4 (PC)",
+    "it": "Annunciato il test pubblico di Year 8 Season 4 (PC)",
+    "pt": "Teste público de Year 8 Season 4 anunciado (PC)",
+    "ru": "Анонсирован публичный тест Year 8 Season 4 (ПК)",
+    "pl": "Ogłoszono publiczny test Year 8 Season 4 (PC)",
+    "nl": "Publieke test van Year 8 Season 4 aangekondigd (pc)"
+   },
+   "text": {
+    "en": "Ubisoft showed the next season on a PTS livestream on Nov 12 and opened the PTS preload for PC players the same day. Test dates and the season's launch date have not been officially confirmed yet; check the official channels before planning.",
+    "tr": "Ubisoft 12 Kasım'daki PTS yayınında yeni sezonu tanıttı ve aynı gün PC oyuncuları için PTS ön yüklemesini açtı. Test tarihleri ve sezonun çıkış tarihi henüz resmî olarak açıklanmadı; plan yapmadan önce resmî kanalları kontrol et.",
+    "de": "Ubisoft hat die nächste Season am 12. Nov. in einem PTS-Livestream gezeigt und am selben Tag den PTS-Preload für PC geöffnet. Testzeitraum und Starttermin der Season sind noch nicht offiziell bestätigt; prüfe die offiziellen Kanäle.",
+    "fr": "Ubisoft a présenté la prochaine saison lors d'un live PTS le 12 nov. et a ouvert le préchargement du PTS sur PC le même jour. Les dates du test et du lancement de la saison ne sont pas encore officiellement confirmées ; surveillez les canaux officiels.",
+    "es": "Ubisoft mostró la próxima temporada en un directo del PTS el 12 de nov. y abrió la precarga del PTS en PC ese mismo día. Las fechas de la prueba y del lanzamiento aún no están confirmadas oficialmente; consulta los canales oficiales.",
+    "it": "Ubisoft ha presentato la prossima stagione in una diretta PTS il 12 nov. e ha aperto lo stesso giorno il precaricamento del PTS su PC. Le date del test e del lancio non sono ancora confermate ufficialmente; controlla i canali ufficiali.",
+    "pt": "A Ubisoft mostrou a próxima temporada numa transmissão do PTS em 12 de nov. e abriu no mesmo dia o pré-download do PTS no PC. As datas do teste e do lançamento ainda não foram confirmadas oficialmente; acompanhe os canais oficiais.",
+    "ru": "Ubisoft показала следующий сезон на стриме PTS 12 нояб. и в тот же день открыла предзагрузку PTS для ПК. Даты теста и запуска сезона официально ещё не подтверждены; следите за официальными каналами.",
+    "pl": "Ubisoft pokazał nowy sezon na transmisji PTS 12 lis. i tego samego dnia uruchomił wstępne pobieranie PTS na PC. Terminy testu i premiery sezonu nie zostały jeszcze oficjalnie potwierdzone; sprawdzaj oficjalne kanały.",
+    "nl": "Ubisoft liet het volgende seizoen zien in een PTS-livestream op 12 nov. en opende dezelfde dag de PTS-preload voor pc. Testdata en de lanceerdatum van het seizoen zijn nog niet officieel bevestigd; houd de officiële kanalen in de gaten."
+   }
+  },
   {
    "id": "echoes-event-pass-twitch-drops-2026-11",
    "kind": "community",
