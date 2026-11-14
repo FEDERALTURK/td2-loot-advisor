@@ -1,9 +1,41 @@
 {
  "schema": 1,
- "version": "2026-11-13.2",
- "updated": "2026-11-13T13:34:46Z",
+ "version": "2026-11-14.1",
+ "updated": "2026-11-14T07:34:54Z",
  "season": "Year 8 Season 3 – Red Horizon",
  "items": [
+  {
+   "id": "y8s4-spearfall-pts-2026-11",
+   "kind": "community",
+   "start": "2026-11-13T13:00:00Z",
+   "end": "2026-11-16T13:00:00Z",
+   "url": "https://www.ubisoft.com/en-us/game/the-division/the-division-2/news-updates/1wrUJ1HzY6BF8zzO4AMhJ3/spearfall-pts-patch-notes",
+   "source": "Ubisoft",
+   "title": {
+    "en": "Spearfall (Y8S4) PTS on PC: Nov 13–16",
+    "tr": "Spearfall (Y8S4) PTS PC'de: 13-16 Kasım",
+    "de": "Spearfall (Y8S4) PTS auf PC: 13.–16. Nov.",
+    "fr": "PTS de Spearfall (Y8S4) sur PC : 13–16 nov.",
+    "es": "PTS de Spearfall (Y8S4) en PC: 13–16 nov.",
+    "it": "PTS di Spearfall (Y8S4) su PC: 13–16 nov.",
+    "pt": "PTS de Spearfall (Y8S4) no PC: 13–16 nov.",
+    "ru": "PTS Spearfall (Y8S4) на ПК: 13–16 нояб.",
+    "pl": "PTS Spearfall (Y8S4) na PC: 13–16 lis.",
+    "nl": "Spearfall (Y8S4) PTS op pc: 13–16 nov."
+   },
+   "text": {
+    "en": "PC-only public test of the next season. Highlights: Contra-Augment season modifiers, Legendary on four main missions plus a DC Legendary Open World, reworked Escalation with Player Rating, Select Augment and Prototype Schematics. Launch date not announced yet.",
+    "tr": "Yeni sezonun yalnız PC'de açık testi. Öne çıkanlar: Contra-Augment sezon değiştiricileri, dört ana görevde Legendary ve DC'de Legendary Open World, Player Rating'li yenilenmiş Escalation, Select Augment ve Prototype Schematics. Çıkış tarihi henüz açıklanmadı.",
+    "de": "Öffentlicher Test der nächsten Season, nur auf PC. Wichtig: Contra-Augment-Modifikatoren, Legendary in vier Hauptmissionen plus Legendary Open World in DC, überarbeitete Escalation mit Player Rating, Select Augment und Prototype Schematics. Starttermin noch offen.",
+    "fr": "Test public de la prochaine saison, sur PC uniquement. Au menu : modificateurs Contra-Augment, Legendary sur quatre missions principales et Legendary Open World à DC, Escalation revue avec Player Rating, Select Augment et Prototype Schematics. Date de sortie pas encore annoncée.",
+    "es": "Prueba pública de la próxima temporada, solo en PC. Destacan: modificadores Contra-Augment, Legendary en cuatro misiones principales y Legendary Open World en DC, Escalation renovada con Player Rating, Select Augment y Prototype Schematics. Fecha de lanzamiento aún sin anunciar.",
+    "it": "Test pubblico della prossima stagione, solo su PC. In evidenza: modificatori Contra-Augment, Legendary su quattro missioni principali e Legendary Open World a DC, Escalation rivista con Player Rating, Select Augment e Prototype Schematics. Data di uscita non ancora annunciata.",
+    "pt": "Teste público da próxima temporada, só no PC. Destaques: modificadores Contra-Augment, Legendary em quatro missões principais e Legendary Open World em DC, Escalation reformulada com Player Rating, Select Augment e Prototype Schematics. Data de lançamento ainda não anunciada.",
+    "ru": "Публичный тест следующего сезона, только на ПК. Главное: модификаторы Contra-Augment, Legendary в четырёх основных миссиях и Legendary Open World в DC, переработанный Escalation с Player Rating, Select Augment и Prototype Schematics. Дата выхода пока не объявлена.",
+    "pl": "Publiczny test nowego sezonu, tylko na PC. Najważniejsze: modyfikatory Contra-Augment, Legendary w czterech misjach głównych i Legendary Open World w DC, przebudowana Escalation z Player Rating, Select Augment i Prototype Schematics. Data premiery nie została jeszcze ogłoszona.",
+    "nl": "Publieke test van het volgende seizoen, alleen op pc. Hoogtepunten: Contra-Augment-modifiers, Legendary in vier hoofdmissies plus Legendary Open World in DC, vernieuwde Escalation met Player Rating, Select Augment en Prototype Schematics. Releasedatum nog niet bekend."
+   }
+  },
   {
    "id": "y8s4-pts-announced-2026-11",
    "kind": "community",
@@ -23,16 +55,16 @@
     "nl": "Publieke test van Year 8 Season 4 aangekondigd (pc)"
    },
    "text": {
-    "en": "Ubisoft showed the next season on a PTS livestream on Nov 12 and opened the PTS preload for PC players the same day. Test dates and the season's launch date have not been officially confirmed yet; check the official channels before planning.",
-    "tr": "Ubisoft 12 Kasım'daki PTS yayınında yeni sezonu tanıttı ve aynı gün PC oyuncuları için PTS ön yüklemesini açtı. Test tarihleri ve sezonun çıkış tarihi henüz resmî olarak açıklanmadı; plan yapmadan önce resmî kanalları kontrol et.",
-    "de": "Ubisoft hat die nächste Season am 12. Nov. in einem PTS-Livestream gezeigt und am selben Tag den PTS-Preload für PC geöffnet. Testzeitraum und Starttermin der Season sind noch nicht offiziell bestätigt; prüfe die offiziellen Kanäle.",
-    "fr": "Ubisoft a présenté la prochaine saison lors d'un live PTS le 12 nov. et a ouvert le préchargement du PTS sur PC le même jour. Les dates du test et du lancement de la saison ne sont pas encore officiellement confirmées ; surveillez les canaux officiels.",
-    "es": "Ubisoft mostró la próxima temporada en un directo del PTS el 12 de nov. y abrió la precarga del PTS en PC ese mismo día. Las fechas de la prueba y del lanzamiento aún no están confirmadas oficialmente; consulta los canales oficiales.",
-    "it": "Ubisoft ha presentato la prossima stagione in una diretta PTS il 12 nov. e ha aperto lo stesso giorno il precaricamento del PTS su PC. Le date del test e del lancio non sono ancora confermate ufficialmente; controlla i canali ufficiali.",
-    "pt": "A Ubisoft mostrou a próxima temporada numa transmissão do PTS em 12 de nov. e abriu no mesmo dia o pré-download do PTS no PC. As datas do teste e do lançamento ainda não foram confirmadas oficialmente; acompanhe os canais oficiais.",
-    "ru": "Ubisoft показала следующий сезон на стриме PTS 12 нояб. и в тот же день открыла предзагрузку PTS для ПК. Даты теста и запуска сезона официально ещё не подтверждены; следите за официальными каналами.",
-    "pl": "Ubisoft pokazał nowy sezon na transmisji PTS 12 lis. i tego samego dnia uruchomił wstępne pobieranie PTS na PC. Terminy testu i premiery sezonu nie zostały jeszcze oficjalnie potwierdzone; sprawdzaj oficjalne kanały.",
-    "nl": "Ubisoft liet het volgende seizoen zien in een PTS-livestream op 12 nov. en opende dezelfde dag de PTS-preload voor pc. Testdata en de lanceerdatum van het seizoen zijn nog niet officieel bevestigd; houd de officiële kanalen in de gaten."
+    "en": "Ubisoft showed the next season on a PTS livestream on Nov 12 and opened the PTS preload for PC players the same day. The test runs Nov 13–16 (see the Spearfall PTS item); the season's launch date has not been announced yet.",
+    "tr": "Ubisoft 12 Kasım'daki PTS yayınında yeni sezonu tanıttı ve aynı gün PC oyuncuları için PTS ön yüklemesini açtı. Test 13-16 Kasım arasında (Spearfall PTS haberine bak); sezonun çıkış tarihi henüz açıklanmadı.",
+    "de": "Ubisoft hat die nächste Season am 12. Nov. in einem PTS-Livestream gezeigt und am selben Tag den PTS-Preload für PC geöffnet. Der Test läuft vom 13. bis 16. Nov. (siehe Spearfall-PTS-Meldung); ein Starttermin der Season steht noch aus.",
+    "fr": "Ubisoft a présenté la prochaine saison lors d'un live PTS le 12 nov. et a ouvert le préchargement du PTS sur PC le même jour. Le test se déroule du 13 au 16 nov. (voir l'actu PTS Spearfall) ; la date de lancement n'est pas encore annoncée.",
+    "es": "Ubisoft mostró la próxima temporada en un directo del PTS el 12 de nov. y abrió la precarga del PTS en PC ese mismo día. La prueba va del 13 al 16 de nov. (ver la noticia del PTS de Spearfall); la fecha de lanzamiento aún no se ha anunciado.",
+    "it": "Ubisoft ha presentato la prossima stagione in una diretta PTS il 12 nov. e ha aperto lo stesso giorno il precaricamento del PTS su PC. Il test si svolge dal 13 al 16 nov. (vedi la notizia sul PTS di Spearfall); la data di lancio non è ancora annunciata.",
+    "pt": "A Ubisoft mostrou a próxima temporada numa transmissão do PTS em 12 de nov. e abriu no mesmo dia o pré-download do PTS no PC. O teste vai de 13 a 16 de nov. (veja a notícia do PTS de Spearfall); a data de lançamento ainda não foi anunciada.",
+    "ru": "Ubisoft показала следующий сезон на стриме PTS 12 нояб. и в тот же день открыла предзагрузку PTS для ПК. Тест идёт 13–16 нояб. (см. новость о PTS Spearfall); дата запуска сезона пока не объявлена.",
+    "pl": "Ubisoft pokazał nowy sezon na transmisji PTS 12 lis. i tego samego dnia uruchomił wstępne pobieranie PTS na PC. Test trwa od 13 do 16 lis. (zobacz wiadomość o PTS Spearfall); data premiery sezonu nie została jeszcze ogłoszona.",
+    "nl": "Ubisoft liet het volgende seizoen zien in een PTS-livestream op 12 nov. en opende dezelfde dag de PTS-preload voor pc. De test loopt van 13 tot 16 nov. (zie het Spearfall-PTS-bericht); de lanceerdatum van het seizoen is nog niet bekend."
    }
   },
   {
