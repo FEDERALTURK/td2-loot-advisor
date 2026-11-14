@@ -408,6 +408,7 @@ class CompanionModel extends ChangeNotifier {
     final httpClient = client ?? http.Client();
     final ownsClient = client == null;
     File? partialFile;
+    IOSink? outputSink;
     try {
       final request = http.Request('GET', Uri.parse(apkUrl));
       final response = await httpClient
@@ -422,16 +423,17 @@ class CompanionModel extends ChangeNotifier {
       );
       partialFile = File('${file.path}.part');
       if (await partialFile.exists()) await partialFile.delete();
-      final sink = partialFile.openWrite();
+      outputSink = partialFile.openWrite();
       var received = 0;
       await for (final chunk in response.stream) {
-        sink.add(chunk);
+        outputSink.add(chunk);
         received += chunk.length;
         updateProgress = downloadProgress(received, response.contentLength);
         notifyListeners();
       }
-      await sink.flush();
-      await sink.close();
+      await outputSink.flush();
+      await outputSink.close();
+      outputSink = null;
       if (received == 0) return 'APK indirilemedi; dosya boş.';
       final expected = await _fetchChecksum();
       if (expected == null || !RegExp(r'^[a-f0-9]{64}$').hasMatch(expected)) {
@@ -451,6 +453,10 @@ class CompanionModel extends ChangeNotifier {
     } catch (error) {
       return 'Güncelleme indirilemedi: $error';
     } finally {
+      if (outputSink != null) {
+        await outputSink.flush();
+        await outputSink.close();
+      }
       if (partialFile != null && await partialFile.exists()) {
         await partialFile.delete();
       }
