@@ -121,5 +121,16 @@ jobs:
         shell: cmd
 
       - name: Build (Release|x64, derleme doğrulaması — paketleme yok)
-        run: msbuild XboxCompanion.sln /p:Configuration=Release /p:Platform=x64 /p:AppxBundle=Never /p:UapAppxPackageBuildMode=SideloadOnly /v:minimal
+        # 13. deneme: C# derleme hataları (CS0234/CS0246, WinRT ad alanları
+        # bulunamıyordu) 12. denemenin TargetPlatformVersion düzeltmesiyle
+        # tamamen gitti — bu kanıtlandı (bu adımın kendisi artık .cs
+        # dosyalarını derliyor). Yeni hata farklı bir sınıftan: "APPX0107:
+        # The certificate specified is not valid for signing." /p:AppxBundle=
+        # Never bundle'ı kapatıyor ama tek mimarili APPX paketinin kendisini
+        # ve imzalamasını KAPATMIYOR; AppContainerExe çıkış türü Build
+        # hedefinde otomatik olarak Microsoft.AppXPackage.Targets'ı tetikliyor.
+        # Bu adımın amacı yalnız derleme doğrulaması (bkz. dosya başındaki
+        # yorum) olduğundan, imzalamayı doğrudan devre dışı bırakan resmi
+        # MSBuild özelliği eklendi: AppxPackageSigningEnabled=false.
+        run: msbuild XboxCompanion.sln /p:Configuration=Release /p:Platform=x64 /p:AppxBundle=Never /p:UapAppxPackageBuildMode=SideloadOnly /p:AppxPackageSigningEnabled=false /v:minimal
         shell: cmd
