@@ -563,3 +563,28 @@ başarıyla yüklendi, konsol hatası yok).
   bulunmadı — mevcut bekleyen kullanıcı kararları (SignPath, Gumroad, eski dalların temizliği, Apple
   Developer Program ödemesi, mobil gradle adımı, PR #3 birleştirme/rebase, `test_knowledge.py` düzeltmesi,
   Xbox Companion CI kök nedeni) aynen duruyor. Değişen dosya: yalnızca `ROADMAP.md`.
+
+- **2026-11-14 (otomatik günlük durum güncellemesi — zamanlanmış görev): sadece durum doğrulaması, kod/belge
+  değişikliği yok.** Depo `/home/claude/td2-loot-advisor`'da önceden klonlu bulundu; `HEAD` detached state'teydi
+  ama zaten `origin/main`'in (`729bc26`) tam ucundaydı. `git checkout main` + fast-forward (`916e782` → `729bc26`,
+  18 commit, 6 dosya, çakışma yok) ile yerel dal işaretçisi gerçek konuma hizalandı — içerik kaybı yok. Bu 18
+  commit'in detayına bakıldı: aynı gün **başka/önceki bir oturum** (session `019puJcpmi1mPj3qdczCYr6K`) Xbox
+  Companion (UWP) CI'yi 5 yeni `workflow_dispatch` denemesiyle (9-13) tamamen yeşile çekmiş (run `43622873860`,
+  `success`, commit `377b441`), `docs/feature_roadmap_2026-11-14.md` (yeni özellik/yol haritası taraması) teslim
+  etmiş, ve `HANDOFF.md`/`ROADMAP.md`'ye bunu + kullanıcının yerel Windows klasöründeki senkronize olmayan
+  "Codex devir" çalışma kolu bulgusunu işlemiş (commit'ler `0bec271`→`729bc26`) — bu girdiyi yazan otomatik
+  oturum bu işin HİÇBİRİNİ tekrar yapmadı, sadece zaten `origin/main`'de olduğunu doğruladı. GitHub kontrol
+  edildi: `federalturk/td2-loot-advisor`'da **0 açık issue**, **hâlâ 1 açık (taslak) PR** — [#3](https://github.com/FEDERALTURK/td2-loot-advisor/pull/3),
+  `updated_at` 2026-11-08'den beri değişmedi (yeni yorum yok). `federalturk/td2-loot-advisor-reports`'ta yalnızca
+  bilinen [#4](https://github.com/federalturk/td2-loot-advisor-reports/issues/4) açık, `updated_at` 2026-10-31'den
+  beri değişmedi. Son ~15 workflow run (`actions_list`) kontrol edildi: bu kontrolden önceki en son etkinlik,
+  yukarıda bahsedilen Xbox CI'nin 13. (son, başarılı) denemesi `43622873860` (2026-11-14 17:45-17:50 UTC) —
+  ondan sonraki üç belge-only commit (`5ebbd40`, `84b7f64`, `729bc26`, hepsi 18:0x-18:24 UTC) hiçbir workflow'u
+  tetiklememiş (beklenen: bunlar yalnızca `.md` dosyalarını değiştiriyor); bu kontrol anına (yaklaşık 19:06 UTC)
+  kadar yeni bir commit/run/issue/PR etkinliği yok — yani son gerçek güncellemeden bu yana (~40 dakika) hiçbir
+  şey değişmedi. `docs/mobile_companion_roadmap.md`'nin son değişiklik tarihi (2026-11-08) ROADMAP tablosundaki
+  mobil companion durumuyla (companion-v0.1.9 + Konsol Modu, aynı tarih) tutarlı bulundu, uyumsuzluk yok. Büyük/
+  riskli, kullanıcı onayı gerektiren yeni bir karar bulunmadı — mevcut bekleyen kullanıcı kararları (Codex devir
+  senkronizasyonu, üç örtüşen Xbox/konsol girişiminin önceliklendirilmesi, SignPath/kod imzalama, Gumroad, PR #3
+  birleştirme/rebase, `test_knowledge.py` KeyError düzeltmesi, Xbox Companion gerçek konsol testi) aynen duruyor.
+  Değişen dosya: yalnızca `ROADMAP.md` (bu girdi) — uygulama kodu/`HANDOFF.md`/`BUGS.md` değişmedi.
