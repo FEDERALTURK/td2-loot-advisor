@@ -23,6 +23,11 @@ class MainActivity : FlutterActivity() {
                     val path = call.argument<String>("path") ?: throw IllegalArgumentException("APK yolu boş")
                     val apk = File(path)
                     if (!apk.isFile) throw IllegalArgumentException("APK bulunamadı")
+                    val appFiles = filesDir.canonicalFile.toPath()
+                    val apkPath = apk.canonicalFile.toPath()
+                    if (!apkPath.startsWith(appFiles)) {
+                        throw SecurityException("APK yolu uygulama dizini dışında")
+                    }
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
                         !packageManager.canRequestPackageInstalls()) {
                         startActivity(Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
