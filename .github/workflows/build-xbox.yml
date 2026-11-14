@@ -33,35 +33,44 @@ jobs:
           Write-Host "--- Windows Kits\10\Platforms\UAP ---"
           Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\Platforms\UAP" -ErrorAction SilentlyContinue -Recurse -Filter "*.winmd" | Select-Object -First 20 FullName
           Write-Host "--- VS kurulu bileşenler (UWP ile ilgili) ---"
-          $vsPath = (& "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath)
-          & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products '*' -property "packages" 2>$null |
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          $vsPath = (& $vswhere -latest -property installationPath)
+          $channelId = (& $vswhere -latest -property channelId)
+          & $vswhere -latest -products '*' -property "packages" 2>$null |
             Select-String -Pattern "UWP|Windows10SDK|Windows11SDK" | Select-Object -First 30
           Write-Host "VS install path: $vsPath"
+          Write-Host "VS channelId: $channelId"
 
       - name: UWP/Windows SDK bileşenini kur (eksikse)
         shell: pwsh
         run: |
-          $vsPath = (& "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath)
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          $vsPath = (& $vswhere -latest -property installationPath)
+          $channelId = (& $vswhere -latest -property channelId)
+          if ([string]::IsNullOrWhiteSpace($channelId)) {
+            Write-Error "vswhere -property channelId boş döndü — kurulu VS örneğinin channelId'si okunamadı, modify komutu zaten burada başarısız olacak (bkz. Microsoft dokümantasyonu: channelId, --installPath ile birlikte modify için zorunludur)."
+            exit 1
+          }
           $installer = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vs_installer.exe"
-          Write-Host "Calling: $installer modify --installPath $vsPath --add Microsoft.VisualStudio.ComponentGroup.UWP.VC --add Microsoft.VisualStudio.Component.Windows10SDK.19041"
-          # ÖNEMLİ DÜZELTME: Önceki denemede --installPath değerine elle
-          # tırnak (`"$vsPath`") eklenmişti — Start-Process -ArgumentList
-          # zaten her dizi elemanını kendi başına bir argüman olarak iletir
-          # ve gerektiğinde kendi tırnaklamasını yapar; elle eklenen tırnak
-          # karakterleri yola karışıp "geçersiz parametre" (exit 87) hatasına
-          # yol açtı (kanıtlandı — bkz. DEVELOPMENT_LOG.md). Burada ham
-          # (tırnaksız) string geçiliyor.
-          # Tırnaklama düzeltmesi exit 87'yi çözmedi (ikinci deneme, aynı
-          # hata) -- bu, bileşen ID'sinden kaynaklanıyor olabilir.
-          # "Microsoft.VisualStudio.ComponentGroup.UWP.VC" bir alt-bileşen
-          # grubu; resmi "Universal Windows Platform development" İŞ YÜKÜ
-          # (workload) kimliği olan Microsoft.VisualStudio.Workload.Universal
-          # ile deneniyor (Microsoft'un vs_buildtools.exe örneklerinde
-          # standart ID).
+          Write-Host "Calling: $installer modify --installPath $vsPath --channelId $channelId --add Microsoft.VisualStudio.Workload.Universal --add Microsoft.VisualStudio.Component.Windows10SDK.19041"
+          # KÖK NEDEN (9. deneme, bu değişiklik): Microsoft'un resmi
+          # dokümantasyonu ("Use command-line parameters to install Visual
+          # Studio") açıkça şunu söylüyor: "channelId is required for modify
+          # operations, alongside either --productID or --installPath."
+          # Önceki 8 denemenin HİÇBİRİ --channelId geçirmedi — sadece
+          # tırnaklama, bileşen/iş yükü ID'si ve Start-Process bekleme
+          # davranışıyla uğraştılar. vs_installer'ın log dosyası bile
+          # oluşturmadan ~6 saniyede exit 87 (ERROR_INVALID_PARAMETER)
+          # vermesi, argüman ayrıştırma aşamasında (installer motoru hiç
+          # başlamadan) patladığını gösteriyor — tam olarak zorunlu bir
+          # parametrenin eksik olduğu senaryoyla uyumlu. channelId'yi sabit
+          # tahmin etmek yerine (bu VS sürümü için doğru değeri bilmiyoruz),
+          # koşucudaki gerçek kurulumdan vswhere ile OKUYUP kullanıyoruz.
           $logPath = "$env:RUNNER_TEMP\vs_installer_modify.log"
           $proc = Start-Process -FilePath $installer -ArgumentList @(
             "modify",
             "--installPath", $vsPath,
+            "--channelId", $channelId,
             "--add", "Microsoft.VisualStudio.Workload.Universal",
             "--add", "Microsoft.VisualStudio.Component.Windows10SDK.19041",
             "--quiet", "--norestart", "--wait",
