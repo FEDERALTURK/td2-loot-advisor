@@ -41,79 +41,80 @@ jobs:
           Write-Host "VS install path: $vsPath"
           Write-Host "VS channelId: $channelId"
 
-      - name: TEŞHİS — vs_installer/setup.exe'nin gerçek davranışını kanıtla (9. deneme sonrası, kod değişikliği YOK)
-        # 9. deneme (bu oturumdan önceki commit) Microsoft dokümantasyonunun
-        # "channelId modify için zorunlu" iddiasını test etti — vswhere'den
-        # dinamik olarak doğru channelId ("VisualStudio.18.Release") okunup
-        # geçirildi, AMA exit 87 ve log dosyasızlık AYNI şekilde, ~5 saniyede
-        # tekrar oluştu. Bu, channelId teorisini KANITLA çürütüyor — tahmin
-        # etmeyi bırakıp aracın kendisini sorguluyoruz. continue-on-error
-        # ile bu adım job'u durdurmuyor; amaç tek bir CI turunda maksimum
-        # kanıt toplamak (AGENTS.md madde 10: kanıtla desteklenen varsayımı
-        # test et, aynı yöntemi gerekçesiz tekrarlama).
-        shell: pwsh
-        continue-on-error: true
-        timeout-minutes: 6
-        run: |
-          $installerDir = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer"
-          Write-Host "--- Installer dizini içeriği ---"
-          Get-ChildItem $installerDir -Filter "*.exe" -ErrorAction SilentlyContinue | Select-Object Name, Length, LastWriteTime | Format-Table
-
-          Write-Host "--- whoami / grup üyeliği (yükseltme durumu) ---"
-          whoami /groups 2>&1 | Select-String -Pattern "Administrators|Mandatory Label"
-
-          $vs_installer = Join-Path $installerDir "vs_installer.exe"
-          $setup = Join-Path $installerDir "setup.exe"
-
-          # ÖNEMLİ: --help bir GUI uygulamasında tanınmayan bir bayrak ise
-          # süreç konsola hiçbir şey yazmadan normal GUI moduna düşüp
-          # SONSUZA DEK askıda kalabilir (headless runner'da kimse
-          # etkileşime giremez). Önceki teşhis denemesi tam olarak bu
-          # yüzden ~1 saat asılı kaldı ve elle iptal edilmek zorunda kaldı.
-          # Bu yüzden her çağrı artık sınırlı bir süre bekliyor, aşarsa
-          # süreci zorla sonlandırıp "zaman aşımı" olarak işaretliyor.
-          function Test-Invocation($exePath, $argList, $label, $timeoutSec = 25) {
-            Write-Host "=== $label (timeout ${timeoutSec}s) ==="
-            Write-Host "Var mı: $(Test-Path $exePath)"
-            if (-not (Test-Path $exePath)) { return }
-            $outFile = "$env:RUNNER_TEMP\$($label)_stdout.txt"
-            $errFile = "$env:RUNNER_TEMP\$($label)_stderr.txt"
-            Remove-Item $outFile, $errFile -ErrorAction SilentlyContinue
-            $p = Start-Process -FilePath $exePath -ArgumentList $argList -PassThru -NoNewWindow `
-              -RedirectStandardOutput $outFile -RedirectStandardError $errFile
-            $finished = $p.WaitForExit($timeoutSec * 1000)
-            if (-not $finished) {
-              Write-Host "ZAMAN AŞIMI (${timeoutSec}s) — süreç muhtemelen GUI açtı veya askıda kaldı. Zorla sonlandırılıyor."
-              try { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue } catch {}
-            } else {
-              Write-Host "Exit code: $($p.ExitCode)"
-            }
-            Write-Host "--- stdout ---"
-            if (Test-Path $outFile) { Get-Content $outFile } else { Write-Host "(boş)" }
-            Write-Host "--- stderr ---"
-            if (Test-Path $errFile) { Get-Content $errFile } else { Write-Host "(boş)" }
-          }
-
-          # 1) Hiç argüman olmadan / --help ile: araç gerçekten çalışıyor mu,
-          #    kabul ettiği gerçek sözdizimini kendi ağzından göster.
-          Test-Invocation $vs_installer @("--help") "vs_installer_help" 20
-          Test-Invocation $setup @("--help") "setup_help" 20
-
-          # 2) Microsoft dokümantasyonunun önerdiği ikili (setup.exe) ile
-          #    AYNI modify çağrısını dene — vs_installer.exe değil.
-          $vsPath = (& "$installerDir\vswhere.exe" -latest -property installationPath)
-          $channelId = (& "$installerDir\vswhere.exe" -latest -property channelId)
-          Test-Invocation $setup @(
-            "modify", "--installPath", $vsPath, "--channelId", $channelId,
-            "--add", "Microsoft.VisualStudio.Workload.Universal",
-            "--quiet", "--norestart"
-          ) "setup_modify" 60
-
       - name: UWP/Windows SDK bileşenini kur (eksikse)
-        run: |
-          Write-Host "Geçici olarak devre dışı — bu oturum yalnızca teşhis topluyor, yukarıdaki adımın çıktısına bakılacak. Kod/komut değişikliği sonraki oturumda, gerçek kanıta göre yapılacak."
-          exit 1
         shell: pwsh
+        timeout-minutes: 10
+        run: |
+          # KÖK NEDEN KANITLANDI (10. deneme — teşhis turunun gerçek STDOUT/
+          # STDERR yakalaması sayesinde, bkz. DEVELOPMENT_LOG.md):
+          #
+          # 1) vs_installer.exe gerçek bir CLI'ya sahip değil — "--help" bile
+          #    20 saniyede yanıt vermedi (muhtemelen GUI'ye düşüyor, headless
+          #    runner'da süresiz askıda kalır). "setup.exe --help" ise ANINDA
+          #    çalıştı ve gerçek kullanım bilgisini bastı — Microsoft'un
+          #    dokümantasyonunda da modify için belgelenen ikili budur,
+          #    vs_installer.exe değil.
+          #
+          # 2) setup.exe ile gerçek bir modify denemesi motoru fiilen
+          #    çalıştırdı (telemetri, kanal/katalog çözümleme adımlarına
+          #    kadar ilerledi) ve şu satırı bastı:
+          #      "Parsed command line options: ... --installPath C:\Program ..."
+          #      "An installed product matching the following parameters
+          #       cannot be found: installPath: C:\Program"
+          #    Yani --installPath değeri ("C:\Program Files\Microsoft Visual
+          #    Studio\18\Enterprise") BOŞLUKTA KESİLİP sadece "C:\Program"
+          #    olarak ayrıştırılmış. PowerShell'in Start-Process -ArgumentList
+          #    dizi elemanlarını OTOMATİK TIRNAKLAMADIĞI (8. denemenin
+          #    yorumundaki varsayımın tersine) ve installer'ın kendi argüman
+          #    ayrıştırıcısının boşlukta bölündüğü kanıtlandı. 8 önceki
+          #    denemenin TAMAMI bu yüzden exit 87/1 ile patlamış olmalı —
+          #    hiçbiri installPath değerini elle tırnaklamamıştı (7. deneme
+          #    tırnaklamayı KALDIRMIŞTI, tam tersi yöne gitmiş).
+          #
+          # DÜZELTME: setup.exe kullan, --installPath değerini elle çift
+          # tırnak içine al (`"$vsPath`"), --wait bayrağını kaldır (Microsoft
+          # dokümantasyonu: --wait yalnız bootstrapper'da (vs_*.exe) var,
+          # setup.exe'de yok — PowerShell'in kendi -Wait parametresi zaten
+          # süreci bekliyor).
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          $vsPath = (& $vswhere -latest -property installationPath)
+          $channelId = (& $vswhere -latest -property channelId)
+          if ([string]::IsNullOrWhiteSpace($channelId)) {
+            Write-Error "vswhere -property channelId boş döndü."
+            exit 1
+          }
+          $installer = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\setup.exe"
+          $quotedVsPath = '"' + $vsPath + '"'
+          Write-Host "Calling: $installer modify --installPath $quotedVsPath --channelId $channelId --add Microsoft.VisualStudio.Workload.Universal --add Microsoft.VisualStudio.Component.Windows10SDK.19041 --quiet --norestart"
+          $logPath = "$env:RUNNER_TEMP\vs_installer_modify.log"
+          $outFile = "$env:RUNNER_TEMP\vs_installer_modify_stdout.txt"
+          $errFile = "$env:RUNNER_TEMP\vs_installer_modify_stderr.txt"
+          $proc = Start-Process -FilePath $installer -ArgumentList @(
+            "modify",
+            "--installPath", $quotedVsPath,
+            "--channelId", $channelId,
+            "--add", "Microsoft.VisualStudio.Workload.Universal",
+            "--add", "Microsoft.VisualStudio.Component.Windows10SDK.19041",
+            "--quiet", "--norestart",
+            "--log", $logPath
+          ) -Wait -PassThru -NoNewWindow -RedirectStandardOutput $outFile -RedirectStandardError $errFile
+          Write-Host "setup.exe exit code: $($proc.ExitCode)"
+          Write-Host "--- stdout ---"
+          if (Test-Path $outFile) { Get-Content $outFile } else { Write-Host "(boş)" }
+          Write-Host "--- stderr ---"
+          if (Test-Path $errFile) { Get-Content $errFile } else { Write-Host "(boş)" }
+          if ($proc.ExitCode -ne 0 -and $proc.ExitCode -ne 3010) {
+            Write-Host "--- vs_installer engine log ($logPath) ---"
+            if (Test-Path $logPath) {
+              Get-Content $logPath -Tail 150
+            } else {
+              Write-Host "(log dosyası oluşmadı)"
+            }
+            Write-Error "setup.exe modify başarısız (exit $($proc.ExitCode))"
+            exit $proc.ExitCode
+          }
+          Write-Host "--- Kurulumdan SONRA Windows Kits\10\UnionMetadata ---"
+          Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\UnionMetadata" -ErrorAction SilentlyContinue | Format-Table Name
 
       - name: Restore NuGet packages (packages.config — klasik UWP projesi)
         run: nuget restore XboxCompanion.sln
