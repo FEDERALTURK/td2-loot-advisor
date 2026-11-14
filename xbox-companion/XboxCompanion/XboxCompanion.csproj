@@ -31,7 +31,22 @@
     <AssemblyName>XboxCompanion</AssemblyName>
     <DefaultLanguage>tr-TR</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
-    <TargetPlatformVersion>10.0.19041.0</TargetPlatformVersion>
+    <!-- 10.0.19041.0 → 10.0.26100.0: CI'daki windows-latest koşucusu
+         (bkz. build-xbox.yml) Windows Kits\10\UnionMetadata altında
+         ZATEN 10.0.26100.0 ile geliyor (kanıtlandı — teşhis adımının
+         çıktısı), ama 10.0.19041.0 hiç yok ve bu VS 18 kataloğunda
+         "Microsoft.VisualStudio.Component.Windows10SDK.19041" bileşeni
+         artık kurulabilir değil (setup.exe exit 0 ile "başarılı"
+         dönüyor ama UnionMetadata'ya hiçbir şey eklemiyor — sessiz
+         no-op). 19041 seçimi ilk commit'te (8990cf8) herhangi bir kod
+         gereksinimine dayanmıyordu, sadece "makul modern bir sürüm"
+         olarak seçilmişti; bu statik referans uygulaması (JsonObject,
+         Storage, Page, Application — hepsi UAP'nin en eski
+         sürümlerinden beri var olan temel API'ler) 26100'ü hedeflemekte
+         hiçbir engelle karşılaşmaz. Bu değişiklikle ayrı bir SDK bileşeni
+         kurulumuna gerek kalmıyor; CI artık koşucuda hazır gelen SDK'yı
+         kullanıyor. -->
+    <TargetPlatformVersion>10.0.26100.0</TargetPlatformVersion>
     <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
     <MinimumVisualStudioVersion>14</MinimumVisualStudioVersion>
     <EnableDotNetNativeCompatibleProfile>true</EnableDotNetNativeCompatibleProfile>
