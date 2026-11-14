@@ -2,6 +2,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:td2_companion/services/companion_release.dart';
 
 void main() {
+  test('shared companion user agent follows the installed version', () {
+    expect(companionUserAgent, 'TD2-Loot-Advisor-Companion/$companionVersion');
+    expect(companionUserAgent, isNot(contains('0.1.5')));
+  });
+
   test('companion release comparison only accepts newer semantic versions', () {
     expect(isNewerVersion('0.1.5', '0.1.4'), isTrue);
     expect(isNewerVersion('0.1.4.1', '0.1.4'), isTrue);
@@ -15,8 +20,17 @@ void main() {
   test('update check is throttled but runs when no check exists', () {
     final now = DateTime(2026, 11, 7, 12);
     expect(isUpdateCheckDue(null, now: now), isTrue);
-    expect(isUpdateCheckDue(now.subtract(const Duration(hours: 5, minutes: 59)), now: now), isFalse);
-    expect(isUpdateCheckDue(now.subtract(const Duration(hours: 6)), now: now), isTrue);
+    expect(
+      isUpdateCheckDue(
+        now.subtract(const Duration(hours: 5, minutes: 59)),
+        now: now,
+      ),
+      isFalse,
+    );
+    expect(
+      isUpdateCheckDue(now.subtract(const Duration(hours: 6)), now: now),
+      isTrue,
+    );
   });
 
   test('companion release selects the newest direct APK asset', () {
@@ -35,13 +49,11 @@ void main() {
           },
           {
             'name': 'TD2LootAdvisor_Companion_0.1.4.1-beta.apk',
-            'browser_download_url':
-                'https://github.com/FEDERALTURK/td2-loot-advisor/releases/download/companion-v0.1.4.1-beta/TD2LootAdvisor_Companion_0.1.4.1-beta.apk',
+            'browser_download_url': 'https://github.com/FEDERALTURK/td2-loot-advisor/releases/download/companion-v0.1.4.1-beta/TD2LootAdvisor_Companion_0.1.4.1-beta.apk',
           },
           {
             'name': 'SHA256SUMS.sha256',
-            'browser_download_url':
-                'https://github.com/FEDERALTURK/td2-loot-advisor/releases/download/companion-v0.1.4.1-beta/SHA256SUMS.sha256',
+            'browser_download_url': 'https://github.com/FEDERALTURK/td2-loot-advisor/releases/download/companion-v0.1.4.1-beta/SHA256SUMS.sha256',
           },
         ],
       },

@@ -365,7 +365,10 @@ class CompanionModel extends ChangeNotifier {
       availableApkUrl = release.apkUrl;
       availableSha256Url = release.sha256Url;
       lastUpdateCheck = DateTime.now();
-      await _prefs?.setInt('last_update_check_ms', lastUpdateCheck!.millisecondsSinceEpoch);
+      await _prefs?.setInt(
+        'last_update_check_ms',
+        lastUpdateCheck!.millisecondsSinceEpoch,
+      );
       if (updateAlertsEnabled && updateAvailable) {
         final notified = _prefs?.getString('notified_companion_version');
         if (notified != release.version) {
@@ -390,7 +393,9 @@ class CompanionModel extends ChangeNotifier {
 
   Future<String?> downloadAndInstallUpdate() async {
     final apkUrl = availableApkUrl;
-    if (apkUrl == null || downloadingUpdate) return 'APK bağlantısı bulunamadı.';
+    if (apkUrl == null || downloadingUpdate) {
+      return 'APK bağlantısı bulunamadı.';
+    }
     downloadingUpdate = true;
     updateProgress = 0;
     notifyListeners();
@@ -414,10 +419,8 @@ class CompanionModel extends ChangeNotifier {
         '${directory.path}/TD2LootAdvisor_Companion_$availableVersion.apk',
       );
       await file.writeAsBytes(response.bodyBytes, flush: true);
-      await const MethodChannel('td2_companion/update').invokeMethod<bool>(
-        'installApk',
-        {'path': file.path},
-      );
+      await const MethodChannel('td2_companion/update')
+          .invokeMethod<bool>('installApk', {'path': file.path});
       return null;
     } catch (error) {
       return 'Güncelleme indirilemedi: $error';
@@ -583,10 +586,7 @@ class CompanionModel extends ChangeNotifier {
     if (endpoint == null || _desktopToken == null) return false;
     try {
       final response = await http
-          .get(
-            endpoint,
-            headers: const {'User-Agent': 'TD2-Loot-Advisor-Companion/0.1.5'},
-          )
+          .get(endpoint, headers: const {'User-Agent': companionUserAgent})
           .timeout(const Duration(seconds: 4));
       if (response.statusCode != 200) {
         desktopError = response.statusCode == 403
@@ -998,7 +998,9 @@ class _ContentAlertsCard extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
                 child: FilledButton.icon(
-                  onPressed: model.downloadingUpdate ? null : () => _startUpdate(context),
+                  onPressed: model.downloadingUpdate
+                      ? null
+                      : () => _startUpdate(context),
                   icon: const Icon(Icons.system_update_alt_rounded),
                   label: Text(
                     model.downloadingUpdate
