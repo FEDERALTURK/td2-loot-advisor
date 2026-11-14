@@ -86,7 +86,14 @@ jobs:
           $installer = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\setup.exe"
           $quotedVsPath = '"' + $vsPath + '"'
           Write-Host "Calling: $installer modify --installPath $quotedVsPath --channelId $channelId --add Microsoft.VisualStudio.Workload.Universal --add Microsoft.VisualStudio.Component.Windows10SDK.19041 --quiet --norestart"
-          $logPath = "$env:RUNNER_TEMP\vs_installer_modify.log"
+          # NOT: --log KALDIRILDI — 10. deneme kanıtladı: setup.exe modify
+          # bu bayrağı tanımıyor ("Option 'log' is unknown." + kabul edilen
+          # seçenekler listesinde --log hiç yok), exit 87'nin asıl sebebi bu
+          # çıktı, boşluk/tırnaklama sorunu bu turda zaten düzelmişti (Raw
+          # Command line satırında installPath artık doğru tırnaklı
+          # görünüyordu). setup.exe kendi varsayılan konumuna (%TEMP%\
+          # dd_setup_*.log) zaten log yazıyor; stdout/stderr yakalaması asıl
+          # hata mesajını göstermeye yetiyor.
           $outFile = "$env:RUNNER_TEMP\vs_installer_modify_stdout.txt"
           $errFile = "$env:RUNNER_TEMP\vs_installer_modify_stderr.txt"
           $proc = Start-Process -FilePath $installer -ArgumentList @(
@@ -95,8 +102,7 @@ jobs:
             "--channelId", $channelId,
             "--add", "Microsoft.VisualStudio.Workload.Universal",
             "--add", "Microsoft.VisualStudio.Component.Windows10SDK.19041",
-            "--quiet", "--norestart",
-            "--log", $logPath
+            "--quiet", "--norestart"
           ) -Wait -PassThru -NoNewWindow -RedirectStandardOutput $outFile -RedirectStandardError $errFile
           Write-Host "setup.exe exit code: $($proc.ExitCode)"
           Write-Host "--- stdout ---"
@@ -104,12 +110,6 @@ jobs:
           Write-Host "--- stderr ---"
           if (Test-Path $errFile) { Get-Content $errFile } else { Write-Host "(boş)" }
           if ($proc.ExitCode -ne 0 -and $proc.ExitCode -ne 3010) {
-            Write-Host "--- vs_installer engine log ($logPath) ---"
-            if (Test-Path $logPath) {
-              Get-Content $logPath -Tail 150
-            } else {
-              Write-Host "(log dosyası oluşmadı)"
-            }
             Write-Error "setup.exe modify başarısız (exit $($proc.ExitCode))"
             exit $proc.ExitCode
           }
