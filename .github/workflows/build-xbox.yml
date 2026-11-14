@@ -41,54 +41,65 @@ jobs:
           Write-Host "VS install path: $vsPath"
           Write-Host "VS channelId: $channelId"
 
-      - name: UWP/Windows SDK bileşenini kur (eksikse)
+      - name: TEŞHİS — vs_installer/setup.exe'nin gerçek davranışını kanıtla (9. deneme sonrası, kod değişikliği YOK)
+        # 9. deneme (bu oturumdan önceki commit) Microsoft dokümantasyonunun
+        # "channelId modify için zorunlu" iddiasını test etti — vswhere'den
+        # dinamik olarak doğru channelId ("VisualStudio.18.Release") okunup
+        # geçirildi, AMA exit 87 ve log dosyasızlık AYNI şekilde, ~5 saniyede
+        # tekrar oluştu. Bu, channelId teorisini KANITLA çürütüyor — tahmin
+        # etmeyi bırakıp aracın kendisini sorguluyoruz. continue-on-error
+        # ile bu adım job'u durdurmuyor; amaç tek bir CI turunda maksimum
+        # kanıt toplamak (AGENTS.md madde 10: kanıtla desteklenen varsayımı
+        # test et, aynı yöntemi gerekçesiz tekrarlama).
         shell: pwsh
+        continue-on-error: true
         run: |
-          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
-          $vsPath = (& $vswhere -latest -property installationPath)
-          $channelId = (& $vswhere -latest -property channelId)
-          if ([string]::IsNullOrWhiteSpace($channelId)) {
-            Write-Error "vswhere -property channelId boş döndü — kurulu VS örneğinin channelId'si okunamadı, modify komutu zaten burada başarısız olacak (bkz. Microsoft dokümantasyonu: channelId, --installPath ile birlikte modify için zorunludur)."
-            exit 1
+          $installerDir = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer"
+          Write-Host "--- Installer dizini içeriği ---"
+          Get-ChildItem $installerDir -Filter "*.exe" -ErrorAction SilentlyContinue | Select-Object Name, Length, LastWriteTime | Format-Table
+
+          Write-Host "--- whoami / grup üyeliği (yükseltme durumu) ---"
+          whoami /groups 2>&1 | Select-String -Pattern "Administrators|Mandatory Label"
+
+          $vs_installer = Join-Path $installerDir "vs_installer.exe"
+          $setup = Join-Path $installerDir "setup.exe"
+
+          function Test-Invocation($exePath, $argList, $label) {
+            Write-Host "=== $label ==="
+            Write-Host "Var mı: $(Test-Path $exePath)"
+            if (-not (Test-Path $exePath)) { return }
+            $outFile = "$env:RUNNER_TEMP\$($label)_stdout.txt"
+            $errFile = "$env:RUNNER_TEMP\$($label)_stderr.txt"
+            Remove-Item $outFile, $errFile -ErrorAction SilentlyContinue
+            $p = Start-Process -FilePath $exePath -ArgumentList $argList -Wait -PassThru -NoNewWindow `
+              -RedirectStandardOutput $outFile -RedirectStandardError $errFile
+            Write-Host "Exit code: $($p.ExitCode)"
+            Write-Host "--- stdout ---"
+            if (Test-Path $outFile) { Get-Content $outFile } else { Write-Host "(boş)" }
+            Write-Host "--- stderr ---"
+            if (Test-Path $errFile) { Get-Content $errFile } else { Write-Host "(boş)" }
           }
-          $installer = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vs_installer.exe"
-          Write-Host "Calling: $installer modify --installPath $vsPath --channelId $channelId --add Microsoft.VisualStudio.Workload.Universal --add Microsoft.VisualStudio.Component.Windows10SDK.19041"
-          # KÖK NEDEN (9. deneme, bu değişiklik): Microsoft'un resmi
-          # dokümantasyonu ("Use command-line parameters to install Visual
-          # Studio") açıkça şunu söylüyor: "channelId is required for modify
-          # operations, alongside either --productID or --installPath."
-          # Önceki 8 denemenin HİÇBİRİ --channelId geçirmedi — sadece
-          # tırnaklama, bileşen/iş yükü ID'si ve Start-Process bekleme
-          # davranışıyla uğraştılar. vs_installer'ın log dosyası bile
-          # oluşturmadan ~6 saniyede exit 87 (ERROR_INVALID_PARAMETER)
-          # vermesi, argüman ayrıştırma aşamasında (installer motoru hiç
-          # başlamadan) patladığını gösteriyor — tam olarak zorunlu bir
-          # parametrenin eksik olduğu senaryoyla uyumlu. channelId'yi sabit
-          # tahmin etmek yerine (bu VS sürümü için doğru değeri bilmiyoruz),
-          # koşucudaki gerçek kurulumdan vswhere ile OKUYUP kullanıyoruz.
-          $logPath = "$env:RUNNER_TEMP\vs_installer_modify.log"
-          $proc = Start-Process -FilePath $installer -ArgumentList @(
-            "modify",
-            "--installPath", $vsPath,
-            "--channelId", $channelId,
+
+          # 1) Hiç argüman olmadan / --help ile: araç gerçekten çalışıyor mu,
+          #    kabul ettiği gerçek sözdizimini kendi ağzından göster.
+          Test-Invocation $vs_installer @("--help") "vs_installer_help"
+          Test-Invocation $setup @("--help") "setup_help"
+
+          # 2) Microsoft dokümantasyonunun önerdiği ikili (setup.exe) ile
+          #    AYNI modify çağrısını dene — vs_installer.exe değil.
+          $vsPath = (& "$installerDir\vswhere.exe" -latest -property installationPath)
+          $channelId = (& "$installerDir\vswhere.exe" -latest -property channelId)
+          Test-Invocation $setup @(
+            "modify", "--installPath", $vsPath, "--channelId", $channelId,
             "--add", "Microsoft.VisualStudio.Workload.Universal",
-            "--add", "Microsoft.VisualStudio.Component.Windows10SDK.19041",
-            "--quiet", "--norestart", "--wait",
-            "--log", $logPath
-          ) -Wait -PassThru -NoNewWindow
-          Write-Host "vs_installer exit code: $($proc.ExitCode)"
-          if ($proc.ExitCode -ne 0 -and $proc.ExitCode -ne 3010) {
-            Write-Host "--- vs_installer log ($logPath) ---"
-            if (Test-Path $logPath) {
-              Get-Content $logPath -Tail 100
-            } else {
-              Write-Host "(log dosyası oluşmadı)"
-            }
-            Write-Error "vs_installer modify başarısız (exit $($proc.ExitCode))"
-            exit $proc.ExitCode
-          }
-          Write-Host "--- Kurulumdan SONRA Windows Kits\10\UnionMetadata ---"
-          Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\UnionMetadata" -ErrorAction SilentlyContinue | Format-Table Name
+            "--quiet", "--norestart"
+          ) "setup_modify"
+
+      - name: UWP/Windows SDK bileşenini kur (eksikse)
+        run: |
+          Write-Host "Geçici olarak devre dışı — bu oturum yalnızca teşhis topluyor, yukarıdaki adımın çıktısına bakılacak. Kod/komut değişikliği sonraki oturumda, gerçek kanıta göre yapılacak."
+          exit 1
+        shell: pwsh
 
       - name: Restore NuGet packages (packages.config — klasik UWP projesi)
         run: nuget restore XboxCompanion.sln
