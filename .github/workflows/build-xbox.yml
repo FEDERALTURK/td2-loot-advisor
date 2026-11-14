@@ -53,6 +53,7 @@ jobs:
         # test et, aynı yöntemi gerekçesiz tekrarlama).
         shell: pwsh
         continue-on-error: true
+        timeout-minutes: 6
         run: |
           $installerDir = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer"
           Write-Host "--- Installer dizini içeriği ---"
@@ -64,16 +65,29 @@ jobs:
           $vs_installer = Join-Path $installerDir "vs_installer.exe"
           $setup = Join-Path $installerDir "setup.exe"
 
-          function Test-Invocation($exePath, $argList, $label) {
-            Write-Host "=== $label ==="
+          # ÖNEMLİ: --help bir GUI uygulamasında tanınmayan bir bayrak ise
+          # süreç konsola hiçbir şey yazmadan normal GUI moduna düşüp
+          # SONSUZA DEK askıda kalabilir (headless runner'da kimse
+          # etkileşime giremez). Önceki teşhis denemesi tam olarak bu
+          # yüzden ~1 saat asılı kaldı ve elle iptal edilmek zorunda kaldı.
+          # Bu yüzden her çağrı artık sınırlı bir süre bekliyor, aşarsa
+          # süreci zorla sonlandırıp "zaman aşımı" olarak işaretliyor.
+          function Test-Invocation($exePath, $argList, $label, $timeoutSec = 25) {
+            Write-Host "=== $label (timeout ${timeoutSec}s) ==="
             Write-Host "Var mı: $(Test-Path $exePath)"
             if (-not (Test-Path $exePath)) { return }
             $outFile = "$env:RUNNER_TEMP\$($label)_stdout.txt"
             $errFile = "$env:RUNNER_TEMP\$($label)_stderr.txt"
             Remove-Item $outFile, $errFile -ErrorAction SilentlyContinue
-            $p = Start-Process -FilePath $exePath -ArgumentList $argList -Wait -PassThru -NoNewWindow `
+            $p = Start-Process -FilePath $exePath -ArgumentList $argList -PassThru -NoNewWindow `
               -RedirectStandardOutput $outFile -RedirectStandardError $errFile
-            Write-Host "Exit code: $($p.ExitCode)"
+            $finished = $p.WaitForExit($timeoutSec * 1000)
+            if (-not $finished) {
+              Write-Host "ZAMAN AŞIMI (${timeoutSec}s) — süreç muhtemelen GUI açtı veya askıda kaldı. Zorla sonlandırılıyor."
+              try { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue } catch {}
+            } else {
+              Write-Host "Exit code: $($p.ExitCode)"
+            }
             Write-Host "--- stdout ---"
             if (Test-Path $outFile) { Get-Content $outFile } else { Write-Host "(boş)" }
             Write-Host "--- stderr ---"
@@ -82,8 +96,8 @@ jobs:
 
           # 1) Hiç argüman olmadan / --help ile: araç gerçekten çalışıyor mu,
           #    kabul ettiği gerçek sözdizimini kendi ağzından göster.
-          Test-Invocation $vs_installer @("--help") "vs_installer_help"
-          Test-Invocation $setup @("--help") "setup_help"
+          Test-Invocation $vs_installer @("--help") "vs_installer_help" 20
+          Test-Invocation $setup @("--help") "setup_help" 20
 
           # 2) Microsoft dokümantasyonunun önerdiği ikili (setup.exe) ile
           #    AYNI modify çağrısını dene — vs_installer.exe değil.
@@ -93,7 +107,7 @@ jobs:
             "modify", "--installPath", $vsPath, "--channelId", $channelId,
             "--add", "Microsoft.VisualStudio.Workload.Universal",
             "--quiet", "--norestart"
-          ) "setup_modify"
+          ) "setup_modify" 60
 
       - name: UWP/Windows SDK bileşenini kur (eksikse)
         run: |
