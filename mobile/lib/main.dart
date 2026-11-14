@@ -21,6 +21,12 @@ const _panel2 = Color(0xFF191F2B);
 const _orange = Color(0xFFFF6D10);
 const _soft = Color(0xFF9AA4B5);
 
+double downloadProgress(int receivedBytes, int? totalBytes) {
+  if (totalBytes == null || totalBytes <= 0) return 0;
+  final progress = receivedBytes / totalBytes;
+  return progress.clamp(0, 1).toDouble();
+}
+
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const TD2CompanionApp());
@@ -391,7 +397,7 @@ class CompanionModel extends ChangeNotifier {
     }
   }
 
-  Future<String?> downloadAndInstallUpdate() async {
+  Future<String?> downloadAndInstallUpdate({http.Client? client}) async {
     final apkUrl = availableApkUrl;
     if (apkUrl == null || downloadingUpdate) {
       return 'APK bağlantısı bulunamadı.';
@@ -399,32 +405,56 @@ class CompanionModel extends ChangeNotifier {
     downloadingUpdate = true;
     updateProgress = 0;
     notifyListeners();
+    final httpClient = client ?? http.Client();
+    final ownsClient = client == null;
+    File? partialFile;
     try {
-      final response = await http
-          .get(Uri.parse(apkUrl))
+      final request = http.Request('GET', Uri.parse(apkUrl));
+      final response = await httpClient
+          .send(request)
           .timeout(const Duration(minutes: 3));
-      if (response.statusCode != 200 || response.bodyBytes.isEmpty) {
+      if (response.statusCode != 200) {
         return 'APK indirilemedi (HTTP ${response.statusCode}).';
-      }
-      final expected = await _fetchChecksum();
-      if (expected == null || !RegExp(r'^[a-f0-9]{64}$').hasMatch(expected)) {
-        return 'APK doğrulama bilgisi alınamadı. Lütfen tekrar deneyin.';
-      }
-      final actual = sha256.convert(response.bodyBytes).toString();
-      if (expected != actual) {
-        return 'APK doğrulaması başarısız; dosya kurulmadı.';
       }
       final directory = await getApplicationSupportDirectory();
       final file = File(
         '${directory.path}/TD2LootAdvisor_Companion_$availableVersion.apk',
       );
-      await file.writeAsBytes(response.bodyBytes, flush: true);
+      partialFile = File('${file.path}.part');
+      if (await partialFile.exists()) await partialFile.delete();
+      final sink = partialFile.openWrite();
+      var received = 0;
+      await for (final chunk in response.stream) {
+        sink.add(chunk);
+        received += chunk.length;
+        updateProgress = downloadProgress(received, response.contentLength);
+        notifyListeners();
+      }
+      await sink.flush();
+      await sink.close();
+      if (received == 0) return 'APK indirilemedi; dosya boş.';
+      final expected = await _fetchChecksum();
+      if (expected == null || !RegExp(r'^[a-f0-9]{64}$').hasMatch(expected)) {
+        return 'APK doğrulama bilgisi alınamadı. Lütfen tekrar deneyin.';
+      }
+      final actual = (await sha256.bind(partialFile.openRead()).first)
+          .toString();
+      if (expected != actual) {
+        return 'APK doğrulaması başarısız; dosya kurulmadı.';
+      }
+      await partialFile.rename(file.path);
+      updateProgress = 1;
+      notifyListeners();
       await const MethodChannel('td2_companion/update')
           .invokeMethod<bool>('installApk', {'path': file.path});
       return null;
     } catch (error) {
       return 'Güncelleme indirilemedi: $error';
     } finally {
+      if (partialFile != null && await partialFile.exists()) {
+        await partialFile.delete();
+      }
+      if (ownsClient) httpClient.close();
       downloadingUpdate = false;
       updateProgress = 0;
       notifyListeners();

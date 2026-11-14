@@ -1,7 +1,14 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:td2_companion/main.dart';
 import 'package:td2_companion/services/companion_release.dart';
 
 void main() {
+  test('download progress is bounded and handles unknown content length', () {
+    expect(downloadProgress(25, 100), 0.25);
+    expect(downloadProgress(150, 100), 1);
+    expect(downloadProgress(25, null), 0);
+  });
+
   test('shared companion user agent follows the installed version', () {
     expect(companionUserAgent, 'TD2-Loot-Advisor-Companion/$companionVersion');
     expect(companionUserAgent, isNot(contains('0.1.5')));
