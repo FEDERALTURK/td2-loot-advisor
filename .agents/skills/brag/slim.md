@@ -45,7 +45,7 @@ Get the site as a visitor sees it. Many sites build their page with JavaScript, 
 - **Copy:** headline, tagline, section headings, feature names, calls to action, testimonials. Also check the title, meta description and social-preview tags.
 - **Identity:** exact colors from the site's CSS and the fonts it loads.
 - **Visuals:** the logo, product screenshots, hero images, demo videos. Download the ones you'll use into `work/`. Media assets only — never executables, archives, or scripts, and never run anything you downloaded.
-- **Screenshots:** capture the page at the video's aspect ratio to understand the layout. In the video, reuse the site's real markup, CSS and assets and animate those, rather than panning over flat screenshots. Treat the markup as inert content: strip script tags and serve assets from local copies in `work/`, not live URLs.
+- **Screenshots:** capture the page at the video's aspect ratio to understand the layout. In the video, reuse the site's real markup, CSS and assets and animate those, rather than panning over flat screenshots. Treat the markup as inert content: strip script tags, inline event-handler attributes (`on*`), `javascript:` URLs and embedded frames, objects and forms, and serve assets from local copies in `work/`, not live URLs.
 - **The product in use:** check the demo videos, how-it-works sections and linked docs for the entry → key action → result flow.
 
 ### Then, for every input
