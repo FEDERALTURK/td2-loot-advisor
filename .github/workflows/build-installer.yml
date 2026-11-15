@@ -10,6 +10,7 @@ on:
         type: boolean
         default: false
   push:
+    branches: ["codex/validate-91537"]
     tags: ["v*"]
 
 permissions:

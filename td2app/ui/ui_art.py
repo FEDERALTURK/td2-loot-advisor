@@ -19,6 +19,7 @@ import re
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFilter
+from . import ui_theme
 
 ART_VERSION = 1
 BG_SIZE = (2000, 300)
@@ -605,16 +606,16 @@ class Banner:
         fs = self.pal
         if h >= 90:
             cv.create_text(22, 40, anchor="w", text=self.title, fill=fs.get("accent", "#ff6d10"),
-                           font=("Segoe UI Semibold", 21))
-            cv.create_text(24, 72, anchor="w", text=self.subtitle, fill="#c9ced8", font=("Segoe UI", 10))
+                           font=(ui_theme.FONT_SEMI, 21))
+            cv.create_text(24, 72, anchor="w", text=self.subtitle, fill="#c9ced8", font=(ui_theme.FONT, 10))
         else:                                                   # kompakt (küçük ekran): tek satır
             cv.create_text(14, h / 2, anchor="w", text=f"{self.title}  {self.subtitle}", fill=fs.get("accent", "#ff6d10"),
-                           font=("Segoe UI Semibold", max(9, int(h / 3.2))))
+                           font=(ui_theme.FONT_SEMI, max(9, int(h / 3.2))))
         if self.flash_state:
             _rgba, t1, t2, col = self.flash_state
             x = int(w * 0.47) + int(min(h - 18, w * 0.32) * 0.75) + 18
-            cv.create_text(x, h / 2 - 12, anchor="w", text=t1, fill="#ffffff", font=("Segoe UI Semibold", 17))
-            cv.create_text(x, h / 2 + 16, anchor="w", text=t2, fill=col, font=("Segoe UI Semibold", 10))
+            cv.create_text(x, h / 2 - 12, anchor="w", text=t1, fill="#ffffff", font=(ui_theme.FONT_SEMI, 17))
+            cv.create_text(x, h / 2 + 16, anchor="w", text=t2, fill=col, font=(ui_theme.FONT_SEMI, 10))
         # rozetler (sağ üst)
         x = w - 16
         for i, chip in reversed(list(enumerate(self.chips))):
@@ -623,7 +624,7 @@ class Banner:
             bg = {"on": fs.get("success", "#22c55e"), "btn": fs.get("accent", "#ff6d10")}.get(kind, "#1d2129")
             fg = "#ffffff" if kind in ("on", "btn") else "#c9ced8"
             tag = f"chip{i}"
-            tid = cv.create_text(0, 0, text=text, font=("Segoe UI Semibold", 9), fill=fg, anchor="e", tags=(tag,))
+            tid = cv.create_text(0, 0, text=text, font=(ui_theme.FONT_SEMI, 9), fill=fg, anchor="e", tags=(tag,))
             bx = cv.bbox(tid); tw = bx[2] - bx[0]
             cv.coords(tid, x - 10, 26)
             cv.create_rectangle(x - tw - 20, 14, x, 38, fill=bg, outline="", tags=(tag,))
@@ -635,7 +636,7 @@ class Banner:
             x -= tw + 28
         if self.toast_text:
             tid = cv.create_text(w - 26, h - 26, text=self.toast_text, anchor="e", fill="#ffffff",
-                                 font=("Segoe UI Semibold", 10))
+                                 font=(ui_theme.FONT_SEMI, 10))
             bx = cv.bbox(tid)
             cv.create_rectangle(bx[0] - 12, bx[1] - 6, bx[2] + 12, bx[3] + 6, fill=fs.get("accent", "#ff6d10"), outline="")
             cv.tag_raise(tid)

@@ -150,7 +150,7 @@ import decision_center
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.1.5.36"
+APP_VERSION = "9.1.5.37"
 # "Bu oturumda ne kazandın?" özeti için kaba tahmin: bir eşyayı elle inceleyip
 # build'e göre karar vermenin (istatistikleri okuma + karşılaştırma) ortalama
 # süresi, saniye. Gerçek bir ölçüm değil — yalnızca arayüzde "tahmini" etiketiyle
@@ -304,7 +304,8 @@ def _cfg_defaults(cfg):
     # Eski çoklu tema sistemi kaldırıldı (tek sabit tema): eski kayıtlı tema adlarını ("kaivolt",
     # "isac", "shd_terminal" vb.) ve onlara bağlı özel kabuk düzenini sessizce yeni varsayılana taşı.
     if st.get("ui_theme") not in ui_theme.THEME_MODES: st["ui_theme"] = DEFAULTS["ui_theme"]
-    if st.get("ui_layout") != "standard": st["ui_layout"] = "standard"
+    if st.get("ui_layout") not in ("standard", "field_command", "shd_terminal"):
+        st["ui_layout"] = "shd_terminal"
     try:
         st["keep_threshold"], st["consider_threshold"] = itempolicy.validate_thresholds(st["keep_threshold"], st["consider_threshold"])
     except ValueError:
@@ -4538,6 +4539,8 @@ class App:
             self.root.after(34, self._build_next_ui_page)
             return
         self._ui_ready = True
+        if getattr(self, "_intro", None):
+            self._intro.finish()
         if self._ui_build_errors:
             self.root.after(120, self._show_startup_recovery)
         self.root.after(300, self.apply_fx)

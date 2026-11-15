@@ -19,6 +19,7 @@ import tkinter as tk
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFilter
+from . import ui_theme
 
 CURSOR_STYLES = ["system", "crosshair", "ring", "rifle", "smg", "sniper", "pistol", "shotgun", "custom"]
 VIDEO_EXT = (".mp4", ".mkv", ".webm", ".mov", ".avi", ".m4v")
@@ -479,7 +480,7 @@ class DigitalRain(tk.Canvas):
         self._size = (n_cols, n_rows)
         self.delete("rain")
         self._grid = [[self.create_text((c + 0.5) * self.cell_w, r * self.cell_h, text="",
-                                        fill=self.dim_color, font=("Consolas", 10), anchor="n", tags=("rain",))
+                                         fill=self.dim_color, font=(ui_theme.FONT_MONO, 10), anchor="n", tags=("rain",))
                        for r in range(n_rows)] for c in range(n_cols)]
         self._cols = [self._new_column(n_rows) for _ in range(n_cols)]
         self.tag_lower("rain")
@@ -571,11 +572,11 @@ class CommandRibbon(tk.Canvas):
             for x in range(14, min(w, 180), 28):
                 self.create_line(x, h - 4, x + 13, 4, fill=self.muted, width=1)
             self.create_text(16, 14, anchor="w", text=self.title, fill="#ffffff",
-                             font=("Segoe UI Semibold", 10))
+                             font=(ui_theme.FONT_SEMI, 10))
             self.create_text(16, 30, anchor="w", text=self.detail, fill=self.muted,
-                             font=("Segoe UI", 8))
+                             font=(ui_theme.FONT, 8))
             self.create_text(w - 16, 21, anchor="e", text="●  LINKED", fill=self.accent,
-                             font=("Segoe UI Semibold", 8))
+                             font=(ui_theme.FONT_SEMI, 8))
             if sweep is not None:
                 x = int(max(-70, min(w + 20, sweep)))
                 self.create_polygon(x - 38, 3, x, 3, x - 18, h - 3, x - 56, h - 3,
@@ -618,10 +619,10 @@ class FieldConsole(CommandRibbon):
             self.create_polygon(0, 3, w - cut, 3, w, h - 3, 0, h - 3, fill=self.surface, outline=self.muted)
             self.create_rectangle(0, 3, 7, h - 3, fill=self.accent, outline="")
             for x in range(18, w, 46): self.create_line(x, h - 5, x + 28, 5, fill=self.muted, width=1)
-            self.create_text(22, 25, anchor="w", text=self.title, fill="#ffffff", font=("Segoe UI Semibold", 18))
-            self.create_text(22, 51, anchor="w", text=self.detail + "  //  SECURE UPLINK", fill=self.muted, font=("Segoe UI Semibold", 9))
-            self.create_text(w - 22, 25, anchor="e", text="SHD-02  •  ONLINE", fill=self.accent, font=("Segoe UI Semibold", 10))
-            self.create_text(w - 22, 50, anchor="e", text="FIELD NETWORK / ENCRYPTED", fill=self.muted, font=("Segoe UI", 8))
+            self.create_text(22, 25, anchor="w", text=self.title, fill="#ffffff", font=(ui_theme.FONT_SEMI, 18))
+            self.create_text(22, 51, anchor="w", text=self.detail + "  //  SECURE UPLINK", fill=self.muted, font=(ui_theme.FONT_SEMI, 9))
+            self.create_text(w - 22, 25, anchor="e", text="SHD-02  •  ONLINE", fill=self.accent, font=(ui_theme.FONT_SEMI, 10))
+            self.create_text(w - 22, 50, anchor="e", text="FIELD NETWORK / ENCRYPTED", fill=self.muted, font=(ui_theme.FONT, 8))
             if sweep is not None:
                 x = int(max(-90, min(w + 25, sweep)))
                 self.create_polygon(x - 55, 4, x, 4, x - 28, h - 4, x - 83, h - 4, fill=self.accent, outline="")
@@ -640,14 +641,14 @@ class SHDStatusBar(tk.Canvas):
             w, h = max(1,self.winfo_width()), max(1,self.winfo_height()); self.delete("all")
             scan = int((time.perf_counter()-self.t0)*150)%max(1,w)
             if self.footer:
-                self.create_text(10,h//2,anchor="w",text="[ LOG ]  SYSTEM READY  //  OCR LINK STANDBY  //  MEMORY NOMINAL",fill=self.muted,font=("Consolas",8))
-                self.create_text(w-10,h//2,anchor="e",text="[ SHD // LOCAL ]",fill=self.accent,font=("Consolas",8))
+                self.create_text(10,h//2,anchor="w",text="[ LOG ]  SYSTEM READY  //  OCR LINK STANDBY  //  MEMORY NOMINAL",fill=self.muted,font=(ui_theme.FONT_MONO,8))
+                self.create_text(w-10,h//2,anchor="e",text="[ SHD // LOCAL ]",fill=self.accent,font=(ui_theme.FONT_MONO,8))
             else:
-                self.create_text(12,16,anchor="w",text="[ SHD_NET // SECURE_CONNECTION ]",fill=self.fg,font=("Consolas",10,"bold"))
-                self.create_text(w-12,16,anchor="e",text=time.strftime("%H:%M:%S")+"  //  ONLINE - 14ms",fill=self.muted,font=("Consolas",9))
+                self.create_text(12,16,anchor="w",text="[ SHD_NET // SECURE_CONNECTION ]",fill=self.fg,font=(ui_theme.FONT_MONO,10,"bold"))
+                self.create_text(w-12,16,anchor="e",text=time.strftime("%H:%M:%S")+"  //  ONLINE - 14ms",fill=self.muted,font=(ui_theme.FONT_MONO,9))
                 self.create_line(0,39,w,39,fill=self.muted,width=1)
                 self.create_line(max(0,scan-80),39,min(w,scan),39,fill=self.accent,width=2)
-                self.create_text(12,49,anchor="w",text="[ STRATEGIC HOMELAND DIVISION // TERMINAL ]",fill=self.accent,font=("Consolas",7))
+                self.create_text(12,49,anchor="w",text="[ STRATEGIC HOMELAND DIVISION // TERMINAL ]",fill=self.accent,font=(ui_theme.FONT_MONO,7))
         except tk.TclError: return
     def _tick(self):
         self._draw(); self.after(33,self._tick)
@@ -1137,7 +1138,7 @@ class AgentWatch:
                 P.put("line", nx, ny, cx + (nx - cx) * 0.78, cy + (ny - cy) * 0.78,
                            fill=self._col(0.18), width=1, dash=(3, 4), tags="dyn")
             P.put("text", cx, cy + R * 0.34, text="ISAC // LIVE SCAN", fill=self._col(0.44),
-                       font=("Segoe UI Semibold", max(8, int(R * 0.22) // 5)), tags="dyn")
+                       font=(ui_theme.FONT_SEMI, max(8, int(R * 0.22) // 5)), tags="dyn")
         elif self.variant == "rogue":
             # Rogue: kırmızı risk dilimleri, bozulan sinyal parçaları ve uyarı nabzı.
             for j in range(7):
@@ -1150,7 +1151,7 @@ class AgentWatch:
                 P.put("line", xx, yy, xx + R * 0.16, yy, fill=self._col(0.26 + 0.12 * (j % 2)), width=2, tags="dyn")
             warn = 0.45 + 0.35 * (0.5 + 0.5 * math.sin(tt * 3.0))
             P.put("text", cx, cy + R * 0.34, text="ROGUE SIGNAL // UNSTABLE", fill=self._col(warn),
-                       font=("Segoe UI Semibold", max(8, int(R * 0.22) // 5)), tags="dyn")
+                       font=(ui_theme.FONT_SEMI, max(8, int(R * 0.22) // 5)), tags="dyn")
         # fareyi takip eden turuncu ışık + kuyruk + parıltı katmanları
         A = self.angle
         for k in range(6, 0, -1):                                   # kuyruk (ters yönde, solarak)
@@ -1166,23 +1167,23 @@ class AgentWatch:
         # merkez: saat
         fs = max(14, int(R * 0.22))
         P.put("text", cx, cy - R * 0.06, text=time.strftime("%H:%M", lt), fill=self._col(1.0),
-                       font=("Segoe UI Semibold", fs), tags="dyn")
+                       font=(ui_theme.FONT_SEMI, fs), tags="dyn")
         P.put("text", cx + R * 0.34, cy - R * 0.02, text=time.strftime("%S", lt), fill=self._col(0.7),
-                       font=("Segoe UI Semibold", max(9, fs // 3)), tags="dyn", anchor="w")
+                       font=(ui_theme.FONT_SEMI, max(9, fs // 3)), tags="dyn", anchor="w")
         P.put("text", cx, cy + R * 0.16, text=time.strftime("%d.%m.%Y", lt), fill=self._grey(0.8),
-                       font=("Segoe UI", max(8, fs // 4)), tags="dyn")
-        P.put("text", cx, cy - R * 0.33, text="◆ AGENT", fill=self._col(0.6), font=("Segoe UI Semibold", max(8, fs // 4)), tags="dyn")
+                       font=(ui_theme.FONT, max(8, fs // 4)), tags="dyn")
+        P.put("text", cx, cy - R * 0.33, text="◆ AGENT", fill=self._col(0.6), font=(ui_theme.FONT_SEMI, max(8, fs // 4)), tags="dyn")
         P.end()
 
     def _render_field(self, P, w, h, cx, cy, R, tt, target):
         """Saat/agent halkası olmadan saha haritası taraması — 12 FPS arka plan katmanı."""
         # Koordinat köşeleri ve tarama bandı, gerçek oyun haritasını kopyalamaz.
         P.put("text", 22, 18, text="SHD FIELD TERMINAL", fill=self._col(0.88),
-              font=("Segoe UI Semibold", 11), anchor="w", tags="dyn")
+               font=(ui_theme.FONT_SEMI, 11), anchor="w", tags="dyn")
         P.put("text", 22, 35, text="SECTOR MAP // DATA LINK STABLE", fill=self._grey(0.7),
-              font=("Segoe UI", 8), anchor="w", tags="dyn")
+               font=(ui_theme.FONT, 8), anchor="w", tags="dyn")
         P.put("text", w - 22, 18, text="GRID 04-A", fill=self._col(0.62),
-              font=("Segoe UI Semibold", 9), anchor="e", tags="dyn")
+               font=(ui_theme.FONT_SEMI, 9), anchor="e", tags="dyn")
         # Harita merkezi + merkezden fare yönüne kısa doğrultu; ajan saati yok.
         mx, my = cx, cy
         P.put("rectangle", mx - R * 0.58, my - R * 0.34, mx + R * 0.58, my + R * 0.34,
@@ -1203,7 +1204,7 @@ class AgentWatch:
         for step, label in enumerate(("SAFEHOUSE", "SUPPLY", "INTEL")):
             x = 22 + step * 115
             P.put("text", x, h - 22, text="■ " + label, fill=self._grey(.70),
-                  font=("Segoe UI Semibold", 8), anchor="w", tags="dyn")
+                  font=(ui_theme.FONT_SEMI, 8), anchor="w", tags="dyn")
 
 
 class WatchBackground:

@@ -10,6 +10,7 @@ import random
 import time
 from pathlib import Path
 import tkinter as tk
+from . import ui_theme
 
 from PIL import Image, ImageOps, ImageTk
 
@@ -91,8 +92,8 @@ class DashboardScene(tk.Canvas):
         accent = accent or self.pal["accent"]
         self.create_rectangle(x1, y1, x2, y2, fill=_blend(self.pal["bg"], self.pal["surface"], 0.78), outline=_blend(accent, self.pal["border"], 0.45), width=1, tags="hud")
         self.create_rectangle(x1, y1, x1 + 3, y2, fill=accent, outline="", tags="hud")
-        self.create_text(x1 + 12, y1 + 13, anchor="w", text=title, fill=self.pal["muted"], font=("Segoe UI Semibold", 8), tags="hud")
-        self.create_text(x1 + 12, y1 + 33, anchor="w", text=value[:48], fill=self.pal["fg"], font=("Segoe UI Semibold", 11), tags="hud")
+        self.create_text(x1 + 12, y1 + 13, anchor="w", text=title, fill=self.pal["muted"], font=(ui_theme.FONT_SEMI, 8), tags="hud")
+        self.create_text(x1 + 12, y1 + 33, anchor="w", text=value[:48], fill=self.pal["fg"], font=(ui_theme.FONT_SEMI, 11), tags="hud")
 
     def _draw_blips(self, cx, cy, radius, ry, accent, sweep_deg):
         """Rastgele 'tespit' noktaları: açı/yarıçap her defasında yeniden seçilir,
@@ -191,12 +192,12 @@ class DashboardScene(tk.Canvas):
                          outline=_blend(self.pal["bg"], accent, 0.16 + pulse * .22), width=2, tags="hud")
         self._draw_blips(cx, cy, radius, ry, accent, sweep_deg)
         self.create_text(cx, cy + radius * ry + 18, text=event_text, fill=_blend(self.pal["bg"], accent, .78),
-                         font=("Segoe UI Semibold", 9), tags="hud")
+                         font=(ui_theme.FONT_SEMI, 9), tags="hud")
 
         pad, card_w = 16, min(325, int(width * .27))
         theme_name = "DARK ZONE // ROGUE EVENT" if self.mode == "rogue" else "ISAC // OPERATIONS"
-        self.create_text(pad, 18, anchor="w", text=theme_name, fill=accent, font=("Segoe UI Semibold", 14), tags="hud")
-        self.create_text(pad, 39, anchor="w", text=self.snapshot["status"][:72], fill=self.pal["muted"], font=("Segoe UI", 9), tags="hud")
+        self.create_text(pad, 18, anchor="w", text=theme_name, fill=accent, font=(ui_theme.FONT_SEMI, 14), tags="hud")
+        self.create_text(pad, 39, anchor="w", text=self.snapshot["status"][:72], fill=self.pal["muted"], font=(ui_theme.FONT, 9), tags="hud")
         self._box(pad, 58, pad + card_w, 118, "SON TARAMA", self.snapshot["name"], accent)
         self._box(pad, 126, pad + card_w, 186, "KARAR / BUILD UYUMU", f"{self.snapshot['verdict']}  ·  {self.snapshot['score']}", accent)
         self._box(pad, 194, pad + card_w, 260, "HIZLI İŞLEM", "TARAMAK İÇİN TIKLA", accent)

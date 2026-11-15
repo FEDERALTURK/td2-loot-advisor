@@ -4,6 +4,7 @@ No game, microphone, personal settings, network or automatic model download.
 The caller supplies an already installed model directory.
 """
 import json
+import os
 import queue
 import time
 from pathlib import Path
@@ -36,6 +37,24 @@ def inspect_render(root, renderer):
         reports.append({"text_items": count, "bright_glyph_pixels": bright,
                         "visible": bool(count and bright > 40)})
     return {"ok": bool(reports) and all(r["visible"] for r in reports), "windows": reports}
+
+
+def wait_for_translation(root, worker, timeout):
+    """Keep Tcl dispatching events while the translation worker is active."""
+    deadline = time.monotonic() + timeout
+    completed = False
+
+    def poll():
+        nonlocal completed
+        completed = worker.wait_idle(0)
+        if completed or time.monotonic() >= deadline:
+            root.quit()
+        else:
+            root.after(20, poll)
+
+    root.after(0, poll)
+    root.mainloop()
+    return completed
 
 
 def run(app, model_dir, output):
@@ -94,7 +113,8 @@ def run(app, model_dir, output):
         assert result["checks"]["ocr"]["ok"], "Synthetic window OCR failed"
         t0 = time.monotonic()
         obj._lt_run(card, area, force=True)
-        assert obj._translation_jobs.wait_idle(120), "Translation timed out"
+        probe_timeout = max(30, int(os.environ.get("TD2_PROBE_TIMEOUT", "120")))
+        assert wait_for_translation(root, obj._translation_jobs, probe_timeout), "Translation timed out"
         while not obj.results.empty():
             _, token, callback = obj.results.get_nowait()
             if obj._translation_jobs.is_current(token): callback()
