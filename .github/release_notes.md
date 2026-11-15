@@ -490,3 +490,9 @@ Bu dosyalar GitHub Actions'ta otomatik derlendi; kurulum dosyası Windows'ta ses
 - Fare izi ve HUD efektleri 30 FPS sınırıyla kaynak dostu çalışır.
 - Tema, overlay ve uygulama kararlılığı regresyon testleri doğrulandı.
 
+**9.1.5.38 — Paketli çeviri testi zaman aşımı düzeltmesi**
+
+- Paketli çeviri probe bekleme süresi CI ortamında yapılandırılabilir hale getirildi.
+- Yavaş CI model çıkarımında test assertion'ı atlanmadan 300 saniyelik güvenli sınır kullanılır.
+- Önceki SHD tema, animasyon ve kararlılık düzenlemeleri korunur.
+

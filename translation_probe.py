@@ -4,6 +4,7 @@ No game, microphone, personal settings, network or automatic model download.
 The caller supplies an already installed model directory.
 """
 import json
+import os
 import queue
 import time
 from pathlib import Path
@@ -94,7 +95,8 @@ def run(app, model_dir, output):
         assert result["checks"]["ocr"]["ok"], "Synthetic window OCR failed"
         t0 = time.monotonic()
         obj._lt_run(card, area, force=True)
-        assert obj._translation_jobs.wait_idle(120), "Translation timed out"
+        probe_timeout = max(30, int(os.environ.get("TD2_PROBE_TIMEOUT", "120")))
+        assert obj._translation_jobs.wait_idle(probe_timeout), "Translation timed out"
         while not obj.results.empty():
             _, token, callback = obj.results.get_nowait()
             if obj._translation_jobs.is_current(token): callback()

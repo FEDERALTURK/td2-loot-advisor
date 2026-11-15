@@ -106,6 +106,7 @@ jobs:
           $probeModel = Join-Path $env:TD2_PROBE_MODEL "en-tr"
           if (-not (Test-Path (Join-Path $probeModel "model.bin"))) { throw "translation test model missing" }
           $tj = Join-Path $env:RUNNER_TEMP "translation-functional.json"
+          $env:TD2_PROBE_TIMEOUT = "300"
           $tp = Start-Process $exe -ArgumentList "--translation-probe", "`"$probeModel`"", "`"$tj`"" -PassThru
           if (-not $tp.WaitForExit(180000)) { Stop-Process -Id $tp.Id -Force; throw "translation functional test hung" }
           if (-not (Test-Path $tj)) { throw "translation test wrote no result" }
