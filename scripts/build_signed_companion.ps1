@@ -1,3 +1,8 @@
+param(
+    [string]$BuildName,
+    [int]$BuildNumber = 0
+)
+
 $ErrorActionPreference = 'Stop'
 
 $projectRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
@@ -25,16 +30,23 @@ try {
     $storePassword = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($storePtr)
     $keyPassword = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($keyPtr)
 
-    @"
-storeFile=$keystore
+    $keystoreForGradle = $keystore.Replace('\', '/')
+    $propertiesText = @"
+storeFile=$keystoreForGradle
 storePassword=$storePassword
 keyAlias=td2-companion-beta
 keyPassword=$keyPassword
-"@ | Set-Content -LiteralPath $properties -Encoding utf8
+"@
+    # Java Properties treats a UTF-8 BOM as part of the first key name.  Write
+    # BOM-free UTF-8 so Gradle can read `storeFile` reliably on Windows.
+    [System.IO.File]::WriteAllText($properties, $propertiesText, [System.Text.UTF8Encoding]::new($false))
 
     Push-Location $mobileRoot
     try {
-        & $flutter build apk --release -PplayRelease=true
+        $buildArgs = @('build', 'apk', '--release', '-PplayRelease=true')
+        if ($BuildName) { $buildArgs += @('--build-name', $BuildName) }
+        if ($BuildNumber -gt 0) { $buildArgs += @('--build-number', [string]$BuildNumber) }
+        & $flutter @buildArgs
         if ($LASTEXITCODE -ne 0) {
             throw "İmzalı Companion APK build başarısız oldu (exit $LASTEXITCODE)."
         }

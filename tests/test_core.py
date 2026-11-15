@@ -290,8 +290,10 @@ if __name__ == "__main__":
     fails = 0
     for n, f in list(globals().items()):
         if n.startswith("test_"):
+            started = time.perf_counter()
             try: f(); print("✔", n)
             except Exception as e: fails += 1; print("✖", n, type(e).__name__, e)
+            finally: print("  elapsed_ms=%.1f" % ((time.perf_counter() - started) * 1000))
     for p in ("tests/.stash_test.json",):
         try: (ROOT / p).unlink()
         except OSError: pass

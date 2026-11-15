@@ -131,6 +131,7 @@ class InPlace:
         self.win = self.cv = None
         self._wins = []
         self._fonts = {}
+        self.last_metrics = {"boxes": 0, "canvas_items": 0, "glyph_items": 0}
         self.native_boxes = (os.name == "nt") if native_boxes is None else bool(native_boxes)
 
     def _font(self, pt, bold=False):
@@ -155,6 +156,7 @@ class InPlace:
         # Set both surfaces explicitly before the first paint.
         items = [it for it in items if any(str(line).strip() for line in it.get("lines", []))]
         if not items:
+            self.last_metrics = {"boxes": 0, "canvas_items": 0, "glyph_items": 0}
             return None
         # Windows' colour-key transparency is not reliable when a game uses a
         # DX12/DWM composition surface: it can leave a black transparent
@@ -172,6 +174,7 @@ class InPlace:
         w.geometry(f"{area['width']}x{area['height']}{int(area['left']):+d}{int(area['top']):+d}")
         cv = self.cv = tk.Canvas(w, bg=self.KEY, highlightthickness=0, bd=0, width=area["width"], height=area["height"])
         cv.pack(fill="both", expand=True)
+        glyph_items = 0
         for it in items:
             x, y, ww, hh = it["x"], it["y"], it["w"], it["h"]
             cv.create_rectangle(x, y, x + ww, y + hh, fill=s["bg"], outline=s.get("border", s["bg"]), width=1)
@@ -184,6 +187,7 @@ class InPlace:
                     for dx, dy in ((-1, 0), (1, 0), (0, -1), (0, 1)):
                         cv.create_text(x + PAD + 4 + dx, ty + dy, text=ln, anchor="nw", font=f, fill="#000000")
                 cv.create_text(x + PAD + 4, ty, text=ln, anchor="nw", font=f, fill=s["fg"])
+                glyph_items += 1
                 ty += lh
         # Tk, özellikle oyun üstü saydam pencerelerde, ilk çizimi geciktirebilir.
         # İlk kareyi burada zorlayarak boş/siyah kaplama görülmesini önle.
@@ -193,10 +197,12 @@ class InPlace:
             try: w.attributes("-alpha", float(s["alpha"]))
             except tk.TclError: pass
         if self.on_window: self.on_window(w)
+        self.last_metrics = {"boxes": len(items), "canvas_items": len(cv.find_all()), "glyph_items": glyph_items}
         return w
 
     def _show_native_boxes(self, tk, items, area):
         s = self.style
+        canvas_items = glyph_items = boxes = 0
         for it in items:
             lines = [str(line) for line in it.get("lines", []) if str(line).strip()]
             if not lines:
@@ -228,9 +234,13 @@ class InPlace:
                 cv.create_text(PAD + 4, y, text=line, fill=s["fg"], font=f, anchor="nw")
                 y += lh
             w.update_idletasks()
+            boxes += 1
+            canvas_items += len(cv.find_all())
+            glyph_items += len(lines)
             if self.on_window:
                 self.on_window(w)
         self.win = self._wins[0] if self._wins else None
+        self.last_metrics = {"boxes": boxes, "canvas_items": canvas_items, "glyph_items": glyph_items}
         return self.win
 
     def hide(self):

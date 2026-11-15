@@ -50,6 +50,22 @@ class TargetPlannerTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             tp.normalize_target({"name": "", "slot": "Chest"})
 
+    def test_malformed_source_metadata_is_safe_review(self):
+        source = tp.normalize_source({
+            "name": "Test Item",
+            "slot": "Chest",
+            "updated_at": "not-a-date",
+            "confidence": "not-a-number",
+            "cadence": "daily",
+        })
+        self.assertEqual(source["confidence"], 0.0)
+        result = tp.match_targets(
+            [{"name": "Test Item", "slot": "Chest"}], [source],
+            now=datetime(2026, 11, 15, tzinfo=timezone.utc),
+        )
+        self.assertEqual(result[0]["status"], "REVIEW")
+        self.assertTrue(result[0]["stale"])
+
 
 if __name__ == "__main__":
     unittest.main()

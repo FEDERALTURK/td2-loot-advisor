@@ -22,6 +22,11 @@ MAX_BATCH = "50"
 MAX_PER_HOUR = "600"
 APNS_BUNDLE_ID = "com.federalturk.td2companion"   # mobile/ios Runner.xcodeproj + android/app build.gradle ile aynı
 
+# Optional Supabase panel mirror. D1 remains the source of truth until this is
+# explicitly enabled after the Worker secret has been configured.
+SUPABASE_URL = "https://ukbbwubktohifdomhcks.supabase.co"
+SUPABASE_PANEL_ENABLED = "true"
+
 # Hata rapor sistemi (worker.js /v1/reports endpoints)
 # Secrets: npx wrangler secret put GITHUB_TOKEN (ayrı olarak)
 # Variables: Cloudflare dashboard'da set et veya npx wrangler secret put ile
@@ -33,6 +38,9 @@ ADMIN_LOGIN = "FEDERALTURK"
 crons = ["17 * * * *"]
 
 # HASH_SALT gizli değişkendir, dosyaya yazılmaz:  npx wrangler secret put HASH_SALT
+# Supabase panel mirror (optional; never put this value in wrangler.toml).
+# Preferred current key: npx wrangler secret put SUPABASE_SECRET_KEY
+# Legacy fallback:       npx wrangler secret put SUPABASE_SERVICE_ROLE_KEY
 
 # Android push bildirimi (FCM HTTP v1) — Firebase Admin SDK servis hesabı JSON'unun TAMAMI tek bir secret olarak:
 #   npx wrangler secret put FCM_SERVICE_ACCOUNT_JSON

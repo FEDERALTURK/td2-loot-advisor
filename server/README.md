@@ -40,6 +40,46 @@ npx wrangler dev --local --port 8787
 python test_local.py TD2P-...                        :: ayrı pencerede; lisans anahtarı isteğe bağlı
 ```
 
+## Supabase panel runtime aynalama (isteğe bağlı)
+
+Panel gözlemleri için ayrı bir Supabase projesi hazırlanmıştır. Worker'ın D1
+rapor kuyruğu kaynak sistem olmaya devam eder; Supabase yalnızca hata
+raporlarının panel görünümü için en iyi çaba ile aynalanan kopyasını alır.
+Tarayıcı, masaüstü uygulaması ve Android istemcisi Supabase service-role
+anahtarını hiçbir zaman görmez.
+
+Önce Cloudflare Worker secret'ını güvenli biçimde tanımlayın (değeri sohbete
+veya depoya yapıştırmayın):
+
+```bat
+cd server
+npx wrangler secret put SUPABASE_SECRET_KEY
+```
+
+Buraya Supabase Dashboard → Project Settings → API Keys bölümündeki backend
+`sb_secret_...` anahtarını girin. Eski projelerdeki `service_role` anahtarı da
+geçici olarak `SUPABASE_SERVICE_ROLE_KEY` adıyla kullanılabilir; yeni secret
+anahtarı tercih edilir.
+
+Ardından `wrangler.toml` içindeki `SUPABASE_PANEL_ENABLED` değerini `true`
+yapıp Worker'ı deploy edin. Secret yokken veya değer `false` iken aynalama
+otomatik olarak devre dışıdır; raporların D1/GitHub akışı çalışmaya devam eder.
+Yerel doğrulama için gerçek secret kullanmadan:
+
+```bat
+node test_supabase.mjs
+```
+
+`GET /v1/health` yanıtındaki `panel_mirror` alanı yalnız yapılandırma durumunu
+(`enabled`/`disabled`) gösterir; service-role anahtarını veya Supabase URL'sini
+istemciye açmaz. Gerçek erişim doğrulaması için güvenli bir hata raporu
+gönderilip Dashboard'daki `panel_error_reports` tablosu kontrol edilmelidir.
+
+Bu ilk entegrasyon yalnız `panel_error_reports` tablosuna güvenli, maskelenmiş
+rapor özeti gönderir. Kullanım sayaçları D1'de tutulur; eşzamanlı sayaçların
+üzerine yazmamak için ayrı bir event/aggregate tasarımı yapılmadan Supabase'e
+kopyalanmaz.
+
 ## Uç noktalar
 
 | Yol | Ne | Erişim |
@@ -48,6 +88,7 @@ python test_local.py TD2P-...                        :: ayrı pencerede; lisans 
 | `GET /v1/summary` | toplam düşüş, katkıcı sayısı | herkese açık |
 | `GET /v1/stats?activity=&q=&weeks=` | aktivite başına en çok düşenler, eşyanın nerede düştüğü | `Authorization: TD2 <lisans>` |
 | `GET /v1/health` | çalışıyor mu | herkese açık |
+| `GET /v1/admin/panel-errors?limit=50` | Supabase'e aynalanan maskelenmiş hata kayıtları | `Authorization: Admin <ADMIN_TOKEN>` |
 | `POST /v1/tasks` | topluluk görevi: `{"client", "app", "task": {title, subtitle, desc, objective, total, rewards, category, period, expires_at}, "tr": {...}}` | herkese açık, saatte 60 / istemci |
 | `GET /v1/tasks/live` | en az 2 oyuncudan gelen güncel görevler (+ Türkçe) | herkese açık, 5 dk önbellek |
 | `GET /v1/admin/tasks`, `POST /v1/admin/tasks/hide`, `POST /v1/admin/tasks/override` | tüm görevler, gizle, Türkçe düzelt | `Authorization: Admin <ADMIN_TOKEN>` |

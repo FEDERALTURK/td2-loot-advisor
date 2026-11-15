@@ -6,6 +6,7 @@ eşleşme sonucu hiçbir zaman silme/kırma kararı üretmez.
 from __future__ import annotations
 
 import json
+import math
 import os
 import re
 import tempfile
@@ -73,6 +74,15 @@ def normalize_source(record: dict[str, Any]) -> dict[str, Any]:
         updated = float(updated or 0)
     except (TypeError, ValueError):
         updated = 0.0
+    if not math.isfinite(updated) or updated < 0:
+        updated = 0.0
+    try:
+        confidence = float(record.get("confidence", 1.0) or 0.0)
+    except (TypeError, ValueError, OverflowError):
+        confidence = 0.0
+    if not math.isfinite(confidence):
+        confidence = 0.0
+    confidence = max(0.0, min(1.0, confidence))
     return {
         "source": str(record.get("source") or "unknown"),
         "name": name,
@@ -84,7 +94,7 @@ def normalize_source(record: dict[str, Any]) -> dict[str, Any]:
         "prototype_augments": _list(record.get("prototype_augments")),
         "updated_at": updated,
         "cadence": cadence,
-        "confidence": float(record.get("confidence", 1.0) or 0.0),
+        "confidence": confidence,
         "raw": record,
     }
 
@@ -94,7 +104,11 @@ def _is_stale(source: dict[str, Any], now: datetime) -> bool:
     if not updated:
         return True
     max_age = _CADENCE_MAX_AGE.get(source.get("cadence"), 24 * 3600)
-    return now.timestamp() - float(updated) > max_age
+    try:
+        updated = float(updated)
+    except (TypeError, ValueError, OverflowError):
+        return True
+    return not math.isfinite(updated) or now.timestamp() - updated > max_age
 
 
 def _match_score(target: dict[str, Any], source: dict[str, Any]) -> tuple[int, list[str]]:

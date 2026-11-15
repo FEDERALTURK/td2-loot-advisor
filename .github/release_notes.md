@@ -483,3 +483,10 @@ Bu dosyalar GitHub Actions'ta otomatik derlendi; kurulum dosyası Windows'ta ses
 - Çeviri sekmesine, AI motorunun çeviri kalitesinin Asistan sekmesinde seçtiğin dil modeline bağlı olduğuna dair bir not eklendi.
 - Küçük düzeltme: hedef dile göre önbellek ayrımı eklendi (farklı diller artık birbirinin çeviri önbelleğini kullanamaz).
 
+**9.1.5.37 — SHD arayüz ve animasyon düzenlemeleri**
+
+- SHD turuncu/cyan tema token'ları ve merkezi yazı tipleri uygulandı.
+- Açılış ekranı daha kısa ve akıcı hale getirildi.
+- Fare izi ve HUD efektleri 30 FPS sınırıyla kaynak dostu çalışır.
+- Tema, overlay ve uygulama kararlılığı regresyon testleri doğrulandı.
+

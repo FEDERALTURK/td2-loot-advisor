@@ -30,6 +30,15 @@ class OcrLabTests(unittest.TestCase):
             self.assertEqual(rows[0]["verdict"], "REVIEW")
             self.assertNotIn("_text", rows[0]["item"])
 
+    def test_malformed_confidence_is_reviewed_without_disabling_engine(self):
+        report = ocr_lab.benchmark(object(), {
+            "rapidocr": lambda _: [("Rewards", (0, 0, 1, 1), "unknown")],
+        })
+        result = report["engines"]["rapidocr"]
+        self.assertTrue(result["available"])
+        self.assertTrue(result["review"])
+        self.assertEqual(result["review_reason"], "low_confidence,malformed_confidence")
+
 
 if __name__ == "__main__":
     unittest.main()

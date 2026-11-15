@@ -1,6 +1,7 @@
 {
   "name": "td2-stats",
   "private": true,
+  "type": "module",
   "version": "1.0.0",
   "description": "TD2 Loot Advisor — topluluk istatistik + hesap sunucusu (Cloudflare Workers + D1)",
   "scripts": {

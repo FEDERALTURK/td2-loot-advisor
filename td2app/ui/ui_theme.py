@@ -35,15 +35,16 @@ def on_color(bg):
 
 
 # ───────────── renk paleti / palette ─────────────
-# Tek, sabit görsel kimlik: koyu grafit zemin + soğuk camgöbeği (cyan-teal) vurgu.
+# Tek, sabit görsel kimlik: koyu grafit zemin + SHD turuncusu ve cyan ikincil vurgu.
 # Eski çoklu tema/paket sistemi (dark/light/classic + 14 oyun-atmosferi paketi) tamamen kaldırıldı.
 PALETTES = {
     "default": {
         "bg": "#0a0d12", "surface": "#121720", "surface2": "#1a212c", "border": "#2b3542",
-        "fg": "#eef2f6", "muted": "#8a96a6", "accent": "#36e0c4", "accent_hover": "#6aedd9",
-        "accent_fg": on_color("#36e0c4"), "success": "#22c55e", "danger": "#ef4444", "warning": "#f5b82e",
-        "info": "#4ea1ff", "select": "#114a49", "entry": "#070a0d", "text_bg": "#070a0d",
-        "ov_bg": "#0c1117", "ov_fg": "#ffffff", "ov_border": "#1f7a73",
+        "fg": "#eef2f6", "muted": "#a0aab2", "accent": "#ff5a00", "accent_hover": "#ff7a2f",
+        "secondary": "#00e5ff", "accent_fg": on_color("#ff5a00"), "success": "#22c55e",
+        "danger": "#ef4444", "warning": "#f5b82e", "info": "#4ea1ff", "select": "#4a2514",
+        "entry": "#070a0d", "text_bg": "#070a0d", "ov_bg": "#0c1117", "ov_fg": "#ffffff",
+        "ov_border": "#9a3a0a",
         "verdict": {"KEEP": "#15803d", "CONSIDER": "#b7791f", "DISMANTLE": "#c53030",
                     "REVIEW": "#2563eb", "ERROR": "#4b5263", "IDLE": "#1d2129"},
         "verdict_fg": {"KEEP": "#4ade80", "CONSIDER": "#facc15", "DISMANTLE": "#f87171",
@@ -69,6 +70,8 @@ def apply_pack(settings, mode):
 
 FONT = "Segoe UI"
 FONT_SEMI = "Segoe UI Semibold"
+FONT_MONO = "Consolas"
+FONT_DISPLAY = "Bahnschrift SemiBold"
 
 # Sekme ikonları (sekme kimliğine göre) / tab icons by tab id
 TAB_ICONS = {"dash": "🎯", "builds": "🧩", "progress": "📦", "stash": "🗄", "stats": "📊", "info": "📚", "translate": "🌐", "tasks": "📋",

@@ -21,6 +21,7 @@ const DB = { prepare: stmt, async batch(list) { return Promise.all(list.map(x =>
 const issues = new Map(); let next = 1; let ghDown = false; const calls = [];
 globalThis.fetch = async (url, opts = {}) => {
   calls.push([opts.method || "GET", url]);
+  if (String(url).includes("supabase.test")) return new Response(null, { status: 201 });
   if (ghDown) return new Response("down", { status: 503 });
   const u = new URL(url); const m = u.pathname.match(/^\/repos\/([^/]+\/[^/]+)\/issues(?:\/(\d+))?(\/comments)?$/);
   if (!m) return new Response("nf", { status: 404 });
@@ -36,7 +37,8 @@ globalThis.fetch = async (url, opts = {}) => {
 };
 
 const env = { DB, HASH_SALT: "test", GITHUB_TOKEN: "ghp_test", REPORTS_REPO: "o/reports", ADMIN_LOGIN: "admin",
-              GITHUB_API: "https://gh.test" };
+              GITHUB_API: "https://gh.test", SUPABASE_URL: "https://supabase.test",
+              SUPABASE_SERVICE_ROLE_KEY: "service-role-test-only", SUPABASE_PANEL_ENABLED: "true" };
 const post = (b, ip = "1.2.3.4") => worker.fetch(new Request("https://w/v1/reports", { method: "POST", body: JSON.stringify(b),
                                                     headers: { "cf-connecting-ip": ip } }), env);
 let fails = 0;
@@ -55,6 +57,11 @@ ok(iss.labels.map(l => l.name).join(",") === "report,type:bug,status:new,v5.0.6,
 ok(!/Soner|a@b\.com|AAAA|ghp_abc/.test(iss.body), "kişisel veriler temizlendi");
 ok(iss.body.includes("C:\\Users\\<user>") && iss.body.includes("<email>") && iss.body.includes("TD2P-<license>") && iss.body.includes("<token>"), "yer tutucular yazıldı");
 ok(iss.body.includes("<!-- td2-report ") && !iss.body.includes("evil_KEY"), "panel için meta veri; geçersiz alan atıldı");
+ok(calls.some(([method, url]) => method === "POST" && url === "https://supabase.test/rest/v1/panel_error_reports"),
+   "Worker raporu Supabase panel aynasına iletildi");
+
+r = await post({ ...good, client: "four-part-version", title: "Dört parçalı sürüm", app_version: "9.1.5.36" });
+ok((await r.json()).ok, "dört parçalı sürüm raporu kabul edildi");
 
 r = await post({ ...good, type: "hack" }); ok(r.status === 400, "geçersiz tür reddedildi");
 r = await post({ ...good, title: "x" }); ok(r.status === 400, "çok kısa başlık reddedildi");

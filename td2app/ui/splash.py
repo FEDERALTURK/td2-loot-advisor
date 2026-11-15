@@ -5,19 +5,22 @@ import math
 import time
 import tkinter as tk
 
+from . import ui_theme
+
 
 class IntroSplash:
     """Raise animated watch rings from a ground plane, then reveal the app mark."""
 
     WIDTH = 912
     HEIGHT = 720
-    DURATION_MS = 5000
+    # Splash is decorative; it must not make the application feel blocked.
+    DURATION_MS = 1800
     FPS = 30
     FRAME_INTERVAL_MS = 1000 / FPS
     KEY = "#010203"
-    ACCENT = "#36e0c4"      # Uygulamanın yeni, tek görsel kimliğinin vurgu rengi (camgöbeği-teal)
-    WHITE = "#edf0f5"
-    MUTED = "#8d95a5"
+    ACCENT = ui_theme.PALETTES["default"]["accent"]
+    WHITE = ui_theme.PALETTES["default"]["fg"]
+    MUTED = ui_theme.PALETTES["default"]["muted"]
 
     def __init__(self, root: tk.Tk, version: str, on_done):
         self.root = root
@@ -53,11 +56,11 @@ class IntroSplash:
         # higher refresh rate.
         self.win.after(round(self.FRAME_INTERVAL_MS), self._tick)
 
-    @staticmethod
-    def _color(level: float) -> str:
+    @classmethod
+    def _color(cls, level: float) -> str:
         level = min(1.0, max(0.0, level))
-        start = (8, 36, 32)        # koyu, sönük camgöbeği-teal (soğuk "ember")
-        end = (54, 224, 196)       # tam vurgu rengi (#36e0c4)
+        start = (48, 18, 4)         # koyu, sönük SHD turuncusu
+        end = tuple(int(cls.ACCENT[i:i + 2], 16) for i in (1, 3, 5))
         return "#" + "".join(f"{round(a + (b - a) * level):02x}" for a, b in zip(start, end))
 
     @staticmethod
@@ -169,12 +172,12 @@ class IntroSplash:
                           cx-panel_w/2+18*scale, panel_cy+panel_h/2,
                           fill=self.ACCENT, width=3*scale)
             c.create_text(cx, panel_cy-5, text="TD2 LOOT ADVISOR", fill=self.WHITE,
-                          font=("Segoe UI", round(20*scale), "bold"))
+                          font=(ui_theme.FONT_DISPLAY, round(20*scale), "bold"))
             c.create_text(cx, panel_cy+19*scale, text=f"TACTICAL COMPANION  ·  v{self.version}",
-                          fill=self.MUTED, font=("Segoe UI", round(8*scale)))
+                           fill=self.MUTED, font=(ui_theme.FONT, round(8*scale)))
 
         c.create_text(cx, 538*scale, text="A G E N T   N E T W O R K   /   SYSTEM INITIALIZING",
-                      fill="#737d8a", font=("Segoe UI", round(8*scale)))
+                       fill="#737d8a", font=(ui_theme.FONT_MONO, round(8*scale)))
         progress_w = 148 * scale * progress
         c.create_line(cx-74*scale, 554*scale, cx-74*scale+progress_w, 554*scale,
                       fill=self.ACCENT, width=2*scale)

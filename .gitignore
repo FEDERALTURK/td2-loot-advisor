@@ -78,3 +78,22 @@ tests/.translate_result.json
 .claude-flow/policy/
 .claude-flow/swarm/
 .swarm/
+
+# VS Code / local environment secrets
+.env
+.env.*
+!.env.example
+.dev.vars
+.wrangler/
+*.jks
+*.keystore
+
+# Local exports and review artifacts
+builds.json
+Claude outputs/
+project_review/
+web_deploy/
+brag-output-*/
+node_modules/
+mobile/.dart_tool/
+mobile/build/

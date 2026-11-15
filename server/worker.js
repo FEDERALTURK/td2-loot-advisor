@@ -20,6 +20,7 @@ import { route as accountRoute, verifyEntitlement, isAdmin } from "./accounts.js
 import { route as tasksRoute, snapshotToRepo, cleanup as tasksCleanup } from "./tasks.js";
 import { route as overviewRoute, countUsage, markCron } from "./overview.js";
 import { route as mobileRoute, cleanup as mobileCleanup } from "./mobile.js";
+import { mirrorErrorReport, readErrorReports, isSupabasePanelEnabled } from "./supabase.js";
 
 const ACTIVITIES = new Set(["open_world", "mission", "legendary", "countdown", "summit", "incursion", "raid", "dark_zone",
   "conflict", "descent", "manhunt", "control_point", "bounty", "season", "vendor", "caches", "crafting", "unknown"]);
@@ -208,7 +209,7 @@ function cleanReport(b) {
   if (b.system && typeof b.system === "object")
     for (const [k, v] of Object.entries(b.system).slice(0, 24))
       if (/^[a-z_]{2,24}$/.test(k) && ["string", "number", "boolean"].includes(typeof v)) sys[k] = typeof v === "string" ? clip(v, 160) : v;
-  const ver = /^\d+\.\d+(\.\d+)?$/.test(b.app_version || "") ? b.app_version : "?";
+  const ver = /^\d+(?:\.\d+){2,3}$/.test(b.app_version || "") ? b.app_version : "?";
   const lang = /^[a-z]{2}$/.test(b.lang || "") ? b.lang : "?";
   return { type, title: scrub(title), body: scrub(body), contact: scrub(clip(b.contact, 80).trim()), app_version: ver, lang,
            system: JSON.parse(scrub(JSON.stringify(sys))), log: scrub(clip(b.log, 12000)), card: scrub(clip(b.card, 3000)) };
@@ -255,7 +256,7 @@ async function forward(env, rowId, payload) {
   return iss.number;
 }
 
-async function postReport(req, env) {
+async function postReport(req, env, ctx) {
   let b;
   try { b = await req.json(); } catch { return json({ error: "bad json" }, 400); }
   const r = cleanReport(b);
@@ -271,6 +272,19 @@ async function postReport(req, env) {
   const payload = issueOf(r, client.slice(0, 10));
   const ins = await env.DB.prepare("INSERT INTO reports (created, client, payload, state) VALUES (?1, ?2, ?3, 'queued') RETURNING id")
     .bind(Date.now(), client, JSON.stringify(payload)).first();
+  // Supabase is an optional panel mirror. D1 remains the source of truth and
+  // a mirror outage must not change the report response or queue semantics.
+  const mirror = mirrorErrorReport(env, {
+    app_version: r.app_version,
+    platform: r.system && r.system.platform,
+    severity: r.type === "bug" ? "error" : "info",
+    error_code: r.type,
+    message_masked: `${r.title}\n${r.body}`,
+    stack_hash: await sha(salt + "|stack|" + (r.log || "")),
+    user_hash: client,
+    metadata: { report_type: r.type, lang: r.lang },
+  }).catch(() => false);
+  if (ctx && ctx.waitUntil) ctx.waitUntil(mirror); else await mirror;
   if (env.GITHUB_TOKEN && env.REPORTS_REPO) {
     try {
       const number = await forward(env, ins.id, payload);
@@ -309,6 +323,15 @@ async function reportStatus(req, env) {
   return json({ reports: out });
 }
 
+async function panelErrors(req, env) {
+  if (!(await isAdmin(req, env))) return json({ error: "forbidden" }, 403);
+  const u = new URL(req.url);
+  const rows = await readErrorReports(env, u.searchParams.get("limit"));
+  if (rows === null) return json({ error: "panel mirror disabled" }, 503);
+  if (rows === false) return json({ error: "panel unavailable" }, 502);
+  return json({ reports: rows });
+}
+
 async function flushQueue(env) {
   if (!env.GITHUB_TOKEN || !env.REPORTS_REPO) return 0;
   const rows = (await env.DB.prepare("SELECT id, payload FROM reports WHERE state = 'queued' ORDER BY id LIMIT 20").all()).results || [];
@@ -325,7 +348,9 @@ export default {
     try {
       if (req.method === "OPTIONS") return json({}, 204, { "access-control-allow-methods": "GET, POST, PUT, DELETE",
                                                            "access-control-allow-headers": "content-type, authorization" });
-      if (u.pathname === "/v1/health") return json({ ok: true, login: !!env.DISCORD_CLIENT_ID, discord_app: env.DISCORD_CLIENT_ID || null });
+      if (u.pathname === "/v1/health") return json({ ok: true, login: !!env.DISCORD_CLIENT_ID,
+        discord_app: env.DISCORD_CLIENT_ID || null,
+        panel_mirror: isSupabasePanelEnabled(env) ? "enabled" : "disabled" });
       if (req.method === "POST" && parseInt(req.headers.get("content-length") || "0", 10) > 262144)   // büyük gövde: reddet
         return json({ error: "payload too large" }, 413);
       if (u.pathname === "/v1/tasks/live" && req.method === "GET") {        // kimliksiz sürüm sayacı (önbellekten önce)
@@ -336,6 +361,10 @@ export default {
       if (ov) return ov;
       const tk = await tasksRoute(req, env, u.pathname, isAdmin, ctx);
       if (tk) return tk;
+      // Keep the Supabase-backed observability route ahead of accounts.js.
+      // accounts.js owns the /v1/admin/* namespace and returns 404 for
+      // unknown account paths, so it must not swallow panel-errors.
+      if (u.pathname === "/v1/admin/panel-errors" && req.method === "GET") return await panelErrors(req, env);
       const acc = await accountRoute(req, env, u.pathname);
       if (acc) return acc;
       const mob = await mobileRoute(req, env, u.pathname, ctx);
@@ -343,7 +372,7 @@ export default {
       if (u.pathname === "/v1/drops" && req.method === "POST") return await postDrops(req, env);
       if (u.pathname === "/v1/summary" && req.method === "GET") return await summary(env);
       if (u.pathname === "/v1/stats" && req.method === "GET") return await stats(req, env);
-      if (u.pathname === "/v1/reports" && req.method === "POST") return await postReport(req, env);
+      if (u.pathname === "/v1/reports" && req.method === "POST") return await postReport(req, env, ctx);
       if (u.pathname === "/v1/reports/status" && req.method === "GET") return await reportStatus(req, env);
       return json({ error: "not found" }, 404);
     } catch (e) {

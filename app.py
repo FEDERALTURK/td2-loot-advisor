@@ -150,7 +150,7 @@ import decision_center
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.1.5.35"
+APP_VERSION = "9.1.5.37"
 # "Bu oturumda ne kazandın?" özeti için kaba tahmin: bir eşyayı elle inceleyip
 # build'e göre karar vermenin (istatistikleri okuma + karşılaştırma) ortalama
 # süresi, saniye. Gerçek bir ölçüm değil — yalnızca arayüzde "tahmini" etiketiyle
@@ -215,9 +215,9 @@ DEFAULTS = {"scan_mode": "hotkey", "auto_interval_ms": 700, "auto_record": True,
             "tasks_hotkey": "<f10>",
             "language": "", "log_level": "INFO", "log_max_kb": 1024, "log_backups": 3,
             "ui_theme": "default", "ui_sounds": True, "bg_interval": 15,
-            "fx_cursor": True, "fx_cursor_style": "crosshair", "fx_cursor_color": "#36e0c4", "fx_cursor_custom": "",
-            "fx_trail": True, "fx_trail_color": "#36e0c4", "fx_trail_len": 18, "fx_transitions": True,
-            "fx_video": True, "fx_video_dim": 0.35, "fx_transition_ms": 220, "fx_transition_style": "tactical", "ui_nav_layout": "tactical", "ui_layout": "standard", "fx_bgwatch": False, "fx_bgwatch_dim": 0.0, "event_fx": "standard",
+            "fx_cursor": True, "fx_cursor_style": "crosshair", "fx_cursor_color": "#ff5a00", "fx_cursor_custom": "",
+            "fx_trail": True, "fx_trail_color": "#ff5a00", "fx_trail_len": 18, "fx_transitions": True,
+            "fx_video": True, "fx_video_dim": 0.35, "fx_transition_ms": 220, "fx_transition_style": "tactical", "ui_nav_layout": "tactical", "ui_layout": "shd_terminal", "fx_bgwatch": False, "fx_bgwatch_dim": 0.0, "event_fx": "standard",
             "res_profile": "auto", "ocr_engine": "auto", "ocr_gpu": "auto", "license_key": "", "update_check": True, "update_last": 0, "update_skip": "", "stash_record": True, "vendor_mode": False, "vendor_auto": True, "drop_share": False, "drop_asked": False, "drop_activity": "none", "drop_server": "", "drop_client": "", "vision_ok": False, "vendor_notified": "", "companion_port": 8765, "svc_tray": True, "svc_close_to_tray": False, "svc_auto_run": True, "svc_session_popup": True, "smart_scan": True, "api_on": False, "api_port": 8766, "api_lan": False, "api_control": True, "api_token": "", "rpc_on": False, "rpc_client_id": "", "push_on": False, "push_topic": "", "push_webhook": "", "push_drop": True, "push_build": True, "push_vendor": True, "push_session": True, "agent_model": "operator", "agent_outfit": "night", "agent_skin": 1, "ocr_threshold": 170, "ocr_scale": "auto", "ocr_psm": 6, "ocr_passes": 3,
             "overlay_mode": "card", "overlay_alpha": 0.94, "overlay_size": 1.0, "ui_depth": True,
             "meta_sync": True, "meta_feed_url": "", "meta_last_try": 0, "meta_last_sync": "", "meta_version": "",
@@ -304,7 +304,8 @@ def _cfg_defaults(cfg):
     # Eski çoklu tema sistemi kaldırıldı (tek sabit tema): eski kayıtlı tema adlarını ("kaivolt",
     # "isac", "shd_terminal" vb.) ve onlara bağlı özel kabuk düzenini sessizce yeni varsayılana taşı.
     if st.get("ui_theme") not in ui_theme.THEME_MODES: st["ui_theme"] = DEFAULTS["ui_theme"]
-    if st.get("ui_layout") != "standard": st["ui_layout"] = "standard"
+    if st.get("ui_layout") not in ("standard", "field_command", "shd_terminal"):
+        st["ui_layout"] = DEFAULTS["ui_layout"]
     try:
         st["keep_threshold"], st["consider_threshold"] = itempolicy.validate_thresholds(st["keep_threshold"], st["consider_threshold"])
     except ValueError:
@@ -2328,6 +2329,69 @@ class App:
         msg = str(error)
         self._post_translation(token, lambda: self._lt_status(t("lt.failed", e=msg), "danger"))
 
+    def _lt_evidence(self, phase, area, lines=None, blocks=None, pairs=None, skipped=0, **extra):
+        """Yerel canlı çeviri kanıtını özetle; ham OCR metnini loglama.
+
+        Bu kayıt, boş/siyah overlay sorununu OCR, geometri, çeviri veya
+        renderer aşamasına ayırmak için tasarlanmıştır. Ekran görüntüsü ve
+        ham metin içermez; yalnız sayılar, koordinatlar ve doğrulanabilir
+        oyun ayarı bilgileri yazılır.
+        """
+        def rect(value):
+            if not isinstance(value, dict): return "-"
+            keys = ("left", "top", "width", "height")
+            try: return ",".join(str(int(value[k])) for k in keys)
+            except (KeyError, TypeError, ValueError): return "-"
+
+        def confidence(values):
+            out = []
+            for row in values or []:
+                try:
+                    value = row[2]
+                    if isinstance(value, (int, float)): out.append(float(value))
+                except (IndexError, TypeError):
+                    continue
+            return (min(out), sum(out) / len(out)) if out else (None, None)
+
+        lines = lines or []
+        blocks = blocks or []
+        pairs = pairs or []
+        conf_min, conf_avg = confidence(lines)
+        if conf_min is None:
+            conf_min_s = conf_avg_s = "-"
+        else:
+            conf_min_s, conf_avg_s = f"{conf_min:.3f}", f"{conf_avg:.3f}"
+        try:
+            game = display.game_window(max_age=2.0) or {}
+        except Exception:
+            game = {}
+        settings = getattr(display, "_last_game_settings", None)
+        if settings is None:
+            try:
+                settings = display.read_game_settings() or {}
+                display._last_game_settings = settings
+            except Exception:
+                settings = {}
+        hdr = settings.get("hdr") if isinstance(settings, dict) else None
+        hdr_s = "on" if hdr is True else "off" if hdr is False else "unknown"
+        engine = self.cfg["settings"].get("tr_ocr", "auto")
+        if engine == "auto": engine = self.cfg["settings"].get("tr_ocr_pick") or "auto"
+        values = {
+            "phase": phase,
+            "capture": rect(area),
+            "game_window": rect(game),
+            "ocr": engine,
+            "lines": len(lines),
+            "blocks": len(blocks),
+            "pairs": len(pairs),
+            "skipped": int(skipped or 0),
+            "conf_min": conf_min_s,
+            "conf_avg": conf_avg_s,
+            "hdr": hdr_s,
+        }
+        values.update(extra)
+        log.info("Live translation evidence: %s", " ".join(f"{k}={v}" for k, v in values.items()))
+
     def _lt_run(self, img, area, force=False, token=None):
         if token is None:
             return self._translation_jobs.submit(lambda tok: self._lt_run(img, area, force, tok))
@@ -2338,9 +2402,11 @@ class App:
                 if not self._translation_jobs.is_current(token): return
                 with self.timings.measure("translate_ocr"):
                     lines = self.lt_ocr(img)
+            self._lt_evidence("ocr", area, lines=lines)
             inplace = self.cfg["settings"].get("tr_mode") == "inplace"
             blocks = livetranslate.blocks_from_lines(lines, GAME.data.get("ui_words", []), preserve_lines=inplace)
             if not blocks:
+                self._lt_evidence("blocks_empty", area, lines=lines, blocks=blocks)
                 def clear_overlay():
                     self._lt_hide()
                     self._lt_last_sig = None
@@ -2361,6 +2427,8 @@ class App:
             ms = int((time.perf_counter() - t0) * 1000)
             pairs = [(b[0], tr, b[1]) for b, tr in zip(blocks, out) if isinstance(tr, str) and tr.strip()]
             skipped = len(blocks) - len(pairs)
+            self._lt_evidence("translation", area, lines=lines, blocks=blocks, pairs=pairs,
+                              skipped=skipped, model_ms=ms)
             if not pairs:
                 raise RuntimeError(t("lt.validation_failed"))
             if skipped:
@@ -2462,12 +2530,22 @@ class App:
         blocks = [(tr, b, en, max(1, en.count("\n") + 1)) for en, tr, b in pairs]
         items = overlay.layout(blocks, area, ip.measure_at)
         log.info("In-place overlay layout: blocks=%d items=%d", len(blocks), len(items))
+        render_started = time.perf_counter()
         if not items:
+            self._lt_evidence("render_empty", area, pairs=pairs, render_ms=0, overlay_boxes=0, canvas_items=0)
             # OCR kutuları oyun alanı dışında kaldıysa boş siyah pencere bırakma.
             ip.hide()
             self._lt_inplace = None
             return self._lt_panel_fallback(pairs)
         self._lt_win = ip.show(items, area)
+        metrics = getattr(ip, "last_metrics", {})
+        render_ms = int((time.perf_counter() - render_started) * 1000)
+        log.info("In-place overlay render: boxes=%s canvas_items=%s glyph_items=%s",
+                 metrics.get("boxes", 0), metrics.get("canvas_items", 0), metrics.get("glyph_items", 0))
+        self._lt_evidence("render", area, pairs=pairs, render_ms=render_ms,
+                          overlay_boxes=metrics.get("boxes", 0),
+                          canvas_items=metrics.get("canvas_items", 0),
+                          glyph_items=metrics.get("glyph_items", 0))
         if self._lt_win is None:
             # A renderer can discard all lines after font measurement.  Do
             # not leave an empty transparent Toplevel above the game.
@@ -4538,6 +4616,9 @@ class App:
             self.root.after(34, self._build_next_ui_page)
             return
         self._ui_ready = True
+        intro = getattr(self, "_intro", None)
+        if intro:
+            intro.finish()
         if self._ui_build_errors:
             self.root.after(120, self._show_startup_recovery)
         self.root.after(300, self.apply_fx)
