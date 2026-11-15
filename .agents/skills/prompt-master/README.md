@@ -12,7 +12,7 @@ A Claude skill that writes the accurate prompts for any AI tool. Zero tokens or 
 
 ### RECOMMENDED - Claude.ai (browser)
 
-1. Download this repo as a ZIP
+1. ZIP the contents of this skill folder so `SKILL.md` sits at the ZIP root (or download the upstream `nidhinjs/prompt-master` repo as a ZIP)
 2. Go to **claude.ai → Sidebar → Customize → Skills → Upload a Skill**
 
 
