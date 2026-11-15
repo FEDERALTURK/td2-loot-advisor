@@ -20,6 +20,7 @@ import ssl
 import time
 import urllib.request
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 
 log = logging.getLogger("td2")
 
@@ -366,6 +367,23 @@ def run_tasks(cfg, cache_path, app_version="", force=False):
 
 # ---------------------------------------------------------------- haber / sezon akışı (meta/news_feed.json)
 DESC_FILES = ("descriptions_i18n.json", "descriptions_i18n_2.json")
+
+
+def read_local_descriptions(folder):
+    """Read bundled description shards; the primary shard wins on duplicate keys."""
+    items = {}
+    found = False
+    for name in reversed(DESC_FILES):
+        path = Path(folder) / name
+        try:
+            raw = json.loads(path.read_text(encoding="utf-8"))
+            if int(raw.get("schema", 0)) != SCHEMA or not isinstance(raw.get("items"), dict):
+                continue
+            items.update(raw["items"])
+            found = True
+        except (OSError, ValueError, TypeError):
+            continue
+    return items if found else None
 
 
 def fetch_descriptions(builds_setting, app_version="", previous=None):

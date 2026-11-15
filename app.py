@@ -3076,9 +3076,15 @@ class App:
     def desc_i18n(self):
         if getattr(self, "_desc_i18n", None) is None:
             self._desc_i18n = {}
-            for p_ in (DESC_CACHE, BASE / "meta" / "descriptions_i18n.json", BUNDLE / "meta" / "descriptions_i18n.json"):
-                try: self._desc_i18n = json.loads(p_.read_text(encoding="utf-8")).get("items", {}); break
-                except Exception: continue
+            try:
+                self._desc_i18n = json.loads(DESC_CACHE.read_text(encoding="utf-8")).get("items", {})
+            except Exception:
+                for folder in (BASE / "meta", BUNDLE / "meta"):
+                    self._desc_i18n = meta_sync.read_local_descriptions(folder)
+                    if self._desc_i18n is not None:
+                        break
+                if self._desc_i18n is None:
+                    self._desc_i18n = {}
         return self._desc_i18n
 
     def _desc_sync(self):

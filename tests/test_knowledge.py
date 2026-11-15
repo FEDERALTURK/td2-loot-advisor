@@ -70,6 +70,18 @@ ok(len(v["items"]) == 1 and v["items"][0]["url"] == "", "kötü kimlik ve https 
 ok(knowledge.pick_lang({"en": "a", "tr": "b"}, "tr") == "b" and knowledge.pick_lang({"en": "a"}, "pl") == "a", "dil seçimi + İngilizce yedeği")
 ok(meta_sync.news_urls("")[0].endswith("meta/news_feed.json"), "akış adresi")
 
+# yerel açıklama yedekleri: ana parça ve ikinci parça çevrimdışı birleşir
+with tempfile.TemporaryDirectory() as _desc_dir:
+    _desc_root = Path(_desc_dir)
+    (_desc_root / "descriptions_i18n.json").write_text(
+        json.dumps({"schema": 1, "items": {"A": {"tr": "ana"}}}), encoding="utf-8"
+    )
+    (_desc_root / "descriptions_i18n_2.json").write_text(
+        json.dumps({"schema": 1, "items": {"B": {"tr": "yedek"}, "A": {"tr": "eski"}}}), encoding="utf-8"
+    )
+    _local = meta_sync.read_local_descriptions(_desc_root)
+    ok(set(_local) == {"A", "B"} and _local["A"]["tr"] == "ana", "çevrimdışı açıklama parçaları birleşti")
+
 # açıklama çevirileri iki parçadan gelir; ikinci parça yoksa eskiler korunur
 _real_fetch = meta_sync.fetch
 _parts = {"descriptions_i18n.json": {"schema": 1, "version": "1", "items": {"A": {"tr": "yeni"}}},
