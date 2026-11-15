@@ -105,3 +105,15 @@ hazırlığı başlamadan önce bu kurallar dikkate alınır.
   inceleme, kullanıcı onayı ve açıklanabilir gerekçe kullan.
 - Oyun kurulum yolu ve ayar dosyaları yalnız okunur biçimde incelenir; oyun
   ayarını değiştirecek bir işlem için kullanıcıya açık bilgi ve onay verilir.
+
+### Test verisi
+
+- Testler `meta/` altındaki bot tarafından güncellenen dosyalardan sabit kimlik,
+  başlık veya metin kullanamaz. Davranış testleri kendi fixture'ını oluşturur;
+  canlı dosyalar yalnız şema/geçerlilik testlerinde kullanılır.
+
+### Dal ve etiket hijyeni
+
+- Her sürüm dalı yayından sonra `main`'e geri birleştirilir.
+- Yayınlanmış bir etiket başka bir commit'e taşınmaz; gerekirse yeni yama
+  sürümü açılır.
