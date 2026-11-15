@@ -584,7 +584,7 @@ def sprite_models(base):
 class SpriteAgentView(tk.Canvas):
     """Blender'da render edilmiş özgün ajan: sürükle → döndür (kareler arası), tıkla → yuva, eksik parça renkli parlar.
     AgentView ile aynı arayüz: set_status, set_labels, set_look, cycle, on_pick, spin, model."""
-    COLORS = {"ok": (34, 197, 94), "miss": (239, 68, 68), "sel": (255, 109, 16)}
+    COLORS = {"ok": (34, 197, 94), "miss": (239, 68, 68), "sel": _hex(ui_theme.PALETTES["default"]["accent"])}
     sprite = True
 
     def __init__(self, parent, base, model="operator", width=360, height=420, bg="#101217", **kw):
