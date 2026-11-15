@@ -61,7 +61,9 @@ ok(calls.some(([method, url]) => method === "POST" && url === "https://supabase.
    "Worker raporu Supabase panel aynasına iletildi");
 
 r = await post({ ...good, client: "four-part-version", title: "Dört parçalı sürüm", app_version: "9.1.5.36" });
-ok((await r.json()).ok, "dört parçalı sürüm raporu kabul edildi");
+j = await r.json();
+ok(j.ok, "dört parçalı sürüm raporu kabul edildi");
+ok(issues.get(j.number)?.labels.some(l => l.name === "v9.1.5.36"), "dört parçalı sürüm etiketi korundu (v9.1.5.36)");
 
 r = await post({ ...good, type: "hack" }); ok(r.status === 400, "geçersiz tür reddedildi");
 r = await post({ ...good, title: "x" }); ok(r.status === 400, "çok kısa başlık reddedildi");
