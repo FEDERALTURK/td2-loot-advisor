@@ -107,7 +107,7 @@ shallow depth of field --ar 16:9 --v 6 --style raw
 
 negative: blurry, low quality, watermark, cartoon, anime, extra limbs
 ```
-**🎯 Target:** Midjourney · **⚡ Framework:** Visual Descriptor · **💰 Tokens:** Light (~60) · **💡 Strategy:** Comma-separated descriptors over prose, lighting and mood anchored early, aspect ratio and version locked, negative prompt prevents style drift.
+**🎯 Target:** Midjourney · **💡 Strategy:** Comma-separated descriptors over prose, lighting and mood anchored early, aspect ratio and version locked, negative prompt prevents style drift.
 
 ---
 ## Full Example #2: Generating Prompts for Coding
@@ -188,7 +188,7 @@ Done When:
 - Hover states work on all interactive elements
 - Opens in browser with zero console errors
 ```
-**🎯 Target:** Claude Code · **💰 Tokens:** Medium (~380) · **💡 Strategy:** Every vague Notion aesthetic cue translated into exact hex values and pixel specs — Claude Code cannot guess wrong. Animations defined with exact timing, method, and trigger so there is no interpretation needed.
+**🎯 Target:** Claude Code · **💡 Strategy:** Every vague Notion aesthetic cue translated into exact hex values and pixel specs — Claude Code cannot guess wrong. Animations defined with exact timing, method, and trigger so there is no interpretation needed.
 
 ---
 
