@@ -53,12 +53,17 @@ f = knowledge.validate_news(raw)
 ok(len(f["items"]) == len(raw["items"]) and all(i["url"].startswith("https://") for i in f["items"]), "haber akışı geçerli, her haberin kaynağı var")
 ok(all(set(i["title"]) >= {"en", "tr", "de", "fr", "es", "it", "pt", "pl", "ru", "nl"} for i in f["items"]), "haberler 10 dilde")
 t0 = datetime(2026, 10, 26, 12, 0, tzinfo=timezone.utc)
-st = {it["id"]: s for it, s in knowledge.news_sorted(f["items"], t0)}
-ok(st["y8s3-red-moon-unleashed"] == "live" and st["y8s3-vanguard-overdrive"] == "upcoming" and st["tu-y8s3-2"] == "news", "durumlar: canlı / yakında / haber")
-order = [s for _, s in knowledge.news_sorted(f["items"], t0)]
+status_feed = knowledge.validate_news({"schema": 1, "items": [
+    {"id": "status-live", "title": "Live", "start": "2026-10-01T08:00:00Z", "end": "2026-11-01T08:00:00Z"},
+    {"id": "status-upcoming", "title": "Upcoming", "start": "2026-11-01T08:00:00Z"},
+    {"id": "status-news", "title": "News", "date": "2026-10-20T08:00:00Z"},
+]})
+st = {it["id"]: s for it, s in knowledge.news_sorted(status_feed["items"], t0)}
+ok(st == {"status-live": "live", "status-upcoming": "upcoming", "status-news": "news"}, "durumlar: canlı / yakında / haber")
+order = [s for _, s in knowledge.news_sorted(status_feed["items"], t0)]
 ok(order == sorted(order, key=["live", "upcoming", "news", "ended"].index), "sıralama: canlı → yakında → haber")
 late = datetime(2026, 11, 20, tzinfo=timezone.utc)
-ok(not any(i["id"] == "y8s3-red-moon-unleashed" for i, _ in knowledge.news_sorted(f["items"], late)), "biten etkinlik 3 gün sonra listeden düşer")
+ok(not any(i["id"] == "status-live" for i, _ in knowledge.news_sorted(status_feed["items"], late)), "biten etkinlik 3 gün sonra listeden düşer")
 evil = {"schema": 1, "items": [{"id": "x<script>", "title": "a"}, {"id": "ok-1", "title": {"en": "t"}, "url": "javascript:alert(1)"}]}
 v = knowledge.validate_news(evil)
 ok(len(v["items"]) == 1 and v["items"][0]["url"] == "", "kötü kimlik ve https olmayan bağlantı atıldı")
