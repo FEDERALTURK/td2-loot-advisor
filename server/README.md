@@ -67,7 +67,7 @@ otomatik olarak devre dışıdır; raporların D1/GitHub akışı çalışmaya d
 Yerel doğrulama için gerçek secret kullanmadan:
 
 ```bat
-node test_supabase.mjs
+node test_reports.mjs
 ```
 
 `GET /v1/health` yanıtındaki `panel_mirror` alanı yalnız yapılandırma durumunu
