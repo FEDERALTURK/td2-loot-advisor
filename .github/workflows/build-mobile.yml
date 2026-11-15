@@ -59,6 +59,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/companion-v')
         uses: softprops/action-gh-release@v2
         with:
+          token: ${{ secrets.TD2_RELEASE_TOKEN || github.token }}
           tag_name: ${{ github.ref_name }}
           name: TD2 Loot Advisor Companion ${{ github.ref_name }}
           prerelease: true
