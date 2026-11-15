@@ -19,7 +19,7 @@ def _protected(item: dict[str, Any]) -> bool:
     locked = item.get("locked")
     if isinstance(locked, str):
         locked = locked.strip().lower() in {"1", "true", "yes", "on", "locked"}
-    return bool(rarity & _PROTECTED or any(word in text for word in _PROTECTED) or locked is True)
+    return bool(rarity & _PROTECTED or any(word in text for word in _PROTECTED) or bool(locked))
 
 
 def compare_item_to_targets(item: dict[str, Any], targets: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:

@@ -43,6 +43,16 @@ class DecisionCenterTests(unittest.TestCase):
         )
         self.assertEqual(rows[0]["recommendation"], "KEEP")
 
+    def test_numeric_locked_flag_is_protected(self):
+        target = target_planner.normalize_target({"name": "Normal Item", "slot": "Chest"})
+        for flag, expected in ((1, "REVIEW"), (0, "KEEP")):
+            with self.subTest(locked=flag):
+                rows = decision_center.compare_item_to_targets(
+                    {"name": "Normal Item", "slot": "Chest", "rarity": "HIGH-END", "locked": flag, "confidence": 0.99},
+                    [target],
+                )
+                self.assertEqual(rows[0]["recommendation"], expected)
+
 
 if __name__ == "__main__":
     unittest.main()
