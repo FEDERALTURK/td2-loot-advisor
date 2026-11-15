@@ -475,3 +475,12 @@ Bu dosyalar GitHub Actions'ta otomatik derlendi; kurulum dosyası Windows'ta ses
 - Çeviri sekmesine, AI motorunun çeviri kalitesinin Asistan sekmesinde seçtiğin dil modeline bağlı olduğuna dair bir not eklendi.
 - Küçük düzeltme: hedef dile göre önbellek ayrımı eklendi (farklı diller artık birbirinin çeviri önbelleğini kullanamaz).
 
+**9.1.5.38 — CI sağlamlaştırma ve çevrimdışı açıklama yedekleri**
+
+- Çevrimdışı ilk açılışta açıklama çevirilerinin iki veri parçası birlikte yüklenir; ana parça çakışmalarda önceliklidir.
+- Canlı meta akışına bağlı bilgi testi artık sabit çevrimiçi kimlikler yerine sentetik fixture kullanır.
+- Release öncesi proje yapısı ve test verisi koruma kontrolleri CI akışlarına eklendi.
+- Görev sunucusu hazır olma denetimi, çeviri probe zaman aşımı ve Node.js modül yapılandırması kararlı hâle getirildi.
+
+Bu sürümde oyun belleği erişimi, DLL injection veya uzak OCR gönderimi yoktur.
+
