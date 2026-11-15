@@ -33,7 +33,7 @@ Build prompts one at a time, ready to paste.
 **Output format — Follow this format**
 
 Output format:
-1. A single copyable prompt block ready to paste into the target tool
+1. A single copyable prompt block ready to paste into the target tool (exception: ComfyUI uses two separate blocks, Positive Prompt and Negative Prompt — see the ComfyUI routing)
 2. 🎯 Target: [tool name],💡 [One sentence — what was optimized and why]
 3. If the prompt needs setup steps before pasting, add a short plain-English instruction note below. 1-2 lines max. ONLY when genuinely needed.
 
