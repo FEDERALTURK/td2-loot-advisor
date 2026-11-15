@@ -24,7 +24,38 @@ jobs:
       - run: flutter pub get
       - run: flutter analyze
       - run: flutter test
-      - run: flutter build apk --release
+      - name: Prepare release signing
+        if: startsWith(github.ref, 'refs/tags/companion-v')
+        shell: bash
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          for value in ANDROID_KEYSTORE_BASE64 ANDROID_KEYSTORE_PASSWORD ANDROID_KEY_ALIAS ANDROID_KEY_PASSWORD; do
+            if [[ -z "${!value}" ]]; then
+              echo "Missing required Android release signing secret: $value" >&2
+              exit 1
+            fi
+          done
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/td2-release.jks
+          cat > android/key.properties <<EOF
+          storeFile=td2-release.jks
+          storePassword=$ANDROID_KEYSTORE_PASSWORD
+          keyAlias=$ANDROID_KEY_ALIAS
+          keyPassword=$ANDROID_KEY_PASSWORD
+          EOF
+      - name: Build APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${GITHUB_REF}" == refs/tags/companion-v* ]]; then
+            flutter build apk --release -PplayRelease=true
+          else
+            flutter build apk --release
+          fi
       - name: Rename APK
         shell: bash
         run: |
@@ -36,6 +67,10 @@ jobs:
           path: |
             mobile/TD2LootAdvisor_Companion_*.apk
             mobile/SHA256SUMS.sha256
+      - name: Remove temporary signing files
+        if: always()
+        shell: bash
+        run: rm -f android/td2-release.jks android/key.properties
       - name: Publish companion release
         if: startsWith(github.ref, 'refs/tags/companion-v')
         uses: softprops/action-gh-release@v2

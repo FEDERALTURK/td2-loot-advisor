@@ -1,5 +1,13 @@
 ## TD2 Loot Advisor — Windows
 
+**9.1.5.35 — Devir doğrulaması ve test dayanıklılığı**
+
+- Android release signing için geçici keystore hazırlama ve cleanup akışı güvenli biçimde belgelendi.
+- Companion signing fingerprint doğrulaması ve fiziksel cihaz güncelleme test sırası netleştirildi.
+- `test_knowledge.py`, değişken canlı feed kimliklerine bağımlı olmaktan çıkarılıp sentetik durum fixture'ı ile kararlı hâle getirildi.
+- CI, signing secret'ları eksik olduğunda debug imzasına sessizce düşmek yerine açık hata verir.
+- Devir teslim ve ajan yol haritası P0–P3 öncelikleriyle ayrıldı.
+
 **9.1.5.34 — Faz 5 karar merkezi ve güncelleme denetimi**
 
 - Komuta Merkezi'ne kişisel hedeflerle son taranan eşyayı güvenli biçimde karşılaştıran karar merkezi eklendi.
