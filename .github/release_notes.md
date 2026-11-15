@@ -496,3 +496,8 @@ Bu dosyalar GitHub Actions'ta otomatik derlendi; kurulum dosyası Windows'ta ses
 - Yavaş CI model çıkarımında test assertion'ı atlanmadan 300 saniyelik güvenli sınır kullanılır.
 - Önceki SHD tema, animasyon ve kararlılık düzenlemeleri korunur.
 
+**9.1.5.39 — Paketli çeviri probe dış zaman aşımı uyumu**
+
+- PowerShell paket testi bekleme sınırı, probe’un yavaş CI model çıkarımı sınırıyla eşitlendi.
+- Çeviri doğrulaması hâlâ gerçek sonuç ve overlay kontrolleriyle yapılır; assertion kaldırılmadı.
+
