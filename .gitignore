@@ -86,3 +86,15 @@ xbox-companion/**/AppPackages/
 xbox-companion/**/BundleArtifacts/
 xbox-companion/*.user
 xbox-companion/.vs/
+
+# Gizli materyal — kök seviyede (mobile/android/.gitignore yalnız kendi alt ağacını kapsar,
+# bu yüzden depo kökündeki bir keystore veya .env ÖNCEDEN korumasızdı; bkz. SETUP.md §7).
+.env
+.env.*
+!.env.example
+*.jks
+*.keystore
+*.p8
+key.properties
+beta-key.properties
+google-services.json
