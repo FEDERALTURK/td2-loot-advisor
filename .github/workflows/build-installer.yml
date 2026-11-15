@@ -53,6 +53,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "backup/update regressions failed" }
           python -B tests/test_intelligence.py
           if ($LASTEXITCODE -ne 0) { throw "command center regressions failed" }
+          python -B tests/test_knowledge.py
+          if ($LASTEXITCODE -ne 0) { throw "knowledge/news regressions failed" }
 
       - name: Package Windows installer
         shell: cmd
