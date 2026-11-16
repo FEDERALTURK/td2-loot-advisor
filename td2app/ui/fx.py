@@ -26,6 +26,10 @@ VIDEO_EXT = (".mp4", ".mkv", ".webm", ".mov", ".avi", ".m4v")
 ANIM_EXT = (".webp", ".gif")            # Pillow ile ek paket olmadan oynatılır
 
 
+def _pal(name):
+    return ui_theme.PALETTES["default"].get(name)
+
+
 def _animation_budget(widget, delay_ms):
     """Read the root's cached policy; never probe window focus from an animation."""
     try:
@@ -84,10 +88,11 @@ def _short(path):
     return p.replace("\\", "/")
 
 
-def draw_cursor(style, color="#ff6d10", size=32):
+def draw_cursor(style, color=None, size=32):
     """Genel (markasız) imleç çizimleri. Dönüş: (RGBA görüntü, sıcak nokta)."""
     S = 4                                               # yüksek çözünürlükte çiz, sonra küçült (yumuşak kenar)
     W = size * S
+    color = color or _pal("accent")
     im = Image.new("RGBA", (W, W), (0, 0, 0, 0))
     d = ImageDraw.Draw(im)
     col = _hex(color) + (255,)
@@ -266,7 +271,8 @@ class CursorFX:
         if self.enabled:
             self._apply_tree(self.root, self.spec)
 
-    def apply(self, enabled, style="crosshair", color="#ff6d10", custom="", scale=1.0):
+    def apply(self, enabled, style="crosshair", color=None, custom="", scale=1.0):
+        color = color or _pal("accent")
         try:
             if not enabled or style == "system":
                 self.enabled = False; self.spec = ""
@@ -314,8 +320,8 @@ class CursorFX:
 class TrailFX:
     KEY = "#010203"
 
-    def __init__(self, root, color="#ff6d10", length=18, click_through=None):
-        self.root, self.color, self.length = root, color, max(4, int(length))
+    def __init__(self, root, color=None, length=18, click_through=None):
+        self.root, self.color, self.length = root, color or _pal("accent"), max(4, int(length))
         self.pts, self.win, self.cv, self.alive = [], None, None, False
         self.click_through = click_through
         self._line_ids = []
@@ -412,7 +418,8 @@ class NavMotif(tk.Canvas):
     yapar, sürekli bir animasyon döngüsü başlatmaz.
     """
 
-    def __init__(self, parent, accent="#ff6d10", bg="#0f1116", muted="#2c313d"):
+    def __init__(self, parent, accent=None, bg=None, muted=None):
+        accent, bg, muted = accent or _pal("accent"), bg or _pal("bg"), muted or _pal("border")
         super().__init__(parent, height=24, bg=bg, highlightthickness=0, bd=0)
         self.accent, self.bg, self.muted = accent, bg, muted
         self._flash = 0
@@ -459,7 +466,8 @@ class DigitalRain(tk.Canvas):
     FPS = 12
     GLYPHS = "01" + "ABCDEF0123456789" + ":;.·-_/"   # her fontta güvenle render olan sade bir küme
 
-    def __init__(self, parent, bg="#0a0d12", dim="#1f7a73", bright="#6aedd9", height=50, cell_w=15, cell_h=16):
+    def __init__(self, parent, bg=None, dim=None, bright=None, height=50, cell_w=15, cell_h=16):
+        bg, dim, bright = bg or _pal("bg"), dim or _pal("border"), bright or _pal("accent")
         super().__init__(parent, height=height, bg=bg, highlightthickness=0, bd=0)
         self.dim_color, self.bright_color = dim, bright
         self.cell_w, self.cell_h = cell_w, cell_h
@@ -546,7 +554,8 @@ class CommandRibbon(tk.Canvas):
     FPS = 30
     INTERVAL_MS = round(1000 / FPS)
 
-    def __init__(self, parent, accent="#ff6d10", bg="#0f1116", surface="#151a22", muted="#667080"):
+    def __init__(self, parent, accent=None, bg=None, surface=None, muted=None):
+        accent, bg, surface, muted = accent or _pal("accent"), bg or _pal("bg"), surface or _pal("surface"), muted or _pal("border")
         super().__init__(parent, height=42, bg=bg, highlightthickness=0, bd=0)
         self.accent, self.bg, self.surface, self.muted = accent, bg, surface, muted
         self.title, self.detail = "ISAC // OPERATION CENTER", "SYSTEM NOMINAL"
@@ -571,7 +580,7 @@ class CommandRibbon(tk.Canvas):
             self.create_rectangle(0, 2, 5, h - 2, fill=self.accent, outline="")
             for x in range(14, min(w, 180), 28):
                 self.create_line(x, h - 4, x + 13, 4, fill=self.muted, width=1)
-            self.create_text(16, 14, anchor="w", text=self.title, fill="#ffffff",
+            self.create_text(16, 14, anchor="w", text=self.title, fill=_pal("fg"),
                              font=(ui_theme.FONT_SEMI, 10))
             self.create_text(16, 30, anchor="w", text=self.detail, fill=self.muted,
                              font=(ui_theme.FONT, 8))
@@ -619,7 +628,7 @@ class FieldConsole(CommandRibbon):
             self.create_polygon(0, 3, w - cut, 3, w, h - 3, 0, h - 3, fill=self.surface, outline=self.muted)
             self.create_rectangle(0, 3, 7, h - 3, fill=self.accent, outline="")
             for x in range(18, w, 46): self.create_line(x, h - 5, x + 28, 5, fill=self.muted, width=1)
-            self.create_text(22, 25, anchor="w", text=self.title, fill="#ffffff", font=(ui_theme.FONT_SEMI, 18))
+            self.create_text(22, 25, anchor="w", text=self.title, fill=_pal("fg"), font=(ui_theme.FONT_SEMI, 18))
             self.create_text(22, 51, anchor="w", text=self.detail + "  //  SECURE UPLINK", fill=self.muted, font=(ui_theme.FONT_SEMI, 9))
             self.create_text(w - 22, 25, anchor="e", text="SHD-02  •  ONLINE", fill=self.accent, font=(ui_theme.FONT_SEMI, 10))
             self.create_text(w - 22, 50, anchor="e", text="FIELD NETWORK / ENCRYPTED", fill=self.muted, font=(ui_theme.FONT, 8))
@@ -632,7 +641,8 @@ class FieldConsole(CommandRibbon):
 
 class SHDStatusBar(tk.Canvas):
     """Özgün SHD-terminal kromu: bağlantı, saat, ping ve 30 FPS scanner çizgisi."""
-    def __init__(self, parent, accent="#ff5a00", bg="#0b0e14", fg="#ffffff", muted="#a0aab2", footer=False):
+    def __init__(self, parent, accent=None, bg=None, fg=None, muted=None, footer=False):
+        accent, bg, fg, muted = accent or _pal("accent"), bg or _pal("bg"), fg or _pal("fg"), muted or _pal("muted")
         super().__init__(parent, height=26 if footer else 54, bg=bg, highlightthickness=0, bd=0)
         self.accent, self.bg, self.fg, self.muted, self.footer = accent, bg, fg, muted, footer
         self.t0 = time.perf_counter(); self.bind("<Configure>", self._draw, add="+"); self.after_idle(self._tick)
@@ -662,8 +672,8 @@ class SafeTrail:
     transparent Toplevel'in siyah kutu ve tıklama engelleme riski yoktur.
     """
     FPS = 30
-    def __init__(self, root, color="#ff5a00", length=14):
-        self.root, self.color = root, color
+    def __init__(self, root, color=None, length=14):
+        self.root, self.color = root, color or _pal("accent")
         self.length = max(6, min(32, int(length)))
         self.cv = tk.Canvas(root, bg=root.cget("bg"), highlightthickness=0, bd=0)
         self.cv.place(x=0, y=0, relwidth=1, relheight=1)
@@ -711,8 +721,8 @@ class Transition:
     akıcı biçimde kayar ve yeni sekmenin genişliğine oturur. Şekiller her karede yeniden yaratılmaz (yalnız konumları
     güncellenir), pencerenin saydamlığına dokunulmaz. play(notebook, eski, yeni) · duration (ms) ile hız."""
 
-    def __init__(self, root, bar_parent=None, color="#ff6d10", bg="#0f1116", duration_ms=260, style="soft"):
-        self.root, self.color, self.bg = root, color, bg
+    def __init__(self, root, bar_parent=None, color=None, bg=None, duration_ms=260, style="soft"):
+        self.root, self.color, self.bg = root, color or _pal("accent"), bg or _pal("bg")
         self.duration = max(120, min(450, int(duration_ms)))
         self.style = style if style in ("soft", "tactical") else "soft"
         self.bar = None
@@ -995,7 +1005,8 @@ class AgentWatch:
     Halkalar, saniye çizgileri, dönen kesikli yaylar, saat/dakika/saniye yayları, ortada saat;
     dış halkadaki turuncu ışık (kuyruklu) fare hangi yöndeyse oraya döner."""
 
-    def __init__(self, canvas, pointer_fn, color="#ff6d10", bg="#0f1116", dim=0.0, variant="standard"):
+    def __init__(self, canvas, pointer_fn, color=None, bg=None, dim=0.0, variant="standard"):
+        color, bg = color or _pal("accent"), bg or _pal("bg")
         self.cv, self.pointer_fn, self.c, self.bgc = canvas, pointer_fn, color, bg
         self.dim = dim
         self.variant = variant
@@ -1212,7 +1223,8 @@ class WatchBackground:
     zemin rengi (-transparentcolor) şeffaf yapılır → kartlar ve listeler okunur kalır, boşluklarda saat görünür.
     Diğer sistemlerde (şeffaflık yok) kapalı kalır."""
 
-    def __init__(self, root, bg="#0f1116", color="#ff6d10", dim=0.0, fps=12, variant="standard"):
+    def __init__(self, root, bg=None, color=None, dim=0.0, fps=12, variant="standard"):
+        bg, color = bg or _pal("bg"), color or _pal("accent")
         self.root, self.bgc, self.color, self.dim, self.fps = root, bg, color, dim, fps
         self.variant = variant
         self.win = self.cv = self.watch = None

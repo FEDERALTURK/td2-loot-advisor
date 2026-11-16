@@ -449,8 +449,9 @@ class Banner:
     """Üst başlık bandı: arka planlar belirli aralıkla yumuşak geçişle değişir;
     flash() ile bir amblem/bayrak birkaç saniye gösterilip temaya geri dönülür."""
 
-    def __init__(self, parent, pal, bg_folder, interval_s=15, height=118, title="", subtitle=""):
+    def __init__(self, parent, pal, bg_folder, interval_s=15, height=118, title="", subtitle="", status_only=False):
         self.pal, self.h, self.interval = pal, height, max(0, int(interval_s or 0))
+        self.status_only = bool(status_only)
         self.folder = Path(bg_folder)
         self.cv = tk.Canvas(parent, height=height, highlightthickness=0, bd=0, bg="#0f1116")
         self.cv.pack(fill="x")
@@ -469,7 +470,10 @@ class Banner:
         self.alive = True
         self.cv.bind("<Configure>", self._on_resize)
         self._ready = False
-        threading.Thread(target=self._prepare, daemon=True).start()
+        if self.status_only:
+            self._found, self._ready = [], True
+        else:
+            threading.Thread(target=self._prepare, daemon=True).start()
         self._poll_ready()
 
     # --- hazırlık ---
@@ -604,7 +608,13 @@ class Banner:
     def _draw_overlay(self):
         cv, w, h = self.cv, self._wh()[0], self.h
         fs = self.pal
-        if h >= 90:
+        if self.status_only:
+            cv.create_text(14, h / 2, anchor="w", text=self.title, fill=fs.get("accent", "#ff6d10"),
+                           font=(ui_theme.FONT_DISPLAY, max(9, int(h / 2.8))))
+            if self.subtitle:
+                cv.create_text(w - 14, h / 2, anchor="e", text=self.subtitle, fill=fs.get("muted", "#8795A6"),
+                               font=(ui_theme.FONT_MONO, max(8, int(h / 3.2))))
+        elif h >= 90:
             cv.create_text(22, 40, anchor="w", text=self.title, fill=fs.get("accent", "#ff6d10"),
                            font=(ui_theme.FONT_SEMI, 21))
             cv.create_text(24, 72, anchor="w", text=self.subtitle, fill="#c9ced8", font=(ui_theme.FONT, 10))
@@ -616,7 +626,10 @@ class Banner:
             x = int(w * 0.47) + int(min(h - 18, w * 0.32) * 0.75) + 18
             cv.create_text(x, h / 2 - 12, anchor="w", text=t1, fill="#ffffff", font=(ui_theme.FONT_SEMI, 17))
             cv.create_text(x, h / 2 + 16, anchor="w", text=t2, fill=col, font=(ui_theme.FONT_SEMI, 10))
-        # rozetler (sağ üst)
+        # rozetler (sağ üst); status şeridinde merkezle, eski bantta üst hizayı koru.
+        chip_y = h / 2 if self.status_only else 26
+        chip_top = chip_y - 12
+        chip_bottom = chip_y + 12
         x = w - 16
         for i, chip in reversed(list(enumerate(self.chips))):
             text, kind = chip[0], chip[1]
@@ -626,8 +639,8 @@ class Banner:
             tag = f"chip{i}"
             tid = cv.create_text(0, 0, text=text, font=(ui_theme.FONT_SEMI, 9), fill=fg, anchor="e", tags=(tag,))
             bx = cv.bbox(tid); tw = bx[2] - bx[0]
-            cv.coords(tid, x - 10, 26)
-            cv.create_rectangle(x - tw - 20, 14, x, 38, fill=bg, outline="", tags=(tag,))
+            cv.coords(tid, x - 10, chip_y)
+            cv.create_rectangle(x - tw - 20, chip_top, x, chip_bottom, fill=bg, outline="", tags=(tag,))
             cv.tag_raise(tid)
             if cb:
                 cv.tag_bind(tag, "<Button-1>", lambda e, cb=cb: cb())
@@ -724,6 +737,11 @@ class Banner:
 
     def set_chips(self, chips):
         self.chips = list(chips)
+        self._redraw_overlay_only()
+
+    def set_status_line(self, text):
+        """Görsel katman için tek satırlık canlı durum metni."""
+        self.title = text or ""
         self._redraw_overlay_only()
 
     def toast(self, text, seconds=2.5):

@@ -4791,11 +4791,11 @@ class App:
         self.set_group_nbs[group].select(page)
 
     def build_header(self):
-        """Üst bant: dönen arka planlar, marka ve durum rozetleri (ui_art.Banner)."""
+        """Üst bant: Division HUD canlı durum şeridi ve durum rozetleri."""
         st = self.cfg["settings"]
         self.banner = ui_art.Banner(self.root, PAL, ART_DIR / "backgrounds", interval_s=st.get("bg_interval", 15),
-                                    title="◆ TD2 LOOT ADVISOR", subtitle=f"v{APP_VERSION}",
-                                    height=max(44, int(118 * getattr(self, "ui_factor", 1.0) * (0.6 if getattr(self, "compact", False) else 1.0))))
+                                    title="SHD // TD2 LOOT ADVISOR", subtitle=f"v{APP_VERSION}", status_only=True,
+                                    height=max(32, int(36 * getattr(self, "ui_factor", 1.0))))
         self.refresh_header()
 
     def toast(self, text):
@@ -4825,6 +4825,14 @@ class App:
         if not hasattr(self, "banner"): return
         st = self.cfg["settings"]
         prov = st.get("ai_provider", "builtin")
+        last = getattr(self, "comp_state", {}).get("verdict_label") or "IDLE"
+        build = (active_build(self.cfg) or {}).get("name") or "—"
+        try:
+            review = len(review_queue.load(OCR_REVIEW_PATH))
+        except Exception:
+            review = 0
+        build = str(build).replace("\n", " ")[:24]
+        self.banner.set_status_line(f"SHD // OCR:{getattr(OCR, 'name', 'AUTO')}  LAST:{last}  REVIEW:{review}  BUILD:{build}")
         self.banner.set_chips([(self._acc_chip_text(), "btn" if not self.account.signed_in else "on", self.open_account),
                                ("🐞 " + t("fb.btn_short"), "off", self.open_feedback),
                                ("🔄 " + t("sync.btn_short"), "btn", self.run_sync),

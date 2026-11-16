@@ -51,7 +51,7 @@ hazırlığı başlamadan önce bu kurallar dikkate alınır.
 
 **Tetikleyici:** `td2app/ui/` altındaki görsel modüller.
 
-- Varsayılan Kaivolt (lacivert/mor) HUD estetiğini koru.
+- Varsayılan Division 2 taktik HUD estetiğini (antrasit, amber/turuncu, keskin köşeler) koru.
 - `SafeTrail` fare izi efektlerinin tıklamayı engellemesini önle.
 - `Canvas.lower()` çağrılarına dayanmak yerine savunmacı nesne varlık ve yaşam
   döngüsü kontrolleri uygula.

@@ -11,6 +11,8 @@ import time
 import tkinter as tk
 from . import ui_theme
 
+_PAL = ui_theme.PALETTES["default"]
+
 
 def _animation_budget(widget, delay_ms):
     try: root = widget._root()
@@ -125,7 +127,8 @@ def ell(cx, cy, cz, rx, ry, rz, color, tag=None, nu=8, nv=6, top=1.0):
 
 
 class Scene3D(tk.Canvas):
-    def __init__(self, parent, bg="#101217", width=420, height=480, **kw):
+    def __init__(self, parent, bg=None, width=420, height=480, **kw):
+        bg = bg or _PAL["surface"]
         super().__init__(parent, bg=bg, width=width, height=height, highlightthickness=0, **kw)
         self.faces, self.yaw, self.pitch, self.zoom = [], 0.6, -0.25, 1.0
         self.key_light = (-0.45, 0.75, -0.65)           # sol-üst-önden gelen ana ışık (görüş uzayında)
@@ -205,7 +208,7 @@ class Scene3D(tk.Canvas):
             self.create_rectangle(0, h * i / steps, w, h * (i + 1) / steps + 1, fill=c, outline="", tags="bg")
 
     def label_color(self, tag):
-        return "#cfd5df"
+        return _PAL["fg"]
 
     def draw_under(self, w, h, f):
         pass
@@ -286,12 +289,12 @@ class Scene3D(tk.Canvas):
 SLOTS = ("Mask", "Chest", "Backpack", "Gloves", "Holster", "Kneepads", "Weapon", "Sidearm")
 MODELS = ("operator", "scout", "heavy", "urban", "arctic")
 THEMES = {   # kıyafet renkleri: kumaş, ikinci kumaş, bot, aksan, metal, kayış
-    "night":    {"cloth": "#2a303b", "cloth2": "#1f242d", "boot": "#14171c", "accent": "#ff6d10", "metal": "#3a404b", "strap": "#181b21"},
+    "night":    {"cloth": "#2a303b", "cloth2": "#1f242d", "boot": "#14171c", "accent": _PAL["accent"], "metal": "#3a404b", "strap": "#181b21"},
     "woodland": {"cloth": "#4a5a3c", "cloth2": "#36422c", "boot": "#2b2219", "accent": "#a5814a", "metal": "#3d4137", "strap": "#2a3122"},
     "desert":   {"cloth": "#b29b72", "cloth2": "#8e7853", "boot": "#5b4631", "accent": "#e0bd7f", "metal": "#6b6253", "strap": "#7a6646"},
     "winter":   {"cloth": "#d5dae1", "cloth2": "#aab1bc", "boot": "#4b5059", "accent": "#5b8bd6", "metal": "#7d8592", "strap": "#8e96a3"},
-    "urban":    {"cloth": "#4d5465", "cloth2": "#373d4a", "boot": "#1b1e24", "accent": "#3aa0ff", "metal": "#5a6170", "strap": "#292e38"},
-    "crimson":  {"cloth": "#3d2629", "cloth2": "#2b1b1d", "boot": "#151012", "accent": "#e0413a", "metal": "#4a3f42", "strap": "#21171a"},
+    "urban":    {"cloth": "#4d5465", "cloth2": "#373d4a", "boot": "#1b1e24", "accent": _PAL["info"], "metal": "#5a6170", "strap": "#292e38"},
+    "crimson":  {"cloth": "#3d2629", "cloth2": "#2b1b1d", "boot": "#151012", "accent": _PAL["danger"], "metal": "#4a3f42", "strap": "#21171a"},
 }
 SKINS = ("#f0c8a4", "#d4a479", "#a8734d", "#6e4a31")
 GUN, GEAR = "#2b2f36", "#555"
@@ -476,14 +479,14 @@ BUILDERS = {"operator": m_operator, "scout": m_scout, "heavy": m_heavy, "urban":
 
 class AgentView(Scene3D):
     """3D ajan modeli; yuva durumları: {"Mask": "ok"|"miss"|"off", …}. Modeller ve kıyafetler değiştirilebilir."""
-    COLORS = {"ok": "#22c55e", "miss": "#ef4444", "off": "#4b5263", "sel": ui_theme.PALETTES["default"]["accent"]}
+    COLORS = {"ok": _PAL["success"], "miss": _PAL["danger"], "off": _PAL["border"], "sel": _PAL["accent"]}
     LABELS = {}
 
     def __init__(self, parent, model="operator", outfit="night", skin=1, **kw):
         super().__init__(parent, **kw)
         self.status, self.selected, self._pulse, self._names = {}, None, 0.0, {}
         self.center_y, self.zoom = 1.05, 1.55
-        self.bg_top, self.bg_bottom = "#1d2230", "#0b0d12"
+        self.bg_top, self.bg_bottom = _PAL["surface2"], _PAL["bg"]
         self.model, self.outfit, self.skin = "operator", "night", 1
         self.set_look(model, outfit, skin, render=False)
 
@@ -493,7 +496,7 @@ class AgentView(Scene3D):
         if isinstance(skin, int) and 0 <= skin < len(SKINS): self.skin = skin
         P = dict(THEMES[self.outfit]); P["skin"] = SKINS[self.skin]
         F, A = BUILDERS[self.model](P)
-        F += cyl((0, -0.31, 0), (0, -0.27, 0), 0.7, 0.7, "#12151b", n=16)                         # zemin diski
+        F += cyl((0, -0.31, 0), (0, -0.27, 0), 0.7, 0.7, _PAL["surface"], n=16)                         # zemin diski
         self.faces = F
         self.anchors = [(tag, A[tag], self._names.get(tag, tag)) for tag in SLOTS if tag in A]
         if render: self.render()
@@ -513,7 +516,7 @@ class AgentView(Scene3D):
     def label_color(self, tag):
         if tag == self.selected: return self.COLORS["sel"]
         st = self.status.get(tag, "off")
-        return {"ok": "#4ade80", "miss": "#f87171", "off": "#8d95a5"}.get(st, "#cfd5df")
+        return {"ok": _PAL["verdict_fg"]["KEEP"], "miss": _PAL["verdict_fg"]["DISMANTLE"], "off": _PAL["muted"]}.get(st, _PAL["fg"])
 
     def draw_under(self, w, h, f):
         pts = []
@@ -521,7 +524,7 @@ class AgentView(Scene3D):
             r = 0.82 + 0.03 * math.sin(self._pulse * 0.4)
             x, y, z, _ = self.project((r * math.cos(math.radians(a)), -0.27, r * math.sin(math.radians(a))), w, h, f)
             pts += [x, y]
-        self.create_line(*pts, fill=THEMES[self.outfit]["accent"] if self.outfit != "night" else "#ff6d10", width=2, smooth=True, tags="dyn")
+        self.create_line(*pts, fill=THEMES[self.outfit]["accent"], width=2, smooth=True, tags="dyn")
 
     def color_of(self, color, tag):
         if not tag: return color
@@ -545,7 +548,7 @@ class Bars3D(Scene3D):
         super().__init__(parent, **kw)
         self.yaw, self.pitch = 0.75, -0.55
         self.auto_spin = False
-        self.bg_top, self.bg_bottom = "#1d2230", "#0b0d12"
+        self.bg_top, self.bg_bottom = _PAL["surface2"], _PAL["bg"]
         self.center_y = 0.3
         self.zoom = 1.2
 
@@ -559,14 +562,14 @@ class Bars3D(Scene3D):
                 v = values[r][c] if r < len(values) and c < len(values[r]) else None
                 x, z = (c - (nc - 1) / 2) * s, (r - (nr - 1) / 2) * s
                 if v is None:
-                    F += box(x, -0.02, z, s * 0.7, 0.04, s * 0.7, "#2a2f3a")
+                    F += box(x, -0.02, z, s * 0.7, 0.04, s * 0.7, _PAL["border"])
                     continue
                 hgt = max(0.04, v / 100 * 1.5)
-                col = "#22c55e" if v >= 70 else "#eab308" if v >= 40 else "#ef4444"
+                col = _PAL["success"] if v >= 70 else _PAL["warning"] if v >= 40 else _PAL["danger"]
                 F += box(x, hgt / 2 - 0.4, z, s * 0.7, hgt, s * 0.7, col, f"{rows[r]} · {cols[c]}: {v}%")
-        F += box(0, -0.45, 0, nc * s + 0.2, 0.05, nr * s + 0.2, "#15181f")
+        F += box(0, -0.45, 0, nc * s + 0.2, 0.05, nr * s + 0.2, _PAL["surface"])
         self.faces = F
-        self.labels = [(f"↕ {r}", 8, 8 + 16 * i, "#9aa1ae") for i, r in enumerate(rows[:12])]
+        self.labels = [(f"↕ {r}", 8, 8 + 16 * i, _PAL["muted"]) for i, r in enumerate(rows[:12])]
         self.render()
 
 
@@ -584,10 +587,11 @@ def sprite_models(base):
 class SpriteAgentView(tk.Canvas):
     """Blender'da render edilmiş özgün ajan: sürükle → döndür (kareler arası), tıkla → yuva, eksik parça renkli parlar.
     AgentView ile aynı arayüz: set_status, set_labels, set_look, cycle, on_pick, spin, model."""
-    COLORS = {"ok": (34, 197, 94), "miss": (239, 68, 68), "sel": (255, 109, 16)}
+    COLORS = {"ok": tuple(_hex(_PAL["success"])), "miss": tuple(_hex(_PAL["danger"])), "sel": tuple(_hex(_PAL["accent"]))}
     sprite = True
 
-    def __init__(self, parent, base, model="operator", width=360, height=420, bg="#101217", **kw):
+    def __init__(self, parent, base, model="operator", width=360, height=420, bg=None, **kw):
+        bg = bg or _PAL["surface"]
         super().__init__(parent, width=width, height=height, bg=bg, highlightthickness=0, **kw)
         from pathlib import Path
         self.base = Path(base)
@@ -597,7 +601,7 @@ class SpriteAgentView(tk.Canvas):
         self.outfit, self.skin = None, 0
         self.zoom, self._pulse, self._drag = 1.0, 0.0, None
         self._frames, self._cache, self._bg = {}, {}, None
-        self.bg_top, self.bg_bottom = "#1d2230", "#0b0d12"
+        self.bg_top, self.bg_bottom = _PAL["surface2"], _PAL["bg"]
         self.bind("<ButtonPress-1>", self._press); self.bind("<B1-Motion>", self._move)
         self.bind("<ButtonRelease-1>", self._release); self.bind("<MouseWheel>", self._wheel)
         self.bind("<Configure>", lambda e=None: (self._cache.clear(), setattr(self, "_bg", None), self.render()))
@@ -683,8 +687,8 @@ class SpriteAgentView(tk.Canvas):
         self.render()
 
     def label_color(self, tag):
-        if tag == self.selected: return ui_theme.PALETTES["default"]["accent"]
-        return {"ok": "#4ade80", "miss": "#f87171", "off": "#8d95a5"}.get(self.status.get(tag, "off"), "#cfd5df")
+        if tag == self.selected: return _PAL["accent"]
+        return {"ok": _PAL["verdict_fg"]["KEEP"], "miss": _PAL["verdict_fg"]["DISMANTLE"], "off": _PAL["muted"]}.get(self.status.get(tag, "off"), _PAL["fg"])
 
     def render(self):
         if not self._alive or not self.model: return
