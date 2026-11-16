@@ -1,9 +1,40 @@
 {
  "schema": 1,
- "version": "2026-11-15.1",
- "updated": "2026-11-15T19:38:40Z",
+ "version": "2026-11-16.1",
+ "updated": "2026-11-16T01:43:54Z",
  "season": "Year 8 Season 3 – Red Horizon",
  "items": [
+  {
+   "id": "pc-crossplay-servers-maintenance-2026-11-12",
+   "kind": "maintenance",
+   "date": "2026-11-12T14:20:00Z",
+   "url": "https://x.com/TheDivisionGame/status/2120884409679102372",
+   "source": "Ubisoft (@TheDivisionGame)",
+   "title": {
+    "en": "PC moved to Crossplay servers (Nov 12)",
+    "tr": "PC, Crossplay sunucularına taşındı (12 Kasım)",
+    "de": "PC auf Crossplay-Server umgezogen (12. Nov.)",
+    "fr": "PC migré vers les serveurs Crossplay (12 nov.)",
+    "es": "PC migrado a los servidores Crossplay (12 nov.)",
+    "it": "PC spostato sui server Crossplay (12 nov.)",
+    "pt": "PC migrado para os servidores Crossplay (12 nov.)",
+    "ru": "ПК переведён на серверы Crossplay (12 нояб.)",
+    "pl": "PC przeniesiony na serwery Crossplay (12 lis.)",
+    "nl": "Pc verhuisd naar Crossplay-servers (12 nov.)"
+   },
+   "text": {
+    "en": "The Nov 12 maintenance (08:30–14:20 UTC) moved PC players to the Crossplay servers, improved stability and fixed a Climax Mission matchmaking issue. Consoles follow on Nov 17.",
+    "tr": "12 Kasım bakımı (08:30–14:20 UTC) PC oyuncularını Crossplay sunucularına taşıdı, kararlılığı artırdı ve Climax Mission eşleştirme sorununu düzeltti. Konsollar 17 Kasım'da geçiyor.",
+    "de": "Die Wartung am 12. Nov. (08:30–14:20 UTC) hat PC-Spieler auf die Crossplay-Server verlegt, die Stabilität verbessert und ein Matchmaking-Problem der Climax Mission behoben. Konsolen folgen am 17. Nov.",
+    "fr": "La maintenance du 12 nov. (08:30–14:20 UTC) a migré les joueurs PC vers les serveurs Crossplay, amélioré la stabilité et corrigé un souci de matchmaking de la Climax Mission. Les consoles suivent le 17 nov.",
+    "es": "El mantenimiento del 12 nov. (08:30–14:20 UTC) pasó a los jugadores de PC a los servidores Crossplay, mejoró la estabilidad y arregló un fallo de emparejamiento de la Climax Mission. Las consolas siguen el 17 nov.",
+    "it": "La manutenzione del 12 nov. (08:30–14:20 UTC) ha spostato i giocatori PC sui server Crossplay, migliorato la stabilità e corretto un problema di matchmaking della Climax Mission. Le console seguono il 17 nov.",
+    "pt": "A manutenção de 12 nov. (08:30–14:20 UTC) levou os jogadores de PC aos servidores Crossplay, melhorou a estabilidade e corrigiu um problema de matchmaking da Climax Mission. Os consoles seguem em 17 nov.",
+    "ru": "Техработы 12 нояб. (08:30–14:20 UTC) перевели игроков ПК на серверы Crossplay, повысили стабильность и исправили подбор игроков в Climax Mission. Консоли перейдут 17 нояб.",
+    "pl": "Przerwa 12 lis. (08:30–14:20 UTC) przeniosła graczy PC na serwery Crossplay, poprawiła stabilność i naprawiła dobieranie graczy w Climax Mission. Konsole dołączą 17 lis.",
+    "nl": "Het onderhoud van 12 nov. (08:30–14:20 UTC) zette pc-spelers over naar de Crossplay-servers, verbeterde de stabiliteit en loste een matchmakingprobleem in de Climax Mission op. Consoles volgen op 17 nov."
+   }
+  },
   {
    "id": "y8s4-spearfall-pts-2026-11",
    "kind": "community",
