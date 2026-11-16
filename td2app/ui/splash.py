@@ -15,9 +15,9 @@ class IntroSplash:
     FPS = 30
     FRAME_INTERVAL_MS = 1000 / FPS
     KEY = "#010203"
-    ACCENT = "#36e0c4"      # Uygulamanın yeni, tek görsel kimliğinin vurgu rengi (camgöbeği-teal)
-    WHITE = "#edf0f5"
-    MUTED = "#8d95a5"
+    ACCENT = "#ff6d10"      # Division 2 Taktik HUD — yanık turuncu (amber) vurgu rengi
+    WHITE = "#e8edf2"
+    MUTED = "#8795a6"
 
     def __init__(self, root: tk.Tk, version: str, on_done):
         self.root = root
@@ -57,7 +57,7 @@ class IntroSplash:
     def _color(level: float) -> str:
         level = min(1.0, max(0.0, level))
         start = (8, 36, 32)        # koyu, sönük camgöbeği-teal (soğuk "ember")
-        end = (54, 224, 196)       # tam vurgu rengi (#36e0c4)
+        end = (54, 224, 196)       # tam vurgu rengi (eski #36e0c4 → şimdi #ff6d10 amber)
         return "#" + "".join(f"{round(a + (b - a) * level):02x}" for a, b in zip(start, end))
 
     @staticmethod
@@ -122,7 +122,7 @@ class IntroSplash:
         for i in range(4):
             c.create_arc(cx-92*scale, watch_y-54*scale, cx+92*scale, watch_y+54*scale,
                          start=(progress*480 + i*90) % 360, extent=42,
-                         style="arc", outline=self.ACCENT if i == 0 else "#1f7a73", width=2*scale)
+                         style="arc", outline=self.ACCENT if i == 0 else "#cc5500", width=2*scale)
 
         # Watch face: rotating hands and minute marks remain crisp on the transparent canvas.
         clock_r = 48 * scale
@@ -136,7 +136,7 @@ class IntroSplash:
             a = i * math.tau / 36 + angle
             inner = clock_r - (9 if i % 3 == 0 else 4) * scale
             outer = clock_r - scale
-            color = self.ACCENT if i in (0, 1, 2, 3) else "#aeb4bf"
+            color = self.ACCENT if i in (0, 1, 2, 3) else "#667788"
             c.create_line(cx+math.cos(a)*inner, watch_y+math.sin(a)*inner,
                           cx+math.cos(a)*outer, watch_y+math.sin(a)*outer,
                           fill=color, width=(2 if i % 3 == 0 else 1) * scale)
@@ -174,7 +174,7 @@ class IntroSplash:
                           fill=self.MUTED, font=("Segoe UI", round(8*scale)))
 
         c.create_text(cx, 538*scale, text="A G E N T   N E T W O R K   /   SYSTEM INITIALIZING",
-                      fill="#737d8a", font=("Segoe UI", round(8*scale)))
+                      fill="#6a7a8a", font=("Segoe UI", round(8*scale)))
         progress_w = 148 * scale * progress
         c.create_line(cx-74*scale, 554*scale, cx-74*scale+progress_w, 554*scale,
                       fill=self.ACCENT, width=2*scale)

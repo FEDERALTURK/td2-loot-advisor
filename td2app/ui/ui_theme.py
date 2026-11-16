@@ -35,19 +35,19 @@ def on_color(bg):
 
 
 # ───────────── renk paleti / palette ─────────────
-# Tek, sabit görsel kimlik: koyu grafit zemin + soğuk camgöbeği (cyan-teal) vurgu.
+# Tek, sabit görsel kimlik: Division 2 Taktik HUD — siyah-zift zemin + yanık turuncu (amber) vurgu.
 # Eski çoklu tema/paket sistemi (dark/light/classic + 14 oyun-atmosferi paketi) tamamen kaldırıldı.
 PALETTES = {
     "default": {
-        "bg": "#0a0d12", "surface": "#121720", "surface2": "#1a212c", "border": "#2b3542",
-        "fg": "#eef2f6", "muted": "#8a96a6", "accent": "#36e0c4", "accent_hover": "#6aedd9",
-        "accent_fg": on_color("#36e0c4"), "success": "#22c55e", "danger": "#ef4444", "warning": "#f5b82e",
-        "info": "#4ea1ff", "select": "#114a49", "entry": "#070a0d", "text_bg": "#070a0d",
-        "ov_bg": "#0c1117", "ov_fg": "#ffffff", "ov_border": "#1f7a73",
-        "verdict": {"KEEP": "#15803d", "CONSIDER": "#b7791f", "DISMANTLE": "#c53030",
-                    "REVIEW": "#2563eb", "ERROR": "#4b5263", "IDLE": "#1d2129"},
-        "verdict_fg": {"KEEP": "#4ade80", "CONSIDER": "#facc15", "DISMANTLE": "#f87171",
-                       "REVIEW": "#60a5fa", "ERROR": "#9ca3af", "IDLE": "#8a96a6"},
+        "bg": "#0b0e13", "surface": "#141a22", "surface2": "#1c242f", "border": "#2a3542",
+        "fg": "#e8edf2", "muted": "#8795a6", "accent": "#ff6d10", "accent_hover": "#ff9440",
+        "accent_fg": on_color("#ff6d10"), "success": "#3fb950", "danger": "#f0534a", "warning": "#ffc247",
+        "info": "#4ea1ff", "select": "#4a2a16", "entry": "#080b0f", "text_bg": "#080b0f",
+        "ov_bg": "#0d1118", "ov_fg": "#ffffff", "ov_border": "#cc5500",
+        "verdict": {"KEEP": "#176b45", "CONSIDER": "#8b5a16", "DISMANTLE": "#8f2d35",
+                    "REVIEW": "#245a9b", "ERROR": "#4b5563", "IDLE": "#26313d"},
+        "verdict_fg": {"KEEP": "#4ade80", "CONSIDER": "#ffc247", "DISMANTLE": "#f87171",
+                       "REVIEW": "#60a5fa", "ERROR": "#9ca3af", "IDLE": "#8795a6"},
     },
 }
 THEME_MODES = ("default",)
@@ -62,8 +62,8 @@ def apply_pack(settings, mode):
     # Keep the pointer and trail coordinated with the palette's accent.
     settings["fx_cursor_color"] = accent
     settings["fx_trail_color"] = accent
-    # Division 2'nin kendi arayüzüne benzer kademeli (tactical) kenar çubuğu ve geçiş temposu.
-    settings.update({"event_fx": "standard", "fx_bgwatch": False, "fx_transition_ms": 220,
+    # Division 2 Taktik HUD — kademeli turuncu kenarlık, hızlı geçiş temposu.
+    settings.update({"event_fx": "standard", "fx_bgwatch": False, "fx_transition_ms": 180,
                      "fx_transition_style": "tactical", "ui_nav_layout": "tactical", "ui_layout": "standard"})
     return True
 
