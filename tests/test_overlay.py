@@ -54,5 +54,6 @@ ok(same == [], "çeviri özgünle aynıysa kutu çizilmez (oyunun yazısı gör�
 menu = overlay.layout([("Haritayı kapat", (500, 600, 560, 616), "Close Map", 1)], area, measure_at)
 ok(menu and menu[0]["kind"] == "menu" and menu[0]["w"] >= 60 + 2 * overlay.PAD, "menü satırı kendi yerinde")
 
-print("RESULT:", "PASS" if not fails else f"FAIL ({fails})")
-sys.exit(1 if fails else 0)
+if __name__ == "__main__":
+    print("RESULT:", "PASS" if not fails else f"FAIL ({fails})")
+    sys.exit(1 if fails else 0)

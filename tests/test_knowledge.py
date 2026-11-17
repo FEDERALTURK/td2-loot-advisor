@@ -132,4 +132,6 @@ ok("91" in L.compose("en", "tactical", "KEEP", "", "Striker", 91) and L.compose(
 tmp = tempfile.mkdtemp(); a = voicepack.tone_wav(os.path.join(tmp, "a.wav")); b = voicepack.radio_fx(a, os.path.join(tmp, "b.wav"), seed=2)
 with wave.open(a) as w1, wave.open(b) as w2:
     ok(w2.getnframes() > w1.getnframes() and w2.getnchannels() == 1, "telsiz efekti: cızırtı eklendi, mono WAV")
-print("RESULT:", "PASS" if not fails else f"FAIL ({fails})"); sys.exit(1 if fails else 0)
+if __name__ == "__main__":
+    print("RESULT:", "PASS" if not fails else f"FAIL ({fails})")
+    sys.exit(1 if fails else 0)

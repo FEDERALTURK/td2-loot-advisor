@@ -101,4 +101,6 @@ reqs.clear()
 for i in range(3): n.send(f"t{i}", "b", kind="vendor")
 time.sleep(1.0)
 ok(len(reqs) == 6, f"kuyruktaki bildirimler sırayla gitti ({len(reqs)})")
-print("RESULT:", "PASS" if not fails else f"FAIL ({fails})"); sys.exit(1 if fails else 0)
+if __name__ == "__main__":
+    print("RESULT:", "PASS" if not fails else f"FAIL ({fails})")
+    sys.exit(1 if fails else 0)

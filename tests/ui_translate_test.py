@@ -155,4 +155,6 @@ def guard(fn):
 for _n in ("s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8"): globals()[_n] = guard(globals()[_n])
 a.root.after(4000, s1); a.root.after(240000, finish)
 a.root.mainloop()
-print("RESULT:", "PASS" if res.get("ok") else "FAIL"); sys.exit(0 if res.get("ok") else 1)
+if __name__ == "__main__":
+    print("RESULT:", "PASS" if res.get("ok") else "FAIL")
+    sys.exit(0 if res.get("ok") else 1)

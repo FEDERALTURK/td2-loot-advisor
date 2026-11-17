@@ -4,17 +4,19 @@ sonuç işlemciyle aynı olmalı. Hız burada ölçülemez (gerçek ekran kartı
 import json, subprocess, sys
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
-r = subprocess.run([sys.executable, str(ROOT / "app.py"), "--dml-probe", str(ROOT / "meta" / "bench_card.jpg")],
-                   capture_output=True, text=True, timeout=600, cwd=str(ROOT))
-line = next((l for l in r.stdout.splitlines() if l.startswith("DMLPROBE ")), "")
-print("exit", r.returncode, "|", line or r.stdout[-500:] or r.stderr[-1500:])
-res = json.loads(line[9:]) if line else {}
-# GitHub-hosted runners commonly expose no DirectML provider.  This is an
-# environment capability, not an OCR regression; keep the check informative
-# without blocking every release on a GPU that CI does not own.
-if "DmlExecutionProvider" not in res.get("providers", []):
-    print("RESULT: SKIP (DirectML provider unavailable on this runner)")
-    sys.exit(0)
-ok = r.returncode == 0 and "DmlExecutionProvider" in res.get("providers", []) and res.get("similarity", 0) >= 0.97
-print("RESULT:", "PASS" if ok else "FAIL", "(GPU speed not measurable on CI)")
-sys.exit(0 if ok else 1)
+
+if __name__ == "__main__":
+    r = subprocess.run([sys.executable, str(ROOT / "app.py"), "--dml-probe", str(ROOT / "meta" / "bench_card.jpg")],
+                       capture_output=True, text=True, timeout=600, cwd=str(ROOT))
+    line = next((l for l in r.stdout.splitlines() if l.startswith("DMLPROBE ")), "")
+    print("exit", r.returncode, "|", line or r.stdout[-500:] or r.stderr[-1500:])
+    res = json.loads(line[9:]) if line else {}
+    # GitHub-hosted runners commonly expose no DirectML provider.  This is an
+    # environment capability, not an OCR regression; keep the check informative
+    # without blocking every release on a GPU that CI does not own.
+    if "DmlExecutionProvider" not in res.get("providers", []):
+        print("RESULT: SKIP (DirectML provider unavailable on this runner)")
+        sys.exit(0)
+    ok = r.returncode == 0 and "DmlExecutionProvider" in res.get("providers", []) and res.get("similarity", 0) >= 0.97
+    print("RESULT:", "PASS" if ok else "FAIL", "(GPU speed not measurable on CI)")
+    sys.exit(0 if ok else 1)

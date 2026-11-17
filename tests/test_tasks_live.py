@@ -175,5 +175,6 @@ def e2e():
 
 
 if "--e2e" in sys.argv: e2e()
-print("RESULT:", "PASS" if not fails else f"FAIL ({fails})")
-sys.exit(1 if fails else 0)
+if __name__ == "__main__":
+    print("RESULT:", "PASS" if not fails else f"FAIL ({fails})")
+    sys.exit(1 if fails else 0)

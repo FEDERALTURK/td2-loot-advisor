@@ -90,5 +90,6 @@ t0 = time.perf_counter()
 for _ in range(20): app.monitors()
 ok((time.perf_counter() - t0) / 20 < 0.005, "monitör listesi önbellekten")
 
-print("RESULT:", "PASS" if not fails else f"FAIL ({fails})")
-sys.exit(1 if fails else 0)
+if __name__ == "__main__":
+    print("RESULT:", "PASS" if not fails else f"FAIL ({fails})")
+    sys.exit(1 if fails else 0)

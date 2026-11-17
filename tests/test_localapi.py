@@ -95,4 +95,6 @@ s, body, _ = get("/deck/start"); ok(json.loads(body)["error"] == "control disabl
 api.stop()
 try: urllib.request.urlopen(B + "/api/state?t=" + api.token, timeout=2); ok(False, "durdurma")
 except Exception: ok(True, "durdurulunca port kapandı")
-print("RESULT:", "PASS" if not fails else f"FAIL ({fails})"); sys.exit(1 if fails else 0)
+if __name__ == "__main__":
+    print("RESULT:", "PASS" if not fails else f"FAIL ({fails})")
+    sys.exit(1 if fails else 0)

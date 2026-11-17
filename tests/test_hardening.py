@@ -130,5 +130,6 @@ if "--model" in sys.argv and os.name == "nt":
     ok(bool(out) and out != "Head to the safe house.", "ASCII dışı klasördeki model çalıştı: " + out)
     m.unload(); ok(m.tr is None, "model bellekten çıkarıldı")
 
-print("RESULT:", "PASS" if not fails else f"FAIL ({fails})")
-sys.exit(1 if fails else 0)
+if __name__ == "__main__":
+    print("RESULT:", "PASS" if not fails else f"FAIL ({fails})")
+    sys.exit(1 if fails else 0)

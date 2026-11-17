@@ -68,4 +68,6 @@ im = menu(3); arr = np.asarray(im)
 bgra = np.dstack([arr[..., 2], arr[..., 1], arr[..., 0], np.full(arr.shape[:2], 255, np.uint8)]).tobytes()
 a, b = ss.small_gray(bgra, W, H), g(im)
 ok(a.shape == b.shape and float(np.abs(a - b).mean()) < 0.03, f"ham ekran tamponundan aynı küçük kare (fark {float(np.abs(a-b).mean()):.3f})")
-print("RESULT:", "PASS" if not fails else f"FAIL ({fails})"); sys.exit(1 if fails else 0)
+if __name__ == "__main__":
+    print("RESULT:", "PASS" if not fails else f"FAIL ({fails})")
+    sys.exit(1 if fails else 0)
