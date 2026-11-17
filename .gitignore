@@ -14,6 +14,7 @@ __pycache__/
 *.pyc
 build/
 dist/
+tempbuild*/
 *.spec
 .venv/
 last_card.png
@@ -70,6 +71,9 @@ tasks_sent.json
 tests/.fake_sub.png
 tests/.fake_sub_game.py
 tests/.translate_result.json
+tests/.service_result.json
+tests/.account_result.json
+tests/.fake_game.py
 
 # Ruflo / Codex kullanıcı ve çalışma zamanı verileri
 .codex/
