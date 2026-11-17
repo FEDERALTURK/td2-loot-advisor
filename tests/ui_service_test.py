@@ -86,7 +86,26 @@ def s1():
     global game
     f = ROOT / "tests" / ".fake_game.py"; f.write_text(FAKE, encoding="utf-8")
     game = subprocess.Popen([sys.executable, str(f), "1280", "720", "40", "40", str(ROOT / "tests/samples/stoner_lamg_3440x1440.png")])
-    a.root.after(20000, s2)
+    # Sahte oyun penceresinin gerçekten görünür olmasını bekle (CI'da tkinter başlatması 2-5s alabilir).
+    # GameWatcher her 2s bir polling yapar; pencere görünmeden s2()'yi planlamak "oyun algılandı" testinin
+    # başarısız olmasına yol açar. Pencere görününce +3s daha bekleyerek GameWatcher'ın event fırlatmasına zaman tanı.
+    _t0 = time.time()
+    def _wait_for_window():
+        try:
+            import display as _d
+            detected = bool(_d.game_window(max_age=0))  # cache'i atla, direkt sorgula
+        except Exception:
+            detected = False
+        elapsed = time.time() - _t0
+        if detected:
+            # Pencere algılandı; GameWatcher event fırlatıp app'in state'ini güncellemesi için 3s daha bekle
+            a.root.after(3000, s2)
+        elif elapsed > 15:
+            # 15s timeout; yine de s2'ye geç (pencere görünmemişse test orada başarısız olur)
+            a.root.after(0, s2)
+        else:
+            a.root.after(500, _wait_for_window)
+    a.root.after(500, _wait_for_window)
 
 def s2():
     step("oyun algılandı", a.game_on)
