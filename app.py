@@ -3991,8 +3991,8 @@ class App:
 
     def _acc_chip_text(self):
         a = getattr(self, "account", None)
-        if not a or not a.signed_in: return "👤 " + t("acc.login_short")
-        return "👤 " + a.username[:16] + (" ⭐" if self.ent.source == "account" or self.ent.valid else "")
+        if not a or not a.signed_in: return "\U0001F464 " + t("acc.login_short")
+        return "\U0001F464 " + a.username[:16] + (" \u2B50" if self.ent.source == "account" or self.ent.valid else "")
 
     def _acc_changed(self):
         """Hesap / yetki deÄŸiÅŸti: baÅŸlÄ±ÄŸÄ± gÃ¼ncelle, premium deÄŸiÅŸtiyse arayÃ¼zÃ¼ yeniden kur."""
@@ -4754,7 +4754,7 @@ class App:
                                ("ğŸ " + t("fb.btn_short"), "off", self.open_feedback),
                                ("ğŸ”„ " + t("sync.btn_short"), "btn", self.run_sync),
                                 ("âš– " + t("perf." + st.get("perf_mode", "balanced")), "btn", self.toggle_performance),
-                               *([("ğŸ® " + t("svc.st_" + self.game_state), "on")] if getattr(self, "game_on", False) else []),
+                               *([( "\U0001F3AE " + t("svc.st_" + self.game_state), "on")] if getattr(self, "game_on", False) else []),
                                (("â— " + t("state.running")) if self.running else ("â—‹ " + t("state.stopped")),
                                 "on" if self.running else "off"),
                                ("ğŸ¤– " + provider_label(prov if prov in PROVIDER_KEYS else "builtin"), "off")])
@@ -4930,7 +4930,8 @@ class App:
         for k, v in item.get("attrs", {}).items():
             mx = GAME.max_of(k, proto) if GAME.ok else None
             q = item.get("quality", {}).get(k)
-            bar = ("â–ˆ" * round((q or 0) / 10)).ljust(10, "â–‘") + f"  {q}%" if q is not None else "â€”"
+            # ASCII dolgu kullan: kaynak dosyası yanlış kodlansa bile ljust tek karakter ister.
+            bar = ("#" * round((q or 0) / 10)).ljust(10, ".") + f"  {q}%" if q is not None else "—"
             self.item_tv.insert("", "end", values=(attr_name(k), f"{v:g}", f"{mx:g}" if mx else "â€”", bar))
         bits = []
         if item.get("gear_set") or item.get("brand"):

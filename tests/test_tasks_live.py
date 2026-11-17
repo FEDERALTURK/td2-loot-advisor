@@ -141,7 +141,11 @@ ok(seen[0][1].get("user-agent") == "TD2LootAdvisor", "geçersiz sürüm metni g�
 
 # --- uçtan uca: yerel sunucu + iki oyuncu
 def e2e():
-    port = 8791
+    # Her koşuda boş port seç: paralel CI işlerinde sabit port çakışması testi
+    # sunucu başlamadan başarısız gösterebiliyordu.
+    with socket.socket() as probe:
+        probe.bind(("127.0.0.1", 0))
+        port = probe.getsockname()[1]
     p = subprocess.Popen(["node", str(ROOT / "server" / "dev_server.mjs"), str(port)], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     try:
         ready = False
@@ -155,6 +159,9 @@ def e2e():
                 time.sleep(0.1)
         ok(ready, "yerel sunucu açıldı")
         if not ready:
+            err = p.stderr.read().strip()
+            if err:
+                print("yerel sunucu stderr:", err)
             return
         url = f"http://127.0.0.1:{port}"
         for i, who in enumerate(("player-one-1234", "player-two-5678")):
