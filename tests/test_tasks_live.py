@@ -142,7 +142,7 @@ ok(seen[0][1].get("user-agent") == "TD2LootAdvisor", "geçersiz sürüm metni g�
 # --- uçtan uca: yerel sunucu + iki oyuncu
 def e2e():
     port = 8791
-    p = subprocess.Popen(["node", str(ROOT / "server" / "dev_server.mjs"), str(port)], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, text=True)
+    p = subprocess.Popen(["node", str(ROOT / "server" / "dev_server.mjs"), str(port)], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     try:
         ready = False
         deadline = time.monotonic() + 15
