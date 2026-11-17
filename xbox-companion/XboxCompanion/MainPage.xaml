@@ -1,0 +1,89 @@
+<Page
+    x:Class="XboxCompanion.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:XboxCompanion"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="#FF090C12">
+
+    <Grid Padding="48,32,48,24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="0,0,0,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0">
+                <TextBlock Text="TD2 Loot Advisor Companion" FontSize="32" FontWeight="Bold" Foreground="White" />
+                <TextBlock Text="Build kuralları ve görev çevirileri — statik referans, canlı ekran okuma içermez"
+                           FontSize="14" Foreground="#FF9AA4B5" Margin="0,4,0,0" />
+            </StackPanel>
+            <ComboBox Grid.Column="1" x:Name="LanguagePicker" Width="200" VerticalAlignment="Center"
+                      SelectionChanged="OnLanguageChanged" />
+        </Grid>
+
+        <Pivot Grid.Row="1" x:Name="MainPivot">
+            <PivotItem Header="Görevler">
+                <ListView x:Name="TasksList" SelectionMode="None" IsItemClickEnabled="False">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Margin="0,10" Padding="16" Background="#FF121722" CornerRadius="10">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Text="{Binding CategoryLabel}" Foreground="#FFFF6D10"
+                                           FontSize="12" FontWeight="Bold" />
+                                <TextBlock Grid.Row="1" Text="{Binding Text}" Foreground="White" FontSize="18"
+                                           TextWrapping="Wrap" Margin="0,4,0,0" />
+                                <TextBlock Grid.Row="2" Text="{Binding How}" Foreground="#FF9AA4B5" FontSize="14"
+                                           TextWrapping="Wrap" Margin="0,6,0,0"
+                                           Visibility="{Binding HowVisibility}" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </PivotItem>
+
+            <PivotItem Header="Build'ler">
+                <ListView x:Name="BuildsList" SelectionMode="None" IsItemClickEnabled="False">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Margin="0,10" Padding="16" Background="#FF121722" CornerRadius="10">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid Grid.Row="0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="{Binding Name}" Foreground="White"
+                                               FontSize="20" FontWeight="Bold" TextWrapping="Wrap" />
+                                    <TextBlock Grid.Column="1" Text="{Binding PopularityLabel}"
+                                               Foreground="#FF3DDC84" FontSize="14" VerticalAlignment="Center" />
+                                </Grid>
+                                <TextBlock Grid.Row="1" Text="{Binding SubLine}" Foreground="#FFFF6D10"
+                                           FontSize="13" Margin="0,4,0,0" />
+                                <TextBlock Grid.Row="2" Text="{Binding Summary}" Foreground="#FF9AA4B5"
+                                           FontSize="14" TextWrapping="Wrap" Margin="0,8,0,0" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </PivotItem>
+        </Pivot>
+
+        <TextBlock Grid.Row="2" x:Name="StatusText" Foreground="#FF9AA4B5" FontSize="12" Margin="0,12,0,0" />
+    </Grid>
+</Page>

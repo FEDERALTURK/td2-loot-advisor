@@ -1,0 +1,18 @@
+[
+  {
+    "pack": "natural_tr",
+    "voice": "tr-TR-EmelNeural",
+    "bytes": 49104,
+    "audio_seconds": 8.184,
+    "request_seconds": 3.94,
+    "file": "project_review\\overlay_voice_check\\online_audio\\68bf686dbf10878a022097082bbefa1623ba383b4d67c99c2566f876bd99f9a2.mp3"
+  },
+  {
+    "pack": "natural_en",
+    "voice": "en-US-AriaNeural",
+    "bytes": 41904,
+    "audio_seconds": 6.984,
+    "request_seconds": 1.934,
+    "file": "project_review\\overlay_voice_check\\online_audio\\ee8f47893f6e6d13c4f7abc4634dc3f6b971d5c445c1b4546224eb6436f5f319.mp3"
+  }
+]

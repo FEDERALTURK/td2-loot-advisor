@@ -4,7 +4,7 @@ name: Info check
 on:
   workflow_dispatch:
   push:
-    paths: ["knowledge.py", "voicepack.py", "meta/news_feed.json", "meta/voice_lines.json", "tests/test_knowledge.py", "tests/ui_info_test.py"]
+    paths: ["knowledge.py", "voicepack.py", "meta/news_feed.json", "meta/tasks_feed.json", "meta/voice_lines.json", "tests/test_knowledge.py", "tests/test_project_structure.py", "tests/ui_info_test.py", ".github/workflows/*.yml"]
 
 env:
   TD2_NO_WELCOME: "1"
@@ -24,6 +24,9 @@ jobs:
       - name: Unit
         shell: cmd
         run: set PYTHONIOENCODING=utf-8&& python tests/test_knowledge.py
+      - name: Live feed guard
+        shell: cmd
+        run: python tests/test_project_structure.py
       - name: Voice diag
         shell: cmd
         run: python tests/voice_diag.py

@@ -1,0 +1,499 @@
+{
+  "ok": false,
+  "strict": false,
+  "browserSkipped": false,
+  "lint": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 4,
+    "infoCount": 0,
+    "findings": [
+      {
+        "code": "nested_structure_needs_subcomposition",
+        "severity": "warning",
+        "message": "<section id=\"hero-scene\"> is a timeline element that contains nested <div>. The timeline shows one row per top-level element, and the root composition is built only from sub-compositions.",
+        "selector": "#hero-scene",
+        "dataAttributes": {},
+        "sourceFile": "C:\\Users\\PC\\Desktop\\Thedivision2program\\brag-output-2026-11-15-074949\\composition\\index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Move <section id=\"hero-scene\"> and its contents into a sub-composition file and mount it with data-composition-src."
+      },
+      {
+        "code": "nested_structure_needs_subcomposition",
+        "severity": "warning",
+        "message": "<section id=\"scan-result\"> is a timeline element that contains nested <div>. The timeline shows one row per top-level element, and the root composition is built only from sub-compositions.",
+        "selector": "#scan-result",
+        "dataAttributes": {},
+        "sourceFile": "C:\\Users\\PC\\Desktop\\Thedivision2program\\brag-output-2026-11-15-074949\\composition\\index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Move <section id=\"scan-result\"> and its contents into a sub-composition file and mount it with data-composition-src."
+      },
+      {
+        "code": "nested_structure_needs_subcomposition",
+        "severity": "warning",
+        "message": "<div id=\"feature-rail\"> is a timeline element that contains nested <div>. The timeline shows one row per top-level element, and the root composition is built only from sub-compositions.",
+        "selector": "#feature-rail",
+        "dataAttributes": {},
+        "sourceFile": "C:\\Users\\PC\\Desktop\\Thedivision2program\\brag-output-2026-11-15-074949\\composition\\index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Move <div id=\"feature-rail\"> and its contents into a sub-composition file and mount it with data-composition-src."
+      },
+      {
+        "code": "nested_structure_needs_subcomposition",
+        "severity": "warning",
+        "message": "<section id=\"final-lockup\"> is a timeline element that contains nested <img>. The timeline shows one row per top-level element, and the root composition is built only from sub-compositions.",
+        "selector": "#final-lockup",
+        "dataAttributes": {},
+        "sourceFile": "C:\\Users\\PC\\Desktop\\Thedivision2program\\brag-output-2026-11-15-074949\\composition\\index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Move <section id=\"final-lockup\"> and its contents into a sub-composition file and mount it with data-composition-src."
+      }
+    ],
+    "filesScanned": 1
+  },
+  "runtime": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": []
+  },
+  "layout": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": [],
+    "duration": 20,
+    "samples": [
+      1.111,
+      3.333,
+      5.556,
+      7.778,
+      10,
+      12.222,
+      14.444,
+      16.667,
+      18.889
+    ],
+    "transitionSamples": [],
+    "transitionSamplesDropped": 0,
+    "tolerance": 2,
+    "totalIssueCount": 0,
+    "truncated": false
+  },
+  "motion": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": [],
+    "enabled": false,
+    "samples": 0
+  },
+  "contrast": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": [],
+    "enabled": true,
+    "samples": [
+      1.111,
+      5.556,
+      10,
+      14.444,
+      18.889
+    ],
+    "checked": 54,
+    "passed": 54
+  },
+  "craft": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 4,
+    "infoCount": 0,
+    "findings": [
+      {
+        "code": "first_frame_empty",
+        "severity": "warning",
+        "message": "Frame 0 shows only the background, and the first frame is the thumbnail on social players: have the title or key image already on screen at 0 s instead of entering from nothing; see references/review.md.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0
+      },
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "message": "\"TURN ONE LOOT CARD INTO A BUILD-AWARE DECISION.\" (9 words) is on screen 2.27 s (±0.01 s), under its 2.40 s floor: hold it about 0.5 s + 0.3 s a word (3.20 s here) before it leaves or changes; see references/motion.md.",
+        "text": "TURN ONE LOOT CARD INTO A BUILD-AWARE DECISION.",
+        "selector": "div.sub.mono",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 129.52,
+          "y": 493.19,
+          "width": 930.6100000000001,
+          "height": 40.00000000000006
+        },
+        "time": 0.602,
+        "words": 9,
+        "seconds": 2.266,
+        "floorSeconds": 2.4,
+        "measured": [
+          {
+            "time": 0.25,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 0.375,
+            "opacity": null,
+            "heightPx": null
+          },
+          {
+            "time": 0.5,
+            "opacity": 0.24,
+            "heightPx": 40
+          },
+          {
+            "time": 0.625,
+            "opacity": 0.59,
+            "heightPx": 40
+          },
+          {
+            "time": 0.75,
+            "opacity": 0.85,
+            "heightPx": 40
+          },
+          {
+            "time": 0.875,
+            "opacity": 0.96,
+            "heightPx": 40
+          },
+          {
+            "time": 1,
+            "opacity": 0.99,
+            "heightPx": 40
+          },
+          {
+            "time": 2.375,
+            "opacity": 1,
+            "heightPx": 40
+          },
+          {
+            "time": 2.5,
+            "opacity": 1,
+            "heightPx": 40
+          },
+          {
+            "time": 2.625,
+            "opacity": 1,
+            "heightPx": 40
+          },
+          {
+            "time": 2.75,
+            "opacity": 1,
+            "heightPx": 40
+          },
+          {
+            "time": 2.875,
+            "opacity": 0.44,
+            "heightPx": 40
+          },
+          {
+            "time": 3,
+            "opacity": 0.08,
+            "heightPx": 40
+          },
+          {
+            "time": 3.125,
+            "opacity": null,
+            "heightPx": null
+          }
+        ]
+      },
+      {
+        "code": "text_below_floor",
+        "severity": "warning",
+        "message": "Type floor is 28 px (2.6% of the 1080 px short side, what a phone can read) and 21 text elements stay under it for 0.5 s or more, the smallest \"PANEL / SCAN RESULT\" at 18 px: set reading text to at least 28 px, or put data-layout-ignore on text that is texture rather than reading; see references/look.md.",
+        "text": "PANEL / SCAN RESULT",
+        "selector": "div.terminal-head > b:nth-of-type(1)",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1117.85,
+          "y": 211,
+          "width": 205.21,
+          "height": 23
+        },
+        "time": 3.25,
+        "times": [
+          0.5,
+          0.5,
+          0.5,
+          0.5,
+          0.625,
+          3.25,
+          3.25,
+          3.875,
+          3.875,
+          3.875,
+          3.875,
+          3.875,
+          3.875,
+          11.25,
+          11.25,
+          11.25,
+          11.25,
+          11.25,
+          11.25,
+          15.75,
+          15.875
+        ],
+        "fontPx": 18,
+        "floorPx": 28,
+        "seconds": 8.75,
+        "elements": [
+          {
+            "selector": "div.terminal-head > b:nth-of-type(1)",
+            "text": "PANEL / SCAN RESULT",
+            "fontPx": 18,
+            "time": 3.25,
+            "seconds": 8.75
+          },
+          {
+            "selector": "div.terminal-head > span:nth-of-type(1)",
+            "text": "RAPIDOCR · READY",
+            "fontPx": 18,
+            "time": 3.25,
+            "seconds": 8.75
+          },
+          {
+            "selector": "div.meta",
+            "text": "CHEST · GEAR SET · OCR 0.94",
+            "fontPx": 18,
+            "time": 3.875,
+            "seconds": 8.125
+          },
+          {
+            "selector": "div.safe",
+            "text": "LOCAL OCR · NO GAME MEMORY",
+            "fontPx": 18,
+            "time": 15.875,
+            "seconds": 4.125
+          },
+          {
+            "selector": "div.checks > div:nth-of-type(1)",
+            "text": "ACTIVE BUILD SLOT MATCH",
+            "fontPx": 19,
+            "time": 3.875,
+            "seconds": 8.125
+          },
+          {
+            "selector": "div.checks > div:nth-of-type(2)",
+            "text": "ATTRIBUTE TYPE ACCEPTED",
+            "fontPx": 19,
+            "time": 3.875,
+            "seconds": 8.125
+          },
+          {
+            "selector": "div.checks > div:nth-of-type(3)",
+            "text": "LOW CONFIDENCE → REVIEW, NEVER AUTO-DISMANTLE",
+            "fontPx": 19,
+            "time": 3.875,
+            "seconds": 8.125
+          },
+          {
+            "selector": "div.card > div:nth-of-type(3) > span:nth-of-type(1)",
+            "text": "WEAPON DAMAGE",
+            "fontPx": 20,
+            "time": 3.875,
+            "seconds": 8.125
+          },
+          {
+            "selector": "div.card > div:nth-of-type(4) > span:nth-of-type(1)",
+            "text": "CRITICAL HIT CHANCE",
+            "fontPx": 20,
+            "time": 3.875,
+            "seconds": 8.125
+          },
+          {
+            "selector": "#feature-rail > div:nth-of-type(1)",
+            "text": "BUILDS",
+            "fontPx": 20,
+            "time": 11.25,
+            "seconds": 3.625
+          },
+          {
+            "selector": "#feature-rail > div:nth-of-type(1) > b:nth-of-type(1)",
+            "text": "01",
+            "fontPx": 20,
+            "time": 11.25,
+            "seconds": 3.625
+          },
+          {
+            "selector": "#feature-rail > div:nth-of-type(2)",
+            "text": "STASH AUDIT",
+            "fontPx": 20,
+            "time": 11.25,
+            "seconds": 3.625
+          },
+          {
+            "selector": "#feature-rail > div:nth-of-type(2) > b:nth-of-type(1)",
+            "text": "02",
+            "fontPx": 20,
+            "time": 11.25,
+            "seconds": 3.625
+          },
+          {
+            "selector": "#feature-rail > div:nth-of-type(3)",
+            "text": "TASKS",
+            "fontPx": 20,
+            "time": 11.25,
+            "seconds": 3.625
+          },
+          {
+            "selector": "#feature-rail > div:nth-of-type(3) > b:nth-of-type(1)",
+            "text": "03",
+            "fontPx": 20,
+            "time": 11.25,
+            "seconds": 3.625
+          },
+          {
+            "selector": "#hud-status > span:nth-of-type(1)",
+            "text": "[SHD_NET // ]",
+            "fontPx": 22,
+            "time": 0.5,
+            "seconds": 14.375
+          },
+          {
+            "selector": "#hud-status > span:nth-of-type(1) > b:nth-of-type(1)",
+            "text": "LOCAL OCR",
+            "fontPx": 22,
+            "time": 0.5,
+            "seconds": 14.375
+          },
+          {
+            "selector": "span.status",
+            "text": "ONLINE ·",
+            "fontPx": 22,
+            "time": 0.5,
+            "seconds": 14.375
+          },
+          {
+            "selector": "span.status > b:nth-of-type(1)",
+            "text": "NO GAME MEMORY",
+            "fontPx": 22,
+            "time": 0.5,
+            "seconds": 14.375
+          },
+          {
+            "selector": "div.version",
+            "text": "TD2 LOOT ADVISOR · v9.1.5.35",
+            "fontPx": 22,
+            "time": 15.75,
+            "seconds": 4.25
+          },
+          {
+            "selector": "div.kicker.mono",
+            "text": "TD2 LOOT ADVISOR // FIELD TERMINAL",
+            "fontPx": 24,
+            "time": 0.625,
+            "seconds": 2.25
+          }
+        ]
+      },
+      {
+        "code": "dead_stretch",
+        "severity": "warning",
+        "message": "Nothing on screen changes for 6.75 s (4.25–11.00 s): start the next move within 3 s, or put data-hold on the element whose stillness is deliberate; see references/motion.md.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 4.25,
+        "seconds": 6.75,
+        "floorSeconds": 3,
+        "until": 11
+      }
+    ],
+    "enabled": true,
+    "step": 0.125,
+    "samples": 160
+  },
+  "audio": {
+    "ok": false,
+    "errorCount": 1,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": [
+      {
+        "code": "audio_source_unreadable",
+        "severity": "error",
+        "message": "assets/music/happy-beats-business-moves-vol-12-by-ende-dot-app.mp3 cannot be read as audio ([FFmpeg] ffprobe not found. Please install FFmpeg.), so the render's audio mix fails and the render stops.",
+        "selector": "#bg-music",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "timeRange": [
+          0,
+          20
+        ],
+        "fixHint": "Point src at a file with an audio track, or re-export this one."
+      }
+    ]
+  },
+  "hdr": {
+    "autoPromotion": null,
+    "inspection": "available"
+  },
+  "snapshots": {
+    "enabled": false,
+    "files": [],
+    "times": [],
+    "findingFiles": []
+  }
+}

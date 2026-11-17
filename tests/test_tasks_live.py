@@ -9,6 +9,8 @@ import subprocess
 import sys
 import io
 import tempfile
+import socket
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -140,10 +142,20 @@ ok(seen[0][1].get("user-agent") == "TD2LootAdvisor", "geçersiz sürüm metni g�
 # --- uçtan uca: yerel sunucu + iki oyuncu
 def e2e():
     port = 8791
-    p = subprocess.Popen(["node", str(ROOT / "server" / "dev_server.mjs"), str(port)], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
+    p = subprocess.Popen(["node", str(ROOT / "server" / "dev_server.mjs"), str(port)], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, text=True)
     try:
-        line = p.stdout.readline().split()
-        ok(line and line[0] == "READY", "yerel sunucu açıldı")
+        ready = False
+        deadline = time.monotonic() + 15
+        while time.monotonic() < deadline and p.poll() is None:
+            try:
+                with socket.create_connection(("127.0.0.1", port), timeout=0.2):
+                    ready = True
+                    break
+            except OSError:
+                time.sleep(0.1)
+        ok(ready, "yerel sunucu açıldı")
+        if not ready:
+            return
         url = f"http://127.0.0.1:{port}"
         for i, who in enumerate(("player-one-1234", "player-two-5678")):
             s = T.Submitter(url, who, None)
@@ -163,5 +175,6 @@ def e2e():
 
 
 if "--e2e" in sys.argv: e2e()
-print("RESULT:", "PASS" if not fails else f"FAIL ({fails})")
-sys.exit(1 if fails else 0)
+if __name__ == "__main__":
+    print("RESULT:", "PASS" if not fails else f"FAIL ({fails})")
+    sys.exit(1 if fails else 0)

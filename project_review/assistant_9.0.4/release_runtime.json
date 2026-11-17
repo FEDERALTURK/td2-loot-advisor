@@ -1,0 +1,1 @@
+{"ok": true, "shortcuts": {"<f8>": "scan", "<f9>": "voice", "<f10>": "tasks", "<f7>": "translate_once", "<f6>": "translate_toggle", "<f12>": "cancel"}, "whisper": "1.2.1", "sounddevice": "0.5.6", "av": "18.1.0", "model_download_on_setup": true}

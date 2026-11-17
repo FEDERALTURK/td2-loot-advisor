@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "version": "2026-11-06.1",
-  "updated": "2026-11-06T01:49:22Z",
+  "version": "2026-11-16.1",
+  "updated": "2026-11-16T01:43:54Z",
   "season": "Year 8 Season 3 – Red Horizon",
   "resets": {
     "daily_hour_utc": 8,
@@ -938,6 +938,39 @@
         "pl": "Z The Crooked Man walczysz trzy razy. ECHO: zestrzel 5 fałszywych kruków migających na czerwono (dachy, maszty; losowe miejsca; pomaga pokój CCTV w szpitalu), by otworzyć piwnicę. Trofeum na plecak: w kostnicy domu pogrzebowego wprowadź 4 fale dźwiękowe laptopów w kolejności z wyliczanki.",
         "nl": "Je vecht drie keer tegen The Crooked Man. ECHO: schiet de 5 rood knipperende nepraven neer (daken, vlaggenmasten; wisselende plekken; de CCTV-kamer in het ziekenhuis helpt) om de kelder te openen. Rugzaktrofee: voer in het mortuarium van de uitvaartonderneming de 4 laptop-golfpatronen in de volgorde van het rijmpje in."
       }
+    },
+    {
+      "id": "y8s3-shepherd-event-projects",
+      "cat": "projects",
+      "kind": "seasonal",
+      "until": "2026-11-26T08:00Z",
+      "source": {
+        "url": "https://www.keengamer.com/articles/guides/the-division-2-echoes-of-central-park-dlc-guide-price-endgame-and-y8s3-3-patch-notes/"
+      },
+      "text": {
+        "en": "Shepherd Event (from Nov 17): complete the 6 seasonal projects; each one needs 1 Shepherd Rank. The last one rewards the Named Mk16 Malinois.",
+        "tr": "Shepherd Event (17 Kasım'dan itibaren): 6 sezon projesini tamamla; her biri 1 Shepherd Rank ister. Sonuncusu Named Mk16 Malinois verir.",
+        "de": "Shepherd Event (ab 17. Nov.): Schließe die 6 saisonalen Projekte ab; jedes braucht 1 Shepherd Rank. Das letzte belohnt mit der Named Mk16 Malinois.",
+        "fr": "Shepherd Event (dès le 17 nov.) : terminez les 6 projets saisonniers ; chacun demande 1 Shepherd Rank. Le dernier offre la Named Mk16 Malinois.",
+        "es": "Shepherd Event (desde el 17 nov.): completa los 6 proyectos de temporada; cada uno pide 1 Shepherd Rank. El último da la Named Mk16 Malinois.",
+        "it": "Shepherd Event (dal 17 nov.): completa i 6 progetti stagionali; ognuno richiede 1 Shepherd Rank. L'ultimo premia con la Named Mk16 Malinois.",
+        "pt": "Shepherd Event (a partir de 17 nov.): conclua os 6 projetos sazonais; cada um exige 1 Shepherd Rank. O último dá a Named Mk16 Malinois.",
+        "ru": "Shepherd Event (с 17 нояб.): выполните 6 сезонных проектов; каждому нужен 1 Shepherd Rank. Последний даёт Named Mk16 Malinois.",
+        "pl": "Shepherd Event (od 17 lis.): ukończ 6 projektów sezonowych; każdy wymaga 1 Shepherd Rank. Ostatni nagradza Named Mk16 Malinois.",
+        "nl": "Shepherd Event (vanaf 17 nov.): voltooi de 6 seizoensprojecten; elk vraagt 1 Shepherd Rank. De laatste beloont met de Named Mk16 Malinois."
+      },
+      "how": {
+        "en": "Shepherd Rank comes from answering Calls for Backup: join another agent's mission when the call pops up. All 6 projects are open from day one; each also pays Exotic Components and XP, and projects 1–5 give a Reconstructed Cache.",
+        "tr": "Shepherd Rank, Call for Backup çağrılarına yanıt vererek kazanılır: çağrı çıkınca başka bir ajanın görevine katıl. 6 projenin hepsi ilk günden açık; her biri Exotic Components ve XP de verir, 1–5. projeler Reconstructed Cache verir.",
+        "de": "Shepherd Rank gibt es für beantwortete Calls for Backup: Tritt der Mission eines anderen Agenten bei, wenn der Ruf erscheint. Alle 6 Projekte sind ab Tag 1 offen; jedes gibt auch Exotic Components und XP, Projekte 1–5 einen Reconstructed Cache.",
+        "fr": "Le Shepherd Rank s'obtient en répondant aux Calls for Backup : rejoignez la mission d'un autre agent quand l'appel apparaît. Les 6 projets sont ouverts dès le premier jour ; chacun donne aussi des Exotic Components et de l'XP, les projets 1–5 un Reconstructed Cache.",
+        "es": "El Shepherd Rank se gana respondiendo a Calls for Backup: únete a la misión de otro agente cuando aparezca la llamada. Los 6 proyectos están abiertos desde el primer día; cada uno da Exotic Components y XP, y los proyectos 1–5 un Reconstructed Cache.",
+        "it": "Lo Shepherd Rank si ottiene rispondendo alle Calls for Backup: unisciti alla missione di un altro agente quando compare la chiamata. I 6 progetti sono aperti dal primo giorno; ognuno dà anche Exotic Components e XP, i progetti 1–5 una Reconstructed Cache.",
+        "pt": "O Shepherd Rank vem de atender Calls for Backup: entre na missão de outro agente quando o chamado aparecer. Os 6 projetos ficam abertos desde o primeiro dia; cada um também dá Exotic Components e XP, e os projetos 1–5 dão um Reconstructed Cache.",
+        "ru": "Shepherd Rank дают за ответы на Calls for Backup: присоединяйтесь к заданию другого агента, когда появится вызов. Все 6 проектов открыты с первого дня; каждый также даёт Exotic Components и опыт, проекты 1–5 — Reconstructed Cache.",
+        "pl": "Shepherd Rank zdobywasz, odpowiadając na Calls for Backup: dołącz do misji innego agenta, gdy pojawi się wezwanie. Wszystkie 6 projektów jest dostępnych od pierwszego dnia; każdy daje też Exotic Components i XP, a projekty 1–5 Reconstructed Cache.",
+        "nl": "Shepherd Rank verdien je door Calls for Backup te beantwoorden: sluit je aan bij de missie van een andere agent als de oproep verschijnt. Alle 6 projecten zijn vanaf dag één open; elk geeft ook Exotic Components en XP, projecten 1–5 een Reconstructed Cache."
+      }
     }
   ],
   "guides": [
@@ -1474,6 +1507,38 @@
         "ru": "Territory Control — случайная активность открытого мира (два скрещённых дробовика). Если указана фракция, выбирайте её значок; если на карте пусто, перезапустите игру.",
         "pl": "Territory Control to losowa aktywność otwartego świata (dwie skrzyżowane strzelby). Gdy podano frakcję, wybierz jej ikonę; gdy na mapie nic nie ma, uruchom grę ponownie.",
         "nl": "Territory Control is een willekeurige open-wereld-activiteit (twee gekruiste shotguns). Is een factie genoemd, kies dan haar icoon; staat er niets op de kaart, herstart de game."
+      }
+    },
+    {
+      "id": "call-for-backup",
+      "match": [
+        "call for backup",
+        "calls for backup",
+        "shepherd",
+        "verstärkung",
+        "renforts",
+        "refuerzos",
+        "rinforzi",
+        "reforços",
+        "подкрепление",
+        "wsparcie",
+        "versterking",
+        "destek çağrısı"
+      ],
+      "source": {
+        "url": "https://www.ubisoft.com/en-gb/game/the-division/the-division-2/news-updates/7JzoUWu79A8Jaxh1HHK4W2/new-recruits-briefing-free-weekend-game-pass-and-call-for-backup-faq"
+      },
+      "tip": {
+        "en": "Shepherd/backup projects count answered Calls for Backup: accept the call when it pops up and help the other agent finish the activity.",
+        "tr": "Shepherd/destek projeleri yanıtlanan Call for Backup çağrılarını sayar: çağrı çıkınca kabul et ve diğer ajanın aktiviteyi bitirmesine yardım et.",
+        "de": "Shepherd-/Backup-Projekte zählen beantwortete Calls for Backup: Nimm den Ruf an, wenn er erscheint, und hilf dem anderen Agenten, die Aktivität abzuschließen.",
+        "fr": "Les projets Shepherd/renforts comptent les Calls for Backup acceptés : répondez à l'appel quand il apparaît et aidez l'autre agent à finir l'activité.",
+        "es": "Los proyectos Shepherd/refuerzos cuentan las Calls for Backup atendidas: acepta la llamada cuando aparezca y ayuda al otro agente a terminar la actividad.",
+        "it": "I progetti Shepherd/rinforzi contano le Calls for Backup accettate: accetta la chiamata quando compare e aiuta l'altro agente a finire l'attività.",
+        "pt": "Projetos Shepherd/reforços contam Calls for Backup atendidas: aceite o chamado quando aparecer e ajude o outro agente a terminar a atividade.",
+        "ru": "Проекты Shepherd/подкрепления засчитывают принятые Calls for Backup: примите вызов, когда он появится, и помогите другому агенту завершить активность.",
+        "pl": "Projekty Shepherd/wsparcia liczą przyjęte Calls for Backup: przyjmij wezwanie, gdy się pojawi, i pomóż innemu agentowi ukończyć aktywność.",
+        "nl": "Shepherd-/versterkingsprojecten tellen beantwoorde Calls for Backup: accepteer de oproep als die verschijnt en help de andere agent de activiteit af te ronden."
       }
     }
   ],

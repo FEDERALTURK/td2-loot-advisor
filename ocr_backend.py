@@ -96,7 +96,6 @@ def dml_probe(image_path, runs=3):
     """DirectML denemesi (ayrı süreçte çalıştırılır; sürücü sorunu programı düşürmesin).
     Aynı kart işlemcide ve DirectML ile okunur: sonuç aynı mı, hangisi hızlı?"""
     import time as _t
-    global USE_DML
     from PIL import Image
     out = {"providers": dml_providers(), "ok": False}
     if "DmlExecutionProvider" not in out["providers"]:

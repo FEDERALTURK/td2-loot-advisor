@@ -1,0 +1,1257 @@
+===GIT_PULL=== 
+From https://github.com/FEDERALTURK/td2-loot-advisor
+ * branch            main       -> FETCH_HEAD
+   2005277..80631f0  main       -> origin/main
+Auto-merging .github/release_notes.md
+CONFLICT (content): Merge conflict in .github/release_notes.md
+Auto-merging .github/workflows/build-installer.yml
+Auto-merging .github/workflows/build-mobile.yml
+CONFLICT (content): Merge conflict in .github/workflows/build-mobile.yml
+Auto-merging .gitignore
+CONFLICT (content): Merge conflict in .gitignore
+Auto-merging AGENTS.md
+CONFLICT (content): Merge conflict in AGENTS.md
+Auto-merging app.py
+CONFLICT (content): Merge conflict in app.py
+Auto-merging mobile/lib/main.dart
+CONFLICT (content): Merge conflict in mobile/lib/main.dart
+Auto-merging mobile/lib/services/cloud_api.dart
+CONFLICT (content): Merge conflict in mobile/lib/services/cloud_api.dart
+Auto-merging mobile/lib/services/companion_release.dart
+CONFLICT (content): Merge conflict in mobile/lib/services/companion_release.dart
+Auto-merging td2app/ui/fx.py
+CONFLICT (content): Merge conflict in td2app/ui/fx.py
+Auto-merging td2app/ui/splash.py
+CONFLICT (content): Merge conflict in td2app/ui/splash.py
+Auto-merging td2app/ui/ui_art.py
+Auto-merging td2app/ui/ui_theme.py
+CONFLICT (content): Merge conflict in td2app/ui/ui_theme.py
+Auto-merging td2app/ui/view3d.py
+CONFLICT (content): Merge conflict in td2app/ui/view3d.py
+Auto-merging tests/test_knowledge.py
+CONFLICT (content): Merge conflict in tests/test_knowledge.py
+Auto-merging tests/test_tasks_live.py
+Auto-merging tests/ui_translate_test.py
+Auto-merging translation_probe.py
+CONFLICT (content): Merge conflict in translation_probe.py
+Automatic merge failed; fix conflicts and then commit the result.
+===ANALYZE_START=== 
+
+┌─────────────────────────────────────────────────────────┐
+│ A new version of Flutter is available!                  │
+│                                                         │
+│ To update to the latest version, run "flutter upgrade". │
+└─────────────────────────────────────────────────────────┘
+Resolving dependencies...
+Downloading packages...
+  code_assets 1.2.1 (2.2.0 available)
++ convert 3.1.2
+  cross_file 0.3.5+5 (0.4.0 available)
+  cupertino_icons 1.0.9 (2.0.0 available)
+  dbus 0.7.15 (0.8.0 available)
+  flutter_local_notifications 19.5.0 (23.0.2 available)
+  flutter_local_notifications_linux 6.0.0 (9.0.0 available)
+  flutter_local_notifications_platform_interface 9.1.0 (13.0.0 available)
+  flutter_local_notifications_windows 1.0.3 (4.0.1 available)
+  flutter_secure_storage 10.3.4 (11.2.0 available)
+  flutter_secure_storage_darwin 0.3.2 (0.4.3 available)
+  google_mlkit_commons 1.0.1 (1.0.3 available)
+  google_mlkit_text_recognition 1.0.1 (1.0.3 available)
+  google_mlkit_translation 1.0.1 (1.0.3 available)
+  hooks 2.0.2 (2.2.0 available)
+  jni 1.1.1 (1.1.2 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  meta 1.18.3 (1.19.0 available)
+  mobile_scanner 7.4.2 (7.5.0 available)
+  objective_c 9.5.0 (9.6.4 available)
+  petitparser 7.0.2 (7.1.0 available)
++ pointycastle 4.0.0
++ qr 3.0.3 (4.0.1 available)
++ qr_flutter 4.1.0
+  record_use 0.6.0 (1.1.1 available)
+  shared_preferences_android 2.5.4 (2.5.5 available)
+  shared_preferences_foundation 2.5.7 (2.6.2 available)
+  test_api 0.7.12 (0.7.15 available)
+  timezone 0.10.1 (0.11.2 available)
+  vector_math 2.4.0 (2.4.4 available)
+  xml 6.6.1 (7.1.0 available)
+Changed 4 dependencies!
+28 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Analyzing mobile...                                             
+
+  error - Missing selector such as '.identifier' or '[0]'. Try adding a selector - lib\main.dart:625:24 - missing_assignable_selector
+  error - The name 'http' refers to an import prefix, so it must be followed by '.'. Try correcting the name to refer to something other than a prefix, or renaming the prefix - lib\main.dart:625:30 - prefix_identifier_not_followed_by_dot
+  error - Expected an identifier - lib\main.dart:626:3 - missing_identifier
+  error - Expected an identifier - lib\main.dart:626:5 - missing_identifier
+  error - The prefix 'HEAD' can't be used here because it's shadowed by a local declaration. Try renaming either the prefix or the local declaration - lib\main.dart:626:9 - prefix_shadowed_by_local_declaration
+  error - Expected to find '>' - lib\main.dart:627:12 - expected_token
+  error - The built-in identifier 'get' can't be used as a type. Try correcting the name to match an existing type - lib\main.dart:627:12 - built_in_identifier_as_type
+  error - Expected to find '[' - lib\main.dart:628:1 - expected_token
+  error - The '===' operator is not supported - lib\main.dart:628:1 - unsupported_operator
+  error - Expected an identifier - lib\main.dart:628:4 - missing_identifier
+  error - The '===' operator is not supported - lib\main.dart:628:4 - unsupported_operator
+  error - The static method or constructor 'get' isn't defined for the context type '_'. Try correcting the name to the name of an existing static method or constructor, or defining a static method or constructor named 'get' - lib\main.dart:629:12 - dot_shorthand_undefined_member
+  error - Expected an identifier - lib\main.dart:633:4 - missing_identifier
+  error - Expected an identifier - lib\main.dart:633:7 - missing_identifier
+  error - Expected to find ';' - lib\main.dart:633:9 - expected_token
+   info - Missing type annotation. Try adding a type annotation - lib\services\cloud_api.dart:50:1 - strict_top_level_inference
+  error - Methods must have an explicit list of parameters. Try adding a parameter list - lib\services\cloud_api.dart:50:1 - missing_method_parameters
+  error - Operator '<<' should declare exactly 1 parameters, but 0 found - lib\services\cloud_api.dart:50:1 - wrong_number_of_parameters_for_operator
+  error - Operator declarations must be preceded by the keyword 'operator'. Try adding the keyword 'operator' - lib\services\cloud_api.dart:50:1 - missing_keyword_operator
+   info - Missing type annotation. Try adding a type annotation - lib\services\cloud_api.dart:50:3 - strict_top_level_inference
+  error - A function body must be provided. Try adding a function body - lib\services\cloud_api.dart:50:3 - missing_function_body
+  error - Methods must have an explicit list of parameters. Try adding a parameter list - lib\services\cloud_api.dart:50:3 - missing_method_parameters
+  error - Operator '<<' should declare exactly 1 parameters, but 0 found - lib\services\cloud_api.dart:50:3 - wrong_number_of_parameters_for_operator
+  error - Operator declarations must be preceded by the keyword 'operator'. Try adding the keyword 'operator' - lib\services\cloud_api.dart:50:3 - missing_keyword_operator
+  error - The name '<<' is already defined. Try renaming one of the declarations - lib\services\cloud_api.dart:50:3 - duplicate_definition
+   info - Missing type annotation. Try adding a type annotation - lib\services\cloud_api.dart:50:5 - strict_top_level_inference
+  error - A function body must be provided. Try adding a function body - lib\services\cloud_api.dart:50:5 - missing_function_body
+  error - Methods must have an explicit list of parameters. Try adding a parameter list - lib\services\cloud_api.dart:50:5 - missing_method_parameters
+  error - Operator '<<' should declare exactly 1 parameters, but 0 found - lib\services\cloud_api.dart:50:5 - wrong_number_of_parameters_for_operator
+  error - Operator declarations must be preceded by the keyword 'operator'. Try adding the keyword 'operator' - lib\services\cloud_api.dart:50:5 - missing_keyword_operator
+  error - The name '<<' is already defined. Try renaming one of the declarations - lib\services\cloud_api.dart:50:5 - duplicate_definition
+  error - Types parameters aren't allowed when defining an operator. Try removing the type parameters - lib\services\cloud_api.dart:50:7 - type_parameter_on_operator
+  error - Expected to find '>' - lib\services\cloud_api.dart:50:9 - expected_token
+  error - A function body must be provided. Try adding a function body - lib\services\cloud_api.dart:51:3 - missing_function_body
+  error - Expected a class member. Try placing this code inside a class member - lib\services\cloud_api.dart:52:1 - expected_class_member
+  error - The '===' operator is not supported - lib\services\cloud_api.dart:52:1 - unsupported_operator
+  error - Expected a class member. Try placing this code inside a class member - lib\services\cloud_api.dart:52:4 - expected_class_member
+  error - The '===' operator is not supported - lib\services\cloud_api.dart:52:4 - unsupported_operator
+   info - Missing type annotation. Try adding a type annotation - lib\services\cloud_api.dart:52:7 - strict_top_level_inference
+  error - Methods must have an explicit list of parameters. Try adding a parameter list - lib\services\cloud_api.dart:52:7 - missing_method_parameters
+  error - Operator declarations must be preceded by the keyword 'operator'. Try adding the keyword 'operator' - lib\services\cloud_api.dart:52:7 - missing_keyword_operator
+  error - The string '=' isn't a user-definable operator - lib\services\cloud_api.dart:52:7 - invalid_operator
+  error - A function body must be provided. Try adding a function body - lib\services\cloud_api.dart:53:3 - missing_function_body
+warning - The value of the field '_userAgent' isn't used. Try removing the field, or using it - lib\services\cloud_api.dart:53:16 - unused_field
+  error - The name '_userAgent' is already defined. Try renaming one of the declarations - lib\services\cloud_api.dart:53:16 - duplicate_definition
+   info - Missing type annotation. Try adding a type annotation - lib\services\cloud_api.dart:54:1 - strict_top_level_inference
+  error - Methods must have an explicit list of parameters. Try adding a parameter list - lib\services\cloud_api.dart:54:1 - missing_method_parameters
+  error - Operator '>>>' should declare exactly 1 parameters, but 0 found - lib\services\cloud_api.dart:54:1 - wrong_number_of_parameters_for_operator
+  error - Operator declarations must be preceded by the keyword 'operator'. Try adding the keyword 'operator' - lib\services\cloud_api.dart:54:1 - missing_keyword_operator
+   info - Missing type annotation. Try adding a type annotation - lib\services\cloud_api.dart:54:4 - strict_top_level_inference
+  error - A function body must be provided. Try adding a function body - lib\services\cloud_api.dart:54:4 - missing_function_body
+  error - Methods must have an explicit list of parameters. Try adding a parameter list - lib\services\cloud_api.dart:54:4 - missing_method_parameters
+  error - Operator '>>>' should declare exactly 1 parameters, but 0 found - lib\services\cloud_api.dart:54:4 - wrong_number_of_parameters_for_operator
+  error - Operator declarations must be preceded by the keyword 'operator'. Try adding the keyword 'operator' - lib\services\cloud_api.dart:54:4 - missing_keyword_operator
+  error - The name '>>>' is already defined. Try renaming one of the declarations - lib\services\cloud_api.dart:54:4 - duplicate_definition
+   info - Missing type annotation. Try adding a type annotation - lib\services\cloud_api.dart:54:7 - strict_top_level_inference
+  error - A function body must be provided. Try adding a function body - lib\services\cloud_api.dart:54:7 - missing_function_body
+  error - Methods must have an explicit list of parameters. Try adding a parameter list - lib\services\cloud_api.dart:54:7 - missing_method_parameters
+  error - Operator '>' should declare exactly 1 parameters, but 0 found - lib\services\cloud_api.dart:54:7 - wrong_number_of_parameters_for_operator
+  error - Operator declarations must be preceded by the keyword 'operator'. Try adding the keyword 'operator' - lib\services\cloud_api.dart:54:7 - missing_keyword_operator
+  error - A function body must be provided. Try adding a function body - lib\services\cloud_api.dart:54:9 - missing_function_body
+  error - Expected a class member. Try placing this code inside a class member - lib\services\cloud_api.dart:54:9 - expected_class_member
+  error - f00b7ee93cc591f02c3223210423cdc92f1 isn't a type. Try correcting the name to match an existing type - lib\services\cloud_api.dart:54:14 - not_a_type
+  error - Expected to find ';' - lib\services\cloud_api.dart:55:3 - expected_token
+  error - Only static fields can be declared as const. Try declaring the field as final, or adding the keyword 'static' - lib\services\cloud_api.dart:55:10 - const_instance_field
+  error - Expected a method, getter, setter or operator declaration. This appears to be incomplete code. Try removing it or completing it - lib\services\companion_release.dart:7:1 - expected_executable
+  error - Expected a method, getter, setter or operator declaration. This appears to be incomplete code. Try removing it or completing it - lib\services\companion_release.dart:7:3 - expected_executable
+  error - Expected a method, getter, setter or operator declaration. This appears to be incomplete code. Try removing it or completing it - lib\services\companion_release.dart:7:5 - expected_executable
+  error - Expected a method, getter, setter or operator declaration. This appears to be incomplete code. Try removing it or completing it - lib\services\companion_release.dart:7:7 - expected_executable
+   info - An uninitialized variable should have an explicit type annotation. Try adding a type annotation - lib\services\companion_release.dart:7:9 - prefer_typing_uninitialized_variables
+   info - Missing type annotation. Try adding a type annotation - lib\services\companion_release.dart:7:9 - strict_top_level_inference
+   info - The variable name 'HEAD' isn't a lowerCamelCase identifier. Try changing the name to follow the lowerCamelCase style - lib\services\companion_release.dart:7:9 - non_constant_identifier_names
+  error - Expected to find ';' - lib\services\companion_release.dart:7:9 - expected_token
+  error - Variables must be declared using the keywords 'const', 'final', 'var' or a type name. Try adding the name of the type of the variable or the keyword 'var' - lib\services\companion_release.dart:7:9 - missing_const_final_var_or_type
+  error - Expected a method, getter, setter or operator declaration. This appears to be incomplete code. Try removing it or completing it - lib\services\companion_release.dart:10:1 - expected_executable
+  error - The '===' operator is not supported - lib\services\companion_release.dart:10:1 - unsupported_operator
+  error - Expected a method, getter, setter or operator declaration. This appears to be incomplete code. Try removing it or completing it - lib\services\companion_release.dart:10:4 - expected_executable
+  error - The '===' operator is not supported - lib\services\companion_release.dart:10:4 - unsupported_operator
+  error - Expected a method, getter, setter or operator declaration. This appears to be incomplete code. Try removing it or completing it - lib\services\companion_release.dart:10:7 - expected_executable
+  error - The name 'companionVersion' is already defined. Try renaming one of the declarations - lib\services\companion_release.dart:11:7 - duplicate_definition
+  error - Expected a method, getter, setter or operator declaration. This appears to be incomplete code. Try removing it or completing it - lib\services\companion_release.dart:12:1 - expected_executable
+  error - Expected a method, getter, setter or operator declaration. This appears to be incomplete code. Try removing it or completing it - lib\services\companion_release.dart:12:4 - expected_executable
+  error - Expected a method, getter, setter or operator declaration. This appears to be incomplete code. Try removing it or completing it - lib\services\companion_release.dart:12:7 - expected_executable
+  error - Expected a method, getter, setter or operator declaration. This appears to be incomplete code. Try removing it or completing it - lib\services\companion_release.dart:12:9 - expected_executable
+   info - An uninitialized variable should have an explicit type annotation. Try adding a type annotation - lib\services\companion_release.dart:12:14 - prefer_typing_uninitialized_variables
+   info - Missing type annotation. Try adding a type annotation - lib\services\companion_release.dart:12:14 - strict_top_level_inference
+  error - Expected to find ';' - lib\services\companion_release.dart:12:14 - expected_token
+  error - Variables must be declared using the keywords 'const', 'final', 'var' or a type name. Try adding the name of the type of the variable or the keyword 'var' - lib\services\companion_release.dart:12:14 - missing_const_final_var_or_type
+
+88 issues found. (ran in 5.8s)
+===ANALYZE_DONE=== 
+===TEST_START=== 
+00:00 +0: loading C:/Users/PC/Desktop/Thedivision2program/mobile/test/companion_release_test.dart
+lib/main.dart:628:1: Error: The '===' operator is not supported.
+=======
+^
+lib/main.dart:628:4: Error: The '===' operator is not supported.
+=======
+   ^
+lib/services/companion_release.dart:10:1: Error: The '===' operator is not supported.
+=======
+^
+lib/services/companion_release.dart:10:4: Error: The '===' operator is not supported.
+=======
+   ^
+lib/services/companion_release.dart:7:1: Error: Expected a declaration, but got '<<'.
+<<<<<<< HEAD
+^^
+lib/services/companion_release.dart:7:3: Error: Expected a declaration, but got '<<'.
+<<<<<<< HEAD
+  ^^
+lib/services/companion_release.dart:7:5: Error: Expected a declaration, but got '<<'.
+<<<<<<< HEAD
+    ^^
+lib/services/companion_release.dart:7:7: Error: Expected a declaration, but got '<'.
+<<<<<<< HEAD
+      ^
+lib/services/companion_release.dart:7:9: Error: Variables must be declared using the keywords 'const', 'final', 'var' or a type name.
+Try adding the name of the type of the variable or the keyword 'var'.
+<<<<<<< HEAD
+        ^^^^
+lib/services/companion_release.dart:7:9: Error: Expected ';' after this.
+<<<<<<< HEAD
+        ^^^^
+lib/services/companion_release.dart:10:1: Error: Expected a declaration, but got '==='.
+=======
+^^^
+lib/services/companion_release.dart:10:4: Error: Expected a declaration, but got '==='.
+=======
+   ^^^
+lib/services/companion_release.dart:10:7: Error: Expected a declaration, but got '='.
+=======
+      ^
+lib/services/companion_release.dart:12:1: Error: Expected a declaration, but got '>>>'.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+^^^
+lib/services/companion_release.dart:12:4: Error: Expected a declaration, but got '>>>'.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+   ^^^
+lib/services/companion_release.dart:12:7: Error: Expected a declaration, but got '>'.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+      ^
+lib/services/companion_release.dart:12:9: Error: Expected a declaration, but got '80631'.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+        ^^^^^
+lib/services/companion_release.dart:12:14: Error: Variables must be declared using the keywords 'const', 'final', 'var' or a type name.
+Try adding the name of the type of the variable or the keyword 'var'.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+lib/services/companion_release.dart:12:14: Error: Expected ';' after this.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+lib/services/cloud_api.dart:52:1: Error: The '===' operator is not supported.
+=======
+^
+lib/services/cloud_api.dart:52:4: Error: The '===' operator is not supported.
+=======
+   ^
+lib/services/cloud_api.dart:50:1: Error: Operator declarations must be preceded by the keyword 'operator'.
+Try adding the keyword 'operator'.
+<<<<<<< HEAD
+^^
+lib/services/cloud_api.dart:50:1: Error: A method declaration needs an explicit list of parameters.
+Try adding a parameter list to the method declaration.
+<<<<<<< HEAD
+^^
+lib/services/cloud_api.dart:50:3: Error: Expected '{' before this.
+<<<<<<< HEAD
+  ^^
+lib/services/cloud_api.dart:50:1: Error: Operator '<<' should have exactly one parameter.
+<<<<<<< HEAD
+^^
+lib/services/cloud_api.dart:50:3: Error: Operator declarations must be preceded by the keyword 'operator'.
+Try adding the keyword 'operator'.
+<<<<<<< HEAD
+  ^^
+lib/services/cloud_api.dart:50:3: Error: A method declaration needs an explicit list of parameters.
+Try adding a parameter list to the method declaration.
+<<<<<<< HEAD
+  ^^
+lib/services/cloud_api.dart:50:5: Error: Expected '{' before this.
+<<<<<<< HEAD
+    ^^
+lib/services/cloud_api.dart:50:3: Error: Operator '<<' should have exactly one parameter.
+<<<<<<< HEAD
+  ^^
+lib/services/cloud_api.dart:50:5: Error: Operator declarations must be preceded by the keyword 'operator'.
+Try adding the keyword 'operator'.
+<<<<<<< HEAD
+    ^^
+lib/services/cloud_api.dart:50:9: Error: Expected '>' after this.
+<<<<<<< HEAD
+        ^^^^
+lib/services/cloud_api.dart:50:5: Error: A method declaration needs an explicit list of parameters.
+Try adding a parameter list to the method declaration.
+<<<<<<< HEAD
+    ^^
+lib/services/cloud_api.dart:51:3: Error: Expected '{' before this.
+  static const _userAgent = companionUserAgent;
+  ^^^^^^
+lib/services/cloud_api.dart:50:5: Error: Operator '<<' should have exactly one parameter.
+<<<<<<< HEAD
+    ^^
+lib/services/cloud_api.dart:50:7: Error: Types parameters aren't allowed when defining an operator.
+Try removing the type parameters.
+<<<<<<< HEAD
+      ^^^^^^^...
+lib/services/cloud_api.dart:52:1: Error: Expected a class member, but got '==='.
+=======
+^^^
+lib/services/cloud_api.dart:52:4: Error: Expected a class member, but got '==='.
+=======
+   ^^^
+lib/services/cloud_api.dart:52:7: Error: Operator declarations must be preceded by the keyword 'operator'.
+Try adding the keyword 'operator'.
+=======
+      ^
+lib/services/cloud_api.dart:52:7: Error: The string '=' isn't a user-definable operator.
+=======
+      ^
+lib/services/cloud_api.dart:52:7: Error: A method declaration needs an explicit list of parameters.
+Try adding a parameter list to the method declaration.
+=======
+      ^
+lib/services/cloud_api.dart:53:3: Error: Expected '{' before this.
+  static const _userAgent = 'TD2-Loot-Advisor-Companion/$companionVersion';
+  ^^^^^^
+lib/services/cloud_api.dart:54:1: Error: Operator declarations must be preceded by the keyword 'operator'.
+Try adding the keyword 'operator'.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+^^^
+lib/services/cloud_api.dart:54:1: Error: A method declaration needs an explicit list of parameters.
+Try adding a parameter list to the method declaration.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+^^^
+lib/services/cloud_api.dart:54:4: Error: Expected '{' before this.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+   ^^^
+lib/services/cloud_api.dart:54:1: Error: Operator '>>>' should have exactly one parameter.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+^^^
+lib/services/cloud_api.dart:54:4: Error: Operator declarations must be preceded by the keyword 'operator'.
+Try adding the keyword 'operator'.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+   ^^^
+lib/services/cloud_api.dart:54:4: Error: A method declaration needs an explicit list of parameters.
+Try adding a parameter list to the method declaration.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+   ^^^
+lib/services/cloud_api.dart:54:7: Error: Expected '{' before this.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+      ^
+lib/services/cloud_api.dart:54:4: Error: Operator '>>>' should have exactly one parameter.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+   ^^^
+lib/services/cloud_api.dart:54:7: Error: Operator declarations must be preceded by the keyword 'operator'.
+Try adding the keyword 'operator'.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+      ^
+lib/services/cloud_api.dart:54:7: Error: A method declaration needs an explicit list of parameters.
+Try adding a parameter list to the method declaration.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+      ^
+lib/services/cloud_api.dart:54:9: Error: Expected '{' before this.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+        ^^^^^
+lib/services/cloud_api.dart:54:7: Error: Operator '>' should have exactly one parameter.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+      ^
+lib/services/cloud_api.dart:54:9: Error: Expected a class member, but got '80631'.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+        ^^^^^
+lib/services/cloud_api.dart:55:3: Error: Expected ';' after this.
+  static const _timeout = Duration(seconds: 8);
+  ^^^^^^
+lib/services/cloud_api.dart:55:10: Error: Only static fields can be declared as const.
+Try using 'final' instead of 'const', or adding the keyword 'static'.
+  static const _timeout = Duration(seconds: 8);
+         ^^^^^
+lib/services/companion_release.dart:11:7: Error: 'companionVersion' is already declared in this scope.
+const companionVersion = '0.1.9';
+      ^^^^^^^^^^^^^^^^
+lib/services/companion_release.dart:8:7: Context: Previous declaration of 'companionVersion'.
+const companionVersion = '0.1.8';
+      ^^^^^^^^^^^^^^^^
+lib/services/cloud_api.dart:50:3: Error: '<<' is already declared in this scope.
+<<<<<<< HEAD
+  ^^
+lib/services/cloud_api.dart:50:1: Context: Previous declaration of '<<'.
+<<<<<<< HEAD
+^^
+lib/services/cloud_api.dart:50:5: Error: '<<' is already declared in this scope.
+<<<<<<< HEAD
+    ^^
+lib/services/cloud_api.dart:50:1: Context: Previous declaration of '<<'.
+<<<<<<< HEAD
+^^
+lib/services/cloud_api.dart:53:16: Error: '_userAgent' is already declared in this scope.
+  static const _userAgent = 'TD2-Loot-Advisor-Companion/$companionVersion';
+               ^^^^^^^^^^
+lib/services/cloud_api.dart:51:16: Context: Previous declaration of '_userAgent'.
+  static const _userAgent = companionUserAgent;
+               ^^^^^^^^^^
+lib/services/cloud_api.dart:54:4: Error: '>>>' is already declared in this scope.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+   ^^^
+lib/services/cloud_api.dart:54:1: Context: Previous declaration of '>>>'.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+^^^
+lib/services/cloud_api.dart:54:14: Error: 'f00b7ee93cc591f02c3223210423cdc92f1' isn't a type.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+lib/services/companion_release.dart:12:14: Context: This isn't a type.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+lib/main.dart:625:30: Error: A prefix can't be used as an expression.
+      final response = await http
+                             ^^^^
+lib/main.dart:626:3: Error: Expected an identifier, but got '<<'.
+Try inserting an identifier before '<<'.
+<<<<<<< HEAD
+  ^^
+lib/main.dart:626:5: Error: Expected an identifier, but got '<<'.
+Try inserting an identifier before '<<'.
+<<<<<<< HEAD
+    ^^
+lib/main.dart:627:12: Error: The built-in identifier 'get' can't be used as a type.
+          .get(endpoint, headers: const {'User-Agent': companionUserAgent})
+           ^^^
+lib/main.dart:626:9: Error: 'HEAD.get' can't be used as a type because 'HEAD' doesn't refer to an import prefix.
+<<<<<<< HEAD
+        ^^^^^...
+lib/main.dart:627:12: Error: Expected '>' after this.
+          .get(endpoint, headers: const {'User-Agent': companionUserAgent})
+           ^^^
+lib/main.dart:628:1: Error: Expected '[' before this.
+=======
+^^^
+lib/main.dart:628:4: Error: Expected an identifier, but got '==='.
+Try inserting an identifier before '==='.
+=======
+   ^^^
+lib/main.dart:628:1: Error: The string '===' isn't a user-definable operator.
+=======
+^^^
+lib/main.dart:633:4: Error: Expected an identifier, but got '>>>'.
+Try inserting an identifier before '>>>'.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+   ^^^
+lib/main.dart:633:7: Error: Expected an identifier, but got '>'.
+Try inserting an identifier before '>'.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+      ^
+lib/main.dart:633:9: Error: Expected ';' after this.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+        ^^^^^
+00:00 +0 -1: loading C:/Users/PC/Desktop/Thedivision2program/mobile/test/companion_release_test.dart [E]
+  Failed to load "C:/Users/PC/Desktop/Thedivision2program/mobile/test/companion_release_test.dart":
+  Compilation failed for testPath=C:/Users/PC/Desktop/Thedivision2program/mobile/test/companion_release_test.dart: lib/main.dart:628:1: Error: The '===' operator is not supported.
+  =======
+  ^
+  lib/main.dart:628:4: Error: The '===' operator is not supported.
+  =======
+     ^
+  lib/services/companion_release.dart:10:1: Error: The '===' operator is not supported.
+  =======
+  ^
+  lib/services/companion_release.dart:10:4: Error: The '===' operator is not supported.
+  =======
+     ^
+  lib/services/companion_release.dart:7:1: Error: Expected a declaration, but got '<<'.
+  <<<<<<< HEAD
+  ^^
+  lib/services/companion_release.dart:7:3: Error: Expected a declaration, but got '<<'.
+  <<<<<<< HEAD
+    ^^
+  lib/services/companion_release.dart:7:5: Error: Expected a declaration, but got '<<'.
+  <<<<<<< HEAD
+      ^^
+  lib/services/companion_release.dart:7:7: Error: Expected a declaration, but got '<'.
+  <<<<<<< HEAD
+        ^
+  lib/services/companion_release.dart:7:9: Error: Variables must be declared using the keywords 'const', 'final', 'var' or a type name.
+  Try adding the name of the type of the variable or the keyword 'var'.
+  <<<<<<< HEAD
+          ^^^^
+  lib/services/companion_release.dart:7:9: Error: Expected ';' after this.
+  <<<<<<< HEAD
+          ^^^^
+  lib/services/companion_release.dart:10:1: Error: Expected a declaration, but got '==='.
+  =======
+  ^^^
+  lib/services/companion_release.dart:10:4: Error: Expected a declaration, but got '==='.
+  =======
+     ^^^
+  lib/services/companion_release.dart:10:7: Error: Expected a declaration, but got '='.
+  =======
+        ^
+  lib/services/companion_release.dart:12:1: Error: Expected a declaration, but got '>>>'.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+  ^^^
+  lib/services/companion_release.dart:12:4: Error: Expected a declaration, but got '>>>'.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+     ^^^
+  lib/services/companion_release.dart:12:7: Error: Expected a declaration, but got '>'.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+        ^
+  lib/services/companion_release.dart:12:9: Error: Expected a declaration, but got '80631'.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+          ^^^^^
+  lib/services/companion_release.dart:12:14: Error: Variables must be declared using the keywords 'const', 'final', 'var' or a type name.
+  Try adding the name of the type of the variable or the keyword 'var'.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  lib/services/companion_release.dart:12:14: Error: Expected ';' after this.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  lib/services/cloud_api.dart:52:1: Error: The '===' operator is not supported.
+  =======
+  ^
+  lib/services/cloud_api.dart:52:4: Error: The '===' operator is not supported.
+  =======
+     ^
+  lib/services/cloud_api.dart:50:1: Error: Operator declarations must be preceded by the keyword 'operator'.
+  Try adding the keyword 'operator'.
+  <<<<<<< HEAD
+  ^^
+  lib/services/cloud_api.dart:50:1: Error: A method declaration needs an explicit list of parameters.
+  Try adding a parameter list to the method declaration.
+  <<<<<<< HEAD
+  ^^
+  lib/services/cloud_api.dart:50:3: Error: Expected '{' before this.
+  <<<<<<< HEAD
+    ^^
+  lib/services/cloud_api.dart:50:1: Error: Operator '<<' should have exactly one parameter.
+  <<<<<<< HEAD
+  ^^
+  lib/services/cloud_api.dart:50:3: Error: Operator declarations must be preceded by the keyword 'operator'.
+  Try adding the keyword 'operator'.
+  <<<<<<< HEAD
+    ^^
+  lib/services/cloud_api.dart:50:3: Error: A method declaration needs an explicit list of parameters.
+  Try adding a parameter list to the method declaration.
+  <<<<<<< HEAD
+    ^^
+  lib/services/cloud_api.dart:50:5: Error: Expected '{' before this.
+  <<<<<<< HEAD
+      ^^
+  lib/services/cloud_api.dart:50:3: Error: Operator '<<' should have exactly one parameter.
+  <<<<<<< HEAD
+    ^^
+  lib/services/cloud_api.dart:50:5: Error: Operator declarations must be preceded by the keyword 'operator'.
+  Try adding the keyword 'operator'.
+  <<<<<<< HEAD
+      ^^
+  lib/services/cloud_api.dart:50:9: Error: Expected '>' after this.
+  <<<<<<< HEAD
+          ^^^^
+  lib/services/cloud_api.dart:50:5: Error: A method declaration needs an explicit list of parameters.
+  Try adding a parameter list to the method declaration.
+  <<<<<<< HEAD
+      ^^
+  lib/services/cloud_api.dart:51:3: Error: Expected '{' before this.
+    static const _userAgent = companionUserAgent;
+    ^^^^^^
+  lib/services/cloud_api.dart:50:5: Error: Operator '<<' should have exactly one parameter.
+  <<<<<<< HEAD
+      ^^
+  lib/services/cloud_api.dart:50:7: Error: Types parameters aren't allowed when defining an operator.
+  Try removing the type parameters.
+  <<<<<<< HEAD
+        ^^^^^^^...
+  lib/services/cloud_api.dart:52:1: Error: Expected a class member, but got '==='.
+  =======
+  ^^^
+  lib/services/cloud_api.dart:52:4: Error: Expected a class member, but got '==='.
+  =======
+     ^^^
+  lib/services/cloud_api.dart:52:7: Error: Operator declarations must be preceded by the keyword 'operator'.
+  Try adding the keyword 'operator'.
+  =======
+        ^
+  lib/services/cloud_api.dart:52:7: Error: The string '=' isn't a user-definable operator.
+  =======
+        ^
+  lib/services/cloud_api.dart:52:7: Error: A method declaration needs an explicit list of parameters.
+  Try adding a parameter list to the method declaration.
+  =======
+        ^
+  lib/services/cloud_api.dart:53:3: Error: Expected '{' before this.
+    static const _userAgent = 'TD2-Loot-Advisor-Companion/$companionVersion';
+    ^^^^^^
+  lib/services/cloud_api.dart:54:1: Error: Operator declarations must be preceded by the keyword 'operator'.
+  Try adding the keyword 'operator'.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+  ^^^
+  lib/services/cloud_api.dart:54:1: Error: A method declaration needs an explicit list of parameters.
+  Try adding a parameter list to the method declaration.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+  ^^^
+  lib/services/cloud_api.dart:54:4: Error: Expected '{' before this.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+     ^^^
+  lib/services/cloud_api.dart:54:1: Error: Operator '>>>' should have exactly one parameter.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+  ^^^
+  lib/services/cloud_api.dart:54:4: Error: Operator declarations must be preceded by the keyword 'operator'.
+  Try adding the keyword 'operator'.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+     ^^^
+  lib/services/cloud_api.dart:54:4: Error: A method declaration needs an explicit list of parameters.
+  Try adding a parameter list to the method declaration.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+     ^^^
+  lib/services/cloud_api.dart:54:7: Error: Expected '{' before this.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+        ^
+  lib/services/cloud_api.dart:54:4: Error: Operator '>>>' should have exactly one parameter.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+     ^^^
+  lib/services/cloud_api.dart:54:7: Error: Operator declarations must be preceded by the keyword 'operator'.
+  Try adding the keyword 'operator'.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+        ^
+  lib/services/cloud_api.dart:54:7: Error: A method declaration needs an explicit list of parameters.
+  Try adding a parameter list to the method declaration.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+        ^
+  lib/services/cloud_api.dart:54:9: Error: Expected '{' before this.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+          ^^^^^
+  lib/services/cloud_api.dart:54:7: Error: Operator '>' should have exactly one parameter.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+        ^
+  lib/services/cloud_api.dart:54:9: Error: Expected a class member, but got '80631'.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+          ^^^^^
+  lib/services/cloud_api.dart:55:3: Error: Expected ';' after this.
+    static const _timeout = Duration(seconds: 8);
+    ^^^^^^
+  lib/services/cloud_api.dart:55:10: Error: Only static fields can be declared as const.
+  Try using 'final' instead of 'const', or adding the keyword 'static'.
+    static const _timeout = Duration(seconds: 8);
+           ^^^^^
+  lib/services/companion_release.dart:11:7: Error: 'companionVersion' is already declared in this scope.
+  const companionVersion = '0.1.9';
+        ^^^^^^^^^^^^^^^^
+  lib/services/companion_release.dart:8:7: Context: Previous declaration of 'companionVersion'.
+  const companionVersion = '0.1.8';
+        ^^^^^^^^^^^^^^^^
+  lib/services/cloud_api.dart:50:3: Error: '<<' is already declared in this scope.
+  <<<<<<< HEAD
+    ^^
+  lib/services/cloud_api.dart:50:1: Context: Previous declaration of '<<'.
+  <<<<<<< HEAD
+  ^^
+  lib/services/cloud_api.dart:50:5: Error: '<<' is already declared in this scope.
+  <<<<<<< HEAD
+      ^^
+  lib/services/cloud_api.dart:50:1: Context: Previous declaration of '<<'.
+  <<<<<<< HEAD
+  ^^
+  lib/services/cloud_api.dart:53:16: Error: '_userAgent' is already declared in this scope.
+    static const _userAgent = 'TD2-Loot-Advisor-Companion/$companionVersion';
+                 ^^^^^^^^^^
+  lib/services/cloud_api.dart:51:16: Context: Previous declaration of '_userAgent'.
+    static const _userAgent = companionUserAgent;
+                 ^^^^^^^^^^
+  lib/services/cloud_api.dart:54:4: Error: '>>>' is already declared in this scope.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+     ^^^
+  lib/services/cloud_api.dart:54:1: Context: Previous declaration of '>>>'.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+  ^^^
+  lib/services/cloud_api.dart:54:14: Error: 'f00b7ee93cc591f02c3223210423cdc92f1' isn't a type.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  lib/services/companion_release.dart:12:14: Context: This isn't a type.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  lib/main.dart:625:30: Error: A prefix can't be used as an expression.
+        final response = await http
+                               ^^^^
+  lib/main.dart:626:3: Error: Expected an identifier, but got '<<'.
+  Try inserting an identifier before '<<'.
+  <<<<<<< HEAD
+    ^^
+  lib/main.dart:626:5: Error: Expected an identifier, but got '<<'.
+  Try inserting an identifier before '<<'.
+  <<<<<<< HEAD
+      ^^
+  lib/main.dart:627:12: Error: The built-in identifier 'get' can't be used as a type.
+            .get(endpoint, headers: const {'User-Agent': companionUserAgent})
+             ^^^
+  lib/main.dart:626:9: Error: 'HEAD.get' can't be used as a type because 'HEAD' doesn't refer to an import prefix.
+  <<<<<<< HEAD
+          ^^^^^...
+  lib/main.dart:627:12: Error: Expected '>' after this.
+            .get(endpoint, headers: const {'User-Agent': companionUserAgent})
+             ^^^
+  lib/main.dart:628:1: Error: Expected '[' before this.
+  =======
+  ^^^
+  lib/main.dart:628:4: Error: Expected an identifier, but got '==='.
+  Try inserting an identifier before '==='.
+  =======
+     ^^^
+  lib/main.dart:628:1: Error: The string '===' isn't a user-definable operator.
+  =======
+  ^^^
+  lib/main.dart:633:4: Error: Expected an identifier, but got '>>>'.
+  Try inserting an identifier before '>>>'.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+     ^^^
+  lib/main.dart:633:7: Error: Expected an identifier, but got '>'.
+  Try inserting an identifier before '>'.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+        ^
+  lib/main.dart:633:9: Error: Expected ';' after this.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+          ^^^^^
+  .
+  Error: The Dart compiler exited unexpectedly.
+  package:flutter_tools/src/base/common.dart 34:3  throwToolExit
+  package:flutter_tools/src/compile.dart 1024:11   DefaultResidentCompiler._compile.<fn>
+  dart:async/zone_root.dart 48:47                  _rootRunUnary
+  dart:async/zone.dart 816:35                      _CustomZone.runUnary
+  dart:async/future_impl.dart 948:45               Future._propagateToListeners.handleValueCallback
+  dart:async/future_impl.dart 977:13               Future._propagateToListeners
+  dart:async/future_impl.dart 862:9                Future._propagateToListeners
+  dart:async/future_impl.dart 720:5                Future._completeWithValue
+  dart:async/future_impl.dart 804:7                Future._asyncCompleteWithValue.<fn>
+  dart:async/zone_root.dart 35:13                  _rootRun
+  dart:async/zone.dart 810:35                      _CustomZone.run
+  dart:async/zone.dart 702:7                       _CustomZone.runGuarded
+  dart:async/zone.dart 743:23                      _CustomZone.bindCallbackGuarded.<fn>
+  dart:async/schedule_microtask.dart 40:35         _microtaskLoop
+  dart:async/schedule_microtask.dart 49:5          _startMicrotaskLoop
+  dart:isolate-patch/isolate_patch.dart 127:13     _runPendingImmediateCallback
+  dart:isolate-patch/isolate_patch.dart 193:5      _RawReceivePort._handleMessage
+  
+lib/main.dart:628:1: Error: The '===' operator is not supported.
+=======
+^
+lib/main.dart:628:4: Error: The '===' operator is not supported.
+=======
+   ^
+lib/services/companion_release.dart:10:1: Error: The '===' operator is not supported.
+=======
+^
+lib/services/companion_release.dart:10:4: Error: The '===' operator is not supported.
+=======
+   ^
+lib/services/companion_release.dart:7:1: Error: Expected a declaration, but got '<<'.
+<<<<<<< HEAD
+^^
+lib/services/companion_release.dart:7:3: Error: Expected a declaration, but got '<<'.
+<<<<<<< HEAD
+  ^^
+lib/services/companion_release.dart:7:5: Error: Expected a declaration, but got '<<'.
+<<<<<<< HEAD
+    ^^
+lib/services/companion_release.dart:7:7: Error: Expected a declaration, but got '<'.
+<<<<<<< HEAD
+      ^
+lib/services/companion_release.dart:7:9: Error: Variables must be declared using the keywords 'const', 'final', 'var' or a type name.
+Try adding the name of the type of the variable or the keyword 'var'.
+<<<<<<< HEAD
+        ^^^^
+lib/services/companion_release.dart:7:9: Error: Expected ';' after this.
+<<<<<<< HEAD
+        ^^^^
+lib/services/companion_release.dart:10:1: Error: Expected a declaration, but got '==='.
+=======
+^^^
+lib/services/companion_release.dart:10:4: Error: Expected a declaration, but got '==='.
+=======
+   ^^^
+lib/services/companion_release.dart:10:7: Error: Expected a declaration, but got '='.
+=======
+      ^
+lib/services/companion_release.dart:12:1: Error: Expected a declaration, but got '>>>'.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+^^^
+lib/services/companion_release.dart:12:4: Error: Expected a declaration, but got '>>>'.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+   ^^^
+lib/services/companion_release.dart:12:7: Error: Expected a declaration, but got '>'.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+      ^
+lib/services/companion_release.dart:12:9: Error: Expected a declaration, but got '80631'.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+        ^^^^^
+lib/services/companion_release.dart:12:14: Error: Variables must be declared using the keywords 'const', 'final', 'var' or a type name.
+Try adding the name of the type of the variable or the keyword 'var'.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+lib/services/companion_release.dart:12:14: Error: Expected ';' after this.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+lib/services/cloud_api.dart:52:1: Error: The '===' operator is not supported.
+=======
+^
+lib/services/cloud_api.dart:52:4: Error: The '===' operator is not supported.
+=======
+   ^
+lib/services/cloud_api.dart:50:1: Error: Operator declarations must be preceded by the keyword 'operator'.
+Try adding the keyword 'operator'.
+<<<<<<< HEAD
+^^
+lib/services/cloud_api.dart:50:1: Error: A method declaration needs an explicit list of parameters.
+Try adding a parameter list to the method declaration.
+<<<<<<< HEAD
+^^
+lib/services/cloud_api.dart:50:3: Error: Expected '{' before this.
+<<<<<<< HEAD
+  ^^
+lib/services/cloud_api.dart:50:1: Error: Operator '<<' should have exactly one parameter.
+<<<<<<< HEAD
+^^
+lib/services/cloud_api.dart:50:3: Error: Operator declarations must be preceded by the keyword 'operator'.
+Try adding the keyword 'operator'.
+<<<<<<< HEAD
+  ^^
+lib/services/cloud_api.dart:50:3: Error: A method declaration needs an explicit list of parameters.
+Try adding a parameter list to the method declaration.
+<<<<<<< HEAD
+  ^^
+lib/services/cloud_api.dart:50:5: Error: Expected '{' before this.
+<<<<<<< HEAD
+    ^^
+lib/services/cloud_api.dart:50:3: Error: Operator '<<' should have exactly one parameter.
+<<<<<<< HEAD
+  ^^
+lib/services/cloud_api.dart:50:5: Error: Operator declarations must be preceded by the keyword 'operator'.
+Try adding the keyword 'operator'.
+<<<<<<< HEAD
+    ^^
+lib/services/cloud_api.dart:50:9: Error: Expected '>' after this.
+<<<<<<< HEAD
+        ^^^^
+lib/services/cloud_api.dart:50:5: Error: A method declaration needs an explicit list of parameters.
+Try adding a parameter list to the method declaration.
+<<<<<<< HEAD
+    ^^
+lib/services/cloud_api.dart:51:3: Error: Expected '{' before this.
+  static const _userAgent = companionUserAgent;
+  ^^^^^^
+lib/services/cloud_api.dart:50:5: Error: Operator '<<' should have exactly one parameter.
+<<<<<<< HEAD
+    ^^
+lib/services/cloud_api.dart:50:7: Error: Types parameters aren't allowed when defining an operator.
+Try removing the type parameters.
+<<<<<<< HEAD
+      ^^^^^^^...
+lib/services/cloud_api.dart:52:1: Error: Expected a class member, but got '==='.
+=======
+^^^
+lib/services/cloud_api.dart:52:4: Error: Expected a class member, but got '==='.
+=======
+   ^^^
+lib/services/cloud_api.dart:52:7: Error: Operator declarations must be preceded by the keyword 'operator'.
+Try adding the keyword 'operator'.
+=======
+      ^
+lib/services/cloud_api.dart:52:7: Error: The string '=' isn't a user-definable operator.
+=======
+      ^
+lib/services/cloud_api.dart:52:7: Error: A method declaration needs an explicit list of parameters.
+Try adding a parameter list to the method declaration.
+=======
+      ^
+lib/services/cloud_api.dart:53:3: Error: Expected '{' before this.
+  static const _userAgent = 'TD2-Loot-Advisor-Companion/$companionVersion';
+  ^^^^^^
+lib/services/cloud_api.dart:54:1: Error: Operator declarations must be preceded by the keyword 'operator'.
+Try adding the keyword 'operator'.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+^^^
+lib/services/cloud_api.dart:54:1: Error: A method declaration needs an explicit list of parameters.
+Try adding a parameter list to the method declaration.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+^^^
+lib/services/cloud_api.dart:54:4: Error: Expected '{' before this.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+   ^^^
+lib/services/cloud_api.dart:54:1: Error: Operator '>>>' should have exactly one parameter.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+^^^
+lib/services/cloud_api.dart:54:4: Error: Operator declarations must be preceded by the keyword 'operator'.
+Try adding the keyword 'operator'.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+   ^^^
+lib/services/cloud_api.dart:54:4: Error: A method declaration needs an explicit list of parameters.
+Try adding a parameter list to the method declaration.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+   ^^^
+lib/services/cloud_api.dart:54:7: Error: Expected '{' before this.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+      ^
+lib/services/cloud_api.dart:54:4: Error: Operator '>>>' should have exactly one parameter.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+   ^^^
+lib/services/cloud_api.dart:54:7: Error: Operator declarations must be preceded by the keyword 'operator'.
+Try adding the keyword 'operator'.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+      ^
+lib/services/cloud_api.dart:54:7: Error: A method declaration needs an explicit list of parameters.
+Try adding a parameter list to the method declaration.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+      ^
+lib/services/cloud_api.dart:54:9: Error: Expected '{' before this.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+        ^^^^^
+lib/services/cloud_api.dart:54:7: Error: Operator '>' should have exactly one parameter.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+      ^
+lib/services/cloud_api.dart:54:9: Error: Expected a class member, but got '80631'.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+        ^^^^^
+lib/services/cloud_api.dart:55:3: Error: Expected ';' after this.
+  static const _timeout = Duration(seconds: 8);
+  ^^^^^^
+lib/services/cloud_api.dart:55:10: Error: Only static fields can be declared as const.
+Try using 'final' instead of 'const', or adding the keyword 'static'.
+  static const _timeout = Duration(seconds: 8);
+         ^^^^^
+lib/services/companion_release.dart:11:7: Error: 'companionVersion' is already declared in this scope.
+const companionVersion = '0.1.9';
+      ^^^^^^^^^^^^^^^^
+lib/services/companion_release.dart:8:7: Context: Previous declaration of 'companionVersion'.
+const companionVersion = '0.1.8';
+      ^^^^^^^^^^^^^^^^
+lib/services/cloud_api.dart:50:3: Error: '<<' is already declared in this scope.
+<<<<<<< HEAD
+  ^^
+lib/services/cloud_api.dart:50:1: Context: Previous declaration of '<<'.
+<<<<<<< HEAD
+^^
+lib/services/cloud_api.dart:50:5: Error: '<<' is already declared in this scope.
+<<<<<<< HEAD
+    ^^
+lib/services/cloud_api.dart:50:1: Context: Previous declaration of '<<'.
+<<<<<<< HEAD
+^^
+lib/services/cloud_api.dart:53:16: Error: '_userAgent' is already declared in this scope.
+  static const _userAgent = 'TD2-Loot-Advisor-Companion/$companionVersion';
+               ^^^^^^^^^^
+lib/services/cloud_api.dart:51:16: Context: Previous declaration of '_userAgent'.
+  static const _userAgent = companionUserAgent;
+               ^^^^^^^^^^
+lib/services/cloud_api.dart:54:4: Error: '>>>' is already declared in this scope.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+   ^^^
+lib/services/cloud_api.dart:54:1: Context: Previous declaration of '>>>'.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+^^^
+lib/services/cloud_api.dart:54:14: Error: 'f00b7ee93cc591f02c3223210423cdc92f1' isn't a type.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+lib/services/companion_release.dart:12:14: Context: This isn't a type.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+lib/main.dart:625:30: Error: A prefix can't be used as an expression.
+      final response = await http
+                             ^^^^
+lib/main.dart:626:3: Error: Expected an identifier, but got '<<'.
+Try inserting an identifier before '<<'.
+<<<<<<< HEAD
+  ^^
+lib/main.dart:626:5: Error: Expected an identifier, but got '<<'.
+Try inserting an identifier before '<<'.
+<<<<<<< HEAD
+    ^^
+lib/main.dart:627:12: Error: The built-in identifier 'get' can't be used as a type.
+          .get(endpoint, headers: const {'User-Agent': companionUserAgent})
+           ^^^
+lib/main.dart:626:9: Error: 'HEAD.get' can't be used as a type because 'HEAD' doesn't refer to an import prefix.
+<<<<<<< HEAD
+        ^^^^^...
+lib/main.dart:627:12: Error: Expected '>' after this.
+          .get(endpoint, headers: const {'User-Agent': companionUserAgent})
+           ^^^
+lib/main.dart:628:1: Error: Expected '[' before this.
+=======
+^^^
+lib/main.dart:628:4: Error: Expected an identifier, but got '==='.
+Try inserting an identifier before '==='.
+=======
+   ^^^
+lib/main.dart:628:1: Error: The string '===' isn't a user-definable operator.
+=======
+^^^
+lib/main.dart:633:4: Error: Expected an identifier, but got '>>>'.
+Try inserting an identifier before '>>>'.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+   ^^^
+lib/main.dart:633:7: Error: Expected an identifier, but got '>'.
+Try inserting an identifier before '>'.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+      ^
+lib/main.dart:633:9: Error: Expected ';' after this.
+>>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+        ^^^^^
+00:00 +0 -2: loading C:/Users/PC/Desktop/Thedivision2program/mobile/test/startup_test.dart [E]
+  Failed to load "C:/Users/PC/Desktop/Thedivision2program/mobile/test/startup_test.dart":
+  Compilation failed for testPath=C:/Users/PC/Desktop/Thedivision2program/mobile/test/startup_test.dart: lib/main.dart:628:1: Error: The '===' operator is not supported.
+  =======
+  ^
+  lib/main.dart:628:4: Error: The '===' operator is not supported.
+  =======
+     ^
+  lib/services/companion_release.dart:10:1: Error: The '===' operator is not supported.
+  =======
+  ^
+  lib/services/companion_release.dart:10:4: Error: The '===' operator is not supported.
+  =======
+     ^
+  lib/services/companion_release.dart:7:1: Error: Expected a declaration, but got '<<'.
+  <<<<<<< HEAD
+  ^^
+  lib/services/companion_release.dart:7:3: Error: Expected a declaration, but got '<<'.
+  <<<<<<< HEAD
+    ^^
+  lib/services/companion_release.dart:7:5: Error: Expected a declaration, but got '<<'.
+  <<<<<<< HEAD
+      ^^
+  lib/services/companion_release.dart:7:7: Error: Expected a declaration, but got '<'.
+  <<<<<<< HEAD
+        ^
+  lib/services/companion_release.dart:7:9: Error: Variables must be declared using the keywords 'const', 'final', 'var' or a type name.
+  Try adding the name of the type of the variable or the keyword 'var'.
+  <<<<<<< HEAD
+          ^^^^
+  lib/services/companion_release.dart:7:9: Error: Expected ';' after this.
+  <<<<<<< HEAD
+          ^^^^
+  lib/services/companion_release.dart:10:1: Error: Expected a declaration, but got '==='.
+  =======
+  ^^^
+  lib/services/companion_release.dart:10:4: Error: Expected a declaration, but got '==='.
+  =======
+     ^^^
+  lib/services/companion_release.dart:10:7: Error: Expected a declaration, but got '='.
+  =======
+        ^
+  lib/services/companion_release.dart:12:1: Error: Expected a declaration, but got '>>>'.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+  ^^^
+  lib/services/companion_release.dart:12:4: Error: Expected a declaration, but got '>>>'.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+     ^^^
+  lib/services/companion_release.dart:12:7: Error: Expected a declaration, but got '>'.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+        ^
+  lib/services/companion_release.dart:12:9: Error: Expected a declaration, but got '80631'.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+          ^^^^^
+  lib/services/companion_release.dart:12:14: Error: Variables must be declared using the keywords 'const', 'final', 'var' or a type name.
+  Try adding the name of the type of the variable or the keyword 'var'.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  lib/services/companion_release.dart:12:14: Error: Expected ';' after this.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  lib/services/cloud_api.dart:52:1: Error: The '===' operator is not supported.
+  =======
+  ^
+  lib/services/cloud_api.dart:52:4: Error: The '===' operator is not supported.
+  =======
+     ^
+  lib/services/cloud_api.dart:50:1: Error: Operator declarations must be preceded by the keyword 'operator'.
+  Try adding the keyword 'operator'.
+  <<<<<<< HEAD
+  ^^
+  lib/services/cloud_api.dart:50:1: Error: A method declaration needs an explicit list of parameters.
+  Try adding a parameter list to the method declaration.
+  <<<<<<< HEAD
+  ^^
+  lib/services/cloud_api.dart:50:3: Error: Expected '{' before this.
+  <<<<<<< HEAD
+    ^^
+  lib/services/cloud_api.dart:50:1: Error: Operator '<<' should have exactly one parameter.
+  <<<<<<< HEAD
+  ^^
+  lib/services/cloud_api.dart:50:3: Error: Operator declarations must be preceded by the keyword 'operator'.
+  Try adding the keyword 'operator'.
+  <<<<<<< HEAD
+    ^^
+  lib/services/cloud_api.dart:50:3: Error: A method declaration needs an explicit list of parameters.
+  Try adding a parameter list to the method declaration.
+  <<<<<<< HEAD
+    ^^
+  lib/services/cloud_api.dart:50:5: Error: Expected '{' before this.
+  <<<<<<< HEAD
+      ^^
+  lib/services/cloud_api.dart:50:3: Error: Operator '<<' should have exactly one parameter.
+  <<<<<<< HEAD
+    ^^
+  lib/services/cloud_api.dart:50:5: Error: Operator declarations must be preceded by the keyword 'operator'.
+  Try adding the keyword 'operator'.
+  <<<<<<< HEAD
+      ^^
+  lib/services/cloud_api.dart:50:9: Error: Expected '>' after this.
+  <<<<<<< HEAD
+          ^^^^
+  lib/services/cloud_api.dart:50:5: Error: A method declaration needs an explicit list of parameters.
+  Try adding a parameter list to the method declaration.
+  <<<<<<< HEAD
+      ^^
+  lib/services/cloud_api.dart:51:3: Error: Expected '{' before this.
+    static const _userAgent = companionUserAgent;
+    ^^^^^^
+  lib/services/cloud_api.dart:50:5: Error: Operator '<<' should have exactly one parameter.
+  <<<<<<< HEAD
+      ^^
+  lib/services/cloud_api.dart:50:7: Error: Types parameters aren't allowed when defining an operator.
+  Try removing the type parameters.
+  <<<<<<< HEAD
+        ^^^^^^^...
+  lib/services/cloud_api.dart:52:1: Error: Expected a class member, but got '==='.
+  =======
+  ^^^
+  lib/services/cloud_api.dart:52:4: Error: Expected a class member, but got '==='.
+  =======
+     ^^^
+  lib/services/cloud_api.dart:52:7: Error: Operator declarations must be preceded by the keyword 'operator'.
+  Try adding the keyword 'operator'.
+  =======
+        ^
+  lib/services/cloud_api.dart:52:7: Error: The string '=' isn't a user-definable operator.
+  =======
+        ^
+  lib/services/cloud_api.dart:52:7: Error: A method declaration needs an explicit list of parameters.
+  Try adding a parameter list to the method declaration.
+  =======
+        ^
+  lib/services/cloud_api.dart:53:3: Error: Expected '{' before this.
+    static const _userAgent = 'TD2-Loot-Advisor-Companion/$companionVersion';
+    ^^^^^^
+  lib/services/cloud_api.dart:54:1: Error: Operator declarations must be preceded by the keyword 'operator'.
+  Try adding the keyword 'operator'.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+  ^^^
+  lib/services/cloud_api.dart:54:1: Error: A method declaration needs an explicit list of parameters.
+  Try adding a parameter list to the method declaration.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+  ^^^
+  lib/services/cloud_api.dart:54:4: Error: Expected '{' before this.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+     ^^^
+  lib/services/cloud_api.dart:54:1: Error: Operator '>>>' should have exactly one parameter.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+  ^^^
+  lib/services/cloud_api.dart:54:4: Error: Operator declarations must be preceded by the keyword 'operator'.
+  Try adding the keyword 'operator'.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+     ^^^
+  lib/services/cloud_api.dart:54:4: Error: A method declaration needs an explicit list of parameters.
+  Try adding a parameter list to the method declaration.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+     ^^^
+  lib/services/cloud_api.dart:54:7: Error: Expected '{' before this.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+        ^
+  lib/services/cloud_api.dart:54:4: Error: Operator '>>>' should have exactly one parameter.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+     ^^^
+  lib/services/cloud_api.dart:54:7: Error: Operator declarations must be preceded by the keyword 'operator'.
+  Try adding the keyword 'operator'.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+        ^
+  lib/services/cloud_api.dart:54:7: Error: A method declaration needs an explicit list of parameters.
+  Try adding a parameter list to the method declaration.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+        ^
+  lib/services/cloud_api.dart:54:9: Error: Expected '{' before this.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+          ^^^^^
+  lib/services/cloud_api.dart:54:7: Error: Operator '>' should have exactly one parameter.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+        ^
+  lib/services/cloud_api.dart:54:9: Error: Expected a class member, but got '80631'.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+          ^^^^^
+  lib/services/cloud_api.dart:55:3: Error: Expected ';' after this.
+    static const _timeout = Duration(seconds: 8);
+    ^^^^^^
+  lib/services/cloud_api.dart:55:10: Error: Only static fields can be declared as const.
+  Try using 'final' instead of 'const', or adding the keyword 'static'.
+    static const _timeout = Duration(seconds: 8);
+           ^^^^^
+  lib/services/companion_release.dart:11:7: Error: 'companionVersion' is already declared in this scope.
+  const companionVersion = '0.1.9';
+        ^^^^^^^^^^^^^^^^
+  lib/services/companion_release.dart:8:7: Context: Previous declaration of 'companionVersion'.
+  const companionVersion = '0.1.8';
+        ^^^^^^^^^^^^^^^^
+  lib/services/cloud_api.dart:50:3: Error: '<<' is already declared in this scope.
+  <<<<<<< HEAD
+    ^^
+  lib/services/cloud_api.dart:50:1: Context: Previous declaration of '<<'.
+  <<<<<<< HEAD
+  ^^
+  lib/services/cloud_api.dart:50:5: Error: '<<' is already declared in this scope.
+  <<<<<<< HEAD
+      ^^
+  lib/services/cloud_api.dart:50:1: Context: Previous declaration of '<<'.
+  <<<<<<< HEAD
+  ^^
+  lib/services/cloud_api.dart:53:16: Error: '_userAgent' is already declared in this scope.
+    static const _userAgent = 'TD2-Loot-Advisor-Companion/$companionVersion';
+                 ^^^^^^^^^^
+  lib/services/cloud_api.dart:51:16: Context: Previous declaration of '_userAgent'.
+    static const _userAgent = companionUserAgent;
+                 ^^^^^^^^^^
+  lib/services/cloud_api.dart:54:4: Error: '>>>' is already declared in this scope.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+     ^^^
+  lib/services/cloud_api.dart:54:1: Context: Previous declaration of '>>>'.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+  ^^^
+  lib/services/cloud_api.dart:54:14: Error: 'f00b7ee93cc591f02c3223210423cdc92f1' isn't a type.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  lib/services/companion_release.dart:12:14: Context: This isn't a type.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  lib/main.dart:625:30: Error: A prefix can't be used as an expression.
+        final response = await http
+                               ^^^^
+  lib/main.dart:626:3: Error: Expected an identifier, but got '<<'.
+  Try inserting an identifier before '<<'.
+  <<<<<<< HEAD
+    ^^
+  lib/main.dart:626:5: Error: Expected an identifier, but got '<<'.
+  Try inserting an identifier before '<<'.
+  <<<<<<< HEAD
+      ^^
+  lib/main.dart:627:12: Error: The built-in identifier 'get' can't be used as a type.
+            .get(endpoint, headers: const {'User-Agent': companionUserAgent})
+             ^^^
+  lib/main.dart:626:9: Error: 'HEAD.get' can't be used as a type because 'HEAD' doesn't refer to an import prefix.
+  <<<<<<< HEAD
+          ^^^^^...
+  lib/main.dart:627:12: Error: Expected '>' after this.
+            .get(endpoint, headers: const {'User-Agent': companionUserAgent})
+             ^^^
+  lib/main.dart:628:1: Error: Expected '[' before this.
+  =======
+  ^^^
+  lib/main.dart:628:4: Error: Expected an identifier, but got '==='.
+  Try inserting an identifier before '==='.
+  =======
+     ^^^
+  lib/main.dart:628:1: Error: The string '===' isn't a user-definable operator.
+  =======
+  ^^^
+  lib/main.dart:633:4: Error: Expected an identifier, but got '>>>'.
+  Try inserting an identifier before '>>>'.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+     ^^^
+  lib/main.dart:633:7: Error: Expected an identifier, but got '>'.
+  Try inserting an identifier before '>'.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+        ^
+  lib/main.dart:633:9: Error: Expected ';' after this.
+  >>>>>>> 80631f00b7ee93cc591f02c3223210423cdc92f1
+          ^^^^^
+  .
+00:00 +0 -2: Some tests failed.
+
+Failing tests:
+  C:/Users/PC/Desktop/Thedivision2program/mobile/test/companion_release_test.dart: loading C:/Users/PC/Desktop/Thedivision2program/mobile/test/companion_release_test.dart
+  C:/Users/PC/Desktop/Thedivision2program/mobile/test/startup_test.dart: loading C:/Users/PC/Desktop/Thedivision2program/mobile/test/startup_test.dart

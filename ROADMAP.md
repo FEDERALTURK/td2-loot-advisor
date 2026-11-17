@@ -1,19 +1,201 @@
 # Yol Haritası
 
 Bu dosya her gün güncellenir (bkz. en alt — otomatik günlük görev). Ayrıntılı mobil plan: `docs/mobile_companion_roadmap.md`.
+Konsol (Xbox/PS5/PS4) yakalama + canlı çeviri fikri için araştırma ve yol haritası: `docs/console_capture_translation_roadmap.md` (**kod yazılmadı, kullanıcının fiziksel capture card edinmesi ve kendi PC'sinde test etmesi gerekiyor**).
+Genel özellik taraması (yeni/gereksiz özellikler, ekran okuma + tanımlama + çeviri'nin açık tanımı, fazlara bölünmüş geliştirme yol haritası): `docs/feature_roadmap_2026-11-14.md`.
 
 ## Genel durum (özet)
 
 | Bileşen | Durum |
 |---|---|
-| Windows masaüstü uygulaması | Canlı, **`v9.1.5.32`** (2026-11-06, GitHub Release yayınlandı 18:54 UTC, `build-installer`/`service-check`/`account-check`/`translate-check`/`stability-check` hepsi `success`). Değişiklik: `display.py`'ye `hdr_enabled()` yardımcı fonksiyonu eklendi — HDR algısı artık yalnızca kesin "açık"/"kapalı" değerlerinden çıkarılıyor, eski/elle değiştirilmiş veya bilinmeyen bir `state.cfg` değeri artık yanlışlıkla "HDR açık" uyarısı üretmiyor (`tests/test_core.py`'a 5 yeni assert). **Bu oturumda yeni, doğrulanmış bir CI regresyonu bulundu**: `Info check` iş akışı (`tests/test_knowledge.py`) 2026-11-06 13:34'teki otomatik "Feeds" senkronundan beri `main`'de **kırmızı**. Kök neden: test, 3 gün önce biten bir haber olayının kimliğini (`y8s3-red-moon-unleashed`) `meta/news_feed.json`'da hep var olacak sabit veri gibi varsayıyor (`assert st["y8s3-red-moon-unleashed"] == "live"`), ama Feeds botu tam olarak "3 günden eski biten olayları" otomatik olarak bu dosyadan siliyor (bugünkü commit mesajı: "Removed events that ended 2026-11-03") — test artık `KeyError: 'y8s3-red-moon-unleashed'` ile çöküyor. Uygulama kodunda bir regresyon değil (HDR değişikliğiyle ilgisiz), test fixture'ının canlı/değişken veriye bağımlı olmasından kaynaklanıyor; GitHub Actions'ta doğrulandı (run `42226626507` ve `42273566998`, ikisi de `failure`). Düzeltme bu oturumun kapsamı dışında bırakıldı, ayrıntı aşağıda "Diğer açık kalemler"de. Önceki not hâlâ geçerli: `v9.1.5.25`-`v9.1.5.31` arasındaki birçok görsel değişiklik gerçek Windows'ta kullanıcı tarafından henüz gözle teyit edilmedi (bkz. `BUGS.md` #11-16). `main`'e henüz birleştirilmemiş bir **draft PR** var: [#3](https://github.com/FEDERALTURK/td2-loot-advisor/pull/3) "açıklama yedeği iki parçayı da okuyor" (`fix/desc-offline-fallback`, hâlâ taslak, `mergeable_state: unstable`, 2026-11-05'ten beri değişmedi) — bu oturum dokunmadı. |
-| Mobil companion (Flutter) | **Faz 3 devam ediyor: push-token kaydı kodu yazıldı**, kullanıcı tarafında tek adım (gradle `google-services` satırı + `flutter pub get`/build doğrulaması) hâlâ bekliyor — bu, dünden bu yana değişmedi. **Yeni (2026-11-06): uygulama içi deneyim/arayüz iyileştirmeleri** (`mobile/lib/main.dart`) — açılışta boş kart flaşını önleyen bir splash ekranı, build listesinin artık ham JSON sırası yerine popülerliğe göre azalan sıralanması, build silmeden önce onay diyaloğu (hesap silme akışıyla aynı desen), Builds sekmesine aşağı-çekip-yenileme, ve "MASAÜSTÜ EŞLEŞTİRMESİ" etiketinin bağlantı durumuna göre dinamik olması (BAĞLI/SONRAKİ AŞAMA). Bu değişiklikler faz kapısını ilerletmiyor (push-token/Faz 4 doğrulaması hâlâ aynı yerde), sadece mevcut özelliklerin cilası; **bu ortamda Flutter SDK'sı olmadığı için derlenmedi/test edilmedi** (BUGS.md #18), Windows PC'de doğrulama gerekiyor. Gerçek cihaz/Play doğrulaması (Faz 4) hâlâ bekliyor. |
+| Windows masaüstü uygulaması | **Yayınlanan sürüm: `v9.1.5.38`** (2026-11-15T21:01:42Z, GitHub Release, `main` dalından — doğrulandı). **`main` artık bundan sonra, yayınlanmamış bir UI tema değişikliği (`335a437`, teal/cyan → turuncu/amber) içeriyor, `APP_VERSION` henüz artırılmadı — bkz. yukarıdaki "Şu an aktif" madde 5.** **`Info check`/`tests/test_knowledge.py` KeyError'ı 2026-11-15'te KALICI OLARAK DÜZELTİLDİ** (bkz. "Şu an aktif" madde 1) — bu tablodaki eski regresyon notu artık geçersiz. `v9.1.5.37` adlı bir GitHub Release de var ama kaynağı `main`'in parçası değil (bkz. "Şu an aktif" madde 4, düşük risk/bilgilendirme). PR #3 ve PR #6 2026-11-15'te merge edilmeden kapatıldı (ayrıntı aşağıda). *(Eski not, artık geçersiz/tarihsel:)* v9.1.5.32 (2026-11-06, GitHub Release yayınlandı 18:54 UTC, `build-installer`/`service-check`/`account-check`/`translate-check`/`stability-check` hepsi `success`). Değişiklik: `display.py`'ye `hdr_enabled()` yardımcı fonksiyonu eklendi — HDR algısı artık yalnızca kesin "açık"/"kapalı" değerlerinden çıkarılıyor, eski/elle değiştirilmiş veya bilinmeyen bir `state.cfg` değeri artık yanlışlıkla "HDR açık" uyarısı üretmiyor (`tests/test_core.py`'a 5 yeni assert). **Bu oturumda yeni, doğrulanmış bir CI regresyonu bulundu**: `Info check` iş akışı (`tests/test_knowledge.py`) 2026-11-06 13:34'teki otomatik "Feeds" senkronundan beri `main`'de **kırmızı**. Kök neden: test, 3 gün önce biten bir haber olayının kimliğini (`y8s3-red-moon-unleashed`) `meta/news_feed.json`'da hep var olacak sabit veri gibi varsayıyor (`assert st["y8s3-red-moon-unleashed"] == "live"`), ama Feeds botu tam olarak "3 günden eski biten olayları" otomatik olarak bu dosyadan siliyor (bugünkü commit mesajı: "Removed events that ended 2026-11-03") — test artık `KeyError: 'y8s3-red-moon-unleashed'` ile çöküyor. Uygulama kodunda bir regresyon değil (HDR değişikliğiyle ilgisiz), test fixture'ının canlı/değişken veriye bağımlı olmasından kaynaklanıyor; GitHub Actions'ta doğrulandı (run `42226626507` ve `42273566998`, ikisi de `failure`). Düzeltme bu oturumun kapsamı dışında bırakıldı, ayrıntı aşağıda "Diğer açık kalemler"de. Önceki not hâlâ geçerli: `v9.1.5.25`-`v9.1.5.31` arasındaki birçok görsel değişiklik gerçek Windows'ta kullanıcı tarafından henüz gözle teyit edilmedi (bkz. `BUGS.md` #11-16). `main`'e henüz birleştirilmemiş bir **draft PR** var: [#3](https://github.com/FEDERALTURK/td2-loot-advisor/pull/3) "açıklama yedeği iki parçayı da okuyor" (`fix/desc-offline-fallback`, hâlâ taslak, `mergeable_state: unstable`, 2026-11-05'ten beri değişmedi) — bu oturum dokunmadı. **Güncelleme (2026-11-09, otomatik durum oturumu):** `Info check`/`tests/test_knowledge.py` aynı `KeyError: 'y8s3-red-moon-unleashed'` ile hâlâ kırmızı (GitHub Actions run `42580288876`, bugünkü otomatik "Feeds" commit'i `93deaa0` üzerinde, doğrulandı) — düzeltme hâlâ yapılmadı, aşağıdaki "Diğer açık kalemler"de duruyor. PR #3'ün `mergeable_state` alanı artık `unstable` değil, **`dirty`** (gerçek çakışma — `main` 2026-11-05'ten beri çok ilerledi, PR'ın temel aldığı commit eski kaldı); birleştirilmeden önce dal sahibinin `main` üzerine rebase etmesi gerekecek. **Güncelleme (2026-11-15, otomatik durum oturumu):** `v9.1.5.36` gerçek bir GitHub Release olarak yayınlandı (GitHub Releases API ile doğrulandı, `published_at` 2026-11-15T05:47:47Z) — PR #4 ("fix: pass explicit token to release publishing", `build-installer.yml`/`build-mobile.yml`'e yayın adımı için açık token eklendi) ve PR #5 ("release: align app version to 9.1.5.36", `app.py`) birleştirildi, `Stability and workload policy` iş akışı bu merge commit'inde (`25a91da`) `success` döndü. Aynı gün, release'den sonra bir güvenlik düzeltmesi geldi (commit `f0a8c74`, bu depoyu kullanan bir önceki Claude oturumu): kök `.gitignore` `.env`/`*.jks`/`*.keystore`/`*.p8`/`key.properties`/`google-services.json` desenlerini içermiyordu — bu desenler yalnızca `mobile/android/.gitignore`'da vardı ve o dosya kendi alt ağacının dışını kapsamıyor, yani depo KÖKÜNE düşecek bir imzalama anahtarı (`td2-companion-beta.jks`, Codex devir belgesine göre tam orada duruyor) korumasızdı; aynı commit eksik olan `SETUP.md`'yi de ekledi. Commit mesajında belirtildiği gibi `git ls-files` ile hiçbir sır dosyasının hiçbir zaman takipli OLMADIĞI doğrulanmış — geçmişe sızma yok, sadece önleyici bir açık kapatıldı. **Yeni bulundu (2026-11-15, bu oturum): [PR #6](https://github.com/FEDERALTURK/td2-loot-advisor/pull/6) "Codex/release 9.1.5.37" — kullanıcı onayı bekliyor, DOKUNULMADI.** Başka bir ajan/oturum tarafından `codex/release-9.1.5.37` dalından açıldı (15:57 UTC), `mergeable_state: dirty` (main ile gerçek çakışma), 331 dosya değişmiş (+37117/-120, 24 commit), ve PR'daki `Workers Builds: td2-stats` check'i `failure` (ana `main` dalında bu kontrol hâlâ yeşil — sorun yalnızca bu dalda). İçerik karışık ve kapsam dışına taşıyor: üç gerçek küçük hata düzeltmesi (seçili sprite overlay rengi paletten alınıyor, decision center'da sayısal "locked" bayrağı artık korumalı sayılıyor — kilitli eşya KEEP önerilmiyor, dört parçalı versiyon testindeki etiket düzeltmesi) YANINDA, projeyle doğrudan ilgisi görünmeyen büyük bir ekleme: tanıtım videosu üretmek için "brag"/"brag-slim" adlı yeni ajan becerileri, lisanslı müzik parçaları ve ses efektleri paketi, tarayıcı tabanlı yakalama araçları. Bu oturum riskli/kapsam dışı bir kararı kendi başına almadı — birleştirme, rebase, veya "sadece hata düzeltmelerini ayıkla" şeklinde bir ayrıştırma kullanıcı kararı bekliyor, bkz. aşağıda "Diğer açık kalemler". |
+| Mobil companion (Flutter) | **`companion-v0.1.9` gerçek GitHub Release'e yayınlandı (2026-11-08)** — Codex'in devir raporunda bulunan P0 (her CI çalışması farklı geçici debug anahtarıyla imzalıyordu, kullanıcılar APK üstüne güncelleyemiyordu) kalıcı bir "GitHub beta" imza yapılandırmasıyla düzeltildi; yayınlanan APK'nin imza sertifikası androguard ile indirilip tekrar çıkarıldı, keystore fingerprint'iyle birebir eşleşti (`BUGS.md` #19). **Aynı gün, yeni "Konsol Modu" (Faz 1 MVP) eklendi**: telefon kamerasıyla TV/monitör ekranını okuyup cihaz-üstü OCR+çeviriyle Xbox-stili altyazı gösteren, platform bağımsız bir sekme (`docs/console_game_caption_roadmap.md` §1.5/Faz 1). İlk commit Flutter SDK'sız bir ortamda yazılmıştı ve CI'de gerçekten 3 ardışık hata verdi — `flutter analyze` (3 lint uyarısı, düzeltildi), ardından release APK derlemesinde R8 "Missing class" hatası (ML Kit'in kullanılmayan script sınıfları için eksik `-dontwarn` kuralları, düzeltildi) — üçüncü `workflow_dispatch` denemesi (run `42514233449`) tamamen yeşil: `flutter analyze`/`flutter test`/gerçek release APK derlemesi hepsi geçti. **Hâlâ sıfır gerçek cihaz testi** (kamera izni akışı, OCR doğruluğu, çeviri modeli indirme, pil etkisi) — bu otomatik oturum da dahil hiçbir AI oturumu fiziksel bir Android/iOS cihazda denemedi. Push-token/Faz 4 adımı (kullanıcı PC'sinde gradle `google-services` satırının açılması) hâlâ aynı yerde bekliyor, değişmedi. |
 | Topluluk sunucusu (Cloudflare Worker) | Canlı. Mobil uçlar (eşleştirme, build senkronu, cihaz listesi/iptali, hesap silme) production'da. |
 | Lisans/telif (mx-division-builds) | **Çözüldü (2026-11-04, kullanıcı kararı).** `recal_advisor` ücretsiz yapıldı — artık ticari bir özelliğin arkasında değil, gri alan ortadan kalktı. [issue #153](https://github.com/mxswat/mx-division-builds/issues/153) kibarlık/şeffaflık amacıyla açık bırakıldı, yanıt gelirse not düşülecek ama artık engelleyici değil. |
 | Kod imzalama (SignPath) | **Reddedildi (2026-11-03).** Foundation (ücretsiz OSS) programı, GitHub yıldız/fork/katkıcı sayısı, dış makale/referans ve kurumsal destek gibi "kamuya görünürlük" sinyalleri yeterli olmadığı için onaylanmadı — proje kalitesiyle ilgisiz, tamamen görünürlük eşiği meselesi. Görünürlük arttıkça yeniden başvurulabilir; alternatif olarak ücretli SignPath aboneliği veya başka bir imzalama sağlayıcısı (ör. Azure Trusted Signing ~$9.99/ay — ABD/Kanada kökenli kuruluş şartı bildirilen yorumlar var, Türkiye'den uygunluk doğrulanmalı) değerlendirilebilir. |
 | Web sitesi (`web/`) | **Yayında (2026-11-03):** https://td2-loot-advisor.pages.dev — Cloudflare Pages'e GitHub bağlantısıyla yayınlandı, `td2-stats` Worker'ı da Cloudflare Workers Builds ile `main`'e bağlandı (otomatik CI/CD). Taktik HUD görsel kimliği eklendi. Geriye kalan: Gumroad ürünü (kullanıcı tarafı). Bkz. aşağıda ve `web/README.md`. |
+| Xbox Companion (`xbox-companion/`, UWP, **DENEYSEL**) | **2026-11-14: CI artık YEŞİL (13. deneme, run `43622873860`, `success`).** 8 önceki oturumdan kalan kırmızı seriye bu oturumda 5 deneme daha eklendi (9-13) ve kök nedenler tek tek kapatıldı: (a) `setup.exe modify`'de zorunlu `--channelId` eksikliği, (b) PowerShell `Start-Process -ArgumentList`'in boşluklu `--installPath` değerini otomatik tırnaklamaması (asıl kök neden — `vs_installer.exe` yerine `setup.exe` + elle tırnaklama ile düzeltildi), (c) `setup.exe`'nin tanımadığı `--log` bayrağının kaldırılması, (d) Windows10SDK.19041 bileşeninin runner'da sessizce kurulamaması → `XboxCompanion.csproj`'daki `TargetPlatformVersion` zaten kurulu olan `10.0.26100.0`'a çekildi (CS0234/CS0246 WinRT ad alanı hataları tamamen gitti), (e) `AppContainerExe` çıkış türünün Build hedefinde otomatik APPX paketleme+imzalama tetiklemesi (`APPX0107`) → `msbuild`'e `/p:AppxPackageSigningEnabled=false` eklendi. Son çalıştırmada gerçek `.msix` paketi üretildi, sıfır derleme hatası. Bu workflow hâlâ sadece **derleme doğrulaması** yapıyor (paketleme/imzalama/gerçek Xbox dağıtımı kapsam dışı, dosya başındaki not aynen geçerli). Gerçek bir Xbox konsolunda hiç denenmedi. |
+| GAMLETSOL (ayrı uygulama) | **Bu depodan çıkarıldı (2026-11-09).** TV/konsol sesini mikrofonla dinleyip Google Cloud Speech-to-Text + Translation API ile canlı altyazı gösteren, td2-loot-advisor'dan tamamen bağımsız bir Flutter MVP'si olarak yazıldı, CI'da bir kez başarıyla derlendi (`Build GAMLETSOL APK`, run `42524145942`, `success`), ardından kullanıcı/oturum kararıyla kendi deposuna (`FEDERALTURK/gamletsol`) taşındı. Bu depoda artık `gamletsol/` dizini yok; ileri takip o depoda yapılmalı. |
 
-## Şu an aktif: Masaüstü özellik/sağlamlaştırma döngüsü + mobil push bildirimi kaydı (Faz 3'ün son parçası)
+## Şu an aktif: `Info check` KeyError hatası kalıcı olarak düzeltildi, PR #3 ve PR #6 kapatıldı (merge edilmeden), `v9.1.5.38` yayınlandı; `main` artık yayınlanmamış bir UI tema değişikliğiyle ilerde
+
+**2026-11-16 (otomatik günlük durum oturumu).** Bu oturum kod değişikliği YAPMADI, sadece `git fetch` +
+doğrulama + `ROADMAP.md` senkronu yaptı. Depo önceden `/home/claude/td2-loot-advisor`'da klonlu ve `main`
+zaten `origin/main` ile aynı noktadaydı (`335a437`, hizalama/rebase gerekmedi). Son 24 saatteki gerçek
+commit'ler (`4678841`'den — dünkü ROADMAP güncellemesi — `335a437`'ye kadar, 12 commit) tek tek `git show
+--stat` ile okundu ve GitHub API'siyle çapraz doğrulandı:
+
+1. **✅ Uzun süredir açık olan `Info check` / `tests/test_knowledge.py` `KeyError: 'y8s3-red-moon-unleashed'`
+   regresyonu (2026-11-06'dan beri kırmızıydı) kalıcı olarak düzeltildi.** Commit `dac8829` ("fix: make
+   knowledge news test independent of live feed") testi artık canlı `meta/news_feed.json` ID'lerine değil
+   kendi sentetik veri setine bağlı hale getirdi — yukarıdaki "Diğer açık kalemler"de önerilen düzeltmeyle
+   birebir aynı yaklaşım. Ardından `5ad98fd` ("test: guard against live feed IDs in test sources") benzer
+   bir regresyonun bir daha sessizce geri gelmemesi için `tests/test_project_structure.py`'a koruyucu bir
+   test ekledi, ve `b28cf9f`/`0f284ab`/`952c782` CI'nin bu kontrolü her push'ta ve release öncesinde
+   çalıştırmasını kalıcılaştırdı. **Bu oturum `python3 -B tests/test_knowledge.py`'ı bu ortamda bizzat
+   çalıştırıp doğruladı: `RESULT: PASS`, hiçbir `KeyError` yok.** GitHub Actions'ta da doğrulandı: `Info
+   check` run `43755846789`'dan bu yana (ve en son `43788006659`, 2026-11-16) art arda `success` dönüyor —
+   on gündür ilk kez yeşil. Bu, 2026-11-06'dan beri her otomatik günlük oturumun not edip kapsam dışı
+   bıraktığı tek kalemdi; artık "Diğer açık kalemler"den çıkarıldı.
+2. **✅ [PR #3](https://github.com/FEDERALTURK/td2-loot-advisor/pull/3) "açıklama yedeği iki parçayı da
+   okuyor" — 2026-11-15 20:46 UTC'de **merge edilmeden kapatıldı** (`mergeable_state: dirty` kaldığı için
+   rebase edilip birleştirilmedi).** Ancak aynı sorunun gerçek bir düzeltmesi aynı gün, bağımsız olarak,
+   doğrudan `main`'e commit edildi: `0d4fc1a` ("fix: merge offline description shards") `app.py` +
+   `meta_sync.py` + `tests/test_knowledge.py`'ı değiştiriyor ve işlevsel olarak PR #3'ün çözmeye çalıştığı
+   aynı boşluğu (ilk senkrondan önce `descriptions_i18n_2.json`'daki 124 girişin İngilizce kalması)
+   kapatıyor — yukarıdaki test çalıştırmasında bu yolun testleri de (`ikinci parça inmezse önbellek
+   korunur`, `ikinci parça yoksa ilk parça yeter`, `ilk parça zorunlu`) PASS döndü. PR'ın kendisi gereksiz
+   hale geldiği için kapatılmış görünüyor (bu oturum PR'ı kapatmadı, sadece zaten kapatılmış olduğunu
+   doğruladı).
+3. **✅ [PR #6](https://github.com/FEDERALTURK/td2-loot-advisor/pull/6) "Codex/release 9.1.5.37" —
+   2026-11-15 20:50 UTC'de **merge edilmeden kapatıldı**.** Bu, dünkü (2026-11-15) otomatik oturumun
+   "büyük/riskli, kullanıcı onayı bekliyor" olarak işaretlediği PR'dı (331 dosya, +37117/-120, kapsam dışı
+   "brag"/tanıtım-video becerisi + lisanslı medya eklentisi). Kapatılarak bu risk ortadan kalktı — bu
+   oturum merge/rebase işlemlerinden hiçbirini yapmadı, sadece zaten kapalı olduğunu doğruladı. PR'ın
+   içindeki üç gerçek küçük hata düzeltmesi (sprite overlay rengi/locked bayrağı/versiyon testi) `main`'e
+   bu haliyle hiç taşınmadı — kullanıcı isterse ayrı, küçük bir PR'da bunlar hâlâ değerlendirilebilir,
+   şu an kapsam dışı.
+4. **⚠️ Yeni bulgu: `v9.1.5.37` GitHub Release'i, `main`'in git geçmişinde HİÇ bulunmayan bir commit'i
+   (`1984939` "Prepare v9.1.5.37 Windows validation") işaret ediyor.** Bu commit yalnızca artık terk
+   edilmiş görünen `codex/validate-91537`/`codex/fix-info-check` dallarında var — `git merge-base
+   --is-ancestor 1984939 origin/main` **false** döndü, doğrulandı. Muhtemel açıklama: bu commit, kapatılan
+   PR #6'nın (veya onun bir öncül dalının) parçasıydı ve release pipeline'ı PR hiç merge edilmeden tag/
+   release üretecek şekilde (`main` dışında bir branch'ten) tetiklenmiş. Sonuç: public GitHub Release
+   sayfasında `v9.1.5.37` diye bir sürüm var ama o sürümün kaynağı `main`'in parçası değil — `v9.1.5.38`
+   (hemen ardından, `main`'den, commit `5c866a5`) bunu pratikte geçersiz kılıyor ama release listesinde
+   tutarsız bir giriş olarak kalıyor. **Düşük risk (yayınlanmış ikili dosyalar muhtemelen zaten kaldırılmış/
+   üzerine yazılmış), ama geri alınamaz bir GitHub işlemi (release silme/düzenleme) içerdiği için bu oturum
+   dokunmadı** — kullanıcı isterse `v9.1.5.37` release notuna "bu sürüm main'e hiç girmedi, v9.1.5.38'e
+   bakın" notu ekleyebilir veya release'i silebilir.
+5. **⚠️ `main` artık `v9.1.5.38`'den (yayın: 2026-11-15T21:01:42Z) sonra, henüz hiçbir sürüme/release'e
+   bağlanmamış yeni bir commit içeriyor:** `335a437` ("refactor(ui): Division 2 Tactical HUD tema — tüm
+   teal/cyan kaldırıldı", bu oturumdan önceki bir Claude oturumu, session `019puJcpmi1mPj3qdczCYr6K`).
+   `ui_theme.PALETTES["default"]` artık teal/cyan (`#36e0c4`) yerine turuncu/amber (`accent=#ff6d10`)
+   kullanıyor; `fx.py`/`splash.py`/`view3d.py`/`ui_art.py`'deki tüm sabit renk referansları buna göre
+   güncellenmiş. `APP_VERSION` bu commit'te **artırılmadı** (hâlâ `"9.1.5.38"`) — yani şu an kurulu/indirilen
+   `v9.1.5.38`'i kullanan kullanıcılar bu yeni renk şemasını görmüyor, sadece bir sonraki release'de görecek.
+   Daha önemlisi: `BUGS.md` madde 15'teki not hâlâ geçerli — yeni renk şemasının kontrastı/okunabilirliği
+   gerçek Windows ekranında gözle teyit edilmedi (bu ortamda ekran görüntüsü alınamadı, render testi
+   yapılmadı). Bir sonraki release'den önce bu teyidin yapılması ve `APP_VERSION`'ın artırılması gerekiyor.
+6. GitHub kontrol edildi: `federalturk/td2-loot-advisor`'da **0 açık PR, 0 açık issue** (PR #3/#6 kapanmasıyla
+   temizlendi). `federalturk/td2-loot-advisor-reports`'ta değişiklik yok — hâlâ 3 açık issue (#4 gerçek
+   çökme kaydı, #5/#6 kullanıcının kendi test amaçlı Supabase bağlantı doğrulaması, aşağıya bakın). Xbox
+   Companion (UWP) CI'de 2026-11-14'ten (run `43622873860`, `success`) beri yeni bir `workflow_dispatch`
+   denemesi yok — değişmedi. `docs/mobile_companion_roadmap.md`'nin son değişikliği hâlâ 2026-11-08 — mobil
+   companion Faz 2/3/4 durumunda (tablodaki "Mobil companion" satırı) yeni bir ilerleme yok, çapraz kontrol
+   edildi, tutarsızlık bulunmadı.
+
+Büyük/riskli, kullanıcı onayı gerektiren **yeni** bir karar bulunmadı (yukarıdaki madde 4 bilgilendirme
+amaçlı, geri alınamaz bir işlem önerilmiyor). Mevcut bekleyen kullanıcı kararları (Codex devir
+senkronizasyonu — madde "Diğer açık kalemler"de aynen duruyor, üç örtüşen Xbox/konsol girişiminin
+önceliklendirilmesi, SignPath/kod imzalama, Gumroad, Xbox Companion gerçek konsol testi, yeni UI renk
+şemasının Windows'ta gözle teyidi) değişmedi. Değişen dosya: yalnızca `ROADMAP.md` (bu girdi) — uygulama
+kodu/`HANDOFF.md`/`BUGS.md` değişmedi, hiçbir GitHub yazma işlemi (merge/close/commit/release) yapılmadı.
+
+## Önceki tur: Xbox Companion CI yeşile çekildi; kullanıcının yerel Windows oturumunda (Codex devir belgesi) ayrı, senkronize olmayan bir çalışma kolu bulundu — kullanıcıdan yön bekleniyor
+
+**2026-11-14.** Bu oturum, önceki 8 başarısız `workflow_dispatch` denemesinin üzerine 5 yeni deneme (9-13)
+ekleyerek Xbox Companion (UWP) CI'yi tamamen yeşile çekti — ayrıntı yukarıdaki genel durum tablosunda ve
+`DEVELOPMENT_LOG.md`'de. Tüm commit'ler (`0bec271`→`377b441`) `origin/main`'e push edildi ve doğrulandı
+(`git fetch` + `git log origin/main -1` ile HEAD eşleşmesi kontrol edildi, ayrıca ilgili `gh run list` ile
+13. koşunun gerçekten tetiklendiği ve `success` döndüğü teyit edildi — hiçbir adım varsayıma dayanmadı).
+
+**Eşzamanlı olarak**, kullanıcı bu oturuma bir "Claude Code → Codex" devir belgesi
+(`ea83fb62-claude_to_codex_handoff.md`) paylaştı. Bu belge, kullanıcının kendi Windows bilgisayarındaki
+**ayrı bir yerel klasörde** (`C:\Users\PC\Desktop\Thedivision2program`) başka bir AI oturumunun Android
+Companion imzalama/FCM/overlay işi yaptığını ve bunu "Codex" adlı başka bir ajana devrettiğini anlatıyor.
+Bu belgedeki son bilinen yerel commit (`6fea365 fix: restrict companion installer paths`) bu bulut
+klonunun (`FEDERALTURK/td2-loot-advisor`, bu oturumun çalıştığı depo) git geçmişinde **hiç yok** —
+`git log --oneline --all | grep 6fea365` sıfır sonuç verdi. Ayrıca belge, Android GitHub-beta imzalama için
+bu depoda kurulu olan secret adlarından (`TD2_BETA_KEYSTORE_BASE64`/`TD2_BETA_KEYSTORE_PASSWORD`/
+`TD2_BETA_KEY_ALIAS`, bkz. `docs/mobile_beta_signing_tr.md`) **farklı** bir isimlendirme
+(`ANDROID_KEYSTORE_BASE64`/`ANDROID_KEYSTORE_PASSWORD`/`ANDROID_KEY_ALIAS`/`ANDROID_KEY_PASSWORD`) ve
+farklı bir yerel betik (`scripts/build_signed_companion.ps1`) kullanıyor — aynı keystore dosyası
+(`td2-companion-beta.jks`, aynı alias, aynı fingerprint) olması muhtemel ama secret isimlendirmesi ve
+hangi `build-mobile.yml` sürümünün "doğru" olduğu belirsiz. **Bu iki çalışma kolu şu an senkronize
+değil ve nasıl birleştirileceği kullanıcıdan yön bekliyor** — aşağıdaki "Diğer açık kalemler"e eklendi.
+
+**2026-11-08/09**, Konsol Modu'nun (aşağıdaki "Önceki tur"a bakın) `main`'e tam yeşil olarak girmesinin
+ardından aynı/başka bir oturum zinciri Xbox platformuna odaklandı — iki ayrı, birbirinden bağımsız iş koluyla:
+
+1. **Mobil companion içinde Xbox doğrudan bağlantı (Faz 3a, alt-aşama 1) — kod yazıldı, hiç çalıştırılmadı.**
+   Kullanıcı elinde test edilecek gerçek bir Xbox Series X/S olmadığını belirtip riski kabul ederek koda
+   başlanmasını istedi. `XStreaming` (MIT) projesinin kimlik doğrulama belgeleri satır satır doğrulanarak
+   `mobile/lib/console/xbox/` altına EC P-256 imzalama (`xbox_crypto.dart`), token saklama
+   (`xbox_token_store.dart`), PKCE/SisuAuthentication/XSTS zinciri (`xbox_auth_service.dart`), konsol listesi
+   (`xbox_console_service.dart`) ve bir giriş ekranı (`xbox_login_page.dart`) yazıldı. CI'da gerçekten
+   derlendiği kanıtlandı (3 koşu, 1 lint düzeltmesi, run `42517746084` yeşil) ama **hiçbir adım gerçek bir
+   Microsoft hesabına/Xbox konsoluna karşı çalıştırılmadı** — bu kum havuzunda interaktif Microsoft girişi
+   yapılamıyor. Gerçek ekran/ses akışı (WebRTC, `docs/console_game_caption_roadmap.md` Faz 3a alt-aşama 2)
+   **BAŞLANMADI** — "Xbox'a bağlan" ekranı şu an sadece giriş + konsol listesi yapıyor, oyun görüntüsü
+   getirmiyor. Ayrıntı: `docs/console_game_caption_roadmap.md` §Faz 3.
+2. **Xbox Companion — ayrı, statik bir UWP referans uygulaması (`xbox-companion/`, DENEYSEL) — CI'da 8
+   ardışık denemedir kırmızı, henüz hiç yeşile çekilemedi.** Xbox'ta üçüncü taraf bir uygulamanın başka bir
+   oyunun ekranını okuduğuna/üstüne overlay koyduğuna dair resmi bir API olmadığı doğrulandıktan sonra kapsam
+   bilinçli olarak "pakete gömülü JSON'dan 10 dilde görev çevirisi + popüler build özeti" ile sınırlandı
+   (canlı OCR/overlay YOK). Ama klasik (SDK-style olmayan) UWP proje formatının WinRT/.NET facade derleme
+   referanslarını CI runner'ında (Windows SDK'nin otomatik kurulu olmadığı bir ortamda) çözme sorunu 8
+   ayrı commit'te sırayla ele alındı — her biri bir öncekinin bulduğu yeni hata sınıfını kapatmaya çalıştı
+   (`PackageReference`→`packages.config` geçişi, 153 facade DLL'in csproj'a elle `<Reference>` olarak
+   eklenmesi, VS UWP iş yükü kurulumu, `Start-Process -Wait` ile gerçek bekleme, `vs_installer` argüman
+   tırnaklama hatası, iş yükü bileşen ID'si değişikliği + hata log'u okuma) — **en son deneme de dahil
+   (GitHub Actions run `42526572150`, commit `2439850`, `workflow_dispatch`) hâlâ `failure`**. Kök neden
+   henüz kesin kapatılmadı; bir sonraki oturumun artık hata durumunda yazdırılan `vs_installer --log`
+   çıktısını okuyup AGENTS.md madde 10'daki sistematik hata ayıklamayla devam etmesi gerekiyor.
+
+**Bu otomatik günlük durum oturumunun kendi katkısı (2026-11-09): kod değişikliği YAPILMADI, sadece
+doğrulama + ROADMAP senkronu.** Repo `origin/main`'e hizalandı (bu oturumun yerel `main` dal işaretçisi
+4 gün önceki bir noktada kalmıştı — önceki bir oturumun rebase+force-push'ı yüzünden `git fetch` "forced
+update" bildirdi; `git reset --hard origin/main` ile hizalandı, içerik kaybı YOK — yerel tarafın tek
+"kendine özgü" commit'i olan `sentencepiece==0.2.2` sabitlemesi `origin/main`'de de aynen duruyor, kontrol
+edildi). Son 24 saatteki commit'ler (`git log --since="24 hours ago"`) tek tek okundu, GitHub'daki açık
+PR (#3, tek), 0 açık issue, ve son ~20 workflow run'ın durumu (`actions_list`) kontrol edildi — yukarıdaki
+iki Xbox bulgusu ve `GAMLETSOL`'un ayrı depoya taşınması (genel durum tablosuna eklendi) bu taramadan
+çıktı. `tests/test_knowledge.py` KeyError'ı bugünkü "Feeds" commit'inde (`93deaa0`) yeniden test edildi,
+hâlâ aynı hatayla kırmızı (değişmedi). Büyük/riskli, kullanıcı onayı gerektiren yeni bir karar bulunmadı.
+
+## Önceki tur: Mobil companion — "Konsol Modu" (Faz 1 MVP) CI'de yeşile çekildi, gerçek cihaz testi bekliyor
+
+**2026-11-08**, aynı Claude oturumu (session `019puJcpmi1mPj3qdczCYr6K`) tek bir gün içinde üç ardışık iş
+yaptı: (1) `companion-v0.1.9`'u P0 imza-sürekliliği düzeltmesiyle gerçek bir public GitHub Release'e
+yayınladı (yukarıdaki tabloya ve `BUGS.md` #19'a bakın), (2) yeni "Konsol Modu" özelliğini (gamecaptionapp
+tarzı, platform bağımsız kamera-altyazı modu) yazdı, (3) bu özelliği push ettikten sonra tetiklenen CI'nin
+gerçekten kırmızı döndüğünü görüp, **kendi kendini düzelten bir döngüyle** (`workflow_dispatch` ile tekrar
+tekrar tetikleyip job log'larını okuyarak) iki ayrı gerçek hatayı sırayla kapattı:
+
+1. **`flutter analyze` kırmızı** (run `42513347058`) — `console_caption_page.dart`'ta okunmayan bir alan
+   (`unused_field`) ve `console_translate_service.dart`'ın constructor'ında initializing-formal kullanılmaması
+   (`prefer_initializing_formals` ×2). Düzeltme (`e97d88c`): alan silinmek yerine gerçekten kullanıldı
+   (altyazı kutusunda orijinal İngilizce metin artık ikinci, soluk bir satır olarak gösteriliyor) ve
+   constructor `this._sourceLanguage`/`this._targetLanguage` ile sadeleştirildi.
+2. **Release APK derlemesi R8'de patladı** (run `42513566679`, `flutter analyze`/`test` geçti ama
+   `assembleRelease`/R8 adımı "Missing class" hatası verdi) — `google_mlkit_text_recognition`, sadece Latin
+   script kullansak da desteklediği TÜM scriptlerin (Çince/Devanagari/Japonca/Korece) sınıflarına koşulsuz
+   referans veriyor; bu scriptlerin native kütüphaneleri bağımlılık olarak eklenmediği için R8 onları
+   bulamıyordu. Düzeltme (`22531bd`): `android/app/proguard-rules.pro` eklendi (kullanılmayan script
+   sınıfları için `-dontwarn`), `build.gradle.kts`'in release buildType'ına bağlandı.
+3. **Üçüncü deneme (run `42514233449`) tamamen yeşil**: `flutter analyze` → "No issues found!",
+   `flutter test` → 4/4 PASS, gerçek `flutter build apk --release` (R8/minify dahil) başarıyla tamamlandı.
+   Sonuç `DEVELOPMENT_LOG.md` ve `docs/console_game_caption_roadmap.md`'ye işlendi (`d407120`).
+
+**Bu otomatik günlük durum oturumunun kendi katkısı**: Yukarıdaki üç düzeltmenin hepsi bu oturum main'i
+`git pull` ettiğinde zaten origin'deydi (başka/aynı oturum eşzamanlı çalışıyordu) — bu oturum onları
+tekrar yazmadı, sadece gerçek bir Flutter SDK'sı (`3.47.9-stable`, resmî Google kanalından) bu konteynere
+indirip kurarak **bağımsız olarak doğruladı** (`flutter analyze` → "No issues found!", `flutter test` →
+4/4 PASS — bu projenin mobil tarafında ilk kez bir AI oturumu gerçek Flutter araç zincirini bu bulut
+ortamında çalıştırdı, önceki tüm oturumlar "Flutter SDK yok" notuyla yalnızca statik inceleme yapmıştı).
+Bu doğrulama sırasında ayrı, gerçek bir boşluk bulundu ve düzeltildi: `mobile/pubspec.lock`, `pubspec.yaml`'a
+4 gün önce eklenen 12 yeni paketi (camera/google_mlkit_*/flutter_tts zinciri) hiç içermiyordu — CI bunu
+her çalışmada `flutter pub get` ile taze çözüyordu ama repodaki kilit dosyası hâlâ eskiydi; gerçek
+`flutter pub get` çıktısıyla yeniden üretilip commit edildi (`85f2f50`).
+
+**Hâlâ açık/bekleyen**: Konsol Modu'nda sıfır gerçek cihaz testi (kamera izni, OCR doğruluğu, çeviri modeli
+indirme, pil etkisi — CI yalnızca derlemenin/analiz'in geçtiğini kanıtlıyor, "telefonda gerçekten çalışıyor"
+değil); mobil push-token/Faz 4 adımı (kullanıcı PC'sinde gradle satırı) aynı yerde duruyor; aşağıdaki
+"Diğer açık kalemler" bölümündeki tüm kullanıcı kararları (SignPath, Gumroad, PR #3 birleştirme, eski dal
+temizliği, `test_knowledge.py` KeyError düzeltmesi) değişmedi.
+
+## Önceki tur: Masaüstü özellik/sağlamlaştırma döngüsü + mobil push bildirimi kaydı (Faz 3'ün son parçası)
 
 2026-11-04/05'te iki paralel iş hattı ilerledi: masaüstü özellik/sağlamlaştırma döngüsü (`v9.1.5.21` → `v9.1.5.31`,
 en son üç sürüm — çeviri genelleştirme, tema sıfırlama, üst nav/radar — ve ardından bir bağımlılık regresyonu
@@ -122,7 +304,12 @@ başarıyla yüklendi, konsol hatası yok).
 
 ## Diğer açık kalemler (BUGS.md/HANDOFF.md'den)
 
-- **CI'de `Info check` kırmızı — `tests/test_knowledge.py`, canlı veriye bağımlı test fixture'ı (bulundu ve doğrulandı, 2026-11-06, bu otomatik oturum tarafından; düzeltilmedi, kapsam dışı bırakıldı).** `tests/test_knowledge.py:57` sabit bir tarihte (`t0 = 2026-10-26`) `meta/news_feed.json`'daki üç haberin durumunu kontrol ediyor: `st["y8s3-red-moon-unleashed"] == "live"`, `st["y8s3-vanguard-overdrive"] == "upcoming"`, `st["tu-y8s3-2"] == "news"`. Bu, test yazıldığı sırada gerçek/canlı haber akışındaki ID'lere doğrudan bağımlı bir fixture — kendi sentetik test verisi değil. `meta_sync.py`'nin günlük otomatik "Feeds" senkronu, biten olayları akıştan 3 gün sonra kalıcı olarak siliyor (tasarım gereği, bkz. commit mesajı "Removed events that ended 2026-11-03 (more than 3 days ago)"); bugün (2026-11-06 13:34, commit `c2f7ebf`) tam olarak `y8s3-red-moon-unleashed` silindi. Sonuç: `st` sözlüğünde artık o anahtar yok, `st["y8s3-red-moon-unleashed"]` `KeyError` fırlatıyor ve `tests/test_knowledge.py` hiç tamamlanamadan çöküyor (sonraki tüm `ok(...)` satırları, bu dosyadaki 300-soru yarışma testi dahil, hiç çalışmıyor). GitHub Actions'ta doğrulandı: `Info check` run `42226626507` (branch `main`, commit `c2f7ebf`, `failure`) ve run `42273566998` (commit `b1f3866`/tag `v9.1.5.32`, `failure`) — ikisi de aynı `KeyError` ile aynı yerde çöküyor, gerçek Windows runner'ında (`windows-latest`). **Bu, HDR düzeltmesiyle veya başka bir uygulama koduyla ilgisiz** — saf test-altyapısı sorunu, ve Feeds botu her çalıştığında (günlük) benzer bir sabit-ID varsayımı tekrar kırılabilir. Düzeltme önerisi (uygulanmadı, bir sonraki oturuma/kullanıcıya bırakıldı): test, gerçek/canlı veriye bağımlı sabit ID'ler yerine kendi sentetik `items` listesini oluşturup `knowledge.news_sorted()`'ı o sentetik veriyle çağırmalı — böylece Feeds botunun günlük veri değişiklikleri testi bir daha kıramaz. **Risk düşük ve geri alınabilir (tek dosya, test kodu) olduğu için düzeltme kullanıcı onayı gerektirmiyor, ama bu otomatik oturumun kapsamı (sadece ROADMAP senkronu) dışında bırakıldı — kod değişikliği YAPILMADI.**
+- ✅ **[PR #6](https://github.com/FEDERALTURK/td2-loot-advisor/pull/6) "Codex/release 9.1.5.37" — 2026-11-15 20:50 UTC'de merge edilmeden kapatıldı, risk ortadan kalktı (bkz. yukarıdaki "Şu an aktif" madde 3).** Aşağıdaki madde artık tarihsel kayıt:
+  ~~**Yeni bulundu (2026-11-15): kullanıcı onayı bekliyor, bu oturum DOKUNMADI.**~~ `codex/release-9.1.5.37` dalından açılan, `main` ile `mergeable_state: dirty` (gerçek çakışma) olan, 331 dosyayı (+37117/-120, 24 commit) değiştiren büyük bir PR. Üç gerçek ve küçük hata düzeltmesi (sprite overlay rengi artık paletten, decision center sayısal `locked` bayrağını koruyor, 4 parçalı versiyon testi düzeltmesi) içeriyor, ama bunların yanında projenin kapsamıyla doğrudan ilgisi görünmeyen büyük bir ek var: proje tanıtım videosu üretmek için "brag"/"brag-slim" adlı yeni ajan becerileri, lisanslı müzik parçaları + ses efektleri paketi, tarayıcı tabanlı yakalama araçları. PR'daki `Workers Builds: td2-stats` check'i `failure` (not: `main` dalında bu kontrol hâlâ `success`, sorun bu PR dalına özgü). **Bu, AGENTS.md'nin "kullanıcı onayı gerektiren" tanımına giren, büyük/riskli, geri dönüşü potansiyel olarak zor bir karar** — bu otomatik oturum merge/rebase/kapatma işlemlerinden hiçbirini yapmadı, sadece durumu doğruladı ve burada not etti. Kullanıcı kararı gerekiyor: (a) PR'ı rebase edip olduğu gibi birleştirmek, (b) sadece hata düzeltmelerini ayrı, küçük bir PR'a taşıyıp "brag" eklentisini ayrı değerlendirmek, (c) PR'ı kapatmak. Ayrıca bu PR'ın bu depoya nereden/nasıl geldiği (hangi oturum/araç "codex/release-9.1.5.37" dalını açtı) bu oturumun GitHub erişim kapsamında doğrulanamadı — sadece PR içeriği ve check durumu incelendi.
+- **Yeni bulundu (2026-11-15), düşük öncelik:** `federalturk/td2-loot-advisor-reports` reposunda, uygulama sahibi tarafından açıkça "sadece ... bağlantıyı doğrulamak için oluşturuldu" notuyla açılan iki test amaçlı issue var — [#5](https://github.com/federalturk/td2-loot-advisor-reports/issues/5) ve [#6](https://github.com/federalturk/td2-loot-advisor-reports/issues/6), ikisi de "Supabase runtime bağlantı testi" başlıklı, 2026-11-15 11:24-11:25 UTC. Gerçek bir kullanıcı hatası değil, Supabase panel aynalama/bağlantı testinin kanıtı; isteğe bağlı olarak kapatılabilir, bu oturum kapatmadı (düşük risk ama gereksiz bir GitHub işlemi olduğu için dokunulmadı).
+- **Codex devir belgesindeki yerel çalışma kolunun bu depoyla senkronizasyonu — kullanıcı yönü bekleniyor (bulundu 2026-11-14, çözülmedi).** Kullanıcının `C:\Users\PC\Desktop\Thedivision2program` klasöründe, bu bulut klonundan (`FEDERALTURK/td2-loot-advisor`) bağımsız ilerleyen bir Android Companion imzalama/FCM işi var (devir belgesi: `ea83fb62-claude_to_codex_handoff.md`). Yerel son commit `6fea365` bu depoda yok; Android GitHub-beta secret isimlendirmesi de bu depodaki `TD2_BETA_*` yerine `ANDROID_*` kullanıyor. Hangi `build-mobile.yml`/secret şemasının geçerli kabul edileceği, iki kolun birleştirilip birleştirilmeyeceği (ve nasıl) kullanıcı kararı gerektiriyor — kodda hiçbir değişiklik yapılmadı.
+- ✅ **Yol haritası/özellik taraması talebi — teslim edildi (2026-11-14).** Kullanıcının istediği yeni/gereksiz özellik taraması, ekran-okuma/tanımlama/çeviri'nin kod düzeyinde açık tanımı ve fazlara bölünmüş geliştirme yol haritası `docs/feature_roadmap_2026-11-14.md`'ye yazıldı. Özet: ekran okuma (eşya tarama, F8) ile canlı çeviri (F6) aynı OCR altyapısını paylaşan ama tamamen ayrı iki boru hattı olarak tanımlandı; doğrudan "gereksiz" kanıtlanmış bir özellik bulunmadı, ama üç örtüşen Xbox/konsol girişiminin (statik UWP referans uygulaması, mobil Xbox doğrudan-bağlantı, capture-card çevirisi) kullanıcı tarafından önceliklendirilmesi gerektiği not edildi; 5 fazlı bir yol haritası (temizlik → konsol stratejisi → mobil tamamlama → OCR/çeviri derinleştirme → topluluk veri → yayın altyapısı) önerildi. Kod değişikliği içermiyor, her faz ayrı onay bekliyor.
+- ✅ **ÇÖZÜLDÜ (2026-11-15, commit `dac8829`/`5ad98fd`) — CI'de `Info check` kırmızı — `tests/test_knowledge.py`, canlı veriye bağımlı test fixture'ı (bulundu ve doğrulandı, 2026-11-06; bu oturum tarafından 2026-11-16'da `python3 -B tests/test_knowledge.py` ile `RESULT: PASS` olarak yeniden doğrulandı, ayrıntı yukarıdaki "Şu an aktif" madde 1).** Aşağıdaki, bu bulgunun o zamanki tam kaydı (artık tarihsel, düzeltme uygulandı): `tests/test_knowledge.py:57` sabit bir tarihte (`t0 = 2026-10-26`) `meta/news_feed.json`'daki üç haberin durumunu kontrol ediyor: `st["y8s3-red-moon-unleashed"] == "live"`, `st["y8s3-vanguard-overdrive"] == "upcoming"`, `st["tu-y8s3-2"] == "news"`. Bu, test yazıldığı sırada gerçek/canlı haber akışındaki ID'lere doğrudan bağımlı bir fixture — kendi sentetik test verisi değil. `meta_sync.py`'nin günlük otomatik "Feeds" senkronu, biten olayları akıştan 3 gün sonra kalıcı olarak siliyor (tasarım gereği, bkz. commit mesajı "Removed events that ended 2026-11-03 (more than 3 days ago)"); bugün (2026-11-06 13:34, commit `c2f7ebf`) tam olarak `y8s3-red-moon-unleashed` silindi. Sonuç: `st` sözlüğünde artık o anahtar yok, `st["y8s3-red-moon-unleashed"]` `KeyError` fırlatıyor ve `tests/test_knowledge.py` hiç tamamlanamadan çöküyor (sonraki tüm `ok(...)` satırları, bu dosyadaki 300-soru yarışma testi dahil, hiç çalışmıyor). GitHub Actions'ta doğrulandı: `Info check` run `42226626507` (branch `main`, commit `c2f7ebf`, `failure`) ve run `42273566998` (commit `b1f3866`/tag `v9.1.5.32`, `failure`) — ikisi de aynı `KeyError` ile aynı yerde çöküyor, gerçek Windows runner'ında (`windows-latest`). **Bu, HDR düzeltmesiyle veya başka bir uygulama koduyla ilgisiz** — saf test-altyapısı sorunu, ve Feeds botu her çalıştığında (günlük) benzer bir sabit-ID varsayımı tekrar kırılabilir. Düzeltme önerisi (uygulanmadı, bir sonraki oturuma/kullanıcıya bırakıldı): test, gerçek/canlı veriye bağımlı sabit ID'ler yerine kendi sentetik `items` listesini oluşturup `knowledge.news_sorted()`'ı o sentetik veriyle çağırmalı — böylece Feeds botunun günlük veri değişiklikleri testi bir daha kıramaz. **Risk düşük ve geri alınabilir (tek dosya, test kodu) olduğu için düzeltme kullanıcı onayı gerektirmiyor, ama bu otomatik oturumun kapsamı (sadece ROADMAP senkronu) dışında bırakıldı — kod değişikliği YAPILMADI.**
 - ✅ **`master` dalı silindi (2026-11-04, kullanıcı tarafından).** `git ls-remote`/GitHub API ile doğrulandı —
   artık yalnızca `main`, `archive/master-superseded-2026-11-03`, `deploy/worker-bundle-temp` ve
   `claude/descriptions-second-shard` dalları kalıyor. `archive/master-superseded-2026-11-03` aynı eski commit'i
@@ -296,3 +483,241 @@ başarıyla yüklendi, konsol hatası yok).
   ama yine de bu oturumun görev tanımı dışında bırakıldı); mevcut bekleyen kullanıcı kararları (SignPath,
   Gumroad, eski dalların temizliği, Apple Developer Program ödemesi, mobil gradle adımı, PR #3 birleştirme
   kararı) aynen duruyor. Değişen dosya: yalnızca `ROADMAP.md`.
+
+- **2026-11-08 (otomatik günlük durum güncellemesi — zamanlanmış görev):** Bu oturum **gerçek bir kod
+  değişikliği de yaptı** (sadece durum güncellemesi değil) — ayrıntı aşağıda. `git fetch`/`checkout main`
+  ile depo `main`'e hizalandı (daha önce detached HEAD'teydi, `origin/main` ile birebir aynı noktaydaydı,
+  rebase gerekmedi). Son 24 saatteki commit'ler tek tek incelendi: `console_capture_translation_roadmap.md`/
+  `console_game_caption_roadmap.md` araştırma turu, "Konsol Modu" (Faz 1 MVP) özelliği, `companion-v0.1.9`
+  gerçek yayını (P0 imza-sürekliliği düzeltmesiyle), ve ardından **aynı gün, aynı oturumun** Konsol Modu'nu
+  push ettikten sonra CI'de gerçekten yakaladığı iki hatayı (lint + R8 missing-class) kendi kendine
+  düzeltip üçüncü denemede tam yeşile çektiği commit zinciri (`e97d88c`, `22531bd`, `d407120`) — bunların
+  hepsi yukarıdaki "Şu an aktif" bölümüne işlendi. **Bu oturum sırasında o zincirle eşzamanlı çalışılıyordu**:
+  bu oturum da bağımsız olarak aynı `flutter analyze` kırmızısını (run `42513347058`) GitHub Actions
+  job log'undan okuyup kendi düzeltmesini yazmıştı, ama `git fetch` sırasında origin'de aynı sorunu çözen
+  (ve `_sourceText` alanını silmek yerine gerçekten kullanan, daha iyi) bir commit (`e97d88c`) bulununca
+  **kendi redundant/çakışan commit'i `git reset --hard origin/main` ile bırakıldı** — iki ayrı oturumun
+  aynı satırları farklı şekilde değiştirip çakışma yaratması yerine, tek doğru kaynak (origin) esas alındı.
+  Bu oturumun kendi, çakışmayan katkısı: (1) gerçek bir Flutter SDK'sı (`3.47.9-stable`) bu bulut ortamına
+  **ilk kez** indirilip kuruldu ve `flutter analyze`/`flutter test` gerçekten çalıştırılıp mevcut `main`
+  HEAD'inin (o an `d407120`) temiz olduğu bağımsız olarak doğrulandı — önceki tüm mobil commit'ler
+  "Flutter SDK yok" notuyla yalnızca statik inceleme yapmıştı; (2) bu doğrulama sırasında ayrı, gerçek bir
+  boşluk bulundu: `mobile/pubspec.lock`, 4 gün önce `pubspec.yaml`'a eklenen 12 yeni pakedi (camera/
+  google_mlkit_*/flutter_tts) hiç içermiyordu (CI bunu her çalışmada taze çözüyordu ama kilit dosyası
+  commit edilmemişti) — gerçek `flutter pub get` çıktısıyla yeniden üretilip commit edildi (`85f2f50`,
+  tek dosya, sıfır davranış değişikliği, `flutter analyze` sonrasında da temiz). GitHub kontrol edildi:
+  `federalturk/td2-loot-advisor`'da 0 açık issue, **hâlâ 1 açık (taslak) PR** — [#3](https://github.com/FEDERALTURK/td2-loot-advisor/pull/3):
+  sahibi tarafından `main`'in son hâliyle güncellenmiş ve Cubic code-review'un iki bulgusu (`desc_i18n()`'in
+  artık `meta_sync.load_descriptions` kullanması, bozuk parça denetimi) `8ee174b` ile kapatılmış, ama PR
+  hâlâ **taslak**, `mergeable_state: unknown` (son API yanıtı), ve kendi yorumunda `tests/test_knowledge.py`'nin
+  (yukarıdaki, günlerdir bilinen `KeyError: 'y8s3-red-moon-unleashed'` sorunu) hem `main`'de hem bu PR'da
+  kırmızı kaldığını tekrar doğrulamış — **birleştirme kararı hâlâ kullanıcıya bırakıldı, bu oturum
+  dokunmadı**. Büyük/riskli bir karar gerektiren yeni bir şey bulunmadı; yapılan tek kod değişikliği
+  (pubspec.lock kilitleme) tek dosyalık, geri alınabilir, davranış değiştirmeyen bir düzeltmeydi ve
+  AGENTS.md madde 6'daki "kod yazımı/commit/push" serbestliği kapsamında kaldı (release/tag/APK yayını
+  YAPILMADI). Mevcut bekleyen kullanıcı kararları (SignPath, Gumroad, eski dalların temizliği, Apple
+  Developer Program ödemesi, mobil gradle adımı, PR #3 birleştirme kararı, `test_knowledge.py` düzeltmesi)
+  aynen duruyor. Değişen dosyalar: `ROADMAP.md` (bu güncelleme) + `mobile/pubspec.lock` (kilit yenileme,
+  ayrı commit).
+
+- **2026-11-09 (otomatik günlük durum güncellemesi — zamanlanmış görev): sadece durum güncellemesi, kod
+  değişikliği yok.** Depo `origin/main`'e (`93deaa0`) hizalandı — bu oturumun yerel `main` dal işaretçisi
+  4 gün önceki bir noktada (`d34fe38`, 2026-11-05) kalmıştı ve `git fetch` origin için "forced update"
+  bildirdi (önceki bir oturumun rebase+force-push'ı); `git reset --hard origin/main` ile hizalandı,
+  içerik kaybı doğrulandı YOK (yerel tarafın `sentencepiece==0.2.2` sabitlemesi gibi tek dosyalık
+  düzeltmeleri `origin/main`'de de aynen mevcut, farklı commit hash'leriyle). Son 24 saatteki commit'ler,
+  GitHub'daki açık PR/issue listesi ve son ~20 workflow run incelendi. Bulunanlar (hepsi yukarıdaki
+  "Genel durum" tablosuna ve yeni "Şu an aktif" bölümüne işlendi): (1) **Xbox Companion (UWP, deneysel)**
+  yeni bir bileşen olarak eklenmiş ama CI'da 8 ardışık `workflow_dispatch` denemesinin hepsi (en sonuncusu
+  dahil, run `42526572150`) `failure` — WinRT/facade derleme referansları sorunu hâlâ çözülmedi; (2)
+  **mobil companion'a Xbox doğrudan bağlantı kimlik doğrulama akışı (Faz 3a alt-aşama 1)** eklendi, CI'da
+  derlendiği kanıtlandı ama gerçek bir Microsoft hesabı/Xbox'a karşı hiç çalıştırılmadı; (3) **GAMLETSOL**
+  (TV/konsol sesi canlı çeviri, ayrı Flutter MVP'si) bir kez CI'da başarıyla derlendi, ardından kendi
+  deposuna (`FEDERALTURK/gamletsol`) taşındı — bu depoda artık yok; (4) **`tests/test_knowledge.py`
+  KeyError'ı** (`y8s3-red-moon-unleashed`, 2026-11-06'dan beri bilinen) bugünkü "Feeds" commit'inde
+  (`93deaa0`) yeniden doğrulandı, **hâlâ aynı hatayla kırmızı** (run `42580288876`) — düzeltme bu oturumun
+  kapsamı dışında bırakıldı; (5) **PR #3** hâlâ açık/taslak, dokunulmadı, ama `mergeable_state` artık
+  `unstable` değil **`dirty`** (gerçek çakışma, `main`'e göre rebase gerekiyor). Büyük/riskli, kullanıcı
+  onayı gerektiren yeni bir karar bulunmadı — mevcut bekleyen kullanıcı kararları (SignPath, Gumroad, eski
+  dalların temizliği, Apple Developer Program ödemesi, mobil gradle adımı, PR #3 birleştirme/rebase,
+  `test_knowledge.py` düzeltmesi, Xbox Companion CI kök nedeni) aynen duruyor. Değişen dosya: yalnızca
+  `ROADMAP.md`.
+
+- **2026-11-10 (otomatik günlük durum güncellemesi — zamanlanmış görev): sadece durum güncellemesi, kod
+  değişikliği yok.** Depo `/home/claude/td2-loot-advisor`'da önceden klonlu bulundu, `HEAD` detached state'te
+  (önceki bir oturumun bıraktığı hâliyle) ama zaten `origin/main`'in tam ucundaydı; `git fetch` yine bir
+  "forced update" bildirdi (yerel `main` dal işaretçisi hâlâ 2026-11-05 tarihli `d34fe38`'de donmuştu,
+  gerçek içerikle ilgisi yoktu), `git checkout -B main origin/main` ile dal işaretçisi gerçek konuma
+  (`aadc88b`) hizalandı — fark/kayıp yok, detached HEAD zaten doğru commit'teydi. Son 24 saatteki commit'ler
+  yalnızca iki otomatik "Feeds" bot commit'i (`65b3dc7` 01:40, `aadc88b` 13:33) — her ikisi de tek dosyayı
+  (`meta/news_feed.json`, haber senkronu) değiştiriyor, uygulama kodunda/dokümantasyonda hiçbir değişiklik
+  yok. GitHub kontrol edildi: `federalturk/td2-loot-advisor`'da **0 açık issue**, **hâlâ 1 açık (taslak)
+  PR** — [#3](https://github.com/FEDERALTURK/td2-loot-advisor/pull/3), `updated_at` 2026-11-08'den beri
+  değişmedi, `mergeable_state` hâlâ `dirty` (rebase edilmemiş) — dokunulmadı. `federalturk/td2-loot-advisor-reports`'ta
+  yalnızca bilinen [#4](https://github.com/federalturk/td2-loot-advisor-reports/issues/4) açık, yeni bir şey
+  yok. Son ~20 workflow run incelendi: `Info check` iş akışı bugünkü her iki "Feeds" commit'inde de
+  (run `42737408332`, run `42825672656`) **aynı `KeyError: 'y8s3-red-moon-unleashed'` ile hâlâ kırmızı** —
+  kök neden değişmedi, düzeltme hâlâ bu oturumun kapsamı dışında bırakıldı. **Xbox Companion (UWP) CI'de
+  2026-11-08'den beri yeni bir `workflow_dispatch` denemesi yapılmadı** — hâlâ 8 ardışık başarısız denemede
+  duruyor (en sonuncusu run `42526572150`), kök neden kapatılmadı. Büyük/riskli, kullanıcı onayı gerektiren
+  yeni bir karar bulunmadı — mevcut bekleyen kullanıcı kararları (SignPath, Gumroad, eski dalların temizliği,
+  Apple Developer Program ödemesi, mobil gradle adımı, PR #3 birleştirme/rebase, `test_knowledge.py`
+  düzeltmesi, Xbox Companion CI kök nedeni) aynen duruyor. Değişen dosya: yalnızca `ROADMAP.md`.
+
+- **2026-11-11 (otomatik günlük durum güncellemesi — zamanlanmış görev): sadece durum güncellemesi, kod
+  değişikliği yok.** Depo `/home/claude/td2-loot-advisor`'da önceden klonlu bulundu, `main` zaten
+  `origin/main`'in (`916e782`) tam ucundaydı, `git fetch`/`git status` temiz — hizalama için ek bir işlem
+  gerekmedi. Son 24 saatteki commit'ler (`git log --since="24 hours ago"`) yalnızca tek bir otomatik
+  "Feeds" bot commit'i (`916e782`, 01:34 UTC, `meta/news_feed.json`'a 1 haber ekliyor) — uygulama
+  kodunda/dokümantasyonda hiçbir değişiklik yok. GitHub kontrol edildi: `federalturk/td2-loot-advisor`'da
+  **0 açık issue**, **hâlâ 1 açık (taslak) PR** — [#3](https://github.com/FEDERALTURK/td2-loot-advisor/pull/3),
+  `updated_at` 2026-11-08'den beri değişmedi, `mergeable_state` hâlâ `dirty` — dokunulmadı.
+  `federalturk/td2-loot-advisor-reports`'ta yalnızca bilinen [#4](https://github.com/federalturk/td2-loot-advisor-reports/issues/4)
+  açık (`updated_at` 2026-10-31'den beri değişmedi), yeni bir şey yok. `Info check` iş akışının bugünkü
+  "Feeds" commit'i üzerindeki çalışması (run `42939973341`) job log'u satır satır okunarak doğrulandı:
+  **aynı `KeyError: 'y8s3-red-moon-unleashed'` ile hâlâ kırmızı**, hatanın yeri/mesajı 2026-11-06'dan beri
+  birebir aynı — kök neden (test, Feeds botunun 3 günden eski biten haber olaylarını otomatik sildiği
+  `meta/news_feed.json`'da sabit bir anahtarın hep var olacağını varsayıyor) değişmedi, düzeltme hâlâ bu
+  oturumun kapsamı dışında bırakıldı. **Xbox Companion (UWP) CI'de 2026-11-08'den beri (`run 42526572150`)
+  yeni bir `workflow_dispatch` denemesi yapılmadı** — hâlâ 8 ardışık başarısız denemede duruyor, kök neden
+  kapatılmadı. Büyük/riskli, kullanıcı onayı gerektiren yeni bir karar bulunmadı — mevcut bekleyen
+  kullanıcı kararları (SignPath, Gumroad, eski dalların temizliği, Apple Developer Program ödemesi, mobil
+  gradle adımı, PR #3 birleştirme/rebase, `test_knowledge.py` düzeltmesi, Xbox Companion CI kök nedeni)
+  aynen duruyor. Değişen dosya: yalnızca `ROADMAP.md`.
+
+- **2026-11-12 (otomatik günlük durum güncellemesi — zamanlanmış görev): sadece durum güncellemesi, kod
+  değişikliği yok.** Depo `/home/claude/td2-loot-advisor`'da önceden klonlu bulundu, `HEAD` yine detached
+  state'te (önceki bir oturumun bıraktığı hâliyle) ama zaten `origin/main`'in (`9d2b7cf`) tam ucundaydı;
+  `git checkout main` + fast-forward (`916e782` → `9d2b7cf`, çakışma yok, 2 dosya: `ROADMAP.md` +
+  `meta/news_feed.json`) ile dal işaretçisi gerçek konuma hizalandı. Son 24 saatteki commit'ler
+  (`git log --since="24 hours ago"`) yalnızca iki otomatik "Feeds" bot commit'i (`e8a8bd8` 07:34,
+  `9d2b7cf` 13:33) — her ikisi de tek dosyayı (`meta/news_feed.json`, haber senkronu) değiştiriyor;
+  `HANDOFF.md`/`BUGS.md`/`docs/mobile_companion_roadmap.md` son değişiklik tarihleri kontrol edildi
+  (sırasıyla 2026-11-08, 2026-11-08, 2026-11-07) — hiçbiri bugün değişmedi, uygulama kodunda/dokümantasyonda
+  hiçbir değişiklik yok. GitHub kontrol edildi: `federalturk/td2-loot-advisor`'da **0 açık issue**, **hâlâ 1
+  açık (taslak) PR** — [#3](https://github.com/FEDERALTURK/td2-loot-advisor/pull/3), `updated_at`
+  2026-11-08'den beri değişmedi (yeni yorum yok), `mergeable_state` artık `dirty` değil **`unknown`**
+  (GitHub'ın yeniden hesaplama ara durumu gibi görünüyor, gerçek bir birleştirme/çakışma değişikliği değil,
+  PR'a dokunulmadı). `federalturk/td2-loot-advisor-reports`'ta yalnızca bilinen
+  [#4](https://github.com/federalturk/td2-loot-advisor-reports/issues/4) açık (`updated_at` 2026-10-31'den
+  beri değişmedi), yeni bir şey yok. `Info check` iş akışının bugünkü her iki "Feeds" commit'indeki çalışması
+  (run `43176278556`, run `43228458506`) job log'u satır satır okunarak doğrulandı: **aynı
+  `KeyError: 'y8s3-red-moon-unleashed'` ile hâlâ kırmızı**, hata mesajı/satırı 2026-11-06'dan beri birebir
+  aynı — kök neden (test, Feeds botunun 3 günden eski biten haber olaylarını `meta/news_feed.json`'dan
+  kalıcı olarak sildiğini hesaba katmayan, sabit bir haber ID'sine bağımlı fixture kullanması) değişmedi,
+  düzeltme hâlâ bu oturumun kapsamı dışında bırakıldı. **Xbox Companion (UWP) CI'de 2026-11-08'den beri
+  (`run 42526572150`) yeni bir `workflow_dispatch` denemesi yapılmadı** — hâlâ aynı 8 ardışık başarısız
+  denemede duruyor, kök neden kapatılmadı. **`Build Companion APK` iş akışında da 2026-11-08'den beri
+  (`run 42517746084`) yeni bir çalışma yok** — mobil tarafta (Konsol Modu, Xbox doğrudan bağlantı) yeni bir
+  CI etkinliği yok. Büyük/riskli, kullanıcı onayı gerektiren yeni bir karar bulunmadı — mevcut bekleyen
+  kullanıcı kararları (SignPath, Gumroad, eski dalların temizliği, Apple Developer Program ödemesi, mobil
+  gradle adımı, PR #3 birleştirme/rebase, `test_knowledge.py` düzeltmesi, Xbox Companion CI kök nedeni)
+  aynen duruyor. Değişen dosya: yalnızca `ROADMAP.md`.
+
+- **2026-11-13 (otomatik günlük durum güncellemesi — zamanlanmış görev): sadece durum güncellemesi, kod
+  değişikliği yok.** Depo `/home/claude/td2-loot-advisor`'da önceden klonlu bulundu, `HEAD` yine detached
+  state'te (önceki bir oturumun bıraktığı hâliyle) ama zaten `origin/main`'in (`cffbc40`) tam ucundaydı;
+  `git checkout main` + fast-forward (`916e782` → `cffbc40`, çakışma yok, 2 dosya: `ROADMAP.md` +
+  `meta/news_feed.json`) ile dal işaretçisi gerçek konuma hizalandı. Son 24 saatteki commit'ler
+  (`git log --since="24 hours ago"`) yalnızca iki otomatik "Feeds" bot commit'i (`be94770` 01:39,
+  `cffbc40` 13:35) — her ikisi de tek dosyayı (`meta/news_feed.json`, haber senkronu) değiştiriyor;
+  `HANDOFF.md` (2026-11-07), `BUGS.md` (2026-11-08) ve `docs/mobile_companion_roadmap.md` (2026-11-07)
+  son değişiklik tarihleri `git log -1 -- <dosya>` ile kontrol edildi — hiçbiri bugün değişmedi, uygulama
+  kodunda/dokümantasyonda hiçbir değişiklik yok. GitHub kontrol edildi: `federalturk/td2-loot-advisor`'da
+  **0 açık issue**, **hâlâ 1 açık (taslak) PR** — [#3](https://github.com/FEDERALTURK/td2-loot-advisor/pull/3),
+  `updated_at` 2026-11-08'den beri değişmedi (yeni yorum yok), `mergeable_state` hâlâ `unknown`, dokunulmadı.
+  `federalturk/td2-loot-advisor-reports`'ta yalnızca bilinen
+  [#4](https://github.com/federalturk/td2-loot-advisor-reports/issues/4) açık (`updated_at` 2026-10-31'den
+  beri değişmedi), yeni bir şey yok. `Info check` iş akışının bugünkü her iki "Feeds" commit'indeki çalışması
+  (run `43346524965`, run `43435002267`) job log'u satır satır okunarak doğrulandı: **aynı
+  `KeyError: 'y8s3-red-moon-unleashed'` ile hâlâ kırmızı** (`tests/test_knowledge.py:57`), hata mesajı/satırı
+  2026-11-06'dan beri birebir aynı — kök neden (test, Feeds botunun 3 günden eski biten haber olaylarını
+  `meta/news_feed.json`'dan kalıcı olarak sildiğini hesaba katmayan, sabit bir haber ID'sine bağımlı fixture
+  kullanması) değişmedi, düzeltme hâlâ bu oturumun kapsamı dışında bırakıldı. **Xbox Companion (UWP) CI'de
+  2026-11-08'den beri (`run 42526572150`) yeni bir `workflow_dispatch` denemesi yapılmadı** — hâlâ aynı 8
+  ardışık başarısız denemede duruyor, kök neden kapatılmadı. **`Build Companion APK` iş akışında da
+  2026-11-08'den beri (`run 42517746084`, `success`) yeni bir çalışma yok** — mobil tarafta (Konsol Modu,
+  Xbox doğrudan bağlantı) yeni bir CI etkinliği yok. Büyük/riskli, kullanıcı onayı gerektiren yeni bir karar
+  bulunmadı — mevcut bekleyen kullanıcı kararları (SignPath, Gumroad, eski dalların temizliği, Apple
+  Developer Program ödemesi, mobil gradle adımı, PR #3 birleştirme/rebase, `test_knowledge.py` düzeltmesi,
+  Xbox Companion CI kök nedeni) aynen duruyor. Değişen dosya: yalnızca `ROADMAP.md`.
+
+- **2026-11-14 (otomatik günlük durum güncellemesi — zamanlanmış görev): sadece durum doğrulaması, kod/belge
+  değişikliği yok.** Depo `/home/claude/td2-loot-advisor`'da önceden klonlu bulundu; `HEAD` detached state'teydi
+  ama zaten `origin/main`'in (`729bc26`) tam ucundaydı. `git checkout main` + fast-forward (`916e782` → `729bc26`,
+  18 commit, 6 dosya, çakışma yok) ile yerel dal işaretçisi gerçek konuma hizalandı — içerik kaybı yok. Bu 18
+  commit'in detayına bakıldı: aynı gün **başka/önceki bir oturum** (session `019puJcpmi1mPj3qdczCYr6K`) Xbox
+  Companion (UWP) CI'yi 5 yeni `workflow_dispatch` denemesiyle (9-13) tamamen yeşile çekmiş (run `43622873860`,
+  `success`, commit `377b441`), `docs/feature_roadmap_2026-11-14.md` (yeni özellik/yol haritası taraması) teslim
+  etmiş, ve `HANDOFF.md`/`ROADMAP.md`'ye bunu + kullanıcının yerel Windows klasöründeki senkronize olmayan
+  "Codex devir" çalışma kolu bulgusunu işlemiş (commit'ler `0bec271`→`729bc26`) — bu girdiyi yazan otomatik
+  oturum bu işin HİÇBİRİNİ tekrar yapmadı, sadece zaten `origin/main`'de olduğunu doğruladı. GitHub kontrol
+  edildi: `federalturk/td2-loot-advisor`'da **0 açık issue**, **hâlâ 1 açık (taslak) PR** — [#3](https://github.com/FEDERALTURK/td2-loot-advisor/pull/3),
+  `updated_at` 2026-11-08'den beri değişmedi (yeni yorum yok). `federalturk/td2-loot-advisor-reports`'ta yalnızca
+  bilinen [#4](https://github.com/federalturk/td2-loot-advisor-reports/issues/4) açık, `updated_at` 2026-10-31'den
+  beri değişmedi. Son ~15 workflow run (`actions_list`) kontrol edildi: bu kontrolden önceki en son etkinlik,
+  yukarıda bahsedilen Xbox CI'nin 13. (son, başarılı) denemesi `43622873860` (2026-11-14 17:45-17:50 UTC) —
+  ondan sonraki üç belge-only commit (`5ebbd40`, `84b7f64`, `729bc26`, hepsi 18:0x-18:24 UTC) hiçbir workflow'u
+  tetiklememiş (beklenen: bunlar yalnızca `.md` dosyalarını değiştiriyor); bu kontrol anına (yaklaşık 19:06 UTC)
+  kadar yeni bir commit/run/issue/PR etkinliği yok — yani son gerçek güncellemeden bu yana (~40 dakika) hiçbir
+  şey değişmedi. `docs/mobile_companion_roadmap.md`'nin son değişiklik tarihi (2026-11-08) ROADMAP tablosundaki
+  mobil companion durumuyla (companion-v0.1.9 + Konsol Modu, aynı tarih) tutarlı bulundu, uyumsuzluk yok. Büyük/
+  riskli, kullanıcı onayı gerektiren yeni bir karar bulunmadı — mevcut bekleyen kullanıcı kararları (Codex devir
+  senkronizasyonu, üç örtüşen Xbox/konsol girişiminin önceliklendirilmesi, SignPath/kod imzalama, Gumroad, PR #3
+  birleştirme/rebase, `test_knowledge.py` KeyError düzeltmesi, Xbox Companion gerçek konsol testi) aynen duruyor.
+  Değişen dosya: yalnızca `ROADMAP.md` (bu girdi) — uygulama kodu/`HANDOFF.md`/`BUGS.md` değişmedi.
+
+- **2026-11-15 (otomatik günlük durum güncellemesi — zamanlanmış görev): sadece durum güncellemesi, kod değişikliği
+  yok.** Depo `/home/claude/td2-loot-advisor`'da önceden klonlu bulundu, `HEAD` detached ve yerel `main` 24 commit
+  gerideydi; `git checkout main` + `git pull --ff-only origin main` ile fast-forward edildi (`916e782` → `f0a8c74`,
+  çakışma yok, içerik kaybı yok). Son 24 saatteki gerçek commit'ler tek tek okundu: **(1)** PR #4/#5 birleştirildi,
+  release token'ı açıkça geçirildi ve uygulama sürümü `9.1.5.36`'ya hizalandı; GitHub Releases API ile `v9.1.5.36`
+  etiketinin gerçekten yayınlandığı doğrulandı (`published_at` 2026-11-15T05:47:47Z, `prerelease: false`). **(2)**
+  Bir önceki Claude oturumu kök `.gitignore`'daki gerçek bir güvenlik açığını (`.jks`/`.env`/`key.properties` vb.
+  desenlerin depo kökünü kapsamaması) kapattı ve eksik `SETUP.md`'yi ekledi (commit `f0a8c74`) — hiçbir sırrın
+  hiçbir zaman takip edilmediği doğrulanmış, geçmişe sızma yok. GitHub durumu kontrol edildi: `main` dalında son
+  ~10 workflow run'ın tamamı `success` (Community tasks feed, Stability and workload policy dahil); `Info check`/
+  `tests/test_knowledge.py` hâlâ aynı bilinen `KeyError` ile kırmızı (değişmedi, düzeltme hâlâ yapılmadı). **Yeni
+  ve dikkat gerektiren bulgu:** [PR #6](https://github.com/FEDERALTURK/td2-loot-advisor/pull/6) "Codex/release
+  9.1.5.37" — başka bir ajan/oturum tarafından açılmış, `main` ile çakışan (`dirty`), 331 dosyalık, içinde gerçek
+  hata düzeltmeleriyle birlikte kapsam dışı görünen büyük bir ek (tanıtım videosu üretim becerileri + lisanslı
+  medya varlıkları) barındıran bir PR; `Workers Builds` kontrolü bu dalda `failure`. Bu, AGENTS.md'nin tanımladığı
+  "büyük/riskli karar" eşiğine giriyor — bu oturum PR'a hiçbir şekilde dokunmadı (merge/rebase/kapatma yapılmadı),
+  sadece ROADMAP.md'ye "kullanıcı onayı bekliyor" olarak not edildi (yukarıdaki genel durum tablosu + "Diğer açık
+  kalemler"). `federalturk/td2-loot-advisor-reports`'ta sahibi tarafından açıkça test amaçlı açılmış iki yeni issue
+  (#5, #6, "Supabase runtime bağlantı testi") bulundu, gerçek bir hata değil, düşük öncelikli not edildi, dokunulmadı.
+  PR #3 hâlâ taslak/`dirty`, değişmedi. Bekleyen diğer tüm kullanıcı kararları (Codex devir senkronizasyonu, Xbox/
+  konsol önceliklendirmesi, SignPath/kod imzalama, Gumroad, `test_knowledge.py` KeyError düzeltmesi) aynen duruyor.
+  Değişen dosya: yalnızca `ROADMAP.md` (bu girdi) — uygulama kodu/`HANDOFF.md`/`BUGS.md` değişmedi, hiçbir GitHub
+  yazma işlemi (merge/close/commit-to-PR) yapılmadı.
+
+- **2026-11-16 (otomatik günlük durum güncellemesi — zamanlanmış görev): sadece durum güncellemesi, kod değişikliği
+  yok.** Depo `/home/claude/td2-loot-advisor`'da önceden klonlu ve `main` zaten `origin/main` ile aynı noktadaydı
+  (`335a437`), `git fetch` sonrası fast-forward/rebase gerekmedi. Son 24 saatteki (önceki günlük güncellemeden bu
+  yana) 12 gerçek commit tek tek `git show --stat` ile okundu, GitHub API'siyle (PR/issue/release/workflow listesi)
+  çapraz doğrulandı. **En önemli bulgu: 2026-11-06'dan beri her oturumun not edip kapsam dışı bıraktığı `Info check`/
+  `tests/test_knowledge.py` `KeyError: 'y8s3-red-moon-unleashed'` regresyonu nihayet kalıcı olarak düzeltildi**
+  (commit `dac8829` + `5ad98fd` + `b28cf9f`/`0f284ab`/`952c782`, tam ayrıntı yukarıdaki "Şu an aktif" bölümünde) —
+  bu oturum `python3 -B tests/test_knowledge.py`'ı bizzat çalıştırıp `RESULT: PASS` ile doğruladı, GitHub Actions'ta
+  da run `43755846789`'dan beri art arda `success`. Diğer bulgular: (1) dünkü günlükte "kullanıcı onayı bekliyor"
+  olarak işaretlenen [PR #6](https://github.com/FEDERALTURK/td2-loot-advisor/pull/6) 2026-11-15 20:50 UTC'de merge
+  edilmeden kapatıldı — risk ortadan kalktı, bu oturum herhangi bir merge/rebase/kapatma işlemi yapmadı, sadece
+  durumu doğruladı. (2) Uzun süredir açık [PR #3](https://github.com/FEDERALTURK/td2-loot-advisor/pull/3) de aynı
+  gün (20:46 UTC) merge edilmeden kapatıldı; aynı sorunun gerçek düzeltmesi bağımsız olarak `main`'e doğrudan
+  commit edildi (`0d4fc1a`). (3) `v9.1.5.37`/`v9.1.5.38` GitHub Release'leri yayınlanmış bulundu, ama `v9.1.5.37`
+  tag'inin işaret ettiği commit (`1984939`) `main`'in git geçmişinin **hiç parçası değil** (`git merge-base
+  --is-ancestor` ile doğrulandı) — yalnızca artık terk edilmiş `codex/validate-91537`/`codex/fix-info-check`
+  dallarında var; düşük risk/bilgilendirme amaçlı not edildi, geri alınamaz bir GitHub işlemi (release
+  silme/düzenleme) gerektirdiği için dokunulmadı. (4) `main`, son release'den (`v9.1.5.38`) sonra henüz hiçbir
+  sürüme bağlanmamış bir UI tema değişikliği (`335a437`, teal/cyan → turuncu/amber, `APP_VERSION` artırılmadı)
+  içeriyor — bir sonraki release'den önce `APP_VERSION`'ın artırılması ve yeni renk şemasının gerçek Windows'ta
+  gözle teyit edilmesi gerekiyor (`BUGS.md` #15'teki teyit boşluğu hâlâ geçerli). (5) GitHub kontrol edildi:
+  `federalturk/td2-loot-advisor`'da **0 açık PR, 0 açık issue**; `federalturk/td2-loot-advisor-reports`'ta 3 açık
+  issue (#4 gerçek çökme kaydı, #5/#6 kullanıcının kendi test amaçlı Supabase doğrulaması) — değişmedi. Xbox
+  Companion CI'de 2026-11-14'ten beri yeni etkinlik yok, `docs/mobile_companion_roadmap.md` 2026-11-08'den beri
+  değişmedi — mobil companion Faz 2/3/4 durumunda yeni bir ilerleme yok, çapraz kontrol edildi, tutarsızlık
+  bulunmadı. Büyük/riskli, kullanıcı onayı gerektiren **yeni** bir karar bulunmadı (madde 3 bilgilendirme amaçlı).
+  Mevcut bekleyen kullanıcı kararları (Codex devir senkronizasyonu — Android imzalama secret şeması, SignPath/kod
+  imzalama, Gumroad, Xbox Companion gerçek konsol testi, yeni UI renk şemasının Windows'ta gözle teyidi) aynen
+  duruyor. Değişen dosya: yalnızca `ROADMAP.md` (bu girdi) — uygulama kodu/`HANDOFF.md`/`BUGS.md` değişmedi, hiçbir
+  GitHub yazma işlemi (merge/close/commit/release) yapılmadı.

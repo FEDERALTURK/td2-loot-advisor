@@ -1,0 +1,1719 @@
+--- a/app.py
++++ b/app.py
+@@ -822,7 +822,7 @@
+     "ai_provider": "ollama", "ollama_url": "http://localhost:11434", "ollama_model": "gemma3:12b",
+     "claude_model": "claude-haiku-5-5", "claude_api_key": "", "claude_code_model": "haiku", "openai_model": "gpt-4o-mini", "openai_api_key": "",
+     "stt_model": "small", "stt_device": "cpu",
+-    "tts_rate": 185, "tts_voice": "", "voice_hotkey": "<f9>", "speak_verdict": True, "speak_chat": True, "voice_pack": "tactical", "voice_radio": True, "quiz_xp": 0, "quiz_best": 0, "quiz_loading": False, "meta_favs": [], "meta_pop_prev": {}, "news_seen": [], "task_share": None, "task_live": True, "task_client": "", "tr_on": False, "tr_engine": "local", "tr_mode": "subtitle", "tr_region": None, "tr_hotkey": "<f7>", "tr_auto": True, "tr_font": 15, "tr_hide": 10, "tr_alpha": 0.9, "tr_screen": False, "tr_screen_port": 8767, "tr_screen_token": "", "tr_speak": "off", "tr_family": "", "tr_outline": False, "sp_on": False, "sp_source": "auto", "sp_hide_captions": True, "tr_ocr": "auto", "tr_ocr_pick": "", "tr_ocr_bench_t": 0, "tr_pad": "back+rb"})
++    "tts_rate": 185, "tts_voice": "", "voice_hotkey": "<f9>", "speak_verdict": True, "speak_chat": True, "voice_pack": "auto", "voice_radio": False, "voice_online": False, "quiz_xp": 0, "quiz_best": 0, "quiz_loading": False, "meta_favs": [], "meta_pop_prev": {}, "news_seen": [], "task_share": None, "task_live": True, "task_client": "", "tr_on": False, "tr_engine": "local", "tr_mode": "subtitle", "tr_region": None, "tr_hotkey": "<f7>", "tr_auto": True, "tr_font": 15, "tr_hide": 10, "tr_alpha": 0.9, "tr_screen": False, "tr_screen_port": 8767, "tr_screen_token": "", "tr_speak": "off", "tr_family": "", "tr_outline": False, "sp_on": False, "sp_source": "auto", "sp_hide_captions": True, "tr_ocr": "auto", "tr_ocr_pick": "", "tr_ocr_bench_t": 0, "tr_pad": "back+rb"})
+ PROVIDER_KEYS = ["ollama", "claude_code", "claude", "openai", "builtin"]
+ 
+ def provider_label(pid):
+@@ -848,9 +848,10 @@
+ 
+ 
+ class Speaker:
+-    """Çevrimdışı konuşma (Windows SAPI, pyttsx3). Kendi iş parçacığında çalışır."""
++    """Bounded worker for recordings, opt-in Neural speech and SAPI fallback."""
+     def __init__(self):
+-        self.q, self.err, self.last_fx = queue.Queue(), None, None
++        self.q, self.err, self.last_fx = queue.Queue(maxsize=4), None, None
++        self._serial, self._closed = 0, False
+         threading.Thread(target=self.run, daemon=True).start()
+ 
+     def run(self):
+@@ -864,9 +865,30 @@
+             job = self.q.get()
+             if job is None:
+                 break
+-            if not eng:
+-                continue
+-            text, rate, hint, fx = job if len(job) == 4 else (*job, False)
++            if isinstance(job, dict):
++                if job["serial"] != self._serial or self._closed: continue
++                if "files" in job:
++                    try:
++                        for path in job["files"]:
++                            if job["serial"] != self._serial or self._closed: break
++                            voicepack.play_audio(path)
++                    except Exception as e:
++                        self.err = f"recording: {type(e).__name__}"
++                        log.warning("Recorded speech playback failed: %s", type(e).__name__)
++                    continue
++                text, rate, hint, fx = job["text"], job["rate"], job["hint"], job["fx"]
++                if job.get("online"):
++                    try:
++                        audio = voicepack.neural_audio(text, job["pack"], BASE / "cache" / "voice", rate)
++                        if job["serial"] == self._serial and not self._closed: voicepack.play_audio(audio)
++                        continue
++                    except Exception as e:
++                        self.err = f"online speech: {type(e).__name__}; system voice fallback"
++                        log.warning("Online speech unavailable (%s); using system voice", type(e).__name__)
++                if job["serial"] != self._serial or self._closed: continue
++            else:
++                text, rate, hint, fx = job if len(job) == 4 else (*job, False)
++            if not eng: continue
+             try:
+                 voices = eng.getProperty("voices")
+                 pick = None
+@@ -897,16 +919,35 @@
+             self.err = f"radio: {type(e).__name__}: {e}"
+             return False
+ 
+-    def say(self, text, rate=185, hint="", interrupt=True, fx=False):
++    def _put(self, job, interrupt=True):
++        if self._closed: return
+         if interrupt:
++            self._serial += 1
+             try:
+                 while True: self.q.get_nowait()
+             except queue.Empty:
+                 pass
+-        self.q.put((text, rate, hint, fx))
++        job["serial"] = self._serial
++        try: self.q.put_nowait(job)
++        except queue.Full:
++            try: self.q.get_nowait()
++            except queue.Empty: pass
++            try: self.q.put_nowait(job)
++            except queue.Full: pass
++
++    def say(self, text, rate=185, hint="", interrupt=True, fx=False, pack=None, online=False):
++        self._put(dict(text=text, rate=rate, hint=hint, fx=fx, pack=pack, online=online), interrupt)
++
++    def files(self, paths):
++        self._put({"files": list(paths)})
+ 
+     def close(self):
+-        self.q.put(None)
++        self._closed = True
++        self._serial += 1
++        try:
++            while True: self.q.get_nowait()
++        except queue.Empty: pass
++        self.q.put_nowait(None)
+ 
+ 
+ class Recorder:
+@@ -1530,7 +1571,15 @@
+ 
+     def _translation_privacy(self):
+         key = "lt.privacy_local" if self.cfg["settings"].get("tr_engine", "local") == "local" else "lt.privacy_ai"
+-        return t(key)
++        return t(key) + ("\n" + t("vp.online_privacy") if self.cfg["settings"].get("voice_online", False) else "")
++
++    def set_online_voice(self, enabled):
++        self.cfg["settings"]["voice_online"] = bool(enabled)
++        for name in ("vp_online", "ts_online_voice"):
++            variable = getattr(self, name, None)
++            if variable is not None: variable.set(bool(enabled))
++        save_cfg(self.cfg)
++        if getattr(self, "lt_privacy_lbl", None): self.lt_privacy_lbl.config(text=self._translation_privacy())
+ 
+     # ---------- Canlı oyun çevirisi (İngilizce → Türkçe) ----------
+     def ai_complete(self, system, user):
+@@ -1964,11 +2013,18 @@
+                 if not self._translation_jobs.is_current(token): return
+                 with self.timings.measure("translate_ocr"):
+                     lines = self.lt_ocr(img)
+-            blocks = livetranslate.blocks_from_lines(lines, GAME.data.get("ui_words", []))
++            inplace = self.cfg["settings"].get("tr_mode") == "inplace"
++            blocks = livetranslate.blocks_from_lines(lines, GAME.data.get("ui_words", []), preserve_lines=inplace)
+             if not blocks:
+-                if force: self._post_translation(token, lambda: self._lt_status(t("lt.nothing"), "muted"))
++                def clear_overlay():
++                    self._lt_hide()
++                    self._lt_last_sig = None
++                    if force: self._lt_status(t("lt.nothing"), "muted")
++                self._post_translation(token, clear_overlay)
+                 return
+             sig = "|".join(b[0] for b in blocks)
++            if inplace:
++                sig += "@" + repr((area, [tuple(round(v) for v in b[1]) for b in blocks]))
+             if sig == getattr(self, "_lt_last_sig", None) and not force: return
+             if not self._translation_jobs.is_current(token): return
+             t0 = time.perf_counter()
+@@ -2057,10 +2113,9 @@
+     def _lt_show_inplace(self, pairs, area):
+         """Yerinde çeviri: her blok kendi yerinde, opak fonla (overlay.py)."""
+         st = self.cfg["settings"]
+-        body = max(8.0, float(livetranslate.BODY_H[0]))
+         sty = dict(self.lt_style(), alpha=1.0)              # yerinde: fon tamamen opak, alttaki İngilizce görünmez
+         ip = self._lt_inplace = overlay.InPlace(self.root, sty, on_window=self._lt_overlay_window)
+-        blocks = [(tr, b, en, max(1, en.count("\n") + 1, round((b[3] - b[1]) / (body * 1.15)))) for en, tr, b in pairs]
++        blocks = [(tr, b, en, max(1, en.count("\n") + 1)) for en, tr, b in pairs]
+         items = overlay.layout(blocks, area, ip.measure_at)
+         if not items: return
+         self._lt_win = ip.show(items, area)
+@@ -2103,8 +2158,8 @@
+                 self._tr_spoken = text
+                 try: rate = int(float(st.get("tts_rate", 185)))
+                 except ValueError: rate = 185
+-                fx = bool(st.get("voice_radio", True)) and st.get("voice_pack", "tactical") != "classic"
+-                self.speaker.say(text, rate, "tr-tr", fx=fx)
++                self.speaker.say(text, rate, "tr-tr", fx=False, pack="natural_tr",
++                                 online=bool(st.get("voice_online", False)))
+ 
+     def term_finder(self):
+         lang = i18n.current_language()
+@@ -2296,6 +2351,11 @@
+         sp.pack(side="left", padx=8)
+         sp.bind("<<ComboboxSelected>>", lambda e: (st.__setitem__("tr_speak", next(k for k in ("off", "subtitle", "all") if t("ts.sp_" + k) == self.ts_speak.get())), save_cfg(self.cfg)))
+         ttk.Label(sr, text=t("ts.speak_hint"), foreground=PAL["muted"]).pack(side="left", padx=6)
++        self.ts_online_voice = tk.BooleanVar(value=bool(st.get("voice_online", False)))
++        ttk.Checkbutton(pb, text=t("vp.online"), variable=self.ts_online_voice,
++                        command=lambda: self.set_online_voice(self.ts_online_voice.get())).pack(anchor="w", padx=10)
++        ttk.Label(pb, text=t("vp.online_route"), foreground=PAL["muted"], wraplength=880,
++                  justify="left").pack(anchor="w", padx=28, pady=(0, 8))
+         self._ts_ui()
+         # konuşma çevirisi
+         kb = ttk.LabelFrame(f, text="🎧 " + t("sp.box")); kb.pack(fill="x", padx=10, pady=6)
+@@ -4126,10 +4186,26 @@
+     def scan_image(self, img, auto):
+         s = self.cfg["settings"]
+         timings = getattr(self, "timings", None)
++        ocr_seconds = 0.0
++        def timed_read(card, scale=None):
++            nonlocal ocr_seconds
++            started = time.perf_counter()
++            try:
++                return read_card(card, scale=scale)
++            finally:
++                elapsed = time.perf_counter() - started
++                ocr_seconds += elapsed
++                if timings is not None: timings.record("ocr", elapsed * 1000)
+         box = getattr(self, "card_box", None)
+         tried_fresh = False
+-        if box is None:
+-            box = find_card(img); tried_fresh = True
++        # An explicitly selected narrow region is already the user's card crop.
++        # Read it first; locating a card with OCR would duplicate the first pass.
++        region_first = (box is None and s.get("scan_source") == "region"
++                        and bool(s.get("region")) and img.width < 1600)
++        if box is None and not region_first:
++            with timings.measure("card_locate") if timings is not None else nullcontext():
++                box = find_card(img)
++            tried_fresh = True
+         if box is None and auto and img.width >= 1600:
+             # Tüm oyun ekranında eşya kartı yok (dünya / harita / başka menü): ekranın tamamını tam çözünürlükte
+             # okumak (ve last_card.png olarak kaydetmek) boşa ekran kartı / disk yükü — otomatik taramada atlanır.
+@@ -4137,16 +4213,18 @@
+             return False
+         card = img.crop(box) if box else img
+         t_ocr = time.perf_counter()
+-        text, lines = read_card(card)
++        text, lines = timed_read(card)
+         ocr_elapsed = time.perf_counter() - t_ocr
+         self._note_ocr_time(ocr_elapsed)
+-        if timings is not None: timings.record("ocr", ocr_elapsed * 1000)
+-        item, verdict, res = evaluate(text, self.cfg)
+-        if not valid_item(item) and not tried_fresh:                  # kart yer değiştirmiş: yeniden bul
+-            box = find_card(img)
+-            card = img.crop(box) if box else img
+-            text, lines = read_card(card)
++        with timings.measure("evaluate") if timings is not None else nullcontext():
+             item, verdict, res = evaluate(text, self.cfg)
++        if not valid_item(item) and not tried_fresh:                  # kart yer değiştirmiş / bölge belirsiz
++            with timings.measure("card_locate") if timings is not None else nullcontext():
++                box = find_card(img)
++            if box or not region_first:
++                card = img.crop(box) if box else img
++                text, lines = timed_read(card)
++                item, verdict, res = evaluate(text, self.cfg)
+         self.card_box = box if valid_item(item) else None
+         if s.get("ocr_passes_auto", True):
+             passes = self.auto_passes()                      # bilgisayarın hızına göre 1-3 okuma
+@@ -4169,13 +4247,13 @@
+                 if OCR.name == "rapidocr":
+                     a = ocr_scale() or ocr_backend.Engine.auto_scale(card)
+                     for sc in [x for x in (2.0, 1.0, 1.5) if abs(x - a) > 0.1][:passes - 1]:
+-                        tx, _ = read_card(card, scale=sc)
++                        tx, _ = timed_read(card, scale=sc)
+                         q = ocr_quality(tx)
+                         if q > best_q: best_q, best_t = q, tx
+                 else:
+                     for th in (base + 10, base - 40)[:passes - 1]:
+                         gamedata.THRESHOLD = max(90, min(235, th))
+-                        tx, _ = read_card(card)
++                        tx, _ = timed_read(card)
+                         q = ocr_quality(tx)
+                         if q > best_q: best_q, best_t = q, tx
+             finally:
+@@ -4208,6 +4286,7 @@
+             log.debug("library learn failed", exc_info=True)
+         verdict = itempolicy.protect_verdict(item, color_hints(card, lines, item, verdict))
+         sig = signature(item)
++        if timings is not None: timings.record("ocr_total", ocr_seconds * 1000)
+         if auto:
+             if not valid_item(item): return False
+             if sig == self.last_sig and time.time() - self.last_time < DEDUP_SECONDS: return True
+@@ -4724,6 +4803,7 @@
+         prev = last_done = None; stable = 0; last_t = 0.0
+         idle = 0                                          # art arda kart bulunamayan dünya okumaları
+         while not stop.is_set():
++            policy = self._policy()
+             try:
+                 region = self.scan_area()
+                 if region and self.cfg["settings"].get("only_game_active", True) and not game_active():
+@@ -4740,18 +4820,25 @@
+                         # menü türleri öğrenilebilsin); kart çıkmadıkça aralık 4 → 8 → 16 → 30 sn'ye uzar
+                         go = changed and stable >= 3 and time.time() - last_t > world_wait(idle)
+                     else:                                                 # menü / bilinmiyor: eski davranış
+-                        go = changed and stable == 1; idle = 0
+-                    if go:
+-                        last_done, last_t = h, time.time()
+-                        img = grab(region)
+-                        with self.lock:
+-                            found = self.scan_image(img, auto=True)
+-                        idle = 0 if found or gs != "world" else idle + 1
++                        go = changed and stable >= 2 and time.time() - last_t >= policy.auto_interval_s
++                        idle = 0
++                    if go and self.lock.acquire(blocking=False):
++                        try:
++                            # If translation is using the OCR engine, retry with a fresh
++                            # screen sample instead of waiting on an obsolete capture.
++                            last_done, last_t = h, time.time()
++                            img = grab(region)
++                            timings = getattr(self, "timings", None)
++                            with timings.measure("scan_total") if timings is not None else nullcontext():
++                                found = self.scan_image(img, auto=True)
++                            idle = 0 if found or gs != "world" else idle + 1
++                        finally:
++                            self.lock.release()
+             except Exception as e:
+                 msg = f"{type(e).__name__}: {e}"
+                 if msg != self.last_err:
+                     self.last_err = msg; self.results.put(("err", msg))
+-            stop.wait(self._policy().auto_interval_s)
++            stop.wait(policy.scan_poll_s)
+ 
+     def poll(self):
+         try:
+@@ -5844,17 +5931,20 @@
+         ttk.Button(box, text=t("btn.save"), command=self.save_ai_settings, style="Accent.TButton").grid(row=4, column=2, sticky="w", padx=16)
+         vp = ttk.Frame(box); vp.grid(row=5, column=2, rowspan=4, sticky="nw", padx=16, pady=(6, 0))
+         ttk.Label(vp, text="🎙 " + t("vp.pack")).pack(anchor="w")
+-        packs = list(voicepack.PACKS)
+-        self.vp_var = tk.StringVar(value=t("vp.p_" + st.get("voice_pack", "tactical")))
++        packs = list(voicepack.NATURAL_PACKS)
++        selected = voicepack.natural_pack(st.get("voice_pack"), i18n.current_language())
++        self.vp_var = tk.StringVar(value=t("vp.p_" + selected))
+         cb = ttk.Combobox(vp, textvariable=self.vp_var, values=[t("vp.p_" + p) for p in packs], state="readonly", width=24); cb.pack(anchor="w", pady=2)
+-        self.vp_radio = tk.BooleanVar(value=bool(st.get("voice_radio", True)))
++        self.vp_radio = tk.BooleanVar(value=False)
++        self.vp_online = tk.BooleanVar(value=bool(st.get("voice_online", False)))
+         def vp_save(*_):
+             st["voice_pack"] = packs[[t("vp.p_" + p) for p in packs].index(self.vp_var.get())]
+-            st["voice_radio"] = bool(self.vp_radio.get()); save_cfg(self.cfg)
++            st["voice_radio"] = False
++            self.set_online_voice(self.vp_online.get())
+         cb.bind("<<ComboboxSelected>>", vp_save)
+-        ttk.Checkbutton(vp, text=t("vp.radio"), variable=self.vp_radio, command=vp_save).pack(anchor="w")
++        ttk.Checkbutton(vp, text=t("vp.online"), variable=self.vp_online, command=vp_save).pack(anchor="w")
+         ttk.Button(vp, text="▶ " + t("vp.test"), command=self.voice_demo).pack(anchor="w", pady=(4, 0))
+-        ttk.Label(vp, text=t("vp.hint"), foreground=PAL["muted"], wraplength=260, justify="left").pack(anchor="w", pady=(4, 0))
++        ttk.Label(vp, text=t("vp.natural_hint"), foreground=PAL["muted"], wraplength=300, justify="left").pack(anchor="w", pady=(4, 0))
+         ttk.Label(box, text=t("ai.key_warning"),
+                  foreground=PAL["muted"]).grid(row=len(fields) + 1, column=0, columnspan=2, sticky="w", padx=8, pady=(6, 0))
+         self.chat_add("sys", t("ai.examples"))
+@@ -5880,19 +5970,30 @@
+         st = self.cfg["settings"]
+         try: rate = int(float(st.get("tts_rate", 185)))
+         except ValueError: rate = 185
+-        if fx is None: fx = bool(st.get("voice_radio", True)) and st.get("voice_pack", "tactical") != "classic"
+-        self.speaker.say(text, rate, st.get("tts_voice", ""), fx=fx)
++        pack = voicepack.natural_pack(None, i18n.current_language())
++        hint = "tr-tr" if pack == "natural_tr" else "en-us"
++        self.speaker.say(text, rate, st.get("tts_voice") or hint, fx=False, pack=pack,
++                         online=bool(st.get("voice_online", False)))
+ 
+     def voice_demo(self):
+         st = self.cfg["settings"]
+-        pack = st.get("voice_pack", "tactical")
+-        if pack == "classic": return self.speak(t("ai.voice_test"))
+-        self.speak(self.voice_lines.compose(i18n.current_language(), pack, "KEEP", "EXOTIC", "Striker", 92, "upgrade"))
++        pack = voicepack.natural_pack(st.get("voice_pack"), i18n.current_language())
++        clip = voicepack.Recordings(BASE / "meta", BUNDLE / "meta").event(pack, "demo")
++        if clip: self.speaker.files([clip])
++        else: self.speak(t("ai.voice_test"))
+ 
+     def speak_verdict(self, verdict, item, res, note):
+         if verdict == "ERROR": return
+         st = self.cfg["settings"]
+         pack = st.get("voice_pack", "tactical")
++        natural = voicepack.natural_pack(pack, i18n.current_language())
++        nk = None
++        if note:
++            head = note.split(":")[0]
++            nk = "fills_gap" if head == t("prog.fills_gap") else "upgrade" if head == t("prog.upgrade") else None
++        clips = voicepack.Recordings(BASE / "meta", BUNDLE / "meta").verdict(
++            natural, verdict, item.get("rarity"), bool(res and res[0][0] > 0), nk)
++        if clips: return self.speaker.files(clips)
+         if pack != "classic" and getattr(self, "voice_lines", None):
+             nk = None
+             if note:
+--- a/performance.py
++++ b/performance.py
+@@ -45,6 +45,11 @@
+     @property
+     def auto_interval_s(self):
+         return self.auto_interval_ms / 1000.0
++
++    @property
++    def scan_poll_s(self):
++        """Cheap change detection is independent of the expensive OCR budget."""
++        return 0.30 if self.mode == "game" else 0.20
+ 
+ 
+ def get_policy(settings, game_active=False, minimized=False):
+--- a/livetranslate.py
++++ b/livetranslate.py
+@@ -111,7 +111,7 @@
+     return ascii_ratio > 0.9 and len(re.findall(r"[A-Za-z]{2,}", text)) >= 1
+ 
+ 
+-def blocks_from_lines(lines, ui_words=()):
++def blocks_from_lines(lines, ui_words=(), preserve_lines=False):
+     """OCR satırlarını [(metin, kutu, güven)] paragraf bloklarına toplar; arayüz gürültüsünü atar."""
+     ui = {w.lower() for w in ui_words}
+     rows = []
+@@ -123,6 +123,10 @@
+     rows.sort(key=lambda r: (r[1][1], r[1][0]))
+     hs = sorted(max(1.0, r[1][3] - r[1][1]) for r in rows)
+     if hs: BODY_H[0] = hs[len(hs) // 2]
++    if preserve_lines:
++        # In-place text must retain each OCR segment's own source rectangle.
++        # Paragraph union boxes erase unrelated UI and lose line positions.
++        return [(s, tuple(b), c) for s, b, c in rows if len(s) >= 4]
+     blocks = []
+     for s, b, c in rows:
+         h = max(1.0, b[3] - b[1])
+--- a/ocr_backend.py
++++ b/ocr_backend.py
+@@ -140,7 +140,8 @@
+     rows, cur, cy, ch = [], [], None, 0
+     for it in items:
+         y = (it[1][1] + it[1][3]) / 2; h = it[1][3] - it[1][1]
+-        if cy is not None and abs(y - cy) > 0.6 * max(h, ch):
++        incompatible = max_gap and min(h, ch) > 0 and max(h, ch) > 1.6 * min(h, ch)
++        if cy is not None and (abs(y - cy) > 0.6 * max(h, ch) or incompatible):
+             rows.append(cur); cur = []
+         if not cur: cy, ch = y, h
+         cur.append(it)
+--- a/overlay.py
++++ b/overlay.py
+@@ -2,13 +2,16 @@
+ 
+ Neden fon: çeviri doğrudan bindirilirse iki yazı üst üste biner ve okunmaz. Her blok kendi kutusunda, oyunun panel
+ rengine yakın opak bir fonla gösterilir; fon İngilizce yazıyı tamamen örter. Türkçe daha uzunsa önce yazı küçülür
+-(en az MIN_PT), yine sığmazsa kutu aşağı doğru uzar. Kutular tek bir şeffaf, tıklama geçiren pencerede çizilir ve
++(en az MIN_PT), yine sığmazsa yalnız boş alana uzar. Komşu satırlar kaydırılmaz; çok dar alanda
++yazı küçültülür ve gerekirse üç noktayla kısaltılır. Tam metin geçmiştedir.
++Kutular tek bir şeffaf, tıklama geçiren pencerede çizilir ve
+ ekran yakalamasından dışlanır (program kendi çevirisini yeniden okumaz).
+ 
+     items = layout(blocks, area, measure)      # saf yerleşim (test edilebilir)
+     ov = InPlace(root, style); ov.show(items, area); ov.hide()
+ """
+ import re
++import math
+ 
+ MIN_PT = 8
+ PAD = 4
+@@ -21,6 +24,15 @@
+         words, cur = para.split(), ""
+         if not words: out.append(""); continue
+         for w in words:
++            if measure(w) > width:
++                if cur: out.append(cur); cur = ""
++                piece = ""
++                for char in w:
++                    if piece and measure(piece + char) > width:
++                        out.append(piece); piece = ""
++                    piece += char
++                cur = piece
++                continue
+             cand = (cur + " " + w).strip()
+             if not cur or measure(cand) <= width: cur = cand
+             else: out.append(cur); cur = w
+@@ -45,19 +57,53 @@
+ def layout(blocks, area, measure_at, px_to_pt=0.75, max_pt=28):
+     """blocks: [(çeviri, (x0,y0,x1,y1) alan içinde px, özgün metin, satır sayısı)] → çizim listesi.
+     Çeviri özgünle aynıysa (ör. "Exotic Cache") kutu çizilmez, oyunun yazısı görünür kalır."""
++    blocks = list(blocks)
+     items = []
++    aw, ah = int(area["width"]), int(area["height"])
++    if aw <= 0 or ah <= 0: return items
+     for tr, box, en, nlines in blocks:
+         if not tr or not tr.strip() or norm(tr) == norm(en): continue
+         x0, y0, x1, y1 = [float(v) for v in box]
+-        w, h = max(24.0, x1 - x0 + 2 * PAD), max(14.0, y1 - y0 + 2 * PAD)
++        if not all(math.isfinite(v) for v in (x0, y0, x1, y1)) or x1 <= x0 or y1 <= y0: continue
++        if x1 <= 0 or y1 <= 0 or x0 >= aw or y0 >= ah: continue
++        x, y = max(0, int(x0 - PAD)), max(0, int(y0 - PAD))
++        w = min(aw - x, max(24, int(x1 + PAD) - x))
++        h = min(ah - y, max(14, int(y1 + PAD) - y))
++        # Expand only into free space below this source, never relocate another
++        # source rectangle. Leave adjacent controls at their original positions.
++        bottom = ah
++        for _, other, _, _ in blocks:
++            ox0, oy0, ox1, oy1 = other
++            overlap = min(x + w, ox1) - max(x, ox0)
++            below = (oy0 + oy1) / 2 - (y0 + y1) / 2 > .4 * min(y1 - y0, oy1 - oy0)
++            if below and oy0 > y + PAD and overlap > .2 * min(w, ox1 - ox0):
++                bottom = min(bottom, int(oy0 - PAD))
++        available = max(1, bottom - y)
++        h = min(h, available)
+         line_px = (y1 - y0) / max(1, nlines)                       # özgün satır yüksekliği → başlangıç puntosu
+         start = min(max_pt, max(MIN_PT, line_px * px_to_pt * 0.75))   # satır aralığı ~1.3 em → kutu yüksekliğine denk
+-        pt, lines, need_h = fit(tr, w, h, measure_at, start)
+-        x, y = x0 - PAD, y0 - PAD
+-        x = max(0.0, min(x, area["width"] - w)); y = max(0.0, min(y, area["height"] - need_h))
++        # The renderer uses the same regular font and horizontal padding.
++        pt, lines, need_h = fit(tr, w - 4, h, measure_at, start)
++        if need_h > available:
++            for pt in range(int(pt), 4, -1):
++                meas, lh = measure_at(pt)
++                lines = wrap(tr, max(1, w - 2 * PAD - 4), meas)
++                need_h = math.ceil(len(lines) * lh * 1.05) + 2 * PAD
++                if need_h <= available: break
++        clipped = need_h > available
++        if clipped:
++            meas, lh = measure_at(pt)
++            count = max(0, int((available - 2 * PAD) / (lh * 1.05)))
++            lines = lines[:count]
++            if lines:
++                last = lines[-1]
++                while last and meas(last + "…") > w - 2 * PAD - 4: last = last[:-1]
++                lines[-1] = last + "…"
++        need_h = min(ah - y, available, max(h, need_h))
+         items.append({"x": int(x), "y": int(y), "w": int(w), "h": int(need_h), "pt": int(pt), "lines": lines,
++                      "clipped": clipped, "source": (x0, y0, x1, y1),
+                       "kind": "menu" if nlines <= 1 and len(en) < 40 else "text"})
+-    return _unoverlap(items)
++    return sorted(items, key=lambda it: (it["y"], it["x"]))
+ 
+ 
+ def _unoverlap(items):
+@@ -105,16 +151,16 @@
+         w.attributes("-topmost", True)
+         try: w.attributes("-transparentcolor", self.KEY)
+         except tk.TclError: pass                           # Windows dışı: arka plan görünür (testler)
+-        w.geometry(f"{area['width']}x{area['height']}+{area['left']}+{area['top']}")
++        w.geometry(f"{area['width']}x{area['height']}{int(area['left']):+d}{int(area['top']):+d}")
+         cv = self.cv = tk.Canvas(w, bg=self.KEY, highlightthickness=0, bd=0, width=area["width"], height=area["height"])
+         cv.pack(fill="both", expand=True)
+         for it in items:
+             x, y, ww, hh = it["x"], it["y"], it["w"], it["h"]
+             cv.create_rectangle(x, y, x + ww, y + hh, fill=s["bg"], outline=s.get("border", s["bg"]), width=1)
+             cv.create_rectangle(x, y, x + 3, y + hh, fill=s["accent"] if it["kind"] == "text" else s.get("border", s["accent"]), width=0)
+-            f = self._font(it["pt"], bold=it["kind"] == "menu")
++            f = self._font(it["pt"])
+             lh = f.metrics("linespace") * 1.05
+-            ty = y + PAD + max(0, (hh - 2 * PAD - lh * len(it["lines"])) / 2)
++            ty = y + PAD
+             for ln in it["lines"]:
+                 if s.get("outline"):
+                     for dx, dy in ((-1, 0), (1, 0), (0, -1), (0, 1)):
+--- a/voicepack.py
++++ b/voicepack.py
+@@ -1,8 +1,8 @@
+-"""Ajan sesi: kararları özgün "taktik asistan" cümleleriyle söyler, isteğe bağlı telsiz efektiyle.
+-
+-Cümleler meta/voice_lines.json'dadır (10 dil × 3 paket; topluluk yeni dil/paket ekleyebilir). Ses Windows'un
+-kendi konuşma motoruyla (SAPI) üretilir; telsiz efekti üretilen sese burada uygulanır (bant geçiren süzgeç,
+-hafif doyum, başta/sonda cızırtı). Hiçbir oyun sesi ya da başka bir yapımın sesi kullanılmaz.
++"""TR/EN Neural recordings, optional online speech, and legacy SAPI helpers.
++
++Fixed recordings in meta/voices play offline. Dynamic text is sent to the
++Microsoft Edge speech service only when online voice is enabled. Legacy voice
++lines, SAPI and radio filtering remain available for fallback and compatibility.
+ """
+ import json
+ import random
+@@ -11,6 +11,107 @@
+ from pathlib import Path
+ 
+ PACKS = ("classic", "tactical", "operator", "brief")
++NATURAL_PACKS = ("natural_tr", "natural_en")
++NATURAL_VOICES = {"natural_tr": "tr-TR-EmelNeural", "natural_en": "en-US-AriaNeural"}
++
++
++def natural_pack(pack, lang="tr"):
++    return pack if pack in NATURAL_PACKS else ("natural_tr" if lang == "tr" else "natural_en")
++
++
++class Recordings:
++    """Fixed notifications shipped in meta; no service calls at runtime."""
++    EVENTS = frozenset({"keep", "consider", "dismantle", "review", "exotic", "named", "build", "fills_gap", "upgrade", "demo"})
++
++    def __init__(self, *meta_dirs):
++        self.roots = [Path(p) for p in meta_dirs]
++
++    def event(self, pack, event):
++        if pack not in NATURAL_PACKS or event not in self.EVENTS: return None
++        for root in self.roots:
++            p = root / "voices" / pack / (event + ".wav")
++            if p.is_file() and p.stat().st_size > 1000: return p
++        return None
++
++    def verdict(self, pack, verdict, rarity=(), build=False, note=None):
++        events = []
++        tags = set(rarity or [])
++        if verdict in ("KEEP", "CONSIDER", "REVIEW"):
++            if "EXOTIC" in tags: events.append("exotic")
++            elif "NAMED" in tags: events.append("named")
++        event = {"KEEP": "keep", "CONSIDER": "consider", "DISMANTLE": "dismantle", "REVIEW": "review"}.get(verdict)
++        if event: events.append(event)
++        if note in ("fills_gap", "upgrade"): events.append(note)
++        elif build and verdict in ("KEEP", "CONSIDER"): events.append("build")
++        return [p for event in events if (p := self.event(pack, event))]
++
++
++def neural_audio(text, pack, cache_dir, rate_wpm=185):
++    """Opt-in online speech. Cache stores hashed filenames, never text metadata.
++
++    Uses Edge's online speech service through edge-tts, not a local model or an
++    Azure subscription. Call only from the speaker worker after user opt-in.
++    """
++    import asyncio
++    import hashlib
++    import tempfile
++    import time
++    if pack not in NATURAL_VOICES: raise ValueError("Unknown voice pack")
++    if not isinstance(text, str) or not text.strip() or len(text) > 5000: raise ValueError("Invalid speech text")
++    rate = max(-35, min(35, round((float(rate_wpm) / 185 - 1) * 100 - 5)))
++    voice = NATURAL_VOICES[pack]
++    key = hashlib.sha256(json.dumps([voice, rate, text], ensure_ascii=False).encode("utf-8")).hexdigest()
++    cache = Path(cache_dir); cache.mkdir(parents=True, exist_ok=True)
++    target = cache / (key + ".mp3")
++    if target.exists() and target.stat().st_size > 1000:
++        target.touch()
++        return target
++    import edge_tts
++    async def synth(path):
++        await edge_tts.Communicate(text, voice, rate=f"{rate:+d}%", pitch="+0Hz",
++                                   connect_timeout=10, receive_timeout=25).save(str(path))
++    with tempfile.NamedTemporaryFile(dir=cache, suffix=".part", delete=False) as tmp:
++        part = Path(tmp.name)
++    try:
++        asyncio.run(synth(part))
++        data = part.read_bytes()
++        if len(data) <= 1000 or not (data.startswith(b"ID3") or data[0] == 0xff):
++            raise RuntimeError("Speech service returned invalid audio")
++        part.replace(target)
++    finally:
++        part.unlink(missing_ok=True)
++    # Bounded disk use: newest 128 clips, at most 32 MiB. Incomplete files are
++    # cleaned separately and never treated as playable cache entries.
++    files = sorted(cache.glob("*.mp3"), key=lambda p: p.stat().st_mtime, reverse=True)
++    total = 0
++    for index, path in enumerate(files):
++        total += path.stat().st_size
++        if index >= 128 or total > 32 * 1024 * 1024:
++            if path != target: path.unlink(missing_ok=True)
++    for path in cache.glob("*.part"):
++        if time.time() - path.stat().st_mtime > 3600: path.unlink(missing_ok=True)
++    return target
++
++
++def play_audio(path):
++    """Blocking playback on the speech worker; PCM WAV or cached neural MP3."""
++    import ctypes
++    import uuid
++    path = Path(path).resolve()
++    if path.suffix.lower() == ".wav":
++        import winsound
++        winsound.PlaySound(str(path), winsound.SND_FILENAME)
++        return
++    alias = "td2voice" + uuid.uuid4().hex
++    send = ctypes.windll.winmm.mciSendStringW
++    def command(text):
++        error = send(text, None, 0, None)
++        if error: raise RuntimeError(f"Audio playback error {error}")
++    try:
++        command(f'open "{path}" type mpegvideo alias {alias}')
++        command(f"play {alias} wait")
++    finally:
++        send(f"close {alias}", None, 0, None)
+ 
+ 
+ class Lines:
+--- a/requirements.txt
++++ b/requirements.txt
+@@ -6,3 +6,4 @@
+ ctranslate2
+ sentencepiece
+ soundcard
++edge-tts>=7.3.1,<8
+--- a/README.md
++++ b/README.md
+@@ -177,3 +177,8 @@
+ Start source builds with `scripts\run.bat`. Normal startup skips pip when installed requirements have not changed. `--check` only checks required modules, `--repair` reinstalls requirements, and `--extras` installs optional voice/video dependencies. Test dependencies are in `requirements-dev.txt`.
+ 
+ These changes are included in release 6.0.2. See [local validation results](docs/stability-6.0.2.md). In-game FPS/GPU behavior and operation on a real 8 GB computer remain unverified.
++
++
++### Local development: in-place translation and natural voice
++
++Source-anchored overlay fixes, two recorded Turkish/English Neural notification packs and optional online natural speech are available in the local source build. These changes are not yet included in the published 6.0.2 executable. See [usage, data routing and validation](docs/overlay_voice_local.md).
+--- a/README.tr.md
++++ b/README.tr.md
+@@ -218,3 +218,8 @@
+ Kaynak koddan başlatma: `scripts\run.bat`. Kurulu bağımlılıklar değişmemişse normal açılışta pip çalışmaz. `scripts\run.bat --check` kurulum yapmadan gerekli modülleri denetler; `--repair` gereksinimleri yeniden kurar; `--extras` isteğe bağlı ses/video paketlerini kurar. Test için `python -m pip install -r requirements-dev.txt` kullanılabilir.
+ 
+ Bu geliştirmeler 6.0.2 sürümüne dahildir. Test kapsamı ve sınırlar: [yerel doğrulama raporu](docs/stability-6.0.2.md). Gerçek 8 GB bilgisayarda ve oyun açıkken FPS/GPU ölçümü ayrıca gereklidir.
++
++
++### Yerinde çeviri ve doğal ses: yerel geliştirme
++
++Yerinde çevirinin satır konumlarını koruyan düzeltmeler, iki hazır Türkçe/İngilizce Neural bildirim paketi ve isteğe bağlı çevrimiçi doğal ses eklendi. Bunlar henüz yayınlanmış 6.0.2 EXE paketinde değildir. Kullanım, veri aktarımı ve doğrulama: [yerel geliştirme notları](docs/overlay_voice_local.md).
+--- a/scripts/launch.py
++++ b/scripts/launch.py
+@@ -12,7 +12,7 @@
+ import subprocess
+ import sys
+ 
+-CORE = ("mss", "PIL", "pytesseract", "pynput", "pystray", "ctranslate2", "sentencepiece", "soundcard")
++CORE = ("mss", "PIL", "pytesseract", "pynput", "pystray", "ctranslate2", "sentencepiece", "soundcard", "edge_tts")
+ OCR = (("onnxruntime", "onnxruntime"), ("rapidocr", "rapidocr"))
+ EXTRAS = (("pyttsx3", "pyttsx3"), ("sounddevice", "sounddevice"), ("numpy", "numpy"),
+           ("faster-whisper", "faster_whisper"), ("qrcode", "qrcode"), ("av", "av"))
+--- a/scripts/build_installer.bat
++++ b/scripts/build_installer.bat
+@@ -73,6 +73,7 @@
+   --add-data "build\pkg\builds.json;." ^
+   --add-data "lang;lang" ^
+   --add-data "meta;meta" ^
++  --collect-all edge_tts --collect-all aiohttp --copy-metadata edge-tts ^
+   --add-data "icon;icon" ^
+   --hidden-import PIL._tkinter_finder --hidden-import PIL.ImageTk ^
+   --hidden-import pynput.keyboard._win32 --hidden-import pynput.mouse._win32 ^
+--- a/scripts/build_exe.bat
++++ b/scripts/build_exe.bat
+@@ -30,6 +30,7 @@
+   --add-data "build\pkg\builds.json;." ^
+   --add-data "lang;lang" ^
+   --add-data "meta;meta" ^
++  --collect-all edge_tts --collect-all aiohttp --copy-metadata edge-tts ^
+   --add-data "icon;icon" ^
+   --hidden-import PIL._tkinter_finder ^
+   --hidden-import pyttsx3.drivers --hidden-import pyttsx3.drivers.sapi5 ^
+--- a/scripts/default_builds.json
++++ b/scripts/default_builds.json
+@@ -12,7 +12,10 @@
+     "log_csv": true,
+     "perf_mode": "balanced",
+     "tr_engine": "local",
+-    "tr_log": false
++    "tr_log": false,
++    "voice_pack": "auto",
++    "voice_radio": false,
++    "voice_online": false
+   },
+   "attributes": {
+     "weapon_damage": [
+--- a/scripts/build_voice_packs.py
++++ b/scripts/build_voice_packs.py
+@@ -0,0 +1,96 @@
++"""Pre-render fixed TR/EN notifications. Runtime playback is fully offline.
++
++Build-only dependencies: edge-tts, av. Only the fixed phrases below are sent to
++the speech service; no user settings, game text or personal data are read.
++"""
++import asyncio
++import hashlib
++import json
++from pathlib import Path
++import tempfile
++import wave
++
++ROOT = Path(__file__).resolve().parents[1]
++VOICES = {
++    "natural_tr": ("tr", "Türkçe — Doğal", "tr-TR-EmelNeural", {
++        "keep": "Bu eşyayı sakla. İşine yarayabilir.",
++        "consider": "Bu eşya değerlendirilmeye değer. Bir göz at.",
++        "dismantle": "Mevcut tercihlerine göre bu eşyayı parçalayabilirsin.",
++        "review": "Bu eşyayı elle kontrol etmeni öneriyorum.",
++        "exotic": "Egzotik bir eşya bulundu. Saklamayı unutma.",
++        "named": "Özel isimli bir eşya bulundu.",
++        "build": "Seçili diziliminle uyumlu bir eşya.",
++        "fills_gap": "Bu parça eksik bir yuvayı tamamlıyor.",
++        "upgrade": "Güzel bir gelişme. Mevcut parçandan daha iyi görünüyor.",
++        "demo": "Merhaba ajan. Eşyalarını birlikte değerlendirelim. Hazırım, başlayabiliriz."}),
++    "natural_en": ("en", "English — Natural", "en-US-AriaNeural", {
++        "keep": "Keep this item. It could be useful.",
++        "consider": "This item is worth a closer look.",
++        "dismantle": "Based on your current preferences, you can dismantle this item.",
++        "review": "I recommend checking this item yourself.",
++        "exotic": "Exotic item detected. Make sure to keep it safe.",
++        "named": "A named item has been found.",
++        "build": "This item matches your selected build.",
++        "fills_gap": "This piece fills an empty slot in your build.",
++        "upgrade": "A nice upgrade. This looks better than your current piece.",
++        "demo": "Hello, agent. Let's take a look at your gear. I'm ready when you are."}),
++}
++
++
++def pcm(src, dest):
++    import av
++    with av.open(str(src)) as container, wave.open(str(dest), "wb") as output:
++        output.setnchannels(1); output.setsampwidth(2); output.setframerate(24000)
++        resampler = av.AudioResampler(format="s16", layout="mono", rate=24000)
++        for frame in container.decode(audio=0):
++            for result in resampler.resample(frame):
++                output.writeframes(result.to_ndarray().tobytes())
++        for result in resampler.resample(None):
++            output.writeframes(result.to_ndarray().tobytes())
++
++
++async def main():
++    import edge_tts
++    live = await edge_tts.list_voices()
++    available = {v["ShortName"] for v in live}
++    manifest = {"schema": 1, "engine": "Microsoft Edge Neural via edge-tts", "runtime": "offline PCM WAV", "packs": {}}
++    for pack, (lang, title, voice, phrases) in VOICES.items():
++        if voice not in available: raise RuntimeError("Voice unavailable: " + voice)
++        directory = ROOT / "meta/voices" / pack
++        directory.mkdir(parents=True, exist_ok=True)
++        events = {}
++        for event, text in phrases.items():
++            target = directory / (event + ".wav")
++            import sys
++            if "--resume" in sys.argv and target.exists():
++                with wave.open(str(target)) as wav:
++                    duration = wav.getnframes() / wav.getframerate()
++                if duration > .3:
++                    events[event] = {"file": f"voices/{pack}/{event}.wav", "text": text,
++                                     "seconds": round(duration, 3), "sha256": hashlib.sha256(target.read_bytes()).hexdigest()}
++                    print(pack, event, "verified existing", flush=True)
++                    continue
++            for attempt in range(3):
++                try:
++                    with tempfile.TemporaryDirectory() as tmp:
++                        mp3 = Path(tmp) / "speech.mp3"
++                        await edge_tts.Communicate(text, voice, rate="+0%", pitch="+0Hz",
++                                                   connect_timeout=10, receive_timeout=15).save(str(mp3))
++                        if mp3.stat().st_size < 1000: raise RuntimeError("Empty speech")
++                        pcm(mp3, target)
++                    with wave.open(str(target)) as wav:
++                        duration = wav.getnframes() / wav.getframerate()
++                    if duration < .3: raise RuntimeError("Invalid duration")
++                    events[event] = {"file": f"voices/{pack}/{event}.wav", "text": text,
++                                     "seconds": round(duration, 3), "sha256": hashlib.sha256(target.read_bytes()).hexdigest()}
++                    print(pack, event, round(duration, 2), flush=True)
++                    break
++                except Exception:
++                    if attempt == 2: raise
++                    await asyncio.sleep(1)
++        manifest["packs"][pack] = {"language": lang, "title": title, "voice": voice, "events": events}
++    (ROOT / "meta/voice_packs.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
++
++
++if __name__ == "__main__":
++    asyncio.run(main())
+--- a/tests/test_overlay.py
++++ b/tests/test_overlay.py
+@@ -35,11 +35,11 @@
+ 
+ # gerçek harita ekranı: OCR → bloklar → (sahte) çeviri → yerleşim
+ L = json.loads((ROOT / "tests/samples/tasks/map_projects_full.json").read_text())["lines"]
+-blocks = lt.blocks_from_lines([tuple(x) for x in L])
++blocks = lt.blocks_from_lines([tuple(x) for x in L], preserve_lines=True)
+ fake = {"Rewards\nExotic Cache\nRecalibration Cache\nRecalibration Cache\nGear Crafting Cache\nOptimization Cache":
+         "Ödüller\nExotic Cache\nRecalibration Cache\nRecalibration Cache\nGear Crafting Cache\nOptimization Cache"}
+ body = lt.BODY_H[0]
+-items = overlay.layout([(fake.get(en, en.upper() + " (TR)"), b, en, max(1, en.count("\n") + 1, round((b[3] - b[1]) / (body * 1.15))))
++items = overlay.layout([(fake.get(en, en.upper() + " (TR)"), b, en, max(1, en.count("\n") + 1))
+                         for en, b, _ in blocks], area, measure_at)
+ ok(len(items) == len(blocks), "her bloğa bir kutu (%d)" % len(items))
+ ok(all(0 <= i["x"] and i["x"] + i["w"] <= area["width"] and 0 <= i["y"] and i["y"] + i["h"] <= area["height"] for i in items), "kutular ekran içinde")
+--- a/tests/test_app_stability.py
++++ b/tests/test_app_stability.py
+@@ -247,6 +247,39 @@
+             obj._lt_failure.assert_called_once()
+             obj._lt_show.assert_not_called()
+ 
++    def test_inplace_repositions_identical_text_when_source_moves(self):
++        obj = self.translation_app(Mock(return_value=["Hedef"]))
++        obj.cfg["settings"]["tr_mode"] = "inplace"
++        area = {"left": 0, "top": 0, "width": 1000, "height": 700}
++        for box in [(10, 10, 100, 30), (200, 200, 290, 220)]:
++            with patch.object(self.app.livetranslate, "blocks_from_lines", return_value=[("Objective", box)]) as blocks:
++                obj._lt_run(None, area, token=7)
++                self.assertTrue(blocks.call_args.kwargs["preserve_lines"])
++            obj.poll()
++        self.assertEqual(obj._lt_show.call_count, 2)
++        self.assertEqual(obj._lt_show.call_args.args[0][0][2], (200, 200, 290, 220))
++
++    def test_empty_screen_removes_previous_overlay(self):
++        obj = self.translation_app(Mock())
++        obj._lt_hide = Mock()
++        with patch.object(self.app.livetranslate, "blocks_from_lines", return_value=[]):
++            obj._lt_run(None, {}, token=7)
++        obj.poll()
++        obj._lt_hide.assert_called_once()
++        self.assertIsNone(obj._lt_last_sig)
++
++    def test_online_voice_switch_updates_both_controls_and_privacy(self):
++        obj = self.bare_app()
++        obj.vp_online, obj.ts_online_voice, obj.lt_privacy_lbl = Mock(), Mock(), Mock()
++        obj._translation_privacy = Mock(return_value="Text goes to the speech service")
++        with patch.object(self.app, "save_cfg") as save:
++            obj.set_online_voice(True)
++        self.assertTrue(obj.cfg["settings"]["voice_online"])
++        obj.vp_online.set.assert_called_once_with(True)
++        obj.ts_online_voice.set.assert_called_once_with(True)
++        obj.lt_privacy_lbl.config.assert_called_once_with(text="Text goes to the speech service")
++        save.assert_called_once_with(obj.cfg)
++
+     def test_translation_superseded_during_model_run_is_discarded(self):
+         current = [7]
+         def translate(text):
+--- a/tests/test_stability_widgets.py
++++ b/tests/test_stability_widgets.py
+@@ -92,6 +92,12 @@
+                 with patch.object(obj.root,"state",return_value="normal"),patch.object(app,"game_active",return_value=False):
+                     obj._performance_tick();assert not obj.root._td2_suspend_animations
+             obj.nb.select(obj.tabs["translate"]);obj.root.update()
++            assert obj.vp_var.get() == app.t("vp.p_natural_tr")
++            obj.set_online_voice(True)
++            assert obj.vp_online.get() and obj.ts_online_voice.get()
++            assert app.t("vp.online_privacy") in obj.lt_privacy_lbl.cget("text")
++            obj.set_online_voice(False)
++            assert not obj.vp_online.get() and not obj.ts_online_voice.get()
+             result["working_set_mb"]=memory_mb();result["callback_errors"]=errors
+             assert not errors,errors
+             result["ok"]=True
+--- a/tests/test_inplace_anchors.py
++++ b/tests/test_inplace_anchors.py
+@@ -0,0 +1,86 @@
++"""Source-anchored in-place translation, including project-menu regressions."""
++import json
++from pathlib import Path
++import sys
++import unittest
++
++ROOT = Path(__file__).resolve().parents[1]
++sys.path.insert(0, str(ROOT))
++import livetranslate as lt
++import overlay
++import ocr_backend
++
++
++def measure(pt):
++    return lambda s: len(s) * pt / .75 * .55, pt / .75 * 1.3
++
++
++class InplaceTests(unittest.TestCase):
++    def test_project_labels_remain_separate_source_rectangles(self):
++        lines = [("Season Pass Project", (20, 20, 240, 40), .99),
++                 ("DCD Headquarters", (20, 44, 210, 64), .99),
++                 ("Base of Operations", (20, 68, 220, 88), .99)]
++        result = lt.blocks_from_lines(lines, preserve_lines=True)
++        self.assertEqual(len(result), 3)
++        self.assertEqual([x[1] for x in result], [x[1] for x in lines])
++
++    def test_real_project_fixture_keeps_line_coordinates(self):
++        lines = json.loads((ROOT / "tests/samples/tasks/map_projects_full.json").read_text())["lines"]
++        result = lt.blocks_from_lines(lines, preserve_lines=True)
++        original = {tuple(x[1]) for x in lines}
++        self.assertTrue(result)
++        self.assertTrue(all(box in original for _, box, _ in result))
++
++    def test_long_translation_does_not_move_next_label(self):
++        blocks = [("Çok uzun bir açıklama " * 20, (10, 10, 150, 30), "A description", 1),
++                  ("Ödüller", (10, 42, 150, 62), "Rewards", 1)]
++        items = overlay.layout(blocks, {"width": 300, "height": 200}, measure)
++        self.assertEqual(items[1]["y"], 42 - overlay.PAD)
++        self.assertLessEqual(items[0]["y"] + items[0]["h"], items[1]["y"])
++        self.assertTrue(items[0]["clipped"])
++
++    def test_bottom_label_stays_anchored_instead_of_moving_up(self):
++        item = overlay.layout([("Çok uzun metin " * 20, (20, 175, 160, 195), "A label", 1)],
++                              {"width": 300, "height": 200}, measure)[0]
++        self.assertEqual(item["y"], 171)
++        self.assertLessEqual(item["y"] + item["h"], 200)
++
++    def test_long_unbroken_word_is_wrapped_inside_measured_width(self):
++        result = overlay.wrap("@THEDIVISIONGAME" * 4, 50, lambda s: len(s) * 8)
++        self.assertTrue(all(len(line) * 8 <= 50 for line in result))
++        self.assertEqual("".join(result), "@THEDIVISIONGAME" * 4)
++
++    def test_invalid_or_offscreen_boxes_are_ignored(self):
++        for box in [(1, 1, float("nan"), 30), (40, 0, 10, 10), (600, 0, 700, 20)]:
++            self.assertEqual(overlay.layout([("Çeviri", box, "Text", 1)], {"width": 300, "height": 200}, measure), [])
++
++    def test_large_logo_cannot_merge_with_small_neighboring_menu(self):
++        words = [("LOGO", (0, 0, 180, 120), .99), ("Projects", (185, 50, 250, 70), .99)]
++        result = ocr_backend.group_lines(words, max_gap=1.6)
++        self.assertEqual(len(result), 2)
++
++    def test_real_tk_font_and_canvas_text_stay_inside_masks(self):
++        import tkinter as tk
++        root = tk.Tk(); root.withdraw()
++        try:
++            renderer = overlay.InPlace(root, {"bg": "#111111", "fg": "white", "accent": "orange"},
++                                       on_window=lambda win: win.withdraw())
++            blocks = [("Haftalık Proje", (10, 10, 170, 35), "Weekly Project", 1),
++                      ("Uzun açıklama metni " * 12, (10, 45, 170, 90), "Description", 2),
++                      ("Ödüller", (10, 100, 170, 125), "Rewards", 1)]
++            area = {"width": 400, "height": 300, "left": 0, "top": 0}
++            items = overlay.layout(blocks, area, renderer.measure_at)
++            renderer.show(items, area); root.update_idletasks()
++            for identity in renderer.cv.find_all():
++                if renderer.cv.type(identity) != "text": continue
++                x0, y0, x1, y1 = renderer.cv.bbox(identity)
++                self.assertTrue(any(x0 >= it["x"] and y0 >= it["y"] and
++                                    x1 <= it["x"] + it["w"] and y1 <= it["y"] + it["h"] for it in items),
++                                (x0, y0, x1, y1))
++            renderer.hide()
++        finally:
++            root.destroy()
++
++
++if __name__ == "__main__":
++    unittest.main()
+--- a/tests/test_natural_voice.py
++++ b/tests/test_natural_voice.py
+@@ -0,0 +1,116 @@
++"""Offline recordings, opt-in online speech and bounded speaker regressions."""
++import hashlib
++import json
++from pathlib import Path
++import queue
++import sys
++import tempfile
++from types import SimpleNamespace
++import unittest
++from unittest.mock import Mock, patch
++import wave
++from array import array
++
++ROOT = Path(__file__).resolve().parents[1]
++sys.path.insert(0, str(ROOT))
++import app
++import voicepack
++
++
++class NaturalVoiceTests(unittest.TestCase):
++    def speaker(self):
++        obj = app.Speaker.__new__(app.Speaker)
++        obj.q, obj.err, obj.last_fx = queue.Queue(maxsize=4), None, None
++        obj._serial, obj._closed = 0, False
++        return obj
++
++    def run_speaker(self, obj, engine=None):
++        obj.q.put_nowait(None)
++        init = Mock(return_value=engine or Mock())
++        with patch.dict(sys.modules, {"pyttsx3": SimpleNamespace(init=init)}):
++            obj.run()
++
++    def test_two_recorded_packs_have_valid_audio_and_hashes(self):
++        manifest = json.loads((ROOT / "meta/voice_packs.json").read_text(encoding="utf-8"))
++        self.assertEqual(set(manifest["packs"]), set(voicepack.NATURAL_PACKS))
++        for pack, data in manifest["packs"].items():
++            self.assertEqual(data["voice"], voicepack.NATURAL_VOICES[pack])
++            self.assertEqual(set(data["events"]), voicepack.Recordings.EVENTS)
++            for event, metadata in data["events"].items():
++                path = voicepack.Recordings(ROOT / "meta").event(pack, event)
++                self.assertIsNotNone(path)
++                self.assertEqual(hashlib.sha256(path.read_bytes()).hexdigest(), metadata["sha256"])
++                with wave.open(str(path)) as audio:
++                    self.assertEqual((audio.getnchannels(), audio.getsampwidth(), audio.getframerate()), (1, 2, 24000))
++                    self.assertAlmostEqual(audio.getnframes() / audio.getframerate(), metadata["seconds"], places=2)
++                    self.assertGreater(audio.getnframes() / audio.getframerate(), .3)
++                    samples = array("h", audio.readframes(audio.getnframes()))
++                    self.assertGreater(max(abs(value) for value in samples), 500)
++
++    def test_recording_paths_reject_unrecognized_pack_and_event(self):
++        recordings = voicepack.Recordings(ROOT / "meta")
++        self.assertIsNone(recordings.event("../private", "keep"))
++        self.assertIsNone(recordings.event("natural_tr", "../../secret"))
++
++    def test_offline_recording_never_invokes_online_tts(self):
++        obj = self.speaker(); obj.files(["demo.wav"])
++        with patch.object(voicepack, "play_audio") as play, patch.object(voicepack, "neural_audio") as online:
++            self.run_speaker(obj)
++        play.assert_called_once_with("demo.wav"); online.assert_not_called()
++
++    def test_online_disabled_keeps_dynamic_text_local(self):
++        obj = self.speaker(); obj.say("Merhaba", hint="tr-tr", pack="natural_tr", online=False)
++        engine = Mock(); engine.getProperty.return_value = []
++        with patch.object(voicepack, "neural_audio") as online:
++            self.run_speaker(obj, engine)
++        online.assert_not_called(); engine.say.assert_called_once_with("Merhaba")
++
++    def test_online_failure_falls_back_without_losing_text(self):
++        obj = self.speaker(); obj.say("Merhaba", hint="tr-tr", pack="natural_tr", online=True)
++        engine = Mock(); engine.getProperty.return_value = []
++        with patch.object(voicepack, "neural_audio", side_effect=TimeoutError):
++            self.run_speaker(obj, engine)
++        engine.say.assert_called_once_with("Merhaba")
++        self.assertIn("fallback", obj.err)
++
++    def test_superseded_online_audio_is_not_played(self):
++        obj = self.speaker(); obj.say("old", pack="natural_en", online=True)
++        def generate(*args):
++            obj._serial += 1
++            return "old.mp3"
++        with patch.object(voicepack, "neural_audio", side_effect=generate), patch.object(voicepack, "play_audio") as play:
++            self.run_speaker(obj)
++        play.assert_not_called()
++
++    def test_queue_is_bounded_and_close_does_not_block(self):
++        obj = self.speaker()
++        for n in range(30): obj.say(str(n), interrupt=False)
++        self.assertEqual(obj.q.qsize(), 4)
++        obj.say("latest")
++        self.assertEqual(obj.q.qsize(), 1)
++        obj.close(); obj.say("ignored")
++        self.assertIsNone(obj.q.get_nowait()); self.assertTrue(obj.q.empty())
++
++    def test_online_cache_hides_text_and_skips_repeated_service_call(self):
++        calls = []
++        class Communicate:
++            def __init__(self, text, voice, **kwargs): calls.append((text, voice))
++            async def save(self, path): Path(path).write_bytes(b"ID3" + b"x" * 2000)
++        with tempfile.TemporaryDirectory() as tmp, patch.dict(sys.modules, {"edge_tts": SimpleNamespace(Communicate=Communicate)}):
++            first = voicepack.neural_audio("Private example text", "natural_tr", tmp)
++            second = voicepack.neural_audio("Private example text", "natural_tr", tmp)
++            self.assertEqual(first, second); self.assertEqual(len(calls), 1)
++            self.assertNotIn("Private", first.name)
++            self.assertEqual([p.suffix for p in Path(tmp).iterdir()], [".mp3"])
++
++    def test_invalid_online_audio_does_not_poison_cache(self):
++        class Communicate:
++            def __init__(self, *args, **kwargs): pass
++            async def save(self, path): Path(path).write_bytes(b"not audio")
++        with tempfile.TemporaryDirectory() as tmp, patch.dict(sys.modules, {"edge_tts": SimpleNamespace(Communicate=Communicate)}):
++            with self.assertRaises(RuntimeError): voicepack.neural_audio("Example", "natural_en", tmp)
++            self.assertEqual(list(Path(tmp).iterdir()), [])
++
++
++if __name__ == "__main__":
++    unittest.main()
+--- a/tests/test_scan_latency.py
++++ b/tests/test_scan_latency.py
+@@ -0,0 +1,105 @@
++"""Deterministic autoscan latency and workload checks; no game or capture."""
++from pathlib import Path
++import queue
++import sys
++from types import SimpleNamespace
++import unittest
++from unittest.mock import patch
++
++sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
++import app
++from performance import get_policy
++
++
++class Clock:
++    def __init__(self, duration):
++        self.now = 100.0
++        self.end = self.now + duration
++
++    def is_set(self):
++        return self.now >= self.end
++
++    def wait(self, seconds):
++        self.now += seconds
++
++
++class Lock:
++    def __init__(self, clock, busy_until=0):
++        self.clock, self.busy_until = clock, busy_until
++        self.held = False
++
++    def acquire(self, blocking=True):
++        if blocking:
++            raise AssertionError("autoscan must not wait on stale images")
++        if self.clock.now < self.busy_until:
++            return False
++        self.held = True
++        return True
++
++    def release(self):
++        assert self.held
++        self.held = False
++
++
++def simulate(mode="balanced", duration=3, state="menu", change_at=None, busy=0):
++    clock = Clock(duration)
++    scans, captures = [], []
++    policy = get_policy({"perf_mode": mode})
++    obj = SimpleNamespace(cfg={"settings": {"only_game_active": False}},
++                          _policy=lambda: policy, scan_area=lambda: {"width": 100},
++                          _screen_observe=lambda small: state,
++                          lock=Lock(clock, 100 + busy), results=queue.Queue(), last_err=None)
++
++    def sample(*args):
++        value = 100 if change_at is not None and clock.now >= 100 + change_at else 0
++        return [value] * 576, object()
++
++    def scan(img, auto):
++        scans.append(round(clock.now - 100, 3))
++        return state != "world"
++
++    def grab(region):
++        captures.append(round(clock.now - 100, 3))
++        return object()
++
++    obj.scan_image = scan
++    with patch.object(app.time, "time", side_effect=lambda: clock.now), \
++         patch.object(app.capture, "default", return_value=SimpleNamespace(sample=sample)), \
++         patch.object(app, "grab", side_effect=grab):
++        app.App._auto_loop(obj, clock)
++    assert obj.results.empty(), list(obj.results.queue)
++    return scans, captures, policy
++
++
++class ScanLatencyTests(unittest.TestCase):
++    def test_initial_card_is_detected_without_waiting_for_full_ocr_interval(self):
++        for mode, expected in (("balanced", .4), ("game", .6)):
++            scans, _, policy = simulate(mode)
++            self.assertEqual(scans, [expected])
++            self.assertLess(scans[0], policy.auto_interval_s)
++
++    def test_unchanged_card_does_not_repeat_ocr(self):
++        self.assertEqual(simulate(duration=10)[0], [.4])
++
++    def test_changed_card_waits_for_budget_then_is_not_lost(self):
++        for mode in ("balanced", "game"):
++            scans, _, policy = simulate(mode, duration=4, change_at=.8)
++            self.assertEqual(len(scans), 2)
++            self.assertGreaterEqual(scans[1] - scans[0] + 1e-6, policy.auto_interval_s)
++            self.assertLessEqual(scans[1] - scans[0], policy.auto_interval_s + policy.scan_poll_s + 1e-6)
++
++    def test_busy_ocr_retries_fresh_capture_without_blocking(self):
++        scans, captures, _ = simulate(busy=1)
++        self.assertEqual(len(scans), 1)
++        self.assertGreaterEqual(scans[0], 1)
++        self.assertEqual(captures, scans)
++
++    def test_loading_screen_does_not_run_ocr(self):
++        self.assertEqual(simulate(state="loading")[0], [])
++
++    def test_world_backoff_and_change_requirement_are_preserved(self):
++        self.assertEqual(simulate(state="world", duration=10)[0], [.6])
++
++
++if __name__ == "__main__":
++    unittest.main()
+--- a/tests/test_region_scan_fastpath.py
++++ b/tests/test_region_scan_fastpath.py
+@@ -0,0 +1,67 @@
++"""Selected card crops avoid locator OCR; invalid input keeps the fallback."""
++from copy import deepcopy
++from pathlib import Path
++import queue
++import sys
++from types import SimpleNamespace
++import unittest
++from unittest.mock import Mock, patch
++from PIL import Image
++
++sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
++import app
++from performance import TimingStats
++
++
++CARD = {"name": "Test Gloves", "kind": "gear", "slot": "Gloves", "rarity": ["HIGH-END"],
++        "attrs": {"weapon_damage": 15}, "talents": [], "confidence": 1.0,
++        "sections": True, "partial": False}
++
++
++class RegionScanTests(unittest.TestCase):
++    def run_scan(self, items, box=None, source="region", width=600, auto=False):
++        obj = app.App.__new__(app.App)
++        obj.cfg = {"settings": {"scan_source": source, "region": {"width": width, "height": 900},
++                                "ocr_passes_auto": False, "ocr_passes": 1}}
++        obj.timings = TimingStats()
++        obj.results = queue.Queue()
++        obj.last_sig, obj.last_time = None, 0
++        obj._note_ocr_time = Mock()
++        obj.merge_scrolled = lambda *args: args
++        obj.scan_area = lambda: {"left": 0, "top": 0}
++        responses = [(deepcopy(it), "DISMANTLE", []) for it in items]
++        with patch.object(app, "GAME", SimpleNamespace(ok=False)), \
++             patch.object(app, "find_card", return_value=box) as locate, \
++             patch.object(app, "read_card", return_value=("card text", [])) as read, \
++             patch.object(app, "evaluate", side_effect=responses), \
++             patch.object(app, "color_hints", side_effect=lambda c, l, i, v: v):
++            app.App.scan_image(obj, Image.new("RGB", (width, 900)), auto=auto)
++        return locate.call_count, read.call_count, obj
++
++    def test_valid_selected_crop_skips_locator_for_manual_scan(self):
++        locate, read, obj = self.run_scan([CARD])
++        self.assertEqual((locate, read), (0, 1))
++        self.assertIn("ocr_total", obj.timings.snapshot())
++
++    def test_valid_selected_crop_skips_locator_for_automatic_scan(self):
++        self.assertEqual(self.run_scan([CARD], auto=True)[0:2], (0, 1))
++
++    def test_invalid_crop_uses_locator_and_reads_recovered_card(self):
++        partial = dict(CARD, partial=True)
++        locate, read, _ = self.run_scan([partial, CARD], box=(0, 0, 500, 800))
++        self.assertEqual((locate, read), (1, 2))
++
++    def test_invalid_crop_without_locator_result_is_not_read_twice(self):
++        locate, read, obj = self.run_scan([dict(CARD, partial=True)])
++        self.assertEqual((locate, read), (1, 1))
++        self.assertEqual(obj.results.get_nowait()[3], "REVIEW")
++
++    def test_full_screen_keeps_locator(self):
++        self.assertEqual(self.run_scan([CARD], source="screen")[0:2], (1, 1))
++
++    def test_large_selected_area_keeps_locator(self):
++        self.assertEqual(self.run_scan([CARD], width=2000)[0:2], (1, 1))
++
++
++if __name__ == "__main__":
++    unittest.main()
+--- a/tests/bench_region_scan.py
++++ b/tests/bench_region_scan.py
+@@ -0,0 +1,72 @@
++"""Compare the published scan path and local region path on one real card.
++
++No game, capture, network, personal settings or GUI. Baseline is the reviewed
++release checkout under project_review/github/td2-loot-advisor.
++"""
++import ast
++import json
++from pathlib import Path
++import queue
++from statistics import median
++import sys
++import time
++from unittest.mock import Mock, patch
++from PIL import Image
++
++ROOT = Path(__file__).resolve().parents[1]
++sys.path.insert(0, str(ROOT))
++import app
++
++
++def main():
++    source = (ROOT / "project_review/github/td2-loot-advisor/app.py").read_text(encoding="utf-8")
++    cls = next(n for n in ast.parse(source).body if isinstance(n, ast.ClassDef) and n.name == "App")
++    fn = next(n for n in cls.body if isinstance(n, ast.FunctionDef) and n.name == "scan_image")
++    fn.name = "baseline_scan"
++    scope = dict(app.__dict__)
++    exec(compile(ast.Module(body=[fn], type_ignores=[]), "<release scan>", "exec"), scope)
++    baseline = scope["baseline_scan"]
++    app.OCR = app.ocr_backend.Engine("rapidocr")
++    app.gamedata.SCALE = None
++    image = Image.open(ROOT / "tests/samples/stoner_lamg_3440x1440.png").convert("RGB")
++
++    def run(scan):
++        obj = app.App.__new__(app.App)
++        obj.cfg = json.loads((ROOT / "scripts/default_builds.json").read_text(encoding="utf-8"))
++        obj.cfg["settings"].update(scan_source="region", region={"width": image.width, "height": image.height},
++                                   ocr_passes_auto=False, ocr_passes=1, save_debug_crop=False)
++        obj.results = queue.Queue()
++        obj.last_sig, obj.last_time = None, 0
++        obj.root = Mock()
++        obj.scan_area = lambda: {"left": 0, "top": 0}
++        obj.timings = app.performance.TimingStats()
++        start = time.perf_counter()
++        with patch.object(app.GAME, "learn", return_value=[]):
++            scan(obj, image, False)
++        elapsed = time.perf_counter() - start
++        result = obj.results.get_nowait()
++        return elapsed, {"attrs": result[2]["attrs"], "name": result[2]["name"], "verdict": result[3]}
++
++    # Warm both paths and input shapes before measuring; alternate execution order.
++    run(baseline)
++    run(app.App.scan_image)
++    rows = []
++    for index in range(4):
++        if index % 2:
++            after, a = run(app.App.scan_image)
++            before, b = run(baseline)
++        else:
++            before, b = run(baseline)
++            after, a = run(app.App.scan_image)
++        assert a == b, (a, b)
++        rows.append({"baseline_s": round(before, 4), "region_fastpath_s": round(after, 4), "same_result": True})
++    report = {"sample": "stoner_lamg_3440x1440.png",
++              "conditions": "CPU RapidOCR, both paths warmed, selected card region, one pass; no capture/game",
++              "runs": rows, "median_before_s": median(r["baseline_s"] for r in rows),
++              "median_after_s": median(r["region_fastpath_s"] for r in rows)}
++    (ROOT / "project_review/scan_latency/region_benchmark.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
++    print(json.dumps(report, indent=2))
++
++
++if __name__ == "__main__":
++    main()
+--- a/meta/voice_packs.json
++++ b/meta/voice_packs.json
+@@ -0,0 +1,141 @@
++{
++  "schema": 1,
++  "engine": "Microsoft Edge Neural via edge-tts",
++  "runtime": "offline PCM WAV",
++  "packs": {
++    "natural_tr": {
++      "language": "tr",
++      "title": "Türkçe — Doğal",
++      "voice": "tr-TR-EmelNeural",
++      "events": {
++        "keep": {
++          "file": "voices/natural_tr/keep.wav",
++          "text": "Bu eşyayı sakla. İşine yarayabilir.",
++          "seconds": 4.464,
++          "sha256": "64f0411030a9dbae6522afdf8f6af41b53505f9341d1b4e75181156a3eeb9484"
++        },
++        "consider": {
++          "file": "voices/natural_tr/consider.wav",
++          "text": "Bu eşya değerlendirilmeye değer. Bir göz at.",
++          "seconds": 4.896,
++          "sha256": "5aca8a136e506c06bca18650427acc66af0f00e0bf53fa46b765de6a8aae5927"
++        },
++        "dismantle": {
++          "file": "voices/natural_tr/dismantle.wav",
++          "text": "Mevcut tercihlerine göre bu eşyayı parçalayabilirsin.",
++          "seconds": 4.176,
++          "sha256": "3bfe46ddb889695600e61d20f5115d2bd966baf291e49f2fe844e7fa86e80f1b"
++        },
++        "review": {
++          "file": "voices/natural_tr/review.wav",
++          "text": "Bu eşyayı elle kontrol etmeni öneriyorum.",
++          "seconds": 3.792,
++          "sha256": "3017acfe25ebcea4ca286fe66ba5a937565cb469e1ac8801e3815397653ae275"
++        },
++        "exotic": {
++          "file": "voices/natural_tr/exotic.wav",
++          "text": "Egzotik bir eşya bulundu. Saklamayı unutma.",
++          "seconds": 4.8,
++          "sha256": "2d8f82281a9e764bab8809b6ae7c9f841549d6ffb2ea028daaeafc188eb98378"
++        },
++        "named": {
++          "file": "voices/natural_tr/named.wav",
++          "text": "Özel isimli bir eşya bulundu.",
++          "seconds": 2.832,
++          "sha256": "38c2c52de11ed063c5d9a7b5d97899218dcfd32e258fa72988f15566aa2edade"
++        },
++        "build": {
++          "file": "voices/natural_tr/build.wav",
++          "text": "Seçili diziliminle uyumlu bir eşya.",
++          "seconds": 3.192,
++          "sha256": "6fb9f68b01ed64ada465d37dd56ad180d3222877e4602c1ec41068db6347f2e2"
++        },
++        "fills_gap": {
++          "file": "voices/natural_tr/fills_gap.wav",
++          "text": "Bu parça eksik bir yuvayı tamamlıyor.",
++          "seconds": 3.264,
++          "sha256": "35cb5d78fcf46859442a116ca82921544ecc3715b6b539c064658b32168a1b0f"
++        },
++        "upgrade": {
++          "file": "voices/natural_tr/upgrade.wav",
++          "text": "Güzel bir gelişme. Mevcut parçandan daha iyi görünüyor.",
++          "seconds": 5.352,
++          "sha256": "7fcc7cabe8ba663b4580889c4c9eb02911dede900e7a3855e79d2ed231896995"
++        },
++        "demo": {
++          "file": "voices/natural_tr/demo.wav",
++          "text": "Merhaba ajan. Eşyalarını birlikte değerlendirelim. Hazırım, başlayabiliriz.",
++          "seconds": 7.776,
++          "sha256": "10f7a36ca20ce4217405d4aa9f7b58cb868cbb6ab6601411ec6d4e89fc82f9db"
++        }
++      }
++    },
++    "natural_en": {
++      "language": "en",
++      "title": "English — Natural",
++      "voice": "en-US-AriaNeural",
++      "events": {
++        "keep": {
++          "file": "voices/natural_en/keep.wav",
++          "text": "Keep this item. It could be useful.",
++          "seconds": 3.984,
++          "sha256": "b099fe1694f14614b5ad2ac74a3d08ea118e021725c90e82c896bf079b34674e"
++        },
++        "consider": {
++          "file": "voices/natural_en/consider.wav",
++          "text": "This item is worth a closer look.",
++          "seconds": 2.904,
++          "sha256": "0fd8a247d2952283acae93ff04e3f69fbf8b1e0370ba4e23bb463da0802972c1"
++        },
++        "dismantle": {
++          "file": "voices/natural_en/dismantle.wav",
++          "text": "Based on your current preferences, you can dismantle this item.",
++          "seconds": 4.368,
++          "sha256": "90d8da90e84f61d17c952ea5b89239beb0c4b01f672c7b3f44107d7e972e4282"
++        },
++        "review": {
++          "file": "voices/natural_en/review.wav",
++          "text": "I recommend checking this item yourself.",
++          "seconds": 3.12,
++          "sha256": "a33f0ccef502e0df600ff5c5f378b5bd61161961c8196fe3887e9aaecbb260f6"
++        },
++        "exotic": {
++          "file": "voices/natural_en/exotic.wav",
++          "text": "Exotic item detected. Make sure to keep it safe.",
++          "seconds": 4.92,
++          "sha256": "0874c41a8305ba92c794c1c899df83e0fc5b52e6d50587d3c6492e2b6f71741c"
++        },
++        "named": {
++          "file": "voices/natural_en/named.wav",
++          "text": "A named item has been found.",
++          "seconds": 2.712,
++          "sha256": "e19c4054f915a5976af19a8515ed7c64bb102ca29670a8cf1cac0e3c52fa0302"
++        },
++        "build": {
++          "file": "voices/natural_en/build.wav",
++          "text": "This item matches your selected build.",
++          "seconds": 3.168,
++          "sha256": "22e4ebba25e997025a63bba14fc717577e27a20e04b9de7bdf7134a03172dfe7"
++        },
++        "fills_gap": {
++          "file": "voices/natural_en/fills_gap.wav",
++          "text": "This piece fills an empty slot in your build.",
++          "seconds": 3.36,
++          "sha256": "362c264d0c6bbb717bae9945b64543f5c95403f0500ec932f35062f3ee37144d"
++        },
++        "upgrade": {
++          "file": "voices/natural_en/upgrade.wav",
++          "text": "A nice upgrade. This looks better than your current piece.",
++          "seconds": 5.016,
++          "sha256": "b4364e9dcaf7217a790ae3e99449383fd66af5c70a0421feccf9a9f689af0a01"
++        },
++        "demo": {
++          "file": "voices/natural_en/demo.wav",
++          "text": "Hello, agent. Let's take a look at your gear. I'm ready when you are.",
++          "seconds": 6.624,
++          "sha256": "a6128db9d4decd49c5bafceeae007ca89c62360cb5e81cf565793ea0d6f28698"
++        }
++      }
++    }
++  }
++}--- a/docs/overlay_voice_local.md
++++ b/docs/overlay_voice_local.md
+@@ -0,0 +1,44 @@
++# Yerinde çeviri ve doğal ses — yerel geliştirme
++
++28 Ekim 2026. Değişiklikler yerel kaynak sürümündedir. Yayınlanmış 6.0.2 kurulum paketi henüz bu değişiklikleri içermez.
++
++## Yerinde çeviri
++
++- Yerinde mod, OCR satırlarını ayrı kaynak dikdörtgenlerinde tutar. Altyazı ve diğer modlarda mevcut paragraf birleştirme davranışı korunur.
++- Büyük logo yazıları ile küçük menü metinlerinin tek OCR satırında birleşmesi engellenir.
++- Uzayan bir kutu, altındaki çeviriyi aşağı kaydırmaz. Metin kaynak konumuna bağlı kalır; yalnız boş alana uzar.
++- Yazı ölçümünde ve çiziminde aynı font kullanılır. Uzun boşluksuz adlar da satıra bölünür. Çok dar alanda yazı küçülür; yine sığmıyorsa üç nokta kullanılır. Tam çeviri geçmişte kalır.
++- Aynı metin farklı koordinata taşınırsa kaplama yeniden konumlanır. Boş ekran okumasında eski kaplama temizlenir.
++
++Kaynak OCR'nin yazıyı kaçırması veya kutuyu yanlış belirlemesi bu değişikliklerle tamamen çözülmez. Gerçek oyunda, kullanıcının ekranı ve görüntü ölçeğiyle son görsel kontrol hâlâ gereklidir.
++
++## İki ses paketi
++
++| Paket | Gerçekte kullanılan ses | Kullanım |
++|---|---|---|
++| Türkçe — Doğal | Microsoft `tr-TR-EmelNeural` | Türkçe bildirimler ve çevrimiçi Türkçe okuma |
++| English — Natural | Microsoft `en-US-AriaNeural` | İngilizce bildirimler ve çevrimiçi İngilizce okuma |
++
++Her pakette 10 kayıt bulunur: sakla, değerlendir, parçala, incele, egzotik, adlı eşya, build uyumu, eksik yuva, yükseltme ve tanıtım. Toplam 20 kayıt yaklaşık 4,07 MB'dır. WAV dosyaları mono, 24 kHz, 16 bit PCM biçimindedir. Kayıtlar özgün bildirim metinlerinden Neural hizmetiyle üretildi; oyun sesleri kullanılmadı. Manifest, metinler, süreler ve SHA-256 değerleri `meta/voice_packs.json` dosyasındadır.
++
++Hazır bildirimler çevrimdışı çalar. Seçilen paket, bildirim dilini belirler. Sohbet seslendirmesi arayüz dilini, canlı çeviri seslendirmesi Türkçeyi izler. Hazır kayıtlarda build adı ve yüzdesi gibi değişken değerler okunmaz; tam değerler uygulama ekranında kalır. Önceki cümle paketleri uyumluluk için korunmuştur.
++
++## Çevrimiçi değişken ses
++
++Asistan sekmesinde ve Canlı Çeviri sekmesindeki sesli okuma bölümünde **Sohbet ve çeviride çevrimiçi doğal ses** seçeneği vardır. İki kontrol aynı ayarı yönetir. Yeni ayarlarda bu seçenek kapalıdır; açılmasıyla okunacak metin Microsoft Edge ses hizmetine `edge-tts` üzerinden gönderilir. Bu, yerel model veya Azure API aboneliği değildir. Bu ses özelliği ekran görüntüsü ya da mikrofon kaydı göndermez.
++
++Kapalıyken değişken metin Windows sistemiyle okunur. Açıksa Emel/Aria Neural kullanılır. Hizmet çalışmazsa sistem sesine dönülür ve günlükte hata türü belirtilir. Ses işçisi arayüzü bekletmez; kuyruk en fazla dört iş tutar, daha yeni istek gelince eski bekleyen istekler bırakılır. Eski çevrimiçi isteğin üretimi tamamlandığında sonucu artık güncel değilse çalınmaz. Çalmaya başlamış sesin anında kesileceği garanti edilmez.
++
++Ses önbelleği `cache/voice` altındadır. Dosya adları metnin kendisini içermez; üretilen MP3 dosyaları konuşulan içeriği barındırır. En fazla 128 kayıt ve yaklaşık 32 MiB tutulur. Aynı ses tekrar gerektiğinde hizmet çağrılmadan kullanılabilir. `requirements.txt` ve paketleme betikleri çevrimiçi ses bağımlılıklarını içerir; sesler çalışma sırasında yeniden üretilmeden EXE içine alınabilir.
++
++## Doğrulama
++
++- Proje ekranı OCR örneği: 38 ayrı kaynak parçası; yerleşimde sıfır kutu çakışması.
++- Gerçek Tk font ve Canvas ölçümü: çizilen metinler maskelerinin içinde kaldı. Test pencereleri gizli oluşturuldu; gerçek oyun ekranı otomasyonu yapılmadı.
++- Kaynak koordinatının değişmesi ve boş ekranda eski kaplamanın temizlenmesi uygulama testleriyle doğrulandı.
++- 20 WAV dosyasının boyutu, süresi, PCM biçimi, sessiz olmaması ve SHA-256 özeti doğrulandı.
++- Çevrimdışı modda hizmet çağrılmaması, bağlantı hatasında sistem sesine dönüş, eski işin çalınmaması, sınırlı kuyruk ve geçersiz sesin önbelleğe alınmaması test edildi.
++- Gerçek çevrimiçi Emel ve Aria çağrılarıyla MP3 üretildi ve çözümlenerek süreleri doğrulandı. Hoparlör çıkışının insan tarafından dinlenmesi ve oyunla birlikte sesli kullanım henüz doğrulanmadı.
++- İlgili test grupları ve gerçek OCR örnekleri tekrar çalıştırıldı. Sonuçlar `project_review/overlay_voice_check/final_tests.json` ve aynı klasördeki günlüklerdedir.
++
++Kaynak sürümünü başlatmak için `scripts/run.bat` kullanılır. Hazır ses örnekleri `meta/voices/natural_tr/demo.wav` ve `meta/voices/natural_en/demo.wav` dosyalarıdır.
+--- a/.github/workflows/stability-check.yml
++++ b/.github/workflows/stability-check.yml
+@@ -2,7 +2,7 @@
+ on:
+   workflow_dispatch:
+   push:
+-    paths: ["app.py", "engine.py", "stash.py", "itempolicy.py", "workqueue.py", "performance.py", "ocr_backend.py", "scripts/**", "requirements-dev.txt", "livetranslate.py", "localapi.py", "fx.py", "ui_art.py", "view3d.py", "tests/test_*stability.py", "tests/test_itempolicy.py", "tests/test_workqueue.py", "tests/test_performance.py", "tests/test_animation_policy.py", "tests/test_translation_reliability.py", "tests/test_localapi_backpressure.py", ".github/workflows/stability-check.yml"]
++    paths: ["app.py", "overlay.py", "voicepack.py", "meta/voice_packs.json", "meta/voices/**", "requirements.txt", "engine.py", "stash.py", "itempolicy.py", "workqueue.py", "performance.py", "ocr_backend.py", "scripts/**", "requirements-dev.txt", "livetranslate.py", "localapi.py", "fx.py", "ui_art.py", "view3d.py", "tests/test_*stability.py", "tests/test_itempolicy.py", "tests/test_workqueue.py", "tests/test_performance.py", "tests/test_animation_policy.py", "tests/test_translation_reliability.py", "tests/test_localapi_backpressure.py", ".github/workflows/stability-check.yml"]
+   pull_request:
+     paths: ["*.py", "scripts/**", "requirements-dev.txt", "tests/**", "lang/**", ".github/workflows/stability-check.yml"]
+ permissions:
+@@ -24,7 +24,7 @@
+       - name: Policy, queues, app integration and translation integrity
+         shell: pwsh
+         run: |
+-          $suites = @('test_itempolicy.py', 'test_workqueue.py', 'test_performance.py', 'test_animation_policy.py', 'test_app_stability.py', 'test_translation_reliability.py', 'test_localapi_backpressure.py', 'test_launcher.py', 'test_ocr_serialization.py')
++          $suites = @('test_itempolicy.py', 'test_workqueue.py', 'test_performance.py', 'test_animation_policy.py', 'test_app_stability.py', 'test_translation_reliability.py', 'test_localapi_backpressure.py', 'test_launcher.py', 'test_ocr_serialization.py', 'test_inplace_anchors.py', 'test_natural_voice.py', 'test_overlay.py', 'test_scan_latency.py', 'test_region_scan_fastpath.py')
+           foreach ($suite in $suites) {
+             python -B "tests/$suite"
+             if ($LASTEXITCODE -ne 0) { throw "$suite failed" }
+--- a/.github/workflows/build-installer.yml
++++ b/.github/workflows/build-installer.yml
+@@ -35,7 +35,7 @@
+         run: |
+           python -m pip install mss pillow pytesseract pynput numpy -r requirements-dev.txt
+           if ($LASTEXITCODE -ne 0) { throw "test dependency installation failed" }
+-          foreach ($suite in @('test_itempolicy.py', 'test_workqueue.py', 'test_performance.py', 'test_animation_policy.py', 'test_app_stability.py', 'test_translation_reliability.py', 'test_localapi_backpressure.py', 'test_launcher.py', 'test_ocr_serialization.py', 'test_core.py', 'test_livetranslate.py', 'test_autoscan.py')) {
++          foreach ($suite in @('test_itempolicy.py', 'test_workqueue.py', 'test_performance.py', 'test_animation_policy.py', 'test_app_stability.py', 'test_translation_reliability.py', 'test_localapi_backpressure.py', 'test_launcher.py', 'test_ocr_serialization.py', 'test_inplace_anchors.py', 'test_natural_voice.py', 'test_overlay.py', 'test_scan_latency.py', 'test_region_scan_fastpath.py', 'test_core.py', 'test_livetranslate.py', 'test_autoscan.py')) {
+             python -B "tests/$suite"
+             if ($LASTEXITCODE -ne 0) { throw "$suite failed" }
+           }
+--- a/lang/de.json
++++ b/lang/de.json
+@@ -1391,5 +1391,11 @@
+   "lt.log_opt": "Save translated text to disk (optional)",
+   "lt.privacy_local": "Local translation: recognized text and speech transcripts are translated on this PC. Community sharing, the phone display and text logging have separate switches.",
+   "lt.privacy_ai": "AI translation: recognized text and speech transcripts go to the selected assistant provider. Online providers receive this text over the internet. Sharing and text logging have separate switches.",
+-  "lt.ai_consent": "Recognized screen text and speech transcripts will be sent to the assistant provider selected in Assistant. If that provider is online, this text leaves your PC. Switch to AI translation?"
++  "lt.ai_consent": "Recognized screen text and speech transcripts will be sent to the assistant provider selected in Assistant. If that provider is online, this text leaves your PC. Switch to AI translation?",
++  "vp.p_natural_tr": "Türkçe — Natural (Emel)",
++  "vp.p_natural_en": "English — Natural (Aria)",
++  "vp.online": "Online natural voice for chat and translation",
++  "vp.online_privacy": "Online voice is enabled: text to be read is sent to Microsoft's speech service. Audio is cached locally; screen images and microphone audio are not sent by this voice feature.",
++  "vp.natural_hint": "Two notification packs: Turkish / English. Recorded notifications work offline without radio distortion. Dynamic chat uses the interface language; translated speech uses Turkish. With online voice off, dynamic text uses the Windows voice. With it on, text goes to Microsoft's speech service and audio is cached locally.",
++  "vp.online_route": "When enabled, text to be spoken is sent to Microsoft's speech service. Recorded notifications stay offline. When disabled, dynamic text uses the Windows voice."
+ }
+--- a/lang/en.json
++++ b/lang/en.json
+@@ -1221,6 +1221,12 @@
+   "themedesc.nightops": "night mission, ISAC cyan",
+   "themedesc.kenly": "the green of the Kenly College woods",
+   "lt.fullscreen_hint": "The game is in exclusive fullscreen: translation boxes can't appear. Set Display Mode: Borderless in the game or use the 📱 phone / second screen.",
++  "vp.p_natural_tr": "Türkçe — Natural (Emel)",
++  "vp.p_natural_en": "English — Natural (Aria)",
++  "vp.online": "Online natural voice for chat and translation",
++  "vp.online_route": "When enabled, text to be spoken is sent to Microsoft's speech service. Recorded notifications stay offline. When disabled, dynamic text uses the Windows voice.",
++  "vp.online_privacy": "Online voice is enabled: text to be read is sent to Microsoft's speech service. Audio is cached locally; screen images and microphone audio are not sent by this voice feature.",
++  "vp.natural_hint": "Two notification packs: Turkish / English. Recorded notifications work offline without radio distortion. Dynamic chat uses the interface language; translated speech uses Turkish. With online voice off, dynamic text uses the Windows voice. With it on, text goes to Microsoft's speech service and audio is cached locally.",
+   "perf.balanced": "Balanced",
+   "perf.game": "Game priority",
+   "perf.changed": "Performance: {mode}",
+--- a/lang/es.json
++++ b/lang/es.json
+@@ -1387,5 +1387,11 @@
+   "lt.log_opt": "Save translated text to disk (optional)",
+   "lt.privacy_local": "Local translation: recognized text and speech transcripts are translated on this PC. Community sharing, the phone display and text logging have separate switches.",
+   "lt.privacy_ai": "AI translation: recognized text and speech transcripts go to the selected assistant provider. Online providers receive this text over the internet. Sharing and text logging have separate switches.",
+-  "lt.ai_consent": "Recognized screen text and speech transcripts will be sent to the assistant provider selected in Assistant. If that provider is online, this text leaves your PC. Switch to AI translation?"
++  "lt.ai_consent": "Recognized screen text and speech transcripts will be sent to the assistant provider selected in Assistant. If that provider is online, this text leaves your PC. Switch to AI translation?",
++  "vp.p_natural_tr": "Türkçe — Natural (Emel)",
++  "vp.p_natural_en": "English — Natural (Aria)",
++  "vp.online": "Online natural voice for chat and translation",
++  "vp.online_privacy": "Online voice is enabled: text to be read is sent to Microsoft's speech service. Audio is cached locally; screen images and microphone audio are not sent by this voice feature.",
++  "vp.natural_hint": "Two notification packs: Turkish / English. Recorded notifications work offline without radio distortion. Dynamic chat uses the interface language; translated speech uses Turkish. With online voice off, dynamic text uses the Windows voice. With it on, text goes to Microsoft's speech service and audio is cached locally.",
++  "vp.online_route": "When enabled, text to be spoken is sent to Microsoft's speech service. Recorded notifications stay offline. When disabled, dynamic text uses the Windows voice."
+ }
+--- a/lang/fr.json
++++ b/lang/fr.json
+@@ -1387,5 +1387,11 @@
+   "lt.log_opt": "Save translated text to disk (optional)",
+   "lt.privacy_local": "Local translation: recognized text and speech transcripts are translated on this PC. Community sharing, the phone display and text logging have separate switches.",
+   "lt.privacy_ai": "AI translation: recognized text and speech transcripts go to the selected assistant provider. Online providers receive this text over the internet. Sharing and text logging have separate switches.",
+-  "lt.ai_consent": "Recognized screen text and speech transcripts will be sent to the assistant provider selected in Assistant. If that provider is online, this text leaves your PC. Switch to AI translation?"
++  "lt.ai_consent": "Recognized screen text and speech transcripts will be sent to the assistant provider selected in Assistant. If that provider is online, this text leaves your PC. Switch to AI translation?",
++  "vp.p_natural_tr": "Türkçe — Natural (Emel)",
++  "vp.p_natural_en": "English — Natural (Aria)",
++  "vp.online": "Online natural voice for chat and translation",
++  "vp.online_privacy": "Online voice is enabled: text to be read is sent to Microsoft's speech service. Audio is cached locally; screen images and microphone audio are not sent by this voice feature.",
++  "vp.natural_hint": "Two notification packs: Turkish / English. Recorded notifications work offline without radio distortion. Dynamic chat uses the interface language; translated speech uses Turkish. With online voice off, dynamic text uses the Windows voice. With it on, text goes to Microsoft's speech service and audio is cached locally.",
++  "vp.online_route": "When enabled, text to be spoken is sent to Microsoft's speech service. Recorded notifications stay offline. When disabled, dynamic text uses the Windows voice."
+ }
+--- a/lang/it.json
++++ b/lang/it.json
+@@ -1387,5 +1387,11 @@
+   "lt.log_opt": "Save translated text to disk (optional)",
+   "lt.privacy_local": "Local translation: recognized text and speech transcripts are translated on this PC. Community sharing, the phone display and text logging have separate switches.",
+   "lt.privacy_ai": "AI translation: recognized text and speech transcripts go to the selected assistant provider. Online providers receive this text over the internet. Sharing and text logging have separate switches.",
+-  "lt.ai_consent": "Recognized screen text and speech transcripts will be sent to the assistant provider selected in Assistant. If that provider is online, this text leaves your PC. Switch to AI translation?"
++  "lt.ai_consent": "Recognized screen text and speech transcripts will be sent to the assistant provider selected in Assistant. If that provider is online, this text leaves your PC. Switch to AI translation?",
++  "vp.p_natural_tr": "Türkçe — Natural (Emel)",
++  "vp.p_natural_en": "English — Natural (Aria)",
++  "vp.online": "Online natural voice for chat and translation",
++  "vp.online_privacy": "Online voice is enabled: text to be read is sent to Microsoft's speech service. Audio is cached locally; screen images and microphone audio are not sent by this voice feature.",
++  "vp.natural_hint": "Two notification packs: Turkish / English. Recorded notifications work offline without radio distortion. Dynamic chat uses the interface language; translated speech uses Turkish. With online voice off, dynamic text uses the Windows voice. With it on, text goes to Microsoft's speech service and audio is cached locally.",
++  "vp.online_route": "When enabled, text to be spoken is sent to Microsoft's speech service. Recorded notifications stay offline. When disabled, dynamic text uses the Windows voice."
+ }
+--- a/lang/nl.json
++++ b/lang/nl.json
+@@ -1387,5 +1387,11 @@
+   "lt.log_opt": "Save translated text to disk (optional)",
+   "lt.privacy_local": "Local translation: recognized text and speech transcripts are translated on this PC. Community sharing, the phone display and text logging have separate switches.",
+   "lt.privacy_ai": "AI translation: recognized text and speech transcripts go to the selected assistant provider. Online providers receive this text over the internet. Sharing and text logging have separate switches.",
+-  "lt.ai_consent": "Recognized screen text and speech transcripts will be sent to the assistant provider selected in Assistant. If that provider is online, this text leaves your PC. Switch to AI translation?"
++  "lt.ai_consent": "Recognized screen text and speech transcripts will be sent to the assistant provider selected in Assistant. If that provider is online, this text leaves your PC. Switch to AI translation?",
++  "vp.p_natural_tr": "Türkçe — Natural (Emel)",
++  "vp.p_natural_en": "English — Natural (Aria)",
++  "vp.online": "Online natural voice for chat and translation",
++  "vp.online_privacy": "Online voice is enabled: text to be read is sent to Microsoft's speech service. Audio is cached locally; screen images and microphone audio are not sent by this voice feature.",
++  "vp.natural_hint": "Two notification packs: Turkish / English. Recorded notifications work offline without radio distortion. Dynamic chat uses the interface language; translated speech uses Turkish. With online voice off, dynamic text uses the Windows voice. With it on, text goes to Microsoft's speech service and audio is cached locally.",
++  "vp.online_route": "When enabled, text to be spoken is sent to Microsoft's speech service. Recorded notifications stay offline. When disabled, dynamic text uses the Windows voice."
+ }
+--- a/lang/pl.json
++++ b/lang/pl.json
+@@ -1387,5 +1387,11 @@
+   "lt.log_opt": "Save translated text to disk (optional)",
+   "lt.privacy_local": "Local translation: recognized text and speech transcripts are translated on this PC. Community sharing, the phone display and text logging have separate switches.",
+   "lt.privacy_ai": "AI translation: recognized text and speech transcripts go to the selected assistant provider. Online providers receive this text over the internet. Sharing and text logging have separate switches.",
+-  "lt.ai_consent": "Recognized screen text and speech transcripts will be sent to the assistant provider selected in Assistant. If that provider is online, this text leaves your PC. Switch to AI translation?"
++  "lt.ai_consent": "Recognized screen text and speech transcripts will be sent to the assistant provider selected in Assistant. If that provider is online, this text leaves your PC. Switch to AI translation?",
++  "vp.p_natural_tr": "Türkçe — Natural (Emel)",
++  "vp.p_natural_en": "English — Natural (Aria)",
++  "vp.online": "Online natural voice for chat and translation",
++  "vp.online_privacy": "Online voice is enabled: text to be read is sent to Microsoft's speech service. Audio is cached locally; screen images and microphone audio are not sent by this voice feature.",
++  "vp.natural_hint": "Two notification packs: Turkish / English. Recorded notifications work offline without radio distortion. Dynamic chat uses the interface language; translated speech uses Turkish. With online voice off, dynamic text uses the Windows voice. With it on, text goes to Microsoft's speech service and audio is cached locally.",
++  "vp.online_route": "When enabled, text to be spoken is sent to Microsoft's speech service. Recorded notifications stay offline. When disabled, dynamic text uses the Windows voice."
+ }
+--- a/lang/pt.json
++++ b/lang/pt.json
+@@ -1387,5 +1387,11 @@
+   "lt.log_opt": "Save translated text to disk (optional)",
+   "lt.privacy_local": "Local translation: recognized text and speech transcripts are translated on this PC. Community sharing, the phone display and text logging have separate switches.",
+   "lt.privacy_ai": "AI translation: recognized text and speech transcripts go to the selected assistant provider. Online providers receive this text over the internet. Sharing and text logging have separate switches.",
+-  "lt.ai_consent": "Recognized screen text and speech transcripts will be sent to the assistant provider selected in Assistant. If that provider is online, this text leaves your PC. Switch to AI translation?"
++  "lt.ai_consent": "Recognized screen text and speech transcripts will be sent to the assistant provider selected in Assistant. If that provider is online, this text leaves your PC. Switch to AI translation?",
++  "vp.p_natural_tr": "Türkçe — Natural (Emel)",
++  "vp.p_natural_en": "English — Natural (Aria)",
++  "vp.online": "Online natural voice for chat and translation",
++  "vp.online_privacy": "Online voice is enabled: text to be read is sent to Microsoft's speech service. Audio is cached locally; screen images and microphone audio are not sent by this voice feature.",
++  "vp.natural_hint": "Two notification packs: Turkish / English. Recorded notifications work offline without radio distortion. Dynamic chat uses the interface language; translated speech uses Turkish. With online voice off, dynamic text uses the Windows voice. With it on, text goes to Microsoft's speech service and audio is cached locally.",
++  "vp.online_route": "When enabled, text to be spoken is sent to Microsoft's speech service. Recorded notifications stay offline. When disabled, dynamic text uses the Windows voice."
+ }
+--- a/lang/ru.json
++++ b/lang/ru.json
+@@ -1387,5 +1387,11 @@
+   "lt.log_opt": "Save translated text to disk (optional)",
+   "lt.privacy_local": "Local translation: recognized text and speech transcripts are translated on this PC. Community sharing, the phone display and text logging have separate switches.",
+   "lt.privacy_ai": "AI translation: recognized text and speech transcripts go to the selected assistant provider. Online providers receive this text over the internet. Sharing and text logging have separate switches.",
+-  "lt.ai_consent": "Recognized screen text and speech transcripts will be sent to the assistant provider selected in Assistant. If that provider is online, this text leaves your PC. Switch to AI translation?"
++  "lt.ai_consent": "Recognized screen text and speech transcripts will be sent to the assistant provider selected in Assistant. If that provider is online, this text leaves your PC. Switch to AI translation?",
++  "vp.p_natural_tr": "Türkçe — Natural (Emel)",
++  "vp.p_natural_en": "English — Natural (Aria)",
++  "vp.online": "Online natural voice for chat and translation",
++  "vp.online_privacy": "Online voice is enabled: text to be read is sent to Microsoft's speech service. Audio is cached locally; screen images and microphone audio are not sent by this voice feature.",
++  "vp.natural_hint": "Two notification packs: Turkish / English. Recorded notifications work offline without radio distortion. Dynamic chat uses the interface language; translated speech uses Turkish. With online voice off, dynamic text uses the Windows voice. With it on, text goes to Microsoft's speech service and audio is cached locally.",
++  "vp.online_route": "When enabled, text to be spoken is sent to Microsoft's speech service. Recorded notifications stay offline. When disabled, dynamic text uses the Windows voice."
+ }
+--- a/lang/tr.json
++++ b/lang/tr.json
+@@ -1523,6 +1523,12 @@
+   "themedesc.nightops": "gece görevi, ISAC camgöbeği",
+   "themedesc.kenly": "Kenly College ormanlarının yeşili",
+   "lt.fullscreen_hint": "Oyun özel tam ekranda: çeviri kutuları görünmez. Oyunda Görüntü modu: Kenarlıksız (Borderless) seç ya da 📱 telefon / ikinci ekranı kullan.",
++  "vp.p_natural_tr": "Türkçe — Doğal (Emel)",
++  "vp.p_natural_en": "English — Doğal (Aria)",
++  "vp.online": "Sohbet ve çeviride çevrimiçi doğal ses",
++  "vp.online_route": "Bu seçenek açıldığında okunacak metin Microsoft ses hizmetine gönderilir. Hazır bildirimler çevrimdışı kalır. Kapatıldığında değişken metin Windows sesiyle okunur.",
++  "vp.online_privacy": "Çevrimiçi ses açık: okunacak metin Microsoft ses hizmetine gönderilir. Ses yerelde önbelleğe alınır; bu ses özelliği ekran görüntüsü veya mikrofon kaydı göndermez.",
++  "vp.natural_hint": "İki bildirim paketi: Türkçe / İngilizce. Hazır bildirimler telsiz bozulması olmadan çevrimdışı çalar. Değişken sohbet arayüz dilinde, çeviri Türkçe okunur. Çevrimiçi ses kapalıysa değişken metin Windows sesiyle okunur. Açıksa metin Microsoft ses hizmetine gönderilir ve ses yerelde önbelleğe alınır.",
+   "perf.balanced": "Dengeli",
+   "perf.game": "Oyun öncelikli",
+   "perf.changed": "Performans: {mode}",

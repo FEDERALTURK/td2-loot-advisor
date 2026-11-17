@@ -1,0 +1,18 @@
+OK   oyun kapalı: olay yok
+OK   oyun açıldı olayı
+OK   oyun öne geldi
+OK   değişiklik yokken tekrar olay yok
+OK   oyun kapandı + odak bitti
+OK   oturum sayaçları
+OK   öne çıkanlar
+OK   oturum dosyaya yazıldı
+OK   boş, kısa oturum saklanmadı
+OK   haftalık toplam
+OK   geçersiz konu ve webhook reddedildi
+OK   rastgele, uzun ntfy konusu: td2-hkeT9KPR6369TbjRD55I
+OK   ntfy + Discord webhook ayarlandı
+OK   ikisine de gönderildi
+OK   ntfy: Türkçe başlık kodlandı, gövde UTF-8
+OK   Discord: embed, @everyone engelli
+OK   kuyruktaki bildirimler sırayla gitti (6)
+RESULT: PASS

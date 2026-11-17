@@ -1,0 +1,1483 @@
+{
+  "schema": 1,
+  "version": "2026-11-06.1",
+  "updated": "2026-11-06T01:49:22Z",
+  "season": "Year 8 Season 3 – Red Horizon",
+  "resets": {
+    "daily_hour_utc": 8,
+    "weekly_weekday": 1,
+    "weekly_hour_utc": 8,
+    "note": "Daily 08:00 UTC; weekly Tuesday 08:00 UTC (weekly_weekday 0 = Monday)"
+  },
+  "tasks": [
+    {
+      "id": "y8s3-scout1-executions",
+      "cat": "manhunt",
+      "text": {
+        "en": "Manhunt Scout 1: complete 2 Public Executions in Downtown East or Judiciary Square",
+        "tr": "Manhunt Scout 1: Downtown East veya Judiciary Square'de 2 Public Execution tamamla",
+        "de": "Manhunt Scout 1: 2 öffentliche Hinrichtungen in Downtown East oder Judiciary Square abschließen",
+        "fr": "Traque Éclaireur 1 : terminer 2 exécutions publiques à Downtown East ou Judiciary Square",
+        "es": "Cacería Explorador 1: completa 2 ejecuciones públicas en Downtown East o Judiciary Square",
+        "it": "Caccia Esploratore 1: completa 2 esecuzioni pubbliche a Downtown East o Judiciary Square",
+        "pt": "Caçada Batedor 1: conclua 2 execuções públicas em Downtown East ou Judiciary Square",
+        "ru": "Охота, Разведчик 1: завершите 2 публичные казни в Downtown East или Judiciary Square",
+        "pl": "Obława, Zwiadowca 1: ukończ 2 publiczne egzekucje w Downtown East lub Judiciary Square",
+        "nl": "Manhunt Verkenner 1: voltooi 2 openbare executies in Downtown East of Judiciary Square"
+      },
+      "source": {
+        "url": "https://www.keengamer.com/articles/guides/the-division-2-y8s3-scout-1-manhunt-clue-solutions/"
+      },
+      "how": {
+        "en": "Red execution icons on the map. Kill the first wave while keeping at least one hostage alive, then beat the second wave that goes for the hostages. Do it twice.",
+        "tr": "Haritadaki kırmızı infaz simgelerine git. İlk dalgayı en az bir rehine hayatta kalacak şekilde temizle, sonra rehinelere saldıran ikinci dalgayı yen. İki kez yap.",
+        "de": "Rote Hinrichtungs-Symbole auf der Karte. Erste Welle töten, mindestens eine Geisel am Leben halten, dann die zweite Welle besiegen, die auf die Geiseln geht. Zweimal.",
+        "fr": "Icônes rouges d’exécution sur la carte. Éliminez la première vague en gardant au moins un otage en vie, puis battez la seconde qui vise les otages. Deux fois.",
+        "es": "Iconos rojos de ejecución en el mapa. Elimina la primera oleada manteniendo vivo al menos un rehén y vence la segunda, que va a por los rehenes. Dos veces.",
+        "it": "Icone rosse di esecuzione sulla mappa. Elimina la prima ondata tenendo in vita almeno un ostaggio, poi sconfiggi la seconda che punta agli ostaggi. Due volte.",
+        "pt": "Ícones vermelhos de execução no mapa. Elimine a primeira onda mantendo ao menos um refém vivo e vença a segunda, que ataca os reféns. Duas vezes.",
+        "ru": "Красные значки казни на карте. Убейте первую волну, сохранив хотя бы одного заложника, затем вторую волну, нацеленную на заложников. Дважды.",
+        "pl": "Czerwone ikony egzekucji na mapie. Pokonaj pierwszą falę, utrzymując przy życiu co najmniej jednego zakładnika, potem drugą falę atakującą zakładników. Dwa razy.",
+        "nl": "Rode executie-iconen op de kaart. Versla de eerste golf en houd minstens één gijzelaar in leven, versla daarna de tweede golf die op de gijzelaars afgaat. Twee keer."
+      },
+      "wiki_id": "wiki-red-horizon-scout-1"
+    },
+    {
+      "id": "y8s3-scout1-control-points",
+      "cat": "manhunt",
+      "text": {
+        "en": "Manhunt Scout 1: capture 3 of the 4 Control Points in Downtown East",
+        "tr": "Manhunt Scout 1: Downtown East'teki 4 Control Point'ten 3'ünü ele geçir",
+        "de": "Manhunt Scout 1: 3 der 4 Kontrollpunkte in Downtown East einnehmen",
+        "fr": "Traque Éclaireur 1 : prendre 3 des 4 points de contrôle de Downtown East",
+        "es": "Cacería Explorador 1: captura 3 de los 4 puntos de control de Downtown East",
+        "it": "Caccia Esploratore 1: conquista 3 dei 4 punti di controllo di Downtown East",
+        "pt": "Caçada Batedor 1: capture 3 dos 4 pontos de controle de Downtown East",
+        "ru": "Охота, Разведчик 1: захватите 3 из 4 контрольных точек в Downtown East",
+        "pl": "Obława, Zwiadowca 1: zdobądź 3 z 4 punktów kontrolnych w Downtown East",
+        "nl": "Manhunt Verkenner 1: verover 3 van de 4 controlepunten in Downtown East"
+      },
+      "source": {
+        "url": "https://www.keengamer.com/articles/guides/the-division-2-y8s3-scout-1-manhunt-clue-solutions/"
+      },
+      "how": {
+        "en": "Be in Downtown East. At each point clear the first wave, then the second wave with elites that tries to retake it. Fire the flare for allied help. Repeat at 3 of the 4 points.",
+        "tr": "Downtown East bölgesinde ol. Her noktada ilk dalgayı, sonra noktayı geri almaya çalışan elitli ikinci dalgayı temizle. Yardım için işaret fişeği at. 4 noktadan 3'ünde tekrarla.",
+        "de": "In Downtown East sein. An jedem Punkt erste Welle, dann die zweite Welle mit Elite-Gegnern besiegen. Leuchtsignal für Verbündete nutzen. An 3 der 4 Punkte wiederholen.",
+        "fr": "Soyez à Downtown East. À chaque point, videz la première vague puis la seconde avec des élites. Lancez la fusée pour des renforts alliés. Répétez sur 3 des 4 points.",
+        "es": "Debes estar en Downtown East. En cada punto elimina la primera oleada y luego la segunda con élites. Lanza la bengala para pedir aliados. Repite en 3 de los 4 puntos.",
+        "it": "Devi essere a Downtown East. In ogni punto elimina la prima ondata, poi la seconda con élite. Usa il razzo per gli alleati. Ripeti in 3 dei 4 punti.",
+        "pt": "Esteja em Downtown East. Em cada ponto elimine a primeira onda e depois a segunda, com elites. Use o sinalizador para aliados. Repita em 3 dos 4 pontos.",
+        "ru": "Будьте в Downtown East. На каждой точке зачистите первую волну, затем вторую с элитой. Пустите сигнальную ракету для союзников. Повторите на 3 из 4 точек.",
+        "pl": "Bądź w Downtown East. Na każdym punkcie pokonaj pierwszą falę, potem drugą z elitami. Wystrzel flarę po sojuszników. Powtórz na 3 z 4 punktów.",
+        "nl": "Wees in Downtown East. Versla per punt de eerste golf en daarna de tweede met elites. Gebruik de lichtkogel voor bondgenoten. Herhaal op 3 van de 4 punten."
+      },
+      "wiki_id": "wiki-red-horizon-scout-1"
+    },
+    {
+      "id": "y8s3-scout1-cleaners",
+      "cat": "manhunt",
+      "text": {
+        "en": "Manhunt Scout 1: kill 10 Cleaners in Downtown East",
+        "tr": "Manhunt Scout 1: Downtown East'te 10 Cleaner öldür",
+        "de": "Manhunt Scout 1: 10 Cleaner in Downtown East töten",
+        "fr": "Traque Éclaireur 1 : éliminer 10 Nettoyeurs à Downtown East",
+        "es": "Cacería Explorador 1: elimina a 10 Limpiadores en Downtown East",
+        "it": "Caccia Esploratore 1: uccidi 10 Pulitori a Downtown East",
+        "pt": "Caçada Batedor 1: elimine 10 Limpadores em Downtown East",
+        "ru": "Охота, Разведчик 1: убейте 10 Чистильщиков в Downtown East",
+        "pl": "Obława, Zwiadowca 1: zabij 10 Czyścicieli w Downtown East",
+        "nl": "Manhunt Verkenner 1: dood 10 Cleaners in Downtown East"
+      },
+      "source": {
+        "url": "https://www.keengamer.com/articles/guides/the-division-2-y8s3-scout-1-manhunt-clue-solutions/"
+      },
+      "how": {
+        "en": "Any activity in Downtown East counts. Lower the world difficulty to finish faster.",
+        "tr": "Downtown East'teki her etkinlik sayılır. Daha hızlı bitirmek için dünya zorluğunu düşür.",
+        "de": "Jede Aktivität in Downtown East zählt. Weltschwierigkeit senken geht schneller.",
+        "fr": "Toute activité à Downtown East compte. Baissez la difficulté du monde pour aller plus vite.",
+        "es": "Cuenta cualquier actividad en Downtown East. Baja la dificultad del mundo para ir más rápido.",
+        "it": "Vale qualsiasi attività a Downtown East. Abbassa la difficoltà del mondo per fare prima.",
+        "pt": "Qualquer atividade em Downtown East conta. Baixe a dificuldade do mundo para ir mais rápido.",
+        "ru": "Засчитывается любая активность в Downtown East. Понизьте сложность мира, чтобы быстрее.",
+        "pl": "Liczy się każda aktywność w Downtown East. Obniż poziom trudności świata, będzie szybciej.",
+        "nl": "Elke activiteit in Downtown East telt. Verlaag de wereldmoeilijkheid om sneller klaar te zijn."
+      },
+      "wiki_id": "wiki-red-horizon-scout-1"
+    },
+    {
+      "id": "y8s3-weekly-clues",
+      "cat": "manhunt",
+      "text": {
+        "en": "New Manhunt clues unlock every weekly reset; missed Scout steps stay available. Finishing the track unlocks the Climax mission (Loaded for Bear exotic gloves)",
+        "tr": "Her haftalık sıfırlamada yeni Manhunt ipuçları açılır; kaçırdığın Scout adımları sonra da yapılabilir. Hepsini bitirince Climax görevi açılır (Loaded for Bear egzotik eldiven)",
+        "de": "Neue Manhunt-Hinweise mit jedem Wochen-Reset; verpasste Scout-Schritte bleiben verfügbar. Am Ende wartet die Climax-Mission (exotische Handschuhe Loaded for Bear)",
+        "fr": "De nouveaux indices de traque à chaque réinitialisation hebdo ; les étapes manquées restent disponibles. La fin débloque la mission Climax (gants exotiques Loaded for Bear)",
+        "es": "Nuevas pistas de cacería con cada reinicio semanal; los pasos perdidos siguen disponibles. Al terminar se desbloquea la misión Climax (guantes exóticos Loaded for Bear)",
+        "it": "Nuovi indizi della caccia a ogni reset settimanale; i passi persi restano disponibili. Alla fine si sblocca la missione Climax (guanti esotici Loaded for Bear)",
+        "pt": "Novas pistas da caçada a cada reset semanal; etapas perdidas continuam disponíveis. Ao terminar, libera a missão Climax (luvas exóticas Loaded for Bear)",
+        "ru": "Новые подсказки охоты открываются с каждым недельным сбросом; пропущенные шаги остаются доступны. В конце открывается миссия Climax (экзотические перчатки Loaded for Bear)",
+        "pl": "Nowe wskazówki obławy z każdym resetem tygodniowym; pominięte etapy zostają dostępne. Koniec odblokowuje misję Climax (egzotyczne rękawice Loaded for Bear)",
+        "nl": "Nieuwe manhunt-aanwijzingen bij elke wekelijkse reset; gemiste stappen blijven beschikbaar. Aan het eind wacht de Climax-missie (exotische handschoenen Loaded for Bear)"
+      },
+      "source": {
+        "url": "https://www.keengamer.com/articles/guides/the-division-2-y8s3-scout-1-manhunt-clue-solutions/"
+      }
+    },
+    {
+      "id": "y8s3-scout9-elite-hyenas",
+      "cat": "manhunt",
+      "source": {
+        "url": "https://allthings.how/?p=296455"
+      },
+      "text": {
+        "en": "Manhunt Scout 9 (week 9, from Oct 20): defeat 3 named or elite Hyenas",
+        "tr": "Manhunt Scout 9 (9. hafta, 20 Ekim'den): 3 isimli ya da elit Hyena yen",
+        "de": "Manhunt Scout 9 (Woche 9, ab 20. Okt.): 3 benannte oder Elite-Hyänen besiegen",
+        "fr": "Traque Éclaireur 9 (semaine 9, dès le 20 oct.) : vaincre 3 Hyènes nommées ou élites",
+        "es": "Cacería Explorador 9 (semana 9, desde el 20 oct.): derrota a 3 Hienas con nombre o de élite",
+        "it": "Caccia Esploratore 9 (settimana 9, dal 20 ott.): sconfiggi 3 Iene con nome o élite",
+        "pt": "Caçada Batedor 9 (semana 9, desde 20 out.): derrote 3 Hienas nomeadas ou de elite",
+        "ru": "Охота, Разведчик 9 (неделя 9, с 20 окт.): победите 3 именных или элитных Гиен",
+        "pl": "Obława, Zwiadowca 9 (tydzień 9, od 20 paź.): pokonaj 3 nazwane lub elitarne Hieny",
+        "nl": "Manhunt Verkenner 9 (week 9, vanaf 20 okt.): versla 3 benoemde of elite Hyenas"
+      },
+      "how": {
+        "en": "Elites and named enemies have yellow health bars. Hyena Control Points and their reinforcement waves are a reliable source; higher difficulty spawns more elites.",
+        "tr": "Elit ve isimli düşmanların can barı sarıdır. Hyena kontrol noktaları ve takviye dalgaları en güvenilir yer; zorluk arttıkça daha çok elit çıkar.",
+        "de": "Elite und Benannte haben gelbe Lebensbalken. Hyänen-Kontrollpunkte und deren Verstärkungswellen sind zuverlässig; höhere Schwierigkeit bringt mehr Elite.",
+        "fr": "Élites et nommés ont une barre de vie jaune. Les points de contrôle Hyènes et leurs renforts sont fiables ; une difficulté plus élevée en fait apparaître plus.",
+        "es": "Élites y enemigos con nombre tienen barra de vida amarilla. Los puntos de control de Hienas y sus refuerzos son fiables; más dificultad, más élites.",
+        "it": "Élite e nemici con nome hanno la barra gialla. I punti di controllo delle Iene e i rinforzi sono affidabili; più difficoltà, più élite.",
+        "pt": "Elites e nomeados têm barra de vida amarela. Pontos de controle das Hienas e seus reforços são confiáveis; dificuldade maior gera mais elites.",
+        "ru": "У элиты и именных врагов жёлтая полоса здоровья. Надёжно — контрольные точки Гиен и волны подкрепления; на высокой сложности элиты больше.",
+        "pl": "Elity i nazwani wrogowie mają żółty pasek zdrowia. Pewne źródło to punkty kontrolne Hien i fale posiłków; wyższa trudność daje więcej elit.",
+        "nl": "Elites en benoemde vijanden hebben een gele levensbalk. Hyena-controlepunten en hun versterkingen zijn betrouwbaar; hogere moeilijkheid geeft meer elites."
+      },
+      "wiki_id": "wiki-red-horizon-scout-9"
+    },
+    {
+      "id": "y8s3-scout9-bt-medics",
+      "cat": "manhunt",
+      "source": {
+        "url": "https://allthings.how/?p=296455"
+      },
+      "text": {
+        "en": "Manhunt Scout 9: defeat 5 Black Tusk Medics",
+        "tr": "Manhunt Scout 9: 5 Black Tusk Medic yen",
+        "de": "Manhunt Scout 9: 5 Black-Tusk-Sanitäter besiegen",
+        "fr": "Traque Éclaireur 9 : vaincre 5 Médecins Black Tusk",
+        "es": "Cacería Explorador 9: derrota a 5 Médicos de Black Tusk",
+        "it": "Caccia Esploratore 9: sconfiggi 5 Medici Black Tusk",
+        "pt": "Caçada Batedor 9: derrote 5 Médicos da Black Tusk",
+        "ru": "Охота, Разведчик 9: победите 5 медиков Black Tusk",
+        "pl": "Obława, Zwiadowca 9: pokonaj 5 Medyków Black Tusk",
+        "nl": "Manhunt Verkenner 9: versla 5 Black Tusk-medics"
+      },
+      "how": {
+        "en": "Medics appear in Invaded missions and other Black Tusk encounters. Replay an Invaded mission from the map's Invaded filter and focus the medics first.",
+        "tr": "Medic'ler İstila (Invaded) görevlerinde ve diğer Black Tusk karşılaşmalarında çıkar. Haritadaki Invaded filtresinden bir görevi tekrar oyna ve önce medic'leri hedef al.",
+        "de": "Sanitäter gibt es in Invaded-Missionen und anderen Black-Tusk-Begegnungen. Eine Invaded-Mission über den Kartenfilter wiederholen und Sanitäter zuerst ausschalten.",
+        "fr": "Les médecins apparaissent dans les missions envahies et autres affrontements Black Tusk. Relancez une mission envahie via le filtre de la carte et ciblez-les d’abord.",
+        "es": "Los médicos aparecen en misiones invadidas y otros encuentros con Black Tusk. Repite una misión invadida desde el filtro del mapa y elimínalos primero.",
+        "it": "I medici compaiono nelle missioni invase e in altri scontri con Black Tusk. Rigioca una missione invasa dal filtro della mappa e colpiscili per primi.",
+        "pt": "Médicos aparecem em missões invadidas e outros encontros com a Black Tusk. Rejogue uma missão invadida pelo filtro do mapa e mire neles primeiro.",
+        "ru": "Медики встречаются в захваченных миссиях и других стычках с Black Tusk. Перепройдите захваченную миссию через фильтр карты и убивайте их первыми.",
+        "pl": "Medycy pojawiają się w misjach najechanych i innych starciach z Black Tusk. Powtórz misję najechaną z filtra mapy i eliminuj ich w pierwszej kolejności.",
+        "nl": "Medics zitten in Invaded-missies en andere Black Tusk-gevechten. Speel een Invaded-missie opnieuw via het kaartfilter en schakel ze als eerste uit."
+      },
+      "wiki_id": "wiki-red-horizon-scout-9"
+    },
+    {
+      "id": "y8s3-scout9-hyena-cp",
+      "cat": "manhunt",
+      "source": {
+        "url": "https://allthings.how/?p=296455"
+      },
+      "text": {
+        "en": "Manhunt Scout 9: capture 2 Hyena-held Control Points (rewards: XP, Pipelines, mask, M870 Express)",
+        "tr": "Manhunt Scout 9: Hyena elindeki 2 kontrol noktasını ele geçir (ödül: XP, Pipelines, maske, M870 Express)",
+        "de": "Manhunt Scout 9: 2 von Hyänen gehaltene Kontrollpunkte einnehmen (Belohnung: EP, Pipelines, Maske, M870 Express)",
+        "fr": "Traque Éclaireur 9 : prendre 2 points de contrôle tenus par les Hyènes (récompenses : XP, Pipelines, masque, M870 Express)",
+        "es": "Cacería Explorador 9: captura 2 puntos de control de las Hienas (recompensas: XP, Pipelines, máscara, M870 Express)",
+        "it": "Caccia Esploratore 9: conquista 2 punti di controllo delle Iene (ricompense: XP, Pipelines, maschera, M870 Express)",
+        "pt": "Caçada Batedor 9: capture 2 pontos de controle das Hienas (recompensas: XP, Pipelines, máscara, M870 Express)",
+        "ru": "Охота, Разведчик 9: захватите 2 контрольные точки Гиен (награда: опыт, Pipelines, маска, M870 Express)",
+        "pl": "Obława, Zwiadowca 9: zdobądź 2 punkty kontrolne Hien (nagrody: PD, Pipelines, maska, M870 Express)",
+        "nl": "Manhunt Verkenner 9: verover 2 controlepunten van de Hyenas (beloning: XP, Pipelines, masker, M870 Express)"
+      },
+      "how": {
+        "en": "Pick Control Points with the Hyena icon on the map. Clear the waves, kill the leader, raise the flag. Doing it on higher difficulty also helps the elite-Hyena step.",
+        "tr": "Haritada Hyena simgeli kontrol noktalarını seç. Dalgaları temizle, lideri öldür, bayrağı kaldır. Yüksek zorlukta yapmak elit Hyena adımına da yardım eder.",
+        "de": "Kontrollpunkte mit Hyänen-Symbol wählen. Wellen besiegen, Anführer töten, Flagge hissen. Auf höherer Schwierigkeit hilft das auch beim Elite-Hyänen-Schritt.",
+        "fr": "Choisissez les points marqués Hyènes. Videz les vagues, tuez le chef, levez le drapeau. En difficulté élevée, cela aide aussi l’étape des Hyènes élites.",
+        "es": "Elige puntos de control con el icono de Hienas. Limpia las oleadas, mata al líder y alza la bandera. En dificultad alta también ayuda al paso de Hienas élite.",
+        "it": "Scegli i punti con l’icona delle Iene. Elimina le ondate, uccidi il capo, alza la bandiera. A difficoltà alta aiuta anche il passo delle Iene élite.",
+        "pt": "Escolha pontos com o ícone das Hienas. Limpe as ondas, mate o líder e erga a bandeira. Em dificuldade alta também ajuda na etapa das Hienas de elite.",
+        "ru": "Выбирайте точки со значком Гиен. Зачистите волны, убейте лидера, поднимите флаг. На высокой сложности это помогает и с шагом про элитных Гиен.",
+        "pl": "Wybierz punkty z ikoną Hien. Pokonaj fale, zabij przywódcę, podnieś flagę. Na wyższej trudności pomoże to też w etapie z elitarnymi Hienami.",
+        "nl": "Kies controlepunten met het Hyena-icoon. Versla de golven, dood de leider, hijs de vlag. Op hogere moeilijkheid helpt dit ook bij de elite-Hyena-stap."
+      },
+      "wiki_id": "wiki-red-horizon-scout-9"
+    },
+    {
+      "id": "y8s3-scout10-cleaners-kills",
+      "cat": "manhunt",
+      "source": {
+        "url": "https://www.destructoid.com/the-division-2-y8s3-red-horizon-week-10-manhunt-scout-10-solutions/"
+      },
+      "wiki_id": "wiki-red-horizon-scout-10",
+      "text": {
+        "en": "Manhunt Scout 10 (week 10, from Oct 27): kill 50 Cleaners",
+        "tr": "Manhunt Scout 10 (10. hafta, 27 Ekim'den itibaren): 50 Cleaners öldür",
+        "de": "Manhunt Scout 10 (Woche 10, ab 27. Okt.): 50 Cleaners töten",
+        "fr": "Traque Éclaireur 10 (semaine 10, dès le 27 oct.) : tuer 50 Cleaners",
+        "es": "Cacería Explorador 10 (semana 10, desde el 27 de oct.): mata a 50 Cleaners",
+        "it": "Caccia Esploratore 10 (settimana 10, dal 27 ott.): uccidi 50 Cleaners",
+        "pt": "Caçada Batedor 10 (semana 10, desde 27 de out.): mate 50 Cleaners",
+        "ru": "Охота, Разведчик 10 (неделя 10, с 27 окт.): убейте 50 Cleaners",
+        "pl": "Obława, Zwiadowca 10 (tydzień 10, od 27 paź.): zabij 50 Cleaners",
+        "nl": "Manhunt Verkenner 10 (week 10, vanaf 27 okt.): dood 50 Cleaners"
+      },
+      "how": {
+        "en": "Only this first step shows at the start; finishing it reveals the next hint. Kills add up across activities. A Cleaners Bounty is a quick source, on any difficulty.",
+        "tr": "Başta yalnız bu adım görünür; bitince sıradaki ipucu açılır. Öldürmeler farklı aktivitelerde toplanır. Cleaners Bounty hızlı bir yoldur, her zorlukta olur.",
+        "de": "Anfangs ist nur dieser Schritt sichtbar; danach erscheint der nächste Hinweis. Kills zählen über alle Aktivitäten. Ein Cleaners-Bounty geht schnell, auf jeder Schwierigkeit.",
+        "fr": "Seule cette étape est visible au début ; la terminer révèle l'indice suivant. Les éliminations se cumulent entre activités. Un Bounty Cleaners va vite, à toute difficulté.",
+        "es": "Al principio solo se ve este paso; al completarlo aparece la siguiente pista. Las bajas se suman entre actividades. Un Bounty de Cleaners es rápido, en cualquier dificultad.",
+        "it": "All'inizio è visibile solo questo passo; completandolo appare l'indizio successivo. Le uccisioni si sommano tra le attività. Un Bounty dei Cleaners è rapido, a qualsiasi difficoltà.",
+        "pt": "No início só esta etapa aparece; ao concluí-la surge a próxima pista. Os abates somam entre atividades. Um Bounty de Cleaners é rápido, em qualquer dificuldade.",
+        "ru": "Сначала виден только этот шаг; его выполнение открывает следующую подсказку. Убийства суммируются между активностями. Bounty на Cleaners — быстрый способ, на любой сложности.",
+        "pl": "Na początku widać tylko ten etap; jego ukończenie odsłania kolejną wskazówkę. Zabójstwa sumują się między aktywnościami. Bounty na Cleaners to szybki sposób, na każdej trudności.",
+        "nl": "Eerst is alleen deze stap zichtbaar; daarna verschijnt de volgende hint. Kills tellen op over activiteiten. Een Cleaners-Bounty gaat snel, op elke moeilijkheid."
+      }
+    },
+    {
+      "id": "y8s3-scout10-cleaners-territory",
+      "cat": "manhunt",
+      "source": {
+        "url": "https://www.destructoid.com/the-division-2-y8s3-red-horizon-week-10-manhunt-scout-10-solutions/"
+      },
+      "wiki_id": "wiki-red-horizon-scout-10",
+      "text": {
+        "en": "Manhunt Scout 10: complete 1 Cleaners Territory Control activity",
+        "tr": "Manhunt Scout 10: 1 Cleaners Territory Control aktivitesini tamamla",
+        "de": "Manhunt Scout 10: 1 Cleaners-Aktivität Territory Control abschließen",
+        "fr": "Traque Éclaireur 10 : terminer 1 activité Territory Control des Cleaners",
+        "es": "Cacería Explorador 10: completa 1 actividad Territory Control de los Cleaners",
+        "it": "Caccia Esploratore 10: completa 1 attività Territory Control dei Cleaners",
+        "pt": "Caçada Batedor 10: conclua 1 atividade Territory Control dos Cleaners",
+        "ru": "Охота, Разведчик 10: завершите 1 активность Territory Control фракции Cleaners",
+        "pl": "Obława, Zwiadowca 10: ukończ 1 aktywność Territory Control frakcji Cleaners",
+        "nl": "Manhunt Verkenner 10: voltooi 1 Territory Control-activiteit van de Cleaners"
+      },
+      "how": {
+        "en": "Territory Control is a random open-world activity marked by two crossed shotguns; it must belong to the Cleaners, on any difficulty. If the map shows none, restart the game.",
+        "tr": "Territory Control, iki çapraz pompalı simgeli rastgele açık dünya aktivitesidir; Cleaners'a ait olmalı, zorluk fark etmez. Haritada yoksa oyunu yeniden başlat.",
+        "de": "Territory Control ist eine zufällige Open-World-Aktivität mit zwei gekreuzten Schrotflinten als Symbol; sie muss den Cleaners gehören, Schwierigkeit egal. Keine auf der Karte? Spiel neu starten.",
+        "fr": "Territory Control est une activité aléatoire du monde ouvert, avec deux fusils à pompe croisés ; elle doit appartenir aux Cleaners, à toute difficulté. Aucune sur la carte ? Relancez le jeu.",
+        "es": "Territory Control es una actividad aleatoria del mundo abierto con dos escopetas cruzadas como icono; debe ser de los Cleaners, en cualquier dificultad. Si no hay ninguna, reinicia el juego.",
+        "it": "Territory Control è un'attività casuale del mondo aperto con due fucili a pompa incrociati; deve essere dei Cleaners, a qualsiasi difficoltà. Se sulla mappa non c'è, riavvia il gioco.",
+        "pt": "Territory Control é uma atividade aleatória do mundo aberto com duas espingardas cruzadas; precisa ser dos Cleaners, em qualquer dificuldade. Se não houver no mapa, reinicie o jogo.",
+        "ru": "Territory Control — случайная активность открытого мира со значком двух скрещённых дробовиков; она должна принадлежать Cleaners, сложность любая. Если на карте её нет, перезапустите игру.",
+        "pl": "Territory Control to losowa aktywność otwartego świata z ikoną dwóch skrzyżowanych strzelb; musi należeć do Cleaners, trudność dowolna. Jeśli na mapie jej nie ma, uruchom grę ponownie.",
+        "nl": "Territory Control is een willekeurige open-wereld-activiteit met twee gekruiste shotguns als icoon; hij moet van de Cleaners zijn, elke moeilijkheid telt. Staat er geen op de kaart, herstart de game."
+      }
+    },
+    {
+      "id": "y8s3-scout10-cleaners-cp",
+      "cat": "manhunt",
+      "source": {
+        "url": "https://www.destructoid.com/the-division-2-y8s3-red-horizon-week-10-manhunt-scout-10-solutions/"
+      },
+      "wiki_id": "wiki-red-horizon-scout-10",
+      "text": {
+        "en": "Manhunt Scout 10: capture 1 Control Point from the Cleaners",
+        "tr": "Manhunt Scout 10: Cleaners'tan 1 kontrol noktası ele geçir",
+        "de": "Manhunt Scout 10: 1 Kontrollpunkt von den Cleaners einnehmen",
+        "fr": "Traque Éclaireur 10 : prendre 1 point de contrôle aux Cleaners",
+        "es": "Cacería Explorador 10: captura 1 punto de control de los Cleaners",
+        "it": "Caccia Esploratore 10: conquista 1 punto di controllo dei Cleaners",
+        "pt": "Caçada Batedor 10: capture 1 ponto de controle dos Cleaners",
+        "ru": "Охота, Разведчик 10: захватите 1 контрольную точку у Cleaners",
+        "pl": "Obława, Zwiadowca 10: zdobądź 1 punkt kontrolny Cleaners",
+        "nl": "Manhunt Verkenner 10: verover 1 controlepunt van de Cleaners"
+      },
+      "how": {
+        "en": "Find a Cleaners-held point on the map (the guide author only had the Washington Monument). Clearing part of it triggers a second wave; defeat that whole wave to capture it. Resetting your vault progress lets you recapture points.",
+        "tr": "Haritada Cleaners elindeki bir nokta bul (rehber yazarında yalnız Washington Monument vardı). Bir kısmını temizleyince ikinci dalga gelir; dalganın tamamını öldürünce nokta alınır. Kasa ilerlemesini sıfırlamak noktaları yeniden almayı sağlar.",
+        "de": "Suche einen Cleaners-Punkt auf der Karte (der Autor hatte nur das Washington Monument). Nach einem Teil startet die zweite Welle; besiege sie ganz, um einzunehmen. Zurücksetzen des Tresorfortschritts erlaubt erneutes Einnehmen.",
+        "fr": "Trouvez un point tenu par les Cleaners (l'auteur du guide n'avait que le Washington Monument). Une partie nettoyée déclenche une seconde vague ; éliminez-la entièrement pour capturer. Réinitialiser la progression du coffre permet de reprendre des points.",
+        "es": "Busca un punto de los Cleaners en el mapa (el autor de la guía solo tenía el Washington Monument). Al limpiar parte se activa una segunda oleada; elimínala entera para capturarlo. Reiniciar el progreso de la cámara permite recapturar puntos.",
+        "it": "Cerca un punto dei Cleaners sulla mappa (l'autore della guida aveva solo il Washington Monument). Ripulita una parte parte una seconda ondata; eliminala tutta per conquistarlo. Azzerare i progressi del caveau permette di riconquistare i punti.",
+        "pt": "Procure um ponto dos Cleaners no mapa (o autor do guia só tinha o Washington Monument). Limpar parte dele aciona uma segunda onda; elimine-a toda para capturar. Reiniciar o progresso do cofre permite recapturar pontos.",
+        "ru": "Найдите точку Cleaners на карте (у автора гайда был только Washington Monument). После частичной зачистки приходит вторая волна; уничтожьте её полностью, чтобы захватить точку. Сброс прогресса хранилища позволяет захватывать точки заново.",
+        "pl": "Znajdź punkt Cleaners na mapie (autor poradnika miał tylko Washington Monument). Po częściowym oczyszczeniu rusza druga fala; pokonaj ją całą, by zdobyć punkt. Reset postępu skarbca pozwala zdobywać punkty ponownie.",
+        "nl": "Zoek een Cleaners-punt op de kaart (de auteur van de gids had alleen het Washington Monument). Na een deel volgt een tweede golf; versla die helemaal om te veroveren. Kluisvoortgang resetten laat je punten opnieuw veroveren."
+      }
+    },
+    {
+      "id": "y8s3-scout11-bt-activities",
+      "cat": "manhunt",
+      "source": {
+        "url": "https://www.destructoid.com/the-division-2-y8s3-red-horizon-week-11-manhunt-hvt-scout-11-solutions/"
+      },
+      "text": {
+        "en": "Manhunt Scout 11: complete 3 Black Tusk Living World Activities",
+        "tr": "Manhunt Scout 11: 3 Black Tusk Living World etkinliği bitir",
+        "de": "Manhunt Scout 11: 3 Black-Tusk-Living-World-Aktivitäten abschließen",
+        "fr": "Traque Éclaireur 11 : terminez 3 activités Living World Black Tusk",
+        "es": "Cacería Explorador 11: completa 3 actividades Living World de Black Tusk",
+        "it": "Caccia Esploratore 11: completa 3 attività Living World di Black Tusk",
+        "pt": "Caçada Batedor 11: conclua 3 atividades Living World de Black Tusk",
+        "ru": "Охота, Разведчик 11: выполните 3 активности Living World фракции Black Tusk",
+        "pl": "Obława, Zwiadowca 11: ukończ 3 aktywności Living World Black Tusk",
+        "nl": "Manhunt Verkenner 11: voltooi 3 Black Tusk Living World-activiteiten"
+      },
+      "how": {
+        "en": "Any three activities count on any difficulty, as long as Black Tusk runs them. Check the map for activity icons of that faction. This step and the Invaded mission open the Higgins Bounty.",
+        "tr": "Black Tusk'a ait olduğu sürece herhangi üç etkinlik, her zorlukta sayılır. Haritada bu grubun etkinlik simgelerine bak. Bu adım ve Invaded görevi Higgins Bounty'sini açar.",
+        "de": "Beliebige drei Aktivitäten auf jeder Schwierigkeit zählen, solange Black Tusk sie kontrolliert. Suche auf der Karte die Symbole dieser Fraktion. Dieser Schritt und die Invaded-Mission schalten den Higgins-Bounty frei.",
+        "fr": "Trois activités au choix comptent, quelle que soit la difficulté, si elles sont tenues par Black Tusk. Repérez leurs icônes sur la carte. Cette étape et la mission Invaded débloquent le Bounty de Higgins.",
+        "es": "Valen tres actividades cualesquiera en cualquier dificultad, siempre que sean de Black Tusk. Busca sus iconos en el mapa. Este paso y la misión Invaded abren el Bounty de Higgins.",
+        "it": "Valgono tre attività qualsiasi a qualunque difficoltà, purché di Black Tusk. Cerca le loro icone sulla mappa. Questo passo e la missione Invaded sbloccano il Bounty di Higgins.",
+        "pt": "Valem três atividades quaisquer em qualquer dificuldade, desde que sejam de Black Tusk. Procure os ícones dessa facção no mapa. Este passo e a missão Invaded liberam o Bounty de Higgins.",
+        "ru": "Засчитываются любые три активности на любой сложности, если их контролирует Black Tusk. Ищите значки этой фракции на карте. Этот шаг и миссия Invaded открывают Bounty на Higgins.",
+        "pl": "Liczą się dowolne trzy aktywności na każdym poziomie trudności, o ile należą do Black Tusk. Szukaj ich ikon na mapie. Ten krok i misja Invaded odblokowują Bounty na Higginsa.",
+        "nl": "Elke drie activiteiten tellen, op elke moeilijkheidsgraad, zolang Black Tusk ze beheert. Zoek de iconen van die factie op de kaart. Deze stap en de Invaded-missie ontgrendelen de Higgins-Bounty."
+      }
+    },
+    {
+      "id": "y8s3-scout11-invaded",
+      "cat": "manhunt",
+      "source": {
+        "url": "https://www.destructoid.com/the-division-2-y8s3-red-horizon-week-11-manhunt-hvt-scout-11-solutions/"
+      },
+      "text": {
+        "en": "Manhunt Scout 11 (final HVT, from Nov 3): complete any Invaded mission",
+        "tr": "Manhunt Scout 11 (son HVT, 3 Kasım'dan itibaren): herhangi bir Invaded görevi bitir",
+        "de": "Manhunt Scout 11 (letztes HVT, ab 3. Nov.): beliebige Invaded-Mission abschließen",
+        "fr": "Traque Éclaireur 11 (dernier HVT, dès le 3 nov.) : terminez n'importe quelle mission Invaded",
+        "es": "Cacería Explorador 11 (último HVT, desde el 3 de nov.): completa cualquier misión Invaded",
+        "it": "Caccia Esploratore 11 (ultimo HVT, dal 3 nov.): completa una missione Invaded qualsiasi",
+        "pt": "Caçada Batedor 11 (último HVT, desde 3 de nov.): conclua qualquer missão Invaded",
+        "ru": "Охота, Разведчик 11 (последняя HVT, с 3 нояб.): пройдите любую миссию Invaded",
+        "pl": "Obława, Zwiadowca 11 (ostatni HVT, od 3 lis.): ukończ dowolną misję Invaded",
+        "nl": "Manhunt Verkenner 11 (laatste HVT, vanaf 3 nov.): voltooi een willekeurige Invaded-missie"
+      },
+      "how": {
+        "en": "Invaded missions are Black Tusk versions of regular missions, marked with a red hexagon pattern instead of the grey one. Switch the mission to Invaded in the menu before you start it. Tidal Basin must be finished first so the world reaches Tier 5.",
+        "tr": "Invaded görevler, normal görevlerin Black Tusk sürümüdür; gri yerine kırmızı altıgen desenle gösterilir. Başlamadan önce menüden görevi Invaded'a çevir. Dünyanın Tier 5 olması için önce Tidal Basin bitmiş olmalı.",
+        "de": "Invaded-Missionen sind Black-Tusk-Versionen normaler Missionen, erkennbar am roten statt grauen Sechseckmuster. Stelle die Mission vor dem Start im Menü auf Invaded um. Zuerst muss Tidal Basin abgeschlossen sein, damit die Welt Tier 5 erreicht.",
+        "fr": "Les missions Invaded sont des versions Black Tusk des missions normales, signalées par un motif hexagonal rouge au lieu de gris. Passez la mission en Invaded dans le menu avant de la lancer. Tidal Basin doit être terminé pour que le monde atteigne le Tier 5.",
+        "es": "Las misiones Invaded son versiones Black Tusk de las normales y llevan un patrón hexagonal rojo en lugar de gris. Cambia la misión a Invaded en el menú antes de empezar. Debes terminar Tidal Basin para que el mundo llegue a Tier 5.",
+        "it": "Le missioni Invaded sono versioni Black Tusk di quelle normali, con un motivo esagonale rosso anziché grigio. Passa la missione a Invaded dal menu prima di avviarla. Devi aver finito Tidal Basin perché il mondo arrivi al Tier 5.",
+        "pt": "Missões Invaded são versões Black Tusk das normais, com padrão hexagonal vermelho em vez de cinza. Mude a missão para Invaded no menu antes de iniciar. É preciso concluir Tidal Basin para o mundo chegar ao Tier 5.",
+        "ru": "Миссии Invaded — версии обычных миссий с Black Tusk; они отмечены красным шестиугольным узором вместо серого. Переключите миссию на Invaded в меню перед запуском. Сначала пройдите Tidal Basin, чтобы мир достиг Tier 5.",
+        "pl": "Misje Invaded to wersje zwykłych misji z Black Tusk, oznaczone czerwonym wzorem sześciokątów zamiast szarego. Przełącz misję na Invaded w menu przed startem. Najpierw ukończ Tidal Basin, aby świat osiągnął Tier 5.",
+        "nl": "Invaded-missies zijn Black Tusk-versies van gewone missies, herkenbaar aan een rood in plaats van grijs zeshoekpatroon. Zet de missie in het menu op Invaded voordat je begint. Rond eerst Tidal Basin af zodat de wereld Tier 5 bereikt."
+      }
+    },
+    {
+      "id": "y8s3-scout11-higgins",
+      "cat": "manhunt",
+      "source": {
+        "url": "https://www.destructoid.com/the-division-2-y8s3-red-horizon-week-11-manhunt-hvt-scout-11-solutions/"
+      },
+      "text": {
+        "en": "Manhunt Scout 11: complete the Bounty on Carl \"Eagle Eye\" Higgins (opens the Climax Mission)",
+        "tr": "Manhunt Scout 11: Carl \"Eagle Eye\" Higgins Bounty'sini bitir (Climax Mission'ı açar)",
+        "de": "Manhunt Scout 11: Bounty auf Carl \"Eagle Eye\" Higgins abschließen (schaltet die Climax Mission frei)",
+        "fr": "Traque Éclaireur 11 : terminez le Bounty de Carl \"Eagle Eye\" Higgins (débloque la Climax Mission)",
+        "es": "Cacería Explorador 11: completa el Bounty de Carl \"Eagle Eye\" Higgins (desbloquea la Climax Mission)",
+        "it": "Caccia Esploratore 11: completa il Bounty su Carl \"Eagle Eye\" Higgins (sblocca la Climax Mission)",
+        "pt": "Caçada Batedor 11: conclua o Bounty de Carl \"Eagle Eye\" Higgins (libera a Climax Mission)",
+        "ru": "Охота, Разведчик 11: выполните Bounty на Carl \"Eagle Eye\" Higgins (открывает Climax Mission)",
+        "pl": "Obława, Zwiadowca 11: ukończ Bounty na Carla \"Eagle Eye\" Higginsa (odblokowuje Climax Mission)",
+        "nl": "Manhunt Verkenner 11: voltooi de Bounty op Carl \"Eagle Eye\" Higgins (ontgrendelt de Climax Mission)"
+      },
+      "how": {
+        "en": "Appears after the earlier steps of this Scout. Its spot is marked on the map and you have 15 minutes to start it. Clear all enemies, then Higgins arrives in special gear; defeat him to finish.",
+        "tr": "Bu Scout'un önceki adımlarından sonra açılır. Yeri haritada işaretlidir ve başlatmak için 15 dakikan var. Tüm düşmanları temizle, Higgins özel teçhizatla gelir; onu yenince görev biter.",
+        "de": "Erscheint nach den vorherigen Schritten dieses Scouts. Der Ort ist auf der Karte markiert, du hast 15 Minuten zum Starten. Besiege alle Gegner, dann kommt Higgins in Spezialausrüstung; schalte ihn aus.",
+        "fr": "Apparaît après les étapes précédentes de ce Scout. Le lieu est indiqué sur la carte et vous avez 15 minutes pour le lancer. Éliminez tous les ennemis, puis Higgins arrive avec un équipement spécial ; battez-le.",
+        "es": "Aparece tras los pasos anteriores de este Scout. Está marcado en el mapa y tienes 15 minutos para activarlo. Elimina a todos los enemigos; Higgins llega con equipo especial y debes derrotarlo.",
+        "it": "Compare dopo i passi precedenti di questo Scout. Il punto è segnato sulla mappa e hai 15 minuti per avviarlo. Elimina tutti i nemici; poi arriva Higgins con equipaggiamento speciale: sconfiggilo.",
+        "pt": "Aparece após as etapas anteriores deste Scout. O local fica marcado no mapa e você tem 15 minutos para iniciar. Elimine todos os inimigos; Higgins chega com equipamento especial e deve ser derrotado.",
+        "ru": "Появляется после предыдущих шагов этого Scout. Место отмечено на карте, на запуск даётся 15 минут. Уничтожьте всех врагов, затем появится Higgins в особом снаряжении; победите его.",
+        "pl": "Pojawia się po wcześniejszych krokach tego Scouta. Miejsce jest zaznaczone na mapie, a na start masz 15 minut. Pokonaj wszystkich wrogów, potem przybywa Higgins w specjalnym ekwipunku; pokonaj go.",
+        "nl": "Verschijnt na de eerdere stappen van deze Scout. De plek staat op de kaart en je hebt 15 minuten om te starten. Schakel alle vijanden uit; daarna komt Higgins in speciale uitrusting, versla hem."
+      }
+    },
+    {
+      "id": "y8s3-climax-master",
+      "cat": "manhunt",
+      "source": {
+        "url": "https://www.ubisoft.com/en-gb/game/the-division/the-division-2/news-updates/7L8TlD1Hv0XC1prOD8mdte/tuy8s33-crossplay-rollout-conflict-improvements-more"
+      },
+      "text": {
+        "en": "Manhunt Climax Mission: clear it on Master difficulty (available from Nov 3) for guaranteed Loaded for Bear exotic gloves",
+        "tr": "Manhunt Climax Mission: Master zorlukta bitir (3 Kasım'dan itibaren), Loaded for Bear egzotik eldivenleri garanti kazan",
+        "de": "Manhunt Climax Mission: auf Master abschließen (ab 3. Nov.) für garantierte exotische Handschuhe Loaded for Bear",
+        "fr": "Traque, Climax Mission : terminez-la en difficulté Master (dès le 3 nov.) pour obtenir à coup sûr les gants exotiques Loaded for Bear",
+        "es": "Cacería, Climax Mission: complétala en dificultad Master (desde el 3 nov.) para conseguir seguro los guantes exóticos Loaded for Bear",
+        "it": "Caccia, Climax Mission: completala a difficoltà Master (dal 3 nov.) per ottenere di sicuro i guanti esotici Loaded for Bear",
+        "pt": "Caçada, Climax Mission: conclua na dificuldade Master (desde 3 nov.) para garantir as luvas exóticas Loaded for Bear",
+        "ru": "Охота, Climax Mission: пройдите на сложности Master (с 3 нояб.) и гарантированно получите экзотические перчатки Loaded for Bear",
+        "pl": "Obława, Climax Mission: ukończ na poziomie Master (od 3 lis.), aby mieć pewność zdobycia egzotycznych rękawic Loaded for Bear",
+        "nl": "Manhunt Climax Mission: voltooi op Master (vanaf 3 nov.) voor gegarandeerd de exotic handschoenen Loaded for Bear"
+      },
+      "how": {
+        "en": "Finish all HVT Scouts first. If the mission stays locked in the Scouts menu and is missing from the map, log out and back in. Only the first Master clear is a guaranteed drop; the gloves can also drop on any difficulty, with better odds higher up.",
+        "tr": "Önce tüm HVT Scout'larını bitir. Görev Scouts menüsünde kilitli kalır ve haritada görünmezse çıkış yapıp yeniden gir. Garanti yalnız ilk Master bitirişte geçerli; eldivenler her zorlukta da düşebilir, zorluk arttıkça şans artar.",
+        "de": "Schließe zuerst alle HVT-Scouts ab. Bleibt die Mission im Scouts-Menü gesperrt und fehlt auf der Karte, melde dich ab und wieder an. Garantiert ist nur der erste Master-Abschluss; die Handschuhe können auf jeder Schwierigkeit droppen, je höher, desto besser die Chance.",
+        "fr": "Terminez d'abord tous les Éclaireurs HVT. Si la mission reste verrouillée dans le menu Scouts et absente de la carte, déconnectez-vous puis reconnectez-vous. Seule la première victoire en Master est garantie ; les gants peuvent aussi tomber à toute difficulté, avec plus de chances aux niveaux élevés.",
+        "es": "Primero completa todos los Exploradores HVT. Si la misión sigue bloqueada en el menú Scouts y no aparece en el mapa, cierra sesión y vuelve a entrar. Solo la primera victoria en Master es garantizada; los guantes también pueden caer en cualquier dificultad, con más probabilidad cuanto más alta.",
+        "it": "Completa prima tutti gli Esploratori HVT. Se la missione resta bloccata nel menu Scouts e non compare sulla mappa, esci e rientra. Solo il primo completamento a Master è garantito; i guanti possono cadere a qualsiasi difficoltà, con più probabilità a quelle alte.",
+        "pt": "Primeiro conclua todos os Batedores HVT. Se a missão continuar bloqueada no menu Scouts e não aparecer no mapa, saia e entre de novo. Só a primeira conclusão em Master é garantida; as luvas também podem cair em qualquer dificuldade, com mais chance nas mais altas.",
+        "ru": "Сначала завершите всех Разведчиков HVT. Если задание остаётся заблокированным в меню Scouts и его нет на карте, выйдите из игры и зайдите снова. Гарантия действует только на первое прохождение Master; перчатки могут выпасть на любой сложности, но чем она выше, тем больше шанс.",
+        "pl": "Najpierw ukończ wszystkich Zwiadowców HVT. Jeśli misja pozostaje zablokowana w menu Scouts i nie ma jej na mapie, wyloguj się i zaloguj ponownie. Gwarancja dotyczy tylko pierwszego ukończenia na Master; rękawice mogą wypaść na każdym poziomie, a im wyższy, tym większa szansa.",
+        "nl": "Voltooi eerst alle HVT-Verkenners. Blijft de missie vergrendeld in het Scouts-menu en staat ze niet op de kaart, log dan uit en weer in. Alleen de eerste Master-voltooiing is gegarandeerd; de handschoenen kunnen op elke moeilijkheid vallen, met betere kansen op hogere niveaus."
+      }
+    },
+    {
+      "id": "y8s3-journey-m3-burn10",
+      "cat": "journey",
+      "source": {
+        "url": "https://itemlevel.net/the-division-2-how-to-burn-10-enemies-during-one-fiery-aura-red-horizon-journey/"
+      },
+      "text": {
+        "en": "Red Horizon Journey – Mission 3: burn 10 enemies during a single Fiery Aura activation (5 times)",
+        "tr": "Red Horizon Yolculuğu – Görev 3: tek bir Fiery Aura etkinleştirmesinde 10 düşman yak (5 kez)",
+        "de": "Red Horizon Reise – Mission 3: 10 Gegner während einer Fiery-Aura-Aktivierung verbrennen (5×)",
+        "fr": "Parcours Red Horizon – Mission 3 : brûler 10 ennemis pendant une seule activation de Fiery Aura (5 fois)",
+        "es": "Recorrido Red Horizon – Misión 3: quema a 10 enemigos en una sola activación de Fiery Aura (5 veces)",
+        "it": "Percorso Red Horizon – Missione 3: brucia 10 nemici in una sola attivazione di Fiery Aura (5 volte)",
+        "pt": "Jornada Red Horizon – Missão 3: queime 10 inimigos em uma única ativação de Fiery Aura (5 vezes)",
+        "ru": "Путешествие Red Horizon – Миссия 3: подожгите 10 врагов за одну активацию Fiery Aura (5 раз)",
+        "pl": "Podróż Red Horizon – Misja 3: podpal 10 wrogów podczas jednej aktywacji Fiery Aura (5 razy)",
+        "nl": "Red Horizon-reis – Missie 3: verbrand 10 vijanden tijdens één Fiery Aura-activatie (5×)"
+      },
+      "how": {
+        "en": "Lincoln Memorial on Story. Active modifier Fiery Aura; passives Flow Regulator, Throttle Valve, Leaky Valve. Fill Pressure to ~95–100% in the first two areas, activate in the third area and push spawn to spawn. Restart and repeat.",
+        "tr": "Lincoln Memorial, Story zorluğu. Aktif değiştirici Fiery Aura; pasifler Flow Regulator, Throttle Valve, Leaky Valve. İlk iki alanda Pressure'ı ~%95-100'e doldur, üçüncü alanda etkinleştir ve düşman gruplarına hızla ilerle. Görevi yeniden başlatıp tekrarla.",
+        "de": "Lincoln Memorial auf Story. Aktiver Modifikator Fiery Aura; passiv Flow Regulator, Throttle Valve, Leaky Valve. Druck in den ersten zwei Bereichen auf ~95–100 % bringen, im dritten aktivieren und von Gruppe zu Gruppe pushen. Neu starten, wiederholen.",
+        "fr": "Lincoln Memorial en Histoire. Modificateur actif Fiery Aura ; passifs Flow Regulator, Throttle Valve, Leaky Valve. Montez la Pression à ~95–100 % dans les deux premières zones, activez dans la troisième et enchaînez les groupes. Relancez et répétez.",
+        "es": "Lincoln Memorial en Historia. Modificador activo Fiery Aura; pasivos Flow Regulator, Throttle Valve, Leaky Valve. Sube la Presión a ~95–100 % en las dos primeras zonas, actívalo en la tercera y avanza de grupo en grupo. Reinicia y repite.",
+        "it": "Lincoln Memorial a Storia. Modificatore attivo Fiery Aura; passivi Flow Regulator, Throttle Valve, Leaky Valve. Porta la Pressione a ~95–100% nelle prime due aree, attiva nella terza e passa da un gruppo all’altro. Riavvia e ripeti.",
+        "pt": "Lincoln Memorial no História. Modificador ativo Fiery Aura; passivos Flow Regulator, Throttle Valve, Leaky Valve. Leve a Pressão a ~95–100% nas duas primeiras áreas, ative na terceira e avance de grupo em grupo. Reinicie e repita.",
+        "ru": "Lincoln Memorial на сюжетной сложности. Активный модификатор Fiery Aura; пассивные Flow Regulator, Throttle Valve, Leaky Valve. Наберите давление ~95–100% в первых двух зонах, активируйте в третьей и идите от группы к группе. Перезапускайте и повторяйте.",
+        "pl": "Lincoln Memorial na poziomie Fabularnym. Aktywny modyfikator Fiery Aura; pasywne Flow Regulator, Throttle Valve, Leaky Valve. Nabij Ciśnienie do ~95–100% w dwóch pierwszych strefach, aktywuj w trzeciej i przechodź od grupy do grupy. Restartuj i powtarzaj.",
+        "nl": "Lincoln Memorial op Verhaal. Actieve modifier Fiery Aura; passief Flow Regulator, Throttle Valve, Leaky Valve. Bouw de druk op tot ~95–100% in de eerste twee gebieden, activeer in het derde en ga van groep naar groep. Herstart en herhaal."
+      }
+    },
+    {
+      "id": "y8s3-journey-m3-burn4",
+      "cat": "journey",
+      "source": {
+        "url": "https://itemlevel.net/the-division-2-how-to-burn-10-enemies-during-one-fiery-aura-red-horizon-journey/"
+      },
+      "text": {
+        "en": "Red Horizon Journey – Mission 3: burn 4 different enemies at once when activating Fiery Aura (5 times)",
+        "tr": "Red Horizon Yolculuğu – Görev 3: Fiery Aura'yı etkinleştirirken aynı anda 4 farklı düşmanı yak (5 kez)",
+        "de": "Red Horizon Reise – Mission 3: beim Aktivieren von Fiery Aura 4 verschiedene Gegner gleichzeitig verbrennen (5×)",
+        "fr": "Parcours Red Horizon – Mission 3 : brûler 4 ennemis différents en même temps en activant Fiery Aura (5 fois)",
+        "es": "Recorrido Red Horizon – Misión 3: quema a 4 enemigos distintos a la vez al activar Fiery Aura (5 veces)",
+        "it": "Percorso Red Horizon – Missione 3: brucia 4 nemici diversi contemporaneamente attivando Fiery Aura (5 volte)",
+        "pt": "Jornada Red Horizon – Missão 3: queime 4 inimigos diferentes ao mesmo tempo ao ativar Fiery Aura (5 vezes)",
+        "ru": "Путешествие Red Horizon – Миссия 3: подожгите 4 разных врагов одновременно при активации Fiery Aura (5 раз)",
+        "pl": "Podróż Red Horizon – Misja 3: podpal jednocześnie 4 różnych wrogów, aktywując Fiery Aura (5 razy)",
+        "nl": "Red Horizon-reis – Missie 3: verbrand 4 verschillende vijanden tegelijk bij het activeren van Fiery Aura (5×)"
+      },
+      "how": {
+        "en": "Same route as the 10-burn step: in Lincoln Memorial's third area go left to the group of four and activate Fiery Aura in the middle of them. If they spread out you may only get the 10-burn credit.",
+        "tr": "10 yakma adımıyla aynı rota: Lincoln Memorial'ın üçüncü alanında soldaki dört kişilik gruba git ve Fiery Aura'yı tam ortalarında etkinleştir. Dağılırlarsa sadece 10 yakma adımı sayılabilir.",
+        "de": "Gleiche Route wie beim 10er-Schritt: im dritten Bereich links zur Vierergruppe und Fiery Aura mitten unter ihnen aktivieren. Verteilen sie sich, zählt evtl. nur der 10er-Schritt.",
+        "fr": "Même parcours que l’étape des 10 : dans la troisième zone, allez à gauche vers le groupe de quatre et activez Fiery Aura au milieu. S’ils s’écartent, seule l’étape des 10 peut compter.",
+        "es": "Misma ruta que el paso de 10: en la tercera zona ve a la izquierda al grupo de cuatro y activa Fiery Aura en medio. Si se separan, quizá solo cuente el paso de 10.",
+        "it": "Stesso percorso del passo da 10: nella terza area vai a sinistra dal gruppo di quattro e attiva Fiery Aura in mezzo a loro. Se si sparpagliano può contare solo il passo da 10.",
+        "pt": "Mesma rota da etapa de 10: na terceira área vá à esquerda até o grupo de quatro e ative Fiery Aura no meio deles. Se se espalharem, talvez só conte a etapa de 10.",
+        "ru": "Тот же маршрут, что и для 10 поджогов: в третьей зоне идите влево к группе из четырёх и активируйте Fiery Aura в их центре. Если они разойдутся, засчитается только шаг на 10.",
+        "pl": "Ta sama trasa co przy 10 podpaleniach: w trzeciej strefie idź w lewo do grupy czterech i aktywuj Fiery Aura w ich środku. Jeśli się rozproszą, zaliczy się tylko etap 10.",
+        "nl": "Zelfde route als de 10-stap: ga in het derde gebied links naar de groep van vier en activeer Fiery Aura midden tussen hen. Verspreiden ze zich, dan telt mogelijk alleen de 10-stap."
+      }
+    },
+    {
+      "id": "y8s3-journey-m4-burning-headshots",
+      "cat": "journey",
+      "source": {
+        "url": "https://grindout.com/division-2/guides/season-journey-missions"
+      },
+      "text": {
+        "en": "Red Horizon Journey – Mission 4: headshot 3 different burning enemies within 3 seconds of each other",
+        "tr": "Red Horizon Yolculuğu – Görev 4: yanan 3 farklı düşmanı birbirinden en fazla 3 saniye arayla kafadan vur",
+        "de": "Red Horizon Reise – Mission 4: 3 verschiedene brennende Gegner innerhalb von 3 Sekunden per Kopfschuss treffen",
+        "fr": "Parcours Red Horizon – Mission 4 : tirer dans la tête de 3 ennemis en feu différents à moins de 3 secondes d'intervalle",
+        "es": "Recorrido Red Horizon – Misión 4: dispara a la cabeza a 3 enemigos ardiendo distintos con menos de 3 segundos entre cada uno",
+        "it": "Percorso Red Horizon – Missione 4: colpisci alla testa 3 nemici in fiamme diversi entro 3 secondi l'uno dall'altro",
+        "pt": "Jornada Red Horizon – Missão 4: acerte na cabeça 3 inimigos diferentes em chamas com até 3 segundos entre cada um",
+        "ru": "Путешествие Red Horizon – Миссия 4: попадите в голову 3 разным горящим врагам с интервалом не более 3 секунд",
+        "pl": "Podróż Red Horizon – Misja 4: traf w głowę 3 różnych płonących wrogów w odstępie maks. 3 sekund",
+        "nl": "Red Horizon-reis – Missie 4: raak 3 verschillende brandende vijanden in het hoofd binnen 3 seconden van elkaar"
+      },
+      "how": {
+        "en": "Set Burn on a group first (Fiery Aura, a firestarter skill or incendiary grenade), then switch to a fast-firing rifle and tap heads quickly. An easy, low difficulty mission makes it simpler. Keep Vicarious Combustion equipped meanwhile to level it to 5.",
+        "tr": "Önce bir gruba Burn uygula (Fiery Aura, firestarter yeteneği ya da yanıcı bomba), sonra hızlı ateş eden bir tüfeğe geçip kafaları peş peşe vur. Kolay zorlukta bir görev işi kolaylaştırır. Bu sırada Vicarious Combustion takılı kalsın ki seviye 5'e çıksın.",
+        "de": "Zuerst eine Gruppe in Brand setzen (Fiery Aura, Firestarter-Skill oder Brandgranate), dann zu einem schnell feuernden Gewehr wechseln und zügig auf Köpfe zielen. Eine leichte Mission auf niedriger Stufe hilft. Vicarious Combustion ausgerüstet lassen, damit es Stufe 5 erreicht.",
+        "fr": "Enflammez d'abord un groupe (Fiery Aura, compétence incendiaire ou grenade incendiaire), puis passez à un fusil rapide et enchaînez les tirs à la tête. Une mission en difficulté basse aide. Gardez Vicarious Combustion équipé pour le monter au niveau 5.",
+        "es": "Primero aplica Burn a un grupo (Fiery Aura, habilidad incendiaria o granada incendiaria), luego cambia a un rifle de cadencia alta y apunta a la cabeza rápido. Una misión en dificultad baja lo facilita. Deja Vicarious Combustion equipado para subirlo a nivel 5.",
+        "it": "Prima incendia un gruppo (Fiery Aura, abilità incendiaria o granata incendiaria), poi passa a un fucile rapido e colpisci le teste in fretta. Una missione a bassa difficoltà aiuta. Tieni equipaggiato Vicarious Combustion per portarlo al livello 5.",
+        "pt": "Primeiro aplique Burn em um grupo (Fiery Aura, habilidade incendiária ou granada incendiária), depois troque para um rifle de tiro rápido e mire na cabeça rapidamente. Uma missão em dificuldade baixa ajuda. Mantenha Vicarious Combustion equipado para chegar ao nível 5.",
+        "ru": "Сначала подожгите группу (Fiery Aura, поджигающий навык или зажигательная граната), затем переключитесь на скорострельную винтовку и быстро стреляйте в голову. Проще на лёгкой сложности. Держите Vicarious Combustion экипированным, чтобы прокачать до 5.",
+        "pl": "Najpierw podpal grupę (Fiery Aura, umiejętność zapalająca lub granat zapalający), potem przełącz się na szybkostrzelny karabin i szybko celuj w głowy. Pomaga misja na niskim poziomie trudności. Trzymaj Vicarious Combustion założone, by wbić poziom 5.",
+        "nl": "Steek eerst een groep in brand (Fiery Aura, firestarter-skill of brandgranaat), wissel dan naar een snel vurend geweer en mik snel op hoofden. Een missie op lage moeilijkheid helpt. Houd Vicarious Combustion uitgerust zodat het niveau 5 haalt."
+      }
+    },
+    {
+      "id": "y8s3-journey-m4-five-burning",
+      "cat": "journey",
+      "source": {
+        "url": "https://grindout.com/division-2/guides/season-journey-missions"
+      },
+      "text": {
+        "en": "Red Horizon Journey – Mission 4: have 5 enemies burning at the same time within 20 m",
+        "tr": "Red Horizon Yolculuğu – Görev 4: 20 m içinde aynı anda 5 düşmanı yanar halde tut",
+        "de": "Red Horizon Reise – Mission 4: 5 Gegner gleichzeitig im Umkreis von 20 m brennen lassen",
+        "fr": "Parcours Red Horizon – Mission 4 : avoir 5 ennemis en feu en même temps à moins de 20 m",
+        "es": "Recorrido Red Horizon – Misión 4: ten 5 enemigos ardiendo a la vez a menos de 20 m",
+        "it": "Percorso Red Horizon – Missione 4: avere 5 nemici in fiamme contemporaneamente entro 20 m",
+        "pt": "Jornada Red Horizon – Missão 4: tenha 5 inimigos em chamas ao mesmo tempo a até 20 m",
+        "ru": "Путешествие Red Horizon – Миссия 4: держите 5 горящих врагов одновременно в радиусе 20 м",
+        "pl": "Podróż Red Horizon – Misja 4: miej 5 płonących wrogów jednocześnie w promieniu 20 m",
+        "nl": "Red Horizon-reis – Missie 4: zorg dat 5 vijanden tegelijk branden binnen 20 m"
+      },
+      "how": {
+        "en": "Bank Headquarters on Hard starts with a group of about 5 enemies close together: open with Fiery Aura or an incendiary grenade/firestarter at short range. Restart the mission if it fails.",
+        "tr": "Bank Headquarters görevi Hard zorlukta, birbirine yakın yaklaşık 5 düşmanla başlar: yakın mesafeden Fiery Aura ya da yanıcı bomba/firestarter ile aç. Olmazsa görevi yeniden başlat.",
+        "de": "Bank Headquarters auf Hard beginnt mit etwa 5 eng beieinander stehenden Gegnern: aus kurzer Distanz mit Fiery Aura oder Brandgranate/Firestarter eröffnen. Bei Fehlschlag Mission neu starten.",
+        "fr": "Bank Headquarters en Difficile commence avec environ 5 ennemis groupés : ouvrez à courte portée avec Fiery Aura ou une grenade incendiaire/firestarter. Relancez la mission en cas d'échec.",
+        "es": "Bank Headquarters en Difícil empieza con unos 5 enemigos juntos: abre a corta distancia con Fiery Aura o una granada incendiaria/firestarter. Reinicia la misión si falla.",
+        "it": "Bank Headquarters a Difficile inizia con circa 5 nemici vicini: apri a breve distanza con Fiery Aura o granata incendiaria/firestarter. Riavvia la missione se non riesce.",
+        "pt": "Bank Headquarters no Difícil começa com cerca de 5 inimigos próximos: abra de perto com Fiery Aura ou granada incendiária/firestarter. Reinicie a missão se falhar.",
+        "ru": "Bank Headquarters на сложности Hard начинается с группы примерно из 5 врагов рядом: начните вблизи с Fiery Aura или зажигательной гранаты/firestarter. При неудаче перезапустите миссию.",
+        "pl": "Bank Headquarters na poziomie Hard zaczyna się od ok. 5 wrogów blisko siebie: otwórz z bliska Fiery Aura lub granatem zapalającym/firestarterem. Jeśli się nie uda, zrestartuj misję.",
+        "nl": "Bank Headquarters op Hard begint met ongeveer 5 vijanden dicht bij elkaar: open op korte afstand met Fiery Aura of een brandgranaat/firestarter. Herstart de missie als het mislukt."
+      }
+    },
+    {
+      "id": "y8s3-journey-m5-sidearm-3",
+      "cat": "journey",
+      "source": {
+        "url": "https://grindout.com/division-2/guides/season-journey-missions"
+      },
+      "text": {
+        "en": "Red Horizon Journey – Mission 5: kill 3 hostiles with a sidearm without reloading",
+        "tr": "Red Horizon Yolculuğu – Görev 5: şarjör değiştirmeden tabancayla 3 düşman öldür",
+        "de": "Red Horizon Reise – Mission 5: 3 Gegner mit der Seitenwaffe ohne Nachladen töten",
+        "fr": "Parcours Red Horizon – Mission 5 : tuer 3 ennemis à l'arme de poing sans recharger",
+        "es": "Recorrido Red Horizon – Misión 5: mata a 3 enemigos con la pistola sin recargar",
+        "it": "Percorso Red Horizon – Missione 5: uccidi 3 nemici con l'arma secondaria senza ricaricare",
+        "pt": "Jornada Red Horizon – Missão 5: elimine 3 inimigos com a arma secundária sem recarregar",
+        "ru": "Путешествие Red Horizon – Миссия 5: убейте 3 врагов из пистолета без перезарядки",
+        "pl": "Podróż Red Horizon – Misja 5: zabij 3 wrogów bronią boczną bez przeładowania",
+        "nl": "Red Horizon-reis – Missie 5: dood 3 vijanden met je zijwapen zonder te herladen"
+      },
+      "how": {
+        "en": "Start a mission on Story difficulty so weak enemies drop in one or two shots, use a pistol with a large magazine and aim for the head. Reload only after the third kill.",
+        "tr": "Düşmanların bir iki atışta düştüğü Story zorluğunda bir görev başlat, büyük şarjörlü bir tabanca kullan ve kafaya nişan al. Şarjörü ancak üçüncü öldürmeden sonra değiştir.",
+        "de": "Eine Mission auf Story starten, damit Gegner nach ein, zwei Treffern fallen; eine Pistole mit großem Magazin nutzen und auf den Kopf zielen. Erst nach dem dritten Kill nachladen.",
+        "fr": "Lancez une mission en difficulté Histoire pour que les ennemis tombent en un ou deux tirs, prenez un pistolet à grand chargeur et visez la tête. Ne rechargez qu'après le troisième kill.",
+        "es": "Empieza una misión en dificultad Historia para que los enemigos caigan en uno o dos disparos, usa una pistola de cargador grande y apunta a la cabeza. Recarga solo tras la tercera baja.",
+        "it": "Avvia una missione a difficoltà Storia così i nemici cadono in uno o due colpi, usa una pistola con caricatore grande e mira alla testa. Ricarica solo dopo la terza uccisione.",
+        "pt": "Inicie uma missão na dificuldade História para os inimigos caírem com um ou dois tiros, use uma pistola de pente grande e mire na cabeça. Recarregue só depois da terceira eliminação.",
+        "ru": "Запустите миссию на сложности Story, чтобы враги падали с одного-двух выстрелов, возьмите пистолет с большим магазином и цельтесь в голову. Перезаряжайтесь только после третьего убийства.",
+        "pl": "Uruchom misję na poziomie Story, by wrogowie padali po jednym-dwóch strzałach, użyj pistoletu z dużym magazynkiem i celuj w głowę. Przeładuj dopiero po trzecim zabójstwie.",
+        "nl": "Start een missie op Story zodat vijanden na één of twee schoten vallen, gebruik een pistool met groot magazijn en mik op het hoofd. Herlaad pas na de derde kill."
+      }
+    },
+    {
+      "id": "y8s3-journey-m6-overheal-3",
+      "cat": "journey",
+      "source": {
+        "url": "https://grindout.com/division-2/guides/season-journey-missions"
+      },
+      "text": {
+        "en": "Red Horizon Journey – Mission 6: remove the Achilles' Heal Overheal from 3 different enemies at the same time",
+        "tr": "Red Horizon Yolculuğu – Görev 6: 3 farklı düşmandaki Achilles' Heal Overheal'ını aynı anda kaldır",
+        "de": "Red Horizon Reise – Mission 6: den Achilles'-Heal-Overheal bei 3 verschiedenen Gegnern gleichzeitig entfernen",
+        "fr": "Parcours Red Horizon – Mission 6 : retirer l'Overheal d'Achilles' Heal à 3 ennemis différents en même temps",
+        "es": "Recorrido Red Horizon – Misión 6: quita el Overheal de Achilles' Heal a 3 enemigos distintos a la vez",
+        "it": "Percorso Red Horizon – Missione 6: rimuovi l'Overheal di Achilles' Heal a 3 nemici diversi contemporaneamente",
+        "pt": "Jornada Red Horizon – Missão 6: remova o Overheal de Achilles' Heal de 3 inimigos diferentes ao mesmo tempo",
+        "ru": "Путешествие Red Horizon – Миссия 6: снимите Overheal от Achilles' Heal с 3 разных врагов одновременно",
+        "pl": "Podróż Red Horizon – Misja 6: usuń Overheal z Achilles' Heal 3 różnym wrogom jednocześnie",
+        "nl": "Red Horizon-reis – Missie 6: verwijder de Achilles' Heal-Overheal bij 3 verschillende vijanden tegelijk"
+      },
+      "how": {
+        "en": "Use a build with a large Incendiary grenade radius and run Bank Headquarters on Story. Find an Achilles' Heal enemy with Scanner Pulse, then throw the grenade into the group around it.",
+        "tr": "Incendiary el bombası yarıçapı büyük bir build kullan, Bank Headquarters'ı Story'de oyna. Scanner Pulse ile Achilles' Heal'lı düşmanı bul, bombayı onun çevresindeki gruba at.",
+        "de": "Nutze einen Build mit großem Incendiary-Granaten-Radius und spiele Bank Headquarters auf Story. Finde mit Scanner Pulse einen Achilles'-Heal-Gegner und wirf die Granate in die Gruppe um ihn.",
+        "fr": "Prenez un build à grand rayon de grenade Incendiary et lancez Bank Headquarters en Histoire. Trouvez un ennemi Achilles' Heal avec Scanner Pulse, puis lancez la grenade sur son groupe.",
+        "es": "Usa una build con gran radio de granada Incendiary y juega Bank Headquarters en Historia. Localiza un enemigo con Achilles' Heal con Scanner Pulse y lanza la granada a su grupo.",
+        "it": "Usa una build con ampio raggio delle granate Incendiary e gioca Bank Headquarters a Storia. Trova un nemico con Achilles' Heal con Scanner Pulse e lancia la granata sul suo gruppo.",
+        "pt": "Use uma build com grande raio de granada Incendiary e jogue Bank Headquarters na História. Ache um inimigo com Achilles' Heal usando Scanner Pulse e jogue a granada no grupo dele.",
+        "ru": "Возьмите билд с большим радиусом гранаты Incendiary и запустите Bank Headquarters на Story. Найдите врага с Achilles' Heal через Scanner Pulse и бросьте гранату в его группу.",
+        "pl": "Użyj buildu z dużym promieniem granatu Incendiary i zagraj Bank Headquarters na Story. Znajdź wroga z Achilles' Heal za pomocą Scanner Pulse i rzuć granat w jego grupę.",
+        "nl": "Gebruik een build met een grote Incendiary-granaatradius en speel Bank Headquarters op Story. Zoek een Achilles' Heal-vijand met Scanner Pulse en gooi de granaat in zijn groep."
+      }
+    },
+    {
+      "id": "y8s3-journey-m6-thousand-cuts",
+      "cat": "journey",
+      "source": {
+        "url": "https://grindout.com/division-2/guides/season-journey-missions"
+      },
+      "text": {
+        "en": "Red Horizon Journey – Mission 6: kill Thousand Cuts enemies while at max stacks",
+        "tr": "Red Horizon Yolculuğu – Görev 6: azami yığındayken Thousand Cuts düşmanları öldür",
+        "de": "Red Horizon Reise – Mission 6: Thousand-Cuts-Gegner bei maximalen Stapeln töten",
+        "fr": "Parcours Red Horizon – Mission 6 : tuer des ennemis Thousand Cuts au maximum de charges",
+        "es": "Recorrido Red Horizon – Misión 6: mata enemigos Thousand Cuts con el máximo de acumulaciones",
+        "it": "Percorso Red Horizon – Missione 6: uccidi nemici Thousand Cuts al massimo degli accumuli",
+        "pt": "Jornada Red Horizon – Missão 6: elimine inimigos Thousand Cuts no máximo de acúmulos",
+        "ru": "Путешествие Red Horizon – Миссия 6: убивайте врагов Thousand Cuts при максимуме зарядов",
+        "pl": "Podróż Red Horizon – Misja 6: zabijaj wrogów Thousand Cuts przy maksymalnych ładunkach",
+        "nl": "Red Horizon-reis – Missie 6: dood Thousand Cuts-vijanden bij maximale stapels"
+      },
+      "how": {
+        "en": "Wear a tough build, ideally all blue cores, and run Viewpoint Museum on Story. Find a Thousand Cuts enemy, let it shoot you until the debuff bar is full, then kill it. Repeat as needed.",
+        "tr": "Dayanıklı bir build giy, tercihen tamamen mavi çekirdek, ve Viewpoint Museum'u Story'de oyna. Thousand Cuts düşmanı bul, zayıflatma çubuğu dolana dek sana ateş etsin, sonra öldür. Gerekirse tekrarla.",
+        "de": "Trage einen robusten Build, am besten nur blaue Kerne, und spiele Viewpoint Museum auf Story. Lass dich von einem Thousand-Cuts-Gegner beschießen, bis die Debuff-Leiste voll ist, dann töte ihn. Bei Bedarf wiederholen.",
+        "fr": "Prenez un build solide, idéalement tout en cœurs bleus, et lancez Viewpoint Museum en Histoire. Laissez un ennemi Thousand Cuts vous tirer dessus jusqu'à remplir la barre de malus, puis tuez-le. Répétez.",
+        "es": "Lleva una build resistente, mejor con todos los núcleos azules, y juega Viewpoint Museum en Historia. Deja que un enemigo Thousand Cuts te dispare hasta llenar la barra de penalización y mátalo. Repite.",
+        "it": "Usa una build resistente, meglio tutta a nuclei blu, e gioca Viewpoint Museum a Storia. Lascia che un nemico Thousand Cuts ti spari finché la barra del malus è piena, poi uccidilo. Ripeti.",
+        "pt": "Use uma build resistente, de preferência só com núcleos azuis, e jogue Viewpoint Museum na História. Deixe um inimigo Thousand Cuts atirar em você até encher a barra de penalidade e elimine-o. Repita.",
+        "ru": "Возьмите живучий билд, лучше только с синими ядрами, и запустите Viewpoint Museum на Story. Дайте врагу Thousand Cuts стрелять в вас, пока шкала дебаффа не заполнится, затем убейте его. Повторяйте.",
+        "pl": "Załóż wytrzymały build, najlepiej same niebieskie rdzenie, i zagraj Viewpoint Museum na Story. Pozwól wrogowi Thousand Cuts strzelać do siebie, aż pasek osłabienia się zapełni, potem go zabij. Powtarzaj.",
+        "nl": "Draag een stevige build, liefst alleen blauwe cores, en speel Viewpoint Museum op Story. Laat een Thousand Cuts-vijand op je schieten tot de debuffbalk vol is en dood hem dan. Herhaal."
+      }
+    },
+    {
+      "id": "y8s3-journey-m6-gauge-60s",
+      "cat": "journey",
+      "source": {
+        "url": "https://grindout.com/division-2/guides/season-journey-missions"
+      },
+      "text": {
+        "en": "Red Horizon Journey – Mission 6: keep the Pressure Gauge above 90% for 60 seconds in combat without going into cover",
+        "tr": "Red Horizon Yolculuğu – Görev 6: siper almadan savaşta Pressure Gauge'u 60 saniye %90'ın üstünde tut",
+        "de": "Red Horizon Reise – Mission 6: Pressure Gauge im Kampf 60 Sekunden über 90 % halten, ohne in Deckung zu gehen",
+        "fr": "Parcours Red Horizon – Mission 6 : garder la Pressure Gauge au-dessus de 90 % pendant 60 s en combat, sans se mettre à couvert",
+        "es": "Recorrido Red Horizon – Misión 6: mantén la Pressure Gauge por encima del 90 % durante 60 s en combate sin ir a cobertura",
+        "it": "Percorso Red Horizon – Missione 6: tieni la Pressure Gauge sopra il 90% per 60 s in combattimento senza andare in copertura",
+        "pt": "Jornada Red Horizon – Missão 6: mantenha a Pressure Gauge acima de 90% por 60 s em combate sem ir para a cobertura",
+        "ru": "Путешествие Red Horizon – Миссия 6: держите Pressure Gauge выше 90% 60 секунд в бою, не уходя в укрытие",
+        "pl": "Podróż Red Horizon – Misja 6: utrzymaj Pressure Gauge powyżej 90% przez 60 s w walce bez wchodzenia za osłonę",
+        "nl": "Red Horizon-reis – Missie 6: houd de Pressure Gauge 60 seconden boven 90% in gevecht zonder dekking te zoeken"
+      },
+      "how": {
+        "en": "Any build works. Equip Flow Regulator, Throttle Valve and Vacuum Seal, reach 90% in a fight, then stay out of cover for a full minute.",
+        "tr": "Her build olur. Flow Regulator, Throttle Valve ve Vacuum Seal tak, savaşta %90'a ulaş, sonra tam bir dakika siper almadan kal.",
+        "de": "Jeder Build geht. Rüste Flow Regulator, Throttle Valve und Vacuum Seal aus, erreiche im Kampf 90 % und bleibe eine volle Minute außerhalb der Deckung.",
+        "fr": "Tout build convient. Équipez Flow Regulator, Throttle Valve et Vacuum Seal, atteignez 90 % en combat, puis restez une minute hors couvert.",
+        "es": "Vale cualquier build. Equipa Flow Regulator, Throttle Valve y Vacuum Seal, llega al 90 % en combate y aguanta un minuto sin cobertura.",
+        "it": "Va bene qualsiasi build. Equipaggia Flow Regulator, Throttle Valve e Vacuum Seal, arriva al 90% in combattimento e resta un minuto fuori copertura.",
+        "pt": "Qualquer build serve. Equipe Flow Regulator, Throttle Valve e Vacuum Seal, chegue a 90% em combate e fique um minuto fora da cobertura.",
+        "ru": "Подойдёт любой билд. Экипируйте Flow Regulator, Throttle Valve и Vacuum Seal, наберите 90% в бою и целую минуту оставайтесь вне укрытия.",
+        "pl": "Każdy build się nadaje. Załóż Flow Regulator, Throttle Valve i Vacuum Seal, osiągnij 90% w walce i przez pełną minutę pozostań poza osłoną.",
+        "nl": "Elke build werkt. Rust Flow Regulator, Throttle Valve en Vacuum Seal uit, bereik 90% in een gevecht en blijf een volle minuut uit dekking."
+      }
+    },
+    {
+      "id": "y8s3-journey-m6-three-status",
+      "cat": "journey",
+      "source": {
+        "url": "https://grindout.com/division-2/guides/season-journey-missions"
+      },
+      "text": {
+        "en": "Red Horizon Journey – Mission 6: kill an enemy affected by at least 3 different status effects",
+        "tr": "Red Horizon Yolculuğu – Görev 6: en az 3 farklı durum etkisi altındaki bir düşmanı öldür",
+        "de": "Red Horizon Reise – Mission 6: einen Gegner mit mindestens 3 verschiedenen Statuseffekten töten",
+        "fr": "Parcours Red Horizon – Mission 6 : tuer un ennemi affecté par au moins 3 effets d'état différents",
+        "es": "Recorrido Red Horizon – Misión 6: mata a un enemigo afectado por al menos 3 efectos de estado distintos",
+        "it": "Percorso Red Horizon – Missione 6: uccidi un nemico colpito da almeno 3 effetti di stato diversi",
+        "pt": "Jornada Red Horizon – Missão 6: elimine um inimigo afetado por pelo menos 3 efeitos de status diferentes",
+        "ru": "Путешествие Red Horizon – Миссия 6: убейте врага минимум с 3 разными эффектами состояния",
+        "pl": "Podróż Red Horizon – Misja 6: zabij wroga objętego co najmniej 3 różnymi efektami statusu",
+        "nl": "Red Horizon-reis – Missie 6: dood een vijand met minstens 3 verschillende statuseffecten"
+      },
+      "how": {
+        "en": "Equip Banshee (Disorient), Riot Foam Launcher (Ensnare) and an Incendiary grenade (Burn). Apply all three to one enemy in quick succession, then finish it.",
+        "tr": "Banshee (Disorient), Riot Foam Launcher (Ensnare) ve Incendiary el bombası (Burn) tak. Üçünü hızla aynı düşmana uygula, sonra öldür.",
+        "de": "Rüste Banshee (Disorient), Riot Foam Launcher (Ensnare) und eine Incendiary-Granate (Burn) aus. Wende alle drei kurz nacheinander auf einen Gegner an und erledige ihn.",
+        "fr": "Équipez Banshee (Disorient), Riot Foam Launcher (Ensnare) et une grenade Incendiary (Burn). Appliquez les trois à un ennemi à la suite, puis achevez-le.",
+        "es": "Equipa Banshee (Disorient), Riot Foam Launcher (Ensnare) y una granada Incendiary (Burn). Aplica los tres a un enemigo seguidos y remátalo.",
+        "it": "Equipaggia Banshee (Disorient), Riot Foam Launcher (Ensnare) e una granata Incendiary (Burn). Applica tutti e tre a un nemico in rapida successione e finiscilo.",
+        "pt": "Equipe Banshee (Disorient), Riot Foam Launcher (Ensnare) e uma granada Incendiary (Burn). Aplique os três em um inimigo em sequência rápida e elimine-o.",
+        "ru": "Экипируйте Banshee (Disorient), Riot Foam Launcher (Ensnare) и гранату Incendiary (Burn). Быстро наложите все три эффекта на одного врага и добейте его.",
+        "pl": "Załóż Banshee (Disorient), Riot Foam Launcher (Ensnare) i granat Incendiary (Burn). Nałóż wszystkie trzy na jednego wroga w szybkiej kolejności i dobij go.",
+        "nl": "Rust Banshee (Disorient), Riot Foam Launcher (Ensnare) en een Incendiary-granaat (Burn) uit. Pas alle drie snel achter elkaar toe op één vijand en maak hem af."
+      }
+    },
+    {
+      "id": "y8s3-journey-m7-extract-4",
+      "cat": "journey",
+      "source": {
+        "url": "https://grindout.com/division-2/guides/season-journey-missions"
+      },
+      "text": {
+        "en": "Red Horizon Journey – Mission 7: extract at least 4 items at once from any Dark Zone",
+        "tr": "Red Horizon Yolculuğu – Görev 7: herhangi bir Dark Zone'dan tek seferde en az 4 eşya çıkar",
+        "de": "Red Horizon Reise – Mission 7: mindestens 4 Gegenstände auf einmal aus einer Dark Zone extrahieren",
+        "fr": "Parcours Red Horizon – Mission 7 : extraire au moins 4 objets d'un coup depuis n'importe quelle Dark Zone",
+        "es": "Recorrido Red Horizon – Misión 7: extrae al menos 4 objetos a la vez de cualquier Dark Zone",
+        "it": "Percorso Red Horizon – Missione 7: estrai almeno 4 oggetti in una volta da una Dark Zone qualsiasi",
+        "pt": "Jornada Red Horizon – Missão 7: extraia pelo menos 4 itens de uma vez de qualquer Dark Zone",
+        "ru": "Путешествие Red Horizon – Миссия 7: эвакуируйте минимум 4 предмета за раз из любой Dark Zone",
+        "pl": "Podróż Red Horizon – Misja 7: ewakuuj naraz co najmniej 4 przedmioty z dowolnej Dark Zone",
+        "nl": "Red Horizon-reis – Missie 7: extraheer minstens 4 items tegelijk uit een Dark Zone"
+      },
+      "how": {
+        "en": "PvE or PvP Dark Zone both count. Collect at least 4 contaminated items, then call a single extraction with all of them on you.",
+        "tr": "PvE ya da PvP Dark Zone fark etmez. En az 4 kirlenmiş eşya topla, sonra hepsi üzerindeyken tek bir tahliye çağır.",
+        "de": "PvE- und PvP-Dark-Zone zählen beide. Sammle mindestens 4 kontaminierte Gegenstände und rufe mit allen eine einzige Extraktion.",
+        "fr": "Dark Zone PvE ou PvP, les deux comptent. Ramassez au moins 4 objets contaminés, puis lancez une seule extraction en les ayant tous sur vous.",
+        "es": "Vale la Dark Zone PvE o PvP. Reúne al menos 4 objetos contaminados y pide una sola extracción con todos encima.",
+        "it": "Vale sia la Dark Zone PvE sia PvP. Raccogli almeno 4 oggetti contaminati e chiama una sola estrazione con tutti addosso.",
+        "pt": "Vale a Dark Zone PvE ou PvP. Colete pelo menos 4 itens contaminados e chame uma única extração com todos com você.",
+        "ru": "Подходит и PvE, и PvP Dark Zone. Соберите минимум 4 заражённых предмета и вызовите одну эвакуацию, держа их все при себе.",
+        "pl": "Liczy się Dark Zone PvE i PvP. Zbierz co najmniej 4 skażone przedmioty i wezwij jedną ewakuację, mając je wszystkie przy sobie.",
+        "nl": "PvE- en PvP-Dark Zone tellen allebei. Verzamel minstens 4 besmette items en roep één extractie op met ze allemaal bij je."
+      }
+    },
+    {
+      "id": "y8s3-journey-m7-cleaner-retaliations",
+      "cat": "journey",
+      "source": {
+        "url": "https://grindout.com/division-2/guides/season-journey-missions"
+      },
+      "text": {
+        "en": "Red Horizon Journey – Mission 7: complete 2 Cleaner Retaliations",
+        "tr": "Red Horizon Yolculuğu – Görev 7: 2 Cleaner Retaliation bitir",
+        "de": "Red Horizon Reise – Mission 7: 2 Cleaner-Retaliations abschließen",
+        "fr": "Parcours Red Horizon – Mission 7 : terminer 2 Retaliations Cleaners",
+        "es": "Recorrido Red Horizon – Misión 7: completa 2 Retaliations de Cleaners",
+        "it": "Percorso Red Horizon – Missione 7: completa 2 Retaliation dei Cleaners",
+        "pt": "Jornada Red Horizon – Missão 7: conclua 2 Retaliations dos Cleaners",
+        "ru": "Путешествие Red Horizon – Миссия 7: выполните 2 Retaliation против Cleaners",
+        "pl": "Podróż Red Horizon – Misja 7: ukończ 2 Retaliation Cleaners",
+        "nl": "Red Horizon-reis – Missie 7: voltooi 2 Cleaner-Retaliations"
+      },
+      "how": {
+        "en": "Abandon any other active Retaliation, build up the Cleaner one, then activate and finish it once its charge bar is full. Do this twice.",
+        "tr": "Etkin diğer Retaliation'ları bırak, Cleaner olanı ilerlet, şarj çubuğu dolunca başlatıp bitir. Bunu iki kez yap.",
+        "de": "Brich andere aktive Retaliations ab, baue die Cleaner-Retaliation auf, aktiviere und beende sie, sobald die Ladeleiste voll ist. Zweimal wiederholen.",
+        "fr": "Abandonnez les autres Retaliations actives, progressez sur celle des Cleaners, puis activez-la et terminez-la quand sa barre est pleine. À faire deux fois.",
+        "es": "Abandona las demás Retaliations activas, avanza la de Cleaners y actívala y complétala cuando su barra esté llena. Hazlo dos veces.",
+        "it": "Abbandona le altre Retaliation attive, fai avanzare quella dei Cleaners, poi attivala e completala quando la barra è piena. Fallo due volte.",
+        "pt": "Abandone outras Retaliations ativas, avance a dos Cleaners e ative e conclua quando a barra encher. Faça isso duas vezes.",
+        "ru": "Отмените другие активные Retaliation, прокачайте Cleaner, затем активируйте и завершите, когда шкала заполнится. Сделайте это дважды.",
+        "pl": "Porzuć inne aktywne Retaliation, rozwiń tę Cleaners, a gdy pasek się zapełni, aktywuj ją i ukończ. Zrób to dwa razy.",
+        "nl": "Breek andere actieve Retaliations af, bouw de Cleaner-versie op en activeer en voltooi die zodra de laadbalk vol is. Doe dit twee keer."
+      }
+    },
+    {
+      "id": "y8s3-journey-m7-burn-5-3s",
+      "cat": "journey",
+      "source": {
+        "url": "https://grindout.com/division-2/guides/season-journey-missions"
+      },
+      "text": {
+        "en": "Red Horizon Journey – Mission 7: apply Burn to 5 enemies within 3 seconds",
+        "tr": "Red Horizon Yolculuğu – Görev 7: 3 saniye içinde 5 düşmana Burn uygula",
+        "de": "Red Horizon Reise – Mission 7: Burn innerhalb von 3 Sekunden auf 5 Gegner anwenden",
+        "fr": "Parcours Red Horizon – Mission 7 : appliquer Burn à 5 ennemis en 3 secondes",
+        "es": "Recorrido Red Horizon – Misión 7: aplica Burn a 5 enemigos en 3 segundos",
+        "it": "Percorso Red Horizon – Missione 7: applica Burn a 5 nemici entro 3 secondi",
+        "pt": "Jornada Red Horizon – Missão 7: aplique Burn a 5 inimigos em 3 segundos",
+        "ru": "Путешествие Red Horizon – Миссия 7: наложите Burn на 5 врагов за 3 секунды",
+        "pl": "Podróż Red Horizon – Misja 7: nałóż Burn na 5 wrogów w ciągu 3 sekund",
+        "nl": "Red Horizon-reis – Missie 7: pas Burn toe op 5 vijanden binnen 3 seconden"
+      },
+      "how": {
+        "en": "Use an Incendiary grenade with the Atomize augment for extra radius and run Bank Headquarters on Story. Eclipse Protocol with a Firestarter Chem Launcher is a more reliable option.",
+        "tr": "Atomize augment'iyle yarıçapı artırılmış Incendiary el bombası kullan, Bank Headquarters'ı Story'de oyna. Eclipse Protocol ile Firestarter Chem Launcher daha güvenilir bir seçenektir.",
+        "de": "Nutze eine Incendiary-Granate mit dem Atomize-Augment für mehr Radius und spiele Bank Headquarters auf Story. Eclipse Protocol mit Firestarter Chem Launcher ist die zuverlässigere Option.",
+        "fr": "Prenez une grenade Incendiary avec l'augment Atomize pour plus de rayon et lancez Bank Headquarters en Histoire. Eclipse Protocol avec un Firestarter Chem Launcher est plus fiable.",
+        "es": "Usa una granada Incendiary con el aumento Atomize para más radio y juega Bank Headquarters en Historia. Eclipse Protocol con Firestarter Chem Launcher es más fiable.",
+        "it": "Usa una granata Incendiary con l'augment Atomize per un raggio maggiore e gioca Bank Headquarters a Storia. Eclipse Protocol con Firestarter Chem Launcher è più affidabile.",
+        "pt": "Use uma granada Incendiary com o aprimoramento Atomize para mais raio e jogue Bank Headquarters na História. Eclipse Protocol com Firestarter Chem Launcher é mais confiável.",
+        "ru": "Используйте гранату Incendiary с аугментом Atomize для большего радиуса и запустите Bank Headquarters на Story. Eclipse Protocol с Firestarter Chem Launcher надёжнее.",
+        "pl": "Użyj granatu Incendiary z augmentem Atomize dla większego promienia i zagraj Bank Headquarters na Story. Eclipse Protocol z Firestarter Chem Launcher jest pewniejszy.",
+        "nl": "Gebruik een Incendiary-granaat met de Atomize-augment voor extra radius en speel Bank Headquarters op Story. Eclipse Protocol met Firestarter Chem Launcher is betrouwbaarder."
+      }
+    },
+    {
+      "id": "y8s3-journey-m7-achilles-tanks",
+      "cat": "journey",
+      "source": {
+        "url": "https://grindout.com/division-2/guides/season-journey-missions"
+      },
+      "text": {
+        "en": "Red Horizon Journey – Mission 7: eliminate Tanks under the effect of Achilles' Heal",
+        "tr": "Red Horizon Yolculuğu – Görev 7: Achilles' Heal etkisindeki Tank'ları öldür",
+        "de": "Red Horizon Reise – Mission 7: Tanks unter dem Effekt von Achilles' Heal ausschalten",
+        "fr": "Parcours Red Horizon – Mission 7 : éliminer des Tanks sous l'effet d'Achilles' Heal",
+        "es": "Recorrido Red Horizon – Misión 7: elimina Tanks bajo el efecto de Achilles' Heal",
+        "it": "Percorso Red Horizon – Missione 7: elimina Tank sotto l'effetto di Achilles' Heal",
+        "pt": "Jornada Red Horizon – Missão 7: elimine Tanks sob o efeito de Achilles' Heal",
+        "ru": "Путешествие Red Horizon – Миссия 7: уничтожьте Tank под действием Achilles' Heal",
+        "pl": "Podróż Red Horizon – Misja 7: wyeliminuj Tanki pod działaniem Achilles' Heal",
+        "nl": "Red Horizon-reis – Missie 7: schakel Tanks uit onder het effect van Achilles' Heal"
+      },
+      "how": {
+        "en": "Run DCD Headquarters on Story, where a Tank always spawns at one spot. Kill it only if it shows the Achilles' Heal icon above its head; if not, restart the mission and try again.",
+        "tr": "DCD Headquarters'ı Story'de oyna; bir noktada her zaman Tank çıkar. Yalnızca başının üstünde Achilles' Heal simgesi varsa öldür; yoksa görevi yeniden başlat.",
+        "de": "Spiele DCD Headquarters auf Story, dort erscheint an einer Stelle immer ein Tank. Töte ihn nur, wenn das Achilles'-Heal-Symbol über seinem Kopf steht; sonst die Mission neu starten.",
+        "fr": "Lancez DCD Headquarters en Histoire : un Tank apparaît toujours au même endroit. Tuez-le seulement s'il affiche l'icône Achilles' Heal au-dessus de la tête ; sinon relancez la mission.",
+        "es": "Juega DCD Headquarters en Historia: siempre aparece un Tank en un punto. Mátalo solo si tiene el icono de Achilles' Heal sobre la cabeza; si no, reinicia la misión.",
+        "it": "Gioca DCD Headquarters a Storia: in un punto compare sempre un Tank. Uccidilo solo se ha l'icona Achilles' Heal sopra la testa; altrimenti riavvia la missione.",
+        "pt": "Jogue DCD Headquarters na História: um Tank sempre aparece em um ponto. Elimine-o só se tiver o ícone de Achilles' Heal sobre a cabeça; se não, reinicie a missão.",
+        "ru": "Запустите DCD Headquarters на Story: в одной точке всегда появляется Tank. Убивайте его только со значком Achilles' Heal над головой; иначе перезапустите миссию.",
+        "pl": "Zagraj DCD Headquarters na Story: w jednym miejscu zawsze pojawia się Tank. Zabij go tylko z ikoną Achilles' Heal nad głową; w przeciwnym razie zrestartuj misję.",
+        "nl": "Speel DCD Headquarters op Story: op één plek verschijnt altijd een Tank. Dood hem alleen als het Achilles' Heal-icoon boven zijn hoofd staat; zo niet, herstart de missie."
+      }
+    },
+    {
+      "id": "y8s3-journey-m8-finale",
+      "cat": "journey",
+      "source": {
+        "url": "https://grindout.com/division-2/guides/season-journey-missions"
+      },
+      "text": {
+        "en": "Red Horizon Journey – Mission 8: complete Journey Missions 1 to 7 (rewards: SHD XP, Season Pass XP, 2 Exotic Caches)",
+        "tr": "Red Horizon Yolculuğu – Görev 8: Yolculuk Görevleri 1-7'yi bitir (ödüller: SHD XP, Season Pass XP, 2 Exotic Cache)",
+        "de": "Red Horizon Reise – Mission 8: Reise-Missionen 1 bis 7 abschließen (Belohnung: SHD-XP, Season-Pass-XP, 2 Exotic Caches)",
+        "fr": "Parcours Red Horizon – Mission 8 : terminer les missions 1 à 7 du Parcours (récompenses : XP SHD, XP Season Pass, 2 Exotic Caches)",
+        "es": "Recorrido Red Horizon – Misión 8: completa las misiones 1 a 7 del Recorrido (recompensas: XP SHD, XP de Season Pass, 2 Exotic Caches)",
+        "it": "Percorso Red Horizon – Missione 8: completa le missioni da 1 a 7 del Percorso (ricompense: XP SHD, XP Season Pass, 2 Exotic Cache)",
+        "pt": "Jornada Red Horizon – Missão 8: conclua as missões 1 a 7 da Jornada (recompensas: XP SHD, XP do Season Pass, 2 Exotic Caches)",
+        "ru": "Путешествие Red Horizon – Миссия 8: завершите миссии 1–7 Путешествия (награды: опыт SHD, опыт Season Pass, 2 Exotic Cache)",
+        "pl": "Podróż Red Horizon – Misja 8: ukończ misje 1-7 Podróży (nagrody: XP SHD, XP Season Pass, 2 Exotic Cache)",
+        "nl": "Red Horizon-reis – Missie 8: voltooi reis-missies 1 t/m 7 (beloningen: SHD XP, Season Pass XP, 2 Exotic Caches)"
+      },
+      "how": {
+        "en": "This mission has no objectives of its own. It finishes itself once Journey Missions 1 to 7 are done, so work through any open objectives from those missions.",
+        "tr": "Bu görevin kendi hedefi yoktur. Yolculuk Görevleri 1-7 bitince tamamlanır; o görevlerde kalan hedefleri bitir.",
+        "de": "Diese Mission hat keine eigenen Ziele. Sie ist erledigt, sobald die Reise-Missionen 1 bis 7 fertig sind; schließe also deren offene Ziele ab.",
+        "fr": "Cette mission n'a pas d'objectifs propres. Elle se termine une fois les missions 1 à 7 faites : finissez leurs objectifs restants.",
+        "es": "Esta misión no tiene objetivos propios. Se completa al terminar las misiones 1 a 7, así que acaba los objetivos pendientes de esas misiones.",
+        "it": "Questa missione non ha obiettivi propri. Si completa finite le missioni da 1 a 7, quindi porta a termine i loro obiettivi rimasti.",
+        "pt": "Esta missão não tem objetivos próprios. Ela termina quando as missões 1 a 7 estiverem feitas, então conclua os objetivos restantes delas.",
+        "ru": "У этой миссии нет своих целей. Она завершается после миссий 1–7, поэтому закройте оставшиеся цели в них.",
+        "pl": "Ta misja nie ma własnych celów. Kończy się po ukończeniu misji 1-7, więc dokończ ich pozostałe cele.",
+        "nl": "Deze missie heeft geen eigen doelen. Ze is klaar zodra reis-missies 1 t/m 7 af zijn, dus rond de openstaande doelen daarvan af."
+      }
+    },
+    {
+      "id": "y8s3-ca-district-mall-inferno",
+      "cat": "journey",
+      "wiki_id": "wiki-ca-district-mall-inferno",
+      "source": {
+        "url": "https://thedivision.fandom.com/wiki/District_Mall_Inferno"
+      },
+      "text": {
+        "en": "Classified Assignment: District Mall Inferno – back up Agent Felix McNally against the Cleaners (boss: Iris Sullivan)",
+        "tr": "Classified Assignment: District Mall Inferno – Cleaner'lara karşı Ajan Felix McNally'ye destek ol (boss: Iris Sullivan)",
+        "de": "Classified Assignment: District Mall Inferno – Agent Felix McNally gegen die Cleaner unterstützen (Boss: Iris Sullivan)",
+        "fr": "Mission classifiée : District Mall Inferno – épauler l’agent Felix McNally contre les Nettoyeurs (boss : Iris Sullivan)",
+        "es": "Misión clasificada: District Mall Inferno – apoya al agente Felix McNally contra los Limpiadores (jefa: Iris Sullivan)",
+        "it": "Incarico classificato: District Mall Inferno – supporta l’agente Felix McNally contro i Pulitori (boss: Iris Sullivan)",
+        "pt": "Missão confidencial: District Mall Inferno – apoie o agente Felix McNally contra os Limpadores (chefe: Iris Sullivan)",
+        "ru": "Секретное задание: District Mall Inferno – поддержите агента Феликса Макнелли против Чистильщиков (босс: Айрис Салливан)",
+        "pl": "Tajne zadanie: District Mall Inferno – wesprzyj agenta Felixa McNally’ego przeciw Czyścicielom (boss: Iris Sullivan)",
+        "nl": "Geheime opdracht: District Mall Inferno – steun agent Felix McNally tegen de Cleaners (baas: Iris Sullivan)"
+      },
+      "how": {
+        "en": "ECHO: after the boss, take the service-tunnel key from McNally, shoot the yellow fuse box in the half-closed elevator shaft, go down and blow the barrels next to the marked wall. Backpack trophy: use 5 glowing blue toy machines (random each run); the CERA Staff Area and Storage keys open some of them.",
+        "tr": "ECHO: Boss'tan sonra McNally'den servis tüneli anahtarını al, yarı kapalı asansör boşluğundaki sarı sigorta kutusunu vur, aşağı in ve işaretli duvarın yanındaki varilleri patlat. Sırt çantası süsü: mavi parlayan 5 oyuncak makinesini kullan (her oyunda farklı); CERA Staff Area ve Storage anahtarları bazılarını açar.",
+        "de": "ECHO: Nach dem Boss von McNally den Servicetunnel-Schlüssel holen, im halb geschlossenen Aufzugsschacht den gelben Sicherungskasten zerschießen, runter und die Fässer an der markierten Wand sprengen. Rucksack-Trophäe: 5 blau leuchtende Spielzeugautomaten nutzen (zufällig); die CERA-Schlüssel öffnen einige davon.",
+        "fr": "ECHO : après le boss, prenez la clé des tunnels auprès de McNally, tirez sur le boîtier à fusibles jaune dans la cage d’ascenseur, descendez et faites sauter les barils près du mur marqué. Trophée de sac : utilisez 5 machines à jouets bleues (aléatoires) ; les clés CERA en ouvrent certaines.",
+        "es": "ECHO: tras el jefe, coge la llave de los túneles de McNally, dispara a la caja de fusibles amarilla del hueco del ascensor, baja y vuela los barriles junto al muro marcado. Trofeo de mochila: usa 5 máquinas de juguetes azules (aleatorias); las llaves CERA abren algunas.",
+        "it": "ECHO: dopo il boss prendi la chiave dei tunnel da McNally, spara alla scatola dei fusibili gialla nel vano ascensore, scendi e fai esplodere i barili vicino al muro segnato. Trofeo zaino: usa 5 macchinette blu (casuali); le chiavi CERA ne aprono alcune.",
+        "pt": "ECHO: após o chefe, pegue a chave dos túneis com McNally, atire na caixa de fusíveis amarela do poço do elevador, desça e exploda os barris junto à parede marcada. Troféu de mochila: use 5 máquinas de brinquedo azuis (aleatórias); as chaves CERA abrem algumas.",
+        "ru": "ECHO: после босса возьмите у Макнелли ключ от служебных тоннелей, выстрелите в жёлтый щиток в шахте лифта, спуститесь и взорвите бочки у отмеченной стены. Трофей на рюкзак: используйте 5 светящихся синим автоматов с игрушками (случайно); ключи CERA открывают часть из них.",
+        "pl": "ECHO: po bossie weź od McNally’ego klucz do tuneli, zestrzel żółtą skrzynkę bezpieczników w szybie windy, zejdź i wysadź beczki przy oznaczonej ścianie. Trofeum na plecak: użyj 5 świecących na niebiesko automatów z zabawkami (losowo); klucze CERA otwierają część.",
+        "nl": "ECHO: pak na de baas de tunnelsleutel van McNally, schiet de gele zekeringkast in de liftschacht kapot, ga naar beneden en blaas de vaten bij de gemarkeerde muur op. Rugzaktrofee: gebruik 5 blauw oplichtende speelgoedautomaten (willekeurig); de CERA-sleutels openen er een paar."
+      }
+    },
+    {
+      "id": "y8s3-ca-georgetown-dead-zone",
+      "cat": "journey",
+      "wiki_id": "wiki-ca-georgetown-dead-zone",
+      "source": {
+        "url": "https://thedivision.fandom.com/wiki/Georgetown_Dead_Zone"
+      },
+      "text": {
+        "en": "Classified Assignment: Georgetown Dead Zone (released Oct 15) – find the missing JTF engineers and restore comms in Acacia Grove (boss: The Crooked Man)",
+        "tr": "Classified Assignment: Georgetown Dead Zone (15 Ekim'de çıktı) – kayıp JTF mühendislerini bul, Acacia Grove'da iletişimi geri getir (boss: The Crooked Man)",
+        "de": "Classified Assignment: Georgetown Dead Zone (seit 15. Okt.) – vermisste JTF-Techniker finden, Funk in Acacia Grove wiederherstellen (Boss: The Crooked Man)",
+        "fr": "Mission classifiée : Georgetown Dead Zone (sortie le 15 oct.) – retrouver les ingénieurs JTF et rétablir les communications à Acacia Grove (boss : The Crooked Man)",
+        "es": "Misión clasificada: Georgetown Dead Zone (desde el 15 oct.) – encuentra a los ingenieros de la JTF y restaura las comunicaciones en Acacia Grove (jefe: The Crooked Man)",
+        "it": "Incarico classificato: Georgetown Dead Zone (dal 15 ott.) – trova gli ingegneri JTF scomparsi e ripristina le comunicazioni ad Acacia Grove (boss: The Crooked Man)",
+        "pt": "Missão confidencial: Georgetown Dead Zone (desde 15 out.) – encontre os engenheiros da JTF e restaure as comunicações em Acacia Grove (chefe: The Crooked Man)",
+        "ru": "Секретное задание: Georgetown Dead Zone (с 15 окт.) – найдите пропавших инженеров JTF и восстановите связь в Acacia Grove (босс: The Crooked Man)",
+        "pl": "Tajne zadanie: Georgetown Dead Zone (od 15 paź.) – odnajdź zaginionych inżynierów JTF i przywróć łączność w Acacia Grove (boss: The Crooked Man)",
+        "nl": "Geheime opdracht: Georgetown Dead Zone (sinds 15 okt.) – vind de vermiste JTF-technici en herstel de verbinding in Acacia Grove (baas: The Crooked Man)"
+      },
+      "how": {
+        "en": "The Crooked Man is fought three times. ECHO: shoot the 5 fake ravens that blink red (rooftops, flagpoles; positions change each run; the hospital CCTV room helps) to open the basement. Backpack trophy: in the funeral home mortuary, enter the 4 laptop sound-wave patterns in the order of the rhyme.",
+        "tr": "The Crooked Man üç kez karşına çıkar. ECHO: kırmızı yanıp sönen 5 sahte kargayı vur (çatılar, bayrak direkleri; yerleri her oyunda değişir; hastanedeki CCTV odası yardımcı olur), bodrum açılır. Sırt çantası süsü: cenaze evinin morgunda 4 dizüstünün ses dalgalarını tekerlemedeki sırayla gir.",
+        "de": "The Crooked Man wird dreimal bekämpft. ECHO: die 5 rot blinkenden falschen Raben abschießen (Dächer, Fahnenmasten; wechselnde Positionen; der Kameraraum im Krankenhaus hilft), dann öffnet sich der Keller. Rucksack-Trophäe: im Bestattungsinstitut die 4 Laptop-Wellenmuster in der Reihenfolge des Reims eingeben.",
+        "fr": "The Crooked Man est affronté trois fois. ECHO : abattez les 5 faux corbeaux qui clignotent en rouge (toits, mâts ; positions variables ; la salle CCTV de l’hôpital aide) pour ouvrir le sous-sol. Trophée de sac : à la morgue du funérarium, entrez les 4 ondes des laptops dans l’ordre de la comptine.",
+        "es": "Te enfrentas a The Crooked Man tres veces. ECHO: dispara a los 5 cuervos falsos que parpadean en rojo (tejados, mástiles; cambian cada partida; la sala CCTV del hospital ayuda) para abrir el sótano. Trofeo de mochila: en la morgue de la funeraria introduce las 4 ondas de los portátiles en el orden de la rima.",
+        "it": "The Crooked Man si affronta tre volte. ECHO: abbatti i 5 corvi finti che lampeggiano in rosso (tetti, pennoni; posizioni casuali; la sala CCTV dell’ospedale aiuta) per aprire il seminterrato. Trofeo zaino: nell’obitorio dell’impresa funebre inserisci le 4 onde dei portatili nell’ordine della filastrocca.",
+        "pt": "The Crooked Man é enfrentado três vezes. ECHO: atire nos 5 corvos falsos que piscam em vermelho (telhados, mastros; mudam a cada partida; a sala de CCTV do hospital ajuda) para abrir o porão. Troféu de mochila: no necrotério da funerária, insira as 4 ondas dos laptops na ordem da rima.",
+        "ru": "С The Crooked Man придётся сразиться трижды. ECHO: сбейте 5 фальшивых воронов, мигающих красным (крыши, флагштоки; места меняются; помогает комната видеонаблюдения в больнице), чтобы открыть подвал. Трофей на рюкзак: в морге похоронного бюро введите 4 звуковые волны ноутбуков в порядке считалки.",
+        "pl": "Z The Crooked Man walczysz trzy razy. ECHO: zestrzel 5 fałszywych kruków migających na czerwono (dachy, maszty; losowe miejsca; pomaga pokój CCTV w szpitalu), by otworzyć piwnicę. Trofeum na plecak: w kostnicy domu pogrzebowego wprowadź 4 fale dźwiękowe laptopów w kolejności z wyliczanki.",
+        "nl": "Je vecht drie keer tegen The Crooked Man. ECHO: schiet de 5 rood knipperende nepraven neer (daken, vlaggenmasten; wisselende plekken; de CCTV-kamer in het ziekenhuis helpt) om de kelder te openen. Rugzaktrofee: voer in het mortuarium van de uitvaartonderneming de 4 laptop-golfpatronen in de volgorde van het rijmpje in."
+      }
+    }
+  ],
+  "guides": [
+    {
+      "id": "control-point",
+      "match": [
+        "control point",
+        "kontrol noktas",
+        "kontrollpunkt",
+        "point de contrôle",
+        "punto de control",
+        "punto di controllo",
+        "ponto de controle",
+        "контрольн",
+        "punkt kontrolny",
+        "punkty kontrolne",
+        "controlepunt"
+      ],
+      "tip": {
+        "en": "Pick a hostile Control Point (flag icon) on the map. Clear the first wave, then the reinforcement wave with elites, kill the leader and raise the flag. Fire the flare for allied help; lower difficulty is faster unless a difficulty is required.",
+        "tr": "Haritada düşman elindeki bir kontrol noktasını (bayrak simgesi) seç. İlk dalgayı, ardından elitli takviye dalgasını temizle, lideri öldür ve bayrağı kaldır. Yardım için işaret fişeği at; zorluk şartı yoksa düşük zorluk daha hızlıdır.",
+        "de": "Feindlichen Kontrollpunkt (Flaggen-Symbol) wählen. Erste Welle, dann Verstärkung mit Elite besiegen, Anführer töten, Flagge hissen. Leuchtsignal für Verbündete; ohne Vorgabe ist niedrige Schwierigkeit schneller.",
+        "fr": "Choisissez un point de contrôle ennemi (icône drapeau). Videz la première vague puis les renforts élites, tuez le chef et levez le drapeau. Fusée pour des alliés ; sans exigence, une difficulté basse va plus vite.",
+        "es": "Elige un punto de control enemigo (icono de bandera). Limpia la primera oleada y los refuerzos con élites, mata al líder y alza la bandera. Usa la bengala para aliados; sin requisito, dificultad baja es más rápida.",
+        "it": "Scegli un punto di controllo nemico (icona bandiera). Elimina la prima ondata e i rinforzi élite, uccidi il capo e alza la bandiera. Razzo per gli alleati; senza requisiti, difficoltà bassa è più veloce.",
+        "pt": "Escolha um ponto de controle inimigo (ícone de bandeira). Limpe a primeira onda e os reforços com elites, mate o líder e erga a bandeira. Sinalizador para aliados; sem exigência, dificuldade baixa é mais rápida.",
+        "ru": "Выберите вражескую контрольную точку (значок флага). Зачистите первую волну и подкрепление с элитой, убейте лидера, поднимите флаг. Ракета вызывает союзников; без требований низкая сложность быстрее.",
+        "pl": "Wybierz wrogi punkt kontrolny (ikona flagi). Pokonaj pierwszą falę i posiłki z elitami, zabij przywódcę, podnieś flagę. Flara wzywa sojuszników; bez wymogu niska trudność jest szybsza.",
+        "nl": "Kies een vijandelijk controlepunt (vlag-icoon). Versla de eerste golf en de versterking met elites, dood de leider en hijs de vlag. Lichtkogel voor bondgenoten; zonder eis is lage moeilijkheid sneller."
+      }
+    },
+    {
+      "id": "public-execution",
+      "match": [
+        "public execution",
+        "infaz",
+        "hinrichtung",
+        "exécution publique",
+        "ejecución pública",
+        "esecuzion",
+        "execuç",
+        "казн",
+        "egzekuc",
+        "executie"
+      ],
+      "tip": {
+        "en": "Red execution icons on the map. Kill the first wave while keeping at least one hostage alive, then beat the second wave that targets the hostages.",
+        "tr": "Haritadaki kırmızı infaz simgeleri. İlk dalgayı en az bir rehine hayatta kalacak şekilde öldür, sonra rehinelere saldıran ikinci dalgayı yen.",
+        "de": "Rote Hinrichtungs-Symbole auf der Karte. Erste Welle töten, mindestens eine Geisel retten, dann die zweite Welle besiegen.",
+        "fr": "Icônes rouges d’exécution sur la carte. Tuez la première vague en gardant un otage en vie, puis battez la seconde qui vise les otages.",
+        "es": "Iconos rojos de ejecución en el mapa. Mata la primera oleada manteniendo vivo un rehén y vence la segunda, que ataca a los rehenes.",
+        "it": "Icone rosse di esecuzione sulla mappa. Uccidi la prima ondata tenendo vivo un ostaggio, poi sconfiggi la seconda che punta agli ostaggi.",
+        "pt": "Ícones vermelhos de execução no mapa. Mate a primeira onda mantendo um refém vivo e vença a segunda, que ataca os reféns.",
+        "ru": "Красные значки казни на карте. Убейте первую волну, сохранив заложника, затем вторую, нацеленную на заложников.",
+        "pl": "Czerwone ikony egzekucji na mapie. Pokonaj pierwszą falę, ratując zakładnika, potem drugą falę atakującą zakładników.",
+        "nl": "Rode executie-iconen op de kaart. Versla de eerste golf en houd een gijzelaar in leven, versla daarna de tweede golf."
+      }
+    },
+    {
+      "id": "bounty",
+      "match": [
+        "bounty",
+        "bounties",
+        "ödül avı",
+        "kopfgeld",
+        "prime",
+        "recompensa",
+        "taglia",
+        "охот за голов",
+        "награда за",
+        "list gończy",
+        "premiejacht"
+      ],
+      "tip": {
+        "en": "Turn on the Bounties filter on the map, travel to an available bounty and kill the target together with its escort. Story/Normal finishes quickly.",
+        "tr": "Haritada Bounty (ödül avı) filtresini aç, uygun bir hedefe git ve hedefi korumalarıyla birlikte öldür. Story/Normal zorlukta çabuk biter.",
+        "de": "Kartenfilter Kopfgelder aktivieren, zu einem verfügbaren Kopfgeld reisen und das Ziel samt Eskorte töten. Story/Normal geht schnell.",
+        "fr": "Activez le filtre Primes sur la carte, rendez-vous à une prime disponible et éliminez la cible et son escorte. Histoire/Normal va vite.",
+        "es": "Activa el filtro de Recompensas en el mapa, viaja a una disponible y mata al objetivo con su escolta. Historia/Normal es rápido.",
+        "it": "Attiva il filtro Taglie sulla mappa, raggiungi una taglia disponibile e uccidi il bersaglio con la scorta. Storia/Normale è rapido.",
+        "pt": "Ative o filtro de Recompensas no mapa, vá até uma disponível e elimine o alvo com a escolta. História/Normal é rápido.",
+        "ru": "Включите на карте фильтр наград за головы, отправляйтесь к доступной цели и убейте её вместе с охраной. На сюжетной/обычной сложности быстро.",
+        "pl": "Włącz na mapie filtr listów gończych, udaj się do dostępnego celu i zabij go wraz z eskortą. Fabularny/Normalny idzie szybko.",
+        "nl": "Zet op de kaart het premiefilter aan, ga naar een beschikbare premie en dood het doelwit met escorte. Verhaal/Normaal gaat snel."
+      }
+    },
+    {
+      "id": "mission",
+      "match": [
+        "main mission",
+        "side mission",
+        "story mission",
+        "stronghold",
+        "invaded",
+        "ana görev",
+        "yan görev",
+        "kale",
+        "istila",
+        "hauptmission",
+        "festung",
+        "mission principale",
+        "forteresse",
+        "misión principal",
+        "fortaleza",
+        "missione principale",
+        "roccaforte",
+        "missão principal",
+        "основн",
+        "крепост",
+        "misja główna",
+        "twierdz",
+        "hoofdmissie",
+        "bolwerk"
+      ],
+      "tip": {
+        "en": "Replay it from the map's mission/stronghold list instead of walking there. Unless the project names a difficulty, lower difficulty is fastest. Invaded versions are under the map's Invaded filter.",
+        "tr": "Oraya yürümek yerine haritadaki görev/kale listesinden tekrar başlat. Proje zorluk belirtmiyorsa düşük zorluk en hızlısıdır. İstila (Invaded) sürümleri haritanın Invaded filtresindedir.",
+        "de": "Über die Missions-/Festungsliste der Karte neu starten statt hinzulaufen. Ohne Vorgabe ist niedrige Schwierigkeit am schnellsten. Invaded-Versionen über den Invaded-Filter.",
+        "fr": "Relancez-la depuis la liste missions/forteresses de la carte plutôt que d’y aller à pied. Sans difficulté imposée, bas = plus rapide. Versions envahies via le filtre Envahi.",
+        "es": "Repítela desde la lista de misiones/fortalezas del mapa en vez de ir a pie. Si no exige dificultad, la baja es la más rápida. Las invadidas están en el filtro Invadida.",
+        "it": "Rigiocala dalla lista missioni/roccaforti della mappa invece di andarci a piedi. Senza difficoltà richiesta, bassa è più veloce. Le invase sono nel filtro Invasa.",
+        "pt": "Rejogue pela lista de missões/fortalezas do mapa em vez de ir a pé. Sem dificuldade exigida, baixa é mais rápida. Versões invadidas ficam no filtro Invadida.",
+        "ru": "Перезапустите через список миссий/крепостей на карте, а не идите пешком. Если сложность не указана, низкая быстрее. Захваченные версии — в фильтре карты.",
+        "pl": "Uruchom ponownie z listy misji/twierdz na mapie zamiast iść pieszo. Bez wymogu trudności niska jest najszybsza. Wersje najechane są w filtrze mapy.",
+        "nl": "Start opnieuw via de missie-/bolwerklijst op de kaart in plaats van ernaartoe te lopen. Zonder eis is lage moeilijkheid het snelst. Invaded-versies via het kaartfilter."
+      }
+    },
+    {
+      "id": "countdown",
+      "match": [
+        "countdown",
+        "geri sayım",
+        "compte à rebours",
+        "cuenta atrás",
+        "conto alla rovescia",
+        "contagem regressiva",
+        "обратный отсч",
+        "odliczanie",
+        "aftellen"
+      ],
+      "tip": {
+        "en": "Queue Countdown from matchmaking. It's a 15-minute 8-player mode: capture the points with the group and reach the extraction helicopter before time runs out to keep the loot.",
+        "tr": "Countdown'ı eşleştirmeden başlat. 15 dakikalık 8 kişilik bir mod: grupla noktaları ele geçir ve süre bitmeden tahliye helikopterine ulaş ki ganimet kalsın.",
+        "de": "Countdown über die Spielersuche starten. 15-Minuten-Modus für 8 Spieler: Punkte einnehmen und vor Ablauf den Helikopter erreichen, um die Beute zu behalten.",
+        "fr": "Lancez Compte à rebours via le matchmaking. Mode de 15 min à 8 : prenez les points et atteignez l’hélicoptère avant la fin pour garder le butin.",
+        "es": "Busca Cuenta atrás en el emparejamiento. Modo de 15 min para 8: captura los puntos y llega al helicóptero antes de que acabe el tiempo para conservar el botín.",
+        "it": "Avvia Conto alla rovescia dal matchmaking. Modalità da 15 min per 8: conquista i punti e raggiungi l’elicottero prima della fine per tenere il bottino.",
+        "pt": "Entre em Contagem Regressiva pelo matchmaking. Modo de 15 min para 8: capture os pontos e chegue ao helicóptero antes do fim para manter o saque.",
+        "ru": "Запустите режим Countdown через подбор. 15 минут, 8 игроков: захватывайте точки и успейте к вертолёту эвакуации, чтобы сохранить добычу.",
+        "pl": "Uruchom Odliczanie przez dobieranie graczy. Tryb 15 min dla 8: zdobywaj punkty i zdąż do helikoptera, by zachować łup.",
+        "nl": "Start Countdown via matchmaking. Modus van 15 min voor 8: verover de punten en haal de helikopter voor de tijd op is om de buit te houden."
+      }
+    },
+    {
+      "id": "summit",
+      "match": [
+        "summit",
+        "zirve",
+        "sommet",
+        "cumbre",
+        "vetta",
+        "cúpula",
+        "саммит",
+        "szczyt"
+      ],
+      "tip": {
+        "en": "Go to The Summit and pick a starting floor and difficulty. Every completed floor counts; low floors on low difficulty are quickest unless a floor or difficulty is required.",
+        "tr": "The Summit'e git, başlangıç katını ve zorluğu seç. Tamamlanan her kat sayılır; kat veya zorluk şartı yoksa düşük katlar ve düşük zorluk en hızlısıdır.",
+        "de": "Zum Summit gehen, Startetage und Schwierigkeit wählen. Jede abgeschlossene Etage zählt; ohne Vorgabe sind niedrige Etagen auf niedriger Schwierigkeit am schnellsten.",
+        "fr": "Allez au Summit, choisissez l’étage de départ et la difficulté. Chaque étage terminé compte ; sans exigence, bas étages en facile = plus rapide.",
+        "es": "Ve a The Summit y elige planta inicial y dificultad. Cada planta completada cuenta; sin requisito, plantas bajas en dificultad baja es lo más rápido.",
+        "it": "Vai al Summit, scegli piano iniziale e difficoltà. Ogni piano completato conta; senza requisiti, piani bassi a difficoltà bassa sono i più rapidi.",
+        "pt": "Vá ao Summit e escolha o andar inicial e a dificuldade. Cada andar concluído conta; sem exigência, andares baixos em dificuldade baixa são mais rápidos.",
+        "ru": "Отправьтесь в The Summit, выберите начальный этаж и сложность. Каждый пройденный этаж засчитывается; без требований быстрее нижние этажи на низкой сложности.",
+        "pl": "Idź do The Summit, wybierz piętro startowe i trudność. Każde ukończone piętro się liczy; bez wymogów najszybsze są niskie piętra na niskiej trudności.",
+        "nl": "Ga naar The Summit en kies startverdieping en moeilijkheid. Elke voltooide verdieping telt; zonder eis zijn lage verdiepingen op lage moeilijkheid het snelst."
+      }
+    },
+    {
+      "id": "dark-zone",
+      "match": [
+        "dark zone",
+        "karanlık bölge",
+        "landmark",
+        "extract",
+        "tahliye",
+        "zone sombre",
+        "zona oscura",
+        "zona nera",
+        "zona escura",
+        "темная зона",
+        "тёмная зона",
+        "strefa mroku",
+        "dark-zone"
+      ],
+      "tip": {
+        "en": "Enter any Dark Zone through its checkpoint. Landmarks are marked on the map. For extraction tasks, pick up contaminated loot, call the helicopter at an extraction zone and defend until it arrives.",
+        "tr": "Herhangi bir Karanlık Bölge'ye kontrol noktasından gir. Landmark'lar haritada işaretlidir. Tahliye görevleri için kirli ganimeti al, tahliye bölgesinde helikopteri çağır ve gelene kadar savun.",
+        "de": "Eine Dark Zone über den Checkpoint betreten. Landmarks sind auf der Karte markiert. Für Extraktionen kontaminierte Beute aufheben, Helikopter an einer Extraktionszone rufen und verteidigen.",
+        "fr": "Entrez dans une Zone sombre par son point de contrôle. Les sites sont indiqués sur la carte. Pour les extractions, ramassez du butin contaminé, appelez l’hélico et défendez la zone.",
+        "es": "Entra en una Zona Oscura por su puesto de control. Los puntos de interés están marcados en el mapa. Para extracciones, recoge botín contaminado, llama al helicóptero y defiende hasta que llegue.",
+        "it": "Entra in una Zona Nera dal checkpoint. I punti di riferimento sono segnati sulla mappa. Per le estrazioni raccogli bottino contaminato, chiama l’elicottero e difendi finché arriva.",
+        "pt": "Entre em uma Zona Escura pelo posto de controle. Pontos de referência ficam marcados no mapa. Para extrações, pegue saque contaminado, chame o helicóptero e defenda até ele chegar.",
+        "ru": "Войдите в любую Тёмную зону через КПП. Ориентиры отмечены на карте. Для эвакуации подберите заражённую добычу, вызовите вертолёт в зоне эвакуации и обороняйтесь до его прилёта.",
+        "pl": "Wejdź do dowolnej Strefy Mroku przez punkt kontrolny. Punkty orientacyjne są na mapie. Przy ewakuacji podnieś skażony łup, wezwij helikopter w strefie ewakuacji i broń się do jego przylotu.",
+        "nl": "Ga een Dark Zone binnen via het checkpoint. Landmarks staan op de kaart. Voor extracties: pak besmette buit op, roep de helikopter bij een extractiezone en verdedig tot hij er is."
+      }
+    },
+    {
+      "id": "donate",
+      "match": [
+        "donate",
+        "bağış",
+        "bağışla",
+        "spende",
+        "spenden",
+        "donner",
+        "donar",
+        "donare",
+        "doar",
+        "пожертв",
+        "przekaż",
+        "doneer"
+      ],
+      "tip": {
+        "en": "Open the project on the Projects screen and donate the requested gear or resources straight from your inventory; the project details show the exact item type needed.",
+        "tr": "Projeler ekranında projeyi aç ve istenen ekipmanı veya kaynağı doğrudan envanterinden bağışla; gereken eşya türü proje detayında yazar.",
+        "de": "Projekt im Projekte-Bildschirm öffnen und die geforderte Ausrüstung oder Ressourcen direkt aus dem Inventar spenden; die Details zeigen den genauen Gegenstandstyp.",
+        "fr": "Ouvrez le projet dans l’écran Projets et donnez l’équipement ou les ressources demandés depuis votre inventaire ; le détail indique le type exact.",
+        "es": "Abre el proyecto en la pantalla de Proyectos y dona el equipo o recurso pedido desde tu inventario; el detalle indica el tipo exacto.",
+        "it": "Apri il progetto nella schermata Progetti e dona l’equipaggiamento o le risorse richieste dall’inventario; i dettagli indicano il tipo esatto.",
+        "pt": "Abra o projeto na tela de Projetos e doe o equipamento ou recurso pedido direto do inventário; os detalhes mostram o tipo exato.",
+        "ru": "Откройте проект на экране «Проекты» и пожертвуйте нужное снаряжение или ресурсы прямо из инвентаря; точный тип указан в деталях проекта.",
+        "pl": "Otwórz projekt na ekranie Projekty i przekaż wymagany sprzęt lub zasoby prosto z ekwipunku; szczegóły pokazują dokładny typ przedmiotu.",
+        "nl": "Open het project op het Projecten-scherm en doneer de gevraagde uitrusting of grondstoffen direct uit je inventaris; de details tonen het exacte type."
+      }
+    },
+    {
+      "id": "headshot",
+      "match": [
+        "headshot",
+        "kafadan",
+        "kafa vuruş",
+        "kopfschuss",
+        "tir à la tête",
+        "a la cabeza",
+        "alla testa",
+        "na cabeça",
+        "в голову",
+        "w głowę",
+        "hoofdschot"
+      ],
+      "tip": {
+        "en": "Use a precise weapon (marksman rifle or rifle) and farm a low-difficulty open-world activity or early Summit floors, aiming at heads of regular red-bar enemies.",
+        "tr": "İsabetli bir silah (keskin nişancı tüfeği veya tüfek) kullan; düşük zorlukta bir açık dünya etkinliğinde ya da Summit'in ilk katlarında normal kırmızı barlı düşmanların kafasını hedefle.",
+        "de": "Präzise Waffe (DMR oder Gewehr) nehmen und eine leichte Open-World-Aktivität oder frühe Summit-Etagen farmen; auf Köpfe normaler Gegner zielen.",
+        "fr": "Prenez une arme précise (fusil de précision ou fusil) et farmez une activité facile du monde ouvert ou les premiers étages du Summit en visant la tête.",
+        "es": "Usa un arma precisa (tirador o fusil) y farmea una actividad fácil del mundo abierto o las primeras plantas del Summit apuntando a la cabeza.",
+        "it": "Usa un’arma precisa (tiratore scelto o fucile) e farma un’attività facile del mondo aperto o i primi piani del Summit mirando alla testa.",
+        "pt": "Use uma arma precisa (atirador ou fuzil) e farme uma atividade fácil do mundo aberto ou os primeiros andares do Summit mirando na cabeça.",
+        "ru": "Возьмите точное оружие (марксманская или обычная винтовка) и фармите лёгкую активность открытого мира или нижние этажи Summit, целясь в голову.",
+        "pl": "Użyj precyzyjnej broni (karabin wyborowy lub karabin) i farm łatwą aktywność w otwartym świecie lub niskie piętra Summit, celując w głowę.",
+        "nl": "Gebruik een precies wapen (marksman rifle of rifle) en farm een makkelijke open-wereldactiviteit of lage Summit-verdiepingen; mik op het hoofd."
+      }
+    },
+    {
+      "id": "weapon-type",
+      "match": [
+        "assault rifle",
+        "submachine",
+        "smg",
+        "lmg",
+        "light machine",
+        "shotgun",
+        "marksman",
+        "pistol",
+        "taarruz tüfeği",
+        "makineli",
+        "pompalı",
+        "tabanca"
+      ],
+      "tip": {
+        "en": "Equip that weapon type (in both slots if possible) and farm low-difficulty open-world activities like Control Points, where enemies come in waves.",
+        "tr": "O silah türünü kuşan (mümkünse iki yuvaya da) ve düşmanların dalga dalga geldiği kontrol noktası gibi düşük zorluktaki açık dünya etkinliklerinde kas.",
+        "de": "Diesen Waffentyp ausrüsten (wenn möglich in beiden Slots) und leichte Open-World-Aktivitäten wie Kontrollpunkte mit Gegnerwellen farmen.",
+        "fr": "Équipez ce type d’arme (dans les deux emplacements si possible) et farmez des activités faciles comme les points de contrôle, où les ennemis arrivent par vagues.",
+        "es": "Equipa ese tipo de arma (en ambas ranuras si puedes) y farmea actividades fáciles como puntos de control, donde los enemigos llegan en oleadas.",
+        "it": "Equipaggia quel tipo d’arma (in entrambi gli slot se puoi) e farma attività facili come i punti di controllo, dove i nemici arrivano a ondate.",
+        "pt": "Equipe esse tipo de arma (nos dois espaços, se possível) e farme atividades fáceis como pontos de controle, onde os inimigos vêm em ondas.",
+        "ru": "Экипируйте этот тип оружия (по возможности в оба слота) и фармите лёгкие активности вроде контрольных точек, где враги идут волнами.",
+        "pl": "Wyposaż ten typ broni (najlepiej w oba sloty) i farm łatwe aktywności, np. punkty kontrolne, gdzie wrogowie przychodzą falami.",
+        "nl": "Rust dat wapentype uit (indien mogelijk in beide slots) en farm makkelijke activiteiten zoals controlepunten, waar vijanden in golven komen."
+      }
+    },
+    {
+      "id": "skill",
+      "match": [
+        "skill kill",
+        "with skills",
+        "using skills",
+        "yetenekle",
+        "yetenek",
+        "fertigkeit",
+        "compétence",
+        "habilidad",
+        "abilità",
+        "habilidade",
+        "навык",
+        "umiejętnoś",
+        "vaardigheid"
+      ],
+      "tip": {
+        "en": "Equip damaging skills such as Assault Turret, Striker Drone, Seeker Mine or Firefly and let them land the kills; skill tier and skill damage gear speed it up.",
+        "tr": "Assault Turret, Striker Drone, Seeker Mine veya Firefly gibi hasar veren yetenekleri kuşan ve öldürmeleri onlara bırak; skill tier ve yetenek hasarı veren ekipman işi hızlandırır.",
+        "de": "Schadens-Fertigkeiten wie Assault Turret, Striker Drone, Seeker Mine oder Firefly ausrüsten und die Kills machen lassen; Skill-Tier- und Fertigkeitsschaden-Ausrüstung beschleunigt.",
+        "fr": "Équipez des compétences offensives (Assault Turret, Striker Drone, Seeker Mine, Firefly) et laissez-les achever ; le niveau et les dégâts de compétence accélèrent.",
+        "es": "Equipa habilidades de daño como Assault Turret, Striker Drone, Seeker Mine o Firefly y deja que rematen; el nivel y daño de habilidad lo aceleran.",
+        "it": "Equipaggia abilità offensive come Assault Turret, Striker Drone, Seeker Mine o Firefly e lascia a loro le uccisioni; livello e danno abilità accelerano.",
+        "pt": "Equipe habilidades de dano como Assault Turret, Striker Drone, Seeker Mine ou Firefly e deixe que finalizem; nível e dano de habilidade aceleram.",
+        "ru": "Возьмите атакующие навыки (Assault Turret, Striker Drone, Seeker Mine, Firefly) и пусть они добивают; уровень и урон навыков ускоряют процесс.",
+        "pl": "Załóż ofensywne umiejętności (Assault Turret, Striker Drone, Seeker Mine, Firefly) i pozwól im dobijać; poziom i obrażenia umiejętności przyspieszają.",
+        "nl": "Gebruik schadevaardigheden zoals Assault Turret, Striker Drone, Seeker Mine of Firefly en laat hen de kills maken; skill tier en vaardigheidsschade versnellen het."
+      }
+    },
+    {
+      "id": "elite",
+      "match": [
+        "elite",
+        "named",
+        "elit",
+        "isimli",
+        "benannt",
+        "élite",
+        "nommé",
+        "élite",
+        "con nome",
+        "nomead",
+        "элит",
+        "именн",
+        "elitarn",
+        "benoemd"
+      ],
+      "tip": {
+        "en": "Elites and named enemies have yellow health bars. Control Point reinforcement waves and higher difficulties spawn more of them.",
+        "tr": "Elit ve isimli düşmanların can barı sarıdır. Kontrol noktası takviye dalgaları ve yüksek zorluklar daha fazlasını çıkarır.",
+        "de": "Elite und Benannte haben gelbe Lebensbalken. Verstärkungswellen an Kontrollpunkten und höhere Schwierigkeit bringen mehr davon.",
+        "fr": "Élites et nommés ont une barre de vie jaune. Les renforts des points de contrôle et les difficultés élevées en font apparaître davantage.",
+        "es": "Élites y enemigos con nombre tienen barra amarilla. Los refuerzos de puntos de control y la dificultad alta generan más.",
+        "it": "Élite e nemici con nome hanno la barra gialla. I rinforzi dei punti di controllo e la difficoltà alta ne generano di più.",
+        "pt": "Elites e nomeados têm barra amarela. Reforços de pontos de controle e dificuldade alta geram mais deles.",
+        "ru": "У элиты и именных врагов жёлтая полоса здоровья. Подкрепления на контрольных точках и высокая сложность дают их больше.",
+        "pl": "Elity i nazwani wrogowie mają żółty pasek zdrowia. Posiłki na punktach kontrolnych i wyższa trudność dają ich więcej.",
+        "nl": "Elites en benoemde vijanden hebben een gele levensbalk. Versterkingsgolven bij controlepunten en hogere moeilijkheid leveren er meer op."
+      }
+    },
+    {
+      "id": "conflict",
+      "match": [
+        "conflict",
+        "çatışma",
+        "konflikt",
+        "conflit",
+        "conflicto",
+        "conflitto",
+        "conflito",
+        "конфликт"
+      ],
+      "tip": {
+        "en": "Start Conflict (PvP) from matchmaking. Check the project text for whether wins or just completed matches are required.",
+        "tr": "Conflict'i (PvP) eşleştirmeden başlat. Projenin galibiyet mi yoksa sadece tamamlanan maç mı istediğine metinden bak.",
+        "de": "Conflict (PvP) über die Spielersuche starten. Im Projekttext prüfen, ob Siege oder nur abgeschlossene Matches nötig sind.",
+        "fr": "Lancez Conflit (JcJ) via le matchmaking. Vérifiez si le projet demande des victoires ou seulement des matchs terminés.",
+        "es": "Inicia Conflicto (JcJ) desde el emparejamiento. Revisa si el proyecto pide victorias o solo partidas completadas.",
+        "it": "Avvia Conflitto (PvP) dal matchmaking. Controlla se il progetto chiede vittorie o solo partite completate.",
+        "pt": "Inicie Conflito (JxJ) pelo matchmaking. Veja se o projeto pede vitórias ou só partidas concluídas.",
+        "ru": "Запустите «Конфликт» (PvP) через подбор. Проверьте, нужны ли победы или просто сыгранные матчи.",
+        "pl": "Uruchom Konflikt (PvP) przez dobieranie graczy. Sprawdź, czy projekt wymaga zwycięstw, czy tylko ukończonych meczów.",
+        "nl": "Start Conflict (PvP) via matchmaking. Kijk of het project overwinningen of alleen voltooide potjes vraagt."
+      }
+    },
+    {
+      "id": "settlement-project",
+      "match": [
+        "settlement",
+        "yerleşim",
+        "siedlung",
+        "colonie",
+        "asentamiento",
+        "insediamento",
+        "assentamento",
+        "поселен",
+        "osad",
+        "nederzetting",
+        "theater",
+        "campus",
+        "castle",
+        "haven"
+      ],
+      "tip": {
+        "en": "Settlement projects come from settlement leaders (Theater, Campus, Castle…). In the campaign they ask for food, water, components or gear donations; in the endgame they are repeatable daily/weekly combat tasks. Open the project on the Projects screen to see exactly what to donate or do.",
+        "tr": "Yerleşim projeleri yerleşim liderlerinden gelir (Theater, Campus, Castle…). Hikâyede yiyecek, su, parça veya ekipman bağışı ister; oyun sonunda tekrarlanabilir günlük/haftalık savaş görevleridir. Ne bağışlayacağını/yapacağını görmek için Projeler ekranında projeyi aç.",
+        "de": "Siedlungsprojekte kommen von Siedlungsleitern (Theater, Campus, Castle…). In der Kampagne wollen sie Nahrung, Wasser, Komponenten oder Ausrüstung; im Endgame sind es wiederholbare tägliche/wöchentliche Kampfaufgaben. Details im Projekte-Bildschirm.",
+        "fr": "Les projets de colonie viennent des chefs (Theater, Campus, Castle…). En campagne : dons de nourriture, d’eau, de composants ou d’équipement ; en fin de jeu : tâches de combat quotidiennes/hebdo. Détails dans l’écran Projets.",
+        "es": "Los proyectos de asentamiento los dan sus líderes (Theater, Campus, Castle…). En la campaña piden donar comida, agua, componentes o equipo; al final del juego son tareas de combate diarias/semanales. Mira el detalle en Proyectos.",
+        "it": "I progetti degli insediamenti arrivano dai leader (Theater, Campus, Castle…). Nella campagna chiedono cibo, acqua, componenti o equipaggiamento; nel finale sono compiti di combattimento giornalieri/settimanali. Dettagli nella schermata Progetti.",
+        "pt": "Projetos de assentamento vêm dos líderes (Theater, Campus, Castle…). Na campanha pedem doação de comida, água, componentes ou equipamento; no fim de jogo são tarefas de combate diárias/semanais. Veja o detalhe em Projetos.",
+        "ru": "Проекты поселений выдают их лидеры (Theater, Campus, Castle…). В кампании просят пожертвовать еду, воду, детали или снаряжение; в эндгейме это повторяемые ежедневные/еженедельные боевые задачи. Подробности — на экране «Проекты».",
+        "pl": "Projekty osad zlecają przywódcy (Theater, Campus, Castle…). W kampanii proszą o żywność, wodę, części lub sprzęt; w endgame to powtarzalne dzienne/tygodniowe zadania bojowe. Szczegóły na ekranie Projekty.",
+        "nl": "Nederzettingsprojecten komen van leiders (Theater, Campus, Castle…). In de campagne vragen ze voedsel, water, onderdelen of uitrusting; in de endgame zijn het herhaalbare dagelijkse/wekelijkse gevechtstaken. Details op het Projecten-scherm."
+      },
+      "source": "https://thedivision.fandom.com/wiki/Projects"
+    },
+    {
+      "id": "zone-liberation",
+      "match": [
+        "liberat",
+        "safe house",
+        "named zone",
+        "sığınak",
+        "kurtar",
+        "befrei",
+        "libér",
+        "liberar",
+        "liberare",
+        "libertar",
+        "освобожд",
+        "wyzwol",
+        "bevrij"
+      ],
+      "tip": {
+        "en": "Zone liberation (safe house) projects: in that named zone capture and resupply its control points, disrupt hostile activities and find the hidden SHD caches; that draws out the faction leader, then defeat them.",
+        "tr": "Bölge kurtarma (sığınak) projeleri: o bölgedeki kontrol noktalarını ele geçirip ikmal et, düşman etkinliklerini boz ve gizli SHD sandıklarını bul; bu, grup liderini ortaya çıkarır, sonra onu yen.",
+        "de": "Zonenbefreiung (Unterschlupf): in der Zone Kontrollpunkte einnehmen und versorgen, feindliche Aktivitäten stören und versteckte SHD-Caches finden; das lockt den Anführer hervor, dann besiegen.",
+        "fr": "Libération de zone (planque) : dans la zone, prenez et ravitaillez les points de contrôle, perturbez les activités ennemies et trouvez les caches SHD ; le chef de faction apparaît, éliminez-le.",
+        "es": "Liberación de zona (refugio): en esa zona captura y abastece los puntos de control, interrumpe actividades enemigas y encuentra los alijos SHD; así aparece el líder de la facción, derrótalo.",
+        "it": "Liberazione della zona (rifugio): nella zona conquista e rifornisci i punti di controllo, interrompi le attività nemiche e trova le casse SHD; così esce allo scoperto il capo della fazione, sconfiggilo.",
+        "pt": "Libertação de zona (abrigo): na zona capture e reabasteça os pontos de controle, atrapalhe atividades inimigas e encontre os esconderijos SHD; isso atrai o líder da facção, derrote-o.",
+        "ru": "Освобождение района (убежище): захватите и снабдите контрольные точки, сорвите вражеские активности и найдите тайники SHD; это выманит лидера фракции — победите его.",
+        "pl": "Wyzwolenie strefy (kryjówka): w tej strefie zdobądź i zaopatrz punkty kontrolne, zakłócaj działania wroga i znajdź ukryte skrzynki SHD; to wywabi przywódcę frakcji — pokonaj go.",
+        "nl": "Zonebevrijding (safehouse): verover en bevoorraad in die zone de controlepunten, verstoor vijandelijke activiteiten en vind de verborgen SHD-caches; dat lokt de leider tevoorschijn, versla hem."
+      },
+      "source": "https://thedivision.fandom.com/wiki/Projects"
+    },
+    {
+      "id": "invaded-mission",
+      "match": [
+        "invaded",
+        "istila",
+        "heroic",
+        "legendary",
+        "challenging",
+        "kahraman",
+        "efsanevi",
+        "zorlu",
+        "invasion",
+        "envahi",
+        "invadid",
+        "invas",
+        "захвач",
+        "najecha",
+        "binnengevallen"
+      ],
+      "tip": {
+        "en": "Invaded / priority mission projects ask for specific main missions on higher difficulties (Hard, Challenging, Legendary or Heroic). Launch them from the map's mission list (Invaded filter for invaded versions) and set the difficulty the project names.",
+        "tr": "İstila/öncelikli görev projeleri belirli ana görevleri yüksek zorlukta (Hard, Challenging, Legendary veya Heroic) ister. Haritadaki görev listesinden başlat (istila sürümleri için Invaded filtresi) ve projenin istediği zorluğu seç.",
+        "de": "Invaded-/Prioritätsmissionsprojekte verlangen bestimmte Hauptmissionen auf hoher Schwierigkeit (Hard, Challenging, Legendary, Heroic). Über die Missionsliste der Karte starten (Invaded-Filter) und die geforderte Schwierigkeit wählen.",
+        "fr": "Les projets de mission envahie/prioritaire demandent certaines missions principales en difficulté élevée (Difficile, Ardu, Légendaire, Héroïque). Lancez-les depuis la liste de la carte (filtre Envahi) avec la difficulté demandée.",
+        "es": "Los proyectos de misión invadida/prioritaria piden misiones principales concretas en dificultad alta (Difícil, Desafiante, Legendaria, Heroica). Lánzalas desde la lista del mapa (filtro Invadida) con la dificultad indicada.",
+        "it": "I progetti di missione invasa/prioritaria chiedono missioni principali specifiche a difficoltà alta (Difficile, Impegnativa, Leggendaria, Eroica). Avviale dalla lista della mappa (filtro Invasa) con la difficoltà richiesta.",
+        "pt": "Projetos de missão invadida/prioritária pedem missões principais específicas em dificuldade alta (Difícil, Desafiador, Lendário, Heroico). Inicie pela lista do mapa (filtro Invadida) com a dificuldade pedida.",
+        "ru": "Проекты захваченных/приоритетных миссий требуют определённые основные миссии на высокой сложности (Hard, Challenging, Legendary, Heroic). Запускайте из списка миссий на карте (фильтр захваченных) с нужной сложностью.",
+        "pl": "Projekty misji najechanych/priorytetowych wymagają konkretnych misji głównych na wysokiej trudności (Hard, Challenging, Legendary, Heroic). Uruchom z listy misji na mapie (filtr najechanych) z wymaganą trudnością.",
+        "nl": "Projecten voor invaded-/prioriteitsmissies vragen bepaalde hoofdmissies op hoge moeilijkheid (Hard, Challenging, Legendary, Heroic). Start ze via de missielijst op de kaart (Invaded-filter) met de gevraagde moeilijkheid."
+      },
+      "source": "https://thedivision.fandom.com/wiki/Projects"
+    },
+    {
+      "id": "red-moon",
+      "match": [
+        "red moon",
+        "moon cultist",
+        "revenant",
+        "kızıl ay",
+        "roter mond",
+        "lune rouge",
+        "luna roja",
+        "luna rossa",
+        "lua vermelha",
+        "красная луна",
+        "czerwony księżyc",
+        "rode maan"
+      ],
+      "tip": {
+        "en": "Kill Moon Cultists on Heroic: 10 kills per key, halved by the Daily Key Boost for your first 150 kills each day (resets 08:00 UTC). Necromancer and Risen Hunter bosses give a key too. Unused keys disappear when the event ends.",
+        "tr": "Moon Cultist'leri Heroic'te öldür: anahtar başına 10 öldürme, Daily Key Boost her gün ilk 150 öldürmede bunu yarıya indirir (08:00 UTC sıfırlanır). Necromancer ve Risen Hunter bossları da anahtar verir. Etkinlik bitince harcanmamış anahtarlar silinir.",
+        "de": "Moon Cultists auf Heroisch töten: 10 Kills pro Key, der Daily Key Boost halbiert das für die ersten 150 Kills pro Tag (Reset 08:00 UTC). Necromancer- und Risen-Hunter-Bosse geben ebenfalls einen Key. Unbenutzte Keys verfallen zum Eventende.",
+        "fr": "Tuez des Moon Cultists en Héroïque : 10 éliminations par clé, divisées par deux par le Daily Key Boost pour les 150 premières du jour (reset 08:00 UTC). Les boss Necromancer et Risen Hunter donnent aussi une clé. Les clés non utilisées disparaissent à la fin.",
+        "es": "Mata Moon Cultists en Heroico: 10 bajas por llave, a la mitad con el Daily Key Boost en tus primeras 150 bajas del día (reinicio 08:00 UTC). Los jefes Necromancer y Risen Hunter también dan llave. Las llaves sin usar se pierden al terminar.",
+        "it": "Uccidi Moon Cultist a Eroico: 10 uccisioni per chiave, dimezzate dal Daily Key Boost per le prime 150 del giorno (reset 08:00 UTC). Anche i boss Necromancer e Risen Hunter danno una chiave. Le chiavi non usate spariscono a fine evento.",
+        "pt": "Mate Moon Cultists no Heroico: 10 abates por chave, metade com o Daily Key Boost nos primeiros 150 do dia (reset 08:00 UTC). Os chefes Necromancer e Risen Hunter também dão chave. Chaves não usadas somem no fim do evento.",
+        "ru": "Убивайте Moon Cultist на «Героической»: 10 убийств за ключ, Daily Key Boost вдвое снижает это для первых 150 убийств в день (сброс 08:00 UTC). Боссы Necromancer и Risen Hunter тоже дают ключ. Неиспользованные ключи сгорают в конце события.",
+        "pl": "Zabijaj Moon Cultists na Heroicznym: 10 zabójstw na klucz, Daily Key Boost zmniejsza to o połowę dla pierwszych 150 dziennie (reset 08:00 UTC). Bossowie Necromancer i Risen Hunter też dają klucz. Niewykorzystane klucze przepadają po wydarzeniu.",
+        "nl": "Dood Moon Cultists op Heroic: 10 kills per key, gehalveerd door de Daily Key Boost voor je eerste 150 kills per dag (reset 08:00 UTC). Necromancer- en Risen Hunter-bazen geven ook een key. Ongebruikte keys vervallen aan het eind."
+      },
+      "source": {
+        "url": "https://www.theclick.gg/the-division-2-red-moon-unleashed-event-keys/"
+      }
+    },
+    {
+      "id": "territory-control",
+      "match": [
+        "territory control",
+        "gebietskontrolle",
+        "contrôle de territoire",
+        "control de territorio",
+        "controllo del territorio",
+        "controle de território",
+        "контроль территории",
+        "kontrola terytorium",
+        "gebiedscontrole",
+        "bölge kontrol"
+      ],
+      "source": {
+        "url": "https://www.destructoid.com/the-division-2-y8s3-red-horizon-week-10-manhunt-scout-10-solutions/"
+      },
+      "tip": {
+        "en": "Territory Control is a random open-world activity marked by two crossed shotguns. If a faction is named, pick its icon; if none is on the map, restart the game.",
+        "tr": "Territory Control, iki çapraz pompalı simgeli rastgele açık dünya aktivitesidir. Grup belirtilmişse onun simgesini seç; haritada yoksa oyunu yeniden başlat.",
+        "de": "Territory Control ist eine zufällige Open-World-Aktivität mit zwei gekreuzten Schrotflinten. Ist eine Fraktion genannt, wähle deren Symbol; keine auf der Karte? Spiel neu starten.",
+        "fr": "Territory Control est une activité aléatoire du monde ouvert (deux fusils à pompe croisés). Si une faction est citée, choisissez son icône ; aucune sur la carte ? Relancez le jeu.",
+        "es": "Territory Control es una actividad aleatoria del mundo abierto (dos escopetas cruzadas). Si se nombra una facción, elige su icono; si no hay ninguna, reinicia el juego.",
+        "it": "Territory Control è un'attività casuale del mondo aperto (due fucili a pompa incrociati). Se è indicata una fazione, scegli la sua icona; se non c'è, riavvia il gioco.",
+        "pt": "Territory Control é uma atividade aleatória do mundo aberto (duas espingardas cruzadas). Se uma facção for citada, escolha o ícone dela; se não houver, reinicie o jogo.",
+        "ru": "Territory Control — случайная активность открытого мира (два скрещённых дробовика). Если указана фракция, выбирайте её значок; если на карте пусто, перезапустите игру.",
+        "pl": "Territory Control to losowa aktywność otwartego świata (dwie skrzyżowane strzelby). Gdy podano frakcję, wybierz jej ikonę; gdy na mapie nic nie ma, uruchom grę ponownie.",
+        "nl": "Territory Control is een willekeurige open-wereld-activiteit (twee gekruiste shotguns). Is een factie genoemd, kies dan haar icoon; staat er niets op de kaart, herstart de game."
+      }
+    }
+  ],
+  "wiki": {
+    "season_page": "Red Horizon"
+  }
+}

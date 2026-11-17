@@ -1,0 +1,77 @@
+[
+  {
+    "suite": "test_itempolicy.py",
+    "exit_code": 0,
+    "seconds": 0.388
+  },
+  {
+    "suite": "test_workqueue.py",
+    "exit_code": 0,
+    "seconds": 0.087
+  },
+  {
+    "suite": "test_performance.py",
+    "exit_code": 0,
+    "seconds": 0.16
+  },
+  {
+    "suite": "test_animation_policy.py",
+    "exit_code": 0,
+    "seconds": 0.18
+  },
+  {
+    "suite": "test_app_stability.py",
+    "exit_code": 0,
+    "seconds": 0.913
+  },
+  {
+    "suite": "test_translation_reliability.py",
+    "exit_code": 0,
+    "seconds": 0.188
+  },
+  {
+    "suite": "test_localapi_backpressure.py",
+    "exit_code": 0,
+    "seconds": 0.667
+  },
+  {
+    "suite": "test_core.py",
+    "exit_code": 1,
+    "seconds": 16.346
+  },
+  {
+    "suite": "test_livetranslate.py",
+    "exit_code": 0,
+    "seconds": 0.752
+  },
+  {
+    "suite": "test_autoscan.py",
+    "exit_code": 0,
+    "seconds": 0.552
+  },
+  {
+    "suite": "test_localapi.py",
+    "exit_code": 0,
+    "seconds": 8.062
+  },
+  {
+    "suite": "test_screenstate.py",
+    "exit_code": 0,
+    "seconds": 4.357
+  },
+  {
+    "suite": "test_service.py",
+    "exit_code": 0,
+    "seconds": 1.103
+  },
+  {
+    "suite": "test_overlay.py",
+    "exit_code": 0,
+    "seconds": 0.102
+  },
+  {
+    "suite": "test_tasks_live.py",
+    "exit_code": 0,
+    "seconds": 0.116
+  }
+]

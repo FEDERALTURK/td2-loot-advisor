@@ -1,0 +1,118 @@
+[
+  {
+    "file": "app.py",
+    "sha256": "4e299a86a2f26ad88f0e793e8438c4623358da311abd7b35ae22cf2374c66c23"
+  },
+  {
+    "file": "game_assistant.py",
+    "sha256": "bf22f525edf576378f592f6135410e6bf14fd8a7a8d882d3e612562522e34e82"
+  },
+  {
+    "file": "voicepack.py",
+    "sha256": "752f68f1929ab21a5ca080cb658620e382b18ab70dd80e7ef8a51e261217f1f1"
+  },
+  {
+    "file": "requirements.txt",
+    "sha256": "436e4043469caed8ebc3084a0b34b2df67d9719e0fd96d25fcd06b73bac99f64"
+  },
+  {
+    "file": "requirements-voice.txt",
+    "sha256": "7b43f9bb7c2f9b3869a45c76286cf4c87ddc85a7dd19445dd9f317d4c651a400"
+  },
+  {
+    "file": "scripts/launch.py",
+    "sha256": "4e2c34e2c24450c29e5fb88bc3b721a6afa2525c9c5892f47cbfdde44f0b0192"
+  },
+  {
+    "file": "scripts/build_installer.bat",
+    "sha256": "c59d7351a6972bc15e2d7ac430c3832a010e311a0fc184e563a6e3c9ab79abed"
+  },
+  {
+    "file": "scripts/build_exe.bat",
+    "sha256": "933a0c87f46a6a81ae4b969129dce33000b33fe071bc65790883f87366407c09"
+  },
+  {
+    "file": "scripts/default_builds.json",
+    "sha256": "e8992b8a4469363aef065f329a1798669743a640311bf99ab75a711eebd19ca5"
+  },
+  {
+    "file": "tests/test_game_assistant.py",
+    "sha256": "2eea75d4191559faacc76a01e684fcc9b174573f890f260f974d22409ee5b831"
+  },
+  {
+    "file": "tests/test_natural_voice.py",
+    "sha256": "8092931cff41d3d937fdc3a0d13c031534b1d4ccfe2ab89f93fa1a14bc2b54d0"
+  },
+  {
+    "file": "tests/test_launcher.py",
+    "sha256": "8b189cb4e22d2108e04c0f552c337b1a12572fd9627eb523f4212cac7c44709c"
+  },
+  {
+    "file": "tests/test_stability_widgets.py",
+    "sha256": "60ad4c01cb700f586eb982ef772cc0a522f11ee0e78ae18b66fa41409b13ffcd"
+  },
+  {
+    "file": ".github/workflows/stability-check.yml",
+    "sha256": "1b201114242a7f852915630fd49c51cc31de5fa220c66f83c6e0f1c01178eae2"
+  },
+  {
+    "file": ".github/workflows/build-installer.yml",
+    "sha256": "256568639cafe1d0589f82e5556ffff7988b7d3f01d38c9ce1c92ac15691ed9c"
+  },
+  {
+    "file": ".github/release_notes.md",
+    "sha256": "474cc86f7f35704eb1c689180a29c5de6cc6f5d1acd9fafd63c59dc3206eadc0"
+  },
+  {
+    "file": "docs/game_assistant_9.0.4.md",
+    "sha256": "0b1d8533ba7f0d85439a84d4a783f2ab9593b3daa092371132522f235c852489"
+  },
+  {
+    "file": "README.md",
+    "sha256": "cc0434ea97b3f195c4942e682bec1cf5e149f7498045aadb79720b90c991d411"
+  },
+  {
+    "file": "README.tr.md",
+    "sha256": "21b7c930ebc71d8c48228c692866f16f7d0e300ef89ce2c56238ee1e4f79c489"
+  },
+  {
+    "file": "lang/de.json",
+    "sha256": "65078f588b0cd10cea5a7c61470d9745b4dddea89f3f2a678be30a06765b5450"
+  },
+  {
+    "file": "lang/en.json",
+    "sha256": "0a9d4dbddd94c965f21aac670fce9c95721c12fc811aabac784f16d87b12b114"
+  },
+  {
+    "file": "lang/es.json",
+    "sha256": "4ff5ff29fa0e1841c62e1acfa82b2998b0a6f8f9935b3b2e94805cc427cc1ef4"
+  },
+  {
+    "file": "lang/fr.json",
+    "sha256": "0723d6b79dbdd530597b3fd5e1342909a1bb96cd8b36c2824d9f8f614798cfe8"
+  },
+  {
+    "file": "lang/it.json",
+    "sha256": "25e8fb09a05e62c236bef1738d20808723f1cb4bd85f7d8b9f123ae518acedeb"
+  },
+  {
+    "file": "lang/nl.json",
+    "sha256": "54b7203435e1227f448309263c6c6a4bd97fc5657f66184614f98e2468cb3e96"
+  },
+  {
+    "file": "lang/pl.json",
+    "sha256": "991ae280f94c3daf57a5660c0019d471f00164e7a2a5d3691c7682ff2b9f1057"
+  },
+  {
+    "file": "lang/pt.json",
+    "sha256": "81a67ba9ae029a95d40787ebe20c7fea816fb8760f04ff6f5d91f9814f67d06b"
+  },
+  {
+    "file": "lang/ru.json",
+    "sha256": "1844c8088b175f046a3b20c99dc27e8b315e36bfaa2a8694da7b5a87c283d052"
+  },
+  {
+    "file": "lang/tr.json",
+    "sha256": "a29db54a95a62a88229b4f623ef9d1c764edf8f347689982ffe7284f9a77406a"
+  }
+]

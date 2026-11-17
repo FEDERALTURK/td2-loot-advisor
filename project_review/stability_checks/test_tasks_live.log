@@ -1,0 +1,31 @@
+OK   tam ekrandan başlık (yan kartlar karışmadı): 'Weekly Legendary Mission'
+OK   alt başlık ve açıklama
+OK   hedef + sayaç ayrı
+OK   ödüller (ikon harfi ayıklandı)
+OK   tür: haftalık proje
+OK   bitiş: haftalık sıfırlama (Salı 08:00 UTC)
+OK   tam ekran ve kırpılmış panel aynı görevi verdi (aynı kimlik)
+OK   görev paneli yoksa None
+OK   eksik panel → None
+OK   kimlik büyük/küçük harf ve noktalamadan bağımsız
+OK   liste doğrulandı, bozuk kayıtlar atıldı
+OK   hafıza
+OK   hedef satırı hafızadan
+OK   başlık ve açıklama hafızadan
+OK   bilinen görevde model hiç çalışmadı: []
+OK   hafıza sayacı ve önbellek anahtarı
+OK   Görevler sekmesine 👥 olarak eklendi
+OK   Türkçe görev metni
+OK   açıklama + ödüller
+OK   listeden düşen topluluk görevi kaldırıldı, kullanıcınınki kaldı
+OK   ortak liste kendi görevleriyle sınırlı
+OK   gönderildi
+OK   gönderilen içerik
+OK   yalnız görev yazısı gönderildi
+OK   aynı gün tekrar gönderilmez
+OK   durum dosyasından hatırlandı
+OK   ağ hatasında yeniden denenecek
+OK   sunucuya sürüm + açılış işareti
+OK   GitHub yedeğine açılış işareti gitmez
+OK   geçersiz sürüm metni gönderilmez
+RESULT: PASS

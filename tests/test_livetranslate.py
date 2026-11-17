@@ -130,4 +130,6 @@ ok("görevini" in o[0] and "misyon" not in o[0], "misyon → görev düzeltmesi:
 ok(o[1] == "Ödüller\nGear Crafting Cache", "sandık adı olduğu gibi kaldı: %r" % o[1])
 ok(all("Cache" not in u for c in Echo.calls for u in c if "ZQ" not in u), "sandık adları modele gitmedi")
 
-print("RESULT:", "PASS" if not fails else f"FAIL ({fails})"); sys.exit(1 if fails else 0)
+if __name__ == "__main__":
+    print("RESULT:", "PASS" if not fails else f"FAIL ({fails})")
+    sys.exit(1 if fails else 0)

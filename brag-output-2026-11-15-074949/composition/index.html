@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en" data-resolution="landscape">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1920, height=1080" />
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+  <style>
+    :root{--bg:#0a0d12;--surface:#121720;--surface2:#1a212c;--line:#2b3542;--ink:#eef2f6;--muted:#8a96a6;--cyan:#36e0c4;--orange:#ff6d10;--good:#22c55e;--review:#60a5fa}
+    *{box-sizing:border-box} html,body{margin:0;width:1920px;height:1080px;overflow:hidden;background:var(--bg);color:var(--ink);font-family:"Segoe UI",Arial,sans-serif}
+    body:before{content:"";position:absolute;inset:0;opacity:.18;background-image:linear-gradient(rgba(54,224,196,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(54,224,196,.05) 1px,transparent 1px);background-size:54px 54px;mask-image:linear-gradient(to bottom,black,transparent 92%)}
+    #root{position:relative;width:100%;height:100%;padding:72px 110px;overflow:hidden}.scan{position:absolute;left:0;right:0;top:-8px;height:5px;background:linear-gradient(90deg,transparent,var(--orange),var(--cyan),transparent);box-shadow:0 0 28px var(--orange);opacity:.8}
+    .hud{position:absolute;inset:42px 88px auto;display:flex;justify-content:space-between;color:var(--muted);font-size:22px;letter-spacing:.16em}.hud b{color:var(--cyan);font-weight:600}.hud .status{color:var(--orange)}
+    .corner{position:absolute;width:42px;height:42px;border-color:var(--cyan);opacity:.75}.tl{left:88px;top:42px;border-left:2px solid;border-top:2px solid}.tr{right:88px;top:42px;border-right:2px solid;border-top:2px solid}.bl{left:88px;bottom:42px;border-left:2px solid;border-bottom:2px solid}.br{right:88px;bottom:42px;border-right:2px solid;border-bottom:2px solid}
+    .hero{position:absolute;left:150px;top:190px}.kicker{color:var(--orange);font-size:24px;letter-spacing:.24em;font-weight:700}.headline{font-size:118px;line-height:.95;letter-spacing:-.04em;margin:24px 0;max-width:1000px}.sub{font-size:30px;color:var(--muted);letter-spacing:.06em}.mono{font-family:Consolas,monospace}
+    .terminal{position:absolute;right:145px;top:180px;width:700px;height:650px;border:1px solid var(--line);background:rgba(18,23,32,.94);box-shadow:0 0 0 1px rgba(54,224,196,.08),0 28px 90px rgba(0,0,0,.45);padding:30px}.terminal-head{display:flex;justify-content:space-between;color:var(--muted);font:18px Consolas,monospace;border-bottom:1px solid var(--line);padding-bottom:18px}.terminal-head b{color:var(--cyan)}
+    .card{margin-top:26px;padding:24px;background:#0f141c;border:1px solid #385064;position:relative}.card:before{content:"ITEM CARD / OCR READ";position:absolute;right:18px;top:14px;color:var(--muted);font:14px Consolas,monospace}.item{font-size:34px;font-weight:700;color:var(--ink);margin-top:20px}.meta{color:var(--cyan);font:18px Consolas,monospace;margin-top:8px}.row{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:20px;margin-top:22px}.bar{width:250px;height:10px;background:#26313e}.fill{display:block;height:100%;background:var(--cyan);width:78%}.checks{margin-top:26px;padding-top:20px;border-top:1px solid var(--line);font:19px Consolas,monospace;line-height:2}.checks span{color:var(--good)}.checks .review{color:var(--review)}
+    .rail{position:absolute;left:150px;bottom:150px;display:flex;gap:18px}.pill{border:1px solid var(--line);padding:16px 24px;color:var(--muted);background:rgba(18,23,32,.85);font:20px Consolas,monospace}.pill b{color:var(--cyan)}
+    .lockup{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:radial-gradient(circle at center,rgba(54,224,196,.11),transparent 34%),rgba(10,13,18,.98)}.logo{width:150px;height:150px;object-fit:contain;filter:drop-shadow(0 0 20px rgba(255,109,16,.35));margin-bottom:24px}.lockline{font-size:56px;font-weight:700;letter-spacing:.05em}.version{margin-top:20px;color:var(--cyan);font:22px Consolas,monospace;letter-spacing:.16em}.safe{margin-top:30px;color:var(--muted);font:18px Consolas,monospace;letter-spacing:.08em}.clip{will-change:transform,opacity,filter}
+  </style>
+</head>
+<body>
+  <div id="root" data-composition-id="main" data-start="0" data-duration="20" data-width="1920" data-height="1080">
+    <audio id="bg-music" data-start="0" data-duration="20" data-track-index="10" data-volume="0.24" src="assets/music/happy-beats-business-moves-vol-12-by-ende-dot-app.mp3"></audio>
+    <div id="scan-line" class="scan clip" data-start="0" data-duration="3" data-track-index="1"></div>
+    <div id="hud-status" class="hud clip" data-start="0" data-duration="20" data-track-index="2"><span>[SHD_NET // <b>LOCAL OCR</b>]</span><span class="status">ONLINE · <b>NO GAME MEMORY</b></span></div>
+    <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+    <section id="hero-scene" class="hero clip" data-start="0" data-duration="8" data-track-index="3"><div class="kicker mono">TD2 LOOT ADVISOR // FIELD TERMINAL</div><h1 id="hero-title" class="headline">HOVER → F8<br/><span style="color:var(--cyan)">→ KNOW.</span></h1><div class="sub mono">TURN ONE LOOT CARD INTO A BUILD-AWARE DECISION.</div></section>
+    <section id="scan-result" class="terminal clip" data-start="3" data-duration="9" data-track-index="4"><div class="terminal-head"><b>PANEL / SCAN RESULT</b><span>RAPIDOCR · READY</span></div><div class="card"><div class="item">STRIKER'S BATTLEGEAR</div><div class="meta">CHEST · GEAR SET · OCR 0.94</div><div class="row"><span>WEAPON DAMAGE</span><span class="bar"><span class="fill"></span></span></div><div class="row"><span>CRITICAL HIT CHANCE</span><span class="bar"><span class="fill" style="width:61%"></span></span></div><div class="checks"><div><span>✓</span> ACTIVE BUILD SLOT MATCH</div><div><span>✓</span> ATTRIBUTE TYPE ACCEPTED</div><div><span class="review">•</span> LOW CONFIDENCE → REVIEW, NEVER AUTO-DISMANTLE</div></div></div></section>
+    <div id="feature-rail" class="rail clip" data-start="11" data-duration="5" data-track-index="5"><div class="pill"><b>01</b> BUILDS</div><div class="pill"><b>02</b> STASH AUDIT</div><div class="pill"><b>03</b> TASKS</div></div>
+    <section id="final-lockup" class="lockup clip" data-start="15" data-duration="5" data-track-index="6"><img class="logo" src="assets/td2.png" alt="TD2 Loot Advisor"/><div class="lockline">KEEP YOUR BUILD.<br/><span style="color:var(--orange)">REVIEW THE UNKNOWN.</span></div><div class="version">TD2 LOOT ADVISOR · v9.1.5.35</div><div class="safe">LOCAL OCR · NO GAME MEMORY</div></section>
+  </div>
+  <script>
+    window.__timelines = window.__timelines || {};
+    const tl = gsap.timeline({paused:true});
+    tl.fromTo('.scan',{y:-20,opacity:0},{y:0,opacity:.85,duration:.45,ease:'power3.out'},0).fromTo('.hud,.corner',{opacity:0},{opacity:1,duration:.6},.2).fromTo('.hero',{x:-50,opacity:0,filter:'blur(8px)'},{x:0,opacity:1,filter:'blur(0px)',duration:.75,ease:'power3.out'},.45).to('.hero',{opacity:0,y:-20,duration:.35},2.75).fromTo('.terminal',{x:60,opacity:0,filter:'blur(8px)'},{x:0,opacity:1,filter:'blur(0px)',duration:.7,ease:'power3.out'},3).fromTo('.card',{y:20,opacity:0},{y:0,opacity:1,duration:.45},3.7).fromTo('.rail',{y:30,opacity:0},{y:0,opacity:1,duration:.55},11).to('.terminal,.rail,.hud,.corner',{opacity:0,duration:.35},14.65).fromTo('.lockup',{opacity:0},{opacity:1,duration:.55},15).fromTo('.logo,.lockline,.version,.safe',{y:18,opacity:0},{y:0,opacity:1,stagger:.12,duration:.45},15.35);
+    window.__timelines.main = tl; tl.seek(0);
+  </script>
+</body>
+</html>

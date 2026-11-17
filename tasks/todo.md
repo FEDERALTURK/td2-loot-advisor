@@ -1,0 +1,5 @@
+- [x] Hedef kayıt şemasını ve normalizasyonu yaz
+- [x] Farm eşleştirme motorunu yaz
+- [x] Hedef JSON kalıcılığını ekle
+- [x] Uygulama paneline salt-okunur plan özeti bağla
+- [x] Faz 4 testlerini ve regresyon testlerini çalıştır

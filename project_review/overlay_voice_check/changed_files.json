@@ -1,0 +1,338 @@
+[
+  {
+    "file": "app.py",
+    "sha256": "9f2bf74259891df8f92cffe653af02997f61af7922d58b84e4b8eafc72f8f2b9",
+    "bytes": 509593,
+    "new": false
+  },
+  {
+    "file": "performance.py",
+    "sha256": "6cff6212698f15e2ac77e0e331c21e01c8672a82f3d1f09775c518d0e5b32316",
+    "bytes": 5121,
+    "new": false
+  },
+  {
+    "file": "livetranslate.py",
+    "sha256": "6b1f1a6eea5b91b4a85f5cb9080a1504c77d02f363a6fe280b7745d0384e9b8d",
+    "bytes": 23301,
+    "new": false
+  },
+  {
+    "file": "ocr_backend.py",
+    "sha256": "08a5ac1c676d0fc8dd0084f8ee2633e06710b1e3a68d22948cf2a18b909857b3",
+    "bytes": 14711,
+    "new": false
+  },
+  {
+    "file": "overlay.py",
+    "sha256": "dd4e819a2f792f7dd842f307e127256e25cd536b4fcfeca7ee1cb8888e355839",
+    "bytes": 8542,
+    "new": false
+  },
+  {
+    "file": "voicepack.py",
+    "sha256": "90e103c2c9a2f58c41effdf7efe5a429b2f0cd1d39fc50aa87a9cec61766a9b6",
+    "bytes": 10185,
+    "new": false
+  },
+  {
+    "file": "requirements.txt",
+    "sha256": "73c42c79899b48c67e9ab819dd898c7f9694fc1299c75111145780638eb95101",
+    "bytes": 102,
+    "new": false
+  },
+  {
+    "file": "README.md",
+    "sha256": "3171862964f409228418b99529b3d5bad1c956e6d86f5fbc7e9513f5b59eee51",
+    "bytes": 13587,
+    "new": false
+  },
+  {
+    "file": "README.tr.md",
+    "sha256": "f1ba2743ca7c371677ffadf1960d4f25eff97ebfe914c4e03a47e7b1ac84842e",
+    "bytes": 17701,
+    "new": false
+  },
+  {
+    "file": "scripts/launch.py",
+    "sha256": "b5212a550c94b6f3143f026428a89ac85b14f5aedca917e696cbd9fc8020e12a",
+    "bytes": 3856,
+    "new": false
+  },
+  {
+    "file": "scripts/build_installer.bat",
+    "sha256": "6a2d8af079eda572b95e4f150f9a3417fb3832d04a364ba20cce8aefc86fb8bb",
+    "bytes": 7664,
+    "new": false
+  },
+  {
+    "file": "scripts/build_exe.bat",
+    "sha256": "1e2518d28005ccb234d44e35933707f2bc771a20a20ad2de0efc5ce995fce8a1",
+    "bytes": 3120,
+    "new": false
+  },
+  {
+    "file": "scripts/default_builds.json",
+    "sha256": "87d357709fdfd0ddc1716a32a6933555513fdcab35749519e0480174a2b4b597",
+    "bytes": 6226,
+    "new": false
+  },
+  {
+    "file": "scripts/build_voice_packs.py",
+    "sha256": "b5f905a8da4828002bc6e4dec8674881decf96bf1fc2b2a9ecf1af2aa4de7a69",
+    "bytes": 5052,
+    "new": true
+  },
+  {
+    "file": "tests/test_overlay.py",
+    "sha256": "895749f4b65073ee0852bf993f8a7615f2852edf75a30c4fc75541ffe6fe7f4e",
+    "bytes": 3103,
+    "new": false
+  },
+  {
+    "file": "tests/test_app_stability.py",
+    "sha256": "f6619e8b818ef58128b9f03785ed635c330d62ad8fb8c77a74a56b2fab68776c",
+    "bytes": 15996,
+    "new": false
+  },
+  {
+    "file": "tests/test_stability_widgets.py",
+    "sha256": "66d475dbf8ef3615d9879aad797ac700a13e2a6d4562099dae14f26e75c4c277",
+    "bytes": 6516,
+    "new": false
+  },
+  {
+    "file": "tests/test_inplace_anchors.py",
+    "sha256": "fa5b9567c07b6c8ccc68f753e975590373bf8c8a2576ac19b7ce1b5b1b011607",
+    "bytes": 4159,
+    "new": true
+  },
+  {
+    "file": "tests/test_natural_voice.py",
+    "sha256": "f2a4383db1e6a94270d004566303b1d30f95d5c892c472167cf322072795ddd0",
+    "bytes": 5769,
+    "new": true
+  },
+  {
+    "file": "tests/test_scan_latency.py",
+    "sha256": "0015c17bd02f8ef45914d466e7d208a8942a670d1c7da83ee3477f873da8ad5a",
+    "bytes": 3671,
+    "new": true
+  },
+  {
+    "file": "tests/test_region_scan_fastpath.py",
+    "sha256": "a799af187bc684918fc3ad61951bcff1fa4601c79a251bb44cdf397fb5a258a3",
+    "bytes": 2939,
+    "new": true
+  },
+  {
+    "file": "tests/bench_region_scan.py",
+    "sha256": "58c65a336709f6e7373ecbf89cc8094997ac0cd800a8db1ca9a57fa39eae47c2",
+    "bytes": 3103,
+    "new": true
+  },
+  {
+    "file": "meta/voice_packs.json",
+    "sha256": "b94bc353d8b56f204afd20f4e567b5c2b91176707b538889aa7c32c8fa908df6",
+    "bytes": 5862,
+    "new": true
+  },
+  {
+    "file": "docs/overlay_voice_local.md",
+    "sha256": "1f498f193f7469ccae89e3a7e3470b8d230b948b4740dc7b3074f849ddd5fd77",
+    "bytes": 4874,
+    "new": true
+  },
+  {
+    "file": ".github/workflows/stability-check.yml",
+    "sha256": "b5ac1789bdfddec59f84aa02cc929f74c75e44dd5152114f41f739e698516d96",
+    "bytes": 2258,
+    "new": false
+  },
+  {
+    "file": ".github/workflows/build-installer.yml",
+    "sha256": "ff433d55fe03212f568d6bafc7aca299e03eb5e79302be91e362c6218ad1c136",
+    "bytes": 7888,
+    "new": false
+  },
+  {
+    "file": "lang/de.json",
+    "sha256": "6ad314950c8219942485544d3bdfb7645f804cca7352962eb8861f09bf0317ca",
+    "bytes": 75722,
+    "new": false
+  },
+  {
+    "file": "lang/en.json",
+    "sha256": "4de6209c15a929e19d8f1496e9a07088a27eee9a00d848b6ed2471cbf38e68ad",
+    "bytes": 73438,
+    "new": false
+  },
+  {
+    "file": "lang/es.json",
+    "sha256": "f2ce6e78a9119e14e419f98e750be1b6089926345768cf51b991ddcc48de21e2",
+    "bytes": 76558,
+    "new": false
+  },
+  {
+    "file": "lang/fr.json",
+    "sha256": "28b81dc224f987bd72b45a0f8e66c4f2b8232aad30a3ea9eda0cbf67b78692b5",
+    "bytes": 78149,
+    "new": false
+  },
+  {
+    "file": "lang/it.json",
+    "sha256": "6dcc8c13307ec3e0ca8429e381a0aadb38ad988d7f585c2358e8ab400f0ca3fb",
+    "bytes": 75796,
+    "new": false
+  },
+  {
+    "file": "lang/nl.json",
+    "sha256": "eb0d6c1fbf602b3b398b305d2e30ebc895c3fafe900d4caaffca05ccbbd4063f",
+    "bytes": 74080,
+    "new": false
+  },
+  {
+    "file": "lang/pl.json",
+    "sha256": "8bdf56fe87122351872ffcd598baeda67c2227e85c9921e3f8ed102ab6874e95",
+    "bytes": 75097,
+    "new": false
+  },
+  {
+    "file": "lang/pt.json",
+    "sha256": "af956d0a145e9029567d840ed744d47dc9a005ef1f5952af2e0bfddb4235a131",
+    "bytes": 75628,
+    "new": false
+  },
+  {
+    "file": "lang/ru.json",
+    "sha256": "4fc9ff2828eaf1e054968e76977d53a55debb698f625eacddc7c03228b281be0",
+    "bytes": 104600,
+    "new": false
+  },
+  {
+    "file": "lang/tr.json",
+    "sha256": "e2227920b9b622881ab74c8de20a58e24aa92390414b4b964ab9651ac840e34f",
+    "bytes": 82053,
+    "new": false
+  },
+  {
+    "file": "meta/voices/natural_en/build.wav",
+    "sha256": "22e4ebba25e997025a63bba14fc717577e27a20e04b9de7bdf7134a03172dfe7",
+    "bytes": 152108,
+    "new": true
+  },
+  {
+    "file": "meta/voices/natural_en/consider.wav",
+    "sha256": "0fd8a247d2952283acae93ff04e3f69fbf8b1e0370ba4e23bb463da0802972c1",
+    "bytes": 139436,
+    "new": true
+  },
+  {
+    "file": "meta/voices/natural_en/demo.wav",
+    "sha256": "a6128db9d4decd49c5bafceeae007ca89c62360cb5e81cf565793ea0d6f28698",
+    "bytes": 317996,
+    "new": true
+  },
+  {
+    "file": "meta/voices/natural_en/dismantle.wav",
+    "sha256": "90d8da90e84f61d17c952ea5b89239beb0c4b01f672c7b3f44107d7e972e4282",
+    "bytes": 209708,
+    "new": true
+  },
+  {
+    "file": "meta/voices/natural_en/exotic.wav",
+    "sha256": "0874c41a8305ba92c794c1c899df83e0fc5b52e6d50587d3c6492e2b6f71741c",
+    "bytes": 236204,
+    "new": true
+  },
+  {
+    "file": "meta/voices/natural_en/fills_gap.wav",
+    "sha256": "362c264d0c6bbb717bae9945b64543f5c95403f0500ec932f35062f3ee37144d",
+    "bytes": 161324,
+    "new": true
+  },
+  {
+    "file": "meta/voices/natural_en/keep.wav",
+    "sha256": "b099fe1694f14614b5ad2ac74a3d08ea118e021725c90e82c896bf079b34674e",
+    "bytes": 191276,
+    "new": true
+  },
+  {
+    "file": "meta/voices/natural_en/named.wav",
+    "sha256": "e19c4054f915a5976af19a8515ed7c64bb102ca29670a8cf1cac0e3c52fa0302",
+    "bytes": 130220,
+    "new": true
+  },
+  {
+    "file": "meta/voices/natural_en/review.wav",
+    "sha256": "a33f0ccef502e0df600ff5c5f378b5bd61161961c8196fe3887e9aaecbb260f6",
+    "bytes": 149804,
+    "new": true
+  },
+  {
+    "file": "meta/voices/natural_en/upgrade.wav",
+    "sha256": "b4364e9dcaf7217a790ae3e99449383fd66af5c70a0421feccf9a9f689af0a01",
+    "bytes": 240812,
+    "new": true
+  },
+  {
+    "file": "meta/voices/natural_tr/build.wav",
+    "sha256": "6fb9f68b01ed64ada465d37dd56ad180d3222877e4602c1ec41068db6347f2e2",
+    "bytes": 153260,
+    "new": true
+  },
+  {
+    "file": "meta/voices/natural_tr/consider.wav",
+    "sha256": "5aca8a136e506c06bca18650427acc66af0f00e0bf53fa46b765de6a8aae5927",
+    "bytes": 235052,
+    "new": true
+  },
+  {
+    "file": "meta/voices/natural_tr/demo.wav",
+    "sha256": "10f7a36ca20ce4217405d4aa9f7b58cb868cbb6ab6601411ec6d4e89fc82f9db",
+    "bytes": 373292,
+    "new": true
+  },
+  {
+    "file": "meta/voices/natural_tr/dismantle.wav",
+    "sha256": "3bfe46ddb889695600e61d20f5115d2bd966baf291e49f2fe844e7fa86e80f1b",
+    "bytes": 200492,
+    "new": true
+  },
+  {
+    "file": "meta/voices/natural_tr/exotic.wav",
+    "sha256": "2d8f82281a9e764bab8809b6ae7c9f841549d6ffb2ea028daaeafc188eb98378",
+    "bytes": 230444,
+    "new": true
+  },
+  {
+    "file": "meta/voices/natural_tr/fills_gap.wav",
+    "sha256": "35cb5d78fcf46859442a116ca82921544ecc3715b6b539c064658b32168a1b0f",
+    "bytes": 156716,
+    "new": true
+  },
+  {
+    "file": "meta/voices/natural_tr/keep.wav",
+    "sha256": "64f0411030a9dbae6522afdf8f6af41b53505f9341d1b4e75181156a3eeb9484",
+    "bytes": 214316,
+    "new": true
+  },
+  {
+    "file": "meta/voices/natural_tr/named.wav",
+    "sha256": "38c2c52de11ed063c5d9a7b5d97899218dcfd32e258fa72988f15566aa2edade",
+    "bytes": 135980,
+    "new": true
+  },
+  {
+    "file": "meta/voices/natural_tr/review.wav",
+    "sha256": "3017acfe25ebcea4ca286fe66ba5a937565cb469e1ac8801e3815397653ae275",
+    "bytes": 182060,
+    "new": true
+  },
+  {
+    "file": "meta/voices/natural_tr/upgrade.wav",
+    "sha256": "7fcc7cabe8ba663b4580889c4c9eb02911dede900e7a3855e79d2ed231896995",
+    "bytes": 256940,
+    "new": true
+  }
+]

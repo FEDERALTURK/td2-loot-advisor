@@ -1,0 +1,30 @@
+{
+  "inventory": {
+    "local": {
+      "files": 247,
+      "bytes": 614625992,
+      "python_sources": 29
+    },
+    "github_main": {
+      "files": 675,
+      "bytes": 11637160,
+      "python_sources": 90
+    },
+    "private_main": {
+      "files": 27,
+      "bytes": 172502,
+      "python_sources": 16
+    },
+    "private_promo": {
+      "files": 11,
+      "bytes": 45265,
+      "python_sources": 4
+    }
+  },
+  "comparison": {
+    "missing_local": 610,
+    "different": 40,
+    "same": 25
+  },
+  "parse_errors": []
+}

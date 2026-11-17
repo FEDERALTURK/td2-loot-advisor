@@ -1,0 +1,390 @@
+--- a/app.py
++++ b/app.py
+@@ -4126,10 +4126,26 @@
+     def scan_image(self, img, auto):
+         s = self.cfg["settings"]
+         timings = getattr(self, "timings", None)
++        ocr_seconds = 0.0
++        def timed_read(card, scale=None):
++            nonlocal ocr_seconds
++            started = time.perf_counter()
++            try:
++                return read_card(card, scale=scale)
++            finally:
++                elapsed = time.perf_counter() - started
++                ocr_seconds += elapsed
++                if timings is not None: timings.record("ocr", elapsed * 1000)
+         box = getattr(self, "card_box", None)
+         tried_fresh = False
+-        if box is None:
+-            box = find_card(img); tried_fresh = True
++        # An explicitly selected narrow region is already the user's card crop.
++        # Read it first; locating a card with OCR would duplicate the first pass.
++        region_first = (box is None and s.get("scan_source") == "region"
++                        and bool(s.get("region")) and img.width < 1600)
++        if box is None and not region_first:
++            with timings.measure("card_locate") if timings is not None else nullcontext():
++                box = find_card(img)
++            tried_fresh = True
+         if box is None and auto and img.width >= 1600:
+             # Tüm oyun ekranında eşya kartı yok (dünya / harita / başka menü): ekranın tamamını tam çözünürlükte
+             # okumak (ve last_card.png olarak kaydetmek) boşa ekran kartı / disk yükü — otomatik taramada atlanır.
+@@ -4137,16 +4153,18 @@
+             return False
+         card = img.crop(box) if box else img
+         t_ocr = time.perf_counter()
+-        text, lines = read_card(card)
++        text, lines = timed_read(card)
+         ocr_elapsed = time.perf_counter() - t_ocr
+         self._note_ocr_time(ocr_elapsed)
+-        if timings is not None: timings.record("ocr", ocr_elapsed * 1000)
+-        item, verdict, res = evaluate(text, self.cfg)
+-        if not valid_item(item) and not tried_fresh:                  # kart yer değiştirmiş: yeniden bul
+-            box = find_card(img)
+-            card = img.crop(box) if box else img
+-            text, lines = read_card(card)
++        with timings.measure("evaluate") if timings is not None else nullcontext():
+             item, verdict, res = evaluate(text, self.cfg)
++        if not valid_item(item) and not tried_fresh:                  # kart yer değiştirmiş / bölge belirsiz
++            with timings.measure("card_locate") if timings is not None else nullcontext():
++                box = find_card(img)
++            if box or not region_first:
++                card = img.crop(box) if box else img
++                text, lines = timed_read(card)
++                item, verdict, res = evaluate(text, self.cfg)
+         self.card_box = box if valid_item(item) else None
+         if s.get("ocr_passes_auto", True):
+             passes = self.auto_passes()                      # bilgisayarın hızına göre 1-3 okuma
+@@ -4169,13 +4187,13 @@
+                 if OCR.name == "rapidocr":
+                     a = ocr_scale() or ocr_backend.Engine.auto_scale(card)
+                     for sc in [x for x in (2.0, 1.0, 1.5) if abs(x - a) > 0.1][:passes - 1]:
+-                        tx, _ = read_card(card, scale=sc)
++                        tx, _ = timed_read(card, scale=sc)
+                         q = ocr_quality(tx)
+                         if q > best_q: best_q, best_t = q, tx
+                 else:
+                     for th in (base + 10, base - 40)[:passes - 1]:
+                         gamedata.THRESHOLD = max(90, min(235, th))
+-                        tx, _ = read_card(card)
++                        tx, _ = timed_read(card)
+                         q = ocr_quality(tx)
+                         if q > best_q: best_q, best_t = q, tx
+             finally:
+@@ -4208,6 +4226,7 @@
+             log.debug("library learn failed", exc_info=True)
+         verdict = itempolicy.protect_verdict(item, color_hints(card, lines, item, verdict))
+         sig = signature(item)
++        if timings is not None: timings.record("ocr_total", ocr_seconds * 1000)
+         if auto:
+             if not valid_item(item): return False
+             if sig == self.last_sig and time.time() - self.last_time < DEDUP_SECONDS: return True
+@@ -4724,6 +4743,7 @@
+         prev = last_done = None; stable = 0; last_t = 0.0
+         idle = 0                                          # art arda kart bulunamayan dünya okumaları
+         while not stop.is_set():
++            policy = self._policy()
+             try:
+                 region = self.scan_area()
+                 if region and self.cfg["settings"].get("only_game_active", True) and not game_active():
+@@ -4740,18 +4760,25 @@
+                         # menü türleri öğrenilebilsin); kart çıkmadıkça aralık 4 → 8 → 16 → 30 sn'ye uzar
+                         go = changed and stable >= 3 and time.time() - last_t > world_wait(idle)
+                     else:                                                 # menü / bilinmiyor: eski davranış
+-                        go = changed and stable == 1; idle = 0
+-                    if go:
+-                        last_done, last_t = h, time.time()
+-                        img = grab(region)
+-                        with self.lock:
+-                            found = self.scan_image(img, auto=True)
+-                        idle = 0 if found or gs != "world" else idle + 1
++                        go = changed and stable >= 2 and time.time() - last_t >= policy.auto_interval_s
++                        idle = 0
++                    if go and self.lock.acquire(blocking=False):
++                        try:
++                            # If translation is using the OCR engine, retry with a fresh
++                            # screen sample instead of waiting on an obsolete capture.
++                            last_done, last_t = h, time.time()
++                            img = grab(region)
++                            timings = getattr(self, "timings", None)
++                            with timings.measure("scan_total") if timings is not None else nullcontext():
++                                found = self.scan_image(img, auto=True)
++                            idle = 0 if found or gs != "world" else idle + 1
++                        finally:
++                            self.lock.release()
+             except Exception as e:
+                 msg = f"{type(e).__name__}: {e}"
+                 if msg != self.last_err:
+                     self.last_err = msg; self.results.put(("err", msg))
+-            stop.wait(self._policy().auto_interval_s)
++            stop.wait(policy.scan_poll_s)
+ 
+     def poll(self):
+         try:
+--- a/performance.py
++++ b/performance.py
+@@ -45,6 +45,11 @@
+     @property
+     def auto_interval_s(self):
+         return self.auto_interval_ms / 1000.0
++
++    @property
++    def scan_poll_s(self):
++        """Cheap change detection is independent of the expensive OCR budget."""
++        return 0.30 if self.mode == "game" else 0.20
+ 
+ 
+ def get_policy(settings, game_active=False, minimized=False):
+--- a/tests/test_scan_latency.py
++++ b/tests/test_scan_latency.py
+@@ -0,0 +1,105 @@
++"""Deterministic autoscan latency and workload checks; no game or capture."""
++from pathlib import Path
++import queue
++import sys
++from types import SimpleNamespace
++import unittest
++from unittest.mock import patch
++
++sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
++import app
++from performance import get_policy
++
++
++class Clock:
++    def __init__(self, duration):
++        self.now = 100.0
++        self.end = self.now + duration
++
++    def is_set(self):
++        return self.now >= self.end
++
++    def wait(self, seconds):
++        self.now += seconds
++
++
++class Lock:
++    def __init__(self, clock, busy_until=0):
++        self.clock, self.busy_until = clock, busy_until
++        self.held = False
++
++    def acquire(self, blocking=True):
++        if blocking:
++            raise AssertionError("autoscan must not wait on stale images")
++        if self.clock.now < self.busy_until:
++            return False
++        self.held = True
++        return True
++
++    def release(self):
++        assert self.held
++        self.held = False
++
++
++def simulate(mode="balanced", duration=3, state="menu", change_at=None, busy=0):
++    clock = Clock(duration)
++    scans, captures = [], []
++    policy = get_policy({"perf_mode": mode})
++    obj = SimpleNamespace(cfg={"settings": {"only_game_active": False}},
++                          _policy=lambda: policy, scan_area=lambda: {"width": 100},
++                          _screen_observe=lambda small: state,
++                          lock=Lock(clock, 100 + busy), results=queue.Queue(), last_err=None)
++
++    def sample(*args):
++        value = 100 if change_at is not None and clock.now >= 100 + change_at else 0
++        return [value] * 576, object()
++
++    def scan(img, auto):
++        scans.append(round(clock.now - 100, 3))
++        return state != "world"
++
++    def grab(region):
++        captures.append(round(clock.now - 100, 3))
++        return object()
++
++    obj.scan_image = scan
++    with patch.object(app.time, "time", side_effect=lambda: clock.now), \
++         patch.object(app.capture, "default", return_value=SimpleNamespace(sample=sample)), \
++         patch.object(app, "grab", side_effect=grab):
++        app.App._auto_loop(obj, clock)
++    assert obj.results.empty(), list(obj.results.queue)
++    return scans, captures, policy
++
++
++class ScanLatencyTests(unittest.TestCase):
++    def test_initial_card_is_detected_without_waiting_for_full_ocr_interval(self):
++        for mode, expected in (("balanced", .4), ("game", .6)):
++            scans, _, policy = simulate(mode)
++            self.assertEqual(scans, [expected])
++            self.assertLess(scans[0], policy.auto_interval_s)
++
++    def test_unchanged_card_does_not_repeat_ocr(self):
++        self.assertEqual(simulate(duration=10)[0], [.4])
++
++    def test_changed_card_waits_for_budget_then_is_not_lost(self):
++        for mode in ("balanced", "game"):
++            scans, _, policy = simulate(mode, duration=4, change_at=.8)
++            self.assertEqual(len(scans), 2)
++            self.assertGreaterEqual(scans[1] - scans[0] + 1e-6, policy.auto_interval_s)
++            self.assertLessEqual(scans[1] - scans[0], policy.auto_interval_s + policy.scan_poll_s + 1e-6)
++
++    def test_busy_ocr_retries_fresh_capture_without_blocking(self):
++        scans, captures, _ = simulate(busy=1)
++        self.assertEqual(len(scans), 1)
++        self.assertGreaterEqual(scans[0], 1)
++        self.assertEqual(captures, scans)
++
++    def test_loading_screen_does_not_run_ocr(self):
++        self.assertEqual(simulate(state="loading")[0], [])
++
++    def test_world_backoff_and_change_requirement_are_preserved(self):
++        self.assertEqual(simulate(state="world", duration=10)[0], [.6])
++
++
++if __name__ == "__main__":
++    unittest.main()
+--- a/tests/test_region_scan_fastpath.py
++++ b/tests/test_region_scan_fastpath.py
+@@ -0,0 +1,67 @@
++"""Selected card crops avoid locator OCR; invalid input keeps the fallback."""
++from copy import deepcopy
++from pathlib import Path
++import queue
++import sys
++from types import SimpleNamespace
++import unittest
++from unittest.mock import Mock, patch
++from PIL import Image
++
++sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
++import app
++from performance import TimingStats
++
++
++CARD = {"name": "Test Gloves", "kind": "gear", "slot": "Gloves", "rarity": ["HIGH-END"],
++        "attrs": {"weapon_damage": 15}, "talents": [], "confidence": 1.0,
++        "sections": True, "partial": False}
++
++
++class RegionScanTests(unittest.TestCase):
++    def run_scan(self, items, box=None, source="region", width=600, auto=False):
++        obj = app.App.__new__(app.App)
++        obj.cfg = {"settings": {"scan_source": source, "region": {"width": width, "height": 900},
++                                "ocr_passes_auto": False, "ocr_passes": 1}}
++        obj.timings = TimingStats()
++        obj.results = queue.Queue()
++        obj.last_sig, obj.last_time = None, 0
++        obj._note_ocr_time = Mock()
++        obj.merge_scrolled = lambda *args: args
++        obj.scan_area = lambda: {"left": 0, "top": 0}
++        responses = [(deepcopy(it), "DISMANTLE", []) for it in items]
++        with patch.object(app, "GAME", SimpleNamespace(ok=False)), \
++             patch.object(app, "find_card", return_value=box) as locate, \
++             patch.object(app, "read_card", return_value=("card text", [])) as read, \
++             patch.object(app, "evaluate", side_effect=responses), \
++             patch.object(app, "color_hints", side_effect=lambda c, l, i, v: v):
++            app.App.scan_image(obj, Image.new("RGB", (width, 900)), auto=auto)
++        return locate.call_count, read.call_count, obj
++
++    def test_valid_selected_crop_skips_locator_for_manual_scan(self):
++        locate, read, obj = self.run_scan([CARD])
++        self.assertEqual((locate, read), (0, 1))
++        self.assertIn("ocr_total", obj.timings.snapshot())
++
++    def test_valid_selected_crop_skips_locator_for_automatic_scan(self):
++        self.assertEqual(self.run_scan([CARD], auto=True)[0:2], (0, 1))
++
++    def test_invalid_crop_uses_locator_and_reads_recovered_card(self):
++        partial = dict(CARD, partial=True)
++        locate, read, _ = self.run_scan([partial, CARD], box=(0, 0, 500, 800))
++        self.assertEqual((locate, read), (1, 2))
++
++    def test_invalid_crop_without_locator_result_is_not_read_twice(self):
++        locate, read, obj = self.run_scan([dict(CARD, partial=True)])
++        self.assertEqual((locate, read), (1, 1))
++        self.assertEqual(obj.results.get_nowait()[3], "REVIEW")
++
++    def test_full_screen_keeps_locator(self):
++        self.assertEqual(self.run_scan([CARD], source="screen")[0:2], (1, 1))
++
++    def test_large_selected_area_keeps_locator(self):
++        self.assertEqual(self.run_scan([CARD], width=2000)[0:2], (1, 1))
++
++
++if __name__ == "__main__":
++    unittest.main()
+--- a/tests/bench_region_scan.py
++++ b/tests/bench_region_scan.py
+@@ -0,0 +1,72 @@
++"""Compare the published scan path and local region path on one real card.
++
++No game, capture, network, personal settings or GUI. Baseline is the reviewed
++release checkout under project_review/github/td2-loot-advisor.
++"""
++import ast
++import json
++from pathlib import Path
++import queue
++from statistics import median
++import sys
++import time
++from unittest.mock import Mock, patch
++from PIL import Image
++
++ROOT = Path(__file__).resolve().parents[1]
++sys.path.insert(0, str(ROOT))
++import app
++
++
++def main():
++    source = (ROOT / "project_review/github/td2-loot-advisor/app.py").read_text(encoding="utf-8")
++    cls = next(n for n in ast.parse(source).body if isinstance(n, ast.ClassDef) and n.name == "App")
++    fn = next(n for n in cls.body if isinstance(n, ast.FunctionDef) and n.name == "scan_image")
++    fn.name = "baseline_scan"
++    scope = dict(app.__dict__)
++    exec(compile(ast.Module(body=[fn], type_ignores=[]), "<release scan>", "exec"), scope)
++    baseline = scope["baseline_scan"]
++    app.OCR = app.ocr_backend.Engine("rapidocr")
++    app.gamedata.SCALE = None
++    image = Image.open(ROOT / "tests/samples/stoner_lamg_3440x1440.png").convert("RGB")
++
++    def run(scan):
++        obj = app.App.__new__(app.App)
++        obj.cfg = json.loads((ROOT / "scripts/default_builds.json").read_text(encoding="utf-8"))
++        obj.cfg["settings"].update(scan_source="region", region={"width": image.width, "height": image.height},
++                                   ocr_passes_auto=False, ocr_passes=1, save_debug_crop=False)
++        obj.results = queue.Queue()
++        obj.last_sig, obj.last_time = None, 0
++        obj.root = Mock()
++        obj.scan_area = lambda: {"left": 0, "top": 0}
++        obj.timings = app.performance.TimingStats()
++        start = time.perf_counter()
++        with patch.object(app.GAME, "learn", return_value=[]):
++            scan(obj, image, False)
++        elapsed = time.perf_counter() - start
++        result = obj.results.get_nowait()
++        return elapsed, {"attrs": result[2]["attrs"], "name": result[2]["name"], "verdict": result[3]}
++
++    # Warm both paths and input shapes before measuring; alternate execution order.
++    run(baseline)
++    run(app.App.scan_image)
++    rows = []
++    for index in range(4):
++        if index % 2:
++            after, a = run(app.App.scan_image)
++            before, b = run(baseline)
++        else:
++            before, b = run(baseline)
++            after, a = run(app.App.scan_image)
++        assert a == b, (a, b)
++        rows.append({"baseline_s": round(before, 4), "region_fastpath_s": round(after, 4), "same_result": True})
++    report = {"sample": "stoner_lamg_3440x1440.png",
++              "conditions": "CPU RapidOCR, both paths warmed, selected card region, one pass; no capture/game",
++              "runs": rows, "median_before_s": median(r["baseline_s"] for r in rows),
++              "median_after_s": median(r["region_fastpath_s"] for r in rows)}
++    (ROOT / "project_review/scan_latency/region_benchmark.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
++    print(json.dumps(report, indent=2))
++
++
++if __name__ == "__main__":
++    main()

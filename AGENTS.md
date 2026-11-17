@@ -51,7 +51,7 @@ hazırlığı başlamadan önce bu kurallar dikkate alınır.
 
 **Tetikleyici:** `td2app/ui/` altındaki görsel modüller.
 
-- Varsayılan Division 2 taktik HUD estetiğini (antrasit, amber/turuncu, keskin köşeler) koru.
+- Varsayılan Kaivolt (lacivert/mor) HUD estetiğini koru.
 - `SafeTrail` fare izi efektlerinin tıklamayı engellemesini önle.
 - `Canvas.lower()` çağrılarına dayanmak yerine savunmacı nesne varlık ve yaşam
   döngüsü kontrolleri uygula.
@@ -93,12 +93,6 @@ hazırlığı başlamadan önce bu kurallar dikkate alınır.
    doğrulamanın hâlâ gerektiğini açıkça bildir.
 6. Public yayın için bu dosyadaki yayın onayı sorusunu sor; açık `Evet` olmadan
    release, tag veya installer/APK yayınlama.
-7. Her işlem öncesinde Claude-mem/kalıcı bellek kullanımının uygun olup olmadığını
-   değerlendir. Geçmiş kararlar, proje durumu, tekrar eden hata kök nedenleri veya
-   daha önce doğrulanmış çözüm gerekiyorsa önce bellek ara; işlem sonunda yeni ve
-   tekrar kullanılabilir bir öğrenim varsa uygun bellek notu oluştur. Ephemeral,
-   hassas veya bellek gerektirmeyen işlemlerde kullanma ve token tasarrufu iddiasını
-   ölçüm olmadan kesin sayı olarak raporlama.
 
 ## Uygulama doğruluk ilkeleri
 
@@ -112,16 +106,14 @@ hazırlığı başlamadan önce bu kurallar dikkate alınır.
 - Oyun kurulum yolu ve ayar dosyaları yalnız okunur biçimde incelenir; oyun
   ayarını değiştirecek bir işlem için kullanıcıya açık bilgi ve onay verilir.
 
-## graphify
+### Test verisi
 
-This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.
+- Testler `meta/` altındaki bot tarafından güncellenen dosyalardan sabit kimlik,
+  başlık veya metin kullanamaz. Davranış testleri kendi fixture'ını oluşturur;
+  canlı dosyalar yalnız şema/geçerlilik testlerinde kullanılır.
 
-When the user types `/graphify`, use the installed graphify skill or instructions before doing anything else.
+### Dal ve etiket hijyeni
 
-Rules:
-- When graphify-out/graph.json exists, run `graphify query "<question>"` before your first grep, search or source-file read for a codebase question, and put this rule in every subagent prompt that explores code. Read raw files only for lines the graph or an earlier read already located. Use `graphify path "<A>" "<B>"` for relationships and `graphify explain "<concept>"` for focused concepts. These return a scoped subgraph, usually much smaller than GRAPH_REPORT.md or raw grep output.
-- Dirty graphify-out/ files are expected after hooks or incremental updates; dirty graph files are not a reason to skip graphify. Only skip graphify if the task is about stale or incorrect graph output, or the user explicitly says not to use it.
-- If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
-- Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context.
-- After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).
-- A committed graphify-out/graph.json is rewritten whole on every build, so a large diff to it in a pull request is expected. Do not flag it as churn or suggest skipping the graph rebuild or its hooks.
+- Her sürüm dalı yayından sonra `main`'e geri birleştirilir.
+- Yayınlanmış bir etiket başka bir commit'e taşınmaz; gerekirse yeni yama
+  sürümü açılır.

@@ -1,0 +1,81 @@
+{
+ "steps": [
+  {
+   "name": "ansiklopedi araması",
+   "ok": true,
+   "n": 4,
+   "first": [
+    "Striker's Battlegear",
+    "Striker's Gamble",
+    "Press the Advantage",
+    "Risk Management"
+   ]
+  },
+  {
+   "name": "ayrıntı: bonuslar + parçalar + yetenek",
+   "ok": true,
+   "chars": 326
+  },
+  {
+   "name": "gear set'ten yeni build",
+   "ok": true,
+   "build": "Striker's Battlegear build'i"
+  },
+  {
+   "name": "kategori filtresi: egzotik",
+   "ok": true
+  },
+  {
+   "name": "meta vitrini kartları",
+   "ok": true,
+   "n": 15
+  },
+  {
+   "name": "favori",
+   "ok": true
+  },
+  {
+   "name": "yalnız favoriler filtresi",
+   "ok": true,
+   "n": 1
+  },
+  {
+   "name": "haber kartları",
+   "ok": true,
+   "n": 17
+  },
+  {
+   "name": "sezon başlığı + sayaçlar",
+   "ok": true,
+   "season": "🗓 Year 8 Season 3 – Red Horizon",
+   "daily": "03:29",
+   "weekly": "1g 03:29"
+  },
+  {
+   "name": "yarışma sorusu üretildi",
+   "ok": true,
+   "kind": "brand_bonus"
+  },
+  {
+   "name": "doğru cevap XP verdi",
+   "ok": true,
+   "xp": 10
+  },
+  {
+   "name": "yükleme ekranı yarışma penceresi",
+   "ok": true
+  },
+  {
+   "name": "doğal Türkçe bildirimleri ses işçisine ulaştı (CI'da ses aygıtı olmadan)",
+   "ok": true,
+   "clips": [
+    "C:\\Users\\PC\\Desktop\\Thedivision2program\\meta\\voices\\natural_tr\\exotic.wav",
+    "C:\\Users\\PC\\Desktop\\Thedivision2program\\meta\\voices\\natural_tr\\keep.wav",
+    "C:\\Users\\PC\\Desktop\\Thedivision2program\\meta\\voices\\natural_tr\\build.wav"
+   ],
+   "err": null
+  }
+ ],
+ "done": true,
+ "ok": true
+}

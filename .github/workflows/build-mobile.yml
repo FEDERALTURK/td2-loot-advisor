@@ -24,38 +24,26 @@ jobs:
       - run: flutter pub get
       - run: flutter analyze
       - run: flutter test
-      - name: Prepare release signing
-        if: startsWith(github.ref, 'refs/tags/companion-v')
-        shell: bash
+      - name: Decode beta signing keystore
         env:
-          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          BETA_KEYSTORE_BASE64: ${{ secrets.TD2_BETA_KEYSTORE_BASE64 }}
+          BETA_KEYSTORE_PASSWORD: ${{ secrets.TD2_BETA_KEYSTORE_PASSWORD }}
+          BETA_KEY_ALIAS: ${{ secrets.TD2_BETA_KEY_ALIAS }}
         run: |
-          set -euo pipefail
-          for value in ANDROID_KEYSTORE_BASE64 ANDROID_KEYSTORE_PASSWORD ANDROID_KEY_ALIAS ANDROID_KEY_PASSWORD; do
-            if [[ -z "${!value}" ]]; then
-              echo "Missing required Android release signing secret: $value" >&2
-              exit 1
-            fi
-          done
-          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/td2-release.jks
-          cat > android/key.properties <<EOF
-          storeFile=td2-release.jks
-          storePassword=$ANDROID_KEYSTORE_PASSWORD
-          keyAlias=$ANDROID_KEY_ALIAS
-          keyPassword=$ANDROID_KEY_PASSWORD
-          EOF
-      - name: Build APK
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [[ "${GITHUB_REF}" == refs/tags/companion-v* ]]; then
-            flutter build apk --release -PplayRelease=true
+          if [ -z "$BETA_KEYSTORE_BASE64" ]; then
+            echo "::warning::TD2_BETA_KEYSTORE_BASE64 secret yok — bu build debug anahtarıyla imzalanacak (kullanıcılar eski APK üstüne güncelleyemeyebilir). Bkz. docs/mobile_beta_signing_tr.md."
+            echo "USE_BETA_SIGNING=false" >> "$GITHUB_ENV"
           else
-            flutter build apk --release
+            echo "$BETA_KEYSTORE_BASE64" | base64 -d > android/td2-companion-beta.jks
+            cat > android/beta-key.properties <<EOF
+          storeFile=td2-companion-beta.jks
+          storePassword=${BETA_KEYSTORE_PASSWORD}
+          keyAlias=${BETA_KEY_ALIAS}
+          keyPassword=${BETA_KEYSTORE_PASSWORD}
+          EOF
+            echo "USE_BETA_SIGNING=true" >> "$GITHUB_ENV"
           fi
+      - run: flutter build apk --release --android-project-arg=githubBetaRelease=${{ env.USE_BETA_SIGNING }}
       - name: Rename APK
         shell: bash
         run: |
@@ -67,10 +55,6 @@ jobs:
           path: |
             mobile/TD2LootAdvisor_Companion_*.apk
             mobile/SHA256SUMS.sha256
-      - name: Remove temporary signing files
-        if: always()
-        shell: bash
-        run: rm -f android/td2-release.jks android/key.properties
       - name: Publish companion release
         if: startsWith(github.ref, 'refs/tags/companion-v')
         uses: softprops/action-gh-release@v2

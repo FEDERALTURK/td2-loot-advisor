@@ -1,0 +1,9 @@
+engine     res    sample                              attrs   sec
+rapidocr   1440p  holster_scrolled_3440x1440.png     2/2      9.5 ✔
+rapidocr   1440p  stoner_lamg_3440x1440.png          3/3      3.8 ✔
+rapidocr   1080p  holster_scrolled_3440x1440.png     2/2      2.0 ✔
+rapidocr   1080p  stoner_lamg_3440x1440.png          3/3      2.7 ✔
+rapidocr   720p   holster_scrolled_3440x1440.png     2/2      1.6 ✔
+rapidocr   720p   stoner_lamg_3440x1440.png          3/3      1.6 ✔
+rapidocr   480p   holster_scrolled_3440x1440.png     2/2      1.6 ✔
+rapidocr   480p   stoner_lamg_3440x1440.png          3/3      1.7 ✔

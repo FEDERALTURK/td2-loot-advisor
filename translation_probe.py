@@ -39,24 +39,6 @@ def inspect_render(root, renderer):
     return {"ok": bool(reports) and all(r["visible"] for r in reports), "windows": reports}
 
 
-def wait_for_translation(root, worker, timeout):
-    """Keep Tcl dispatching events while the translation worker is active."""
-    deadline = time.monotonic() + timeout
-    completed = False
-
-    def poll():
-        nonlocal completed
-        completed = worker.wait_idle(0)
-        if completed or time.monotonic() >= deadline:
-            root.quit()
-        else:
-            root.after(20, poll)
-
-    root.after(0, poll)
-    root.mainloop()
-    return completed
-
-
 def run(app, model_dir, output):
     root = None
     result = {"ok": False, "steps": [], "checks": {},
@@ -113,8 +95,10 @@ def run(app, model_dir, output):
         assert result["checks"]["ocr"]["ok"], "Synthetic window OCR failed"
         t0 = time.monotonic()
         obj._lt_run(card, area, force=True)
-        probe_timeout = max(30, int(os.environ.get("TD2_PROBE_TIMEOUT", "120")))
-        assert wait_for_translation(root, obj._translation_jobs, probe_timeout), "Translation timed out"
+        # CI can provide a longer bound for first-load model initialization;
+        # keep the local default bounded so a broken worker never hangs forever.
+        probe_timeout = max(30.0, min(600.0, float(os.environ.get("TD2_PROBE_TIMEOUT", "120"))))
+        assert obj._translation_jobs.wait_idle(probe_timeout), "Translation timed out"
         while not obj.results.empty():
             _, token, callback = obj.results.get_nowait()
             if obj._translation_jobs.is_current(token): callback()

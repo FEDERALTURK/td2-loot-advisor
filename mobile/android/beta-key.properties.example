@@ -1,0 +1,8 @@
+# CI, flutter build sırasında bu dosyayı GitHub Actions secret'larından üretir
+# (bkz. .github/workflows/build-mobile.yml). Yerelde elle test etmek istersen
+# bu dosyayı "beta-key.properties" olarak kopyala ve değerleri doldur — bu
+# dosya .gitignore kapsamındadır, asla commit edilmez.
+storeFile=td2-companion-beta.jks
+storePassword=REPLACE_WITH_BETA_STORE_PASSWORD
+keyAlias=td2-companion-beta
+keyPassword=REPLACE_WITH_BETA_KEY_PASSWORD

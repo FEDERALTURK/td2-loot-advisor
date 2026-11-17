@@ -151,5 +151,6 @@ try:
 finally:
     srv.terminate()
     app.ACCOUNT_PATH.unlink(missing_ok=True)
-print("RESULT:", "PASS" if res.get("ok") else "FAIL")
-sys.exit(0 if res.get("ok") else 1)
+if __name__ == "__main__":
+    print("RESULT:", "PASS" if res.get("ok") else "FAIL")
+    sys.exit(0 if res.get("ok") else 1)

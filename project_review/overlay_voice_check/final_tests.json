@@ -1,0 +1,71 @@
+[
+  {
+    "suite": "overlay",
+    "exit_code": 0,
+    "seconds": 0.191
+  },
+  {
+    "suite": "livetranslate",
+    "exit_code": 0,
+    "seconds": 2.651
+  },
+  {
+    "suite": "translation_reliability",
+    "exit_code": 0,
+    "seconds": 0.506
+  },
+  {
+    "suite": "ocr_serialization",
+    "exit_code": 0,
+    "seconds": 0.387
+  },
+  {
+    "suite": "knowledge",
+    "exit_code": 0,
+    "seconds": 0.587
+  },
+  {
+    "suite": "launcher",
+    "exit_code": 0,
+    "seconds": 0.259
+  },
+  {
+    "suite": "scan_latency",
+    "exit_code": 0,
+    "seconds": 1.4
+  },
+  {
+    "suite": "region_scan_fastpath",
+    "exit_code": 0,
+    "seconds": 2.069
+  },
+  {
+    "suite": "core",
+    "exit_code": 0,
+    "seconds": 53.381
+  },
+  {
+    "suite": "ocr_real_8_samples",
+    "exit_code": 0
+  },
+  {
+    "suite": "inplace_anchors",
+    "exit_code": 0,
+    "seconds": 1.211
+  },
+  {
+    "suite": "natural_voice",
+    "exit_code": 0,
+    "seconds": 1.56
+  },
+  {
+    "suite": "app_stability",
+    "exit_code": 0,
+    "seconds": 1.669
+  },
+  {
+    "suite": "stability_widgets",
+    "exit_code": 0,
+    "seconds": 6.539
+  }
+]

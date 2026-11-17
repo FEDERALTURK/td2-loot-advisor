@@ -1,0 +1,429 @@
+{
+  "version": 1,
+  "historyId": "5f31988d-e139-4376-88b7-306e805ee0ab",
+  "currentRevision": "92cea424-50d1-41c8-af2e-f2911bbb6a00",
+  "pendingChanges": false,
+  "files": {
+    "assets/music/happy-beats-business-moves-vol-12-by-ende-dot-app.music-cues.json": {
+      "hash": "76eea97e347e63e8037dc4fdbc08ab373bc83c10f797d1a8abd5509e73892aab",
+      "content": "C:\\Users\\PC\\.cache\\hyperframes\\history\\5f31988d-e139-4376-88b7-306e805ee0ab\\blobs\\76\\76eea97e347e63e8037dc4fdbc08ab373bc83c10f797d1a8abd5509e73892aab"
+    },
+    "assets/music/happy-beats-business-moves-vol-12-by-ende-dot-app.music-cues.md": {
+      "hash": "9441eb1c04d3278fe7e9d9820396345d206dc5aa97828610410ff28beab28936",
+      "content": "C:\\Users\\PC\\.cache\\hyperframes\\history\\5f31988d-e139-4376-88b7-306e805ee0ab\\blobs\\94\\9441eb1c04d3278fe7e9d9820396345d206dc5aa97828610410ff28beab28936"
+    },
+    "assets/td2.png": {
+      "hash": "eba90c454dcdaf7d4029c326d1b46c82ca5305684cf854e5ef66b67649dff946",
+      "content": "C:\\Users\\PC\\.cache\\hyperframes\\history\\5f31988d-e139-4376-88b7-306e805ee0ab\\blobs\\eb\\eba90c454dcdaf7d4029c326d1b46c82ca5305684cf854e5ef66b67649dff946"
+    },
+    "hyperframes.json": {
+      "hash": "53dbce1e19aa713cbb12ee0bc4d206143b45ab15e6ffbfcaa8f69572d4d24d50",
+      "content": "C:\\Users\\PC\\.cache\\hyperframes\\history\\5f31988d-e139-4376-88b7-306e805ee0ab\\blobs\\53\\53dbce1e19aa713cbb12ee0bc4d206143b45ab15e6ffbfcaa8f69572d4d24d50"
+    },
+    "index.html": {
+      "hash": "58b6755fc2f6125d10d5b97807bd0b1b5175dc75cd37cfc58ce606a1d7b9852a",
+      "content": "C:\\Users\\PC\\.cache\\hyperframes\\history\\5f31988d-e139-4376-88b7-306e805ee0ab\\blobs\\58\\58b6755fc2f6125d10d5b97807bd0b1b5175dc75cd37cfc58ce606a1d7b9852a"
+    },
+    "meta.json": {
+      "hash": "5a4d10780eca5967c75808de8c92967a9b6d20e5d0ac194a30ef2db86b547ee4",
+      "content": "C:\\Users\\PC\\.cache\\hyperframes\\history\\5f31988d-e139-4376-88b7-306e805ee0ab\\blobs\\5a\\5a4d10780eca5967c75808de8c92967a9b6d20e5d0ac194a30ef2db86b547ee4"
+    },
+    "package.json": {
+      "hash": "3390cbfb7eaa21f2414ae2d7b9dba911ab18fd8c887a12b9f847da312aa73516",
+      "content": "C:\\Users\\PC\\.cache\\hyperframes\\history\\5f31988d-e139-4376-88b7-306e805ee0ab\\blobs\\33\\3390cbfb7eaa21f2414ae2d7b9dba911ab18fd8c887a12b9f847da312aa73516"
+    },
+    "assets/music/happy-beats-business-moves-vol-12-by-ende-dot-app.mp3": {
+      "hash": "5888d4bd2ba0119b87a94e502ae2cc401c08192945cc5e5c2f8e8a33aa47a0a1",
+      "content": "C:\\Users\\PC\\.cache\\hyperframes\\history\\5f31988d-e139-4376-88b7-306e805ee0ab\\blobs\\58\\5888d4bd2ba0119b87a94e502ae2cc401c08192945cc5e5c2f8e8a33aa47a0a1"
+    },
+    "check-output.json": {
+      "hash": "2cf77ad2ae477afe5accf9bb73b0b4bf041a3f3fc341b607803af54fd4850b6d",
+      "content": "C:\\Users\\PC\\.cache\\hyperframes\\history\\5f31988d-e139-4376-88b7-306e805ee0ab\\blobs\\2c\\2cf77ad2ae477afe5accf9bb73b0b4bf041a3f3fc341b607803af54fd4850b6d"
+    },
+    "check-output-ffmpeg.json": {
+      "hash": "e743dba4b8646b54d279c760ca6850d71561ff5da2c342afd6871d04da9e08dc",
+      "content": "C:\\Users\\PC\\.cache\\hyperframes\\history\\5f31988d-e139-4376-88b7-306e805ee0ab\\blobs\\e7\\e743dba4b8646b54d279c760ca6850d71561ff5da2c342afd6871d04da9e08dc"
+    }
+  },
+  "revisions": {
+    "ace16c37-29a7-496a-8e78-2e66a7b38776": {
+      "actor": {
+        "kind": "outside",
+        "name": "Outside"
+      },
+      "label": "Changed outside the app",
+      "startedAt": 1794718439625,
+      "endedAt": 1794718439626,
+      "files": {
+        "index.html": {
+          "before": "C:\\Users\\PC\\.cache\\hyperframes\\history\\5f31988d-e139-4376-88b7-306e805ee0ab\\blobs\\ac\\ac795c7944997b4d58be97eec30327f22ac2719cff2ea5ca6a0346f8f7f37bff",
+          "after": "C:\\Users\\PC\\.cache\\hyperframes\\history\\5f31988d-e139-4376-88b7-306e805ee0ab\\blobs\\58\\58b6755fc2f6125d10d5b97807bd0b1b5175dc75cd37cfc58ce606a1d7b9852a"
+        }
+      }
+    },
+    "15fa3dd9-8c87-4243-9f01-3979d6abe20f": {
+      "actor": {
+        "kind": "outside",
+        "name": "Outside"
+      },
+      "label": "Changed outside the app",
+      "startedAt": 1794718463302,
+      "endedAt": 1794718463304,
+      "files": {
+        "check-output.json": {
+          "before": null,
+          "after": "C:\\Users\\PC\\.cache\\hyperframes\\history\\5f31988d-e139-4376-88b7-306e805ee0ab\\blobs\\2c\\2cf77ad2ae477afe5accf9bb73b0b4bf041a3f3fc341b607803af54fd4850b6d"
+        }
+      }
+    },
+    "698ef055-907c-4404-835a-a45c79f3b423": {
+      "actor": {
+        "kind": "outside",
+        "name": "Outside"
+      },
+      "label": "Changed outside the app",
+      "startedAt": 1794718554244,
+      "endedAt": 1794718554245,
+      "files": {
+        "package.json": {
+          "before": "C:\\Users\\PC\\.cache\\hyperframes\\history\\5f31988d-e139-4376-88b7-306e805ee0ab\\blobs\\89\\89e4091172afdf43f1f75bb2c3196e804255bd1cea1e2de3a29ec27965090c67",
+          "after": "C:\\Users\\PC\\.cache\\hyperframes\\history\\5f31988d-e139-4376-88b7-306e805ee0ab\\blobs\\33\\3390cbfb7eaa21f2414ae2d7b9dba911ab18fd8c887a12b9f847da312aa73516"
+        }
+      }
+    },
+    "92cea424-50d1-41c8-af2e-f2911bbb6a00": {
+      "actor": {
+        "kind": "outside",
+        "name": "Outside"
+      },
+      "label": "Changed outside the app",
+      "startedAt": 1794718578165,
+      "endedAt": 1794718578166,
+      "files": {
+        "check-output-ffmpeg.json": {
+          "before": null,
+          "after": "C:\\Users\\PC\\.cache\\hyperframes\\history\\5f31988d-e139-4376-88b7-306e805ee0ab\\blobs\\e7\\e743dba4b8646b54d279c760ca6850d71561ff5da2c342afd6871d04da9e08dc"
+        }
+      }
+    }
+  },
+  "checks": {
+    "latest": {
+      "revision": "92cea424-50d1-41c8-af2e-f2911bbb6a00",
+      "id": "1a424277-428d-4ba6-9862-90d6b862fa23"
+    },
+    "revisions": {
+      "ace16c37-29a7-496a-8e78-2e66a7b38776": [
+        {
+          "id": "5b1d04bd-faa5-4916-8ffe-b22e695237ac",
+          "scope": "project",
+          "metadata": {
+            "ok": false,
+            "browserSkipped": false,
+            "options": {
+              "samples": 9,
+              "atTransitions": false,
+              "maxIssues": 80,
+              "collapseStatic": true,
+              "tolerance": 2,
+              "timeout": 45000,
+              "cache": true,
+              "contrast": true,
+              "craft": true,
+              "strict": false,
+              "snapshots": false,
+              "safeZones": [
+                "tiktok",
+                "reels",
+                "shorts"
+              ],
+              "browserGpuMode": "auto",
+              "includeUnmounted": false
+            }
+          },
+          "createdAt": 1794718444391,
+          "contentHash": "7135a63fe5f65e60710100cf96701bda17c2b0e6e3c779418ce99b10f872f383",
+          "revision": "ace16c37-29a7-496a-8e78-2e66a7b38776",
+          "inputFingerprint": "7019378512854ce1f10e6c24c22704dd9ea8c7436eb5bc150884bf0915d33df9",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision",
+          "status": "cleaned",
+          "cleanedAfterRender": "3dafb62a-3003-4d6b-be99-45c746f2869e"
+        }
+      ],
+      "698ef055-907c-4404-835a-a45c79f3b423": [
+        {
+          "id": "15f677b5-c9c5-4f21-884d-59f1f3fdf972",
+          "scope": "project",
+          "metadata": {
+            "ok": false,
+            "browserSkipped": false,
+            "options": {
+              "samples": 9,
+              "atTransitions": false,
+              "maxIssues": 80,
+              "collapseStatic": true,
+              "tolerance": 2,
+              "timeout": 45000,
+              "cache": true,
+              "contrast": true,
+              "craft": true,
+              "strict": false,
+              "snapshots": false,
+              "safeZones": [
+                "tiktok",
+                "reels",
+                "shorts"
+              ],
+              "browserGpuMode": "auto",
+              "includeUnmounted": false
+            }
+          },
+          "createdAt": 1794718559754,
+          "contentHash": "7135a63fe5f65e60710100cf96701bda17c2b0e6e3c779418ce99b10f872f383",
+          "revision": "698ef055-907c-4404-835a-a45c79f3b423",
+          "inputFingerprint": "2be2f3edc0ab36504b58227e61d0b707cdb33dbb60f38ad5fed55a30177e9c35",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision",
+          "status": "cleaned",
+          "cleanedAfterRender": "3dafb62a-3003-4d6b-be99-45c746f2869e"
+        }
+      ],
+      "92cea424-50d1-41c8-af2e-f2911bbb6a00": [
+        {
+          "id": "a96d747d-a9c9-456e-b133-ee54710a86a4",
+          "scope": "project",
+          "report": "C:\\Users\\PC\\Desktop\\Thedivision2program\\brag-output-2026-11-15-074949\\composition\\.hyperframes\\artifacts\\checks\\a96d747d-a9c9-456e-b133-ee54710a86a4.json",
+          "metadata": {
+            "ok": false,
+            "browserSkipped": false,
+            "options": {
+              "samples": 9,
+              "atTransitions": false,
+              "maxIssues": 80,
+              "collapseStatic": true,
+              "tolerance": 2,
+              "timeout": 45000,
+              "cache": true,
+              "contrast": true,
+              "craft": true,
+              "strict": false,
+              "snapshots": false,
+              "safeZones": [
+                "tiktok",
+                "reels",
+                "shorts"
+              ],
+              "browserGpuMode": "auto",
+              "includeUnmounted": false
+            }
+          },
+          "createdAt": 1794718582768,
+          "contentHash": "7135a63fe5f65e60710100cf96701bda17c2b0e6e3c779418ce99b10f872f383",
+          "revision": "92cea424-50d1-41c8-af2e-f2911bbb6a00",
+          "inputFingerprint": "e3dddf4aafcf065bede722df7540f3efd593afd452cb4c736d61d0af60aaefb5",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        },
+        {
+          "id": "1a424277-428d-4ba6-9862-90d6b862fa23",
+          "scope": "project",
+          "report": "C:\\Users\\PC\\Desktop\\Thedivision2program\\brag-output-2026-11-15-074949\\composition\\.hyperframes\\artifacts\\checks\\1a424277-428d-4ba6-9862-90d6b862fa23.json",
+          "metadata": {
+            "ok": true,
+            "browserSkipped": false,
+            "options": {
+              "samples": 9,
+              "atTransitions": false,
+              "maxIssues": 80,
+              "collapseStatic": true,
+              "tolerance": 2,
+              "timeout": 45000,
+              "cache": true,
+              "contrast": true,
+              "craft": true,
+              "strict": false,
+              "snapshots": false,
+              "safeZones": [
+                "tiktok",
+                "reels",
+                "shorts"
+              ],
+              "browserGpuMode": "auto",
+              "includeUnmounted": false
+            }
+          },
+          "createdAt": 1794718623583,
+          "contentHash": "36a82bf4319ac66c3a321e8557262ccd7216b3dbe5d7e2e89670af8a19efc817",
+          "revision": "92cea424-50d1-41c8-af2e-f2911bbb6a00",
+          "inputFingerprint": "e3dddf4aafcf065bede722df7540f3efd593afd452cb4c736d61d0af60aaefb5",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        }
+      ]
+    },
+    "unversioned": [
+      {
+        "id": "b65de8a4-8dcd-492d-a631-33ac6757f920",
+        "scope": "project",
+        "report": "C:\\Users\\PC\\Desktop\\Thedivision2program\\brag-output-2026-11-15-074949\\composition\\.hyperframes\\artifacts\\checks\\b65de8a4-8dcd-492d-a631-33ac6757f920.json",
+        "metadata": {
+          "ok": true,
+          "browserSkipped": false,
+          "options": {
+            "samples": 9,
+            "atTransitions": false,
+            "maxIssues": 80,
+            "collapseStatic": true,
+            "tolerance": 2,
+            "timeout": 45000,
+            "cache": true,
+            "contrast": true,
+            "craft": true,
+            "strict": false,
+            "snapshots": false,
+            "safeZones": [
+              "tiktok",
+              "reels",
+              "shorts"
+            ],
+            "browserGpuMode": "auto",
+            "includeUnmounted": false
+          }
+        },
+        "createdAt": 1794718400473,
+        "contentHash": "7c04a1a9c598d983d40d7855c96594701563329d428cf2006a5f7a98d1dcae2a",
+        "revision": null,
+        "inputFingerprint": "10b13b0a948cc5c988f563e909509b35b85dd5a9b3666c7733573abb6bdcc62e",
+        "inputScope": "local-project-files",
+        "attribution": "unversioned"
+      }
+    ]
+  },
+  "snapshots": {
+    "latest": null,
+    "revisions": {
+      "15fa3dd9-8c87-4243-9f01-3979d6abe20f": [
+        {
+          "scope": "full",
+          "id": "9541f71a-fccf-4bc2-8617-b2c11543c073-0",
+          "time": 0,
+          "metadata": {
+            "width": 1920,
+            "height": 1080,
+            "zoomScale": 1,
+            "browserGpuMode": "auto",
+            "warnings": [],
+            "partial": false
+          },
+          "createdAt": 1794718473145,
+          "contentHash": "e3ba7f36e954976c131b317665f9352a317d6ef099cf4a402e430fb5c692234e",
+          "revision": "15fa3dd9-8c87-4243-9f01-3979d6abe20f",
+          "inputFingerprint": "08a2a681934695c59eb3305a30be582d1a33eaac601816087ab2b3de73cacd3e",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision",
+          "status": "cleaned",
+          "cleanedAfterRender": "3dafb62a-3003-4d6b-be99-45c746f2869e"
+        },
+        {
+          "scope": "full",
+          "id": "9541f71a-fccf-4bc2-8617-b2c11543c073-1",
+          "time": 5,
+          "metadata": {
+            "width": 1920,
+            "height": 1080,
+            "zoomScale": 1,
+            "browserGpuMode": "auto",
+            "warnings": [],
+            "partial": false
+          },
+          "createdAt": 1794718473145,
+          "contentHash": "1329eddf7173b6ca7659231f723ecae18ab23fe8c528352f6d75df03b374f9b0",
+          "revision": "15fa3dd9-8c87-4243-9f01-3979d6abe20f",
+          "inputFingerprint": "08a2a681934695c59eb3305a30be582d1a33eaac601816087ab2b3de73cacd3e",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision",
+          "status": "cleaned",
+          "cleanedAfterRender": "3dafb62a-3003-4d6b-be99-45c746f2869e"
+        },
+        {
+          "scope": "full",
+          "id": "9541f71a-fccf-4bc2-8617-b2c11543c073-2",
+          "time": 10,
+          "metadata": {
+            "width": 1920,
+            "height": 1080,
+            "zoomScale": 1,
+            "browserGpuMode": "auto",
+            "warnings": [],
+            "partial": false
+          },
+          "createdAt": 1794718473145,
+          "contentHash": "1329eddf7173b6ca7659231f723ecae18ab23fe8c528352f6d75df03b374f9b0",
+          "revision": "15fa3dd9-8c87-4243-9f01-3979d6abe20f",
+          "inputFingerprint": "08a2a681934695c59eb3305a30be582d1a33eaac601816087ab2b3de73cacd3e",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision",
+          "status": "cleaned",
+          "cleanedAfterRender": "3dafb62a-3003-4d6b-be99-45c746f2869e"
+        },
+        {
+          "scope": "full",
+          "id": "9541f71a-fccf-4bc2-8617-b2c11543c073-3",
+          "time": 15,
+          "metadata": {
+            "width": 1920,
+            "height": 1080,
+            "zoomScale": 1,
+            "browserGpuMode": "auto",
+            "warnings": [],
+            "partial": false
+          },
+          "createdAt": 1794718473145,
+          "contentHash": "e3ba7f36e954976c131b317665f9352a317d6ef099cf4a402e430fb5c692234e",
+          "revision": "15fa3dd9-8c87-4243-9f01-3979d6abe20f",
+          "inputFingerprint": "08a2a681934695c59eb3305a30be582d1a33eaac601816087ab2b3de73cacd3e",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision",
+          "status": "cleaned",
+          "cleanedAfterRender": "3dafb62a-3003-4d6b-be99-45c746f2869e"
+        },
+        {
+          "scope": "full",
+          "id": "9541f71a-fccf-4bc2-8617-b2c11543c073-4",
+          "time": 19.75,
+          "metadata": {
+            "width": 1920,
+            "height": 1080,
+            "zoomScale": 1,
+            "browserGpuMode": "auto",
+            "warnings": [],
+            "partial": false
+          },
+          "createdAt": 1794718473145,
+          "contentHash": "4f92973e44367c145bb5ae8e42f7e8045bead14065a72a3d3adafa29f91fb87f",
+          "revision": "15fa3dd9-8c87-4243-9f01-3979d6abe20f",
+          "inputFingerprint": "08a2a681934695c59eb3305a30be582d1a33eaac601816087ab2b3de73cacd3e",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision",
+          "status": "cleaned",
+          "cleanedAfterRender": "3dafb62a-3003-4d6b-be99-45c746f2869e"
+        }
+      ]
+    },
+    "unversioned": []
+  },
+  "renders": {
+    "latest": {
+      "id": "3dafb62a-3003-4d6b-be99-45c746f2869e",
+      "completedAt": 1794718652234,
+      "output": "C:\\Users\\PC\\Desktop\\Thedivision2program\\brag-output-2026-11-15-074949\\brag.mp4",
+      "status": "completed",
+      "revision": "92cea424-50d1-41c8-af2e-f2911bbb6a00"
+    },
+    "retainedRevisions": [
+      "92cea424-50d1-41c8-af2e-f2911bbb6a00"
+    ]
+  },
+  "pendingArtifactCleanup": []
+}

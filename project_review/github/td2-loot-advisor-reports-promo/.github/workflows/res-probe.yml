@@ -1,0 +1,17 @@
+name: res-probe
+on: workflow_dispatch
+jobs:
+  probe:
+    runs-on: windows-latest
+    steps:
+      - shell: pwsh
+        run: |
+          Add-Type -AssemblyName System.Windows.Forms
+          "before: " + [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+          foreach ($r in @(@(3840,2160), @(2560,1440), @(1920,1080))) {
+            try { Set-DisplayResolution -Width $r[0] -Height $r[1] -Force -ErrorAction Stop; "set ok $($r[0])x$($r[1])"; break } catch { "fail $($r[0])x$($r[1]): $_" }
+          }
+          Start-Sleep 3
+          "after: " + [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+          Get-CimInstance Win32_VideoController | Select-Object Name, VideoModeDescription, CurrentHorizontalResolution | Format-List
+

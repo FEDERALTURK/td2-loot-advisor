@@ -1,0 +1,126 @@
+[
+  {
+    "suite": "app_stability",
+    "exit_code": 0,
+    "seconds": 0.753
+  },
+  {
+    "suite": "itempolicy",
+    "exit_code": 0,
+    "seconds": 0.392
+  },
+  {
+    "suite": "workqueue",
+    "exit_code": 0,
+    "seconds": 0.088
+  },
+  {
+    "suite": "performance",
+    "exit_code": 0,
+    "seconds": 0.129
+  },
+  {
+    "suite": "animation_policy",
+    "exit_code": 0,
+    "seconds": 0.166
+  },
+  {
+    "suite": "translation_reliability",
+    "exit_code": 0,
+    "seconds": 0.191
+  },
+  {
+    "suite": "localapi_backpressure",
+    "exit_code": 0,
+    "seconds": 0.653
+  },
+  {
+    "suite": "launcher",
+    "exit_code": 0,
+    "seconds": 0.099
+  },
+  {
+    "suite": "ocr_serialization",
+    "exit_code": 0,
+    "seconds": 0.171
+  },
+  {
+    "suite": "inplace_anchors",
+    "exit_code": 0,
+    "seconds": 0.407
+  },
+  {
+    "suite": "overlay",
+    "exit_code": 0,
+    "seconds": 0.104
+  },
+  {
+    "suite": "scan_latency",
+    "exit_code": 0,
+    "seconds": 0.571
+  },
+  {
+    "suite": "region_scan_fastpath",
+    "exit_code": 0,
+    "seconds": 0.564
+  },
+  {
+    "suite": "livetranslate",
+    "exit_code": 0,
+    "seconds": 0.66
+  },
+  {
+    "suite": "autoscan",
+    "exit_code": 0,
+    "seconds": 0.567
+  },
+  {
+    "suite": "core",
+    "exit_code": 0,
+    "seconds": 17.456
+  },
+  {
+    "suite": "knowledge",
+    "exit_code": 0,
+    "seconds": 0.225
+  },
+  {
+    "suite": "speech",
+    "exit_code": 0,
+    "seconds": 0.205
+  },
+  {
+    "suite": "screenstate",
+    "exit_code": 0,
+    "seconds": 4.416
+  },
+  {
+    "suite": "service",
+    "exit_code": 0,
+    "seconds": 1.105
+  },
+  {
+    "suite": "localapi",
+    "exit_code": 0,
+    "seconds": 7.744
+  },
+  {
+    "suite": "stability_widgets",
+    "exit_code": 0,
+    "seconds": 2.802
+  },
+  {
+    "suite": "real_ocr_8_samples",
+    "exit_code": 0
+  },
+  {
+    "suite": "game_assistant",
+    "exit_code": 0,
+    "seconds": 1.09
+  },
+  {
+    "suite": "natural_voice",
+    "exit_code": 0,
+    "seconds": 0.638
+  }
+]

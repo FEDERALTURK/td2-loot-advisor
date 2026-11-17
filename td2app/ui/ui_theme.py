@@ -35,21 +35,19 @@ def on_color(bg):
 
 
 # ───────────── renk paleti / palette ─────────────
-# Tek, sabit görsel kimlik: koyu grafit zemin + SHD turuncusu ve cyan ikincil vurgu.
+# Tek, sabit görsel kimlik: Division 2 Taktik HUD — siyah-zift zemin + yanık turuncu (amber) vurgu.
 # Eski çoklu tema/paket sistemi (dark/light/classic + 14 oyun-atmosferi paketi) tamamen kaldırıldı.
 PALETTES = {
     "default": {
-        "bg": "#0B0E13", "surface": "#141A22", "surface2": "#1C242F", "border": "#2A3542",
-        "fg": "#E8EDF2", "muted": "#8795A6", "accent": "#FF7A1A", "accent_hover": "#FF9440",
-        "secondary": "#4EA1FF", "accent_fg": on_color("#FF7A1A"), "success": "#3FB950",
-        "danger": "#F0534A", "warning": "#FFC247", "info": "#4EA1FF", "select": "#4A2A16",
-        "entry": "#070a0d", "text_bg": "#070a0d", "ov_bg": "#0c1117", "ov_fg": "#ffffff",
-        "ov_border": "#9a3a0a",
-        # Verdict renkleri turuncu aksandan ayrışır; her rozetin metni ayrıca anlam taşır.
-        "verdict": {"KEEP": "#176B45", "CONSIDER": "#8B5A16", "DISMANTLE": "#8F2D35",
-                    "REVIEW": "#245A9B", "ERROR": "#4B5563", "IDLE": "#26313D"},
-        "verdict_fg": {"KEEP": "#7EE2A8", "CONSIDER": "#FFD166", "DISMANTLE": "#FF8A8A",
-                       "REVIEW": "#9BC7FF", "ERROR": "#D1D5DB", "IDLE": "#AAB7C5"},
+        "bg": "#0b0e13", "surface": "#141a22", "surface2": "#1c242f", "border": "#2a3542",
+        "fg": "#e8edf2", "muted": "#8795a6", "accent": "#ff6d10", "accent_hover": "#ff9440",
+        "accent_fg": on_color("#ff6d10"), "success": "#3fb950", "danger": "#f0534a", "warning": "#ffc247",
+        "info": "#4ea1ff", "select": "#4a2a16", "entry": "#080b0f", "text_bg": "#080b0f",
+        "ov_bg": "#0d1118", "ov_fg": "#ffffff", "ov_border": "#cc5500",
+        "verdict": {"KEEP": "#176b45", "CONSIDER": "#8b5a16", "DISMANTLE": "#8f2d35",
+                    "REVIEW": "#245a9b", "ERROR": "#4b5563", "IDLE": "#26313d"},
+        "verdict_fg": {"KEEP": "#4ade80", "CONSIDER": "#ffc247", "DISMANTLE": "#f87171",
+                       "REVIEW": "#60a5fa", "ERROR": "#9ca3af", "IDLE": "#8795a6"},
     },
 }
 THEME_MODES = ("default",)
@@ -64,24 +62,13 @@ def apply_pack(settings, mode):
     # Keep the pointer and trail coordinated with the palette's accent.
     settings["fx_cursor_color"] = accent
     settings["fx_trail_color"] = accent
-    # Division 2'nin kendi arayüzüne benzer kademeli (tactical) kenar çubuğu ve geçiş temposu.
-    settings.update({"event_fx": "standard", "fx_bgwatch": False, "fx_transition_ms": 220,
+    # Division 2 Taktik HUD — kademeli turuncu kenarlık, hızlı geçiş temposu.
+    settings.update({"event_fx": "standard", "fx_bgwatch": False, "fx_transition_ms": 180,
                      "fx_transition_style": "tactical", "ui_nav_layout": "tactical", "ui_layout": "standard"})
     return True
 
 FONT = "Segoe UI"
 FONT_SEMI = "Segoe UI Semibold"
-FONT_MONO = "Consolas"
-FONT_DISPLAY = "Bahnschrift SemiBold"
-
-
-def _display_font(root):
-    """Bahnschrift yoksa Windows varsayılanına sessizce düş."""
-    try:
-        families = set(root.tk.call("font", "families"))
-    except (AttributeError, tk.TclError):
-        families = set()
-    return "Bahnschrift" if "Bahnschrift" in families else FONT_SEMI
 
 # Sekme ikonları (sekme kimliğine göre) / tab icons by tab id
 TAB_ICONS = {"dash": "🎯", "builds": "🧩", "progress": "📦", "stash": "🗄", "stats": "📊", "info": "📚", "translate": "🌐", "tasks": "📋",
@@ -110,8 +97,6 @@ def apply(root, mode="default"):
 
     bg, sf, sf2, bd, fg, mu = p["bg"], p["surface"], p["surface2"], p["border"], p["fg"], p["muted"]
     ac, ach, ent = p["accent"], p["accent_hover"], p["entry"]
-    global FONT_DISPLAY
-    FONT_DISPLAY = _display_font(root)
     base = (FONT, 10)
 
     root.configure(bg=bg)
@@ -137,7 +122,7 @@ def apply(root, mode="default"):
     s.configure("FieldNavActive.TButton", background=p["select"], foreground=ac, bordercolor=ac, anchor="center",
                 padding=(12, 9), relief="flat", font=(FONT_SEMI, 10))
     s.map("FieldNavActive.TButton", background=[("active", sf2), ("pressed", bd)], foreground=[("active", fg)])
-    s.configure("Card.TFrame", background=sf, borderwidth=1, relief="solid")
+    s.configure("Card.TFrame", background=sf)
     s.configure("Header.TFrame", background=sf)
     s.configure("TLabel", background=bg, foreground=fg)
     s.configure("Muted.TLabel", background=bg, foreground=mu)
@@ -149,7 +134,7 @@ def apply(root, mode="default"):
     s.configure("Chip.TLabel", background=sf2, foreground=mu, padding=(10, 3), font=(FONT_SEMI, 9))
     s.configure("ChipOn.TLabel", background=p["success"], foreground="#ffffff", padding=(10, 3), font=(FONT_SEMI, 9))
     s.configure("Warn.TLabel", background=bg, foreground=p["warning"])
-    s.configure("Section.TLabel", background=bg, foreground=fg, font=(FONT_DISPLAY, 10))
+    s.configure("Section.TLabel", background=bg, foreground=fg, font=(FONT_SEMI, 11))
     s.configure("TSeparator", background=bd)
 
     # butonlar

@@ -12,11 +12,12 @@ sys.path.insert(0, str(ROOT))
 import app  # noqa: E402
 import view3d  # noqa: E402
 
-app.messagebox.askyesno = lambda *a, **k: False
-app.messagebox.showinfo = lambda *a, **k: None
-SHOTS = ROOT / "shots"; SHOTS.mkdir(exist_ok=True)
-a = app.App()
-fails, times = [], []
+if __name__ == "__main__":
+    app.messagebox.askyesno = lambda *a, **k: False
+    app.messagebox.showinfo = lambda *a, **k: None
+    SHOTS = ROOT / "shots"; SHOTS.mkdir(exist_ok=True)
+    a = app.App()
+    fails, times = [], []
 
 
 def ok(c, msg):
@@ -146,6 +147,6 @@ def finish():
     a.root.after(800, a.root.destroy)
 
 
-a.root.after(9000, start)
-a.root.mainloop()
-sys.exit(1 if fails else 0)
+    a.root.after(9000, start)
+    a.root.mainloop()
+    sys.exit(1 if fails else 0)

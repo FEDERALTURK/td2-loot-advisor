@@ -1,0 +1,9 @@
+shots/
+dist/
+build/
+__pycache__/
+*.pyc
+reports_sent.json
+reports_queue.json
+/app
+

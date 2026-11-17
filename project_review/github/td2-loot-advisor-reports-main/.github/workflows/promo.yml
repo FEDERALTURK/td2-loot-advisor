@@ -1,0 +1,92 @@
+# Tanıtım videosu: anlatım (Chatterbox, MIT) + kurgu (4K) — kaynaklar "promo" dalında.
+name: promo-video
+on:
+  workflow_dispatch:
+    inputs:
+      vo_run:
+        description: "Önceki bir çalıştırmanın anlatımını kullan (run id; boş = yeniden üret)"
+        default: ""
+      res:
+        description: "Çözünürlük"
+        default: "3840x2160"
+      langs:
+        description: "Diller (JSON)"
+        default: '["tr","en"]'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  vo:
+    if: github.event.inputs.vo_run == ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        lang: ${{ fromJSON(github.event.inputs.langs) }}
+        idx: [0, 1, 2, 3, 4, 5, 6]
+    steps:
+      - uses: actions/checkout@v5
+        with: { ref: promo }
+      - uses: actions/setup-python@v6
+        with: { python-version: "3.11" }
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: hf-chatterbox-mtl-whisper-small-v1
+      - name: Install
+        run: |
+          pip install -q torch==2.6.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cpu
+          pip install -q chatterbox-tts==0.1.7 faster-whisper
+      - name: Generate
+        run: python promo/gen_vo.py ${{ matrix.lang }} ${{ matrix.idx }} out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vo-${{ matrix.lang }}-${{ matrix.idx }}
+          path: out/*.wav
+  render:
+    needs: vo
+    if: always() && (needs.vo.result == 'success' || needs.vo.result == 'skipped')
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        lang: ${{ fromJSON(github.event.inputs.langs) }}
+        kind: [main, vertical]
+    steps:
+      - uses: actions/checkout@v5
+        with: { ref: promo }
+      - uses: actions/setup-python@v6
+        with: { python-version: "3.12" }
+      - run: sudo apt-get -qq update && sudo apt-get -qq install -y ffmpeg >/dev/null && pip install -q pillow numpy
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: vo-${{ matrix.lang }}-*
+          merge-multiple: true
+          path: promo/vo
+          run-id: ${{ github.event.inputs.vo_run || github.run_id }}
+          github-token: ${{ github.token }}
+      - name: Render
+        run: |
+          cp promo/vo_override/*.wav promo/vo/ 2>/dev/null || true
+          ls promo/vo
+          W=${RES%x*}; H=${RES#*x}
+          if [ "${{ matrix.kind }}" = vertical ]; then EXTRA="--vertical"; W=1920; H=1080; fi
+          python promo/render.py promo ${{ matrix.lang }} out/td2_loot_advisor_${{ matrix.lang }}_${{ matrix.kind }}.mp4 --w $W --h $H $EXTRA
+          ffprobe -v error -show_entries format=duration:stream=width,height,codec_name -of compact out/*.mp4
+        env:
+          RES: ${{ github.event.inputs.res }}
+      - name: Preview frames
+        run: |
+          f=out/td2_loot_advisor_${{ matrix.lang }}_${{ matrix.kind }}.mp4
+          for s in 1.5 8 14 22 30 38 45 52 58; do ffmpeg -v error -ss $s -i $f -frames:v 1 -vf scale=1280:-2 out/prev_${{ matrix.kind }}_$s.jpg || true; done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: video-${{ matrix.lang }}-${{ matrix.kind }}
+          path: |
+            out/*.mp4
+            out/*.srt
+            out/*.jpg
+            out/td2_loot_advisor_*/mix.wav
+

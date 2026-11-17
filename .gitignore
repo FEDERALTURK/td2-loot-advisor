@@ -79,21 +79,22 @@ tests/.translate_result.json
 .claude-flow/swarm/
 .swarm/
 
-# VS Code / local environment secrets
+# Xbox Companion (UWP, xbox-companion/) — derleme çıktıları ve VS kullanıcı dosyaları
+xbox-companion/**/bin/
+xbox-companion/**/obj/
+xbox-companion/**/AppPackages/
+xbox-companion/**/BundleArtifacts/
+xbox-companion/*.user
+xbox-companion/.vs/
+
+# Gizli materyal — kök seviyede (mobile/android/.gitignore yalnız kendi alt ağacını kapsar,
+# bu yüzden depo kökündeki bir keystore veya .env ÖNCEDEN korumasızdı; bkz. SETUP.md §7).
 .env
 .env.*
 !.env.example
-.dev.vars
-.wrangler/
 *.jks
 *.keystore
-
-# Local exports and review artifacts
-builds.json
-Claude outputs/
-project_review/
-web_deploy/
-brag-output-*/
-node_modules/
-mobile/.dart_tool/
-mobile/build/
+*.p8
+key.properties
+beta-key.properties
+google-services.json
