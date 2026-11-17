@@ -140,7 +140,7 @@ ok(seen[0][1].get("user-agent") == "TD2LootAdvisor", "geçersiz sürüm metni g�
 # --- uçtan uca: yerel sunucu + iki oyuncu
 def e2e():
     port = 8791
-    p = subprocess.Popen(["node", str(ROOT / "server" / "dev_server.mjs"), str(port)], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
+    p = subprocess.Popen(["node", str(ROOT / "server" / "dev_server.mjs"), str(port)], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, text=True)
     try:
         line = p.stdout.readline().split()
         ok(line and line[0] == "READY", "yerel sunucu açıldı")
