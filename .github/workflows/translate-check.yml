@@ -21,7 +21,9 @@ jobs:
       - uses: actions/setup-python@v6
         with: { python-version: "3.13" }
       - uses: actions/setup-node@v5
-        with: { node-version: "22.5" }
+        # server/dev_server.mjs uses node:sqlite; use the current Node 22 line so the
+        # experimental built-in is available on GitHub-hosted runners.
+        with: { node-version: "22" }
       - name: Install
         shell: cmd
         run: |

@@ -6,6 +6,14 @@ import 'package:http/http.dart' as http;
 /// package sürümü ise pubspec içinde üç bileşen + artan build numarasıdır.
 const companionVersion = '0.1.9';
 const updateCheckInterval = Duration(hours: 6);
+const companionUserAgent = 'TD2-Loot-Advisor-Companion/$companionVersion';
+
+/// Returns a bounded download fraction. Unknown or invalid content lengths
+/// deliberately report zero so callers do not display a false percentage.
+double downloadProgress(int received, int? total) {
+  if (total == null || total <= 0 || received <= 0) return 0;
+  return (received / total).clamp(0.0, 1.0).toDouble();
+}
 
 class CompanionRelease {
   const CompanionRelease({

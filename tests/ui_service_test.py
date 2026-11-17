@@ -87,8 +87,8 @@ def s1():
     f = ROOT / "tests" / ".fake_game.py"; f.write_text(FAKE, encoding="utf-8")
     game = subprocess.Popen([sys.executable, str(f), "1280", "720", "40", "40", str(ROOT / "tests/samples/stoner_lamg_3440x1440.png")])
     # Sahte oyun penceresinin gerçekten görünür olmasını bekle (CI'da tkinter başlatması 2-5s alabilir).
-    # GameWatcher her 2s bir polling yapar; pencere görünmeden s2()'yi planlamak "oyun algılandı" testinin
-    # başarısız olmasına yol açar. Pencere görününce +3s daha bekleyerek GameWatcher'ın event fırlatmasına zaman tanı.
+    # GameWatcher ve OCR, CI'da sabit bir gecikmeden daha uzun sürebilir. Sadece pencerenin
+    # görünmesini beklemek s2()'yi OCR tamamlanmadan çalıştırarak sahte negatif üretir.
     _t0 = time.time()
     def _wait_for_window():
         try:
@@ -98,8 +98,24 @@ def s1():
             detected = False
         elapsed = time.time() - _t0
         if detected:
-            # Pencere algılandı; GameWatcher event fırlatıp app'in state'ini güncellemesi için 3s daha bekle
-            a.root.after(3000, s2)
+            # Pencere algılandı; GameWatcher + OCR sonuçları hazır olana kadar bekle.
+            # Timeout yalnızca tanı amaçlıdır; s2() içindeki gerçek assertion'lar korunur.
+            _scan_t0 = time.time()
+            def _wait_for_scan_ready():
+                try:
+                    session = a.sessions.stats()
+                    ready = (
+                        a.game_on and a.running
+                        and session.get("scanned", 0) >= 1
+                        and a.screen.learned() >= 1
+                    )
+                except Exception:
+                    ready = False
+                if ready or time.time() - _scan_t0 > 20:
+                    a.root.after(0, s2)
+                else:
+                    a.root.after(500, _wait_for_scan_ready)
+            a.root.after(0, _wait_for_scan_ready)
         elif elapsed > 15:
             # 15s timeout; yine de s2'ye geç (pencere görünmemişse test orada başarısız olur)
             a.root.after(0, s2)
@@ -143,7 +159,25 @@ def s3b():
 
 def s4():
     game.terminate()
-    a.root.after(8000, s5)
+    try:
+        game.wait(timeout=5)
+    except Exception:
+        pass
+    # The watcher runs on a two-second background cadence.  Probe it from the
+    # Tk loop as well so process termination is observed before the assertions;
+    # assertions still require the real game/stopping state transition.
+    deadline = time.time() + 8
+    def wait_stopped():
+        if a.game_on and a.watcher:
+            try:
+                a.watcher.tick()
+            except Exception:
+                pass
+        if a.game_on and time.time() < deadline:
+            a.root.after(250, wait_stopped)
+        else:
+            a.root.after(0, s5)
+    a.root.after(250, wait_stopped)
 
 def s5():
     step("oyun kapanınca tarama durdu", not a.game_on and not a.running)
