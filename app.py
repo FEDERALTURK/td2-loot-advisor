@@ -3178,7 +3178,7 @@ class App:
         bar = ttk.Frame(right); bar.pack(fill="x", pady=(6, 0))
         self.enc_add_btn = ttk.Button(bar, text="â• " + t("enc.add"), command=self.enc_add_to_build, style="Accent.TButton")
         self.enc_add_btn.pack(side="left")
-        ttk.Button(bar, text="ğŸ“ " + t("enc.where") + ("" if self.ent.has("drop_stats_view") else " â­"), command=self.enc_where).pack(side="left", padx=6)
+        ttk.Button(bar, text="ğŸ“ " + t("enc.where") + ("" if self.ent.has("drop_stats_view") else " ⭐"), command=self.enc_where).pack(side="left", padx=6)
         ttk.Button(bar, text="ğŸŒ " + t("enc.wiki"), command=self.enc_wiki).pack(side="left")
         self.enc_status = ttk.Label(right, text="", foreground=PAL["muted"]); self.enc_status.pack(anchor="w", pady=(4, 0))
         self._enc_fill()
@@ -3731,7 +3731,7 @@ class App:
             rar = " ".join(item.get("rarity") or []).upper()
             if verdict == "KEEP" and ("EXOTIC" in rar or "NAMED" in rar):
                 kind = t("push.exotic") if "EXOTIC" in rar else t("push.named")
-                self._push("drop", "â­ " + t("push.drop_title", kind=kind),
+                self._push("drop", "⭐ " + t("push.drop_title", kind=kind),
                            f"{item.get('name')} â€” {verdict_label(verdict)}" + (f"\n{res[0][1]} {res[0][0]}%" if res else ""))
             ev = {"type": "scan", **{k: v for k, v in self.comp_state.items() if k in ("verdict", "verdict_label", "best", "item", "note")}}
             self._service_publish(extra=ev)
@@ -3887,7 +3887,7 @@ class App:
             def ch():
                 st[key] = bool(v.get()); save_cfg(self.cfg)
                 if cmd: cmd()
-            cb = ttk.Checkbutton(parent, text=label + ("" if not feature or self.ent.has(feature) else "  â­"), variable=v, command=ch)
+            cb = ttk.Checkbutton(parent, text=label + ("" if not feature or self.ent.has(feature) else "  ⭐"), variable=v, command=ch)
             if feature and not self.ent.has(feature): cb.state(["disabled"])
             cb.pack(anchor="w", padx=10, pady=1); return v
         # 1) arka plan
@@ -3911,7 +3911,7 @@ class App:
         rr = ttk.Frame(sm); rr.pack(anchor="w", padx=10, pady=(4, 8))
         ttk.Button(rr, text=t("svc.smart_reset"), command=lambda: (self.screen.reset(), self.toast(t("svc.smart_reset_done")))).pack(side="left")
         # 3) yerel API
-        ap = ttk.LabelFrame(f, text="ğŸ”Œ " + t("svc.box_api") + ("" if self.ent.has("local_api") else "  â­")); ap.pack(fill="x", padx=10, pady=6)
+        ap = ttk.LabelFrame(f, text="ğŸ”Œ " + t("svc.box_api") + ("" if self.ent.has("local_api") else "  ⭐")); ap.pack(fill="x", padx=10, pady=6)
         chk(ap, "api_on", t("svc.api_on"), cmd=lambda: (self.api_apply(), self.rebuild_ui(tab="settings")), feature="local_api")
         chk(ap, "api_control", t("svc.api_control"), cmd=self.api_apply, feature="local_api")
         chk(ap, "api_lan", t("svc.api_lan"), cmd=lambda: (self.api_apply(), self.rebuild_ui(tab="settings")), feature="local_api")
@@ -3930,7 +3930,7 @@ class App:
         dc = ttk.LabelFrame(f, text="ğŸ’¬ " + t("svc.box_discord")); dc.pack(fill="x", padx=10, pady=6)
         chk(dc, "rpc_on", t("svc.rpc_on"), cmd=self.rpc_apply, feature="discord_presence")
         P(dc, t("svc.rpc_hint")).pack(anchor="w", padx=12, pady=(0, 8))
-        pn = ttk.LabelFrame(f, text="ğŸ“± " + t("svc.box_push") + ("" if self.ent.has("push_notify") else "  â­")); pn.pack(fill="x", padx=10, pady=6)
+        pn = ttk.LabelFrame(f, text="ğŸ“± " + t("svc.box_push") + ("" if self.ent.has("push_notify") else "  ⭐")); pn.pack(fill="x", padx=10, pady=6)
         chk(pn, "push_on", t("svc.push_on"), cmd=self._push_configure, feature="push_notify")
         r1 = ttk.Frame(pn); r1.pack(fill="x", padx=10, pady=2)
         ttk.Label(r1, text=t("svc.push_topic"), width=16).pack(side="left")
@@ -3991,8 +3991,8 @@ class App:
 
     def _acc_chip_text(self):
         a = getattr(self, "account", None)
-        if not a or not a.signed_in: return "ğŸ‘¤ " + t("acc.login_short")
-        return "ğŸ‘¤ " + a.username[:16] + (" â­" if self.ent.source == "account" or self.ent.valid else "")
+        if not a or not a.signed_in: return "👤 " + t("acc.login_short")
+        return "👤 " + a.username[:16] + (" ⭐" if self.ent.source == "account" or self.ent.valid else "")
 
     def _acc_changed(self):
         """Hesap / yetki deÄŸiÅŸti: baÅŸlÄ±ÄŸÄ± gÃ¼ncelle, premium deÄŸiÅŸtiyse arayÃ¼zÃ¼ yeniden kur."""
@@ -4047,7 +4047,7 @@ class App:
     def open_account(self, welcome=False):
         if getattr(self, "_acc_win", None) and self._acc_win.winfo_exists():
             self._acc_win.lift(); return
-        w = self._acc_win = tk.Toplevel(self.root); w.title("ğŸ‘¤ " + t("acc.title")); w.configure(bg=PAL["bg"])
+        w = self._acc_win = tk.Toplevel(self.root); w.title("👤 " + t("acc.title")); w.configure(bg=PAL["bg"])
         w.transient(self.root)
         k = getattr(self, "ui_factor", 1.0)
         w.geometry(f"{int(560 * k)}x{int(600 * k)}"); w.minsize(int(480 * k), int(460 * k))
@@ -4065,12 +4065,12 @@ class App:
         P = lambda txt, fg=None: tk.Label(b, text=txt, bg=PAL["bg"], fg=fg or PAL["muted"], font=(ui_theme.FONT, 10),
                                           anchor="w", justify="left", wraplength=int(500 * getattr(self, "ui_factor", 1.0)))
         if not a.signed_in:
-            H("ğŸ‘¤ " + t("acc.welcome_title" if self._acc_welcome else "acc.title")).pack(fill="x")
+            H("👤 " + t("acc.welcome_title" if self._acc_welcome else "acc.title")).pack(fill="x")
             P(t("acc.intro")).pack(fill="x", pady=(6, 12))
             card = tk.Frame(b, bg=PAL["surface"], highlightthickness=1, highlightbackground=PAL["accent"])
             card.pack(fill="x", pady=4)
             for line in ("acc.why_1", "acc.why_2", "acc.why_3"):
-                tk.Label(card, text="â­  " + t(line), bg=PAL["surface"], fg=PAL["fg"], font=(ui_theme.FONT, 10), anchor="w",
+                tk.Label(card, text="⭐  " + t(line), bg=PAL["surface"], fg=PAL["fg"], font=(ui_theme.FONT, 10), anchor="w",
                          justify="left").pack(fill="x", padx=12, pady=(6, 0))
             tk.Frame(card, height=8, bg=PAL["surface"]).pack()
             self._acc_btn = ttk.Button(b, text="ğŸ®  " + t("acc.discord"), style="Accent.TButton", command=self._acc_login)
@@ -4086,8 +4086,8 @@ class App:
                 ttk.Button(b, text=t("acc.skip"), command=self._acc_win.destroy).pack(anchor="e", pady=(10, 6), side="bottom")
         else:
             prem = e.source == "account"
-            H("ğŸ‘¤ " + a.username).pack(fill="x")
-            badge = ("â­ " + t("prem.premium")) if prem else (("â­ " + t("acc.via_key")) if e.valid else t("prem.free"))
+            H("👤 " + a.username).pack(fill="x")
+            badge = ("⭐ " + t("prem.premium")) if prem else (("⭐ " + t("acc.via_key")) if e.valid else t("prem.free"))
             tk.Label(b, text=badge, bg=PAL["accent"] if (prem or e.valid) else PAL["surface"],
                      fg=PAL["bg"] if (prem or e.valid) else PAL["muted"], font=(ui_theme.FONT_SEMI, 10), padx=10, pady=2).pack(anchor="w", pady=(4, 8))
             lic = a.data.get("license") or {}
@@ -4832,7 +4832,7 @@ class App:
         for txt, val in ((t("mode.hotkey"), "hotkey"), (t("mode.auto"), "auto")):
             ttk.Radiobutton(mode, text=txt, value=val, variable=self.mode_var, command=self.change_mode).pack(side="left", padx=6)
         ab = ttk.Frame(left); ab.pack(fill="x", pady=(4, 0))
-        ttk.Label(ab, text="â­ " + t("plan.active"), foreground=PAL["accent"]).pack(side="left")
+        ttk.Label(ab, text="⭐ " + t("plan.active"), foreground=PAL["accent"]).pack(side="left")
         self.act_cb = ttk.Combobox(ab, state="readonly", width=44, values=[b["name"] for b in self.cfg["builds"]])
         a0 = active_build(self.cfg)
         if a0: self.act_cb.set(a0["name"])
@@ -6235,7 +6235,7 @@ class App:
         ttk.Button(bb3, text="ğŸ”— " + t("share.share"), command=self.share_build).pack(side="left", fill="x", expand=True)
         ttk.Button(bb3, text="ğŸ“¥ " + t("share.paste"), command=self.import_build_code).pack(side="left", fill="x", expand=True, padx=(4, 0))
         ttk.Button(left, text="ğŸ†š " + t("cmp.compare_btn"), command=self.show_build_compare).pack(fill="x", pady=(6, 0))
-        ttk.Button(left, text=ui_theme.with_icon(t("meta.sync_now"), "â­"), command=lambda: self.meta_sync_start(force=True, what=("builds",)),
+        ttk.Button(left, text=ui_theme.with_icon(t("meta.sync_now"), "⭐"), command=lambda: self.meta_sync_start(force=True, what=("builds",)),
                    style="Accent.TButton").pack(fill="x", pady=(6, 0))
         self.meta_info = ttk.Label(left, text=self.meta_status_text(), foreground=PAL["muted"], wraplength=300, justify="left")
         self.meta_info.pack(fill="x", pady=(4, 0))
@@ -6371,10 +6371,10 @@ class App:
 
     @staticmethod
     def build_label(b):
-        """Listede gÃ¶rÃ¼nen ad: â­ meta, ğŸ”’ dÃ¼zenlenmiÅŸ meta, ğŸ”¥ popÃ¼lerlik."""
+        """Listede gÃ¶rÃ¼nen ad: ⭐ meta, ğŸ”’ dÃ¼zenlenmiÅŸ meta, ğŸ”¥ popÃ¼lerlik."""
         if not b.get("meta_id"): return b["name"]
         pop = b.get("meta", {}).get("popularity", 0)
-        return f"{'ğŸ”’' if b.get('meta_locked') else 'â­'} {b['name']}" + (f"  ğŸ”¥{pop}" if pop else "")
+        return f"{'ğŸ”’' if b.get('meta_locked') else '⭐'} {b['name']}" + (f"  ğŸ”¥{pop}" if pop else "")
 
     def selected_build_index(self):
         s = self.lb.curselection()
@@ -6411,9 +6411,9 @@ class App:
         head = ttk.Frame(box); head.pack(fill="x", padx=8, pady=(8, 4))
         ttk.Label(head, text=b["name"], font=(ui_theme.FONT_SEMI, 16)).pack(side="left")
         if is_act:
-            tk.Label(head, text="â­ " + t("plan.is_active"), bg=PAL["accent"], fg="white", font=(ui_theme.FONT_SEMI, 9), padx=8, pady=2).pack(side="left", padx=10)
+            tk.Label(head, text="⭐ " + t("plan.is_active"), bg=PAL["accent"], fg="white", font=(ui_theme.FONT_SEMI, 9), padx=8, pady=2).pack(side="left", padx=10)
         else:
-            ttk.Button(head, text="â­ " + t("plan.make_active"), style="Accent.TButton",
+            ttk.Button(head, text="⭐ " + t("plan.make_active"), style="Accent.TButton",
                        command=lambda: (self.set_active_build(b["name"]), self.refresh_builds(keep=True))).pack(side="left", padx=10)
         ttk.Button(head, text="ğŸ§ " + t("plan.open_progress"), command=lambda: (self.pb.set(b["name"]), self.refresh_prog(),
                                                                               self.select_page("progress"))).pack(side="right")
@@ -6950,7 +6950,7 @@ class App:
         else:
             T.insert("end", t("drops.weeks", n=d.get("weeks"), since=d.get("since")) + "\n")
             for a in d.get("activities", [])[:8]:
-                T.insert("end", f"  {self._acts.get(a['activity'], a['activity'])}: {a['drops']}  Â·  â˜…{a.get('named') or 0}  â¬¢{a.get('exotic') or 0}  Â·  {a.get('players')}ğŸ‘¤\n")
+                T.insert("end", f"  {self._acts.get(a['activity'], a['activity'])}: {a['drops']}  Â·  â˜…{a.get('named') or 0}  â¬¢{a.get('exotic') or 0}  Â·  {a.get('players')}👤\n")
             if d.get("top"):
                 T.insert("end", "\n" + t("drops.top", act=self._acts.get(d["activity"], d["activity"])) + "\n")
                 for x in d["top"][:15]: T.insert("end", f"  {x['n']:4d}  {x['item']}  ({x.get('slot') or x.get('kind')})\n")
@@ -8348,7 +8348,7 @@ class App:
                          "premium": "service", "logs": "service", "diagnostics": "service"}
         P = {}
         for key, icon in (("general", "âš™"), ("shortcuts", "âŒ¨"), ("fx", "âœ¨"), ("scan", "ğŸ¯"), ("display", "ğŸ–¥"), ("ocr", "ğŸ”"), ("overlay", "ğŸªŸ"),
-                          ("sync", "ğŸ”„"), ("service", "ğŸ›°"), ("premium", "â­"), ("logs", "ğŸ“"), ("diagnostics", "ğŸ©º")):
+                          ("sync", "ğŸ”„"), ("service", "ğŸ›°"), ("premium", "⭐"), ("logs", "ğŸ“"), ("diagnostics", "ğŸ©º")):
             group = set_group_for[key]
             holder = ttk.Frame(self.set_group_nbs[group])
             label = ("KÄ±sayollar" if i18n.current_language() == "tr" else "Shortcuts") if key == "shortcuts" else t("setpage." + key)
@@ -8420,7 +8420,7 @@ class App:
         rm = ttk.Frame(mb); rm.pack(fill="x", padx=8, pady=6)
         self.bv["meta_sync"] = tk.BooleanVar(value=bool(st.get("meta_sync", True)))
         ttk.Checkbutton(rm, text=t("meta.enable"), variable=self.bv["meta_sync"]).pack(side="left")
-        ttk.Button(rm, text=ui_theme.with_icon(t("meta.sync_now"), "â­"), command=lambda: self.meta_sync_start(force=True, what=("builds",))).pack(side="left", padx=12)
+        ttk.Button(rm, text=ui_theme.with_icon(t("meta.sync_now"), "⭐"), command=lambda: self.meta_sync_start(force=True, what=("builds",))).pack(side="left", padx=12)
         if st.get("meta_hidden"):
             ttk.Button(rm, text=t("meta.restore_hidden"), command=self.meta_restore_hidden).pack(side="left")
         rm2 = ttk.Frame(mb); rm2.pack(fill="x", padx=8, pady=(0, 4))
@@ -9352,7 +9352,7 @@ class App:
         if self.ent.has(feature): return True
         box = tk.Frame(parent, bg=PAL["surface"], highlightthickness=1, highlightbackground=PAL["accent"])
         box.pack(fill="x", padx=4, pady=6)
-        tk.Label(box, text="â­ " + t("prem.locked") + " â€” " + t("feat." + feature), bg=PAL["surface"], fg=PAL["accent"],
+        tk.Label(box, text="⭐ " + t("prem.locked") + " â€” " + t("feat." + feature), bg=PAL["surface"], fg=PAL["accent"],
                  font=(ui_theme.FONT_SEMI, 11), anchor="w").pack(fill="x", padx=10, pady=(8, 2))
         tk.Label(box, text=t("prem.locked_hint"), bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 10),
                  anchor="w", justify="left", wraplength=700).pack(fill="x", padx=10)
@@ -9364,10 +9364,10 @@ class App:
         if "premium" in getattr(self, "_set_keys", []): self.select_settings_page("premium")
 
     def build_premium_box(self, f, st):
-        ab = ttk.LabelFrame(f, text="ğŸ‘¤ " + t("acc.title")); ab.pack(fill="x", padx=10, pady=(10, 6))
+        ab = ttk.LabelFrame(f, text="👤 " + t("acc.title")); ab.pack(fill="x", padx=10, pady=(10, 6))
         ar = ttk.Frame(ab); ar.pack(fill="x", padx=8, pady=8)
         a = self.account
-        txt = (t("acc.signed_as", name=a.username) + ("  â­ " + t("prem.premium") if self.ent.source == "account" else "")) if a.signed_in \
+        txt = (t("acc.signed_as", name=a.username) + ("  ⭐ " + t("prem.premium") if self.ent.source == "account" else "")) if a.signed_in \
             else t("acc.not_signed")
         ttk.Label(ar, text=txt).pack(side="left")
         ttk.Button(ar, text=t("acc.open") if a.signed_in else "ğŸ® " + t("acc.discord"), command=self.open_account,
@@ -9646,7 +9646,7 @@ class App:
         ttk.Button(bar2, text="â‡© " + t("stash.import"), command=self._stash_import).pack(side="left")
         ttk.Button(bar2, text="ğŸ’¾ Yedekle", command=self._stash_backup).pack(side="left", padx=6)
         ttk.Button(bar2, text="â†© Geri yÃ¼kle", command=self._stash_restore).pack(side="left")
-        ttk.Button(bar2, text="ğŸ“¤ " + t("stash.export") + ("" if self.ent.has("stash_export") else " â­"),
+        ttk.Button(bar2, text="ğŸ“¤ " + t("stash.export") + ("" if self.ent.has("stash_export") else " ⭐"),
                    command=self._stash_export).pack(side="left", padx=6)
         ttk.Button(bar2, text="ğŸ§¹ " + t("stash.clear"), command=self._stash_clear).pack(side="right")
         cols = ("slot", "item", "src", "attrs", "verdict", "best", "time")
