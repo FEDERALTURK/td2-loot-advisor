@@ -1,0 +1,56 @@
+name: archive-releases
+# Copies old releases from the public td2-loot-advisor repo into this private repo
+# as "arsiv-<tag>" pre-releases (notes and all files, sizes verified).
+# The public repo is only read here; nothing is changed or deleted there.
+on:
+  workflow_dispatch:
+    inputs:
+      tags:
+        description: "Space-separated tags to archive"
+        required: true
+permissions:
+  contents: write
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PUB: FEDERALTURK/td2-loot-advisor
+      PRIV: ${{ github.repository }}
+      TAGS: ${{ inputs.tags }}
+    steps:
+      - name: Copy and verify
+        shell: bash
+        run: |
+          set -euo pipefail
+          fail=0
+          for T in $TAGS; do
+            [[ "$T" =~ ^v[0-9][0-9.]*$ ]] || { echo "skip bad tag $T"; continue; }
+            NEW="arsiv-$T"
+            rel=$(gh api "repos/$PUB/releases/tags/$T")
+            if ! gh release view "$NEW" -R "$PRIV" >/dev/null 2>&1; then
+              {
+                echo "Herkese açık depodan ($PUB) arşivlendi. Asıl yayın tarihi: $(jq -r .published_at <<<"$rel")"
+                echo; echo "---"; echo
+                jq -r '.body // ""' <<<"$rel"
+              } > notes.md
+              gh release create "$NEW" -R "$PRIV" --target main --prerelease \
+                --title "Arşiv: TD2 Loot Advisor $T" --notes-file notes.md
+            fi
+            rm -rf dl && mkdir dl
+            have=$(gh release view "$NEW" -R "$PRIV" --json assets -q '.assets[] | "\(.name) \(.size)"')
+            while read -r n s; do
+              [ -z "$n" ] && continue
+              grep -qx "$n $s" <<<"$have" && continue
+              gh release download "$T" -R "$PUB" -p "$n" -D dl
+              [ "$(stat -c %s "dl/$n")" = "$s" ] || { echo "size mismatch $T/$n"; exit 1; }
+              gh release upload "$NEW" -R "$PRIV" "dl/$n" --clobber
+              rm -f "dl/$n"
+            done < <(jq -r '.assets[] | "\(.name) \(.size)"' <<<"$rel")
+            want=$(jq -r '.assets[] | "\(.name) \(.size)"' <<<"$rel" | sort)
+            got=$(gh release view "$NEW" -R "$PRIV" --json assets -q '.assets[] | "\(.name) \(.size)"' | sort)
+            if [ "$want" = "$got" ]; then echo "OK $T"; else echo "VERIFY FAILED $T"; fail=1; fi
+          done
+          exit $fail
+

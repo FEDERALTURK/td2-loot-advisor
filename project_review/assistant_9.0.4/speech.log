@@ -1,0 +1,16 @@
+OK   konuşma bölümü sessizlikte kapandı (2.1 sn)
+OK   çok kısa ses (öksürük, tık) bölüm sayılmadı
+OK   uzun konuşma 8 sn'de bölündü
+OK   yarım cümle beklenir
+OK   nokta gelince cümle verildi
+OK   eski cümle tekrar verilmez
+OK   değişen yarım cümle beklenir
+OK   1 sn değişmeyen yarım cümle verildi
+OK   sahte (halüsinasyon) metin atıldı
+OK   oyun adları düzeltildi
+OK   bayt düzeyi çözümleme
+OK   log-mel biçimi
+OK   mel süzgeçleri
+OK   model indirildi ve doğrulandı
+OK   yanlış SHA-256 reddedildi
+RESULT: PASS

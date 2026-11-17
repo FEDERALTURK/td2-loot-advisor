@@ -4,8 +4,7 @@ import 'package:http/http.dart' as http;
 
 /// GitHub beta etiketi dört bileşene izin verir (ör. 0.1.4.1). Android'in
 /// package sürümü ise pubspec içinde üç bileşen + artan build numarasıdır.
-const companionVersion = '0.1.8';
-const companionUserAgent = 'TD2-Loot-Advisor-Companion/$companionVersion';
+const companionVersion = '0.1.9';
 const updateCheckInterval = Duration(hours: 6);
 
 class CompanionRelease {
@@ -40,7 +39,7 @@ Future<CompanionRelease?> fetchLatestCompanionRelease(
         uri,
         headers: const {
           'Accept': 'application/vnd.github+json',
-          'User-Agent': companionUserAgent,
+          'User-Agent': 'TD2-Loot-Advisor-Companion/$companionVersion',
         },
       )
       .timeout(const Duration(seconds: 8));

@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TD2 Loot Advisor — The Division 2 için anlık sakla/kır kararı</title>
+<meta name="description" content="Ekranı okuyan, build kurallarınla karşılaştıran ve saniyeler içinde sakla/kır kararı veren ücretsiz, açık kaynak The Division 2 aracı.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><circle cx=%2216%22 cy=%2216%22 r=%2214%22 fill=%22%230f1116%22 stroke=%22%23ff6d10%22 stroke-width=%222%22/><circle cx=%2216%22 cy=%2216%22 r=%225%22 fill=%22%23ff6d10%22/></svg>">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<header class="td2-header">
+  <div class="td2-wrap td2-nav">
+    <div class="td2-brand"><span class="dot"></span> TD2 Loot Advisor</div>
+    <nav class="td2-nav-links">
+      <a href="index.html" class="active" data-i18n="nav_home">Ana Sayfa</a>
+      <a href="news/" data-i18n="nav_news">Haberler</a>
+      <a href="premium/" data-i18n="nav_premium">Premium</a>
+      <a href="account/" data-i18n="nav_account">Hesabım</a>
+    </nav>
+    <div class="td2-nav-right">
+      <div class="td2-lang"><button class="td2-lang-btn" data-lang="tr">TR</button><button class="td2-lang-btn" data-lang="en">EN</button></div>
+      <a class="btn btn-primary btn-sm" href="#indir" data-i18n="nav_download">İndir</a>
+    </div>
+  </div>
+</header>
+
+<section class="td2-hero td2-wrap">
+  <h1 data-i18n="hero_title">Envanterde zaman kaybetme.</h1>
+  <p data-i18n="hero_sub">Bir eşyanın üzerine gel, F8'e bas: TD2 Loot Advisor ekranı okur, kendi build kurallarınla karşılaştırır ve saniyeler içinde sakla / düşün / kır kararını verir. Oyunun belleğine hiç dokunmaz.</p>
+  <div class="cta-row">
+    <a class="btn btn-primary" href="#indir" data-i18n="hero_cta_download">Windows için indir</a>
+    <a class="btn btn-ghost" href="https://github.com/FEDERALTURK/td2-loot-advisor" data-i18n="hero_cta_source">Kaynak kodu (GitHub)</a>
+  </div>
+  <div class="note" data-i18n="hero_note">Ücretsiz ve açık kaynak (MIT). Hesap gerektirmez.</div>
+</section>
+
+<section class="section td2-wrap">
+  <h2 data-i18n="feat_title">Ne yapıyor?</h2>
+  <div class="grid">
+    <div class="card"><span class="emoji">🎯</span><h3 data-i18n="feat_scan_t">Ekran okuma ile anında karar</h3><p data-i18n="feat_scan_d"></p></div>
+    <div class="card"><span class="emoji">🧩</span><h3 data-i18n="feat_build_t">Build takibi</h3><p data-i18n="feat_build_d"></p></div>
+    <div class="card"><span class="emoji">🎒</span><h3 data-i18n="feat_stash_t">Envanter analizi (Stash)</h3><p data-i18n="feat_stash_d"></p></div>
+    <div class="card"><span class="emoji">🗒️</span><h3 data-i18n="feat_task_t">Görev çevirisi</h3><p data-i18n="feat_task_d"></p></div>
+    <div class="card"><span class="emoji">🔒</span><h3 data-i18n="feat_mem_t">Belleğe asla dokunmaz</h3><p data-i18n="feat_mem_d"></p></div>
+    <div class="card"><span class="emoji">🌍</span><h3 data-i18n="feat_lang_t">10 dil, herkes kendi dilini ekleyebilir</h3><p data-i18n="feat_lang_d"></p></div>
+  </div>
+  <p style="margin-top:20px"><a href="https://github.com/FEDERALTURK/td2-loot-advisor#features" data-i18n="feat_more">Tüm özellikler → GitHub README</a></p>
+</section>
+
+<section class="section td2-wrap">
+  <h2 data-i18n="free_title">Ücretsiz ve Premium</h2>
+  <p class="section-lede" data-i18n="free_lede">Tarama, build takibi, görevler, envanter (stash) ve aktif-build optimizasyonu tamamen ücretsiz ve her zaman öyle kalacak.</p>
+  <a class="btn btn-ghost" href="premium/" data-i18n="free_cta">Premium'u gör</a>
+</section>
+
+<section class="section td2-wrap" id="indir">
+  <h2 data-i18n="down_title">İndir</h2>
+  <div id="dl-status" style="color:var(--muted);font-size:14px;margin-bottom:16px" data-i18n="down_loading">Son sürüm bilgisi alınıyor…</div>
+  <div class="dl-grid" id="dl-grid" hidden>
+    <div class="dl-card">
+      <strong data-i18n="down_installer">Kurulum dosyası (önerilen)</strong>
+      <span class="ver" id="dl-ver"></span>
+      <a class="btn btn-primary btn-sm" id="dl-installer" href="#">.exe</a>
+    </div>
+    <div class="dl-card">
+      <strong data-i18n="down_portable">Taşınabilir (zip)</strong>
+      <span class="ver">&nbsp;</span>
+      <a class="btn btn-ghost btn-sm" id="dl-portable" href="#">.zip</a>
+    </div>
+    <div class="dl-card" id="dl-mobile-card" hidden>
+      <strong data-i18n="down_mobile">Android companion (beta)</strong>
+      <span class="ver">&nbsp;</span>
+      <a class="btn btn-ghost btn-sm" id="dl-mobile" href="#">.apk</a>
+    </div>
+    <div class="dl-card">
+      <strong data-i18n="down_source">Kaynak kodundan çalıştır</strong>
+      <span class="ver">&nbsp;</span>
+      <a class="btn btn-ghost btn-sm" href="https://github.com/FEDERALTURK/td2-loot-advisor#install-from-source-windows">README</a>
+    </div>
+  </div>
+</section>
+
+<footer class="td2-footer td2-wrap">
+  <div class="links">
+    <a href="https://github.com/FEDERALTURK/td2-loot-advisor/blob/main/PRIVACY_POLICY.md" data-i18n="footer_privacy">Gizlilik Politikası</a>
+    <a href="https://github.com/FEDERALTURK/td2-loot-advisor/blob/main/LICENSE" data-i18n="footer_license">Lisans (MIT)</a>
+    <a href="https://github.com/FEDERALTURK/td2-loot-advisor">GitHub</a>
+  </div>
+  <div data-i18n="footer_disclaimer">Bağımsız bir topluluk projesidir; Ubisoft veya Massive Entertainment tarafından yayımlanmaz ya da desteklenmez.</div>
+</footer>
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/api.js"></script>
+<script>
+(async () => {
+  const statusEl = document.getElementById("dl-status"), grid = document.getElementById("dl-grid");
+  try {
+    const rel = await td2LatestRelease();
+    const assets = rel.assets || [];
+    const find = re => assets.find(a => re.test(a.name));
+    const installer = find(/Setup.*\.exe$/i), portable = find(/portable.*\.zip$/i), mobile = find(/Companion.*\.apk$/i);
+    if (installer) document.getElementById("dl-installer").href = installer.browser_download_url;
+    else document.getElementById("dl-installer").href = rel.html_url;
+    if (portable) document.getElementById("dl-portable").href = portable.browser_download_url;
+    else document.getElementById("dl-portable").href = rel.html_url;
+    if (mobile) {
+      document.getElementById("dl-mobile").href = mobile.browser_download_url;
+      document.getElementById("dl-mobile-card").hidden = false;
+    }
+    document.getElementById("dl-ver").textContent = (td2T("down_version") + " " + (rel.tag_name || "")).trim();
+    statusEl.hidden = true;
+    grid.hidden = false;
+  } catch (e) {
+    statusEl.textContent = td2T("down_error") + " ";
+    const a = document.createElement("a");
+    a.href = "https://github.com/FEDERALTURK/td2-loot-advisor/releases/latest"; a.textContent = "Releases";
+    statusEl.appendChild(a);
+  }
+})();
+</script>
+</body>
+</html>

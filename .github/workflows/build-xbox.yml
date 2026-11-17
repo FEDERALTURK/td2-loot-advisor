@@ -1,0 +1,136 @@
+name: Build Xbox Companion (UWP)
+
+# NOT: Bu, xbox-companion/ içindeki klasik UWP projesinin GERÇEK MSBuild ile
+# derlendiğini doğrulayan TEK yol — bu proje bir Linux kum havuzunda, hiçbir
+# Windows/UWP araç zinciri olmadan yazıldı (bkz. xbox-companion/README.md
+# "Doğrulama durumu"). Bu workflow yalnız DERLEME doğrular; paketleme/imzalama
+# (MSIX/APPX üretimi) veya gerçek bir Xbox'a dağıtım YAPMAZ.
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: xbox-companion
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Windows SDK / UWP metadata durumunu teşhis et (Windows.winmd var mı?)
+        # Önceki 4 CI denemesinde System.String gibi temel BCL tiplerinin
+        # çözülememesi ayrı bir sorundu (facade Reference eksikliği — bkz.
+        # commit 186f12d, kök neden bulundu ve düzeltildi). Bu adım, Windows.*
+        # (WinRT) ad alanlarının kaynağı olan Windows.winmd'nin koşucuda zaten
+        # var olup olmadığını kanıtla doğruluyor — tahmin yok.
+        shell: pwsh
+        run: |
+          Write-Host "--- Windows Kits\10\UnionMetadata ---"
+          Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\UnionMetadata" -ErrorAction SilentlyContinue | Format-Table Name
+          Write-Host "--- Windows Kits\10\Platforms\UAP ---"
+          Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\Platforms\UAP" -ErrorAction SilentlyContinue -Recurse -Filter "*.winmd" | Select-Object -First 20 FullName
+          Write-Host "--- VS kurulu bileşenler (UWP ile ilgili) ---"
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          $vsPath = (& $vswhere -latest -property installationPath)
+          $channelId = (& $vswhere -latest -property channelId)
+          & $vswhere -latest -products '*' -property "packages" 2>$null |
+            Select-String -Pattern "UWP|Windows10SDK|Windows11SDK" | Select-Object -First 30
+          Write-Host "VS install path: $vsPath"
+          Write-Host "VS channelId: $channelId"
+
+      - name: UWP/Windows SDK bileşenini kur (eksikse)
+        shell: pwsh
+        timeout-minutes: 10
+        run: |
+          # KÖK NEDEN KANITLANDI (10. deneme — teşhis turunun gerçek STDOUT/
+          # STDERR yakalaması sayesinde, bkz. DEVELOPMENT_LOG.md):
+          #
+          # 1) vs_installer.exe gerçek bir CLI'ya sahip değil — "--help" bile
+          #    20 saniyede yanıt vermedi (muhtemelen GUI'ye düşüyor, headless
+          #    runner'da süresiz askıda kalır). "setup.exe --help" ise ANINDA
+          #    çalıştı ve gerçek kullanım bilgisini bastı — Microsoft'un
+          #    dokümantasyonunda da modify için belgelenen ikili budur,
+          #    vs_installer.exe değil.
+          #
+          # 2) setup.exe ile gerçek bir modify denemesi motoru fiilen
+          #    çalıştırdı (telemetri, kanal/katalog çözümleme adımlarına
+          #    kadar ilerledi) ve şu satırı bastı:
+          #      "Parsed command line options: ... --installPath C:\Program ..."
+          #      "An installed product matching the following parameters
+          #       cannot be found: installPath: C:\Program"
+          #    Yani --installPath değeri ("C:\Program Files\Microsoft Visual
+          #    Studio\18\Enterprise") BOŞLUKTA KESİLİP sadece "C:\Program"
+          #    olarak ayrıştırılmış. PowerShell'in Start-Process -ArgumentList
+          #    dizi elemanlarını OTOMATİK TIRNAKLAMADIĞI (8. denemenin
+          #    yorumundaki varsayımın tersine) ve installer'ın kendi argüman
+          #    ayrıştırıcısının boşlukta bölündüğü kanıtlandı. 8 önceki
+          #    denemenin TAMAMI bu yüzden exit 87/1 ile patlamış olmalı —
+          #    hiçbiri installPath değerini elle tırnaklamamıştı (7. deneme
+          #    tırnaklamayı KALDIRMIŞTI, tam tersi yöne gitmiş).
+          #
+          # DÜZELTME: setup.exe kullan, --installPath değerini elle çift
+          # tırnak içine al (`"$vsPath`"), --wait bayrağını kaldır (Microsoft
+          # dokümantasyonu: --wait yalnız bootstrapper'da (vs_*.exe) var,
+          # setup.exe'de yok — PowerShell'in kendi -Wait parametresi zaten
+          # süreci bekliyor).
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          $vsPath = (& $vswhere -latest -property installationPath)
+          $channelId = (& $vswhere -latest -property channelId)
+          if ([string]::IsNullOrWhiteSpace($channelId)) {
+            Write-Error "vswhere -property channelId boş döndü."
+            exit 1
+          }
+          $installer = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\setup.exe"
+          $quotedVsPath = '"' + $vsPath + '"'
+          Write-Host "Calling: $installer modify --installPath $quotedVsPath --channelId $channelId --add Microsoft.VisualStudio.Workload.Universal --add Microsoft.VisualStudio.Component.Windows10SDK.19041 --quiet --norestart"
+          # NOT: --log KALDIRILDI — 10. deneme kanıtladı: setup.exe modify
+          # bu bayrağı tanımıyor ("Option 'log' is unknown." + kabul edilen
+          # seçenekler listesinde --log hiç yok), exit 87'nin asıl sebebi bu
+          # çıktı, boşluk/tırnaklama sorunu bu turda zaten düzelmişti (Raw
+          # Command line satırında installPath artık doğru tırnaklı
+          # görünüyordu). setup.exe kendi varsayılan konumuna (%TEMP%\
+          # dd_setup_*.log) zaten log yazıyor; stdout/stderr yakalaması asıl
+          # hata mesajını göstermeye yetiyor.
+          $outFile = "$env:RUNNER_TEMP\vs_installer_modify_stdout.txt"
+          $errFile = "$env:RUNNER_TEMP\vs_installer_modify_stderr.txt"
+          $proc = Start-Process -FilePath $installer -ArgumentList @(
+            "modify",
+            "--installPath", $quotedVsPath,
+            "--channelId", $channelId,
+            "--add", "Microsoft.VisualStudio.Workload.Universal",
+            "--add", "Microsoft.VisualStudio.Component.Windows10SDK.19041",
+            "--quiet", "--norestart"
+          ) -Wait -PassThru -NoNewWindow -RedirectStandardOutput $outFile -RedirectStandardError $errFile
+          Write-Host "setup.exe exit code: $($proc.ExitCode)"
+          Write-Host "--- stdout ---"
+          if (Test-Path $outFile) { Get-Content $outFile } else { Write-Host "(boş)" }
+          Write-Host "--- stderr ---"
+          if (Test-Path $errFile) { Get-Content $errFile } else { Write-Host "(boş)" }
+          if ($proc.ExitCode -ne 0 -and $proc.ExitCode -ne 3010) {
+            Write-Error "setup.exe modify başarısız (exit $($proc.ExitCode))"
+            exit $proc.ExitCode
+          }
+          Write-Host "--- Kurulumdan SONRA Windows Kits\10\UnionMetadata ---"
+          Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\UnionMetadata" -ErrorAction SilentlyContinue | Format-Table Name
+
+      - name: Restore NuGet packages (packages.config — klasik UWP projesi)
+        run: nuget restore XboxCompanion.sln
+        shell: cmd
+
+      - name: Build (Release|x64, derleme doğrulaması — paketleme yok)
+        # 13. deneme: C# derleme hataları (CS0234/CS0246, WinRT ad alanları
+        # bulunamıyordu) 12. denemenin TargetPlatformVersion düzeltmesiyle
+        # tamamen gitti — bu kanıtlandı (bu adımın kendisi artık .cs
+        # dosyalarını derliyor). Yeni hata farklı bir sınıftan: "APPX0107:
+        # The certificate specified is not valid for signing." /p:AppxBundle=
+        # Never bundle'ı kapatıyor ama tek mimarili APPX paketinin kendisini
+        # ve imzalamasını KAPATMIYOR; AppContainerExe çıkış türü Build
+        # hedefinde otomatik olarak Microsoft.AppXPackage.Targets'ı tetikliyor.
+        # Bu adımın amacı yalnız derleme doğrulaması (bkz. dosya başındaki
+        # yorum) olduğundan, imzalamayı doğrudan devre dışı bırakan resmi
+        # MSBuild özelliği eklendi: AppxPackageSigningEnabled=false.
+        run: msbuild XboxCompanion.sln /p:Configuration=Release /p:Platform=x64 /p:AppxBundle=Never /p:UapAppxPackageBuildMode=SideloadOnly /p:AppxPackageSigningEnabled=false /v:minimal
+        shell: cmd

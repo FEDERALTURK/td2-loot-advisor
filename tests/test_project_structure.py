@@ -1,4 +1,5 @@
 """Low-risk package layout and visual frame-budget regression checks."""
+import json
 from pathlib import Path
 import sys
 import unittest
@@ -15,6 +16,26 @@ from td2app.ui import ui_theme as packaged_theme
 
 
 class ProjectStructureTests(unittest.TestCase):
+    def test_tests_do_not_embed_live_feed_ids(self):
+        """Bot-managed feed IDs belong in fixtures, not in test source literals."""
+        feed_ids = set()
+        for filename, key in (("news_feed.json", "items"), ("tasks_feed.json", "tasks")):
+            payload = json.loads((ROOT / "meta" / filename).read_text(encoding="utf-8"))
+            for item in payload.get(key, []):
+                if isinstance(item, dict) and isinstance(item.get("id"), str):
+                    feed_ids.add(item["id"])
+
+        violations = []
+        for path in sorted((ROOT / "tests").glob("*.py")):
+            for line_no, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+                for feed_id in feed_ids:
+                    if feed_id in line:
+                        violations.append(
+                            f"Test, bot tarafından güncellenen canlı veriye bağlı: "
+                            f"{path.relative_to(ROOT)}:{line_no} '{feed_id}'. Fixture kullan."
+                        )
+        self.assertFalse(violations, "\n".join(violations))
+
     def test_ui_compatibility_modules_forward_to_grouped_package(self):
         self.assertIs(splash.IntroSplash, packaged_splash.IntroSplash)
         self.assertIs(fx.Transition, packaged_fx.Transition)

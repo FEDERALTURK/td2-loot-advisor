@@ -1,0 +1,28 @@
+{
+  "sample": "stoner_lamg_3440x1440.png",
+  "conditions": "CPU RapidOCR, both paths warmed, selected card region, one pass; no capture/game",
+  "runs": [
+    {
+      "baseline_s": 2.2883,
+      "region_fastpath_s": 0.6597,
+      "same_result": true
+    },
+    {
+      "baseline_s": 1.8814,
+      "region_fastpath_s": 0.8534,
+      "same_result": true
+    },
+    {
+      "baseline_s": 2.3246,
+      "region_fastpath_s": 1.0886,
+      "same_result": true
+    },
+    {
+      "baseline_s": 1.5865,
+      "region_fastpath_s": 1.1678,
+      "same_result": true
+    }
+  ],
+  "median_before_s": 2.08485,
+  "median_after_s": 0.9710000000000001
+}

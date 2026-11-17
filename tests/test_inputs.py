@@ -53,5 +53,6 @@ if os.name == "nt" and wo.available:
     ok("white house" in txt and "manny" in txt, "Windows OCR okudu")
     ok(len(segs) >= 2, "sütunlar ayrı parça")
 
-print("RESULT:", "PASS" if not fails else f"FAIL ({fails})")
-sys.exit(1 if fails else 0)
+if __name__ == "__main__":
+    print("RESULT:", "PASS" if not fails else f"FAIL ({fails})")
+    sys.exit(1 if fails else 0)

@@ -1,0 +1,1 @@
+TD2 Loot Advisor turns one hovered Division 2 item into a build-aware decision: scan locally, compare against your build, and keep the unknown in REVIEW instead of guessing.

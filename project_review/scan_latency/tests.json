@@ -1,0 +1,37 @@
+[
+  {
+    "suite": "performance",
+    "exit_code": 0,
+    "seconds": 0.19
+  },
+  {
+    "suite": "itempolicy",
+    "exit_code": 0,
+    "seconds": 0.472
+  },
+  {
+    "suite": "ocr_serialization",
+    "exit_code": 0,
+    "seconds": 0.224
+  },
+  {
+    "suite": "region_scan_fastpath",
+    "exit_code": 0,
+    "seconds": 1.365
+  },
+  {
+    "suite": "scan_latency",
+    "exit_code": 0,
+    "seconds": 1.54
+  },
+  {
+    "suite": "autoscan",
+    "exit_code": 0,
+    "seconds": 1.542
+  },
+  {
+    "suite": "app_stability",
+    "exit_code": 0,
+    "seconds": 2.343
+  }
+]

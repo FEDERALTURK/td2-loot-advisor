@@ -1,0 +1,26 @@
+OK   özel adlar maskelendi (uzun ad önce)
+OK   ad geri konuldu, Türkçe ek korunuyor
+OK   kelime sınırları
+OK   satırlar paragrafa birleşti; arayüz kelimesi, sayılar ve Türkçe (kendi kaplamamız) atıldı
+OK   cümlelere bölme
+OK   model sözlüğü için sadeleştirme
+OK   satır/madde korunur, ⁇ temizlenir, büyük harf
+OK   modele maskeli ve maddesiz cümleler gitti
+OK   önbellekten geldi (model çağrılmadı)
+OK   önbellek diske yazıldı
+OK   yapay zekâ JSON yanıtı ayrıştırıldı
+OK   bozuk yapay zekâ yanıtı hata verir
+OK   model indirildi, açıldı, ilerleme bildirildi
+OK   yanlış SHA-256 reddedildi
+OK   arşivden dışarı yazma girişimi reddedildi
+    ["Ajan, Black Tusk Capitol Binası'nın kontrolünü ele geçirdi. Safe house'a gidin.", 'Kafa vuruşu 15 saniyeliğine bir buff verir.\n• +30% doğruluk']
+OK   gerçek model: anlamlı Türkçe, adlar korundu (0.5s)
+OK   tekrar eden çıktı yok
+OK   büyük başlığın satırları birleşti: 'Weekly Legendary Mission'
+OK   başlık ayrı satır, paragraf birleşik
+OK   liste satırları ayrı, ikon harfi atıldı: ['Weekly Legendary Mission', 'Objective\nComplete the Roosevelt Island mission on Legendary difficulty\nRewards\nRecalibration Cache\nGear Crafting Cache']
+OK   sabit başlık + sayaç sona: 'Hedef\nTamamla: Roosevelt Island görevini Legendary zorlukta (00/01)'
+OK   misyon → görev düzeltmesi: 'Hedef\nTamamla: Roosevelt Island görevini Legendary zorlukta (00/01)'
+OK   sandık adı olduğu gibi kaldı: 'Ödüller\nGear Crafting Cache'
+OK   sandık adları modele gitmedi
+RESULT: PASS

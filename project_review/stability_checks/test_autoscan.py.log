@@ -1,0 +1,13 @@
+OK   dünya okuma aralığı uzuyor
+OK   tam ekranda kart yok: tam çözünürlükte okuma yapılmadı
+OK   kart kutusu sıfırlandı
+OK   kısayolla taramada okuma yapıldı
+OK   küçük bölgede eski davranış (okuma yapıldı)
+OK   kartsız ekran atlaması anında
+OK   oyun açıkken öncelik: normalin altı
+OK   oyun kapanınca öncelik: normal
+     pencere taraması: ilk 0.8 ms, önbellekli 0.2 ms
+OK   süreç adı önbelleği taramayı hızlandırıyor
+OK   monitör listesi önbellekten
+RESULT: PASS
+

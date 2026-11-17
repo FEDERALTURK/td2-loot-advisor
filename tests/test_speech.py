@@ -104,5 +104,6 @@ if "--model" in sys.argv:
     tr_needed = time.time() - t0
     ok(tr_needed < len(x16) / sr * 3 + 10, "gerçek zamana yakın")
 
-print("RESULT:", "PASS" if not fails else f"FAIL ({fails})")
-sys.exit(1 if fails else 0)
+if __name__ == "__main__":
+    print("RESULT:", "PASS" if not fails else f"FAIL ({fails})")
+    sys.exit(1 if fails else 0)

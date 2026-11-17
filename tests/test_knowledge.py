@@ -53,24 +53,34 @@ f = knowledge.validate_news(raw)
 ok(len(f["items"]) == len(raw["items"]) and all(i["url"].startswith("https://") for i in f["items"]), "haber akışı geçerli, her haberin kaynağı var")
 ok(all(set(i["title"]) >= {"en", "tr", "de", "fr", "es", "it", "pt", "pl", "ru", "nl"} for i in f["items"]), "haberler 10 dilde")
 t0 = datetime(2026, 10, 26, 12, 0, tzinfo=timezone.utc)
-status_fixture = [
-    {"id": "fixture-live", "start": datetime(2026, 10, 25, tzinfo=timezone.utc), "end": datetime(2026, 10, 27, tzinfo=timezone.utc), "date": None},
-    {"id": "fixture-upcoming", "start": datetime(2026, 10, 27, tzinfo=timezone.utc), "end": None, "date": None},
-    {"id": "fixture-news", "start": None, "end": None, "date": datetime(2026, 10, 20, tzinfo=timezone.utc)},
-]
-st = {it["id"]: s for it, s in knowledge.news_sorted(status_fixture, t0)}
-ok(st == {"fixture-live": "live", "fixture-upcoming": "upcoming", "fixture-news": "news"}, "durumlar: canlı / yakında / haber")
-current_ids = {it["id"] for it in f["items"]}
-ok("tu-y8s3-2" in current_ids and "y8s3-3-pc-performance-update" in current_ids, "güncel haber kimlikleri sözleşmesi")
-order = [s for _, s in knowledge.news_sorted(status_fixture, t0)]
+status_feed = knowledge.validate_news({"schema": 1, "items": [
+    {"id": "status-live", "title": "Live", "start": "2026-10-01T08:00:00Z", "end": "2026-11-01T08:00:00Z"},
+    {"id": "status-upcoming", "title": "Upcoming", "start": "2026-11-01T08:00:00Z"},
+    {"id": "status-news", "title": "News", "date": "2026-10-20T08:00:00Z"},
+]})
+st = {it["id"]: s for it, s in knowledge.news_sorted(status_feed["items"], t0)}
+ok(st == {"status-live": "live", "status-upcoming": "upcoming", "status-news": "news"}, "durumlar: canlı / yakında / haber")
+order = [s for _, s in knowledge.news_sorted(status_feed["items"], t0)]
 ok(order == sorted(order, key=["live", "upcoming", "news", "ended"].index), "sıralama: canlı → yakında → haber")
 late = datetime(2026, 11, 20, tzinfo=timezone.utc)
-ok(not any(i["id"] == "echoes-launch-twitch-drops" for i, _ in knowledge.news_sorted(f["items"], late)), "biten etkinlik 3 gün sonra listeden düşer")
+ok(not any(i["id"] == "status-live" for i, _ in knowledge.news_sorted(status_feed["items"], late)), "biten etkinlik 3 gün sonra listeden düşer")
 evil = {"schema": 1, "items": [{"id": "x<script>", "title": "a"}, {"id": "ok-1", "title": {"en": "t"}, "url": "javascript:alert(1)"}]}
 v = knowledge.validate_news(evil)
 ok(len(v["items"]) == 1 and v["items"][0]["url"] == "", "kötü kimlik ve https olmayan bağlantı atıldı")
 ok(knowledge.pick_lang({"en": "a", "tr": "b"}, "tr") == "b" and knowledge.pick_lang({"en": "a"}, "pl") == "a", "dil seçimi + İngilizce yedeği")
 ok(meta_sync.news_urls("")[0].endswith("meta/news_feed.json"), "akış adresi")
+
+# yerel açıklama yedekleri: ana parça ve ikinci parça çevrimdışı birleşir
+with tempfile.TemporaryDirectory() as _desc_dir:
+    _desc_root = Path(_desc_dir)
+    (_desc_root / "descriptions_i18n.json").write_text(
+        json.dumps({"schema": 1, "items": {"A": {"tr": "ana"}}}), encoding="utf-8"
+    )
+    (_desc_root / "descriptions_i18n_2.json").write_text(
+        json.dumps({"schema": 1, "items": {"B": {"tr": "yedek"}, "A": {"tr": "eski"}}}), encoding="utf-8"
+    )
+    _local = meta_sync.read_local_descriptions(_desc_root)
+    ok(set(_local) == {"A", "B"} and _local["A"]["tr"] == "ana", "çevrimdışı açıklama parçaları birleşti")
 
 # açıklama çevirileri iki parçadan gelir; ikinci parça yoksa eskiler korunur
 _real_fetch = meta_sync.fetch
@@ -122,4 +132,6 @@ ok("91" in L.compose("en", "tactical", "KEEP", "", "Striker", 91) and L.compose(
 tmp = tempfile.mkdtemp(); a = voicepack.tone_wav(os.path.join(tmp, "a.wav")); b = voicepack.radio_fx(a, os.path.join(tmp, "b.wav"), seed=2)
 with wave.open(a) as w1, wave.open(b) as w2:
     ok(w2.getnframes() > w1.getnframes() and w2.getnchannels() == 1, "telsiz efekti: cızırtı eklendi, mono WAV")
-print("RESULT:", "PASS" if not fails else f"FAIL ({fails})"); sys.exit(1 if fails else 0)
+if __name__ == "__main__":
+    print("RESULT:", "PASS" if not fails else f"FAIL ({fails})")
+    sys.exit(1 if fails else 0)

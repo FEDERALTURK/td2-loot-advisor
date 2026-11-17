@@ -1,0 +1,21 @@
+OK   belirteçsiz istek reddedildi
+OK   yanlış belirteç reddedildi
+OK   durum JSON
+OK   Authorization başlığıyla da çalışır
+OK   OBS sayfası + CSP
+OK   Stream Deck: başlat
+OK   Stream Deck: aç/kapa
+OK   listede olmayan komut reddedildi
+OK   başka web sitesinden WebSocket reddedildi (Origin)
+OK   belirteçsiz WebSocket reddedildi
+OK   aynı kaynaktan (OBS sayfası) WebSocket kabul
+OK   hello + anlık durum
+OK   tarama olayı yayınlandı
+OK   WS komutu: start
+OK   WS: bilinmeyen komut reddedildi
+OK   WS mesaj sınırı
+OK   standart WebSocket istemcisi (node) bağlandı ve komut çalıştı
+OK   kontrol kapalıyken komut yok
+OK   durdurulunca port kapandı
+RESULT: PASS
+

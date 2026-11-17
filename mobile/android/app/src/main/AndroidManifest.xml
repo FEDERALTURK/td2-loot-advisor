@@ -4,6 +4,11 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- Yalnız GitHub beta APK akışı için; Play sürümünde Play In-App Updates kullanılmalıdır. -->
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <!-- QR eşleştirme (mobile_scanner) ve Konsol Modu (camera) için — her ikisi de
+         yalnız kullanıcı izin verirse ve yalnız cihaz üstünde kullanılır. -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
 
     <application
         android:label="TD2 Loot Advisor"

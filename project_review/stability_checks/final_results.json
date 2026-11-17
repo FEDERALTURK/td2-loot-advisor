@@ -1,0 +1,92 @@
+[
+  {
+    "suite": "itempolicy",
+    "exit_code": 0,
+    "seconds": 0.403
+  },
+  {
+    "suite": "workqueue",
+    "exit_code": 0,
+    "seconds": 0.088
+  },
+  {
+    "suite": "performance",
+    "exit_code": 0,
+    "seconds": 0.132
+  },
+  {
+    "suite": "animation_policy",
+    "exit_code": 0,
+    "seconds": 0.17
+  },
+  {
+    "suite": "app_stability",
+    "exit_code": 0,
+    "seconds": 0.768
+  },
+  {
+    "suite": "translation_reliability",
+    "exit_code": 0,
+    "seconds": 0.196
+  },
+  {
+    "suite": "localapi_backpressure",
+    "exit_code": 0,
+    "seconds": 0.645
+  },
+  {
+    "suite": "launcher",
+    "exit_code": 0,
+    "seconds": 0.102
+  },
+  {
+    "suite": "ocr_serialization",
+    "exit_code": 0,
+    "seconds": 0.172
+  },
+  {
+    "suite": "core",
+    "exit_code": 0,
+    "seconds": 17.718
+  },
+  {
+    "suite": "livetranslate",
+    "exit_code": 0,
+    "seconds": 0.614
+  },
+  {
+    "suite": "autoscan",
+    "exit_code": 0,
+    "seconds": 0.549
+  },
+  {
+    "suite": "localapi",
+    "exit_code": 0,
+    "seconds": 7.704
+  },
+  {
+    "suite": "screenstate",
+    "exit_code": 0,
+    "seconds": 4.313
+  },
+  {
+    "suite": "service",
+    "exit_code": 0,
+    "seconds": 1.103
+  },
+  {
+    "suite": "overlay",
+    "exit_code": 0,
+    "seconds": 0.101
+  },
+  {
+    "suite": "tasks_live",
+    "exit_code": 0,
+    "seconds": 0.123
+  },
+  {
+    "suite": "stability_widgets",
+    "exit_code": 0,
+    "seconds": 2.784
+  }
+]

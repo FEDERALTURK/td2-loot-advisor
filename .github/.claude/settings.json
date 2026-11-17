@@ -1,0 +1,7 @@
+{
+  "allowedTools": [
+    "Bash(gh workflow run:*)",
+    "Bash(gh release:*)",
+    "Bash(gh api:*)"
+  ]
+}

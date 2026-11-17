@@ -47,7 +47,7 @@ class CloudApi {
   CloudApi({http.Client? client}) : _client = client ?? http.Client();
   final http.Client _client;
 
-  static const _userAgent = companionUserAgent;
+  static const _userAgent = 'TD2-Loot-Advisor-Companion/$companionVersion';
   static const _timeout = Duration(seconds: 8);
 
   Uri _uri(String path) => Uri.parse('$kCloudApiBase$path');
@@ -85,16 +85,12 @@ class CloudApi {
     } catch (_) {
       throw CloudApiException(0, 'network');
     }
-    if (response.body.isEmpty) {
-      return (response.statusCode, const <String, dynamic>{});
-    }
+    if (response.body.isEmpty) return (response.statusCode, const <String, dynamic>{});
     try {
       final value = jsonDecode(utf8.decode(response.bodyBytes));
       return (
         response.statusCode,
-        value is Map
-            ? Map<String, dynamic>.from(value)
-            : const <String, dynamic>{},
+        value is Map ? Map<String, dynamic>.from(value) : const <String, dynamic>{},
       );
     } catch (_) {
       return (response.statusCode, const <String, dynamic>{});
@@ -108,12 +104,7 @@ class CloudApi {
     String? token,
     Map<String, dynamic>? body,
   }) async {
-    final (status, decoded) = await _raw(
-      method,
-      path,
-      token: token,
-      body: body,
-    );
+    final (status, decoded) = await _raw(method, path, token: token, body: body);
     if (status < 200 || status >= 300) {
       throw CloudApiException(status, '${decoded['error'] ?? 'http_$status'}');
     }
@@ -121,10 +112,7 @@ class CloudApi {
   }
 
   /// Masaüstünde üretilen kısa ömürlü kodu telefon adına talep eder.
-  Future<CloudPairResult> claimPairing(
-    String code, {
-    required bool isIos,
-  }) async {
+  Future<CloudPairResult> claimPairing(String code, {required bool isIos}) async {
     final j = await _send(
       'POST',
       '/v1/mobile/pairings/claim',
@@ -182,28 +170,19 @@ class CloudApi {
   /// Build'i buluta "silindi" (tombstone) olarak işaretler; diğer cihazlar bir
   /// sonraki senkronda bunu görür. Zaten silinmişse de 200 döner (idempotent).
   Future<int> deleteBuild(String token, String clientId) async {
-    final j = await _send(
-      'DELETE',
-      '/v1/mobile/builds/$clientId',
-      token: token,
-    );
+    final j = await _send('DELETE', '/v1/mobile/builds/$clientId', token: token);
     return (j['revision'] as num?)?.toInt() ?? 0;
   }
 
   /// Hesap silme talebi oluşturur (24 saat bekleme süresi, ardından kalıcı silme).
   /// Bu, SADECE bu telefonu değil, masaüstünün bağlı olduğu TÜM hesabı siler.
-  Future<void> deleteAccount(String token) =>
-      _send('DELETE', '/v1/mobile/me', token: token);
+  Future<void> deleteAccount(String token) => _send('DELETE', '/v1/mobile/me', token: token);
 
   /// Bu cihazın FCM/APNs push belirtecini sunucuya kaydeder (bkz. server/mobile.js
   /// → putPushToken). `delivery` sunucunun dürüst durumu: "available" (ilgili
   /// platformun secret'ı tanımlı, gerçekten gönderilebilir) ya da
   /// "not_yet_implemented" (secret henüz yok — bkz. ROADMAP.md, iOS/APNs).
-  Future<String> putPushToken(
-    String token,
-    String deviceId,
-    String pushToken,
-  ) async {
+  Future<String> putPushToken(String token, String deviceId, String pushToken) async {
     final j = await _send(
       'PUT',
       '/v1/mobile/push-tokens/$deviceId',

@@ -1,0 +1,12 @@
+OK   öğrenmeden önce 'unknown' (eski davranış)
+OK   siyah kare → yükleme
+OK   ilk başarılı okumada menü imzası öğrenildi
+OK   aynı menü ikinci kez eklenmez
+OK   farklı içerikli menü kareleri tanındı (20/20)
+OK   dünya kareleri menü sanılmadı (40/40, en yüksek 0.26)
+OK   başka sekme seçiliyken de menü
+OK   menüye geçiş en geç 2 karede
+OK   tek kare dünyaya geçişi tetiklemez, ikincide geçer
+OK   öğrenilen imzalar dosyadan geri yüklendi
+OK   ham ekran tamponundan aynı küçük kare (fark 0.021)
+RESULT: PASS

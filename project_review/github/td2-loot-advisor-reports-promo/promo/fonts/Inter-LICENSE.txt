@@ -1,0 +1,13 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: fonts-inter
+Upstream-Contact: The Inter Project Authors <rasmus@notion.se>
+Source: https://github.com/rsms/inter
+Files-Excluded: docs/font-files/*.woff* docs/lab docs/samples
+
+Files: *
+Copyright: 2016-2023 The Inter Project Authors <rasmus@notion.se>
+License: OFL-1.1 and Apache-2.0
+
+License: OFL-1.1
+ PREAMBLE
+

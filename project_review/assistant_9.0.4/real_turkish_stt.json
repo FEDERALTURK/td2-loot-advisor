@@ -1,0 +1,8 @@
+{
+  "input": "natural_tr/demo.wav",
+  "model": "base",
+  "device": "cpu",
+  "recognized": "Merhaba Ajan. Eşyalarını birlikte değerlendirelim. Hazırım başlayabiliriz.",
+  "elapsed_seconds": 6.335,
+  "live_microphone": false
+}

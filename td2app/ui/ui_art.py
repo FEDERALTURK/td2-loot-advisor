@@ -453,7 +453,7 @@ class Banner:
         self.pal, self.h, self.interval = pal, height, max(0, int(interval_s or 0))
         self.status_only = bool(status_only)
         self.folder = Path(bg_folder)
-        self.cv = tk.Canvas(parent, height=height, highlightthickness=0, bd=0, bg="#0f1116")
+        self.cv = tk.Canvas(parent, height=height, highlightthickness=0, bd=0, bg="#0b0e13")
         self.cv.pack(fill="x")
         self.title, self.subtitle = title, subtitle
         self.paths, self.idx, self._raw = [], 0, {}
@@ -592,7 +592,7 @@ class Banner:
         self.transparent = bool(on)
         if self.alive:
             if on:
-                self.cv.config(bg=self.pal.get("bg", "#0f1116")); self.cv.delete("all"); self._draw_overlay()
+                self.cv.config(bg=self.pal.get("bg", "#0b0e13")); self.cv.delete("all"); self._draw_overlay()
             else:
                 self._resized()
 

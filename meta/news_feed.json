@@ -1,9 +1,199 @@
 {
  "schema": 1,
- "version": "2026-11-06.3",
- "updated": "2026-11-06T19:33:08Z",
+ "version": "2026-11-17.1",
+ "updated": "2026-11-17T07:34:02Z",
  "season": "Year 8 Season 3 – Red Horizon",
  "items": [
+  {
+   "id": "console-crossplay-servers-maintenance-2026-11-17",
+   "kind": "maintenance",
+   "start": "2026-11-17T07:00:00Z",
+   "end": "2026-11-17T15:00:00Z",
+   "url": "https://x.com/TheDivisionGame/status/2122374137989456316",
+   "source": "Ubisoft (@TheDivisionGame)",
+   "title": {
+    "en": "Maintenance Nov 17: consoles move to Crossplay",
+    "tr": "17 Kasım bakımı: konsollar Crossplay'e geçiyor",
+    "de": "Wartung 17. Nov.: Konsolen wechseln zu Crossplay",
+    "fr": "Maintenance du 17 nov. : les consoles passent au Crossplay",
+    "es": "Mantenimiento 17 nov.: las consolas pasan a Crossplay",
+    "it": "Manutenzione 17 nov.: le console passano al Crossplay",
+    "pt": "Manutenção 17 nov.: consoles migram para o Crossplay",
+    "ru": "Техработы 17 нояб.: консоли переходят на Crossplay",
+    "pl": "Przerwa 17 lis.: konsole przechodzą na Crossplay",
+    "nl": "Onderhoud 17 nov.: consoles gaan naar Crossplay"
+   },
+   "text": {
+    "en": "Servers are down from 07:00 UTC for about 8 hours (longer than usual). PlayStation and Xbox players are moved to the Crossplay servers; after that, Crossplay works across PC, PlayStation and Xbox. The end time is an estimate.",
+    "tr": "Sunucular 07:00 UTC'den itibaren yaklaşık 8 saat kapalı (normalden uzun). PlayStation ve Xbox oyuncuları Crossplay sunucularına taşınıyor; ardından Crossplay PC, PlayStation ve Xbox arasında çalışacak. Bitiş saati tahminidir.",
+    "de": "Die Server sind ab 07:00 UTC für etwa 8 Stunden offline (länger als üblich). PlayStation- und Xbox-Spieler werden auf die Crossplay-Server verlegt; danach funktioniert Crossplay zwischen PC, PlayStation und Xbox. Das Ende ist geschätzt.",
+    "fr": "Serveurs indisponibles dès 07:00 UTC pendant environ 8 heures (plus long que d'habitude). Les joueurs PlayStation et Xbox passent sur les serveurs Crossplay ; ensuite, le Crossplay fonctionne entre PC, PlayStation et Xbox. L'heure de fin est estimée.",
+    "es": "Servidores caídos desde las 07:00 UTC durante unas 8 horas (más de lo habitual). Los jugadores de PlayStation y Xbox pasan a los servidores Crossplay; después, el Crossplay funcionará entre PC, PlayStation y Xbox. La hora de fin es estimada.",
+    "it": "Server offline dalle 07:00 UTC per circa 8 ore (più del solito). I giocatori PlayStation e Xbox vengono spostati sui server Crossplay; poi il Crossplay funzionerà tra PC, PlayStation e Xbox. L'orario di fine è stimato.",
+    "pt": "Servidores fora do ar a partir das 07:00 UTC por cerca de 8 horas (mais que o normal). Jogadores de PlayStation e Xbox migram para os servidores Crossplay; depois, o Crossplay funciona entre PC, PlayStation e Xbox. O horário de término é estimado.",
+    "ru": "Серверы недоступны с 07:00 UTC примерно 8 часов (дольше обычного). Игроков PlayStation и Xbox переводят на серверы Crossplay; после этого Crossplay заработает между ПК, PlayStation и Xbox. Время окончания примерное.",
+    "pl": "Serwery są wyłączone od 07:00 UTC na około 8 godzin (dłużej niż zwykle). Gracze PlayStation i Xbox są przenoszeni na serwery Crossplay; potem Crossplay działa między PC, PlayStation i Xbox. Godzina zakończenia jest szacunkowa.",
+    "nl": "Servers zijn vanaf 07:00 UTC ongeveer 8 uur offline (langer dan normaal). PlayStation- en Xbox-spelers gaan naar de Crossplay-servers; daarna werkt Crossplay tussen pc, PlayStation en Xbox. De eindtijd is een schatting."
+   }
+  },
+  {
+   "id": "pc-crossplay-servers-maintenance-2026-11-12",
+   "kind": "maintenance",
+   "date": "2026-11-12T14:20:00Z",
+   "url": "https://x.com/TheDivisionGame/status/2120884409679102372",
+   "source": "Ubisoft (@TheDivisionGame)",
+   "title": {
+    "en": "PC moved to Crossplay servers (Nov 12)",
+    "tr": "PC, Crossplay sunucularına taşındı (12 Kasım)",
+    "de": "PC auf Crossplay-Server umgezogen (12. Nov.)",
+    "fr": "PC migré vers les serveurs Crossplay (12 nov.)",
+    "es": "PC migrado a los servidores Crossplay (12 nov.)",
+    "it": "PC spostato sui server Crossplay (12 nov.)",
+    "pt": "PC migrado para os servidores Crossplay (12 nov.)",
+    "ru": "ПК переведён на серверы Crossplay (12 нояб.)",
+    "pl": "PC przeniesiony na serwery Crossplay (12 lis.)",
+    "nl": "Pc verhuisd naar Crossplay-servers (12 nov.)"
+   },
+   "text": {
+    "en": "The Nov 12 maintenance (08:30–14:20 UTC) moved PC players to the Crossplay servers, improved stability and fixed a Climax Mission matchmaking issue. Consoles follow on Nov 17.",
+    "tr": "12 Kasım bakımı (08:30–14:20 UTC) PC oyuncularını Crossplay sunucularına taşıdı, kararlılığı artırdı ve Climax Mission eşleştirme sorununu düzeltti. Konsollar 17 Kasım'da geçiyor.",
+    "de": "Die Wartung am 12. Nov. (08:30–14:20 UTC) hat PC-Spieler auf die Crossplay-Server verlegt, die Stabilität verbessert und ein Matchmaking-Problem der Climax Mission behoben. Konsolen folgen am 17. Nov.",
+    "fr": "La maintenance du 12 nov. (08:30–14:20 UTC) a migré les joueurs PC vers les serveurs Crossplay, amélioré la stabilité et corrigé un souci de matchmaking de la Climax Mission. Les consoles suivent le 17 nov.",
+    "es": "El mantenimiento del 12 nov. (08:30–14:20 UTC) pasó a los jugadores de PC a los servidores Crossplay, mejoró la estabilidad y arregló un fallo de emparejamiento de la Climax Mission. Las consolas siguen el 17 nov.",
+    "it": "La manutenzione del 12 nov. (08:30–14:20 UTC) ha spostato i giocatori PC sui server Crossplay, migliorato la stabilità e corretto un problema di matchmaking della Climax Mission. Le console seguono il 17 nov.",
+    "pt": "A manutenção de 12 nov. (08:30–14:20 UTC) levou os jogadores de PC aos servidores Crossplay, melhorou a estabilidade e corrigiu um problema de matchmaking da Climax Mission. Os consoles seguem em 17 nov.",
+    "ru": "Техработы 12 нояб. (08:30–14:20 UTC) перевели игроков ПК на серверы Crossplay, повысили стабильность и исправили подбор игроков в Climax Mission. Консоли перейдут 17 нояб.",
+    "pl": "Przerwa 12 lis. (08:30–14:20 UTC) przeniosła graczy PC na serwery Crossplay, poprawiła stabilność i naprawiła dobieranie graczy w Climax Mission. Konsole dołączą 17 lis.",
+    "nl": "Het onderhoud van 12 nov. (08:30–14:20 UTC) zette pc-spelers over naar de Crossplay-servers, verbeterde de stabiliteit en loste een matchmakingprobleem in de Climax Mission op. Consoles volgen op 17 nov."
+   }
+  },
+  {
+   "id": "y8s4-spearfall-pts-2026-11",
+   "kind": "community",
+   "start": "2026-11-13T13:00:00Z",
+   "end": "2026-11-16T13:00:00Z",
+   "url": "https://www.ubisoft.com/en-us/game/the-division/the-division-2/news-updates/1wrUJ1HzY6BF8zzO4AMhJ3/spearfall-pts-patch-notes",
+   "source": "Ubisoft",
+   "title": {
+    "en": "Spearfall (Y8S4) PTS on PC: Nov 13–16",
+    "tr": "Spearfall (Y8S4) PTS PC'de: 13-16 Kasım",
+    "de": "Spearfall (Y8S4) PTS auf PC: 13.–16. Nov.",
+    "fr": "PTS de Spearfall (Y8S4) sur PC : 13–16 nov.",
+    "es": "PTS de Spearfall (Y8S4) en PC: 13–16 nov.",
+    "it": "PTS di Spearfall (Y8S4) su PC: 13–16 nov.",
+    "pt": "PTS de Spearfall (Y8S4) no PC: 13–16 nov.",
+    "ru": "PTS Spearfall (Y8S4) на ПК: 13–16 нояб.",
+    "pl": "PTS Spearfall (Y8S4) na PC: 13–16 lis.",
+    "nl": "Spearfall (Y8S4) PTS op pc: 13–16 nov."
+   },
+   "text": {
+    "en": "PC-only public test of the next season. Highlights: Contra-Augment season modifiers, Legendary on four main missions plus a DC Legendary Open World, reworked Escalation with Player Rating, Select Augment and Prototype Schematics. Launch date not announced yet.",
+    "tr": "Yeni sezonun yalnız PC'de açık testi. Öne çıkanlar: Contra-Augment sezon değiştiricileri, dört ana görevde Legendary ve DC'de Legendary Open World, Player Rating'li yenilenmiş Escalation, Select Augment ve Prototype Schematics. Çıkış tarihi henüz açıklanmadı.",
+    "de": "Öffentlicher Test der nächsten Season, nur auf PC. Wichtig: Contra-Augment-Modifikatoren, Legendary in vier Hauptmissionen plus Legendary Open World in DC, überarbeitete Escalation mit Player Rating, Select Augment und Prototype Schematics. Starttermin noch offen.",
+    "fr": "Test public de la prochaine saison, sur PC uniquement. Au menu : modificateurs Contra-Augment, Legendary sur quatre missions principales et Legendary Open World à DC, Escalation revue avec Player Rating, Select Augment et Prototype Schematics. Date de sortie pas encore annoncée.",
+    "es": "Prueba pública de la próxima temporada, solo en PC. Destacan: modificadores Contra-Augment, Legendary en cuatro misiones principales y Legendary Open World en DC, Escalation renovada con Player Rating, Select Augment y Prototype Schematics. Fecha de lanzamiento aún sin anunciar.",
+    "it": "Test pubblico della prossima stagione, solo su PC. In evidenza: modificatori Contra-Augment, Legendary su quattro missioni principali e Legendary Open World a DC, Escalation rivista con Player Rating, Select Augment e Prototype Schematics. Data di uscita non ancora annunciata.",
+    "pt": "Teste público da próxima temporada, só no PC. Destaques: modificadores Contra-Augment, Legendary em quatro missões principais e Legendary Open World em DC, Escalation reformulada com Player Rating, Select Augment e Prototype Schematics. Data de lançamento ainda não anunciada.",
+    "ru": "Публичный тест следующего сезона, только на ПК. Главное: модификаторы Contra-Augment, Legendary в четырёх основных миссиях и Legendary Open World в DC, переработанный Escalation с Player Rating, Select Augment и Prototype Schematics. Дата выхода пока не объявлена.",
+    "pl": "Publiczny test nowego sezonu, tylko na PC. Najważniejsze: modyfikatory Contra-Augment, Legendary w czterech misjach głównych i Legendary Open World w DC, przebudowana Escalation z Player Rating, Select Augment i Prototype Schematics. Data premiery nie została jeszcze ogłoszona.",
+    "nl": "Publieke test van het volgende seizoen, alleen op pc. Hoogtepunten: Contra-Augment-modifiers, Legendary in vier hoofdmissies plus Legendary Open World in DC, vernieuwde Escalation met Player Rating, Select Augment en Prototype Schematics. Releasedatum nog niet bekend."
+   }
+  },
+  {
+   "id": "y8s4-pts-announced-2026-11",
+   "kind": "community",
+   "date": "2026-11-12T17:00:00Z",
+   "url": "https://x.com/TheDivisionGame/status/2120199814763761834",
+   "source": "Ubisoft (X)",
+   "title": {
+    "en": "Year 8 Season 4 Public Test announced (PC)",
+    "tr": "Year 8 Season 4 Açık Testi duyuruldu (PC)",
+    "de": "Public Test für Year 8 Season 4 angekündigt (PC)",
+    "fr": "Test public de Year 8 Season 4 annoncé (PC)",
+    "es": "Anunciada la prueba pública de Year 8 Season 4 (PC)",
+    "it": "Annunciato il test pubblico di Year 8 Season 4 (PC)",
+    "pt": "Teste público de Year 8 Season 4 anunciado (PC)",
+    "ru": "Анонсирован публичный тест Year 8 Season 4 (ПК)",
+    "pl": "Ogłoszono publiczny test Year 8 Season 4 (PC)",
+    "nl": "Publieke test van Year 8 Season 4 aangekondigd (pc)"
+   },
+   "text": {
+    "en": "Ubisoft showed the next season on a PTS livestream on Nov 12 and opened the PTS preload for PC players the same day. The test runs Nov 13–16 (see the Spearfall PTS item); the season's launch date has not been announced yet.",
+    "tr": "Ubisoft 12 Kasım'daki PTS yayınında yeni sezonu tanıttı ve aynı gün PC oyuncuları için PTS ön yüklemesini açtı. Test 13-16 Kasım arasında (Spearfall PTS haberine bak); sezonun çıkış tarihi henüz açıklanmadı.",
+    "de": "Ubisoft hat die nächste Season am 12. Nov. in einem PTS-Livestream gezeigt und am selben Tag den PTS-Preload für PC geöffnet. Der Test läuft vom 13. bis 16. Nov. (siehe Spearfall-PTS-Meldung); ein Starttermin der Season steht noch aus.",
+    "fr": "Ubisoft a présenté la prochaine saison lors d'un live PTS le 12 nov. et a ouvert le préchargement du PTS sur PC le même jour. Le test se déroule du 13 au 16 nov. (voir l'actu PTS Spearfall) ; la date de lancement n'est pas encore annoncée.",
+    "es": "Ubisoft mostró la próxima temporada en un directo del PTS el 12 de nov. y abrió la precarga del PTS en PC ese mismo día. La prueba va del 13 al 16 de nov. (ver la noticia del PTS de Spearfall); la fecha de lanzamiento aún no se ha anunciado.",
+    "it": "Ubisoft ha presentato la prossima stagione in una diretta PTS il 12 nov. e ha aperto lo stesso giorno il precaricamento del PTS su PC. Il test si svolge dal 13 al 16 nov. (vedi la notizia sul PTS di Spearfall); la data di lancio non è ancora annunciata.",
+    "pt": "A Ubisoft mostrou a próxima temporada numa transmissão do PTS em 12 de nov. e abriu no mesmo dia o pré-download do PTS no PC. O teste vai de 13 a 16 de nov. (veja a notícia do PTS de Spearfall); a data de lançamento ainda não foi anunciada.",
+    "ru": "Ubisoft показала следующий сезон на стриме PTS 12 нояб. и в тот же день открыла предзагрузку PTS для ПК. Тест идёт 13–16 нояб. (см. новость о PTS Spearfall); дата запуска сезона пока не объявлена.",
+    "pl": "Ubisoft pokazał nowy sezon na transmisji PTS 12 lis. i tego samego dnia uruchomił wstępne pobieranie PTS na PC. Test trwa od 13 do 16 lis. (zobacz wiadomość o PTS Spearfall); data premiery sezonu nie została jeszcze ogłoszona.",
+    "nl": "Ubisoft liet het volgende seizoen zien in een PTS-livestream op 12 nov. en opende dezelfde dag de PTS-preload voor pc. De test loopt van 13 tot 16 nov. (zie het Spearfall-PTS-bericht); de lanceerdatum van het seizoen is nog niet bekend."
+   }
+  },
+  {
+   "id": "echoes-event-pass-twitch-drops-2026-11",
+   "kind": "community",
+   "start": "2026-11-10T08:00:00Z",
+   "end": "2026-11-17T08:00:00Z",
+   "url": "https://www.ubisoft.com/en-us/game/the-division/the-division-2/news-updates/5jeY7kzIeBLvfHja0iBIuX/the-division-2-echoes-of-central-park-event-pass-twitch-drops",
+   "source": "Ubisoft",
+   "title": {
+    "en": "Event Pass Twitch Drops (Nov 10–17)",
+    "tr": "Etkinlik Bileti Twitch Drop'ları (10-17 Kasım)",
+    "de": "Event-Pass: Twitch Drops (10.–17. Nov.)",
+    "fr": "Drops Twitch du Passe d'événement (10–17 nov.)",
+    "es": "Drops de Twitch del Pase de evento (10–17 nov.)",
+    "it": "Drop di Twitch del Pass evento (10–17 nov.)",
+    "pt": "Drops da Twitch do Passe de evento (10–17 nov.)",
+    "ru": "Дропы Twitch пропуска события (10–17 нояб.)",
+    "pl": "Dropy z Twitcha – przepustka wydarzenia (10–17 lis.)",
+    "nl": "Twitch Drops van de eventpas (10–17 nov.)"
+   },
+   "text": {
+    "en": "Nov 10–17: watch drop-enabled The Division 2 streams on Twitch (time adds up across channels): 30 min Gnarled Arm Patch, 1 h Named Cache, 2 h Wrong Path Arm Patch, 3 h Exotic Cache, 4 h The Block Weapon Skin. Link Twitch and your platforms to Ubisoft Connect, then claim on Twitch.",
+    "tr": "10-17 Kasım: Twitch'te drop açık The Division 2 yayınlarını izle (süre kanallar arasında toplanır): 30 dk Gnarled Arm Patch, 1 sa Named Cache, 2 sa Wrong Path Arm Patch, 3 sa Exotic Cache, 4 sa The Block Weapon Skin. Twitch ve platform hesaplarını Ubisoft Connect'e bağla, ödülleri Twitch'ten al.",
+    "de": "10.–17. Nov.: Schau auf Twitch Streams von The Division 2 mit Drops (Zeit zählt kanalübergreifend): 30 Min. Gnarled Arm Patch, 1 Std. Named Cache, 2 Std. Wrong Path Arm Patch, 3 Std. Exotic Cache, 4 Std. Waffenskin The Block. Twitch und Plattformen mit Ubisoft Connect verknüpfen, dann auf Twitch abholen.",
+    "fr": "10–17 nov. : regardez sur Twitch des streams The Division 2 avec drops (le temps se cumule entre chaînes) : 30 min Gnarled Arm Patch, 1 h Named Cache, 2 h Wrong Path Arm Patch, 3 h Exotic Cache, 4 h skin d'arme The Block. Liez Twitch et vos plateformes à Ubisoft Connect, puis récupérez sur Twitch.",
+    "es": "10–17 nov.: mira en Twitch directos de The Division 2 con drops (el tiempo se suma entre canales): 30 min Gnarled Arm Patch, 1 h Named Cache, 2 h Wrong Path Arm Patch, 3 h Exotic Cache, 4 h aspecto de arma The Block. Vincula Twitch y tus plataformas a Ubisoft Connect y reclama en Twitch.",
+    "it": "10–17 nov.: guarda su Twitch le dirette di The Division 2 con drop (il tempo si somma tra i canali): 30 min Gnarled Arm Patch, 1 h Named Cache, 2 h Wrong Path Arm Patch, 3 h Exotic Cache, 4 h skin arma The Block. Collega Twitch e le piattaforme a Ubisoft Connect, poi riscatta su Twitch.",
+    "pt": "10–17 nov.: assista na Twitch a transmissões de The Division 2 com drops (o tempo soma entre canais): 30 min Gnarled Arm Patch, 1 h Named Cache, 2 h Wrong Path Arm Patch, 3 h Exotic Cache, 4 h skin de arma The Block. Vincule a Twitch e suas plataformas ao Ubisoft Connect e resgate na Twitch.",
+    "ru": "10–17 нояб.: смотрите на Twitch стримы The Division 2 с дропами (время суммируется по каналам): 30 мин — Gnarled Arm Patch, 1 ч — Named Cache, 2 ч — Wrong Path Arm Patch, 3 ч — Exotic Cache, 4 ч — скин оружия The Block. Привяжите Twitch и платформы к Ubisoft Connect и заберите награды на Twitch.",
+    "pl": "10–17 lis.: oglądaj na Twitchu transmisje The Division 2 z dropami (czas sumuje się między kanałami): 30 min Gnarled Arm Patch, 1 h Named Cache, 2 h Wrong Path Arm Patch, 3 h Exotic Cache, 4 h skórka broni The Block. Połącz Twitcha i platformy z Ubisoft Connect, potem odbierz na Twitchu.",
+    "nl": "10–17 nov.: kijk op Twitch naar The Division 2-streams met drops (tijd telt over kanalen op): 30 min Gnarled Arm Patch, 1 u Named Cache, 2 u Wrong Path Arm Patch, 3 u Exotic Cache, 4 u wapenskin The Block. Koppel Twitch en je platforms aan Ubisoft Connect en claim op Twitch."
+   }
+  },
+  {
+   "id": "echoes-event-pass-2026-11",
+   "kind": "event",
+   "start": "2026-11-10T08:00:00Z",
+   "end": "2026-11-24T08:00:00Z",
+   "url": "https://www.ubisoft.com/en-us/game/the-division/the-division-2/news-updates/3kST0nQsp0klDZlR2vAI0F/the-division-2-echoes-of-central-park-event-pass",
+   "source": "Ubisoft",
+   "title": {
+    "en": "Echoes of Central Park Event Pass",
+    "tr": "Echoes of Central Park Etkinlik Bileti",
+    "de": "Echoes of Central Park Event-Pass",
+    "fr": "Passe d'événement Echoes of Central Park",
+    "es": "Pase de evento Echoes of Central Park",
+    "it": "Pass evento Echoes of Central Park",
+    "pt": "Passe de evento Echoes of Central Park",
+    "ru": "Пропуск события Echoes of Central Park",
+    "pl": "Przepustka wydarzenia Echoes of Central Park",
+    "nl": "Echoes of Central Park-eventpas"
+   },
+   "text": {
+    "en": "Event Pass from November 10 to 24. The free track has the Mire and Thorn masks and weapon skins, the Guardian outfit and 2 Named Item Caches. The premium track (1000 VC) adds more masks and skins, the Rick vest and mask, 2 Exotic Caches and other caches.",
+    "tr": "10-24 Kasım arası Etkinlik Bileti. Ücretsiz yolda Mire ve Thorn maskeleri ile silah kaplamaları, Guardian kıyafeti ve 2 Named Item Cache var. Premium yol (1000 VC) ek maske ve kaplamalar, Rick yeleği ve maskesi, 2 Exotic Cache ve başka sandıklar ekliyor.",
+    "de": "Event-Pass vom 10. bis 24. November. Die kostenlose Stufe bietet die Mire- und Thorn-Masken und Waffenskins, das Guardian-Outfit und 2 Named Item Caches. Die Premium-Stufe (1000 VC) bringt weitere Masken und Skins, Weste und Maske Rick, 2 Exotic Caches und weitere Caches.",
+    "fr": "Passe d'événement du 10 au 24 novembre. La voie gratuite offre les masques et skins d'arme Mire et Thorn, la tenue Guardian et 2 Named Item Caches. La voie premium (1000 VC) ajoute d'autres masques et skins, le gilet et le masque Rick, 2 Exotic Caches et d'autres caches.",
+    "es": "Pase de evento del 10 al 24 de noviembre. La vía gratuita trae las máscaras y aspectos de arma Mire y Thorn, el atuendo Guardian y 2 Named Item Caches. La vía premium (1000 VC) suma más máscaras y aspectos, el chaleco y la máscara Rick, 2 Exotic Caches y otros alijos.",
+    "it": "Pass evento dal 10 al 24 novembre. Il percorso gratuito include maschere e skin per armi Mire e Thorn, l'outfit Guardian e 2 Named Item Cache. Il percorso premium (1000 VC) aggiunge altre maschere e skin, giubbotto e maschera Rick, 2 Exotic Cache e altre casse.",
+    "pt": "Passe de evento de 10 a 24 de novembro. A trilha gratuita traz as máscaras e skins de arma Mire e Thorn, o traje Guardian e 2 Named Item Caches. A trilha premium (1000 VC) soma mais máscaras e skins, o colete e a máscara Rick, 2 Exotic Caches e outros caches.",
+    "ru": "Пропуск события с 10 по 24 ноября. В бесплатной ветке — маски и облики оружия Mire и Thorn, костюм Guardian и 2 Named Item Cache. Премиум-ветка (1000 VC) добавляет другие маски и облики, жилет и маску Rick, 2 Exotic Cache и другие тайники.",
+    "pl": "Przepustka wydarzenia od 10 do 24 listopada. Darmowa ścieżka daje maski i skórki broni Mire i Thorn, strój Guardian oraz 2 Named Item Cache. Ścieżka premium (1000 VC) dodaje kolejne maski i skórki, kamizelkę i maskę Rick, 2 Exotic Cache i inne skrzynki.",
+    "nl": "Eventpas van 10 tot 24 november. Het gratis spoor bevat de Mire- en Thorn-maskers en wapenskins, de Guardian-outfit en 2 Named Item Caches. Het premiumspoor (1000 VC) voegt meer maskers en skins, het Rick-vest en -masker, 2 Exotic Caches en andere caches toe."
+   }
+  },
   {
    "id": "y8s3-3-pc-performance-update",
    "kind": "patch",
@@ -223,38 +413,6 @@
    }
   },
   {
-   "id": "echoes-launch-twitch-drops",
-   "kind": "community",
-   "start": "2026-11-03T08:00:00Z",
-   "end": "2026-11-10T08:00:00Z",
-   "url": "https://www.ubisoft.com/en-us/game/the-division/the-division-2/news-updates/5EEgwKS6kDqyvUFo5PJYsB/the-division-2-drops-da-twitch-do-lanamento-de-ecos-do-central-park",
-   "source": "Ubisoft",
-   "title": {
-    "en": "Echoes of Central Park Twitch Drops",
-    "tr": "Echoes of Central Park Twitch Drop'ları",
-    "de": "Echoes of Central Park: Twitch Drops",
-    "fr": "Drops Twitch d'Echoes of Central Park",
-    "es": "Drops de Twitch de Echoes of Central Park",
-    "it": "Drop di Twitch di Echoes of Central Park",
-    "pt": "Drops da Twitch de Echoes of Central Park",
-    "ru": "Дропы Twitch: Echoes of Central Park",
-    "pl": "Dropy z Twitcha: Echoes of Central Park",
-    "nl": "Echoes of Central Park Twitch Drops"
-   },
-   "text": {
-    "en": "Nov 3–10: watch drop-enabled The Division 2 streams on Twitch: 30 min Central Park Arm Patch, 1 h Named Cache, 2 h Bird Skull Backpack Trophy, 3 h Exotic Cache, 4 h Outfit Token. Link Twitch and your platforms to Ubisoft Connect, then claim drops on Twitch.",
-    "tr": "3-10 Kasım: Twitch'te drop açık The Division 2 yayınlarını izle: 30 dk Central Park Arm Patch, 1 sa Named Cache, 2 sa Bird Skull Backpack Trophy, 3 sa Exotic Cache, 4 sa Outfit Token. Twitch ve platform hesaplarını Ubisoft Connect'e bağla; ödülleri Twitch'ten al.",
-    "de": "3.–10. Nov.: Schau auf Twitch Streams von The Division 2 mit aktivierten Drops: 30 Min. Central Park Arm Patch, 1 Std. Named Cache, 2 Std. Bird Skull Backpack Trophy, 3 Std. Exotic Cache, 4 Std. Outfit Token. Verknüpfe Twitch und deine Plattformen mit Ubisoft Connect und hole die Drops auf Twitch ab.",
-    "fr": "Du 3 au 10 nov. : regardez sur Twitch des streams The Division 2 avec drops activés : 30 min Central Park Arm Patch, 1 h Named Cache, 2 h Bird Skull Backpack Trophy, 3 h Exotic Cache, 4 h Outfit Token. Liez Twitch et vos plateformes à Ubisoft Connect, puis récupérez les drops sur Twitch.",
-    "es": "Del 3 al 10 de nov.: mira en Twitch directos de The Division 2 con drops activados: 30 min Central Park Arm Patch, 1 h Named Cache, 2 h Bird Skull Backpack Trophy, 3 h Exotic Cache, 4 h Outfit Token. Vincula Twitch y tus plataformas a Ubisoft Connect y reclama los drops en Twitch.",
-    "it": "Dal 3 al 10 nov.: guarda su Twitch le dirette di The Division 2 con drop attivi: 30 min Central Park Arm Patch, 1 h Named Cache, 2 h Bird Skull Backpack Trophy, 3 h Exotic Cache, 4 h Outfit Token. Collega Twitch e le tue piattaforme a Ubisoft Connect e riscatta i drop su Twitch.",
-    "pt": "De 3 a 10 de nov.: assista na Twitch a transmissões de The Division 2 com drops ativos: 30 min Central Park Arm Patch, 1 h Named Cache, 2 h Bird Skull Backpack Trophy, 3 h Exotic Cache, 4 h Outfit Token. Vincule a Twitch e suas plataformas à Ubisoft Connect e resgate os drops na Twitch.",
-    "ru": "3–10 ноября: смотрите на Twitch трансляции The Division 2 с включёнными дропами: 30 мин — Central Park Arm Patch, 1 ч — Named Cache, 2 ч — Bird Skull Backpack Trophy, 3 ч — Exotic Cache, 4 ч — Outfit Token. Привяжите Twitch и свои платформы к Ubisoft Connect и забирайте дропы на Twitch.",
-    "pl": "3–10 lis.: oglądaj na Twitchu transmisje The Division 2 z włączonymi dropami: 30 min Central Park Arm Patch, 1 godz. Named Cache, 2 godz. Bird Skull Backpack Trophy, 3 godz. Exotic Cache, 4 godz. Outfit Token. Połącz Twitcha i swoje platformy z Ubisoft Connect, a dropy odbierz na Twitchu.",
-    "nl": "3–10 nov.: kijk op Twitch naar streams van The Division 2 met drops: 30 min Central Park Arm Patch, 1 u Named Cache, 2 u Bird Skull Backpack Trophy, 3 u Exotic Cache, 4 u Outfit Token. Koppel Twitch en je platforms aan Ubisoft Connect en claim de drops op Twitch."
-   }
-  },
-  {
    "id": "friend-referral-2026",
    "kind": "community",
    "date": "2026-11-02T08:00:00Z",
@@ -283,37 +441,6 @@
     "ru": "Получите ссылку на сайте Friend Referral через аккаунт Ubisoft. Друг должен сыграть не менее 2 часов, чтобы приглашение засчиталось. За первое приглашение вы получите Cyclops Outfit, за второе — Esprit de Corps; приглашённый друг получит Frenzied Outfit.",
     "pl": "Pobierz link ze strony Friend Referral za pomocą konta Ubisoft. Znajomy musi zagrać co najmniej 2 godziny, by się liczyło. Za pierwsze zaproszenie dostajesz Cyclops Outfit, za drugie Esprit de Corps; zaproszony znajomy dostaje Frenzied Outfit.",
     "nl": "Haal je link op de Friend Referral-website met een Ubisoft-account. Een vriend moet minstens 2 uur spelen om mee te tellen. Je krijgt de Cyclops Outfit voor de eerste verwijzing en Esprit de Corps voor de tweede; de uitgenodigde vriend krijgt de Frenzied Outfit."
-   }
-  },
-  {
-   "id": "tu-y8s3-2",
-   "kind": "patch",
-   "date": "2026-10-13T08:00:00Z",
-   "url": "https://www.ubisoft.com/en-gb/game/the-division/the-division-2/news-updates/7uzKuy4iB0MtOJfsXAr3TO/tuy8s32-red-moon-unleashed-creator-collaboration-escalation-updates-more",
-   "source": "Ubisoft",
-   "title": {
-    "en": "Title Update Y8S3.2",
-    "tr": "Güncelleme Y8S3.2",
-    "de": "Title Update Y8S3.2",
-    "fr": "Mise à jour Y8S3.2",
-    "es": "Actualización Y8S3.2",
-    "it": "Aggiornamento Y8S3.2",
-    "pt": "Atualização Y8S3.2",
-    "pl": "Aktualizacja Y8S3.2",
-    "ru": "Обновление Y8S3.2",
-    "nl": "Title Update Y8S3.2"
-   },
-   "text": {
-    "en": "Escalation no longer consumes tokens to start (you need the tier's minimum balance). Conflict: new Prometheus Terminal with CCC currency, rank cap 200. Rifles and Marksman Rifles get 20% more ammo. Movement speed bonuses capped at 20%. New named Classic M1A: Lichtenberg.",
-    "tr": "Escalation başlatmak artık token harcamıyor (kademenin en az bakiyesi gerekiyor). Conflict: CCC para birimiyle yeni Prometheus Terminal, rütbe sınırı 200. Rifle ve Marksman Rifle'lara %20 fazla mermi. Hareket hızı bonusları %20 ile sınırlandı. Yeni adlı Classic M1A: Lichtenberg.",
-    "de": "Escalation verbraucht beim Start keine Token mehr (Mindeststand der Stufe nötig). Conflict: neues Prometheus-Terminal mit CCC-Währung, Rangobergrenze 200. Gewehre und Präzisionsgewehre erhalten 20 % mehr Munition. Bewegungsboni auf 20 % begrenzt. Neues benanntes Classic M1A: Lichtenberg.",
-    "fr": "L'Escalade ne consomme plus de jetons au lancement (solde minimum du palier requis). Conflict : nouveau Terminal Prometheus avec la monnaie CCC, rang max 200. Fusils et fusils de précision : +20 % de munitions. Bonus de vitesse plafonnés à 20 %. Nouveau Classic M1A nommé : Lichtenberg.",
-    "es": "Escalada ya no gasta fichas al empezar (se necesita el saldo mínimo del nivel). Conflict: nueva Terminal Prometheus con moneda CCC, rango máximo 200. Rifles y rifles de tirador: 20 % más de munición. Bonificaciones de velocidad limitadas al 20 %. Nuevo Classic M1A con nombre: Lichtenberg.",
-    "it": "L'Escalation non consuma più gettoni all'avvio (serve il saldo minimo del livello). Conflict: nuovo Terminale Prometheus con valuta CCC, grado massimo 200. Fucili e fucili di precisione: +20% munizioni. Bonus velocità limitati al 20%. Nuovo Classic M1A con nome: Lichtenberg.",
-    "pt": "Escalation não gasta mais tokens para começar (é preciso o saldo mínimo do nível). Conflict: novo Terminal Prometheus com moeda CCC, patente máxima 200. Rifles e rifles de precisão: 20% mais munição. Bônus de velocidade limitados a 20%. Novo Classic M1A nomeado: Lichtenberg.",
-    "pl": "Escalation nie zużywa już żetonów przy starcie (wymagane minimalne saldo poziomu). Conflict: nowy Terminal Prometheus z walutą CCC, limit rangi 200. Karabiny i karabiny wyborowe: +20% amunicji. Premie do szybkości ruchu ograniczone do 20%. Nowy nazwany Classic M1A: Lichtenberg.",
-    "ru": "Эскалация больше не тратит жетоны при запуске (нужен минимальный баланс уровня). Conflict: новый терминал Prometheus с валютой CCC, предел ранга 200. Винтовки и марксманские винтовки: +20% патронов. Бонусы скорости ограничены 20%. Новый именной Classic M1A: Lichtenberg.",
-    "nl": "Escalation verbruikt geen tokens meer bij de start (minimumsaldo van de tier nodig). Conflict: nieuwe Prometheus Terminal met CCC-valuta, rangplafond 200. Geweren en precisiegeweren: 20% meer munitie. Bewegingsbonussen beperkt tot 20%. Nieuwe benoemde Classic M1A: Lichtenberg."
    }
   },
   {
@@ -385,28 +512,28 @@
    "url": "https://www.ubisoft.com/en-us/game/the-division/the-division-2/news-updates/7L8TlD1Hv0XC1prOD8mdte/tuy8s33-crossplay-rollout-conflict-improvements-more",
    "source": "Ubisoft",
    "title": {
-    "en": "Crossplay rollout: Nov 3, 10 and 17",
-    "tr": "Crossplay takvimi: 3, 10 ve 17 Kasım",
-    "de": "Crossplay-Rollout: 3., 10. und 17. Nov.",
-    "fr": "Déploiement du crossplay : 3, 10 et 17 nov.",
-    "es": "Despliegue de crossplay: 3, 10 y 17 de nov.",
-    "it": "Arrivo del crossplay: 3, 10 e 17 nov.",
-    "pt": "Implantação do crossplay: 3, 10 e 17 de nov.",
-    "ru": "Запуск кроссплея: 3, 10 и 17 ноября",
-    "pl": "Wdrażanie crossplay: 3, 10 i 17 listopada",
-    "nl": "Crossplay-uitrol: 3, 10 en 17 nov."
+    "en": "Crossplay rollout: Nov 3, 12 and 17",
+    "tr": "Crossplay takvimi: 3, 12 ve 17 Kasım",
+    "de": "Crossplay-Rollout: 3., 12. und 17. Nov.",
+    "fr": "Déploiement du crossplay : 3, 12 et 17 nov.",
+    "es": "Despliegue de crossplay: 3, 12 y 17 de nov.",
+    "it": "Arrivo del crossplay: 3, 12 e 17 nov.",
+    "pt": "Implantação do crossplay: 3, 12 e 17 de nov.",
+    "ru": "Запуск кроссплея: 3, 12 и 17 ноября",
+    "pl": "Wdrażanie crossplay: 3, 12 i 17 listopada",
+    "nl": "Crossplay-uitrol: 3, 12 en 17 nov."
    },
    "text": {
-    "en": "Nov 3: icons and interface changes only. Nov 10: PC moves to new servers and PC leaderboards reset. Nov 17: PlayStation and Xbox move and cross-platform play goes live. Leaderboards stay hidden until then. Clan size rises from 50 to 100.",
-    "tr": "3 Kasım: yalnız simgeler ve arayüz değişiklikleri. 10 Kasım: PC yeni sunuculara geçer, PC sıralamaları sıfırlanır. 17 Kasım: PlayStation ve Xbox geçer, platformlar arası oyun başlar. Sıralamalar o güne kadar gizli. Klan sınırı 50'den 100'e çıkıyor.",
-    "de": "3. Nov.: nur Icons und Oberflächenänderungen. 10. Nov.: PC wechselt auf neue Server, PC-Bestenlisten werden zurückgesetzt. 17. Nov.: PlayStation und Xbox wechseln, plattformübergreifendes Spielen startet. Bestenlisten bleiben bis dahin verborgen. Clan-Limit steigt von 50 auf 100.",
-    "fr": "3 nov. : icônes et interface uniquement. 10 nov. : le PC passe sur les nouveaux serveurs et ses classements sont réinitialisés. 17 nov. : PlayStation et Xbox migrent, le jeu multiplateforme démarre. Classements masqués jusque-là. Les clans passent de 50 à 100 membres.",
-    "es": "3 de nov.: solo iconos y cambios de interfaz. 10 de nov.: PC pasa a los nuevos servidores y se reinician sus clasificaciones. 17 de nov.: PlayStation y Xbox migran y empieza el juego cruzado. Clasificaciones ocultas hasta entonces. Los clanes suben de 50 a 100 miembros.",
-    "it": "3 nov.: solo icone e modifiche all'interfaccia. 10 nov.: il PC passa ai nuovi server e le sue classifiche si azzerano. 17 nov.: PlayStation e Xbox migrano e parte il gioco multipiattaforma. Classifiche nascoste fino ad allora. I clan passano da 50 a 100 membri.",
-    "pt": "3 de nov.: apenas ícones e mudanças de interface. 10 de nov.: PC vai para os novos servidores e seus placares são zerados. 17 de nov.: PlayStation e Xbox migram e o jogo cruzado começa. Placares ocultos até lá. Clãs sobem de 50 para 100 membros.",
-    "ru": "3 ноября: только значки и изменения интерфейса. 10 ноября: ПК переходит на новые серверы, таблицы лидеров ПК сбрасываются. 17 ноября: переходят PlayStation и Xbox, запускается кроссплей. До этого таблицы лидеров скрыты. Лимит клана вырастет с 50 до 100.",
-    "pl": "3 listopada: tylko ikony i zmiany interfejsu. 10 listopada: PC przechodzi na nowe serwery, a rankingi PC są resetowane. 17 listopada: PlayStation i Xbox przechodzą, startuje gra międzyplatformowa. Do tego czasu rankingi są ukryte. Limit klanu rośnie z 50 do 100.",
-    "nl": "3 nov.: alleen iconen en interfacewijzigingen. 10 nov.: pc gaat naar nieuwe servers en pc-ranglijsten worden gereset. 17 nov.: PlayStation en Xbox verhuizen en cross-platform spelen start. Ranglijsten blijven tot dan verborgen. Clans groeien van 50 naar 100 leden."
+    "en": "Nov 3: icons and interface changes only. Nov 12: PC moves to new servers and PC leaderboards reset. Nov 17: PlayStation and Xbox move and cross-platform play goes live. Leaderboards stay hidden until then. Clan size rises from 50 to 100.",
+    "tr": "3 Kasım: yalnız simgeler ve arayüz değişiklikleri. 12 Kasım: PC yeni sunuculara geçer, PC sıralamaları sıfırlanır. 17 Kasım: PlayStation ve Xbox geçer, platformlar arası oyun başlar. Sıralamalar o güne kadar gizli. Klan sınırı 50'den 100'e çıkıyor.",
+    "de": "3. Nov.: nur Icons und Oberflächenänderungen. 12. Nov.: PC wechselt auf neue Server, PC-Bestenlisten werden zurückgesetzt. 17. Nov.: PlayStation und Xbox wechseln, plattformübergreifendes Spielen startet. Bestenlisten bleiben bis dahin verborgen. Clan-Limit steigt von 50 auf 100.",
+    "fr": "3 nov. : icônes et interface uniquement. 12 nov. : le PC passe sur les nouveaux serveurs et ses classements sont réinitialisés. 17 nov. : PlayStation et Xbox migrent, le jeu multiplateforme démarre. Classements masqués jusque-là. Les clans passent de 50 à 100 membres.",
+    "es": "3 de nov.: solo iconos y cambios de interfaz. 12 de nov.: PC pasa a los nuevos servidores y se reinician sus clasificaciones. 17 de nov.: PlayStation y Xbox migran y empieza el juego cruzado. Clasificaciones ocultas hasta entonces. Los clanes suben de 50 a 100 miembros.",
+    "it": "3 nov.: solo icone e modifiche all'interfaccia. 12 nov.: il PC passa ai nuovi server e le sue classifiche si azzerano. 17 nov.: PlayStation e Xbox migrano e parte il gioco multipiattaforma. Classifiche nascoste fino ad allora. I clan passano da 50 a 100 membri.",
+    "pt": "3 de nov.: apenas ícones e mudanças de interface. 12 de nov.: PC vai para os novos servidores e seus placares são zerados. 17 de nov.: PlayStation e Xbox migram e o jogo cruzado começa. Placares ocultos até lá. Clãs sobem de 50 para 100 membros.",
+    "ru": "3 ноября: только значки и изменения интерфейса. 12 ноября: ПК переходит на новые серверы, таблицы лидеров ПК сбрасываются. 17 ноября: переходят PlayStation и Xbox, запускается кроссплей. До этого таблицы лидеров скрыты. Лимит клана вырастет с 50 до 100.",
+    "pl": "3 listopada: tylko ikony i zmiany interfejsu. 12 listopada: PC przechodzi na nowe serwery, a rankingi PC są resetowane. 17 listopada: PlayStation i Xbox przechodzą, startuje gra międzyplatformowa. Do tego czasu rankingi są ukryte. Limit klanu rośnie z 50 do 100.",
+    "nl": "3 nov.: alleen iconen en interfacewijzigingen. 12 nov.: pc gaat naar nieuwe servers en pc-ranglijsten worden gereset. 17 nov.: PlayStation en Xbox verhuizen en cross-platform spelen start. Ranglijsten blijven tot dan verborgen. Clans groeien van 50 naar 100 leden."
    }
   },
   {

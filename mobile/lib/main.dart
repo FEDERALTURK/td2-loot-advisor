@@ -11,6 +11,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'console/console_caption_page.dart';
 import 'services/cloud_link.dart';
 import 'services/companion_release.dart';
 import 'services/local_alerts.dart';
@@ -20,12 +21,6 @@ const _panel = Color(0xFF121722);
 const _panel2 = Color(0xFF191F2B);
 const _orange = Color(0xFFFF6D10);
 const _soft = Color(0xFF9AA4B5);
-
-double downloadProgress(int receivedBytes, int? totalBytes) {
-  if (totalBytes == null || totalBytes <= 0) return 0;
-  final progress = receivedBytes / totalBytes;
-  return progress.clamp(0, 1).toDouble();
-}
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -371,10 +366,7 @@ class CompanionModel extends ChangeNotifier {
       availableApkUrl = release.apkUrl;
       availableSha256Url = release.sha256Url;
       lastUpdateCheck = DateTime.now();
-      await _prefs?.setInt(
-        'last_update_check_ms',
-        lastUpdateCheck!.millisecondsSinceEpoch,
-      );
+      await _prefs?.setInt('last_update_check_ms', lastUpdateCheck!.millisecondsSinceEpoch);
       if (updateAlertsEnabled && updateAvailable) {
         final notified = _prefs?.getString('notified_companion_version');
         if (notified != release.version) {
@@ -397,70 +389,40 @@ class CompanionModel extends ChangeNotifier {
     }
   }
 
-  Future<String?> downloadAndInstallUpdate({http.Client? client}) async {
+  Future<String?> downloadAndInstallUpdate() async {
     final apkUrl = availableApkUrl;
-    if (apkUrl == null || downloadingUpdate) {
-      return 'APK bağlantısı bulunamadı.';
-    }
+    if (apkUrl == null || downloadingUpdate) return 'APK bağlantısı bulunamadı.';
     downloadingUpdate = true;
     updateProgress = 0;
     notifyListeners();
-    final httpClient = client ?? http.Client();
-    final ownsClient = client == null;
-    File? partialFile;
-    IOSink? outputSink;
     try {
-      final request = http.Request('GET', Uri.parse(apkUrl));
-      final response = await httpClient
-          .send(request)
+      final response = await http
+          .get(Uri.parse(apkUrl))
           .timeout(const Duration(minutes: 3));
-      if (response.statusCode != 200) {
+      if (response.statusCode != 200 || response.bodyBytes.isEmpty) {
         return 'APK indirilemedi (HTTP ${response.statusCode}).';
+      }
+      final expected = await _fetchChecksum();
+      if (expected == null || !RegExp(r'^[a-f0-9]{64}$').hasMatch(expected)) {
+        return 'APK doğrulama bilgisi alınamadı. Lütfen tekrar deneyin.';
+      }
+      final actual = sha256.convert(response.bodyBytes).toString();
+      if (expected != actual) {
+        return 'APK doğrulaması başarısız; dosya kurulmadı.';
       }
       final directory = await getApplicationSupportDirectory();
       final file = File(
         '${directory.path}/TD2LootAdvisor_Companion_$availableVersion.apk',
       );
-      partialFile = File('${file.path}.part');
-      if (await partialFile.exists()) await partialFile.delete();
-      outputSink = partialFile.openWrite();
-      var received = 0;
-      await for (final chunk in response.stream) {
-        outputSink.add(chunk);
-        received += chunk.length;
-        updateProgress = downloadProgress(received, response.contentLength);
-        notifyListeners();
-      }
-      await outputSink.flush();
-      await outputSink.close();
-      outputSink = null;
-      if (received == 0) return 'APK indirilemedi; dosya boş.';
-      final expected = await _fetchChecksum();
-      if (expected == null || !RegExp(r'^[a-f0-9]{64}$').hasMatch(expected)) {
-        return 'APK doğrulama bilgisi alınamadı. Lütfen tekrar deneyin.';
-      }
-      final actual = (await sha256.bind(partialFile.openRead()).first)
-          .toString();
-      if (expected != actual) {
-        return 'APK doğrulaması başarısız; dosya kurulmadı.';
-      }
-      await partialFile.rename(file.path);
-      updateProgress = 1;
-      notifyListeners();
-      await const MethodChannel('td2_companion/update')
-          .invokeMethod<bool>('installApk', {'path': file.path});
+      await file.writeAsBytes(response.bodyBytes, flush: true);
+      await const MethodChannel('td2_companion/update').invokeMethod<bool>(
+        'installApk',
+        {'path': file.path},
+      );
       return null;
     } catch (error) {
       return 'Güncelleme indirilemedi: $error';
     } finally {
-      if (outputSink != null) {
-        await outputSink.flush();
-        await outputSink.close();
-      }
-      if (partialFile != null && await partialFile.exists()) {
-        await partialFile.delete();
-      }
-      if (ownsClient) httpClient.close();
       downloadingUpdate = false;
       updateProgress = 0;
       notifyListeners();
@@ -622,7 +584,10 @@ class CompanionModel extends ChangeNotifier {
     if (endpoint == null || _desktopToken == null) return false;
     try {
       final response = await http
-          .get(endpoint, headers: const {'User-Agent': companionUserAgent})
+          .get(
+            endpoint,
+            headers: {'User-Agent': 'TD2-Loot-Advisor-Companion/$companionVersion'},
+          )
           .timeout(const Duration(seconds: 4));
       if (response.statusCode != 200) {
         desktopError = response.statusCode == 403
@@ -694,6 +659,7 @@ class _MainShellState extends State<MainShell> {
       TasksPage(model: widget.model),
       BuildsPage(model: widget.model, cloud: widget.cloud),
       NewsPage(model: widget.model),
+      const ConsoleCaptionPage(),
     ];
     return AnimatedBuilder(
       animation: Listenable.merge([widget.model, widget.cloud]),
@@ -793,6 +759,10 @@ class _MainShellState extends State<MainShell> {
             NavigationDestination(
               icon: Icon(Icons.newspaper_rounded),
               label: 'Haberler',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.live_tv_rounded),
+              label: 'Konsol',
             ),
           ],
         ),
@@ -1034,9 +1004,7 @@ class _ContentAlertsCard extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
                 child: FilledButton.icon(
-                  onPressed: model.downloadingUpdate
-                      ? null
-                      : () => _startUpdate(context),
+                  onPressed: model.downloadingUpdate ? null : () => _startUpdate(context),
                   icon: const Icon(Icons.system_update_alt_rounded),
                   label: Text(
                     model.downloadingUpdate

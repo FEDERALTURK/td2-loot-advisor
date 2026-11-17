@@ -1,0 +1,11 @@
+OK   satır kaydırma
+OK   satır sonları korunur
+OK   sığan metin aynı puntoda
+OK   uzun Türkçe: punto küçüldü (8)
+OK   en küçük puntoda da sığmazsa kutu aşağı uzadı (182 px)
+OK   her bloğa bir kutu (17)
+OK   kutular ekran içinde
+OK   kutular üst üste binmiyor (0 çakışma)
+OK   çeviri özgünle aynıysa kutu çizilmez (oyunun yazısı görünür)
+OK   menü satırı kendi yerinde
+RESULT: PASS

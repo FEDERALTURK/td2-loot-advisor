@@ -1,7 +1,7 @@
 {
  "schema": 1,
- "version": "2026-11-06.1",
- "updated": "2026-11-06T03:46:53Z",
+ "version": "2026-11-16.1",
+ "updated": "2026-11-16T01:43:54Z",
  "season": "Year 8 Season 3 – Red Horizon",
  "generator": "seed (manual research)",
  "popularity_method": "0-100; seed = how many independent sources feature the build, weighted by recency. Daily updater adds engagement signals (views/upvotes) where public.",
@@ -368,49 +368,6 @@
    }
   },
   {
-   "id": "negotiators-pestilence",
-   "name": "Negotiator's Dilemma Pestilence",
-   "mode": "Legendary",
-   "role": "dps",
-   "sets_or_brands": [
-    "Negotiator's Dilemma"
-   ],
-   "set_bonus": 15,
-   "attributes": {
-    "crit_chance": {
-     "weight": 3,
-     "good_at": 5
-    },
-    "crit_damage": {
-     "weight": 2.5,
-     "good_at": 9
-    },
-    "weapon_damage": {
-     "weight": 2.5,
-     "good_at": 10
-    }
-   },
-   "talents": {
-    "Obliterate": 4,
-    "Perfect Focus": 3
-   },
-   "popularity": 62,
-   "sources": [
-    {
-     "title": "Overgear – Division 2 builds (Red Horizon)",
-     "url": "https://overgear.com/guides/division-2/best-builds-for-any-activities/"
-    },
-    {
-     "title": "GrindOut – Division 2 builds (Red Horizon, updated Oct 23 2026)",
-     "url": "https://grindout.com/division-2/guides/builds"
-    }
-   ],
-   "summary": {
-    "tr": "Pestilence LMG + Negotiator's Dilemma; Obliterate göğüs, kritik odaklı.",
-    "en": "Pestilence LMG + Negotiator's Dilemma; Obliterate chest, crit focused."
-   }
-  },
-  {
    "id": "refactor-drone-turret",
    "name": "Refactor Drone & Turret (Skill)",
    "mode": "Legendary",
@@ -689,16 +646,20 @@
    "items": [
     "The Ratel"
    ],
-   "popularity": 50,
+   "popularity": 58,
    "sources": [
     {
      "title": "KeenGamer – How to get the Ratel exotic (Nov 2026)",
      "url": "https://www.keengamer.com/articles/guides/how-to-get-the-ratel-exotic-in-the-division-2-talent-mods-and-farming/"
+    },
+    {
+     "title": "Boostroom – The Ratel exotic guide & builds (Nov 3 2026)",
+     "url": "https://boostroom.com/blog/the-division-2-the-ratel-exotic-weapon-guide-how-to-get-it-and-best-builds"
     }
    ],
    "summary": {
-    "en": "The Ratel with Striker's Battlegear (Tipping Scales as an alternative); stack Crit Chance and Crit Damage, counting the optic's +15% CHC. Best in long fights: Voracious needs 100 hits per stack and swapping weapons wipes stacks. Single source.",
-    "tr": "The Ratel + Striker's Battlegear (alternatif: Tipping Scales); kritik şansı ve kritik hasar topla, nişangâhın +%15 kritik şansını hesaba kat. Uzun savaşlar için: Voracious yığın başına 100 isabet ister, silah değiştirmek yığınları siler. Tek kaynak."
+    "en": "The Ratel with Striker's Battlegear (Tipping Scales as an alternative); stack Crit Chance and Crit Damage, counting the optic's +15% CHC. Best in long fights: Voracious needs 100 hits per stack and swapping weapons wipes stacks. Guides still call it an early, not fully tested setup.",
+    "tr": "The Ratel + Striker's Battlegear (alternatif: Tipping Scales); kritik şansı ve kritik hasar topla, nişangâhın +%15 kritik şansını hesaba kat. Uzun savaşlar için: Voracious yığın başına 100 isabet ister, silah değiştirmek yığınları siler. Rehberler bunu henüz tam denenmemiş bir başlangıç kurulumu sayıyor."
    }
   },
   {
@@ -807,6 +768,58 @@
    "summary": {
     "en": "3x Empress + 2x Hana-U with Waveform and Capacitor, yellow cores, Skill Damage and Skill Haste; Technician, Striker Drone and Assault Turret. Red Horizon raised Empress skill damage.",
     "tr": "3 Empress + 2 Hana-U, Waveform ve Capacitor; sarı çekirdek, Skill Damage ve Skill Haste; Technician, Striker Drone ve Assault Turret. Red Horizon, Empress skill hasarını artırdı."
+   }
+  },
+  {
+   "id": "eclipse-protocol-status",
+   "name": "Eclipse Protocol Status (Co-op CC)",
+   "mode": "PvE / Group",
+   "role": "skill",
+   "sets_or_brands": [
+    "Eclipse Protocol",
+    "Electrique",
+    "Golan Gear Ltd"
+   ],
+   "set_bonus": 15,
+   "attributes": {
+    "status_effects": {
+     "weight": 3,
+     "good_at": 10
+    },
+    "skill_haste": {
+     "weight": 2.5,
+     "good_at": 10
+    },
+    "skill_tier": {
+     "weight": 2,
+     "good_at": 1
+    }
+   },
+   "talents": {
+    "Indirect Transmission": 4
+   },
+   "items": [
+    "Vile",
+    "Scorpio"
+   ],
+   "popularity": 60,
+   "sources": [
+    {
+     "title": "Boostroom – Echoes of Central Park best builds (Nov 3 2026)",
+     "url": "https://boostroom.com/blog/the-division-2-echoes-of-central-park-best-builds"
+    },
+    {
+     "title": "LFCarry – Division 2 gear set tier list (updated Nov 11 2026)",
+     "url": "https://lfcarry.com/guides/division-2-gear-sets"
+    },
+    {
+     "title": "Overgear – Division 2 builds",
+     "url": "https://overgear.com/guides/division-2/best-builds-for-any-activities/"
+    }
+   ],
+   "summary": {
+    "en": "4x Eclipse Protocol (Indirect Transmission spreads status effects) with Vile mask and an Electrique or Golan holster; roll Status Effects and Skill Haste. Chem Launcher (Firestarter/Riot Foam) or Stinger Hive; Test Subject rifle is a common pick. Crowd control for groups.",
+    "tr": "4 Eclipse Protocol (Indirect Transmission durum etkilerini yayar) + Vile maske, Electrique veya Golan kılıf; Status Effects ve Skill Haste topla. Chem Launcher (Firestarter/Riot Foam) veya Stinger Hive; silahta sık tercih Test Subject. Grup oyunu için kalabalık kontrolü."
    }
   }
  ]

@@ -1,0 +1,26 @@
+OK   ansiklopedi dolu: {'exotic': 80, 'named': 170, 'gear_set': 29, 'brand': 39, 'talent': 242}
+OK   gear set: parçalar + 4 parça yeteneği
+OK   arama: egzotikler
+OK   wiki işaretleri temizlendi
+OK   yeteneklerin %88'inde açıklama var
+OK   marka: bonuslar + ilgili adlı eşyalar
+OK   300 soru: doğru cevap seçeneklerde, 4 farklı seçenek, cevap veriyle tutarlı, açıklama cevabı ele vermiyor (hata 0)
+OK   6 soru tipinin hepsi üretilebiliyor
+OK   seviye eğrisi
+OK   haber akışı geçerli, her haberin kaynağı var
+OK   haberler 10 dilde
+OK   durumlar: canlı / yakında / haber
+OK   sıralama: canlı → yakında → haber
+OK   biten etkinlik 3 gün sonra listeden düşer
+OK   kötü kimlik ve https olmayan bağlantı atıldı
+OK   dil seçimi + İngilizce yedeği
+OK   akış adresi
+OK   pazartesi öğlen: ikisi de salı 08:00
+OK   sıfırlamadan hemen sonra: bir sonraki
+OK   süre biçimi
+OK   build etiketleri
+OK   eğilim
+OK   10 dil × 3 paket cümleleri eksiksiz
+OK   karar + build yüzdesi
+OK   telsiz efekti: cızırtı eklendi, mono WAV
+RESULT: PASS

@@ -1,0 +1,27 @@
+{
+  "version": "6.0.3",
+  "release": "https://github.com/FEDERALTURK/td2-loot-advisor/releases/tag/v6.0.3",
+  "latest": true,
+  "workflow": "https://github.com/FEDERALTURK/td2-loot-advisor/actions/runs/40584993415",
+  "workflow_conclusion": "success",
+  "assets": [
+    {
+      "file": "C:\\Users\\PC\\Desktop\\Thedivision2program\\installer\\v6.0.3\\SHA256SUMS.sha256",
+      "sha256": "096cb6f7cdf7739922035073db215a2de9c10a6f3343d3eeab06b70887d7b2b7",
+      "size": 199,
+      "url": "https://github.com/FEDERALTURK/td2-loot-advisor/releases/download/v6.0.3/SHA256SUMS.sha256"
+    },
+    {
+      "file": "C:\\Users\\PC\\Desktop\\Thedivision2program\\installer\\v6.0.3\\TD2LootAdvisor_6.0.3_portable.zip",
+      "sha256": "7bb618dbbe7a8050d427cb09d113ca6fb4e7e7690fd01385bb8a6f8313231304",
+      "size": 181788734,
+      "url": "https://github.com/FEDERALTURK/td2-loot-advisor/releases/download/v6.0.3/TD2LootAdvisor_6.0.3_portable.zip"
+    },
+    {
+      "file": "C:\\Users\\PC\\Desktop\\Thedivision2program\\installer\\v6.0.3\\TD2LootAdvisor_Setup_6.0.3.exe",
+      "sha256": "79b14e2ad45dc07110fe0d0aee3d95919b7085aee47564b6f9d5b2b24f04c230",
+      "size": 136263884,
+      "url": "https://github.com/FEDERALTURK/td2-loot-advisor/releases/download/v6.0.3/TD2LootAdvisor_Setup_6.0.3.exe"
+    }
+  ]
+}

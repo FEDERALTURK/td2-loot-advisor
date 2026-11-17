@@ -2,6 +2,207 @@
 
 Önemli kararların ve sürümlerin kısa, kronolojik özeti. Tam ayrıntı için `git log` ve `.github/release_notes.md`.
 
+## GAMLETSOL kendi deposuna ayrıldı (2026-11-09)
+
+- Kullanıcı isteğiyle, bu depoda scaffold edilen GAMLETSOL (bkz. alttaki
+  giriş) kendi bağımsız GitHub reposuna taşındı: **github.com/FEDERALTURK/gamletsol**.
+  Bu depodaki `gamletsol/` klasörü ve `.github/workflows/build-gamletsol.yml`
+  kaldırıldı — artık tek kaynak yeni repo. İlk commit oradaki
+  `1fe0243` — bu depodaki son hâlin (`3bd4aea`) birebir kopyası, yalnızca
+  TD2'ye özgü çapraz referanslar (mobile/ karşılaştırması, pubspec açıklaması)
+  bağımsız bir proje olacak şekilde güncellendi.
+- Bu kararın gerekçesi: GAMLETSOL, TD2 Loot Advisor ile kod/mağaza/yayın
+  açısından hiçbir bağımlılığı olmayan, tamamen ayrı bir ürün — ayrı depo
+  bunu kod seviyesinde netleştiriyor. Yeni sohbet/claude.ai projesi açmak
+  kullanıcının kendisinin yapması gereken bir adım (bu oturum yeni bir
+  claude.ai sohbeti/projesi başlatamıyor); bunun için kullanıcıya yapıştırması
+  için kısa bir devir özeti verildi.
+
+## GAMLETSOL — TV/konsol sesi canlı çeviri, yeni bağımsız uygulama (2026-11-09)
+
+- Kullanıcı, "game caption" tarzı uygulamaların TV/konsol sesini telefon
+  mikrofonuyla dinleyip altyazıya çevirebildiğini belirtti ve bunun mevcut
+  `mobile/` companion'a mı yoksa ayrı bir uygulamaya mı ekleneceğini sordu.
+  Mekanizma araştırıldı: Google'ın "Live Caption" özelliği telefonun KENDİ
+  çalan sesini yakalıyor (research.google/blog doğrulandı — mikrofon/oda
+  sesi değil); kullanıcının istediği "TV/konsol sesini mikrofonla dinleme"
+  davranışı Google "Live Transcribe" / Translate'in "Transcribe" moduna
+  benziyor (mikrofon → ASR → çeviri).
+- İki netleştirici soru soruldu (kapsam: mevcut uygulamaya mı ekle yoksa ayrı
+  uygulama mı; STT/çeviri motoru: bulut mu cihaz-üstü mü). Kullanıcı **ayrı,
+  bağımsız bir uygulama** ("GAMLETSOL" — Game Translate Console kısaltması)
+  ve **bulut API** (Google Cloud) seçti.
+- **Yeni proje**: `gamletsol/` (repo köküne, `mobile/`'dan tamamen ayrı
+  Flutter uygulaması, paket adı `com.federalturk.gamletsol`). Android
+  Gradle iskeleti `mobile/android`'den esinlenilip sadeleştirildi (beta/Play
+  imzalama YOK, sadece debug imzalı CI doğrulaması).
+- **Mimari**: `record` paketi (`startStream`, LINEAR16/PCM16/16kHz/mono —
+  WAV başlığı gerekmiyor) ile mikrofon yakalama → ~4 saniyelik parçalar
+  halinde Google Cloud Speech-to-Text REST (`v1/speech:recognize`) → Google
+  Cloud Translation API v2 (`language/translate/v2`) → canlı altyazı ekranı.
+  API anahtarı `flutter_secure_storage` ile cihazda saklanıyor, asla koda/
+  loga yazılmıyor (AGENTS.md madde 3).
+- **Kök neden odaklı doğrulama** (bu kum havuzunda Flutter SDK kurulu değil,
+  `mobile/` ile aynı durum): her dış API çağrısının İSTEK/YANIT şeması
+  (`record` paketinin `AudioRecorder`/`RecordConfig` API'si, Google Speech
+  `speech:recognize` uç noktası, Google Translate v2 uç noktası,
+  `DropdownButtonFormField.initialValue`, `ThemeData.cardTheme`'in
+  `CardThemeData` tipi) resmi dokümantasyondan TEK TEK doğrulandı — Xbox
+  Companion UWP işindeki tahmin-ve-dene hatasından ders çıkarılarak. Tüm
+  yeni `.dart` dosyalarında parantez/süslü-parantez dengesi programatik
+  olarak kontrol edildi.
+- **Doğrulama durumu (dürüstlük notu)**: `.github/workflows/build-gamletsol.yml`
+  (`flutter analyze` + `flutter test` + `flutter build apk --debug`,
+  ubuntu-latest) tetiklendi — CI sonucu bu commit'ten SONRA doğrulanacak.
+  Gerçek bir Google Cloud API anahtarıyla uçtan uca davranış (mikrofon →
+  STT → çeviri) HİÇ denenmedi — bkz. `gamletsol/README.md` "Bilinen
+  sınırlamalar" ve "Doğrulama durumu".
+
+## Xbox Companion — statik referans UWP uygulaması, CI derleme teşhisi (2026-11-08/09)
+
+- Kullanıcının Microsoft Partner Center kaydı olduğunu belirtmesi üzerine,
+  önce ayrı bir Xbox/UWP uygulaması başlatılması, sonra (Xbox'ta üçüncü
+  taraf ekran-üstü-overlay/canlı-OCR için resmi bir API bulunmadığı
+  araştırmayla doğrulandıktan sonra) kapsamın **statik referans uygulaması**
+  (10 dilde görev/build verisi, canlı OCR/overlay YOK) olarak sınırlanması
+  kullanıcı onayıyla kararlaştırıldı.
+- `xbox-companion/` (klasik UWP, C#, `Windows.UI.Xaml` — WinUI3/Windows App
+  SDK DEĞİL, Xbox konsolları bunu desteklemiyor) sıfırdan yazıldı; bu kum
+  havuzunda Windows/MSBuild/UWP araç zinciri yok, tek doğrulama yolu
+  `.github/workflows/build-xbox.yml` (windows-latest).
+- **CI derleme teşhisi (5 deneme, kanıta dayalı, tahmin değil)**:
+  1. `PackageReference` ile WinRT (`Windows.*`) ad alanları çözülemedi.
+  2. `packages.config`'e geçildi — kısmen düzeldi ama TEMEL .NET tipleri
+     (`System.String` vb.) bile çözülemedi.
+  3. "VS UWP iş yükü eksik" varsayımıyla `vs_installer modify` eklendi —
+     işe yaramadı (çağırma operatörü muhtemelen gerçek süreci beklemedi).
+  4. **Kök neden bulundu**: `Microsoft.NETCore.UniversalWindowsPlatform`
+     6.2.14 paketinin `.nupkg`'si indirilip incelendi — paketin
+     `.props`/`.targets` dosyaları HİÇBİR referans derlemesi bağlamıyor
+     (doğrulandı, içerik boş/işlevsiz). `packages.config` kurulumunda bu
+     referansları normalde gerçek Visual Studio/NuGet istemcisi csproj'a
+     otomatik yazar — bu proje elle yazıldığı için bu adım hiç olmadı.
+     Paketin `ref/uap10.0.15138/` klasöründeki 153 facade DLL'i (mscorlib,
+     System.Runtime vb.) için `<Reference>` girdileri üretilip csproj'a
+     eklendi (commit `186f12d`) → temel .NET tipleri TAMAMEN çözüldü.
+  5. Kalan tek hata sınıfı artık yalnızca `Windows.*` (WinRT) ad alanları —
+     bunun kaynağı NuGet paketi değil, doğrudan Windows SDK'nın
+     `Windows.winmd` metadata dosyası. Teşhis + `Start-Process -Wait
+     -PassThru` ile gerçek kurulum bekleme eklendi (commit `2716d2e`) —
+     sonuç bu günlüğün yazıldığı sırada henüz CI'da bekleniyor.
+- **Dürüstlük notu**: Bu proje hiçbir noktada gerçek bir Xbox konsoluna
+  veya Partner Center'a karşı denenmedi; `Package.appxmanifest`'teki
+  Identity/Publisher alanları yer tutucu. Bkz. `xbox-companion/README.md`.
+
+## Xbox doğrudan bağlantı — kimlik doğrulama akışı (deneysel, Faz 3a alt-aşama 1, mobil, 2026-11-08)
+
+- Kullanıcı, elinde test edecek gerçek bir Xbox Series X/S olmadığını ve "haftalarca kod
+  yazıp hiç çalışmıyor ile karşılaşma" riskini açıkça kabul ettiğini belirterek koda
+  başlanmasını istedi. Kapsam bilinçli olarak ikiye bölündü (bkz. `docs/console_game_caption_roadmap.md`
+  §3a): (1) kimlik doğrulama + konsol listesi — bu commit'te tamamlandı; (2) gerçek WebRTC
+  ekran/ses akışı — henüz başlanmadı, çok daha büyük ve ayrı bir aşama.
+- **Kaynak doğrulama**: XStreaming (MIT, github.com/GiGanTe71/XStreaming) `docs/1.Auth.md`
+  (850 satır) ve `docs/2.Web.md` (214 satır) tamamen okunup protokol satır satır doğrulandı
+  (tahmin edilmedi); `docs/3.Stream.md` (362 satır) da okundu, WebRTC aşaması için referans.
+  `pointycastle`'ın gerçek kaynağı (bcgit/pc-dart) klonlanıp `ECDSASigner`/`ECKeyGenerator`
+  API'leri (IEEE-P1363 ham imza desteği dahil) doğrulandı.
+- **Yeni dosyalar**: `mobile/lib/console/xbox/xbox_crypto.dart` (EC P-256 anahtar üretimi +
+  özel ikili istek imzalama), `xbox_token_store.dart` (flutter_secure_storage üzerinde
+  userToken/sisuToken/jwtKeys saklama), `xbox_auth_service.dart` (device token → PKCE →
+  SisuAuthentication → kullanıcı elle yönlendirme adresi yapıştırır → authenticateUserUsingCode
+  → SisuAuthorization → XSTS web+streaming → xhome akış belirteci), `xbox_console_service.dart`
+  (hesaba kayıtlı konsol listesi), `xbox_login_page.dart` (deneysel giriş+liste ekranı, Konsol
+  Modu app bar'ından erişilir). `pubspec.yaml`'a `pointycastle: ^4.0.0` eklendi.
+- **CI doğrulaması**: run 42517628850 `flutter analyze` 2 `unnecessary_cast` uyarısıyla
+  FAILED → `xbox_crypto.dart`'ta `ECKeyGenerator.generateKeyPair()`'ın zaten
+  `AsymmetricKeyPair<ECPublicKey, ECPrivateKey>` döndürdüğü (kaynaktan doğrulandı) fark
+  edilip gereksiz `as` dönüşümleri kaldırıldı → run 42517746084 tamamen YEŞİL (analyze, test,
+  gerçek `flutter build apk --release`).
+- **Dürüstlük notu (önemli)**: Yukarıdaki CI başarısı SADECE kodun derlendiğini kanıtlar.
+  Hiçbir adım gerçek bir Microsoft hesabına veya Xbox konsoluna karşı ÇALIŞTIRILMADI — bu kum
+  havuzunda interaktif Microsoft girişi yapılamıyor, kullanıcının da test edecek bir Xbox'ı
+  yok. "Çalışıyor" iddiası yapılmadı; "protokolle bayt-bayt eşleşecek şekilde yazıldı ve
+  derleniyor, ama gerçek sunucuya karşı doğrulanmadı" iddiası yapıldı.
+
+## Konsol Modu — gamecaptionapp tarzı kamera modu, Faz 1 MVP kodu (mobil, 2026-11-08)
+
+- Kullanıcı isteği: "Xbox Series X/S'de çalışan ve gamecaptionapp gibi çalışan bir uygulama
+  geliştirelim" → netleştirme sorusunda kullanıcı "gamecaptionapp'ın aynısı, aynı mantıkla" dedi. Bu,
+  yol haritasındaki (`docs/console_game_caption_roadmap.md`) Faz 1'e (mobil kamera modu — platform
+  bağımsız, Xbox/PS/PC hepsinde aynı anda çalışır) karşılık geliyor; Faz 3a (doğrudan Xbox protokolü,
+  XStreaming) DEĞİL — gamecaptionapp'ın kendisi de birincil modunda ("herhangi bir konsol/bilgisayar/
+  film/dizide çalışır") bu mantığı kullanıyor.
+- **Yeni dosyalar**: `mobile/lib/console/console_caption_page.dart` (kamera önizleme + yeşil hizalama
+  kutusu + Xbox-stili alt altyazı kutusu + TTS aç/kapa + başlat/durdur düğmesi),
+  `mobile/lib/console/console_translate_service.dart` (OCR + çeviri servisi, cihaz-üstü).
+- **Yeni bağımlılıklar** (`mobile/pubspec.yaml`): `camera ^0.12.2`, `google_mlkit_text_recognition
+  ^1.0.1`, `google_mlkit_translation ^1.0.1`, `flutter_tts ^4.2.5`. Gerçek versiyon numaraları
+  pub.dev'den sorgulanarak alındı (tahmin edilmedi); her paketin kullanılan API'si (metod imzaları,
+  enum alanları) `flutter-ml/google_ml_kit_flutter` deposu klonlanıp kaynağından tek tek doğrulandı.
+- **Mimari**: tamamı cihaz-üstü (AGENTS.md madde 3 ile uyumlu — ekran/OCR verisi hiçbir sunucuya
+  gitmiyor). ASR yok, yalnız ekrandaki yazı okunuyor (gamecaptionapp'ın kendi tanımladığı basitleştirme,
+  bkz. yol haritası §1.5). `main.dart`'a "Konsol" adında 5. bir alt sekme eklendi.
+  `android/app/src/main/AndroidManifest.xml`'e `CAMERA` izni + isteğe bağlı kamera donanım özellikleri,
+  `ios/Runner/Info.plist`'teki `NSCameraUsageDescription` iki kullanım amacını (QR eşleştirme + Konsol
+  Modu) kapsayacak şekilde güncellendi.
+- **Doğrulama durumu — ÖNEMLİ, dürüstçe belirtilmeli**: Bu konteynerde Flutter SDK YOK — `flutter pub
+  get`, `flutter analyze`, `flutter test`, gerçek derleme hiçbiri çalıştırılamadı. Yazılan kod, ilgili
+  paketlerin gerçek kaynak kodu klonlanıp API imzaları tek tek karşılaştırılarak "doğru çağrılıyor" (statik)
+  seviyesinde doğrulandı — ama **sıfır gerçek cihaz testi** (kamera izni akışı, OCR doğruluğu, çeviri
+  modeli indirme, pil/performans). Ayrıntı ve bilinçli MVP basitleştirmeleri (periyodik `takePicture()`
+  vs canlı kare akışı, hizalama kutusunun OCR'ı kırpmaması) için `docs/console_game_caption_roadmap.md`
+  Faz 1 bölümüne bakın.
+- **CI doğrulaması (aynı gün)**: Push sonrası `workflow_dispatch` ile 3 deneme yapıldı. İlk ikisi gerçek
+  hatalar buldu ve düzeltildi: (1) `flutter analyze` 3 lint uyarısı (unused_field,
+  prefer_initializing_formals×2); (2) release APK derlemesi R8'de "Missing class" hatasıyla patladı
+  (`google_mlkit_text_recognition`'ın kullanılmayan script sınıflarına referansı —
+  `android/app/proguard-rules.pro` ile `-dontwarn` kuralları eklenerek giderildi). **Üçüncü deneme (run
+  42514233449) tamamen yeşil**: analyze/test/gerçek APK derlemesi hepsi geçti. Ayrıntı:
+  `docs/console_game_caption_roadmap.md` Faz 1 "Durum" bölümü.
+- **Bekleyen**: Kod artık derleniyor (kanıtlanmış), ama **sıfır gerçek cihaz testi** kalıyor — kamera
+  izni akışı, OCR doğruluğu, çeviri modeli indirme, pil/performans hiçbiri henüz denenmedi. Bu özellik
+  bir `companion-v*` public sürümüne dahil edilmeden önce en az bir gerçek telefonda uçtan uca
+  doğrulanmalı.
+
+## Mobil companion v0.1.9 — imza sürekliliği P0 düzeltmesiyle ilk yayın (0.1.9, 2026-11-08)
+
+- Kullanıcı isteği: Codex'in PC kopyasında yaptığı çalışmanın devir raporu (`CODEX_DEVIR_RAPORU.md`)
+  incelendi; raporun P0 olarak işaretlediği "GitHub Actions her çalışmada farklı bir geçici debug anahtarıyla
+  imzalıyor, bu yüzden kullanıcılar eski APK üstüne güncelleyemiyor" sorunu doğrulanıp giderildi, ardından
+  kullanıcı bu düzeltmeyle birlikte yeni bir companion sürümü hazırlanmasını istedi ("evet").
+- **İmza sürekliliği P0 düzeltmesi** (ayrıntı: `docs/mobile_beta_signing_tr.md`, `BUGS.md` #19):
+  `mobile/android/app/build.gradle.kts`'e Play yükleme anahtarından tamamen ayrı, kalıcı bir
+  `githubBetaRelease` imzalama yapılandırması eklendi (`beta-key.properties`, `.gitignore`'da);
+  `.github/workflows/build-mobile.yml`'e bu anahtarı `TD2_BETA_KEYSTORE_BASE64`/`_PASSWORD`/`_ALIAS`
+  secret'larından çözen bir adım eklendi. Gerçek bir `workflow_dispatch` CI çalışmasıyla (run 42502909839)
+  doğrulandı: üretilen APK'nin v2 imza sertifikası (androguard), oluşturulan keystore'un kendi
+  fingerprint'iyle (SHA256 `B1:FD:...:BA`) birebir eşleşti — **P0 doğrulandı ve giderildi.**
+- **P2 düzeltmesi (yan ürün)**: `lib/main.dart` ve `lib/services/cloud_api.dart`'taki sabit kodlanmış
+  eski `'TD2-Loot-Advisor-Companion/0.1.5'` User-Agent dizeleri, zaten var olan tek doğruluk kaynağı
+  `lib/services/companion_release.dart`'taki `companionVersion` sabitine yönlendirildi (`cloud_api.dart`'a
+  yeni `import 'companion_release.dart';` eklendi). Artık sürüm numarası yalnızca tek bir yerde değişiyor.
+- **Sürüm artışı**: `mobile/pubspec.yaml` `0.1.8+10` → `0.1.9+11`; `companionVersion` `'0.1.8'` →
+  `'0.1.9'`. `grep -rn "0\.1\.8" mobile/lib mobile/test` boş döndü (kalan eski referans yok).
+- **Doğrulama**: Dart/Flutter derleyicisi bu konteynerde yok — değişiklikler statik olarak (import zinciri,
+  sabit kullanım yerleri) doğrulandı; gerçek derleme doğrulaması `build-mobile.yml` CI'sinin
+  `flutter build apk --release` adımında (tag push ile tetiklenince) gerçekleşecek.
+- **Önemli göç notu**: Bu, P0 düzeltmesinden sonraki İLK yayın. Telefonlarda zaten kurulu olan eski beta
+  APK'nin üzerine bu sürüm imza uyuşmazlığından dolayı kurulamayabilir — kullanıcıların bir kez elle
+  kaldır/yeniden kur yapması gerekir; bundan sonraki sürümler normal şekilde zincirlenecek.
+- **Yayınlandı (2026-11-08)**: AGENTS.md'nin zorunlu yayın onayı sorusu kullanıcıya soruldu, açık
+  "Evet" alındı. Bu ortamın proxy'si hem `git push` ile tag push'u hem de GitHub API üzerinden tag
+  oluşturmayı kalıcı olarak engellediği için (`403: Write access ... not permitted through this proxy`,
+  tekrar denemekle çözülmedi), kullanıcı tag'i kendi GitHub web arayüzünden (Releases → New release →
+  tag `companion-v0.1.9`, target `main`) oluşturup "Publish release"e tıkladı. Bu, CI'yi tag-push
+  yoluyla tetikledi (run 42511119543): build + imzalama + **gerçek "Publish companion release" adımı
+  bu kez çalışıp** `TD2LootAdvisor_Companion_0.1.9.apk` + `SHA256SUMS.sha256`'yı
+  `https://github.com/FEDERALTURK/td2-loot-advisor/releases/tag/companion-v0.1.9` adresine ekledi
+  (companion kanalı kasıtlı olarak her zaman `prerelease: true` işaretli — bkz.
+  `build-mobile.yml`'deki `Publish companion release` adımı). Yayınlanan APK GitHub'dan indirilip
+  androguard ile v2 imza sertifikası tekrar çıkarıldı — fingerprint yine
+  `B1:FD:...:BA` ile birebir eşleşti. **P0 düzeltmesi artık gerçek bir public yayında da kanıtlandı**
+  (ayrıntı: `docs/mobile_beta_signing_tr.md`).
+
 ## Üst yatay menü, dijital yağmur efekti, 3B radar + rastgele tespit noktaları (9.1.5.31, 2026-11-05)
 
 - Kullanıcı isteği: "Arkada bulunan haritanın dah 3 boyutlu ve gerçek olmasını saatin dönmesiyle tespit

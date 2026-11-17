@@ -1,0 +1,29 @@
+{
+ "en": [
+  "Agent, the Black Tusk have taken control of the Capitol Building.",
+  "Secure the area and protect the civilians.",
+  "Eliminate the enemy patrol near the river."
+ ],
+ "tr": [
+  "Ajan, Black Tusk Capitol Binası'nın kontrolünü ele geçirdi.",
+  "Bölgeyi emniyete alın ve sivilleri koruyun.",
+  "Nehrin yakınındaki düşman devriyesini ortadan kaldırın."
+ ],
+ "style": {
+  "bg": [
+   17,
+   19,
+   24
+  ],
+  "fg": [
+   255,
+   255,
+   255
+  ],
+  "border": [
+   255,
+   106,
+   0
+  ]
+ }
+}

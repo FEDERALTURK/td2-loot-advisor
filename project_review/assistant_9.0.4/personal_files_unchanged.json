@@ -1,0 +1,7 @@
+{
+  "builds.json": true,
+  "tasks.json": true,
+  "stash.json": true,
+  "progress.json": true,
+  "server/wrangler.toml": true
+}

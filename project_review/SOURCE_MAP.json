@@ -1,0 +1,3900 @@
+{
+  "modules": [
+    {
+      "area": "local",
+      "path": "app.py",
+      "lines": 5029,
+      "imports": [
+        "PIL",
+        "bgvideo",
+        "collections",
+        "companion",
+        "csv",
+        "ctypes",
+        "datetime",
+        "difflib",
+        "display",
+        "dropstats",
+        "engine",
+        "faster_whisper",
+        "features",
+        "fx",
+        "gamedata",
+        "hashlib",
+        "i18n",
+        "json",
+        "logging",
+        "logging.handlers",
+        "math",
+        "meta_sync",
+        "mss",
+        "numpy",
+        "ocr_backend",
+        "os",
+        "pathlib",
+        "pynput",
+        "pytesseract",
+        "pyttsx3",
+        "queue",
+        "re",
+        "share",
+        "shutil",
+        "sounddevice",
+        "stash",
+        "subprocess",
+        "sys",
+        "tempfile",
+        "threading",
+        "time",
+        "tkinter",
+        "ui_art",
+        "ui_theme",
+        "updater",
+        "urllib.error",
+        "urllib.parse",
+        "urllib.request",
+        "vendor",
+        "view3d",
+        "wave",
+        "webbrowser",
+        "wiki_sync"
+      ],
+      "functions": [
+        "setup_logging",
+        "load_cfg",
+        "save_cfg",
+        "check_hotkey",
+        "load_progress",
+        "save_progress",
+        "ensure_log",
+        "read_log",
+        "find_tesseract",
+        "norm",
+        "attr_name",
+        "elevated",
+        "_tint",
+        "active_profile",
+        "apply_ocr_settings",
+        "make_ocr",
+        "ocr_scale",
+        "read_card",
+        "find_card",
+        "color_hints",
+        "ocr_config",
+        "ocr_quality",
+        "ocr_data",
+        "foreground_title",
+        "game_active",
+        "grab",
+        "ocr",
+        "thumb",
+        "dist",
+        "find_talent",
+        "detect_slot",
+        "parse_item",
+        "parse_item_legacy",
+        "signature",
+        "valid_item",
+        "set_matches",
+        "score_build",
+        "evaluate",
+        "evaluate_legacy",
+        "build_by_name",
+        "active_build",
+        "req_lines_short",
+        "plan_of",
+        "req_lines",
+        "check_lines",
+        "build_slots",
+        "roll_diff",
+        "apply_progress",
+        "set_palette",
+        "verdict_label",
+        "slot_name",
+        "click_through",
+        "draw_bars",
+        "provider_label",
+        "system_prompt",
+        "transcribe",
+        "windows_stt",
+        "voice_diagnostics",
+        "http_json",
+        "ask_ollama",
+        "ask_claude",
+        "ask_openai",
+        "find_claude_cli",
+        "_history_as_prompt",
+        "ask_claude_code",
+        "split_cat",
+        "add_choice_name",
+        "cat_name",
+        "weekday_names",
+        "load_tasks",
+        "save_tasks",
+        "daily_period_key",
+        "weekly_period_key",
+        "next_daily_reset",
+        "next_weekly_reset",
+        "fmt_remaining",
+        "builtin_task_translate",
+        "task_text",
+        "split_title",
+        "task_group",
+        "task_dedupe_key",
+        "task_image_query",
+        "load_task_images",
+        "claude_tasks_prompt",
+        "parse_claude_tasks",
+        "task_system_prompt",
+        "translate_task_text"
+      ],
+      "classes": [
+        "Speaker",
+        "Recorder",
+        "App"
+      ]
+    },
+    {
+      "area": "local",
+      "path": "bgvideo.py",
+      "lines": 333,
+      "imports": [
+        "PIL",
+        "av",
+        "math",
+        "pathlib",
+        "random",
+        "sys"
+      ],
+      "functions": [
+        "_mix",
+        "_bg",
+        "render_webp",
+        "has_av",
+        "render",
+        "default_set",
+        "generate"
+      ],
+      "classes": [
+        "Renderer"
+      ]
+    },
+    {
+      "area": "local",
+      "path": "companion.py",
+      "lines": 148,
+      "imports": [
+        "hmac",
+        "http.server",
+        "json",
+        "logging",
+        "qrcode",
+        "secrets",
+        "socket",
+        "threading",
+        "urllib.parse"
+      ],
+      "functions": [
+        "lan_ip",
+        "qr_image"
+      ],
+      "classes": [
+        "Companion"
+      ]
+    },
+    {
+      "area": "local",
+      "path": "display.py",
+      "lines": 208,
+      "imports": [
+        "ctypes",
+        "mss",
+        "os",
+        "pathlib",
+        "re",
+        "xml.etree"
+      ],
+      "functions": [
+        "set_dpi_aware",
+        "profile_warning",
+        "detect_profile",
+        "monitor_size",
+        "settings_dir",
+        "parse_cfg",
+        "_read_cfg",
+        "read_game_settings",
+        "recommendations"
+      ],
+      "classes": []
+    },
+    {
+      "area": "local",
+      "path": "dropstats.py",
+      "lines": 120,
+      "imports": [
+        "hashlib",
+        "json",
+        "logging",
+        "os",
+        "threading",
+        "time",
+        "urllib.error",
+        "urllib.parse",
+        "urllib.request",
+        "uuid"
+      ],
+      "functions": [
+        "new_client_id",
+        "item_sig",
+        "record",
+        "_get",
+        "summary",
+        "stats"
+      ],
+      "classes": [
+        "Queue"
+      ]
+    },
+    {
+      "area": "local",
+      "path": "engine.py",
+      "lines": 426,
+      "imports": [
+        "PIL",
+        "gamedata",
+        "re"
+      ],
+      "functions": [
+        "find_card",
+        "weapon_types_of",
+        "item_weapon_type",
+        "normalize_build",
+        "build_mentions",
+        "set_hit",
+        "_q",
+        "score_gear",
+        "score_mod",
+        "score_weapon",
+        "evaluate",
+        "decide",
+        "_talent_slot",
+        "build_plan",
+        "check_slot",
+        "slot_done"
+      ],
+      "classes": []
+    },
+    {
+      "area": "local",
+      "path": "features.py",
+      "lines": 190,
+      "imports": [
+        "base64",
+        "hashlib",
+        "json",
+        "time"
+      ],
+      "functions": [
+        "_H",
+        "_xrecover",
+        "_add",
+        "_mul",
+        "_enc",
+        "_dec",
+        "_eq",
+        "_secret_scalar",
+        "public_key",
+        "sign",
+        "verify",
+        "_b64e",
+        "_b64d",
+        "make_key",
+        "check_key"
+      ],
+      "classes": [
+        "Entitlements"
+      ]
+    },
+    {
+      "area": "local",
+      "path": "fx.py",
+      "lines": 652,
+      "imports": [
+        "PIL",
+        "av",
+        "ctypes",
+        "cv2",
+        "math",
+        "os",
+        "pathlib",
+        "random",
+        "struct",
+        "threading",
+        "time",
+        "tkinter"
+      ],
+      "functions": [
+        "_hex",
+        "write_cur",
+        "_short",
+        "draw_cursor",
+        "video_backend",
+        "list_videos"
+      ],
+      "classes": [
+        "CursorFX",
+        "TrailFX",
+        "Transition",
+        "VideoFX",
+        "AgentWatch",
+        "WatchBackground"
+      ]
+    },
+    {
+      "area": "local",
+      "path": "gamedata.py",
+      "lines": 348,
+      "imports": [
+        "PIL",
+        "difflib",
+        "json",
+        "pathlib",
+        "re"
+      ],
+      "functions": [
+        "nrm",
+        "ratio",
+        "best_window",
+        "text_image"
+      ],
+      "classes": [
+        "GameData"
+      ]
+    },
+    {
+      "area": "local",
+      "path": "i18n.py",
+      "lines": 153,
+      "imports": [
+        "json",
+        "locale",
+        "os",
+        "pathlib"
+      ],
+      "functions": [
+        "init",
+        "_load",
+        "available_languages",
+        "detect_language",
+        "set_language",
+        "current_language",
+        "language_name",
+        "english_name",
+        "t",
+        "task_dictionary",
+        "missing_keys"
+      ],
+      "classes": []
+    },
+    {
+      "area": "local",
+      "path": "meta_sync.py",
+      "lines": 361,
+      "imports": [
+        "datetime",
+        "json",
+        "logging",
+        "re",
+        "ssl",
+        "time",
+        "urllib.request"
+      ],
+      "functions": [
+        "default_urls",
+        "configured_urls",
+        "fetch",
+        "_num",
+        "_text",
+        "validate",
+        "merge",
+        "_comparable",
+        "due",
+        "run",
+        "apply",
+        "_langs",
+        "_https",
+        "find_guide",
+        "task_urls",
+        "_iso_utc",
+        "validate_tasks",
+        "task_expired",
+        "merge_tasks",
+        "local_resets",
+        "run_tasks"
+      ],
+      "classes": []
+    },
+    {
+      "area": "local",
+      "path": "ocr_backend.py",
+      "lines": 246,
+      "imports": [
+        "PIL",
+        "colorsys",
+        "logging",
+        "numpy",
+        "onnxruntime",
+        "pytesseract",
+        "rapidocr",
+        "re",
+        "threading"
+      ],
+      "functions": [
+        "rapid_available",
+        "tesseract_available",
+        "_rapid",
+        "_np",
+        "_fix",
+        "group_lines",
+        "_hue_class",
+        "icon_colors",
+        "rarity_color"
+      ],
+      "classes": [
+        "Engine"
+      ]
+    },
+    {
+      "area": "local",
+      "path": "panel/__init__.py",
+      "lines": 1,
+      "imports": [],
+      "functions": [],
+      "classes": []
+    },
+    {
+      "area": "local",
+      "path": "panel/github_api.py",
+      "lines": 68,
+      "imports": [
+        "json",
+        "urllib.error",
+        "urllib.parse",
+        "urllib.request"
+      ],
+      "functions": [],
+      "classes": [
+        "GitHub"
+      ]
+    },
+    {
+      "area": "local",
+      "path": "panel/panel.py",
+      "lines": 254,
+      "imports": [
+        "datetime",
+        "github_api",
+        "json",
+        "os",
+        "pathlib",
+        "re",
+        "sys",
+        "threading",
+        "tkinter",
+        "webbrowser"
+      ],
+      "functions": [],
+      "classes": [
+        "Panel"
+      ]
+    },
+    {
+      "area": "local",
+      "path": "scripts/license_tool.py",
+      "lines": 65,
+      "imports": [
+        "argparse",
+        "features",
+        "os",
+        "pathlib",
+        "re",
+        "secrets",
+        "sys",
+        "time",
+        "uuid"
+      ],
+      "functions": [
+        "load_seed",
+        "cmd_init",
+        "cmd_issue",
+        "cmd_check"
+      ],
+      "classes": []
+    },
+    {
+      "area": "local",
+      "path": "scripts/make_icon.py",
+      "lines": 361,
+      "imports": [
+        "PIL",
+        "math",
+        "random",
+        "sys"
+      ],
+      "functions": [
+        "_bg",
+        "_glow",
+        "design_scan",
+        "design_shield",
+        "design_card",
+        "_grime",
+        "design_hud",
+        "design_badge",
+        "design_watch",
+        "_lin",
+        "_mask_poly",
+        "_mask_rrect",
+        "_paint",
+        "_noise",
+        "design_watch_real",
+        "render",
+        "save_ico",
+        "preview"
+      ],
+      "classes": []
+    },
+    {
+      "area": "local",
+      "path": "scripts/version.py",
+      "lines": 5,
+      "imports": [
+        "pathlib",
+        "re"
+      ],
+      "functions": [],
+      "classes": []
+    },
+    {
+      "area": "local",
+      "path": "server/test_local.py",
+      "lines": 46,
+      "imports": [
+        "features",
+        "hashlib",
+        "json",
+        "pathlib",
+        "sys",
+        "urllib.error",
+        "urllib.request"
+      ],
+      "functions": [
+        "req",
+        "sig",
+        "check"
+      ],
+      "classes": []
+    },
+    {
+      "area": "local",
+      "path": "share.py",
+      "lines": 60,
+      "imports": [
+        "base64",
+        "json",
+        "zlib"
+      ],
+      "functions": [
+        "_clean",
+        "encode",
+        "decode"
+      ],
+      "classes": []
+    },
+    {
+      "area": "local",
+      "path": "stash.py",
+      "lines": 316,
+      "imports": [
+        "collections",
+        "csv",
+        "engine",
+        "itertools",
+        "json",
+        "os",
+        "time",
+        "uuid"
+      ],
+      "functions": [
+        "signature",
+        "sanitize",
+        "slot_fit",
+        "_variants",
+        "_best_for",
+        "optimize",
+        "rank_builds",
+        "recal_advice",
+        "duplicates",
+        "audit",
+        "export_csv"
+      ],
+      "classes": [
+        "Stash"
+      ]
+    },
+    {
+      "area": "local",
+      "path": "tests/test_core.py",
+      "lines": 88,
+      "imports": [
+        "engine",
+        "features",
+        "gamedata",
+        "pathlib",
+        "share",
+        "stash",
+        "sys",
+        "time",
+        "vendor"
+      ],
+      "functions": [
+        "test_ed25519_rfc8032",
+        "test_license_key",
+        "_game",
+        "test_optimizer_keeps_set_bonus",
+        "test_sanitize",
+        "test_weapon_limits",
+        "test_share_roundtrip",
+        "test_vendor_record"
+      ],
+      "classes": []
+    },
+    {
+      "area": "local",
+      "path": "tests/test_ocr.py",
+      "lines": 39,
+      "imports": [
+        "PIL",
+        "gamedata",
+        "json",
+        "ocr_backend",
+        "pathlib",
+        "sys",
+        "time"
+      ],
+      "functions": [
+        "main"
+      ],
+      "classes": []
+    },
+    {
+      "area": "local",
+      "path": "ui_art.py",
+      "lines": 704,
+      "imports": [
+        "PIL",
+        "math",
+        "pathlib",
+        "random",
+        "re",
+        "threading",
+        "tkinter"
+      ],
+      "functions": [
+        "_rgb",
+        "_vgradient",
+        "_vignette",
+        "_glow",
+        "_noise",
+        "bg_skyline",
+        "bg_hexgrid",
+        "bg_radar",
+        "bg_topo",
+        "bg_smoke",
+        "ensure_backgrounds",
+        "list_images",
+        "build_role",
+        "_safe",
+        "_initials",
+        "emblem",
+        "role_color",
+        "_star",
+        "_bands",
+        "flag"
+      ],
+      "classes": [
+        "Banner"
+      ]
+    },
+    {
+      "area": "local",
+      "path": "ui_theme.py",
+      "lines": 330,
+      "imports": [
+        "math",
+        "pathlib",
+        "struct",
+        "time",
+        "tkinter",
+        "wave",
+        "winsound"
+      ],
+      "functions": [
+        "with_icon",
+        "apply",
+        "_tone",
+        "bind_click_sounds",
+        "scrollable"
+      ],
+      "classes": [
+        "Sounds"
+      ]
+    },
+    {
+      "area": "local",
+      "path": "updater.py",
+      "lines": 150,
+      "imports": [
+        "hashlib",
+        "io",
+        "json",
+        "logging",
+        "os",
+        "pathlib",
+        "re",
+        "subprocess",
+        "sys",
+        "tempfile",
+        "time",
+        "urllib.request",
+        "zipfile"
+      ],
+      "functions": [
+        "parse_version",
+        "newer",
+        "_get",
+        "latest",
+        "_expected_sha",
+        "install_frozen",
+        "_allowed",
+        "update_source",
+        "restart_source"
+      ],
+      "classes": []
+    },
+    {
+      "area": "local",
+      "path": "vendor.py",
+      "lines": 176,
+      "imports": [
+        "engine",
+        "gamedata",
+        "gzip",
+        "io",
+        "json",
+        "logging",
+        "stash",
+        "time",
+        "urllib.request"
+      ],
+      "functions": [
+        "_get",
+        "fetch_week",
+        "load_cache",
+        "save_cache",
+        "last_reset",
+        "stale",
+        "_attr_key",
+        "to_item",
+        "match",
+        "target_loot_today"
+      ],
+      "classes": []
+    },
+    {
+      "area": "local",
+      "path": "view3d.py",
+      "lines": 260,
+      "imports": [
+        "math",
+        "tkinter"
+      ],
+      "functions": [
+        "_hex",
+        "_shade",
+        "box"
+      ],
+      "classes": [
+        "Scene3D",
+        "AgentView",
+        "Bars3D"
+      ]
+    },
+    {
+      "area": "local",
+      "path": "wiki_sync.py",
+      "lines": 274,
+      "imports": [
+        "datetime",
+        "json",
+        "logging",
+        "re",
+        "ssl",
+        "urllib.parse",
+        "urllib.request"
+      ],
+      "functions": [
+        "_get",
+        "wikitext",
+        "page_url",
+        "_strip_templates",
+        "clean",
+        "sections",
+        "children",
+        "infobox",
+        "link_target",
+        "parse_date",
+        "first_sentences",
+        "slug",
+        "resolve_season",
+        "parse_scouts",
+        "parse_classified",
+        "parse_project_events",
+        "run",
+        "images_for",
+        "fetch_bytes"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "account.py",
+      "lines": 256,
+      "imports": [
+        "base64",
+        "ctypes",
+        "hashlib",
+        "http.server",
+        "json",
+        "os",
+        "secrets",
+        "socket",
+        "sys",
+        "threading",
+        "time",
+        "urllib.error",
+        "urllib.parse",
+        "urllib.request",
+        "uuid",
+        "webbrowser",
+        "winreg"
+      ],
+      "functions": [
+        "_b64u",
+        "_machine_guid",
+        "device_id",
+        "device_pub",
+        "_dpapi"
+      ],
+      "classes": [
+        "_Loopback",
+        "AuthError",
+        "Account"
+      ]
+    },
+    {
+      "area": "github_main",
+      "path": "app.py",
+      "lines": 8033,
+      "imports": [
+        "PIL",
+        "account",
+        "bgvideo",
+        "capture",
+        "collections",
+        "companion",
+        "csv",
+        "ctranslate2",
+        "ctypes",
+        "datetime",
+        "difflib",
+        "display",
+        "dropstats",
+        "engine",
+        "faster_whisper",
+        "features",
+        "fx",
+        "gamedata",
+        "gameinfo",
+        "gamepad",
+        "hashlib",
+        "i18n",
+        "json",
+        "knowledge",
+        "livetranslate",
+        "localapi",
+        "logging",
+        "logging.handlers",
+        "math",
+        "meta_sync",
+        "mss",
+        "notify",
+        "numpy",
+        "ocr_backend",
+        "os",
+        "overlay",
+        "pathlib",
+        "presence",
+        "pynput",
+        "pytesseract",
+        "pyttsx3",
+        "queue",
+        "re",
+        "reports",
+        "safeio",
+        "screenstate",
+        "secrets",
+        "sentencepiece",
+        "service",
+        "share",
+        "shutil",
+        "single",
+        "sounddevice",
+        "speech",
+        "stash",
+        "subprocess",
+        "syncer",
+        "sys",
+        "tasks_live",
+        "tempfile",
+        "terms",
+        "threading",
+        "time",
+        "tkinter",
+        "trscreen",
+        "ui_art",
+        "ui_theme",
+        "updater",
+        "updates",
+        "urllib.error",
+        "urllib.parse",
+        "urllib.request",
+        "vendor",
+        "view3d",
+        "voicepack",
+        "wave",
+        "webbrowser",
+        "wiki_sync",
+        "winocr",
+        "winsound"
+      ],
+      "functions": [
+        "webbrowser_open",
+        "_test_browser",
+        "setup_logging",
+        "load_cfg",
+        "_cfg_defaults",
+        "save_cfg",
+        "check_hotkey",
+        "load_progress",
+        "save_progress",
+        "ensure_log",
+        "read_log",
+        "find_tesseract",
+        "norm",
+        "attr_name",
+        "elevated",
+        "_tint",
+        "game_size",
+        "active_profile",
+        "apply_ocr_settings",
+        "make_ocr",
+        "ocr_scale",
+        "read_card",
+        "monitors",
+        "world_wait",
+        "find_card",
+        "color_hints",
+        "ocr_config",
+        "ocr_quality",
+        "ocr_data",
+        "first_pass_confident",
+        "foreground_title",
+        "game_active",
+        "grab",
+        "ocr",
+        "thumb",
+        "dist",
+        "find_talent",
+        "detect_slot",
+        "parse_item",
+        "parse_item_legacy",
+        "signature",
+        "valid_item",
+        "set_matches",
+        "score_build",
+        "evaluate",
+        "evaluate_legacy",
+        "build_by_name",
+        "active_build",
+        "req_lines_short",
+        "plan_of",
+        "req_lines",
+        "check_lines",
+        "build_slots",
+        "roll_diff",
+        "apply_progress",
+        "set_palette",
+        "verdict_label",
+        "slot_name",
+        "click_through",
+        "exclude_from_capture",
+        "draw_bars",
+        "provider_label",
+        "system_prompt",
+        "transcribe",
+        "windows_stt",
+        "voice_diagnostics",
+        "http_json",
+        "ask_ollama",
+        "ask_claude",
+        "ask_openai",
+        "find_claude_cli",
+        "_history_as_prompt",
+        "ask_claude_code",
+        "split_cat",
+        "add_choice_name",
+        "cat_name",
+        "weekday_names",
+        "load_tasks",
+        "save_tasks",
+        "daily_period_key",
+        "weekly_period_key",
+        "next_daily_reset",
+        "next_weekly_reset",
+        "fmt_remaining",
+        "builtin_task_translate",
+        "task_text",
+        "split_title",
+        "task_group",
+        "task_dedupe_key",
+        "task_image_query",
+        "load_task_images",
+        "claude_tasks_prompt",
+        "parse_claude_tasks",
+        "task_system_prompt",
+        "translate_task_text",
+        "_instance_poll"
+      ],
+      "classes": [
+        "Speaker",
+        "Recorder",
+        "App"
+      ]
+    },
+    {
+      "area": "github_main",
+      "path": "bgvideo.py",
+      "lines": 333,
+      "imports": [
+        "PIL",
+        "av",
+        "math",
+        "pathlib",
+        "random",
+        "sys"
+      ],
+      "functions": [
+        "_mix",
+        "_bg",
+        "render_webp",
+        "has_av",
+        "render",
+        "default_set",
+        "generate"
+      ],
+      "classes": [
+        "Renderer"
+      ]
+    },
+    {
+      "area": "github_main",
+      "path": "capture.py",
+      "lines": 93,
+      "imports": [
+        "PIL",
+        "mss",
+        "numpy",
+        "screenstate",
+        "threading"
+      ],
+      "functions": [
+        "default"
+      ],
+      "classes": [
+        "Grabber"
+      ]
+    },
+    {
+      "area": "github_main",
+      "path": "companion.py",
+      "lines": 154,
+      "imports": [
+        "hmac",
+        "http.server",
+        "json",
+        "logging",
+        "os",
+        "qrcode",
+        "secrets",
+        "socket",
+        "threading",
+        "urllib.parse"
+      ],
+      "functions": [
+        "lan_ip",
+        "qr_image"
+      ],
+      "classes": [
+        "Companion"
+      ]
+    },
+    {
+      "area": "github_main",
+      "path": "display.py",
+      "lines": 353,
+      "imports": [
+        "ctypes",
+        "mss",
+        "os",
+        "pathlib",
+        "re",
+        "time",
+        "xml.etree"
+      ],
+      "functions": [
+        "set_dpi_aware",
+        "profile_warning",
+        "detect_profile",
+        "monitor_size",
+        "_exe_of",
+        "_exe_query",
+        "find_game_hwnd",
+        "window_client_rect",
+        "game_window",
+        "clamp_to_screen",
+        "monitor_of",
+        "dynamic_profile",
+        "profile_for",
+        "settings_dir",
+        "parse_cfg",
+        "_read_cfg",
+        "read_game_settings",
+        "recommendations"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "dropstats.py",
+      "lines": 120,
+      "imports": [
+        "hashlib",
+        "json",
+        "logging",
+        "os",
+        "threading",
+        "time",
+        "urllib.error",
+        "urllib.parse",
+        "urllib.request",
+        "uuid"
+      ],
+      "functions": [
+        "new_client_id",
+        "item_sig",
+        "record",
+        "_get",
+        "summary",
+        "stats"
+      ],
+      "classes": [
+        "Queue"
+      ]
+    },
+    {
+      "area": "github_main",
+      "path": "engine.py",
+      "lines": 500,
+      "imports": [
+        "PIL",
+        "gamedata",
+        "re"
+      ],
+      "functions": [
+        "find_card",
+        "weapon_types_of",
+        "item_weapon_type",
+        "normalize_build",
+        "build_mentions",
+        "set_hit",
+        "_q",
+        "score_gear",
+        "score_mod",
+        "score_weapon",
+        "evaluate",
+        "decide",
+        "_talent_slot",
+        "build_plan",
+        "check_slot",
+        "slot_done",
+        "_is_select",
+        "find_selected_row",
+        "parse_row_text",
+        "list_hint"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "features.py",
+      "lines": 247,
+      "imports": [
+        "base64",
+        "hashlib",
+        "json",
+        "time"
+      ],
+      "functions": [
+        "_H",
+        "_xrecover",
+        "_add",
+        "_mul",
+        "_enc",
+        "_dec",
+        "_eq",
+        "_secret_scalar",
+        "public_key",
+        "sign",
+        "verify",
+        "_b64e",
+        "_b64d",
+        "make_key",
+        "check_key",
+        "check_entitlement"
+      ],
+      "classes": [
+        "Entitlements"
+      ]
+    },
+    {
+      "area": "github_main",
+      "path": "fx.py",
+      "lines": 814,
+      "imports": [
+        "PIL",
+        "av",
+        "ctypes",
+        "cv2",
+        "math",
+        "os",
+        "pathlib",
+        "random",
+        "struct",
+        "threading",
+        "time",
+        "tkinter"
+      ],
+      "functions": [
+        "_hex",
+        "write_cur",
+        "_short",
+        "draw_cursor",
+        "video_backend",
+        "list_videos"
+      ],
+      "classes": [
+        "CursorFX",
+        "TrailFX",
+        "Transition",
+        "VideoFX",
+        "_ItemPool",
+        "AgentWatch",
+        "WatchBackground"
+      ]
+    },
+    {
+      "area": "github_main",
+      "path": "gamedata.py",
+      "lines": 513,
+      "imports": [
+        "PIL",
+        "collections",
+        "difflib",
+        "functools",
+        "json",
+        "os",
+        "pathlib",
+        "re",
+        "threading",
+        "time"
+      ],
+      "functions": [
+        "nrm",
+        "_chars",
+        "_matcher",
+        "ratio",
+        "_windows",
+        "best_window",
+        "text_image"
+      ],
+      "classes": [
+        "GameData"
+      ]
+    },
+    {
+      "area": "github_main",
+      "path": "gameinfo.py",
+      "lines": 151,
+      "imports": [
+        "ctypes",
+        "display",
+        "os",
+        "pathlib",
+        "re",
+        "time",
+        "winreg"
+      ],
+      "functions": [
+        "_reg_values",
+        "_reg_get",
+        "install_dirs",
+        "running_exe",
+        "file_version",
+        "current",
+        "label",
+        "changed"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "gamepad.py",
+      "lines": 86,
+      "imports": [
+        "ctypes",
+        "os",
+        "threading"
+      ],
+      "functions": [
+        "mask_of",
+        "_xinput"
+      ],
+      "classes": [
+        "_GAMEPAD",
+        "_STATE",
+        "ComboWatcher"
+      ]
+    },
+    {
+      "area": "github_main",
+      "path": "i18n.py",
+      "lines": 153,
+      "imports": [
+        "json",
+        "locale",
+        "os",
+        "pathlib"
+      ],
+      "functions": [
+        "init",
+        "_load",
+        "available_languages",
+        "detect_language",
+        "set_language",
+        "current_language",
+        "language_name",
+        "english_name",
+        "t",
+        "task_dictionary",
+        "missing_keys"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "knowledge.py",
+      "lines": 315,
+      "imports": [
+        "csv",
+        "datetime",
+        "json",
+        "pathlib",
+        "random",
+        "re",
+        "time"
+      ],
+      "functions": [
+        "_load",
+        "_clean_desc",
+        "_txt",
+        "_iso",
+        "validate_news",
+        "news_status",
+        "news_sorted",
+        "pick_lang",
+        "next_resets",
+        "fmt_left",
+        "build_tags",
+        "trend",
+        "quiz_level"
+      ],
+      "classes": [
+        "Encyclopedia",
+        "Quiz"
+      ]
+    },
+    {
+      "area": "github_main",
+      "path": "livetranslate.py",
+      "lines": 396,
+      "imports": [
+        "collections",
+        "ctranslate2",
+        "hashlib",
+        "json",
+        "os",
+        "pathlib",
+        "re",
+        "safeio",
+        "sentencepiece",
+        "threading",
+        "time",
+        "urllib.request",
+        "winpath",
+        "zipfile"
+      ],
+      "functions": [
+        "is_english",
+        "blocks_from_lines",
+        "_is_label",
+        "_joiner",
+        "clean_for_mt",
+        "split_sentences",
+        "download_model"
+      ],
+      "classes": [
+        "Glossary",
+        "Cache",
+        "LocalMT",
+        "AIMT",
+        "Translator"
+      ]
+    },
+    {
+      "area": "github_main",
+      "path": "localapi.py",
+      "lines": 269,
+      "imports": [
+        "base64",
+        "companion",
+        "hashlib",
+        "hmac",
+        "http.server",
+        "json",
+        "logging",
+        "os",
+        "secrets",
+        "socket",
+        "struct",
+        "threading",
+        "time",
+        "urllib.parse"
+      ],
+      "functions": [
+        "_accept",
+        "_frame"
+      ],
+      "classes": [
+        "_Server",
+        "_Client",
+        "LocalAPI"
+      ]
+    },
+    {
+      "area": "github_main",
+      "path": "meta_sync.py",
+      "lines": 388,
+      "imports": [
+        "datetime",
+        "json",
+        "knowledge",
+        "logging",
+        "re",
+        "ssl",
+        "time",
+        "urllib.request"
+      ],
+      "functions": [
+        "default_urls",
+        "configured_urls",
+        "fetch",
+        "_num",
+        "_text",
+        "validate",
+        "merge",
+        "_comparable",
+        "due",
+        "run",
+        "apply",
+        "_langs",
+        "_https",
+        "find_guide",
+        "task_urls",
+        "_iso_utc",
+        "validate_tasks",
+        "task_expired",
+        "merge_tasks",
+        "local_resets",
+        "run_tasks",
+        "news_urls",
+        "run_news"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "notify.py",
+      "lines": 122,
+      "imports": [
+        "base64",
+        "json",
+        "logging",
+        "queue",
+        "re",
+        "secrets",
+        "threading",
+        "time",
+        "urllib.error",
+        "urllib.parse",
+        "urllib.request"
+      ],
+      "functions": [
+        "new_topic",
+        "valid_webhook",
+        "valid_topic",
+        "_hdr"
+      ],
+      "classes": [
+        "Notifier"
+      ]
+    },
+    {
+      "area": "github_main",
+      "path": "ocr_backend.py",
+      "lines": 322,
+      "imports": [
+        "PIL",
+        "colorsys",
+        "difflib",
+        "importlib.util",
+        "logging",
+        "numpy",
+        "onnxruntime",
+        "pytesseract",
+        "rapidocr",
+        "re",
+        "threading",
+        "time"
+      ],
+      "functions": [
+        "rapid_available",
+        "tesseract_available",
+        "_rapid",
+        "reset_rapid",
+        "dml_providers",
+        "dml_probe",
+        "_np",
+        "_fix",
+        "group_lines",
+        "_hue_class",
+        "icon_colors",
+        "rarity_color"
+      ],
+      "classes": [
+        "Engine"
+      ]
+    },
+    {
+      "area": "github_main",
+      "path": "overlay.py",
+      "lines": 134,
+      "imports": [
+        "re",
+        "tkinter",
+        "tkinter.font"
+      ],
+      "functions": [
+        "wrap",
+        "fit",
+        "layout",
+        "_unoverlap",
+        "norm"
+      ],
+      "classes": [
+        "InPlace"
+      ]
+    },
+    {
+      "area": "github_main",
+      "path": "presence.py",
+      "lines": 143,
+      "imports": [
+        "json",
+        "logging",
+        "os",
+        "socket",
+        "struct",
+        "sys",
+        "threading",
+        "time",
+        "uuid"
+      ],
+      "functions": [
+        "_paths"
+      ],
+      "classes": [
+        "_Conn",
+        "Presence"
+      ]
+    },
+    {
+      "area": "github_main",
+      "path": "reports.py",
+      "lines": 156,
+      "imports": [
+        "json",
+        "pathlib",
+        "platform",
+        "re",
+        "time",
+        "urllib.error",
+        "urllib.parse",
+        "urllib.request"
+      ],
+      "functions": [
+        "scrub",
+        "system_info",
+        "log_tail",
+        "build",
+        "_post"
+      ],
+      "classes": [
+        "Store"
+      ]
+    },
+    {
+      "area": "github_main",
+      "path": "safeio.py",
+      "lines": 118,
+      "imports": [
+        "base64",
+        "ctypes",
+        "json",
+        "os",
+        "pathlib",
+        "shutil",
+        "sys",
+        "threading",
+        "time"
+      ],
+      "functions": [
+        "_lock",
+        "_dumps",
+        "write_json",
+        "read_json",
+        "_dpapi",
+        "protect",
+        "unprotect",
+        "seal_settings",
+        "open_settings"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "screenstate.py",
+      "lines": 136,
+      "imports": [
+        "json",
+        "numpy",
+        "os",
+        "time"
+      ],
+      "functions": [
+        "small_gray",
+        "from_image",
+        "signature",
+        "similarity",
+        "is_loading"
+      ],
+      "classes": [
+        "Detector"
+      ]
+    },
+    {
+      "area": "github_main",
+      "path": "scripts/agents/build_agents.py",
+      "lines": 457,
+      "imports": [
+        "argparse",
+        "bmesh",
+        "bpy",
+        "json",
+        "math",
+        "mathutils",
+        "os",
+        "pathlib",
+        "sys"
+      ],
+      "functions": [
+        "reset",
+        "link",
+        "mat",
+        "glass",
+        "setmat",
+        "smooth",
+        "bevel",
+        "box",
+        "sphere",
+        "cyl",
+        "skin",
+        "displace",
+        "along",
+        "body",
+        "kneepads",
+        "holster",
+        "plate_carrier",
+        "backpack",
+        "rifle",
+        "shadow_plane",
+        "palette",
+        "o_operator",
+        "stage",
+        "render_frame",
+        "render_mask",
+        "main"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "scripts/agents3d/build_agent.py",
+      "lines": 433,
+      "imports": [
+        "argparse",
+        "bmesh",
+        "bpy",
+        "math",
+        "mathutils",
+        "os",
+        "sys"
+      ],
+      "functions": [
+        "reset",
+        "link",
+        "smooth",
+        "mat",
+        "setmat",
+        "mods",
+        "cube",
+        "cyl",
+        "sphere",
+        "shell",
+        "skin",
+        "V",
+        "body",
+        "hands",
+        "boots",
+        "kneepads",
+        "holster",
+        "rifle",
+        "backpack",
+        "carrier",
+        "belt",
+        "outfit_operator",
+        "lights_camera",
+        "render",
+        "render_ids",
+        "main"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "scripts/agents3d/build_mh.py",
+      "lines": 505,
+      "imports": [
+        "argparse",
+        "bmesh",
+        "bpy",
+        "build_agent",
+        "json",
+        "math",
+        "mathutils",
+        "os",
+        "sys"
+      ],
+      "functions": [
+        "J",
+        "region_mesh",
+        "stats",
+        "rifle",
+        "head_box",
+        "helmet",
+        "goggles",
+        "carrier",
+        "chest_rig",
+        "backpack",
+        "boots",
+        "cuffs",
+        "cargo",
+        "soles",
+        "belt",
+        "kneepads",
+        "holster",
+        "outfit_operator",
+        "head_geo",
+        "open_shell",
+        "visor",
+        "lower_face",
+        "glasses",
+        "sling_bag",
+        "antenna",
+        "base_mats",
+        "dress",
+        "outfit_scout",
+        "outfit_heavy",
+        "outfit_urban",
+        "outfit_arctic",
+        "main"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "scripts/agents3d/fix_anchors.py",
+      "lines": 39,
+      "imports": [
+        "PIL",
+        "json",
+        "pathlib",
+        "sys"
+      ],
+      "functions": [
+        "anchors_of",
+        "main"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "scripts/agents3d/mh_pose.py",
+      "lines": 181,
+      "imports": [
+        "json",
+        "numpy",
+        "sys"
+      ],
+      "functions": [
+        "visit",
+        "rot",
+        "align",
+        "about",
+        "apply",
+        "fk",
+        "ph",
+        "pt",
+        "set_world",
+        "point",
+        "ik",
+        "curl",
+        "region",
+        "tb"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "scripts/agents3d/pack_frames.py",
+      "lines": 49,
+      "imports": [
+        "PIL",
+        "fix_anchors",
+        "json",
+        "pathlib",
+        "sys"
+      ],
+      "functions": [
+        "main"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "scripts/build_library.py",
+      "lines": 302,
+      "imports": [
+        "gamedata",
+        "json",
+        "pathlib",
+        "re",
+        "sys",
+        "time",
+        "urllib.parse",
+        "urllib.request"
+      ],
+      "functions": [
+        "api",
+        "members",
+        "wikitext",
+        "_tpl",
+        "plain",
+        "slot_of",
+        "section",
+        "bonuses_of",
+        "parse_set_page",
+        "main"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "scripts/import_library_excel.py",
+      "lines": 189,
+      "imports": [
+        "gamedata",
+        "json",
+        "library_excel",
+        "openpyxl",
+        "pathlib",
+        "re",
+        "sys",
+        "time"
+      ],
+      "functions": [
+        "rows",
+        "find_key",
+        "main"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "scripts/library_excel.py",
+      "lines": 415,
+      "imports": [
+        "collections",
+        "csv",
+        "gamedata",
+        "json",
+        "openpyxl",
+        "openpyxl.styles",
+        "openpyxl.utils",
+        "openpyxl.worksheet.table",
+        "pathlib",
+        "re",
+        "sys"
+      ],
+      "functions": [
+        "load",
+        "apply_corrections",
+        "wiki_talent",
+        "wiki_kind",
+        "build",
+        "_num",
+        "write"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "scripts/license_tool.py",
+      "lines": 65,
+      "imports": [
+        "argparse",
+        "features",
+        "os",
+        "pathlib",
+        "re",
+        "secrets",
+        "sys",
+        "time",
+        "uuid"
+      ],
+      "functions": [
+        "load_seed",
+        "cmd_init",
+        "cmd_issue",
+        "cmd_check"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "scripts/make_icon.py",
+      "lines": 361,
+      "imports": [
+        "PIL",
+        "math",
+        "random",
+        "sys"
+      ],
+      "functions": [
+        "_bg",
+        "_glow",
+        "design_scan",
+        "design_shield",
+        "design_card",
+        "_grime",
+        "design_hud",
+        "design_badge",
+        "design_watch",
+        "_lin",
+        "_mask_poly",
+        "_mask_rrect",
+        "_paint",
+        "_noise",
+        "design_watch_real",
+        "render",
+        "save_ico",
+        "preview"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "scripts/mt/build_model.py",
+      "lines": 45,
+      "imports": [
+        "ctranslate2",
+        "hashlib",
+        "huggingface_hub",
+        "json",
+        "os",
+        "pathlib",
+        "sentencepiece",
+        "shutil",
+        "subprocess",
+        "sys",
+        "time",
+        "zipfile"
+      ],
+      "functions": [],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "scripts/mt/translate_descriptions.py",
+      "lines": 35,
+      "imports": [
+        "json",
+        "knowledge",
+        "livetranslate",
+        "pathlib",
+        "sys",
+        "time"
+      ],
+      "functions": [],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "scripts/version.py",
+      "lines": 5,
+      "imports": [
+        "pathlib",
+        "re"
+      ],
+      "functions": [],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "server/test_local.py",
+      "lines": 46,
+      "imports": [
+        "features",
+        "hashlib",
+        "json",
+        "pathlib",
+        "sys",
+        "urllib.error",
+        "urllib.request"
+      ],
+      "functions": [
+        "req",
+        "sig",
+        "check"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "service.py",
+      "lines": 247,
+      "imports": [
+        "ctypes",
+        "display",
+        "json",
+        "logging",
+        "os",
+        "pystray",
+        "sys",
+        "threading",
+        "time",
+        "winreg"
+      ],
+      "functions": [
+        "game_running",
+        "game_focused",
+        "set_low_priority",
+        "_k32",
+        "get_priority",
+        "autostart_command",
+        "autostart_get",
+        "autostart_set"
+      ],
+      "classes": [
+        "GameWatcher",
+        "SessionLog",
+        "Tray"
+      ]
+    },
+    {
+      "area": "github_main",
+      "path": "share.py",
+      "lines": 60,
+      "imports": [
+        "base64",
+        "json",
+        "zlib"
+      ],
+      "functions": [
+        "_clean",
+        "encode",
+        "decode"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "single.py",
+      "lines": 68,
+      "imports": [
+        "ctypes",
+        "os",
+        "time"
+      ],
+      "functions": [],
+      "classes": [
+        "SingleInstance"
+      ]
+    },
+    {
+      "area": "github_main",
+      "path": "speech.py",
+      "lines": 356,
+      "imports": [
+        "comtypes",
+        "comtypes.client",
+        "comtypes.gen.UIAutomationClient",
+        "ctranslate2",
+        "ctypes",
+        "hashlib",
+        "json",
+        "logging",
+        "numpy",
+        "os",
+        "pathlib",
+        "re",
+        "soundcard",
+        "subprocess",
+        "sys",
+        "threading",
+        "time",
+        "urllib.request",
+        "winpath"
+      ],
+      "functions": [
+        "whisper_installed",
+        "download_whisper",
+        "mel_filters",
+        "log_mel",
+        "_bytes_to_unicode",
+        "detok",
+        "clean_text",
+        "windows_build",
+        "captions_available"
+      ],
+      "classes": [
+        "Whisper",
+        "Segmenter",
+        "CaptionDiff",
+        "_Source",
+        "LiveCaptionsSource",
+        "WhisperSource"
+      ]
+    },
+    {
+      "area": "github_main",
+      "path": "stash.py",
+      "lines": 314,
+      "imports": [
+        "collections",
+        "csv",
+        "engine",
+        "itertools",
+        "json",
+        "os",
+        "safeio",
+        "time",
+        "uuid"
+      ],
+      "functions": [
+        "signature",
+        "sanitize",
+        "slot_fit",
+        "_variants",
+        "_best_for",
+        "optimize",
+        "rank_builds",
+        "recal_advice",
+        "duplicates",
+        "audit",
+        "export_csv"
+      ],
+      "classes": [
+        "Stash"
+      ]
+    },
+    {
+      "area": "github_main",
+      "path": "syncer.py",
+      "lines": 271,
+      "imports": [
+        "PIL",
+        "ctypes",
+        "display",
+        "hashlib",
+        "json",
+        "mss",
+        "os",
+        "pathlib",
+        "platform",
+        "time",
+        "winreg"
+      ],
+      "functions": [
+        "_ram_gb",
+        "_cpu_name",
+        "_gpus",
+        "_monitor_dpi",
+        "scan_pc",
+        "scan_game",
+        "benchmark",
+        "fingerprint",
+        "make_plan",
+        "apply_plan",
+        "needs_sync",
+        "report_text"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "tasks_live.py",
+      "lines": 311,
+      "imports": [
+        "datetime",
+        "hashlib",
+        "json",
+        "livetranslate",
+        "re",
+        "reports",
+        "threading",
+        "time",
+        "urllib.request"
+      ],
+      "functions": [
+        "norm",
+        "task_key",
+        "_english",
+        "extract",
+        "_h",
+        "_extract_at",
+        "expires_for",
+        "validate_feed",
+        "fetch_live",
+        "to_feed_tasks",
+        "suggest"
+      ],
+      "classes": [
+        "Submitter",
+        "Memory"
+      ]
+    },
+    {
+      "area": "github_main",
+      "path": "terms.py",
+      "lines": 60,
+      "imports": [
+        "json",
+        "pathlib",
+        "re"
+      ],
+      "functions": [
+        "_load"
+      ],
+      "classes": [
+        "TermFinder"
+      ]
+    },
+    {
+      "area": "github_main",
+      "path": "tests/bench_scan.py",
+      "lines": 88,
+      "imports": [
+        "PIL",
+        "capture",
+        "gamedata",
+        "json",
+        "mss",
+        "ocr_backend",
+        "pathlib",
+        "statistics",
+        "sys",
+        "time"
+      ],
+      "functions": [
+        "timeit"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "tests/startup_time.py",
+      "lines": 17,
+      "imports": [
+        "pathlib",
+        "subprocess",
+        "sys",
+        "time"
+      ],
+      "functions": [],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "tests/test_account.py",
+      "lines": 129,
+      "imports": [
+        "account",
+        "features",
+        "json",
+        "os",
+        "pathlib",
+        "subprocess",
+        "sys",
+        "tempfile",
+        "threading",
+        "time",
+        "urllib.parse",
+        "urllib.request"
+      ],
+      "functions": [
+        "ok"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "tests/test_autoscan.py",
+      "lines": 94,
+      "imports": [
+        "PIL",
+        "app",
+        "display",
+        "os",
+        "pathlib",
+        "service",
+        "sys",
+        "time"
+      ],
+      "functions": [
+        "ok",
+        "fake_read"
+      ],
+      "classes": [
+        "Fake"
+      ]
+    },
+    {
+      "area": "github_main",
+      "path": "tests/test_core.py",
+      "lines": 242,
+      "imports": [
+        "display",
+        "engine",
+        "features",
+        "gamedata",
+        "gameinfo",
+        "import_library_excel",
+        "json",
+        "os",
+        "pathlib",
+        "share",
+        "stash",
+        "syncer",
+        "sys",
+        "tempfile",
+        "time",
+        "updates",
+        "vendor"
+      ],
+      "functions": [
+        "test_ed25519_rfc8032",
+        "test_license_key",
+        "_game",
+        "test_optimizer_keeps_set_bonus",
+        "test_sanitize",
+        "test_weapon_limits",
+        "test_decimal_repair",
+        "test_share_roundtrip",
+        "test_vendor_record",
+        "test_skill_build_not_weapon_type",
+        "test_real_cards_and_learning",
+        "test_library_self_check",
+        "test_excel_library_in_sync",
+        "test_display_sync_helpers",
+        "test_sync_plan",
+        "test_update_center_logic"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "tests/test_gpu_probe.py",
+      "lines": 14,
+      "imports": [
+        "json",
+        "pathlib",
+        "subprocess",
+        "sys"
+      ],
+      "functions": [],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "tests/test_hardening.py",
+      "lines": 134,
+      "imports": [
+        "ctranslate2",
+        "io",
+        "json",
+        "livetranslate",
+        "localapi",
+        "os",
+        "pathlib",
+        "reports",
+        "safeio",
+        "shutil",
+        "socket",
+        "sys",
+        "tempfile",
+        "threading",
+        "time",
+        "updater",
+        "urllib.request",
+        "winpath",
+        "zipfile"
+      ],
+      "functions": [
+        "ok",
+        "writer"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "tests/test_inputs.py",
+      "lines": 57,
+      "imports": [
+        "PIL",
+        "gamepad",
+        "os",
+        "pathlib",
+        "sys",
+        "time",
+        "winocr"
+      ],
+      "functions": [
+        "ok"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "tests/test_inventory.py",
+      "lines": 39,
+      "imports": [
+        "PIL",
+        "engine",
+        "gamedata",
+        "ocr_backend",
+        "pathlib",
+        "sys"
+      ],
+      "functions": [
+        "main"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "tests/test_knowledge.py",
+      "lines": 91,
+      "imports": [
+        "datetime",
+        "json",
+        "knowledge",
+        "meta_sync",
+        "os",
+        "pathlib",
+        "random",
+        "sys",
+        "tempfile",
+        "voicepack",
+        "wave"
+      ],
+      "functions": [
+        "ok"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "tests/test_livetranslate.py",
+      "lines": 107,
+      "imports": [
+        "hashlib",
+        "io",
+        "json",
+        "livetranslate",
+        "os",
+        "pathlib",
+        "sys",
+        "tempfile",
+        "time",
+        "zipfile"
+      ],
+      "functions": [
+        "ok"
+      ],
+      "classes": [
+        "Fake",
+        "R",
+        "Echo"
+      ]
+    },
+    {
+      "area": "github_main",
+      "path": "tests/test_localapi.py",
+      "lines": 90,
+      "imports": [
+        "base64",
+        "json",
+        "localapi",
+        "os",
+        "pathlib",
+        "shutil",
+        "socket",
+        "struct",
+        "subprocess",
+        "sys",
+        "time",
+        "urllib.error",
+        "urllib.request"
+      ],
+      "functions": [
+        "ok",
+        "cmd",
+        "get",
+        "ws",
+        "send",
+        "recv"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "tests/test_ocr.py",
+      "lines": 39,
+      "imports": [
+        "PIL",
+        "gamedata",
+        "json",
+        "ocr_backend",
+        "pathlib",
+        "sys",
+        "time"
+      ],
+      "functions": [
+        "main"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "tests/test_overlay.py",
+      "lines": 58,
+      "imports": [
+        "json",
+        "livetranslate",
+        "overlay",
+        "pathlib",
+        "sys"
+      ],
+      "functions": [
+        "ok",
+        "measure_at"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "tests/test_reports.py",
+      "lines": 102,
+      "imports": [
+        "json",
+        "pathlib",
+        "reports",
+        "sys",
+        "tempfile"
+      ],
+      "functions": [
+        "test_scrub",
+        "test_build",
+        "test_store",
+        "test_system_info",
+        "test_log_tail"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "tests/test_screenstate.py",
+      "lines": 71,
+      "imports": [
+        "PIL",
+        "numpy",
+        "os",
+        "pathlib",
+        "screenstate",
+        "sys",
+        "tempfile"
+      ],
+      "functions": [
+        "ok",
+        "world",
+        "menu"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "tests/test_service.py",
+      "lines": 104,
+      "imports": [
+        "json",
+        "notify",
+        "os",
+        "pathlib",
+        "presence",
+        "service",
+        "socket",
+        "struct",
+        "sys",
+        "tempfile",
+        "threading",
+        "time"
+      ],
+      "functions": [
+        "ok",
+        "opener"
+      ],
+      "classes": [
+        "R"
+      ]
+    },
+    {
+      "area": "github_main",
+      "path": "tests/test_single.py",
+      "lines": 85,
+      "imports": [
+        "os",
+        "pathlib",
+        "single",
+        "subprocess",
+        "sys",
+        "time"
+      ],
+      "functions": [
+        "unit",
+        "app_e2e"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "tests/test_speech.py",
+      "lines": 109,
+      "imports": [
+        "hashlib",
+        "io",
+        "math",
+        "numpy",
+        "os",
+        "pathlib",
+        "speech",
+        "sys",
+        "tempfile",
+        "time",
+        "voicepack",
+        "wave"
+      ],
+      "functions": [
+        "ok"
+      ],
+      "classes": [
+        "R"
+      ]
+    },
+    {
+      "area": "github_main",
+      "path": "tests/test_tasks_live.py",
+      "lines": 168,
+      "imports": [
+        "datetime",
+        "io",
+        "json",
+        "livetranslate",
+        "meta_sync",
+        "os",
+        "pathlib",
+        "subprocess",
+        "sys",
+        "tasks_live",
+        "tempfile",
+        "time"
+      ],
+      "functions": [
+        "ok",
+        "opener",
+        "bad_opener",
+        "_op",
+        "e2e"
+      ],
+      "classes": [
+        "NoModel",
+        "Resp",
+        "_R"
+      ]
+    },
+    {
+      "area": "github_main",
+      "path": "tests/test_windows_sync.py",
+      "lines": 122,
+      "imports": [
+        "app",
+        "display",
+        "json",
+        "mss",
+        "os",
+        "pathlib",
+        "subprocess",
+        "syncer",
+        "sys",
+        "time"
+      ],
+      "functions": [
+        "spawn",
+        "main"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "tests/ui_account_test.py",
+      "lines": 155,
+      "imports": [
+        "PIL",
+        "account",
+        "app",
+        "features",
+        "json",
+        "os",
+        "pathlib",
+        "subprocess",
+        "sys",
+        "traceback",
+        "urllib.request"
+      ],
+      "functions": [
+        "fake_restart",
+        "step",
+        "shot",
+        "admin",
+        "s1",
+        "s2",
+        "s3",
+        "s4",
+        "s5",
+        "s6",
+        "s7",
+        "finish",
+        "guard",
+        "finish"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "tests/ui_agent_test.py",
+      "lines": 152,
+      "imports": [
+        "PIL",
+        "app",
+        "json",
+        "pathlib",
+        "sys",
+        "time",
+        "view3d"
+      ],
+      "functions": [
+        "ok",
+        "shot",
+        "zoom_shot",
+        "timed_render",
+        "start",
+        "models",
+        "sprite_extra",
+        "outfits",
+        "skins",
+        "rotate",
+        "finish"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "tests/ui_click_test.py",
+      "lines": 126,
+      "imports": [
+        "PIL",
+        "app",
+        "ctypes",
+        "json",
+        "mss",
+        "pathlib",
+        "sys",
+        "time"
+      ],
+      "functions": [
+        "click",
+        "find_gap_in_tab",
+        "step_click",
+        "check",
+        "step_lag",
+        "step_transition"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "tests/ui_info_test.py",
+      "lines": 105,
+      "imports": [
+        "PIL",
+        "app",
+        "json",
+        "os",
+        "pathlib",
+        "sys",
+        "time",
+        "traceback"
+      ],
+      "functions": [
+        "step",
+        "shot",
+        "s1",
+        "s2",
+        "s3",
+        "s4",
+        "s5",
+        "s6",
+        "s7",
+        "finish",
+        "guard"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "tests/ui_service_test.py",
+      "lines": 157,
+      "imports": [
+        "PIL",
+        "app",
+        "base64",
+        "features",
+        "json",
+        "notify",
+        "os",
+        "pathlib",
+        "service",
+        "socket",
+        "struct",
+        "subprocess",
+        "sys",
+        "test_windows_sync",
+        "threading",
+        "time",
+        "traceback",
+        "urllib.request"
+      ],
+      "functions": [
+        "fake_open",
+        "_init",
+        "step",
+        "shot",
+        "ws_listen",
+        "s0",
+        "s1",
+        "s2",
+        "s3",
+        "s3b",
+        "s4",
+        "s5",
+        "finish",
+        "guard"
+      ],
+      "classes": [
+        "_R"
+      ]
+    },
+    {
+      "area": "github_main",
+      "path": "tests/ui_sync_shot.py",
+      "lines": 23,
+      "imports": [
+        "app",
+        "pathlib",
+        "sys"
+      ],
+      "functions": [
+        "open_sync",
+        "press_apply"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "tests/ui_tab_test.py",
+      "lines": 39,
+      "imports": [
+        "app",
+        "json",
+        "pathlib",
+        "sys",
+        "time"
+      ],
+      "functions": [
+        "switch"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "tests/ui_translate_test.py",
+      "lines": 140,
+      "imports": [
+        "PIL",
+        "app",
+        "json",
+        "os",
+        "pathlib",
+        "subprocess",
+        "sys",
+        "time",
+        "traceback",
+        "urllib.request"
+      ],
+      "functions": [
+        "step",
+        "shot",
+        "s1",
+        "s2",
+        "s3",
+        "s4",
+        "s5",
+        "s6",
+        "s7",
+        "s8",
+        "finish",
+        "guard"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "tests/ui_update_shot.py",
+      "lines": 25,
+      "imports": [
+        "app",
+        "gameinfo",
+        "json",
+        "pathlib",
+        "sys"
+      ],
+      "functions": [
+        "press"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "tests/voice_diag.py",
+      "lines": 13,
+      "imports": [
+        "os",
+        "sys",
+        "tempfile",
+        "threading",
+        "time",
+        "voicepack"
+      ],
+      "functions": [
+        "work"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "trscreen.py",
+      "lines": 65,
+      "imports": [],
+      "functions": [],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "ui_art.py",
+      "lines": 711,
+      "imports": [
+        "PIL",
+        "math",
+        "pathlib",
+        "random",
+        "re",
+        "threading",
+        "tkinter"
+      ],
+      "functions": [
+        "_rgb",
+        "_vgradient",
+        "_vignette",
+        "_glow",
+        "_noise",
+        "bg_skyline",
+        "bg_hexgrid",
+        "bg_radar",
+        "bg_topo",
+        "bg_smoke",
+        "ensure_backgrounds",
+        "list_images",
+        "build_role",
+        "_safe",
+        "_initials",
+        "emblem",
+        "role_color",
+        "_star",
+        "_bands",
+        "flag"
+      ],
+      "classes": [
+        "Banner"
+      ]
+    },
+    {
+      "area": "github_main",
+      "path": "ui_theme.py",
+      "lines": 382,
+      "imports": [
+        "math",
+        "pathlib",
+        "struct",
+        "time",
+        "tkinter",
+        "wave",
+        "winsound"
+      ],
+      "functions": [
+        "luminance",
+        "contrast",
+        "on_color",
+        "with_icon",
+        "apply",
+        "_tone",
+        "bind_click_sounds",
+        "scrollable"
+      ],
+      "classes": [
+        "Sounds"
+      ]
+    },
+    {
+      "area": "github_main",
+      "path": "updater.py",
+      "lines": 158,
+      "imports": [
+        "hashlib",
+        "io",
+        "json",
+        "logging",
+        "os",
+        "pathlib",
+        "re",
+        "subprocess",
+        "sys",
+        "tempfile",
+        "time",
+        "urllib.request",
+        "zipfile"
+      ],
+      "functions": [
+        "parse_version",
+        "newer",
+        "_get",
+        "latest",
+        "_expected_sha",
+        "install_frozen",
+        "_allowed",
+        "update_source",
+        "restart_source"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "updates.py",
+      "lines": 67,
+      "imports": [
+        "gamedata",
+        "re"
+      ],
+      "functions": [
+        "lib_version_key",
+        "lib_newer",
+        "valid_library",
+        "lib_diff",
+        "diff_summary",
+        "release_highlights"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "vendor.py",
+      "lines": 176,
+      "imports": [
+        "engine",
+        "gamedata",
+        "gzip",
+        "io",
+        "json",
+        "logging",
+        "stash",
+        "time",
+        "urllib.request"
+      ],
+      "functions": [
+        "_get",
+        "fetch_week",
+        "load_cache",
+        "save_cache",
+        "last_reset",
+        "stale",
+        "_attr_key",
+        "to_item",
+        "match",
+        "target_loot_today"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "view3d.py",
+      "lines": 739,
+      "imports": [
+        "PIL",
+        "json",
+        "math",
+        "pathlib",
+        "time",
+        "tkinter"
+      ],
+      "functions": [
+        "_hex",
+        "_shade",
+        "_sub",
+        "_cross",
+        "_dot",
+        "_norm",
+        "_orient",
+        "box",
+        "taper",
+        "cyl",
+        "ell",
+        "_body",
+        "_gun",
+        "_carrier",
+        "_pack",
+        "m_operator",
+        "m_scout",
+        "m_heavy",
+        "m_urban",
+        "m_arctic",
+        "sprite_models"
+      ],
+      "classes": [
+        "Scene3D",
+        "AgentView",
+        "Bars3D",
+        "SpriteAgentView"
+      ]
+    },
+    {
+      "area": "github_main",
+      "path": "voicepack.py",
+      "lines": 124,
+      "imports": [
+        "comtypes",
+        "comtypes.client",
+        "json",
+        "math",
+        "numpy",
+        "pathlib",
+        "random",
+        "struct",
+        "wave"
+      ],
+      "functions": [
+        "sapi_to_wav",
+        "radio_fx",
+        "tone_wav"
+      ],
+      "classes": [
+        "Lines"
+      ]
+    },
+    {
+      "area": "github_main",
+      "path": "wiki_sync.py",
+      "lines": 274,
+      "imports": [
+        "datetime",
+        "json",
+        "logging",
+        "re",
+        "ssl",
+        "urllib.parse",
+        "urllib.request"
+      ],
+      "functions": [
+        "_get",
+        "wikitext",
+        "page_url",
+        "_strip_templates",
+        "clean",
+        "sections",
+        "children",
+        "infobox",
+        "link_target",
+        "parse_date",
+        "first_sentences",
+        "slug",
+        "resolve_season",
+        "parse_scouts",
+        "parse_classified",
+        "parse_project_events",
+        "run",
+        "images_for",
+        "fetch_bytes"
+      ],
+      "classes": []
+    },
+    {
+      "area": "github_main",
+      "path": "winocr.py",
+      "lines": 75,
+      "imports": [
+        "PIL",
+        "asyncio",
+        "difflib",
+        "logging",
+        "ocr_backend",
+        "os",
+        "winrt.windows.globalization",
+        "winrt.windows.graphics.imaging",
+        "winrt.windows.media.ocr",
+        "winrt.windows.storage.streams"
+      ],
+      "functions": [
+        "similar"
+      ],
+      "classes": [
+        "WinOCR"
+      ]
+    },
+    {
+      "area": "github_main",
+      "path": "winpath.py",
+      "lines": 55,
+      "imports": [
+        "ctypes",
+        "os",
+        "pathlib",
+        "shutil"
+      ],
+      "functions": [
+        "is_ascii",
+        "short_path",
+        "public_root",
+        "safe_dir"
+      ],
+      "classes": []
+    },
+    {
+      "area": "private_main",
+      "path": "panel/__init__.py",
+      "lines": 2,
+      "imports": [],
+      "functions": [],
+      "classes": []
+    },
+    {
+      "area": "private_main",
+      "path": "panel/dashboard_tab.py",
+      "lines": 223,
+      "imports": [
+        "datetime",
+        "json",
+        "license_tab",
+        "threading",
+        "time",
+        "tkinter",
+        "urllib.request"
+      ],
+      "functions": [
+        "ago_s",
+        "vkey"
+      ],
+      "classes": [
+        "DashboardTab"
+      ]
+    },
+    {
+      "area": "private_main",
+      "path": "panel/github_api.py",
+      "lines": 95,
+      "imports": [
+        "json",
+        "re",
+        "urllib.error",
+        "urllib.request"
+      ],
+      "functions": [
+        "parse_meta",
+        "label_value"
+      ],
+      "classes": [
+        "GitHub"
+      ]
+    },
+    {
+      "area": "private_main",
+      "path": "panel/license_tab.py",
+      "lines": 276,
+      "imports": [
+        "datetime",
+        "json",
+        "threading",
+        "time",
+        "tkinter",
+        "urllib.error",
+        "urllib.parse",
+        "urllib.request"
+      ],
+      "functions": [
+        "fmt_t",
+        "fmt_d"
+      ],
+      "classes": [
+        "AdminAPI",
+        "LicenseTab"
+      ]
+    },
+    {
+      "area": "private_main",
+      "path": "panel/lock.py",
+      "lines": 96,
+      "imports": [
+        "base64",
+        "hashlib",
+        "hmac",
+        "os",
+        "time"
+      ],
+      "functions": [
+        "_derive",
+        "_sub",
+        "_stream",
+        "encrypt",
+        "decrypt",
+        "valid_pin",
+        "make",
+        "wait_left",
+        "check"
+      ],
+      "classes": []
+    },
+    {
+      "area": "private_main",
+      "path": "panel/panel.py",
+      "lines": 740,
+      "imports": [
+        "base64",
+        "csv",
+        "ctypes",
+        "dashboard_tab",
+        "datetime",
+        "github_api",
+        "json",
+        "license_tab",
+        "lock",
+        "os",
+        "pathlib",
+        "selfupdate",
+        "sys",
+        "tasks_tab",
+        "threading",
+        "time",
+        "tkinter",
+        "tray",
+        "webbrowser"
+      ],
+      "functions": [
+        "config_path",
+        "_dpapi",
+        "seal",
+        "unseal",
+        "resource",
+        "ago",
+        "main"
+      ],
+      "classes": [
+        "Panel"
+      ]
+    },
+    {
+      "area": "private_main",
+      "path": "panel/selfupdate.py",
+      "lines": 117,
+      "imports": [
+        "hashlib",
+        "json",
+        "os",
+        "pathlib",
+        "re",
+        "subprocess",
+        "sys",
+        "urllib.error",
+        "urllib.request"
+      ],
+      "functions": [
+        "vtuple",
+        "_open",
+        "latest",
+        "expected_sha",
+        "download",
+        "install",
+        "cleanup"
+      ],
+      "classes": [
+        "_NoRedirect"
+      ]
+    },
+    {
+      "area": "private_main",
+      "path": "panel/tasks_tab.py",
+      "lines": 282,
+      "imports": [
+        "datetime",
+        "json",
+        "license_tab",
+        "threading",
+        "tkinter"
+      ],
+      "functions": [
+        "fmt_t"
+      ],
+      "classes": [
+        "TasksTab",
+        "SuggestTab"
+      ]
+    },
+    {
+      "area": "private_main",
+      "path": "panel/tray.py",
+      "lines": 61,
+      "imports": [
+        "PIL",
+        "pystray",
+        "queue",
+        "threading"
+      ],
+      "functions": [
+        "summarize"
+      ],
+      "classes": [
+        "Tray"
+      ]
+    },
+    {
+      "area": "private_main",
+      "path": "tests/dashboard_shot.py",
+      "lines": 90,
+      "imports": [
+        "PIL",
+        "json",
+        "os",
+        "panel",
+        "pathlib",
+        "subprocess",
+        "sys",
+        "tasks_live",
+        "tempfile",
+        "time",
+        "tkinter",
+        "tray",
+        "urllib.request"
+      ],
+      "functions": [
+        "ok",
+        "shot",
+        "s1",
+        "s2",
+        "s3"
+      ],
+      "classes": []
+    },
+    {
+      "area": "private_main",
+      "path": "tests/fake_reports_server.py",
+      "lines": 112,
+      "imports": [
+        "datetime",
+        "http.server",
+        "json",
+        "re",
+        "threading"
+      ],
+      "functions": [
+        "now",
+        "start"
+      ],
+      "classes": [
+        "H"
+      ]
+    },
+    {
+      "area": "private_main",
+      "path": "tests/license_shot.py",
+      "lines": 103,
+      "imports": [
+        "PIL",
+        "account",
+        "json",
+        "os",
+        "panel",
+        "pathlib",
+        "subprocess",
+        "sys",
+        "tempfile",
+        "threading",
+        "tkinter",
+        "urllib.parse",
+        "urllib.request"
+      ],
+      "functions": [
+        "browser",
+        "admin",
+        "ok",
+        "shot",
+        "s1",
+        "s2",
+        "s3",
+        "s4",
+        "s5",
+        "s6",
+        "s7"
+      ],
+      "classes": []
+    },
+    {
+      "area": "private_main",
+      "path": "tests/lock_test.py",
+      "lines": 164,
+      "imports": [
+        "PIL",
+        "hashlib",
+        "http.server",
+        "json",
+        "lock",
+        "os",
+        "panel",
+        "pathlib",
+        "selfupdate",
+        "sys",
+        "tempfile",
+        "threading",
+        "time",
+        "tkinter"
+      ],
+      "functions": [
+        "ok",
+        "shot"
+      ],
+      "classes": [
+        "GH"
+      ]
+    },
+    {
+      "area": "private_main",
+      "path": "tests/panel_shot.py",
+      "lines": 181,
+      "imports": [
+        "PIL",
+        "http.server",
+        "json",
+        "os",
+        "panel",
+        "pathlib",
+        "re",
+        "sys",
+        "tempfile",
+        "threading",
+        "tkinter"
+      ],
+      "functions": [
+        "meta",
+        "ok",
+        "shot",
+        "step",
+        "s_loaded",
+        "s_select",
+        "s_status",
+        "s_reply",
+        "s_close",
+        "s_filter",
+        "s_end"
+      ],
+      "classes": [
+        "H"
+      ]
+    },
+    {
+      "area": "private_main",
+      "path": "tests/tasks_shot.py",
+      "lines": 120,
+      "imports": [
+        "PIL",
+        "json",
+        "os",
+        "panel",
+        "pathlib",
+        "subprocess",
+        "sys",
+        "tasks_live",
+        "tempfile",
+        "time",
+        "tkinter",
+        "urllib.request"
+      ],
+      "functions": [
+        "ok",
+        "shot",
+        "s1",
+        "s2",
+        "s3",
+        "s4",
+        "s5",
+        "s6",
+        "s7"
+      ],
+      "classes": []
+    },
+    {
+      "area": "private_main",
+      "path": "tests/ui_feedback_test.py",
+      "lines": 143,
+      "imports": [
+        "PIL",
+        "app",
+        "fake_reports_server",
+        "json",
+        "os",
+        "pathlib",
+        "subprocess",
+        "sys",
+        "tempfile",
+        "time"
+      ],
+      "functions": [
+        "ok",
+        "shot",
+        "typer",
+        "s1_open",
+        "s1_send",
+        "s1_check",
+        "s2_panel",
+        "s2_check",
+        "s3_refresh",
+        "s3_check",
+        "s3_end"
+      ],
+      "classes": []
+    },
+    {
+      "area": "private_promo",
+      "path": "promo/capture.py",
+      "lines": 170,
+      "imports": [
+        "PIL",
+        "app",
+        "companion",
+        "json",
+        "os",
+        "pathlib",
+        "subprocess",
+        "sys",
+        "threading",
+        "time"
+      ],
+      "functions": [
+        "wp",
+        "card_image",
+        "grab",
+        "show",
+        "popup_big",
+        "tab",
+        "run"
+      ],
+      "classes": []
+    },
+    {
+      "area": "private_promo",
+      "path": "promo/gen_vo.py",
+      "lines": 33,
+      "imports": [
+        "chatterbox.mtl_tts",
+        "difflib",
+        "faster_whisper",
+        "json",
+        "pathlib",
+        "re",
+        "shutil",
+        "sys",
+        "torchaudio"
+      ],
+      "functions": [],
+      "classes": []
+    },
+    {
+      "area": "private_promo",
+      "path": "promo/music.py",
+      "lines": 88,
+      "imports": [
+        "numpy",
+        "sys",
+        "wave"
+      ],
+      "functions": [
+        "note",
+        "env_ad"
+      ],
+      "classes": []
+    },
+    {
+      "area": "private_promo",
+      "path": "promo/render.py",
+      "lines": 468,
+      "imports": [
+        "PIL",
+        "argparse",
+        "json",
+        "math",
+        "pathlib",
+        "subprocess",
+        "sys",
+        "wave"
+      ],
+      "functions": [
+        "font",
+        "raj",
+        "rajs",
+        "inter",
+        "interr",
+        "ease",
+        "ease_out",
+        "lerp",
+        "load",
+        "shot",
+        "shadow_for",
+        "place",
+        "text",
+        "diamond",
+        "title",
+        "make_bg",
+        "background",
+        "brief_panel",
+        "wrap",
+        "phone_frame",
+        "s_intro",
+        "s_verdict",
+        "s_builds",
+        "s_translate",
+        "s_tasks",
+        "s_themes",
+        "s_outro",
+        "wav_dur",
+        "ts",
+        "frame",
+        "caption"
+      ],
+      "classes": []
+    }
+  ],
+  "parse_errors": []
+}

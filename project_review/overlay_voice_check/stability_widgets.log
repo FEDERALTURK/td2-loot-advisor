@@ -1,0 +1,9 @@
+{"source": "C:\\Users\\PC\\Desktop\\Thedivision2program", "import_ms": 1037.6, "widgets_ms": 4530.7, "tabs": 13, "working_set_mb": 89.0, "callback_errors": [], "ok": true}
+2026-10-28 00:05:06 | INFO    | td2 | === TD2 Loot Advisor v6.0.2 starting ===
+2026-10-28 00:05:06 | INFO    | td2 | Language: tr (Türkçe)
+2026-10-28 00:05:06 | INFO    | td2 | Tier: free (key=empty, account=empty)
+2026-10-28 00:05:06 | INFO    | td2 | Display profile: 3440x1440, OCR threshold 170, scale auto
+2026-10-28 00:05:07 | INFO    | td2 | Window profile 3440x1440: 1700x1080, ui scale 1.17, compact=False
+2026-10-28 00:05:09 | INFO    | td2 | Game settings: {'file': "C:\\Users\\PC\\Documents\\My Games\\Tom Clancy's The Division 2\\state.cfg", 'width': 1916, 'height': 1006, 'refresh': 60, 'display_mode': 'Borderless', 'hdr': False, 'dx12': True, 'language': 0, 'view_scale': 0.75, 'enlarge_ui': False}
+2026-10-28 00:05:09 | INFO    | td2 | UI ready — language=tr, OCR=rapidocr, tesseract=C:\Program Files\Tesseract-OCR\tesseract.exe
+2026-10-28 00:05:11 | INFO    | td2 | Scanning stopped

@@ -1,0 +1,16 @@
+✔ test_ed25519_rfc8032
+✔ test_license_key
+✔ test_optimizer_keeps_set_bonus
+✔ test_sanitize
+✔ test_weapon_limits
+✔ test_decimal_repair
+✔ test_share_roundtrip
+✔ test_vendor_record
+✔ test_skill_build_not_weapon_type
+✔ test_real_cards_and_learning
+✔ test_library_self_check
+değişiklik yok: Excel ile kütüphane aynı
+✔ test_excel_library_in_sync
+✔ test_display_sync_helpers
+✔ test_sync_plan
+✔ test_update_center_logic
