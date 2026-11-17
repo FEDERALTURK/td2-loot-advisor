@@ -1,12 +1,12 @@
-"""
-TD2 Loot Advisor v5 — The Division 2 item / build / project assistant.
-TD2 Loot Advisor v5 — The Division 2 için eşya, build ve görev asistanı.
+﻿"""
+TD2 Loot Advisor v5 â€” The Division 2 item / build / project assistant.
+TD2 Loot Advisor v5 â€” The Division 2 iÃ§in eÅŸya, build ve gÃ¶rev asistanÄ±.
 
 Multi-language: the interface language is chosen in Settings and lives in
 `lang/<code>.json`. See i18n.py to add a new language.
 
-IMPORTANT / ÖNEMLİ: this program never touches the game process or its
-memory — no offsets, no injection. It only reads text from screenshots via
+IMPORTANT / Ã–NEMLÄ°: this program never touches the game process or its
+memory â€” no offsets, no injection. It only reads text from screenshots via
 OCR and runs in its own windows. Even so, do not assume zero risk with
 respect to Ubisoft's stance on overlay/automation tools.
 
@@ -23,8 +23,8 @@ from pathlib import Path
 from tkinter import ttk, filedialog, messagebox, simpledialog
 from td2app.ui import splash, ui_theme, ui_hud, ui_art, view3d, fx, bgvideo
 
-if "--dml-probe" in sys.argv:          # ekran kartı (DirectML) denemesi: ayrı süreçte, programın geri kalanı yüklenmeden
-    import ocr_backend as _ob                # sonuç dosyaya yazılır (pencere modundaki .exe'de konsol çıktısı yoktur)
+if "--dml-probe" in sys.argv:          # ekran kartÄ± (DirectML) denemesi: ayrÄ± sÃ¼reÃ§te, programÄ±n geri kalanÄ± yÃ¼klenmeden
+    import ocr_backend as _ob                # sonuÃ§ dosyaya yazÄ±lÄ±r (pencere modundaki .exe'de konsol Ã§Ä±ktÄ±sÄ± yoktur)
     _i = sys.argv.index("--dml-probe")
     try: _res = _ob.dml_probe(sys.argv[_i + 1])
     except Exception as _e: _res = {"ok": False, "reason": f"{type(_e).__name__}: {_e}"}
@@ -34,7 +34,7 @@ if "--dml-probe" in sys.argv:          # ekran kartı (DirectML) denemesi: ayrı
         print("DMLPROBE " + json.dumps(_res), flush=True)
     sys.exit(0)
 
-if "--lt-check" in sys.argv:           # paket denetimi: çeviri altyapısı (ctranslate2 + sentencepiece) pakette mi
+if "--lt-check" in sys.argv:           # paket denetimi: Ã§eviri altyapÄ±sÄ± (ctranslate2 + sentencepiece) pakette mi
     _i = sys.argv.index("--lt-check")
     try:
         import ctranslate2 as _ct, sentencepiece as _sp
@@ -150,23 +150,23 @@ import decision_center
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.1.5.38"
-# "Bu oturumda ne kazandın?" özeti için kaba tahmin: bir eşyayı elle inceleyip
-# build'e göre karar vermenin (istatistikleri okuma + karşılaştırma) ortalama
-# süresi, saniye. Gerçek bir ölçüm değil — yalnızca arayüzde "tahmini" etiketiyle
-# gösterilen bir gösterge (bkz. App._session_time_saved_min).
+APP_VERSION = "9.1.5.39"
+# "Bu oturumda ne kazandÄ±n?" Ã¶zeti iÃ§in kaba tahmin: bir eÅŸyayÄ± elle inceleyip
+# build'e gÃ¶re karar vermenin (istatistikleri okuma + karÅŸÄ±laÅŸtÄ±rma) ortalama
+# sÃ¼resi, saniye. GerÃ§ek bir Ã¶lÃ§Ã¼m deÄŸil â€” yalnÄ±zca arayÃ¼zde "tahmini" etiketiyle
+# gÃ¶sterilen bir gÃ¶sterge (bkz. App._session_time_saved_min).
 SESSION_SAVE_SEC_PER_ITEM = 12
 FROZEN = getattr(sys, "frozen", False)
 BASE = Path(sys.executable).parent if FROZEN else Path(__file__).resolve().parent
-TASKS_CACHE = BASE / "tasks_cache.json"  # son indirilen görev listesi
+TASKS_CACHE = BASE / "tasks_cache.json"  # son indirilen gÃ¶rev listesi
 META_CACHE = BASE / "meta_cache.json"
 NEWS_CACHE = BASE / "news_cache.json"
 DESC_CACHE = BASE / "descriptions_cache.json"
-NEWS_POLL_MS = 30 * 60 * 1000          # program açıkken haber akışına bakma aralığı (canlı akış)   # son indirilen meta listesi (çevrimdışı kullanım)
+NEWS_POLL_MS = 30 * 60 * 1000          # program aÃ§Ä±kken haber akÄ±ÅŸÄ±na bakma aralÄ±ÄŸÄ± (canlÄ± akÄ±ÅŸ)   # son indirilen meta listesi (Ã§evrimdÄ±ÅŸÄ± kullanÄ±m)
 BUNDLE = Path(getattr(sys, "_MEIPASS", BASE))
-# Paketli sürümde PyInstaller görselleri _internal/art içine koyar. Geliştirme
-# ortamında ve kullanıcının kendi paketlerinde ise proje kökündeki art/ tercih
-# edilir; bu yüzden iki konumu da destekliyoruz.
+# Paketli sÃ¼rÃ¼mde PyInstaller gÃ¶rselleri _internal/art iÃ§ine koyar. GeliÅŸtirme
+# ortamÄ±nda ve kullanÄ±cÄ±nÄ±n kendi paketlerinde ise proje kÃ¶kÃ¼ndeki art/ tercih
+# edilir; bu yÃ¼zden iki konumu da destekliyoruz.
 ART_DIR = (BASE / "art") if (BASE / "art").exists() else (BUNDLE / "art")
 CFG_PATH, LOG_PATH, DEBUG_PATH, PROG_PATH = (BASE / n for n in ("builds.json", "loot_log.csv", "last_crop.png", "progress.json"))
 STASH_PATH = BASE / "stash.json"
@@ -176,7 +176,7 @@ DROPQ_PATH = BASE / "drop_queue.json"
 ACCOUNT_PATH = BASE / "account.dat"
 SESSIONS_PATH = BASE / "sessions.json"
 SCREEN_PATH = BASE / "screen_states.json"
-VERDICT_FEEDBACK_PATH = BASE / "verdict_feedback.json"  # "Bu karar yanlıştı" bildirimleri (yerel, son 300)
+VERDICT_FEEDBACK_PATH = BASE / "verdict_feedback.json"  # "Bu karar yanlÄ±ÅŸtÄ±" bildirimleri (yerel, son 300)
 VERDICT_FEEDBACK_KEEP = 300
 START_IN_TRAY = "--tray" in sys.argv
 ACC_ERRORS = {"offline", "timeout", "invalid", "used", "expired", "payment", "rate", "disabled", "forbidden", "noserver"}
@@ -188,7 +188,7 @@ def webbrowser_open(url):
 
 
 def _test_browser(url):
-    """Yalnız UI testi (TD2_ACCOUNT_TEST_BROWSER): yerel test sunucusunun sahte Discord onayını açar."""
+    """YalnÄ±z UI testi (TD2_ACCOUNT_TEST_BROWSER): yerel test sunucusunun sahte Discord onayÄ±nÄ± aÃ§ar."""
     st = urllib.parse.parse_qs(urllib.parse.urlparse(url).query).get("state", [""])[0]
     base = os.environ.get("TD2_ACCOUNT_URL", "").rstrip("/")
     if not base.startswith("http://127.0.0.1:"): return
@@ -202,8 +202,8 @@ LOG_HEADER = ["time", "item", "verdict", "best_build", "score", "slot", "rarity"
 ALL_SLOTS = ["Mask", "Backpack", "Chest", "Gloves", "Holster", "Kneepads", "Weapon", "Sidearm"]
 SLOT_WORDS = {"mask": "Mask", "backpack": "Backpack", "chest": "Chest", "vest": "Chest", "gloves": "Gloves",
               "holster": "Holster", "kneepads": "Kneepads", "kneepad": "Kneepads", "knee pads": "Kneepads",
-              # Silah tipleri: tooltip'te "Primary/Secondary" yazmaz, bu yüzden tek bir "Weapon" slotuna toplanır.
-              # Tabanca ayrı "Sidearm" sayılır çünkü oyunda kendi slotu vardır; diğer tüm silahlar "Weapon" sayılır.
+              # Silah tipleri: tooltip'te "Primary/Secondary" yazmaz, bu yÃ¼zden tek bir "Weapon" slotuna toplanÄ±r.
+              # Tabanca ayrÄ± "Sidearm" sayÄ±lÄ±r Ã§Ã¼nkÃ¼ oyunda kendi slotu vardÄ±r; diÄŸer tÃ¼m silahlar "Weapon" sayÄ±lÄ±r.
               "assault rifle": "Weapon", "submachine gun": "Weapon", "light machine gun": "Weapon",
               "marksman rifle": "Weapon", "sniper rifle": "Weapon", "shotgun": "Weapon", "rifle": "Weapon",
               "smg": "Weapon", "lmg": "Weapon", "pistol": "Sidearm"}
@@ -224,12 +224,12 @@ DEFAULTS = {"scan_mode": "hotkey", "auto_interval_ms": 700, "auto_record": True,
             "meta_hidden": [], "tasks_sync": True, "auto_reset_times": True,
             "wiki_sync": True, "wiki_last_try": 0, "only_game_active": True, "scan_source": "screen"}
 AUTO_STABLE, AUTO_CHANGE, DEDUP_SECONDS, UPGRADE_MARGIN = 4, 8, 30, 3
-LOW_CONF_WARN = 0.68   # canlı çeviri: bu eşiğin altındaki OCR güveni "şüpheli çeviri" uyarısı verir
+LOW_CONF_WARN = 0.68   # canlÄ± Ã§eviri: bu eÅŸiÄŸin altÄ±ndaki OCR gÃ¼veni "ÅŸÃ¼pheli Ã§eviri" uyarÄ±sÄ± verir
 
 if not CFG_PATH.exists() and (BUNDLE / "builds.json").exists():
     shutil.copy(BUNDLE / "builds.json", CFG_PATH)
-if (BUNDLE / "lang").is_dir() and BUNDLE != BASE:      # .exe: dilleri çıkar; güncellemede paketteki yeni sürümle yenile
-    (BASE / "lang").mkdir(exist_ok=True)              # (kullanıcının eklediği yeni dil dosyalarına dokunulmaz)
+if (BUNDLE / "lang").is_dir() and BUNDLE != BASE:      # .exe: dilleri Ã§Ä±kar; gÃ¼ncellemede paketteki yeni sÃ¼rÃ¼mle yenile
+    (BASE / "lang").mkdir(exist_ok=True)              # (kullanÄ±cÄ±nÄ±n eklediÄŸi yeni dil dosyalarÄ±na dokunulmaz)
     for _src in (BUNDLE / "lang").glob("*.json"):
         _dst = BASE / "lang" / _src.name
         try:
@@ -238,11 +238,11 @@ if (BUNDLE / "lang").is_dir() and BUNDLE != BASE:      # .exe: dilleri çıkar; 
         except OSError:
             pass
 
-# ───────────── Günlük kayıt / application log ─────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ GÃ¼nlÃ¼k kayÄ±t / application log â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 log = logging.getLogger("td2")
 
 def setup_logging(level="INFO", max_kb=1024, backups=3):
-    """Dönen dosyalı günlük kayıt. Aynı anda konsola da yazar."""
+    """DÃ¶nen dosyalÄ± gÃ¼nlÃ¼k kayÄ±t. AynÄ± anda konsola da yazar."""
     try:
         APPLOG_DIR.mkdir(exist_ok=True)
     except Exception:
@@ -264,18 +264,18 @@ def setup_logging(level="INFO", max_kb=1024, backups=3):
     return log
 
 
-# ───────────── dosyalar ─────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ dosyalar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 OBSOLETE_SETTINGS = ("chatgpt_window_title", "chatgpt_wait_seconds", "chatgpt_region", "chatgpt_prompt", "chatgpt_hotkey")
 
 
 def load_cfg():
-    """builds.json'u okur; bozuksa yedekleyip varsayılanla başlar, eski ayarları taşır."""
+    """builds.json'u okur; bozuksa yedekleyip varsayÄ±lanla baÅŸlar, eski ayarlarÄ± taÅŸÄ±r."""
     try:
         with open(CFG_PATH, encoding="utf-8") as f:
             cfg = json.load(f)
         if not isinstance(cfg, dict) or "builds" not in cfg: raise ValueError("bad config")
     except Exception as e:
-        bakc = safeio.read_json(CFG_PATH.with_name(CFG_PATH.name + ".bak"))      # önce günlük yedek
+        bakc = safeio.read_json(CFG_PATH.with_name(CFG_PATH.name + ".bak"))      # Ã¶nce gÃ¼nlÃ¼k yedek
         if isinstance(bakc, dict) and "builds" in bakc and CFG_PATH.exists():
             logging.getLogger("td2").warning("builds.json unreadable (%s); restored from daily backup", e)
             try: shutil.copy(CFG_PATH, CFG_PATH.with_suffix(f".broken-{int(time.time())}.json"))
@@ -293,16 +293,16 @@ def load_cfg():
 
 def _cfg_defaults(cfg):
     cfg.setdefault("settings", {}); cfg.setdefault("builds", []); cfg.setdefault("attributes", {})
-    safeio.open_settings(cfg)                            # şifreli gizli ayarları aç (DPAPI)
+    safeio.open_settings(cfg)                            # ÅŸifreli gizli ayarlarÄ± aÃ§ (DPAPI)
     st = cfg["settings"]
-    if st.get("chatgpt_hotkey") and "tasks_hotkey" not in st:      # eski ChatGPT kısayolu → Claude görev getirme
+    if st.get("chatgpt_hotkey") and "tasks_hotkey" not in st:      # eski ChatGPT kÄ±sayolu â†’ Claude gÃ¶rev getirme
         st["tasks_hotkey"] = st["chatgpt_hotkey"]
     for k in OBSOLETE_SETTINGS: st.pop(k, None)
     for k, v in DEFAULTS.items():
         st.setdefault(k, v)
     if st.get("perf_mode") not in performance.MODES: st["perf_mode"] = "balanced"
-    # Eski çoklu tema sistemi kaldırıldı (tek sabit tema): eski kayıtlı tema adlarını ("kaivolt",
-    # "isac", "shd_terminal" vb.) ve onlara bağlı özel kabuk düzenini sessizce yeni varsayılana taşı.
+    # Eski Ã§oklu tema sistemi kaldÄ±rÄ±ldÄ± (tek sabit tema): eski kayÄ±tlÄ± tema adlarÄ±nÄ± ("kaivolt",
+    # "isac", "shd_terminal" vb.) ve onlara baÄŸlÄ± Ã¶zel kabuk dÃ¼zenini sessizce yeni varsayÄ±lana taÅŸÄ±.
     if st.get("ui_theme") not in ui_theme.THEME_MODES: st["ui_theme"] = DEFAULTS["ui_theme"]
     if st.get("ui_layout") != "standard": st["ui_layout"] = "standard"
     try:
@@ -315,11 +315,11 @@ def _cfg_defaults(cfg):
     return cfg
 
 def save_cfg(cfg):
-    """Atomik yazım + kilit (birden çok iş parçacığı kaydedebilir); gizli ayarlar dosyada şifreli."""
+    """Atomik yazÄ±m + kilit (birden Ã§ok iÅŸ parÃ§acÄ±ÄŸÄ± kaydedebilir); gizli ayarlar dosyada ÅŸifreli."""
     safeio.write_json(CFG_PATH, safeio.seal_settings(cfg))
 
 def check_hotkey(spec):
-    """Kısayol biçimini doğrular (pynput yoksa doğrulama atlanır, kayıt engellenmez)."""
+    """KÄ±sayol biÃ§imini doÄŸrular (pynput yoksa doÄŸrulama atlanÄ±r, kayÄ±t engellenmez)."""
     try:
         from pynput import keyboard
     except Exception:
@@ -328,22 +328,22 @@ def check_hotkey(spec):
 
 
 def load_progress():
-    d = safeio.read_json(PROG_PATH, {})                  # bozuksa günlük yedekten
+    d = safeio.read_json(PROG_PATH, {})                  # bozuksa gÃ¼nlÃ¼k yedekten
     return d if isinstance(d, dict) else {}
 
 def save_progress(p):
     safeio.write_json(PROG_PATH, p)
 
 def load_verdict_feedback():
-    """'Bu karar yanlıştı' bildirimlerinin yerel kaydı — kuralları (build attribute/weight) elle
-    iyileştirmek isteyen kullanıcı için; program bunları kendisi otomatik işlemez (bkz. ROADMAP)."""
+    """'Bu karar yanlÄ±ÅŸtÄ±' bildirimlerinin yerel kaydÄ± â€” kurallarÄ± (build attribute/weight) elle
+    iyileÅŸtirmek isteyen kullanÄ±cÄ± iÃ§in; program bunlarÄ± kendisi otomatik iÅŸlemez (bkz. ROADMAP)."""
     return safeio.read_json(VERDICT_FEEDBACK_PATH, {}).get("items", [])
 
 def save_verdict_feedback(items):
     safeio.write_json(VERDICT_FEEDBACK_PATH, {"v": 1, "items": items[-VERDICT_FEEDBACK_KEEP:]})
 
 def ensure_log():
-    """Eski 5 sütunlu geçmişi 7 sütuna çevirir."""
+    """Eski 5 sÃ¼tunlu geÃ§miÅŸi 7 sÃ¼tuna Ã§evirir."""
     if not LOG_PATH.exists():
         return
     with open(LOG_PATH, encoding="utf-8") as f:
@@ -365,13 +365,13 @@ def find_tesseract(cfg):
     for c in (cfg["settings"].get("tesseract_cmd", ""), shutil.which("tesseract") or "",
               r"C:\Program Files\Tesseract-OCR\tesseract.exe", r"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe"):
         if c and os.path.exists(c):
-            import pytesseract                       # yedek motor: yalnız kuruluysa yüklenir (açılışı yavaşlatmasın)
+            import pytesseract                       # yedek motor: yalnÄ±z kuruluysa yÃ¼klenir (aÃ§Ä±lÄ±ÅŸÄ± yavaÅŸlatmasÄ±n)
             pytesseract.pytesseract.tesseract_cmd = c
             return c
     return None
 
 
-# ───────────── OCR / ayrıştırma / skor ─────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ OCR / ayrÄ±ÅŸtÄ±rma / skor â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 RARITY_WORDS = {"exotic": "EXOTIC", "named": "NAMED", "prototype": "PROTOTYPE",
                 "high-end": "HIGH-END", "high end": "HIGH-END", "superior": "SUPERIOR", "gear set": "GEAR SET"}
 NUM = re.compile(r"(\d+(?:[.,]\d+)?)")
@@ -380,14 +380,14 @@ def norm(s):
     return gamedata.nrm(s)
 
 GAME_DATA_CACHE = BASE / "game_data_cache.json"
-LEARNED_LIB = BASE / "learned_library.json"      # kartlardan öğrenilen markalar / setler / parça adları
+LEARNED_LIB = BASE / "learned_library.json"      # kartlardan Ã¶ÄŸrenilen markalar / setler / parÃ§a adlarÄ±
 GAME = gamedata.GameData(GAME_DATA_CACHE, BASE / "meta" / "game_data.json", BUNDLE / "meta" / "game_data.json").attach_learned(LEARNED_LIB)
 
-SLOT_ICONS = {"Mask": "🎭", "Chest": "🦺", "Backpack": "🎒", "Gloves": "🧤", "Holster": "🔫", "Kneepads": "🦵",
-              "Weapon": "🔫", "Sidearm": "🔫"}
+SLOT_ICONS = {"Mask": "ğŸ­", "Chest": "ğŸ¦º", "Backpack": "ğŸ’", "Gloves": "ğŸ§¤", "Holster": "ğŸ”«", "Kneepads": "ğŸ¦µ",
+              "Weapon": "ğŸ”«", "Sidearm": "ğŸ”«"}
 
 def attr_name(k):
-    """Attribute anahtarının okunur adı (oyundaki İngilizce ad)."""
+    """Attribute anahtarÄ±nÄ±n okunur adÄ± (oyundaki Ä°ngilizce ad)."""
     if k == "weapon_type_damage": return "Weapon Type Damage"
     if GAME.ok:
         al = GAME.data.get("attributes", {}).get(k, {}).get("aliases")
@@ -395,7 +395,7 @@ def attr_name(k):
     return k.replace("_", " ").title()
 
 def elevated(parent, row, column, depth=True):
-    """Gölgeli, üzerine gelince kalkan kart (grid ile). Dönüş: iç çerçeve."""
+    """GÃ¶lgeli, Ã¼zerine gelince kalkan kart (grid ile). DÃ¶nÃ¼ÅŸ: iÃ§ Ã§erÃ§eve."""
     outer = tk.Frame(parent, bg=PAL["bg"])
     outer.grid(row=row, column=column, sticky="nsew", padx=6, pady=6)
     if depth:
@@ -427,7 +427,7 @@ _PROFILE_NOTE = {}
 
 
 def game_size(st=None):
-    """Oyunun gerçek boyutu: açık oyun penceresi, yoksa oyunun ayar dosyası (state.cfg), yoksa oyunun monitörü."""
+    """Oyunun gerÃ§ek boyutu: aÃ§Ä±k oyun penceresi, yoksa oyunun ayar dosyasÄ± (state.cfg), yoksa oyunun monitÃ¶rÃ¼."""
     g = display.game_window()
     if g: return g["width"], g["height"], "window"
     gs = getattr(display, "_last_game_settings", None)
@@ -442,8 +442,8 @@ def game_size(st=None):
 
 
 def active_profile(st):
-    """(anahtar, profil). 'auto': oyunun gerçek boyutundan (pencere / ayar dosyası) — her çözünürlükte hesaplanır.
-    Elle seçilmiş profil oyunun boyutuna uymuyorsa (başka bilgisayar, monitör değişti) otomatiğe dönülür."""
+    """(anahtar, profil). 'auto': oyunun gerÃ§ek boyutundan (pencere / ayar dosyasÄ±) â€” her Ã§Ã¶zÃ¼nÃ¼rlÃ¼kte hesaplanÄ±r.
+    Elle seÃ§ilmiÅŸ profil oyunun boyutuna uymuyorsa (baÅŸka bilgisayar, monitÃ¶r deÄŸiÅŸti) otomatiÄŸe dÃ¶nÃ¼lÃ¼r."""
     w, h, src = game_size(st)
     key = st.get("res_profile", "auto")
     if key in display.PROFILES and not st.get("res_profile_lock"):
@@ -460,9 +460,9 @@ def active_profile(st):
 
 
 def apply_ocr_settings(st):
-    """Eşik / ölçek ayarlarını OCR ön işlemine uygular (profil + kullanıcı ince ayarı)."""
+    """EÅŸik / Ã¶lÃ§ek ayarlarÄ±nÄ± OCR Ã¶n iÅŸlemine uygular (profil + kullanÄ±cÄ± ince ayarÄ±)."""
     _, prof = active_profile(st)
-    # elle ince ayar yapılmadıysa eşik profilden gelir (eski sürümlerde kayıtlı sabit 170 her bilgisayarda kalıyordu)
+    # elle ince ayar yapÄ±lmadÄ±ysa eÅŸik profilden gelir (eski sÃ¼rÃ¼mlerde kayÄ±tlÄ± sabit 170 her bilgisayarda kalÄ±yordu)
     try: gamedata.THRESHOLD = int(float(st.get("ocr_threshold"))) if st.get("ocr_tuned") else prof["threshold"]
     except (TypeError, ValueError): gamedata.THRESHOLD = prof["threshold"]
     sc = st.get("ocr_scale", "auto")
@@ -475,7 +475,7 @@ OCR = None
 
 
 def make_ocr(st):
-    """Seçili OCR motoru (otomatik: RapidOCR kuruluysa o, yoksa Tesseract)."""
+    """SeÃ§ili OCR motoru (otomatik: RapidOCR kuruluysa o, yoksa Tesseract)."""
     global OCR
     rec = ocr_backend.GAME_LANG_TO_REC.get(st.get("game_lang", "en"), "en")
     OCR = ocr_backend.Engine(st.get("ocr_engine", "auto"), rec_lang=rec, tess_lang=st.get("ocr_lang", "eng"),
@@ -484,12 +484,12 @@ def make_ocr(st):
 
 
 def ocr_scale():
-    """Kullanıcı ölçeği sabitlediyse o, yoksa motorun kendi otomatik ölçeği."""
+    """KullanÄ±cÄ± Ã¶lÃ§eÄŸi sabitlediyse o, yoksa motorun kendi otomatik Ã¶lÃ§eÄŸi."""
     return gamedata.SCALE
 
 
 def read_card(img, scale=None):
-    """Kart metni ve satır kutuları: (metin, [(satır, kutu, güven)])."""
+    """Kart metni ve satÄ±r kutularÄ±: (metin, [(satÄ±r, kutu, gÃ¼ven)])."""
     lines = OCR.lines(img, ocr_scale() if scale is None else scale)
     return "\n".join(l for l, _, _ in lines), lines
 
@@ -498,7 +498,7 @@ _MON_CACHE = {"t": 0.0, "v": None}
 
 
 def monitors(max_age=3.0):
-    """mss monitör listesi; tarama/çeviri döngüleri saniyede birkaç kez sorar — her seferinde mss açmak yerine önbellek."""
+    """mss monitÃ¶r listesi; tarama/Ã§eviri dÃ¶ngÃ¼leri saniyede birkaÃ§ kez sorar â€” her seferinde mss aÃ§mak yerine Ã¶nbellek."""
     now = time.time()
     if _MON_CACHE["v"] is None or now - _MON_CACHE["t"] > max_age:
         with mss.mss() as sct:
@@ -507,7 +507,7 @@ def monitors(max_age=3.0):
 
 
 def world_wait(idle):
-    """Oyun dünyasındayken iki otomatik okuma arası en az süre (sn): kart bulunamadıkça uzar."""
+    """Oyun dÃ¼nyasÄ±ndayken iki otomatik okuma arasÄ± en az sÃ¼re (sn): kart bulunamadÄ±kÃ§a uzar."""
     return min(30.0, 4.0 * (2 ** min(idle, 3)))
 
 
@@ -516,8 +516,8 @@ def find_card(img):
 
 
 def color_hints(card, lines, item, verdict):
-    """Simge/şerit renkleri (yalnız RapidOCR satır kutularıyla): nadirlik ipucu ve güvenlik ağı.
-    Kart rengi egzotik gösterip yazı egzotik demiyorsa asla KIR denmez (KONTROL ET)."""
+    """Simge/ÅŸerit renkleri (yalnÄ±z RapidOCR satÄ±r kutularÄ±yla): nadirlik ipucu ve gÃ¼venlik aÄŸÄ±.
+    Kart rengi egzotik gÃ¶sterip yazÄ± egzotik demiyorsa asla KIR denmez (KONTROL ET)."""
     if not lines or not any(b != (0, 0, 0, 0) for _, b, _ in lines) or not isinstance(item, dict):
         return verdict
     try:
@@ -540,7 +540,7 @@ def ocr_config(st):
 
 
 def ocr_quality(text):
-    """Kalibrasyon puanı: tanınan ad/set/attribute/talent sayısı + güven."""
+    """Kalibrasyon puanÄ±: tanÄ±nan ad/set/attribute/talent sayÄ±sÄ± + gÃ¼ven."""
     if not GAME.ok: return len(text.strip()) / 100
     r = GAME.recognize(text)
     return (r.get("confidence", 0) * 10 + len(r.get("attrs", {})) * 2 + len(r.get("talents", [])) * 1.5 +
@@ -552,8 +552,8 @@ def ocr_data(img):
 
 
 def first_pass_confident(item, lines):
-    """İlk okuma güvenilir mi? Eşya tam güvenle tanındı, kesik değil ve rakamlı satırlar net okundu → ek geçiş gereksiz.
-    (Kaydırılmış/eksik kartlarda güven düşer ve eskisi gibi çoklu okuma yapılır.)"""
+    """Ä°lk okuma gÃ¼venilir mi? EÅŸya tam gÃ¼venle tanÄ±ndÄ±, kesik deÄŸil ve rakamlÄ± satÄ±rlar net okundu â†’ ek geÃ§iÅŸ gereksiz.
+    (KaydÄ±rÄ±lmÄ±ÅŸ/eksik kartlarda gÃ¼ven dÃ¼ÅŸer ve eskisi gibi Ã§oklu okuma yapÄ±lÄ±r.)"""
     if OCR is None or OCR.name != "rapidocr" or not isinstance(item, dict): return False
     if not item.get("known") or item.get("partial") or item.get("suspect") or float(item.get("confidence") or 0) < 0.95: return False
     if not item.get("attrs"): return False
@@ -561,7 +561,7 @@ def first_pass_confident(item, lines):
     return bool(dig) and min(dig) >= 0.9
 
 def foreground_title():
-    """Öndeki pencerenin başlığı (yalnız Windows; başka sistemde boş)."""
+    """Ã–ndeki pencerenin baÅŸlÄ±ÄŸÄ± (yalnÄ±z Windows; baÅŸka sistemde boÅŸ)."""
     if os.name != "nt": return ""
     try:
         u = ctypes.windll.user32
@@ -572,13 +572,13 @@ def foreground_title():
         return ""
 
 def game_active():
-    """Sadece oyun öndeyken tara: program kendi penceresini ya da başka uygulamaları okumasın."""
+    """Sadece oyun Ã¶ndeyken tara: program kendi penceresini ya da baÅŸka uygulamalarÄ± okumasÄ±n."""
     if os.name != "nt": return True
     title = foreground_title().lower()
     return "division" in title and "loot advisor" not in title
 
 def grab(region):
-    img = capture.default().grab(region)            # kalıcı mss (her yakalamada yeniden açılmaz)
+    img = capture.default().grab(region)            # kalÄ±cÄ± mss (her yakalamada yeniden aÃ§Ä±lmaz)
     if CAPTURE_MASK:
         from PIL import ImageDraw
         dr = ImageDraw.Draw(img); L, T = region["left"], region["top"]
@@ -610,10 +610,10 @@ def detect_slot(lines):
     return None
 
 def parse_item(text, cfg):
-    """Oyun verisi varsa onunla tanır (bilinen ad/marka/set/talent + rulo kalitesi), yoksa eski yöntem."""
+    """Oyun verisi varsa onunla tanÄ±r (bilinen ad/marka/set/talent + rulo kalitesi), yoksa eski yÃ¶ntem."""
     if GAME.ok:
         item = GAME.recognize(text)
-        known = {tal for b in cfg["builds"] for tal in b["talents"]}      # build'deki özel adlar da sayılsın
+        known = {tal for b in cfg["builds"] for tal in b["talents"]}      # build'deki Ã¶zel adlar da sayÄ±lsÄ±n
         low = text.lower()
         for tal in known:
             if tal not in item["talents"] and find_talent(tal, low, [l for l in text.splitlines() if l.strip()]):
@@ -650,7 +650,7 @@ def valid_item(item):
     return itempolicy.item_valid(item)
 
 def set_matches(item, names, low):
-    """Build'in set/marka adı eşyada var mı? Önce tanınan marka/set, yoksa metinde arar."""
+    """Build'in set/marka adÄ± eÅŸyada var mÄ±? Ã–nce tanÄ±nan marka/set, yoksa metinde arar."""
     have = [gamedata.nrm(x) for x in (item.get("brand"), item.get("gear_set"), item.get("name")) if x]
     for n in names:
         nn = gamedata.nrm(n)
@@ -719,19 +719,19 @@ def build_by_name(cfg, name):
 
 
 def active_build(cfg):
-    """Aktif build (Panel, Build'ler ve Eksik Parça bunu ortak kullanır)."""
+    """Aktif build (Panel, Build'ler ve Eksik ParÃ§a bunu ortak kullanÄ±r)."""
     b = build_by_name(cfg, cfg["settings"].get("active_build", ""))
     return b or (cfg["builds"][0] if cfg["builds"] else None)
 
 
 def req_lines_short(req):
-    """Yuva şartının tek satırlık özeti: 'Striker's Battlegear · Weapon Damage · Critical Hit Chance'."""
+    """Yuva ÅŸartÄ±nÄ±n tek satÄ±rlÄ±k Ã¶zeti: 'Striker's Battlegear Â· Weapon Damage Â· Critical Hit Chance'."""
     if not req or req.get("kind") == "off": return ""
     parts = list(req.get("source") or []) + list(req.get("types") or [])
     if req.get("core"): parts.append(attr_name(req["core"]))
     parts += [attr_name(a) for a in req.get("attrs") or []]
-    if req.get("talent"): parts.append("★ " + req["talent"])
-    return " · ".join(parts) or t("plan.any")
+    if req.get("talent"): parts.append("â˜… " + req["talent"])
+    return " Â· ".join(parts) or t("plan.any")
 
 
 def plan_of(build):
@@ -743,14 +743,14 @@ def plan_of(build):
 
 
 def req_lines(req):
-    """Bir yuvanın şartlarını okunur satırlara çevirir."""
+    """Bir yuvanÄ±n ÅŸartlarÄ±nÄ± okunur satÄ±rlara Ã§evirir."""
     if not req or req.get("kind") == "off": return [t("plan.off")]
     L = []
     k = req.get("kind")
-    if k == "item": L.append("★ " + t("plan.item", item=req.get("item")))
-    elif k == "set": L.append("🧩 " + t("plan.set", s=", ".join(req.get("source", []))))
-    elif k == "weapon": L.append("🔫 " + t("plan.weapon", types=", ".join(req.get("types", [])) or "—"))
-    else: L.append("🏷 " + (t("plan.brand", s=", ".join(req["source"])) if req.get("source") else t("plan.any")))
+    if k == "item": L.append("â˜… " + t("plan.item", item=req.get("item")))
+    elif k == "set": L.append("ğŸ§© " + t("plan.set", s=", ".join(req.get("source", []))))
+    elif k == "weapon": L.append("ğŸ”« " + t("plan.weapon", types=", ".join(req.get("types", [])) or "â€”"))
+    else: L.append("ğŸ· " + (t("plan.brand", s=", ".join(req["source"])) if req.get("source") else t("plan.any")))
     if req.get("core"): L.append(t("plan.core", a=attr_name(req["core"])))
     if req.get("attrs"): L.append(t("plan.attrs", a=", ".join(attr_name(x) for x in req["attrs"])))
     if req.get("talent"): L.append(t("plan.talent", t=req["talent"]))
@@ -758,7 +758,7 @@ def req_lines(req):
 
 
 def check_lines(checks):
-    sym = {True: "✔", False: "✖", None: "?"}
+    sym = {True: "âœ”", False: "âœ–", None: "?"}
     lab = {"source": t("plan.c_source"), "type": t("plan.c_type"), "core": t("plan.c_core"), "attr": t("plan.c_attr"), "talent": t("plan.c_talent")}
     out = []
     for kind, ok, detail in checks:
@@ -777,7 +777,7 @@ def build_slots(cfg, name):
     return ALL_SLOTS
 
 def roll_diff(old_attrs, new_attrs):
-    """İki eşyanın attribute rulolarını karşılaştırır: her satır bir attribute'taki farkı gösterir."""
+    """Ä°ki eÅŸyanÄ±n attribute rulolarÄ±nÄ± karÅŸÄ±laÅŸtÄ±rÄ±r: her satÄ±r bir attribute'taki farkÄ± gÃ¶sterir."""
     old_attrs, new_attrs = old_attrs or {}, new_attrs or {}
     lines = []
     for k in sorted(set(old_attrs) | set(new_attrs)):
@@ -787,12 +787,12 @@ def roll_diff(old_attrs, new_attrs):
         elif n is None:
             lines.append(t("roll.only_old", k=k, o=f"{o:g}"))
         elif abs(n - o) >= 0.05:
-            lines.append(f"{k}: {o:g} → {n:g} ({'↑' if n > o else '↓'}{abs(n - o):.1f})")
+            lines.append(f"{k}: {o:g} â†’ {n:g} ({'â†‘' if n > o else 'â†“'}{abs(n - o):.1f})")
     return lines
 
 def apply_progress(cfg, progress, item, verdict, res):
-    """Eksik parça / yükseltme / rulo karşılaştırması — önce AKTİF build'e göre.
-    (verdict, not, aksiyon, rulo_farki) döner; not içinde yuvanın şartları (✔/✖) da yazılır."""
+    """Eksik parÃ§a / yÃ¼kseltme / rulo karÅŸÄ±laÅŸtÄ±rmasÄ± â€” Ã¶nce AKTÄ°F build'e gÃ¶re.
+    (verdict, not, aksiyon, rulo_farki) dÃ¶ner; not iÃ§inde yuvanÄ±n ÅŸartlarÄ± (âœ”/âœ–) da yazÄ±lÄ±r."""
     if not item.get("slot") or not res or item.get("kind") not in ("gear", "weapon"):
         return verdict, None, None, None
     st = cfg["settings"]
@@ -810,7 +810,7 @@ def apply_progress(cfg, progress, item, verdict, res):
     b = build_by_name(cfg, bname)
     checks = engine.check_slot(item, plan_of(b).get(slot), GAME)
     done = engine.slot_done(checks)
-    tail = ("  ·  " + "  ".join(check_lines(checks))) if checks else ""
+    tail = ("  Â·  " + "  ".join(check_lines(checks))) if checks else ""
     cur = progress.get(bname, {}).get(slot)
     act = (bname, slot, score)
     if verdict == "DISMANTLE" and bname == (act_b or {}).get("name"):
@@ -826,11 +826,11 @@ def apply_progress(cfg, progress, item, verdict, res):
     return ("CONSIDER" if verdict == "KEEP" else verdict), t("note.yours_better", build=bname, slot=slot_name(slot), pct=cur["score"]), None, diff
 
 
-# ───────────── UI sabitleri ─────────────
-# Renkler seçili temadan gelir (ui_theme.py). App açılışta PAL/COLORS/VFG'yi günceller.
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ UI sabitleri â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# Renkler seÃ§ili temadan gelir (ui_theme.py). App aÃ§Ä±lÄ±ÅŸta PAL/COLORS/VFG'yi gÃ¼nceller.
 PAL = dict(ui_theme.PALETTES["default"], mode="default")
-COLORS = dict(PAL["verdict"])      # karar kartı arka planları (beyaz yazı)
-VFG = dict(PAL["verdict_fg"])      # karar renkleri yazı olarak (tablolar, sohbet)
+COLORS = dict(PAL["verdict"])      # karar kartÄ± arka planlarÄ± (beyaz yazÄ±)
+VFG = dict(PAL["verdict_fg"])      # karar renkleri yazÄ± olarak (tablolar, sohbet)
 
 def set_palette(p):
     PAL.clear(); PAL.update(p)
@@ -838,32 +838,32 @@ def set_palette(p):
     VFG.clear(); VFG.update(p["verdict_fg"])
 
 def verdict_label(v):
-    """Karar etiketinin o anki dildeki karşılığı (SAKLA / KEEP / BEHALTEN ...)."""
+    """Karar etiketinin o anki dildeki karÅŸÄ±lÄ±ÄŸÄ± (SAKLA / KEEP / BEHALTEN ...)."""
     return t(f"verdict.{v.lower()}")
 
 def slot_name(slot):
-    """Slot adının çevirisi; bilinmeyen slot olduğu gibi döner."""
+    """Slot adÄ±nÄ±n Ã§evirisi; bilinmeyen slot olduÄŸu gibi dÃ¶ner."""
     return t(f"slot.{slot.lower()}") if slot else ""
 
 def click_through(win, *, layered=False):
     if os.name != "nt":
         return
     try:
-        # Tk Toplevel'larda winfo_id() bazı Windows sürümlerinde gerçek
-        # pencereyi, bazılarında ise ara pencereyi döndürebilir. Önceden
-        # yalnızca GetParent() sonucu biçimlendirildiği için fare izi
-        # penceresi menülerin üzerine tıklama yakalayabiliyordu.
+        # Tk Toplevel'larda winfo_id() bazÄ± Windows sÃ¼rÃ¼mlerinde gerÃ§ek
+        # pencereyi, bazÄ±larÄ±nda ise ara pencereyi dÃ¶ndÃ¼rebilir. Ã–nceden
+        # yalnÄ±zca GetParent() sonucu biÃ§imlendirildiÄŸi iÃ§in fare izi
+        # penceresi menÃ¼lerin Ã¼zerine tÄ±klama yakalayabiliyordu.
         wid = int(win.winfo_id())
         parent = int(ctypes.windll.user32.GetParent(wid) or 0)
         handles = [wid] + ([parent] if parent and parent != wid else [])
         for hwnd in handles:
             st = ctypes.windll.user32.GetWindowLongW(hwnd, -20)
-            # WS_EX_TRANSPARENT + WS_EX_NOACTIVATE fareyi oyuna geçirir.
-            # WS_EX_LAYERED click-through için gerekli değildir; Tk Canvas ve
-            # Label metnini bazı Windows/DWM + DX12 bileşimlerinde görünmez
-            # yapabiliyor (koyu panel/kutu kalıp yazı kaybolur).  Bu yüzden
-            # oyun üstü opak sonuç, asistan ve çeviri kartlarının varsayılanı
-            # güvenli non-layered yoldur.
+            # WS_EX_TRANSPARENT + WS_EX_NOACTIVATE fareyi oyuna geÃ§irir.
+            # WS_EX_LAYERED click-through iÃ§in gerekli deÄŸildir; Tk Canvas ve
+            # Label metnini bazÄ± Windows/DWM + DX12 bileÅŸimlerinde gÃ¶rÃ¼nmez
+            # yapabiliyor (koyu panel/kutu kalÄ±p yazÄ± kaybolur).  Bu yÃ¼zden
+            # oyun Ã¼stÃ¼ opak sonuÃ§, asistan ve Ã§eviri kartlarÄ±nÄ±n varsayÄ±lanÄ±
+            # gÃ¼venli non-layered yoldur.
             flags = 0x00000020 | 0x08000000
             if layered:
                 flags |= 0x00080000
@@ -871,15 +871,15 @@ def click_through(win, *, layered=False):
     except Exception:
         pass
 
-# Programın kendi pencereleri (bindirme kartı) ekran okumasına girmesin: önceki kararın yazıları
-# yeni kartın başlığını kapatıp "Iron Will Hotshot …" gibi kendi metnini okutuyordu.
-CAPTURE_MASK = {}          # pencere adı -> (x0, y0, x1, y1) ekran; yalnız Windows dışlama çalışmadıysa boyanır
+# ProgramÄ±n kendi pencereleri (bindirme kartÄ±) ekran okumasÄ±na girmesin: Ã¶nceki kararÄ±n yazÄ±larÄ±
+# yeni kartÄ±n baÅŸlÄ±ÄŸÄ±nÄ± kapatÄ±p "Iron Will Hotshot â€¦" gibi kendi metnini okutuyordu.
+CAPTURE_MASK = {}          # pencere adÄ± -> (x0, y0, x1, y1) ekran; yalnÄ±z Windows dÄ±ÅŸlama Ã§alÄ±ÅŸmadÄ±ysa boyanÄ±r
 
 def exclude_from_capture(win, key="overlay"):
-    """Windows 10 2004+: WDA_EXCLUDEFROMCAPTURE — oyuncu pencereyi görür, ekran görüntüsünde altındaki oyun görünür.
-    Desteklenmezse pencerenin yeri kaydedilir ve okunan görüntüde siyaha boyanır."""
+    """Windows 10 2004+: WDA_EXCLUDEFROMCAPTURE â€” oyuncu pencereyi gÃ¶rÃ¼r, ekran gÃ¶rÃ¼ntÃ¼sÃ¼nde altÄ±ndaki oyun gÃ¶rÃ¼nÃ¼r.
+    Desteklenmezse pencerenin yeri kaydedilir ve okunan gÃ¶rÃ¼ntÃ¼de siyaha boyanÄ±r."""
     ok = False
-    if os.name == "nt" and not os.environ.get("TD2_SHOT_OVERLAY"):        # testler: kaplama ekran görüntüsünde görünsün
+    if os.name == "nt" and not os.environ.get("TD2_SHOT_OVERLAY"):        # testler: kaplama ekran gÃ¶rÃ¼ntÃ¼sÃ¼nde gÃ¶rÃ¼nsÃ¼n
         try:
             hwnd = ctypes.windll.user32.GetParent(win.winfo_id()) or win.winfo_id()
             ok = bool(ctypes.windll.user32.SetWindowDisplayAffinity(hwnd, 0x11))
@@ -915,7 +915,7 @@ def draw_bars(cv, title, data, empty=None):
         cv.create_text(158 + full, y + row // 2 - 2, anchor="w", text=str(val), fill=PAL["fg"], font=(ui_theme.FONT_SEMI, 9))
 
 
-# ───────────── Asistan yardımcıları ─────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Asistan yardÄ±mcÄ±larÄ± â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 DEFAULTS.update({
     "ai_provider": "ollama", "ollama_url": "http://localhost:11434", "ollama_model": "gemma3:12b",
     "claude_model": "claude-haiku-5-5", "claude_api_key": "", "claude_code_model": "haiku", "openai_model": "gpt-4o-mini", "openai_api_key": "",
@@ -927,14 +927,14 @@ DEFAULTS.update(tr_toggle_hotkey="<f6>", assistant_cancel_hotkey="<f12>", assist
 def provider_label(pid):
     return t(f"provider.{pid}")
 def system_prompt():
-    """Asistan istemi; yanıt dili seçili arayüz diline göre belirlenir."""
+    """Asistan istemi; yanÄ±t dili seÃ§ili arayÃ¼z diline gÃ¶re belirlenir."""
     lang = i18n.english_name()
     return (f"You are a local item and build assistant for Tom Clancy's The Division 2. "
             f"The user writes in {lang}; always answer in {lang}. "
             f"Your answer may be read aloud: be short and clear, at most 3 sentences, "
             f"no bullet points and no markdown. "
-            f"Rely only on the CONTEXT data below. If something is not in the context — other game "
-            f"knowledge or the current meta — say you are not sure rather than inventing it. "
+            f"Rely only on the CONTEXT data below. If something is not in the context â€” other game "
+            f"knowledge or the current meta â€” say you are not sure rather than inventing it. "
             f"Base keep/dismantle advice on the scores and empty slots in the context. "
             f"Warn before dismantling Exotic, Named or Prototype items. "
             f"Do not help with reading game memory, cheats or bot software.")
@@ -1014,7 +1014,7 @@ class Speaker:
                 self.err = f"{type(e).__name__}: {e}"
 
     def _say_radio(self, text, rate, hint):
-        """Telsiz efektli konuşma: sesi dosyaya üret (SAPI) → efekt → çal. Başarısızsa False (düz konuşmaya düşer)."""
+        """Telsiz efektli konuÅŸma: sesi dosyaya Ã¼ret (SAPI) â†’ efekt â†’ Ã§al. BaÅŸarÄ±sÄ±zsa False (dÃ¼z konuÅŸmaya dÃ¼ÅŸer)."""
         try:
             import tempfile, winsound
             d = Path(tempfile.gettempdir())
@@ -1022,7 +1022,7 @@ class Speaker:
             if not voicepack.sapi_to_wav(text, raw, rate, [hint] + VOICE_HINTS.get(i18n.current_language(), [])): return False
             voicepack.radio_fx(raw, fxp)
             self.last_fx = str(fxp)
-            winsound.PlaySound(str(fxp), winsound.SND_FILENAME)      # ses aygıtı yoksa hata → düz konuşmaya düşer
+            winsound.PlaySound(str(fxp), winsound.SND_FILENAME)      # ses aygÄ±tÄ± yoksa hata â†’ dÃ¼z konuÅŸmaya dÃ¼ÅŸer
             return True
         except Exception as e:
             self.err = f"radio: {type(e).__name__}: {e}"
@@ -1068,7 +1068,7 @@ class Speaker:
 
 
 class Recorder:
-    """Mikrofon kaydı (sounddevice, 16 kHz mono)."""
+    """Mikrofon kaydÄ± (sounddevice, 16 kHz mono)."""
     def __init__(self):
         self.frames, self.stream, self.active = [], None, False
 
@@ -1147,7 +1147,7 @@ def unload_assistant_stt(idle=300):
 
 
 def windows_stt(audio, lang):
-    """Windows'ta kurulu konuşma tanıyıcı ile (çevrimdışı) metne çevirir. Ek paket gerekmez."""
+    """Windows'ta kurulu konuÅŸma tanÄ±yÄ±cÄ± ile (Ã§evrimdÄ±ÅŸÄ±) metne Ã§evirir. Ek paket gerekmez."""
     if os.name != "nt":
         raise RuntimeError(t("err.no_stt"))
     import tempfile, wave
@@ -1156,7 +1156,7 @@ def windows_stt(audio, lang):
     with wave.open(str(path), "wb") as w:
         w.setnchannels(1); w.setsampwidth(2); w.setframerate(16000)
         w.writeframes((np.clip(audio, -1, 1) * 32767).astype("<i2").tobytes())
-    wav = str(path).replace("'", "''")                    # PowerShell tek tırnak kaçışı (kullanıcı adında ' olabilir)
+    wav = str(path).replace("'", "''")                    # PowerShell tek tÄ±rnak kaÃ§Ä±ÅŸÄ± (kullanÄ±cÄ± adÄ±nda ' olabilir)
     ps = ("[Console]::OutputEncoding=[Text.Encoding]::UTF8; Add-Type -AssemblyName System.Speech; "
           "$rs=[System.Speech.Recognition.SpeechRecognitionEngine]::InstalledRecognizers(); "
           f"$p=$rs | Where-Object {{ $_.Culture.Name -like '{lang}*' }} | Select-Object -First 1; "
@@ -1179,32 +1179,32 @@ def windows_stt(audio, lang):
 
 
 POWERSHELL = str(Path(os.environ.get("SystemRoot", r"C:\Windows")) / "System32" / "WindowsPowerShell" / "v1.0" / "powershell.exe") \
-    if os.name == "nt" else "powershell"           # tam yol: PATH'teki sahte bir powershell.exe çalışmasın
+    if os.name == "nt" else "powershell"           # tam yol: PATH'teki sahte bir powershell.exe Ã§alÄ±ÅŸmasÄ±n
 
 
 def voice_diagnostics(cfg):
-    """Sesli komut bileşenlerini tek tek dener; satır listesi döner (Asistan → Ses testi)."""
+    """Sesli komut bileÅŸenlerini tek tek dener; satÄ±r listesi dÃ¶ner (Asistan â†’ Ses testi)."""
     rows = [f"Python {sys.version.split()[0]} ({sys.executable})"]
     for mod in ("pyttsx3", "sounddevice", "numpy", "faster_whisper"):
         try:
-            m = __import__(mod); rows.append(f"✔ {mod} {getattr(m, '__version__', '')}")
+            m = __import__(mod); rows.append(f"âœ” {mod} {getattr(m, '__version__', '')}")
         except Exception as e:
-            rows.append(f"✖ {mod}: {type(e).__name__}: {e}")
+            rows.append(f"âœ– {mod}: {type(e).__name__}: {e}")
     try:
         import sounddevice as sd
-        dev = sd.query_devices(kind="input"); rows.append(f"✔ mic: {dev['name']}")
+        dev = sd.query_devices(kind="input"); rows.append(f"âœ” mic: {dev['name']}")
     except Exception as e:
-        rows.append(f"✖ mic: {e}")
+        rows.append(f"âœ– mic: {e}")
     if os.name == "nt":
         try:
             r = subprocess.run([POWERSHELL, "-NoProfile", "-Command",
                                 "Add-Type -AssemblyName System.Speech; [System.Speech.Recognition.SpeechRecognitionEngine]::InstalledRecognizers() | % { $_.Culture.Name }"],
                                capture_output=True, timeout=30, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
             names = r.stdout.decode("utf-8", "replace").split()
-            rows.append(("✔ " if names else "✖ ") + "Windows speech: " + (", ".join(names) or "—"))
+            rows.append(("âœ” " if names else "âœ– ") + "Windows speech: " + (", ".join(names) or "â€”"))
         except Exception as e:
-            rows.append(f"✖ Windows speech: {e}")
-    if "faster_whisper" not in " ".join(r for r in rows if r.startswith("✔")) and sys.version_info >= (3, 14):
+            rows.append(f"âœ– Windows speech: {e}")
+    if "faster_whisper" not in " ".join(r for r in rows if r.startswith("âœ”")) and sys.version_info >= (3, 14):
         rows.append(t("ai.diag_py"))
     for r in rows: log.info("Voice diag: %s", r)
     return rows
@@ -1239,10 +1239,10 @@ def ask_openai(key, model, system, history):
     return j["choices"][0]["message"]["content"].strip()
 
 
-# ───────────── Claude Code (abonelik ile, API anahtarsız) ─────────────
-# Resmi `claude` komut satırı aracını `claude -p` ile çağırır. Giriş, kullanıcının
-# kendi Claude aboneliğiyle (Pro/Max) Claude Code içinde yapılır; bu program hiçbir
-# giriş bilgisini okumaz veya saklamaz. Kullanım aboneliğin limitinden düşer.
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Claude Code (abonelik ile, API anahtarsÄ±z) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# Resmi `claude` komut satÄ±rÄ± aracÄ±nÄ± `claude -p` ile Ã§aÄŸÄ±rÄ±r. GiriÅŸ, kullanÄ±cÄ±nÄ±n
+# kendi Claude aboneliÄŸiyle (Pro/Max) Claude Code iÃ§inde yapÄ±lÄ±r; bu program hiÃ§bir
+# giriÅŸ bilgisini okumaz veya saklamaz. KullanÄ±m aboneliÄŸin limitinden dÃ¼ÅŸer.
 # Calls the official `claude` CLI in print mode. Sign-in lives inside Claude Code;
 # this app never reads or stores credentials.
 CLAUDE_CODE_TIMEOUT = 150
@@ -1267,7 +1267,7 @@ def find_claude_cli():
     return None
 
 def _history_as_prompt(history):
-    """Sohbet geçmişini tek bir metin istemine çevirir (claude -p tek mesaj alır)."""
+    """Sohbet geÃ§miÅŸini tek bir metin istemine Ã§evirir (claude -p tek mesaj alÄ±r)."""
     if len(history) == 1:
         return history[0]["content"]
     names = {"user": "User", "assistant": "Assistant"}
@@ -1280,7 +1280,7 @@ def ask_claude_code(model, system, history, timeout=CLAUDE_CODE_TIMEOUT, tools="
     exe = find_claude_cli()
     if not exe:
         raise RuntimeError(t("ai.cc_missing"))
-    # Ayrı, boş bir çalışma klasörü: kullanıcının projelerindeki CLAUDE.md vb. yüklenmez.
+    # AyrÄ±, boÅŸ bir Ã§alÄ±ÅŸma klasÃ¶rÃ¼: kullanÄ±cÄ±nÄ±n projelerindeki CLAUDE.md vb. yÃ¼klenmez.
     work = BASE / "logs" / "claude_code"
     work.mkdir(parents=True, exist_ok=True)
     with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", suffix=".txt", prefix="prompt-", dir=work, delete=False) as f:
@@ -1288,7 +1288,7 @@ def ask_claude_code(model, system, history, timeout=CLAUDE_CODE_TIMEOUT, tools="
         sys_file = Path(f.name)
     args = [exe, "-p", "--output-format", "json",
             "--system-prompt-file", str(sys_file),
-            "--tools", tools,               # varsayılan: hiç araç yok (yalnızca cevap). Görev getirme: WebSearch,WebFetch
+            "--tools", tools,               # varsayÄ±lan: hiÃ§ araÃ§ yok (yalnÄ±zca cevap). GÃ¶rev getirme: WebSearch,WebFetch
             "--disallowedTools", "mcp__*",
             "--strict-mcp-config",
             "--no-session-persistence",
@@ -1322,33 +1322,33 @@ def ask_claude_code(model, system, history, timeout=CLAUDE_CODE_TIMEOUT, tools="
     return result
 
 
-# ───────────── Görev takibi / project tracking ─────────────
-# Kategoriler diskte SABİT İNGİLİZCE KİMLİKLE saklanır, ekranda t() ile çevrilir;
-# böylece dil değişince kayıtlı görevler yerinde kalır.
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ GÃ¶rev takibi / project tracking â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# Kategoriler diskte SABÄ°T Ä°NGÄ°LÄ°ZCE KÄ°MLÄ°KLE saklanÄ±r, ekranda t() ile Ã§evrilir;
+# bÃ¶ylece dil deÄŸiÅŸince kayÄ±tlÄ± gÃ¶revler yerinde kalÄ±r.
 # Category IDs are stored on disk and never translated.
 TASK_PATH = BASE / "tasks.json"
-# Oyundaki menülere göre: Projeler (günlük/haftalık/yerleşim/sezonluk), Yolculuk (sezon sekmesi), Manhunt.
+# Oyundaki menÃ¼lere gÃ¶re: Projeler (gÃ¼nlÃ¼k/haftalÄ±k/yerleÅŸim/sezonluk), Yolculuk (sezon sekmesi), Manhunt.
 TASK_CATS = ["projects", "journey", "manhunt"]
 PROJECT_KINDS = ["daily", "weekly", "settlement", "seasonal"]
-AUTO_RESET_KINDS = {"daily", "weekly"}  # sıfırlama sınırı geçince o türdeki projeler temizlenir
-# Eski sürümlerin kategorileri (v4 Türkçe adlar, v5.0 daily/weekly/global_event/other) taşınır.
-LEGACY_CATS = {"Günlük": "daily", "Haftalık": "weekly", "Journey": "journey",
-               "Global Event": "global_event", "Manhunt": "manhunt", "Diğer": "other"}
+AUTO_RESET_KINDS = {"daily", "weekly"}  # sÄ±fÄ±rlama sÄ±nÄ±rÄ± geÃ§ince o tÃ¼rdeki projeler temizlenir
+# Eski sÃ¼rÃ¼mlerin kategorileri (v4 TÃ¼rkÃ§e adlar, v5.0 daily/weekly/global_event/other) taÅŸÄ±nÄ±r.
+LEGACY_CATS = {"GÃ¼nlÃ¼k": "daily", "HaftalÄ±k": "weekly", "Journey": "journey",
+               "Global Event": "global_event", "Manhunt": "manhunt", "DiÄŸer": "other"}
 
 def split_cat(c):
-    """Eski/ham kategori → (kategori, proje türü)."""
+    """Eski/ham kategori â†’ (kategori, proje tÃ¼rÃ¼)."""
     c = LEGACY_CATS.get(c, c)
     if c in PROJECT_KINDS: return "projects", c
     if c in ("journey", "manhunt", "projects"): return c, ""
-    return "projects", ""          # global_event / other / bilinmeyen → Projeler (türsüz)
+    return "projects", ""          # global_event / other / bilinmeyen â†’ Projeler (tÃ¼rsÃ¼z)
 
 ADD_CHOICES = [("projects", k) for k in PROJECT_KINDS] + [("journey", ""), ("manhunt", "")]
 
 def add_choice_name(cat, kind):
-    return f"{cat_name(cat)} – {cat_name(kind)}" if kind else cat_name(cat)
+    return f"{cat_name(cat)} â€“ {cat_name(kind)}" if kind else cat_name(cat)
 
 def cat_name(cid):
-    """Kategori kimliğinin o anki dildeki görünen adı."""
+    """Kategori kimliÄŸinin o anki dildeki gÃ¶rÃ¼nen adÄ±."""
     return t(f"cat.{cid}")
 
 def weekday_names():
@@ -1359,7 +1359,7 @@ def load_tasks():
     if not isinstance(d, dict): d = {}
     items = d.get("items") or {}
     d["items"] = {c: [] for c in TASK_CATS}
-    for key, val in items.items():                   # eski kategorileri yeni yapıya taşı
+    for key, val in items.items():                   # eski kategorileri yeni yapÄ±ya taÅŸÄ±
         cat, kind = split_cat(key)
         for it in val or []:
             if kind and not it.get("kind"): it["kind"] = kind
@@ -1397,8 +1397,8 @@ def fmt_remaining(target, now):
     return (t("time.days", n=d) + " " if d else "") + t("time.hm", h=f"{h:02d}", m=f"{m:02d}")
 
 def builtin_task_translate(text):
-    """Sözlükle kaba çeviri. Seçili dilin __task_dict__ girdisi yoksa metni olduğu
-    gibi döndürür — uydurma çeviri yapmaktansa orijinali göstermek daha dürüst."""
+    """SÃ¶zlÃ¼kle kaba Ã§eviri. SeÃ§ili dilin __task_dict__ girdisi yoksa metni olduÄŸu
+    gibi dÃ¶ndÃ¼rÃ¼r â€” uydurma Ã§eviri yapmaktansa orijinali gÃ¶stermek daha dÃ¼rÃ¼st."""
     pairs = i18n.task_dictionary()
     if not pairs:
         return text
@@ -1408,7 +1408,7 @@ def builtin_task_translate(text):
     return out
 
 def task_text(task, lang=None):
-    """Görevin yalnızca seçili dildeki metni: (metin, çevrili mi)."""
+    """GÃ¶revin yalnÄ±zca seÃ§ili dildeki metni: (metin, Ã§evrili mi)."""
     lang = lang or i18n.current_language()
     tx = task.get("texts") or {}
     if tx.get(lang): return tx[lang].replace("**", "").strip(), True
@@ -1418,22 +1418,22 @@ def task_text(task, lang=None):
 
 
 def split_title(text):
-    """'Red Horizon Yolculuğu – Görev 3: 10 düşmanı yak' → ('Görev 3', '10 düşmanı yak')."""
+    """'Red Horizon YolculuÄŸu â€“ GÃ¶rev 3: 10 dÃ¼ÅŸmanÄ± yak' â†’ ('GÃ¶rev 3', '10 dÃ¼ÅŸmanÄ± yak')."""
     text = (text or "").strip()
     m = re.match(r"^(.{3,70}?):\s+(.+)$", text)
     if not m: return "", text
     group, rest = m.group(1).strip(), m.group(2).strip()
-    if " – " in group: group = group.split(" – ")[-1].strip()
+    if " â€“ " in group: group = group.split(" â€“ ")[-1].strip()
     elif " - " in group: group = group.split(" - ")[-1].strip()
     return group, rest[:1].upper() + rest[1:]
 
 
 def task_group(task, cat):
-    """Grup anahtarı ve arayüz dilinde grup adı (İngilizce metinden; çeviriler farklı olsa da aynı grup)."""
+    """Grup anahtarÄ± ve arayÃ¼z dilinde grup adÄ± (Ä°ngilizce metinden; Ã§eviriler farklÄ± olsa da aynÄ± grup)."""
     en = task.get("en") or (task.get("texts") or {}).get("en", "")
     g_en, _ = split_title(en)
     low = g_en.lower()
-    m = re.search(r"(?:mission|görev|scout|sector)\s*(\d+)", low)
+    m = re.search(r"(?:mission|gÃ¶rev|scout|sector)\s*(\d+)", low)
     if "classified" in low:
         return "classified", t("grp.classified")
     if "scout" in low and m:
@@ -1445,11 +1445,11 @@ def task_group(task, cat):
 
 
 def task_dedupe_key(task):
-    """Aynı görevin farklı kaynaklardan gelen kopyaları (ör. ortak liste + wiki) için anahtar."""
+    """AynÄ± gÃ¶revin farklÄ± kaynaklardan gelen kopyalarÄ± (Ã¶r. ortak liste + wiki) iÃ§in anahtar."""
     en = task.get("en") or (task.get("texts") or {}).get("en", "")
     g, rest = split_title(en)
-    head = re.split(r"\s+[–-]\s+|\s*\(", rest)[0]
-    return gamedata.nrm(g.split(" – ")[-1] + "|" + head)[:60]
+    head = re.split(r"\s+[â€“-]\s+|\s*\(", rest)[0]
+    return gamedata.nrm(g.split(" â€“ ")[-1] + "|" + head)[:60]
 
 
 TASK_KEYWORDS = ["Control Point", "Public Execution", "Stronghold", "Bounty", "Dark Zone", "Countdown", "Summit", "Descent",
@@ -1460,7 +1460,7 @@ TASK_KEYWORDS = ["Control Point", "Public Execution", "Stronghold", "Bounty", "D
 
 
 def task_image_query(task):
-    """Görsel için (wiki sayfası, arama terimi)."""
+    """GÃ¶rsel iÃ§in (wiki sayfasÄ±, arama terimi)."""
     title = None
     url = task.get("url") or ""
     if "/wiki/" in url:
@@ -1474,7 +1474,7 @@ TASK_IMG_DIR = BASE / "cache" / "task_images"
 
 
 def load_task_images(task, n=3):
-    """Wiki'den görevle ilgili görseller (diskte önbellekli). [(PIL.Image, başlık)]."""
+    """Wiki'den gÃ¶revle ilgili gÃ¶rseller (diskte Ã¶nbellekli). [(PIL.Image, baÅŸlÄ±k)]."""
     import hashlib
     title, search = task_image_query(task)
     key = hashlib.sha1(f"{title}|{search}".encode("utf-8")).hexdigest()[:16]
@@ -1511,7 +1511,7 @@ def claude_tasks_prompt():
 
 
 def parse_claude_tasks(raw):
-    """Claude'un JSON yanıtını görev kayıtlarına çevirir: {kategori: [görev]}."""
+    """Claude'un JSON yanÄ±tÄ±nÄ± gÃ¶rev kayÄ±tlarÄ±na Ã§evirir: {kategori: [gÃ¶rev]}."""
     m = re.search(r"\{.*\}", raw or "", re.S)
     if not m: return {}, ""
     data = json.loads(m.group(0))
@@ -1536,16 +1536,16 @@ def parse_claude_tasks(raw):
 
 
 def task_system_prompt():
-    """Çeviri istemi, seçili dile göre kurulur."""
+    """Ã‡eviri istemi, seÃ§ili dile gÃ¶re kurulur."""
     lang = i18n.english_name()
     return (f"You translate The Division 2 project/mission texts from English into {lang}. "
             f"Write natural, short wording that players of the game would recognise. "
-            f"Reply with the {lang} translation only — no explanation, no quotes, no extra comment. "
+            f"Reply with the {lang} translation only â€” no explanation, no quotes, no extra comment. "
             f"Use the game's own {lang} terminology for things like Control Point, Stronghold, "
             f"Supply Drop, Dark Zone, Bounty, Seasonal Journey and Global Event where it exists.")
 
 def translate_task_text(app, text):
-    """AI varsa onunla, yoksa/başarısızsa sözlükle çevirir. (çeviri, kaynak) döner."""
+    """AI varsa onunla, yoksa/baÅŸarÄ±sÄ±zsa sÃ¶zlÃ¼kle Ã§evirir. (Ã§eviri, kaynak) dÃ¶ner."""
     st = app.cfg["settings"]
     prov = st.get("ai_provider", "builtin")
     prompt, msg = task_system_prompt(), [{"role": "user", "content": text}]
@@ -1565,7 +1565,7 @@ def translate_task_text(app, text):
     return builtin_task_translate(text), t("src.dict")
 
 
-# ───────────── Uygulama ─────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ Uygulama â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class App:
     def __init__(self):
         startup = time.perf_counter()
@@ -1595,7 +1595,7 @@ class App:
         self._diag_events = diagnostics_center.EventBuffer()
         log.addHandler(self._diag_events)
         log.info("=== %s v%s starting ===", APP_NAME, APP_VERSION)
-        # Dil: ayarlardaki seçim, yoksa işletim sisteminin dili, o da yoksa İngilizce.
+        # Dil: ayarlardaki seÃ§im, yoksa iÅŸletim sisteminin dili, o da yoksa Ä°ngilizce.
         i18n.init(BASE)
         chosen = stg.get("language") or i18n.detect_language()
         active = i18n.set_language(chosen)
@@ -1611,7 +1611,7 @@ class App:
         self._acc_apply()
         log.info("Tier: %s (key=%s, account=%s)", self.ent.tier, self.ent.reason, self.ent.ent_reason)
         self.sessions = service.SessionLog(SESSIONS_PATH)
-        self._last_session = None  # "Bu oturumda ne kazandın?" — son tamamlanan oturum (tepsi menüsünden tekrar açılabilir)
+        self._last_session = None  # "Bu oturumda ne kazandÄ±n?" â€” son tamamlanan oturum (tepsi menÃ¼sÃ¼nden tekrar aÃ§Ä±labilir)
         self.screen = screenstate.Detector(SCREEN_PATH)
         self.game_state, self.game_on, self._auto_started = "unknown", False, False
         self.notifier, self.presence, self.api, self.tray, self.watcher = notify.Notifier(), None, None, None, None
@@ -1622,11 +1622,11 @@ class App:
         self.dropq = dropstats.Queue(DROPQ_PATH)
         if not stg.get("drop_client"):
             stg["drop_client"] = dropstats.new_client_id(); save_cfg(self.cfg)
-        if not stg.get("task_client"):                    # topluluk görevleri için ayrı, rastgele kimlik
+        if not stg.get("task_client"):                    # topluluk gÃ¶revleri iÃ§in ayrÄ±, rastgele kimlik
             stg["task_client"] = dropstats.new_client_id(); save_cfg(self.cfg)
         self.task_mem = tasks_live.Memory(); self.task_feed = None; self.task_sub = None
         self.last_text, self.drops_busy = "", False
-        if not self.stash.data.get("imported_progress"):          # eski sürümün kayıtları bir kez aktarılır
+        if not self.stash.data.get("imported_progress"):          # eski sÃ¼rÃ¼mÃ¼n kayÄ±tlarÄ± bir kez aktarÄ±lÄ±r
             try:
                 n = self.stash.import_progress(self.progress, GAME) if GAME.ok else 0
                 self.stash.data["imported_progress"] = True; self.stash.save()
@@ -1670,13 +1670,13 @@ class App:
         self.root.bind("<Destroy>", lambda e: e.widget is self.root and self.service_stop(), add="+")
         self.meta_busy = False
         self.poll(); self.check_resets()
-        self.root.after(2500, self.meta_sync_start)     # açılışı bekletmeden, günde bir
+        self.root.after(2500, self.meta_sync_start)     # aÃ§Ä±lÄ±ÅŸÄ± bekletmeden, gÃ¼nde bir
         self.root.after(6000, lambda: self.vendor_refresh(auto=True))
         self.root.after(4000, self.ask_drop_consent)
         self.root.after(3000, self.check_new_pc)
-        self.root.after(6000, lambda: self.update_center(reason="startup"))   # her açılışta: program + kütüphane + oyun
+        self.root.after(6000, lambda: self.update_center(reason="startup"))   # her aÃ§Ä±lÄ±ÅŸta: program + kÃ¼tÃ¼phane + oyun
         self.root.after(20000, self._drops_tick)
-        log.info("UI ready — language=%s, OCR=%s, tesseract=%s", i18n.current_language(), OCR.name, self.tess or "NOT FOUND")
+        log.info("UI ready â€” language=%s, OCR=%s, tesseract=%s", i18n.current_language(), OCR.name, self.tess or "NOT FOUND")
         if not self.gpu_apply_cached(): OCR.warm_up()
         self.root.after(8000, lambda: threading.Thread(target=self.gpu_check, daemon=True).start())
         self.root.after(1500, self.account_startup)
@@ -1698,7 +1698,7 @@ class App:
         return getattr(self, "_perf_policy", None) or performance.get_policy(self.cfg["settings"])
 
     def _ensure_diagnostic_event_handler(self):
-        """Log yapılandırması yenilense bile canlı tanılama akışını korur."""
+        """Log yapÄ±landÄ±rmasÄ± yenilense bile canlÄ± tanÄ±lama akÄ±ÅŸÄ±nÄ± korur."""
         handler = getattr(self, "_diag_events", None)
         if handler and handler not in log.handlers:
             log.addHandler(handler)
@@ -1746,7 +1746,7 @@ class App:
         sty = self.lt_style()
         w.configure(bg=sty["bg"])
         width = min(440, max(240, area["width"] - 40))
-        tk.Label(w, text="◆ " + t("ga.title"), bg=sty["bg"], fg=sty["accent"],
+        tk.Label(w, text="â—† " + t("ga.title"), bg=sty["bg"], fg=sty["accent"],
                  font=(ui_theme.FONT_SEMI, 10), anchor="w").pack(fill="x", padx=12, pady=(8, 2))
         tk.Label(w, text=text[:1400], bg=sty["bg"], fg=sty["fg"], wraplength=width - 24,
                  justify="left", font=(ui_theme.FONT, 11)).pack(padx=12, pady=(0, 8))
@@ -1799,7 +1799,7 @@ class App:
         self._perf_policy = performance.get_policy(st)
         save_cfg(self.cfg)
         self.refresh_header()
-        if getattr(self, "perf_btn", None): self.perf_btn.config(text="⚖ " + t("perf." + st["perf_mode"]))
+        if getattr(self, "perf_btn", None): self.perf_btn.config(text="âš– " + t("perf." + st["perf_mode"]))
         self.toast(t("perf.changed", mode=t("perf." + st["perf_mode"])))
 
     def show_performance(self):
@@ -1842,9 +1842,9 @@ class App:
         save_cfg(self.cfg)
         if getattr(self, "lt_privacy_lbl", None): self.lt_privacy_lbl.config(text=self._translation_privacy())
 
-    # ---------- Canlı oyun çevirisi (İngilizce → Türkçe) ----------
+    # ---------- CanlÄ± oyun Ã§evirisi (Ä°ngilizce â†’ TÃ¼rkÃ§e) ----------
     def ai_complete(self, system, user):
-        """Asistan sekmesinde seçili büyük dil modeliyle tek seferlik tamamlama (arka plan iş parçacığında çağrılır)."""
+        """Asistan sekmesinde seÃ§ili bÃ¼yÃ¼k dil modeliyle tek seferlik tamamlama (arka plan iÅŸ parÃ§acÄ±ÄŸÄ±nda Ã§aÄŸrÄ±lÄ±r)."""
         st = self.cfg["settings"]; prov = st.get("ai_provider", "builtin")
         hist = [{"role": "user", "content": user}]
         if prov == "ollama": return ask_ollama(st["ollama_url"], st["ollama_model"], system, hist)
@@ -1861,9 +1861,9 @@ class App:
 
     def lt_model_dir(self):
         bundled = BASE / "models" / "en-tr"
-        # Kaynaktan çalışırken proje içindeki model klasörü korunur. Kurulu
-        # EXE ise çoğunlukla Program Files altındadır ve model indirirken
-        # yazma izni olmayabilir; kullanıcı verisini LOCALAPPDATA'ya al.
+        # Kaynaktan Ã§alÄ±ÅŸÄ±rken proje iÃ§indeki model klasÃ¶rÃ¼ korunur. Kurulu
+        # EXE ise Ã§oÄŸunlukla Program Files altÄ±ndadÄ±r ve model indirirken
+        # yazma izni olmayabilir; kullanÄ±cÄ± verisini LOCALAPPDATA'ya al.
         if not FROZEN:
             return bundled
         if bundled.exists():
@@ -1893,8 +1893,8 @@ class App:
         st = self.cfg["settings"]
         if not getattr(self, "lt_cache", None): self.lt_cache = livetranslate.Cache(BASE / "translate_cache.json", size=1500)
         if st.get("tr_engine", "local") == "ai":
-            # AI motoru herhangi bir desteklenen dile çevirebilir: hedef, uygulamanın
-            # seçili arayüz dili (bkz. livetranslate.LANGUAGE_NAMES).
+            # AI motoru herhangi bir desteklenen dile Ã§evirebilir: hedef, uygulamanÄ±n
+            # seÃ§ili arayÃ¼z dili (bkz. livetranslate.LANGUAGE_NAMES).
             lang = i18n.current_language()
             eng = livetranslate.AIMT(self.ai_complete, target_lang=lang)
         else:
@@ -1902,12 +1902,12 @@ class App:
             if not getattr(self, "_lt_local", None): self._lt_local = livetranslate.LocalMT(self.lt_model_dir())
             if not self._lt_local.installed(): raise RuntimeError(t("lt.need_model"))
             eng = self._lt_local
-            lang = "tr"   # yerel model tek dil çifti (EN→TR); arayüz dilinden bağımsız
+            lang = "tr"   # yerel model tek dil Ã§ifti (ENâ†’TR); arayÃ¼z dilinden baÄŸÄ±msÄ±z
         tr = livetranslate.Translator(eng, self.lt_glossary(), self.lt_cache, target_lang=lang)
         if st.get("task_live", True): tr.set_memory(getattr(self, "task_mem", None))
         return tr
 
-    # ---------- Topluluk görevleri (canlı çeviriyle toplanan / dağıtılan görevler)
+    # ---------- Topluluk gÃ¶revleri (canlÄ± Ã§eviriyle toplanan / daÄŸÄ±tÄ±lan gÃ¶revler)
     def task_server(self):
         st = self.cfg["settings"]
         return os.environ.get("TD2_TASKS_URL") or st.get("drop_server") or dropstats.DEFAULT_URL
@@ -1915,7 +1915,7 @@ class App:
     TASKS_RAW_URL = "https://raw.githubusercontent.com/FEDERALTURK/td2-loot-advisor/main/meta/tasks_live.json"
 
     def _task_live_poll(self):
-        """Açılışta ve 30 dakikada bir: oyunculardan toplanan güncel görev listesi."""
+        """AÃ§Ä±lÄ±ÅŸta ve 30 dakikada bir: oyunculardan toplanan gÃ¼ncel gÃ¶rev listesi."""
         st = self.cfg["settings"]
         if st.get("task_live", True):
             first = not getattr(self, "_task_live_started", False); self._task_live_started = True
@@ -1961,7 +1961,7 @@ class App:
         threading.Thread(target=work, daemon=True).start()
 
     def task_ask_share(self):
-        """Görev paylaşımı izni: canlı çeviri ilk açıldığında bir kez sorulur."""
+        """GÃ¶rev paylaÅŸÄ±mÄ± izni: canlÄ± Ã§eviri ilk aÃ§Ä±ldÄ±ÄŸÄ±nda bir kez sorulur."""
         st = self.cfg["settings"]
         if st.get("task_share") is not None: return
         st["task_share"] = bool(messagebox.askyesno(t("tl.ask_title"), t("tl.ask")))
@@ -1970,7 +1970,7 @@ class App:
         self._task_ui()
 
     def _task_seen(self, lines, translator):
-        """Canlı çeviri ekranında görev paneli varsa ayıkla ve (izin verildiyse) topluluğa gönder. Arka plandan çağrılır."""
+        """CanlÄ± Ã§eviri ekranÄ±nda gÃ¶rev paneli varsa ayÄ±kla ve (izin verildiyse) topluluÄŸa gÃ¶nder. Arka plandan Ã§aÄŸrÄ±lÄ±r."""
         st = self.cfg["settings"]
         try:
             task = tasks_live.extract(lines, self._news_resets())
@@ -2000,9 +2000,9 @@ class App:
         parts = [t("tl.status", n=n, m=len(self.task_mem))] if self.task_feed else [t("tl.status_none")]
         if shared: parts.append(t("tl.shared", title=shared))
         elif st.get("task_share") is False: parts.append(t("tl.share_off"))
-        lbl.config(text="  ·  ".join(parts))
+        lbl.config(text="  Â·  ".join(parts))
 
-    # ---------- Canlı çeviri OCR'ı: RapidOCR ya da Windows OCR (bilgisayara hafif olan)
+    # ---------- CanlÄ± Ã§eviri OCR'Ä±: RapidOCR ya da Windows OCR (bilgisayara hafif olan)
     def _winocr(self):
         if getattr(self, "_wocr", None) is None: self._wocr = winocr.WinOCR()
         return self._wocr
@@ -2020,8 +2020,8 @@ class App:
         return w.segments(img) if pick == "windows" else rapid()
 
     def _lt_ocr_bench(self, img, w):
-        """İki OCR'ı aynı görüntüde ölç: Windows OCR, RapidOCR kadar okuyorsa ve daha hızlıysa (ya da ekran kartı oyunda
-        meşgulken işlemcide çalıştığı için) onu seç."""
+        """Ä°ki OCR'Ä± aynÄ± gÃ¶rÃ¼ntÃ¼de Ã¶lÃ§: Windows OCR, RapidOCR kadar okuyorsa ve daha hÄ±zlÄ±ysa (ya da ekran kartÄ± oyunda
+        meÅŸgulken iÅŸlemcide Ã§alÄ±ÅŸtÄ±ÄŸÄ± iÃ§in) onu seÃ§."""
         st = self.cfg["settings"]
         t0 = time.perf_counter(); r = OCR.segments(img) if hasattr(OCR, "segments") else OCR.lines(img); tr_ = time.perf_counter() - t0
         try:
@@ -2058,7 +2058,7 @@ class App:
     def _lt_pad_stop(self):
         if getattr(self, "lt_pad", None): self.lt_pad.stop(); self.lt_pad = None
 
-    # ---------- Konuşma çevirisi (W11 Canlı Altyazı / W10 Whisper)
+    # ---------- KonuÅŸma Ã§evirisi (W11 CanlÄ± AltyazÄ± / W10 Whisper)
     def sp_model_dir(self):
         return BASE / "models" / "whisper-base.en"
 
@@ -2107,7 +2107,7 @@ class App:
         if state == "error": self.root.after(0, lambda: self._sp_status(t("sp.error", e=detail), "danger"))
 
     def _sp_text(self, en, generation=None):
-        """Kaynaktan gelen İngilizce cümle → Türkçe → altyazı kutusu (arka plan iş parçacığından)."""
+        """Kaynaktan gelen Ä°ngilizce cÃ¼mle â†’ TÃ¼rkÃ§e â†’ altyazÄ± kutusu (arka plan iÅŸ parÃ§acÄ±ÄŸÄ±ndan)."""
         if not en or livetranslate.PRIVATE.search(en) or getattr(self, "_closing", False): return
         generation = getattr(self, "_speech_generation", 0) if generation is None else generation
         if generation != getattr(self, "_speech_generation", 0): return
@@ -2123,7 +2123,7 @@ class App:
                 area = {"left": int(g["left"] + g["width"] * 0.12), "top": int(g["top"] + g["height"] * 0.70),
                         "width": int(g["width"] * 0.76), "height": int(g["height"] * 0.24)}
                 if generation == getattr(self, "_speech_generation", 0):
-                    self._post_translation(token, lambda: self._lt_show([("🎧 " + en, tr, (0, 0, 0, 0))], area, ms, force_mode="subtitle"))
+                    self._post_translation(token, lambda: self._lt_show([("ğŸ§ " + en, tr, (0, 0, 0, 0))], area, ms, force_mode="subtitle"))
             except Exception as e:
                 log.info("Speech translate failed: %s", e)
         self._translation_jobs.submit(run)
@@ -2136,7 +2136,7 @@ class App:
         b = getattr(self, "sp_btn", None)
         if not b or not b.winfo_exists(): return
         on = bool(getattr(self, "sp", None))
-        b.config(text=("■ " + t("sp.stop")) if on else ("▶ " + t("sp.start")), style="Danger.TButton" if on else "Accent.TButton")
+        b.config(text=("â–  " + t("sp.stop")) if on else ("â–¶ " + t("sp.start")), style="Danger.TButton" if on else "Accent.TButton")
         src = self.sp_source()
         need = src == "whisper" and not speech.whisper_installed(self.sp_model_dir())
         if need: self.sp_dl.pack(side="left", padx=6)
@@ -2176,7 +2176,7 @@ class App:
                 self._lt_status(t("lt.model_missing"), "warning")
                 try: self.select_page("translate")
                 except Exception: pass
-                # Model indirme kullanıcı onaylıdır; program kendiliğinden ağdan indirme yapmaz.
+                # Model indirme kullanÄ±cÄ± onaylÄ±dÄ±r; program kendiliÄŸinden aÄŸdan indirme yapmaz.
                 messagebox.showwarning(APP_NAME, t("lt.need_model") + "\n\n" + t("lt.download"), parent=self.root)
             elif not quiet:
                 messagebox.showwarning(APP_NAME, str(e), parent=self.root)
@@ -2189,7 +2189,7 @@ class App:
             threading.Thread(target=self._lt_loop, args=(self.lt_stop_ev,), daemon=True, name="live-translate").start()
         log.info("Live translation on (engine=%s, mode=%s)", st.get("tr_engine"), st.get("tr_mode"))
         area = self.lt_area()
-        if area:                                            # program penceresi okunan alanı kapatıyorsa küçült
+        if area:                                            # program penceresi okunan alanÄ± kapatÄ±yorsa kÃ¼Ã§Ã¼lt
             try:
                 self.root.update_idletasks()
                 x, y = self.root.winfo_rootx(), self.root.winfo_rooty()
@@ -2200,7 +2200,7 @@ class App:
                 pass
         self._lt_pad_start()
         self._lt_status(t("lt.running", key=st.get("tr_hotkey", "<f7>").upper().strip("<>")), "success")
-        try:                                                 # özel tam ekranda kaplama görünmez: kullanıcıya söyle
+        try:                                                 # Ã¶zel tam ekranda kaplama gÃ¶rÃ¼nmez: kullanÄ±cÄ±ya sÃ¶yle
             # Do not reuse a stale HDR/window-mode value after the user
             # changes the game settings while the advisor is open.
             gs = display.read_game_settings() or getattr(display, "_last_game_settings", None) or {}
@@ -2232,7 +2232,7 @@ class App:
         if active:
             self._paused_translation = (bool(getattr(self, "lt_stop_ev", None)), bool(getattr(self, "sp", None)))
             self.lt_stop()
-            # Live çeviri durdurma, konuşma çevirisi nesnesi yoksa da tamamlanır.
+            # Live Ã§eviri durdurma, konuÅŸma Ã§evirisi nesnesi yoksa da tamamlanÄ±r.
             if getattr(self, "sp", None) is not None: self.speech_stop(quiet=False)
             if not self._microphone_busy(): self.speaker.stop()
             self._lt_hide()
@@ -2245,7 +2245,7 @@ class App:
             self.toast(t("ga.translation_resumed" if restored else "ga.translation_unavailable"))
 
     def _lt_loop(self, stop):
-        if stop.wait(1.6): return                            # program penceresi küçülürken okuma yapma
+        if stop.wait(1.6): return                            # program penceresi kÃ¼Ã§Ã¼lÃ¼rken okuma yapma
         g = capture.Grabber(); g.keep()
         prev = last = None; stable = 0
         revision = getattr(self, "_lt_revision", 0)
@@ -2277,7 +2277,7 @@ class App:
             g.release()
 
     def lt_once(self):
-        """Kısayol / düğme: alanı hemen bir kez oku ve çevir."""
+        """KÄ±sayol / dÃ¼ÄŸme: alanÄ± hemen bir kez oku ve Ã§evir."""
         try:
             self.lt_translator()
         except Exception as e:
@@ -2289,7 +2289,7 @@ class App:
             return False
         area = self.lt_area()
         if not area: return False
-        try:                                                # kendi penceremizi okumayalım
+        try:                                                # kendi penceremizi okumayalÄ±m
             x, y = self.root.winfo_rootx(), self.root.winfo_rooty()
             if self.root.state() == "normal" and self.rects_overlap((x, y, x + self.root.winfo_width(), y + self.root.winfo_height()),
                                       (area["left"], area["top"], area["left"] + area["width"], area["top"] + area["height"])):
@@ -2333,7 +2333,7 @@ class App:
             return self._translation_jobs.submit(lambda tok: self._lt_run(img, area, force, tok))
         try:
             if not self._translation_jobs.is_current(token): return
-            # OCR motoru eşya okumasıyla eşzamanlı çalıştırılmaz; model çevirisi F8 kilidini tutmaz.
+            # OCR motoru eÅŸya okumasÄ±yla eÅŸzamanlÄ± Ã§alÄ±ÅŸtÄ±rÄ±lmaz; model Ã§evirisi F8 kilidini tutmaz.
             with getattr(self, "lock", nullcontext()):
                 if not self._translation_jobs.is_current(token): return
                 with self.timings.measure("translate_ocr"):
@@ -2365,10 +2365,10 @@ class App:
                 raise RuntimeError(t("lt.validation_failed"))
             if skipped:
                 log.info("Live translation: displayed %d blocks, rejected %d unsafe blocks", len(pairs), skipped)
-            # Bulanık/karanlık ekranda OCR bazı harfleri yanlış okuyup modele gramer açısından
-            # tutarlı ama anlamca hatalı bir çeviri ürettirebilir — kullanıcı bunu fark edemez.
-            # OCR'ın kendi güven skoru düşükse (blocks_from_lines zaten <0.5'i eliyor; burada
-            # "şüpheli ama elenmemiş" aralığı yakalanır) durum satırında ayrıca uyarılır.
+            # BulanÄ±k/karanlÄ±k ekranda OCR bazÄ± harfleri yanlÄ±ÅŸ okuyup modele gramer aÃ§Ä±sÄ±ndan
+            # tutarlÄ± ama anlamca hatalÄ± bir Ã§eviri Ã¼rettirebilir â€” kullanÄ±cÄ± bunu fark edemez.
+            # OCR'Ä±n kendi gÃ¼ven skoru dÃ¼ÅŸÃ¼kse (blocks_from_lines zaten <0.5'i eliyor; burada
+            # "ÅŸÃ¼pheli ama elenmemiÅŸ" aralÄ±ÄŸÄ± yakalanÄ±r) durum satÄ±rÄ±nda ayrÄ±ca uyarÄ±lÄ±r.
             low_conf = any(len(b) > 2 and b[2] < LOW_CONF_WARN for b, tr in zip(blocks, out) if isinstance(tr, str) and tr.strip())
             if low_conf:
                 log.info("Live translation: low OCR confidence in at least one block (<%.2f)", LOW_CONF_WARN)
@@ -2386,8 +2386,8 @@ class App:
             self._lt_failure(token, e)
 
     def _lt_log(self, pairs, ms):
-        """Çevirileri logs/live_translate.log dosyasına yazar (oyun üstü kutu ekran görüntüsüne girmediği için
-        sonradan kontrol edebilmek amacıyla). Dosya 256 KB'ı geçince .1 olarak saklanır."""
+        """Ã‡evirileri logs/live_translate.log dosyasÄ±na yazar (oyun Ã¼stÃ¼ kutu ekran gÃ¶rÃ¼ntÃ¼sÃ¼ne girmediÄŸi iÃ§in
+        sonradan kontrol edebilmek amacÄ±yla). Dosya 256 KB'Ä± geÃ§ince .1 olarak saklanÄ±r."""
         if not self.cfg["settings"].get("tr_log", False): return
         try:
             APPLOG_DIR.mkdir(parents=True, exist_ok=True)
@@ -2433,7 +2433,7 @@ class App:
             y = max(0, area["top"] - w.winfo_reqheight() - 10)
         else:
             tk.Frame(w, height=3, bg=sty["accent"]).pack(fill="x")
-            tk.Label(w, text="◆ " + t("lt.overlay_title").upper(), bg=sty["bg"], fg=sty["accent"], font=(sty["font_semi"], 9), anchor="w").pack(fill="x", padx=12, pady=(6, 0))
+            tk.Label(w, text="â—† " + t("lt.overlay_title").upper(), bg=sty["bg"], fg=sty["accent"], font=(sty["font_semi"], 9), anchor="w").pack(fill="x", padx=12, pady=(6, 0))
             for en, tr, _ in pairs[:8]:
                 tk.Label(w, text=tr, bg=sty["bg"], fg=sty["fg"], font=(sty["font"], max(9, size - 3)), wraplength=420, justify="left",
                          anchor="w").pack(fill="x", padx=12, pady=(4, 0))
@@ -2447,7 +2447,7 @@ class App:
         self._lt_job = self.root.after(int(float(st.get("tr_hide", 10)) * 1000), self._lt_hide)
 
     def lt_style(self):
-        """Çeviri kutularının görünümü: seçili tema paketinden (oyun panel renklerine yakın)."""
+        """Ã‡eviri kutularÄ±nÄ±n gÃ¶rÃ¼nÃ¼mÃ¼: seÃ§ili tema paketinden (oyun panel renklerine yakÄ±n)."""
         st = self.cfg["settings"]
         return {"bg": PAL.get("ov_bg", "#0d0f12"), "fg": PAL.get("ov_fg", "#ffffff"), "accent": PAL.get("accent", "#ff6d10"),
                 "border": PAL.get("ov_border", "#2c313d"), "alpha": max(0.6, min(1.0, float(st.get("tr_alpha", 0.9)) + 0.06)),
@@ -2455,15 +2455,15 @@ class App:
                 "outline": bool(st.get("tr_outline", False))}
 
     def _lt_show_inplace(self, pairs, area):
-        """Yerinde çeviri: her blok kendi yerinde, opak fonla (overlay.py)."""
+        """Yerinde Ã§eviri: her blok kendi yerinde, opak fonla (overlay.py)."""
         st = self.cfg["settings"]
-        sty = dict(self.lt_style(), alpha=1.0)              # yerinde: fon tamamen opak, alttaki İngilizce görünmez
+        sty = dict(self.lt_style(), alpha=1.0)              # yerinde: fon tamamen opak, alttaki Ä°ngilizce gÃ¶rÃ¼nmez
         ip = self._lt_inplace = overlay.InPlace(self.root, sty, on_window=self._lt_overlay_window)
         blocks = [(tr, b, en, max(1, en.count("\n") + 1)) for en, tr, b in pairs]
         items = overlay.layout(blocks, area, ip.measure_at)
         log.info("In-place overlay layout: blocks=%d items=%d", len(blocks), len(items))
         if not items:
-            # OCR kutuları oyun alanı dışında kaldıysa boş siyah pencere bırakma.
+            # OCR kutularÄ± oyun alanÄ± dÄ±ÅŸÄ±nda kaldÄ±ysa boÅŸ siyah pencere bÄ±rakma.
             ip.hide()
             self._lt_inplace = None
             return self._lt_panel_fallback(pairs)
@@ -2487,13 +2487,13 @@ class App:
 
     def _lt_overlay_window(self, w):
         # Opak native kutular click-through olur, fakat layered olmaz: bu
-        # Windows/DX12 yolunda koyu kutu kalıp Canvas metni kaybolabiliyor.
+        # Windows/DX12 yolunda koyu kutu kalÄ±p Canvas metni kaybolabiliyor.
         click_through(w)
         exclude_from_capture(w, "translate")
         w.bind("<Destroy>", lambda e, w=w: CAPTURE_MASK.pop("translate", None) if e.widget is w else None)
 
     def _lt_after(self, pairs, ms):
-        """Çeviri sonrası: terimler, telefon / ikinci ekran, sesli okuma."""
+        """Ã‡eviri sonrasÄ±: terimler, telefon / ikinci ekran, sesli okuma."""
         now = int(time.time())
         items = []
         for en, tr, _ in pairs:
@@ -2503,7 +2503,7 @@ class App:
         self.lt_terms = dict(list(getattr(self, "lt_terms", {}).items())[-200:]) | {it["en"]: it["terms"] for it in items}
         rec = getattr(self, "tr_recent", [])
         recent_en = {x["en"] for x in rec[-6:]}
-        fresh = [it for it in items if it["en"] not in recent_en]          # aynı yazı art arda okunursa bir kez
+        fresh = [it for it in items if it["en"] not in recent_en]          # aynÄ± yazÄ± art arda okunursa bir kez
         self.tr_recent = (rec + fresh)[-20:]
         items = fresh
         if not items: return self._lt_speak(pairs)
@@ -2541,7 +2541,7 @@ class App:
         return self._terms
 
     def _housekeep(self):
-        """5 dakikada bir: kullanılmayan büyük modelleri bellekten çıkar (düşük RAM'li bilgisayarlar için)."""
+        """5 dakikada bir: kullanÄ±lmayan bÃ¼yÃ¼k modelleri bellekten Ã§Ä±kar (dÃ¼ÅŸÃ¼k RAM'li bilgisayarlar iÃ§in)."""
         try:
             m = getattr(self, "_lt_local", None)
             idle = 180 if self._policy().mode == "game" else 300
@@ -2553,7 +2553,7 @@ class App:
         if not getattr(self, "_closing", False): self.root.after(60000, self._housekeep)
 
     def tr_theme_vars(self):
-        """Telefon sayfasının renkleri: seçili tema paketi."""
+        """Telefon sayfasÄ±nÄ±n renkleri: seÃ§ili tema paketi."""
         return {"bg": PAL.get("bg"), "sf": PAL.get("surface"), "sf2": PAL.get("surface2"), "fg": PAL.get("fg"),
                 "mu": PAL.get("muted"), "ac": PAL.get("accent")}
 
@@ -2561,7 +2561,7 @@ class App:
         return {"translate": {"recent": getattr(self, "tr_recent", [])[-8:], "theme": self.tr_theme_vars()}, "version": APP_VERSION}
 
     def tr_screen_apply(self, quiet=True):
-        """Telefon / ikinci ekran sunucusu (yerel ağ). Yalnız yazı gönderir; ücretsiz."""
+        """Telefon / ikinci ekran sunucusu (yerel aÄŸ). YalnÄ±z yazÄ± gÃ¶nderir; Ã¼cretsiz."""
         st = self.cfg["settings"]
         if getattr(self, "tr_api", None): self.tr_api.stop(); self.tr_api = None
         if not st.get("tr_screen"): return None
@@ -2605,15 +2605,15 @@ class App:
         f = ui_theme.scrollable(self.tabs["translate"], PAL["bg"])
         st = self.cfg["settings"]
         hero = tk.Frame(f, bg=PAL["surface"]); hero.pack(fill="x", padx=10, pady=(10, 6))
-        tk.Label(hero, text="🌐 " + t("lt.title"), bg=PAL["surface"], fg=PAL["fg"], font=(ui_theme.FONT_SEMI, 15), anchor="w").pack(fill="x", padx=14, pady=(10, 0))
+        tk.Label(hero, text="ğŸŒ " + t("lt.title"), bg=PAL["surface"], fg=PAL["fg"], font=(ui_theme.FONT_SEMI, 15), anchor="w").pack(fill="x", padx=14, pady=(10, 0))
         tk.Label(hero, text=t("lt.intro"), bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 10), justify="left", anchor="w",
                  wraplength=900).pack(fill="x", padx=14, pady=(2, 8))
         row = tk.Frame(hero, bg=PAL["surface"]); row.pack(fill="x", padx=14, pady=(0, 12))
         self.lt_btn = ttk.Button(row, text="", command=self.lt_toggle, style="Accent.TButton"); self.lt_btn.pack(side="left")
-        ttk.Button(row, text="⚡ " + t("lt.now"), command=lambda: (self._lt_status(t("lt.now_hint")), self.root.after(3000, self.lt_once))).pack(side="left", padx=6)
+        ttk.Button(row, text="âš¡ " + t("lt.now"), command=lambda: (self._lt_status(t("lt.now_hint")), self.root.after(3000, self.lt_once))).pack(side="left", padx=6)
         self.lt_stat = tk.Label(row, text="", bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 10)); self.lt_stat.pack(side="left", padx=10)
         # motor
-        eb = ttk.LabelFrame(f, text="🧠 " + t("lt.engine")); eb.pack(fill="x", padx=10, pady=6)
+        eb = ttk.LabelFrame(f, text="ğŸ§  " + t("lt.engine")); eb.pack(fill="x", padx=10, pady=6)
         self.lt_eng = tk.StringVar(value=st.get("tr_engine", "local"))
         def eng_set():
             choice = self.lt_eng.get()
@@ -2626,12 +2626,12 @@ class App:
         r1 = ttk.Frame(eb); r1.pack(fill="x", padx=8, pady=(6, 2))
         ttk.Radiobutton(r1, text=t("lt.e_local"), value="local", variable=self.lt_eng, command=eng_set).pack(side="left")
         self.lt_model_lbl = ttk.Label(r1, text="", foreground=PAL["muted"]); self.lt_model_lbl.pack(side="left", padx=10)
-        self.lt_dl_btn = ttk.Button(r1, text="⬇ " + t("lt.download"), command=self.lt_download); self.lt_dl_btn.pack(side="left")
+        self.lt_dl_btn = ttk.Button(r1, text="â¬‡ " + t("lt.download"), command=self.lt_download); self.lt_dl_btn.pack(side="left")
         self.lt_pb = ttk.Progressbar(r1, length=180, mode="determinate"); self.lt_pb.pack(side="left", padx=8)
         ttk.Label(eb, text=t("lt.e_local_hint"), foreground=PAL["muted"], wraplength=880, justify="left").pack(anchor="w", padx=28)
         cur_lang = i18n.current_language()
-        if cur_lang != "tr":          # yerel model tek dil çifti (EN→TR); başka arayüz dilinde bunu açıkça belirt
-            ttk.Label(eb, text="⚠ " + t("lt.e_local_tr_only"), foreground=PAL["warning"], wraplength=880,
+        if cur_lang != "tr":          # yerel model tek dil Ã§ifti (ENâ†’TR); baÅŸka arayÃ¼z dilinde bunu aÃ§Ä±kÃ§a belirt
+            ttk.Label(eb, text="âš  " + t("lt.e_local_tr_only"), foreground=PAL["warning"], wraplength=880,
                       justify="left").pack(anchor="w", padx=28, pady=(0, 4))
         r2 = ttk.Frame(eb); r2.pack(fill="x", padx=8, pady=(8, 2))
         ttk.Radiobutton(r2, text=t("lt.e_ai"), value="ai", variable=self.lt_eng, command=eng_set).pack(side="left")
@@ -2639,11 +2639,11 @@ class App:
         ttk.Label(r2, text=t("lt.ai_now", p=provider_label(prov if prov in PROVIDER_KEYS else "builtin")), foreground=PAL["muted"]).pack(side="left", padx=10)
         ttk.Label(eb, text=t("lt.e_ai_hint"), foreground=PAL["muted"], wraplength=880, justify="left").pack(anchor="w", padx=28, pady=(0, 2))
         ttk.Label(eb, text=t("lt.ai_quality_hint"), foreground=PAL["muted"], wraplength=880, justify="left").pack(anchor="w", padx=28, pady=(0, 2))
-        ttk.Label(eb, text="🎯 " + t("lt.target", lang=i18n.language_name(cur_lang)), foreground=PAL["info"]).pack(anchor="w", padx=28, pady=(0, 8))
+        ttk.Label(eb, text="ğŸ¯ " + t("lt.target", lang=i18n.language_name(cur_lang)), foreground=PAL["info"]).pack(anchor="w", padx=28, pady=(0, 8))
         self.lt_privacy_lbl = ttk.Label(eb, text=self._translation_privacy(), foreground=PAL["info"], wraplength=880, justify="left")
         self.lt_privacy_lbl.pack(anchor="w", padx=12, pady=(0, 8))
         # alan
-        mb = ttk.LabelFrame(f, text="🎯 " + t("lt.mode")); mb.pack(fill="x", padx=10, pady=6)
+        mb = ttk.LabelFrame(f, text="ğŸ¯ " + t("lt.mode")); mb.pack(fill="x", padx=10, pady=6)
         self.lt_mode = tk.StringVar(value=st.get("tr_mode", "subtitle"))
         def mode_set():
             self._invalidate_translation()
@@ -2653,9 +2653,9 @@ class App:
             rr = ttk.Frame(mb); rr.pack(fill="x", padx=8, pady=1)
             ttk.Radiobutton(rr, text=t("lt.m_" + k), value=k, variable=self.lt_mode, command=mode_set).pack(side="left")
             ttk.Label(rr, text=t("lt.m_" + k + "_hint"), foreground=PAL["muted"]).pack(side="left", padx=8)
-            if k == "region": ttk.Button(rr, text="⛶ " + t("lt.pick"), command=self.lt_pick_region).pack(side="right")
-        # seçenekler
-        ob = ttk.LabelFrame(f, text="⚙ " + t("lt.options")); ob.pack(fill="x", padx=10, pady=6)
+            if k == "region": ttk.Button(rr, text="â›¶ " + t("lt.pick"), command=self.lt_pick_region).pack(side="right")
+        # seÃ§enekler
+        ob = ttk.LabelFrame(f, text="âš™ " + t("lt.options")); ob.pack(fill="x", padx=10, pady=6)
         self.lt_auto = tk.BooleanVar(value=bool(st.get("tr_auto", True)))
         ttk.Checkbutton(ob, text=t("lt.auto"), variable=self.lt_auto,
                         command=lambda: (st.__setitem__("tr_auto", bool(self.lt_auto.get())), save_cfg(self.cfg))).pack(anchor="w", padx=8, pady=(6, 2))
@@ -2679,7 +2679,7 @@ class App:
         cb1.bind("<<ComboboxSelected>>", lambda e: (st.__setitem__("tr_ocr", next(k for k in ocr_keys if t("ocr2." + k) == self.lt_ocr_var.get())),
                                                      st.__setitem__("tr_ocr_pick", ""), save_cfg(self.cfg), self._lt_ocr_ui()))
         self.lt_ocr_lbl = ttk.Label(g2, text="", foreground=PAL["muted"]); self.lt_ocr_lbl.pack(side="left", padx=(0, 16))
-        ttk.Label(g2, text="🎮 " + t("pad.label")).pack(side="left")
+        ttk.Label(g2, text="ğŸ® " + t("pad.label")).pack(side="left")
         self.lt_pad_var = tk.StringVar(value=t("pad." + st.get("tr_pad", "back+rb")))
         cb2 = ttk.Combobox(g2, textvariable=self.lt_pad_var, state="readonly", width=16, values=[t("pad." + k) for k in gamepad.COMBOS])
         cb2.pack(side="left", padx=4)
@@ -2697,8 +2697,8 @@ class App:
         ttk.Checkbutton(fam, text=t("lt.outline"), variable=self.lt_outline,
                         command=lambda: (st.__setitem__("tr_outline", bool(self.lt_outline.get())), save_cfg(self.cfg))).pack(side="left", padx=12)
         self._lt_ocr_ui()
-        # topluluk görevleri
-        cb = ttk.LabelFrame(f, text="👥 " + t("tl.box")); cb.pack(fill="x", padx=10, pady=6)
+        # topluluk gÃ¶revleri
+        cb = ttk.LabelFrame(f, text="ğŸ‘¥ " + t("tl.box")); cb.pack(fill="x", padx=10, pady=6)
         self.task_share_var = tk.BooleanVar(value=bool(st.get("task_share")))
         self.task_live_var = tk.BooleanVar(value=bool(st.get("task_live", True)))
         def tl_set():
@@ -2712,7 +2712,7 @@ class App:
         self.task_stat = ttk.Label(cb, text="", foreground=PAL["muted"]); self.task_stat.pack(anchor="w", padx=8, pady=(4, 8))
         self._task_ui()
         # telefon / ikinci ekran + sesli okuma
-        pb = ttk.LabelFrame(f, text="📱 " + t("ts.box")); pb.pack(fill="x", padx=10, pady=6)
+        pb = ttk.LabelFrame(f, text="ğŸ“± " + t("ts.box")); pb.pack(fill="x", padx=10, pady=6)
         prow = ttk.Frame(pb); prow.pack(fill="x", padx=8, pady=(6, 2))
         pleft = ttk.Frame(prow); pleft.pack(side="left", fill="x", expand=True)
         self.ts_var = tk.BooleanVar(value=bool(st.get("tr_screen")))
@@ -2724,11 +2724,11 @@ class App:
         self.ts_url = ttk.Label(pleft, text="", foreground=PAL["info"], cursor="hand2"); self.ts_url.pack(anchor="w", padx=20, pady=(4, 0))
         self.ts_url.bind("<Button-1>", lambda e: self.tr_api and webbrowser_open(self.tr_api.url("/tr")))
         br = ttk.Frame(pleft); br.pack(anchor="w", padx=20, pady=4)
-        ttk.Button(br, text="🖥 " + t("ts.open"), command=lambda: self.tr_api and webbrowser_open(self.tr_api.url("/tr"))).pack(side="left")
-        ttk.Button(br, text="📋 " + t("ts.copy"), command=lambda: self.tr_api and (self.root.clipboard_clear(), self.root.clipboard_append(self.tr_api.url("/tr")))).pack(side="left", padx=6)
+        ttk.Button(br, text="ğŸ–¥ " + t("ts.open"), command=lambda: self.tr_api and webbrowser_open(self.tr_api.url("/tr"))).pack(side="left")
+        ttk.Button(br, text="ğŸ“‹ " + t("ts.copy"), command=lambda: self.tr_api and (self.root.clipboard_clear(), self.root.clipboard_append(self.tr_api.url("/tr")))).pack(side="left", padx=6)
         self.ts_qr = ttk.Label(prow); self.ts_qr.pack(side="right", padx=8)
         sr = ttk.Frame(pb); sr.pack(fill="x", padx=8, pady=(4, 8))
-        ttk.Label(sr, text="🔊 " + t("ts.speak")).pack(side="left")
+        ttk.Label(sr, text="ğŸ”Š " + t("ts.speak")).pack(side="left")
         self.ts_speak = tk.StringVar(value=t("ts.sp_" + st.get("tr_speak", "off")))
         sp = ttk.Combobox(sr, textvariable=self.ts_speak, state="readonly", width=26, values=[t("ts.sp_" + k) for k in ("off", "subtitle", "all")])
         sp.pack(side="left", padx=8)
@@ -2740,34 +2740,34 @@ class App:
         ttk.Label(pb, text=t("vp.online_route"), foreground=PAL["muted"], wraplength=880,
                   justify="left").pack(anchor="w", padx=28, pady=(0, 8))
         self._ts_ui()
-        # konuşma çevirisi
-        kb = ttk.LabelFrame(f, text="🎧 " + t("sp.box")); kb.pack(fill="x", padx=10, pady=6)
+        # konuÅŸma Ã§evirisi
+        kb = ttk.LabelFrame(f, text="ğŸ§ " + t("sp.box")); kb.pack(fill="x", padx=10, pady=6)
         kr = ttk.Frame(kb); kr.pack(fill="x", padx=8, pady=(6, 2))
         self.sp_btn = ttk.Button(kr, text="", command=lambda: self.speech_stop(quiet=False) if getattr(self, "sp", None) else self.speech_start())
         self.sp_btn.pack(side="left")
-        self.sp_dl = ttk.Button(kr, text="⬇ " + t("sp.download", mb=speech.WHISPER_MB), command=self.sp_download)
+        self.sp_dl = ttk.Button(kr, text="â¬‡ " + t("sp.download", mb=speech.WHISPER_MB), command=self.sp_download)
         self.sp_src_lbl = ttk.Label(kr, text="", foreground=PAL["muted"]); self.sp_src_lbl.pack(side="left", padx=10)
         self.sp_stat = tk.Label(kb, text="", bg=PAL["bg"], fg=PAL["muted"], anchor="w"); self.sp_stat.pack(fill="x", padx=10)
         ttk.Label(kb, text=t("sp.hint"), foreground=PAL["muted"], wraplength=880, justify="left").pack(anchor="w", padx=10, pady=(2, 8))
         self._sp_ui()
         # dene
-        tb = ttk.LabelFrame(f, text="✍ " + t("lt.try")); tb.pack(fill="x", padx=10, pady=6)
+        tb = ttk.LabelFrame(f, text="âœ " + t("lt.try")); tb.pack(fill="x", padx=10, pady=6)
         self.lt_in = tk.Text(tb, height=3, wrap="word", bg=PAL["entry"], fg=PAL["fg"], insertbackground=PAL["fg"], relief="flat",
                              font=(ui_theme.FONT, 10), padx=8, pady=6)
         self.lt_in.pack(fill="x", padx=8, pady=(6, 4))
         self.lt_in.insert("1.0", "Agent, the Black Tusk have taken control of the Capitol Building. Head to the White House and talk to Manny.")
         rr = ttk.Frame(tb); rr.pack(fill="x", padx=8)
-        ttk.Button(rr, text="➜ " + t("lt.translate"), command=self.lt_try, style="Accent.TButton").pack(side="left")
+        ttk.Button(rr, text="âœ " + t("lt.translate"), command=self.lt_try, style="Accent.TButton").pack(side="left")
         self.lt_out = tk.Label(tb, text="", bg=PAL["bg"], fg=PAL["fg"], font=(ui_theme.FONT, 11), justify="left", anchor="w", wraplength=880)
         self.lt_out.pack(fill="x", padx=8, pady=(6, 8))
-        # geçmiş
-        hb = ttk.LabelFrame(f, text="🕘 " + t("lt.history")); hb.pack(fill="both", expand=True, padx=10, pady=6)
+        # geÃ§miÅŸ
+        hb = ttk.LabelFrame(f, text="ğŸ•˜ " + t("lt.history")); hb.pack(fill="both", expand=True, padx=10, pady=6)
         hbar = ttk.Frame(hb); hbar.pack(fill="x", padx=6, pady=(6, 0))
         self.lt_q = tk.StringVar()
-        ttk.Label(hbar, text="🔎").pack(side="left")
+        ttk.Label(hbar, text="ğŸ”").pack(side="left")
         qe = ttk.Entry(hbar, textvariable=self.lt_q, width=30); qe.pack(side="left", padx=4)
         self.lt_q.trace_add("write", lambda *a: self._lt_hist_fill())
-        ttk.Button(hbar, text="⬇ CSV", command=self.lt_export).pack(side="right")
+        ttk.Button(hbar, text="â¬‡ CSV", command=self.lt_export).pack(side="right")
         self.lt_hist_txt = tk.Text(hb, height=12, wrap="word", bg=PAL["surface"], fg=PAL["fg"], relief="flat", font=(ui_theme.FONT, 10), padx=10, pady=8)
         self.lt_hist_txt.tag_configure("en", foreground=PAL["muted"]); self.lt_hist_txt.tag_configure("tr", font=(ui_theme.FONT_SEMI, 10))
         self.lt_hist_txt.pack(fill="both", expand=True, padx=6, pady=6)
@@ -2793,7 +2793,7 @@ class App:
     def _lt_ui(self):
         if not getattr(self, "lt_btn", None) or not self.lt_btn.winfo_exists(): return
         on = bool(getattr(self, "lt_stop_ev", None) or getattr(self, "lt_keys", None))
-        self.lt_btn.config(text=("⏹ " + t("lt.stop")) if on else ("▶ " + t("lt.start")))
+        self.lt_btn.config(text=("â¹ " + t("lt.stop")) if on else ("â–¶ " + t("lt.start")))
         inst = livetranslate.LocalMT(self.lt_model_dir()).installed()
         rt = livetranslate.LocalMT.available()
         self.lt_model_lbl.config(text=t("lt.model_ok") if inst and rt else t("lt.no_runtime") if not rt else t("lt.model_missing"),
@@ -2814,12 +2814,12 @@ class App:
                 T.tag_configure(tag, foreground=PAL["accent"], underline=True)
                 T.tag_bind(tag, "<Button-1>", lambda e, tm=term: self._term_popup(tm))
                 T.tag_bind(tag, "<Enter>", lambda e: T.config(cursor="hand2")); T.tag_bind(tag, "<Leave>", lambda e: T.config(cursor=""))
-                T.insert("end", ("📖 " if k == 0 else "   ") + term["name"], tag)
+                T.insert("end", ("ğŸ“– " if k == 0 else "   ") + term["name"], tag)
             line = (tr, en)
             ftag = f"fix{i}"
             T.tag_configure(ftag, foreground=PAL["muted"], underline=True)
             T.tag_bind(ftag, "<Button-1>", lambda e, ln=line: self.lt_suggest(ln[1], ln[0]))
-            T.insert("end", ("   " if terms_of.get(en) else "") + "✍ " + t("sg.link"), ftag)
+            T.insert("end", ("   " if terms_of.get(en) else "") + "âœ " + t("sg.link"), ftag)
             T.insert("end", "\n\n")
         if not getattr(self, "lt_hist", None): T.insert("end", t("lt.hist_empty"), "en")
         T.config(state="disabled")
@@ -2830,12 +2830,12 @@ class App:
         p = filedialog.asksaveasfilename(defaultextension=".csv", initialfile="ceviri_gecmisi.csv", filetypes=[("CSV", "*.csv")])
         if not p: return
         with open(p, "w", encoding="utf-8-sig", newline="") as fh:
-            w = csv.writer(fh); w.writerow(["English", "Türkçe"])
+            w = csv.writer(fh); w.writerow(["English", "TÃ¼rkÃ§e"])
             for en, tr in hist: w.writerow([en, tr])
         self.toast(t("lt.exported", n=len(hist)))
 
     def lt_suggest(self, en, tr):
-        """Topluluk düzeltme önerisi: oyuncu daha iyi bir Türkçe yazar → sunucu → yönetici onayı → herkesin çeviri hafızası."""
+        """Topluluk dÃ¼zeltme Ã¶nerisi: oyuncu daha iyi bir TÃ¼rkÃ§e yazar â†’ sunucu â†’ yÃ¶netici onayÄ± â†’ herkesin Ã§eviri hafÄ±zasÄ±."""
         st = self.cfg["settings"]
         w = tk.Toplevel(self.root); w.title(t("sg.title")); w.configure(bg=PAL["surface"]); w.transient(self.root)
         tk.Frame(w, height=3, bg=PAL["accent"]).pack(fill="x")
@@ -2856,20 +2856,20 @@ class App:
                                             ok_ and w.after(1500, w.destroy)))
             threading.Thread(target=go, daemon=True).start()
         bar = ttk.Frame(w); bar.pack(fill="x", padx=12, pady=12)
-        ttk.Button(bar, text="✉ " + t("sg.send"), style="Accent.TButton", command=send).pack(side="right")
-        ttk.Button(bar, text=t("btn.cancel") if t("btn.cancel") != "btn.cancel" else "✖", command=w.destroy).pack(side="right", padx=6)
+        ttk.Button(bar, text="âœ‰ " + t("sg.send"), style="Accent.TButton", command=send).pack(side="right")
+        ttk.Button(bar, text=t("btn.cancel") if t("btn.cancel") != "btn.cancel" else "âœ–", command=w.destroy).pack(side="right", padx=6)
 
     def _term_popup(self, term):
         w = tk.Toplevel(self.root); w.title(term["name"]); w.configure(bg=PAL["surface"]); w.transient(self.root)
         tk.Frame(w, height=3, bg=PAL["accent"]).pack(fill="x")
-        tk.Label(w, text=(term.get("label") + " · " if term.get("label") else "") + term["name"], bg=PAL["surface"], fg=PAL["accent"],
+        tk.Label(w, text=(term.get("label") + " Â· " if term.get("label") else "") + term["name"], bg=PAL["surface"], fg=PAL["accent"],
                  font=(ui_theme.FONT_SEMI, 12)).pack(anchor="w", padx=16, pady=(12, 4))
-        tk.Label(w, text=term.get("text") or "—", bg=PAL["surface"], fg=PAL["fg"], wraplength=440, justify="left",
+        tk.Label(w, text=term.get("text") or "â€”", bg=PAL["surface"], fg=PAL["fg"], wraplength=440, justify="left",
                  font=(ui_theme.FONT, 10)).pack(anchor="w", padx=16, pady=(0, 10))
         bar = ttk.Frame(w); bar.pack(fill="x", padx=12, pady=(0, 12))
         if term.get("cat") != "term":
-            ttk.Button(bar, text="📚 " + t("ts.in_enc"), command=lambda: (w.destroy(), self._open_enc(term["name"]))).pack(side="left")
-        ttk.Button(bar, text="✖", command=w.destroy).pack(side="right")
+            ttk.Button(bar, text="ğŸ“š " + t("ts.in_enc"), command=lambda: (w.destroy(), self._open_enc(term["name"]))).pack(side="left")
+        ttk.Button(bar, text="âœ–", command=w.destroy).pack(side="right")
 
     def _open_enc(self, name):
         try:
@@ -2939,7 +2939,7 @@ class App:
         cv.bind("<ButtonPress-1>", down); cv.bind("<B1-Motion>", move); cv.bind("<ButtonRelease-1>", up)
         w.bind("<Escape>", lambda e: w.destroy())
 
-    # ---------- Bilgi: ansiklopedi, meta build vitrini, haberler ve sezon, bilgi yarışması ----------
+    # ---------- Bilgi: ansiklopedi, meta build vitrini, haberler ve sezon, bilgi yarÄ±ÅŸmasÄ± ----------
     CAT_COLORS = {"exotic": "#ff8a3d", "named": "#e0b03a", "gear_set": "#2fbf71", "brand": "#5b8def", "talent": "#a78bfa"}
 
     def encyclopedia(self):
@@ -2953,7 +2953,7 @@ class App:
         nb = self.info_nb = ttk.Notebook(p); nb.pack(fill="both", expand=True, padx=8, pady=8)
         self._info_keys = ["enc", "meta", "news", "quiz"]
         frames = {}
-        for k, icon in zip(self._info_keys, ("📖", "🏆", "📰", "❓")):
+        for k, icon in zip(self._info_keys, ("ğŸ“–", "ğŸ†", "ğŸ“°", "â“")):
             fr = ttk.Frame(nb, padding=8); nb.add(fr, text=f" {icon} {t('info.' + k)} "); frames[k] = fr
         self._build_enc(frames["enc"]); self._build_meta_gallery(frames["meta"])
         self._build_news(frames["news"]); self._build_quiz(frames["quiz"])
@@ -2966,7 +2966,7 @@ class App:
         if k == "quiz" and not getattr(self, "_quiz_q", None): self.quiz_next()
 
     def build_division3(self):
-        """Division 3 için kaynaklı gelişme özeti; yalnızca doğrulanmış bilgileri gösterir."""
+        """Division 3 iÃ§in kaynaklÄ± geliÅŸme Ã¶zeti; yalnÄ±zca doÄŸrulanmÄ±ÅŸ bilgileri gÃ¶sterir."""
         page = self.tabs["division3"]
         feed = {}
         for path in (BASE / "meta" / "division3_feed.json", BUNDLE / "meta" / "division3_feed.json"):
@@ -2975,21 +2975,21 @@ class App:
             except (OSError, ValueError):
                 continue
         wrap = ui_theme.scrollable(page, PAL["bg"])
-        ttk.Label(wrap, text="The Division 3 — doğrulanmış gelişmeler", style="Section.TLabel").pack(anchor="w", padx=12, pady=(12, 4))
-        ttk.Label(wrap, text=(feed.get("status_tr") or "Ubisoft oyunun geliştirme aşamasında olduğunu doğruluyor; çıkış tarihi ve oyun ayrıntıları açıklanmadı."),
+        ttk.Label(wrap, text="The Division 3 â€” doÄŸrulanmÄ±ÅŸ geliÅŸmeler", style="Section.TLabel").pack(anchor="w", padx=12, pady=(12, 4))
+        ttk.Label(wrap, text=(feed.get("status_tr") or "Ubisoft oyunun geliÅŸtirme aÅŸamasÄ±nda olduÄŸunu doÄŸruluyor; Ã§Ä±kÄ±ÅŸ tarihi ve oyun ayrÄ±ntÄ±larÄ± aÃ§Ä±klanmadÄ±."),
                   foreground=PAL["muted"], wraplength=920, justify="left").pack(anchor="w", padx=12, pady=(0, 10))
-        live = ttk.LabelFrame(wrap, text="Son resmî haber akışından")
+        live = ttk.LabelFrame(wrap, text="Son resmÃ® haber akÄ±ÅŸÄ±ndan")
         live.pack(fill="x", padx=10, pady=5)
         self.div3_news_area = ttk.Frame(live); self.div3_news_area.pack(fill="x", padx=8, pady=5)
         self.refresh_division3_news()
         for item in feed.get("updates", []):
-            card = ttk.LabelFrame(wrap, text=f'{item.get("date", "")}  ·  {item.get("title", "")}')
+            card = ttk.LabelFrame(wrap, text=f'{item.get("date", "")}  Â·  {item.get("title", "")}')
             card.pack(fill="x", padx=10, pady=5)
             ttk.Label(card, text=item.get("summary_tr", ""), wraplength=900, justify="left").pack(anchor="w", padx=10, pady=7)
             url = item.get("url", "")
             if url.startswith("https://"):
-                ttk.Button(card, text="🔗 Kaynağı aç", command=lambda u=url: webbrowser.open(u)).pack(anchor="w", padx=10, pady=(0, 8))
-        sources = ttk.LabelFrame(wrap, text="Güvenilir kaynaklar")
+                ttk.Button(card, text="ğŸ”— KaynaÄŸÄ± aÃ§", command=lambda u=url: webbrowser.open(u)).pack(anchor="w", padx=10, pady=(0, 8))
+        sources = ttk.LabelFrame(wrap, text="GÃ¼venilir kaynaklar")
         sources.pack(fill="x", padx=10, pady=10)
         for source in feed.get("sources", []):
             url = source.get("url", "")
@@ -2997,8 +2997,8 @@ class App:
             row = ttk.Frame(sources); row.pack(fill="x", padx=8, pady=4)
             ttk.Label(row, text=source.get("name", "Ubisoft"), width=34).pack(side="left", anchor="n")
             ttk.Label(row, text=source.get("note_tr", ""), foreground=PAL["muted"], wraplength=570, justify="left").pack(side="left", fill="x", expand=True, padx=8)
-            ttk.Button(row, text="Aç", command=lambda u=url: webbrowser.open(u)).pack(side="right")
-        ttk.Label(wrap, text=f'Kaynak kontrol tarihi: {feed.get("checked", "—")}. Yeni bilgiler doğrulanana kadar burada söylenti değil, resmî durum gösterilir.',
+            ttk.Button(row, text="AÃ§", command=lambda u=url: webbrowser.open(u)).pack(side="right")
+        ttk.Label(wrap, text=f'Kaynak kontrol tarihi: {feed.get("checked", "â€”")}. Yeni bilgiler doÄŸrulanana kadar burada sÃ¶ylenti deÄŸil, resmÃ® durum gÃ¶sterilir.',
                   foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=12, pady=(4, 12))
 
     def refresh_division3_news(self):
@@ -3013,7 +3013,7 @@ class App:
             if any(term in text.casefold() for term in ("division 3", "division iii", "division three")):
                 hits.append(item)
         if not hits:
-            ttk.Label(area, text="İndirilen Ubisoft haber akışında henüz doğrudan The Division 3'ü konu alan yeni bir yazı yok.",
+            ttk.Label(area, text="Ä°ndirilen Ubisoft haber akÄ±ÅŸÄ±nda henÃ¼z doÄŸrudan The Division 3'Ã¼ konu alan yeni bir yazÄ± yok.",
                       foreground=PAL["muted"], wraplength=850, justify="left").pack(anchor="w", padx=4, pady=4)
             return
         for item in hits[:8]:
@@ -3024,11 +3024,11 @@ class App:
                       wraplength=750, justify="left").pack(side="left", fill="x", expand=True)
             url = item.get("url", "")
             if url.startswith("https://"):
-                ttk.Button(row, text="Aç", command=lambda u=url: webbrowser.open(u)).pack(side="right")
+                ttk.Button(row, text="AÃ§", command=lambda u=url: webbrowser.open(u)).pack(side="right")
 
-    # --- canlı haber akışı
+    # --- canlÄ± haber akÄ±ÅŸÄ±
     def _news_poll(self):
-        """Program açıkken 30 dakikada bir haber akışına bakar; yeni haber gelirse sayfayı yeniden başlatmadan günceller."""
+        """Program aÃ§Ä±kken 30 dakikada bir haber akÄ±ÅŸÄ±na bakar; yeni haber gelirse sayfayÄ± yeniden baÅŸlatmadan gÃ¼nceller."""
         def work():
             try: res = meta_sync.run_news(self.cfg, NEWS_CACHE, APP_VERSION, force=True)
             except Exception as e:
@@ -3057,22 +3057,22 @@ class App:
             self.toast(t("news.new_toast", n=len(new), title=first))
             important = [x for x in new if x["kind"] in ("season", "maintenance", "dlc", "event")]
             if important:
-                body = "\n".join("• " + knowledge.pick_lang(x["title"], lang) for x in important[:5])
-                if self.tray and self.tray.available: self.tray.notify(body, "📰 " + t("news.push_title"))
-                self._push("news", "📰 " + t("news.push_title"), body)
+                body = "\n".join("â€¢ " + knowledge.pick_lang(x["title"], lang) for x in important[:5])
+                if self.tray and self.tray.available: self.tray.notify(body, "ğŸ“° " + t("news.push_title"))
+                self._push("news", "ğŸ“° " + t("news.push_title"), body)
 
     def _info_badge(self):
-        """Bilgi sekmesinin başlığında okunmamış haber sayısı."""
+        """Bilgi sekmesinin baÅŸlÄ±ÄŸÄ±nda okunmamÄ±ÅŸ haber sayÄ±sÄ±."""
         if not hasattr(self, "nb") or "info" not in self.tab_keys: return
         seen = set(self.cfg["settings"].get("news_seen", []))
         n = sum(1 for it, stt in knowledge.news_sorted((self.news or {}).get("items", [])) if it["id"] not in seen and stt != "ended")
         try:
             intel = self.group_nbs["intel"]
-            intel.tab(self.tabs["info"], text=ui_theme.with_icon(t("tab.info"), "📚") + (f"  ●{n}" if n else ""))
+            intel.tab(self.tabs["info"], text=ui_theme.with_icon(t("tab.info"), "ğŸ“š") + (f"  â—{n}" if n else ""))
         except Exception:
             pass
 
-    # --- açıklama çevirileri (10 dil, günlük akıştan) ve kullanıcının eklediği diller için yapay zekâ çevirisi
+    # --- aÃ§Ä±klama Ã§evirileri (10 dil, gÃ¼nlÃ¼k akÄ±ÅŸtan) ve kullanÄ±cÄ±nÄ±n eklediÄŸi diller iÃ§in yapay zekÃ¢ Ã§evirisi
     def desc_i18n(self):
         if getattr(self, "_desc_i18n", None) is None:
             self._desc_i18n = {}
@@ -3102,7 +3102,7 @@ class App:
         threading.Thread(target=work, daemon=True).start()
 
     def localized_desc(self, name, desc, on_ready=None):
-        """Açıklamanın kullanıcının dilindeki hali. Yoksa ve bir yapay zekâ seçiliyse arka planda çevirip on_ready(metin)."""
+        """AÃ§Ä±klamanÄ±n kullanÄ±cÄ±nÄ±n dilindeki hali. Yoksa ve bir yapay zekÃ¢ seÃ§iliyse arka planda Ã§evirip on_ready(metin)."""
         lang = i18n.current_language()
         if lang == "en" or not desc: return desc
         tr = self.desc_i18n().get(name, {}).get(lang)
@@ -3110,7 +3110,7 @@ class App:
         return self.ai_localize(desc, lang, on_ready) or desc
 
     def ai_localize(self, text, lang, on_ready=None):
-        """Desteklenen 10 dil dışındaki (ya da henüz çevrilmemiş) metinler için seçili yapay zekâyla çeviri, önbellekli."""
+        """Desteklenen 10 dil dÄ±ÅŸÄ±ndaki (ya da henÃ¼z Ã§evrilmemiÅŸ) metinler iÃ§in seÃ§ili yapay zekÃ¢yla Ã§eviri, Ã¶nbellekli."""
         if not text or self.cfg["settings"].get("ai_provider", "builtin") == "builtin": return None
         if not getattr(self, "lt_cache", None): self.lt_cache = livetranslate.Cache(BASE / "translate_cache.json")
         key = "ai-" + lang
@@ -3176,10 +3176,10 @@ class App:
         for k, col in self.CAT_COLORS.items(): self.enc_txt.tag_configure("c_" + k, foreground=col, font=(ui_theme.FONT_SEMI, 10))
         self.enc_txt.config(state="disabled")
         bar = ttk.Frame(right); bar.pack(fill="x", pady=(6, 0))
-        self.enc_add_btn = ttk.Button(bar, text="➕ " + t("enc.add"), command=self.enc_add_to_build, style="Accent.TButton")
+        self.enc_add_btn = ttk.Button(bar, text="â• " + t("enc.add"), command=self.enc_add_to_build, style="Accent.TButton")
         self.enc_add_btn.pack(side="left")
-        ttk.Button(bar, text="📍 " + t("enc.where") + ("" if self.ent.has("drop_stats_view") else " ⭐"), command=self.enc_where).pack(side="left", padx=6)
-        ttk.Button(bar, text="🌐 " + t("enc.wiki"), command=self.enc_wiki).pack(side="left")
+        ttk.Button(bar, text="ğŸ“ " + t("enc.where") + ("" if self.ent.has("drop_stats_view") else " â­"), command=self.enc_where).pack(side="left", padx=6)
+        ttk.Button(bar, text="ğŸŒ " + t("enc.wiki"), command=self.enc_wiki).pack(side="left")
         self.enc_status = ttk.Label(right, text="", foreground=PAL["muted"]); self.enc_status.pack(anchor="w", pady=(4, 0))
         self._enc_fill()
 
@@ -3194,7 +3194,7 @@ class App:
         self._enc_rows = {}
         for i, e in enumerate(rows):
             iid = f"e{i}"; self._enc_rows[iid] = e
-            kind = t("enc.c_" + e["cat"]) + (f" · {slot_name(e['slot'])}" if e.get("slot") in knowledge.SLOT_ORDER else "")
+            kind = t("enc.c_" + e["cat"]) + (f" Â· {slot_name(e['slot'])}" if e.get("slot") in knowledge.SLOT_ORDER else "")
             tv.insert("", "end", iid=iid, values=(e["name"], kind), tags=(e["cat"],))
         self.enc_count.config(text=t("enc.found", n=len(rows)))
         if rows and not tv.selection(): tv.selection_set("e0")
@@ -3214,7 +3214,7 @@ class App:
         if e.get("brand"): meta.append(e["brand"])
         if e.get("gear_set"): meta.append(e["gear_set"])
         if e.get("kind"): meta.append(t("enc.k_" + e["kind"]))
-        T.insert("end", "  ·  ".join(meta) + "\n", ("c_" + e["cat"],))
+        T.insert("end", "  Â·  ".join(meta) + "\n", ("c_" + e["cat"],))
         if e.get("talent") and e["cat"] in ("exotic", "named"):
             T.insert("end", t("enc.talent") + "\n", "h2"); T.insert("end", e["talent"] + "\n", "chip")
         if e.get("desc"):
@@ -3228,7 +3228,7 @@ class App:
         if e.get("bonuses"):
             T.insert("end", t("enc.bonuses") + "\n", "h2")
             for i, b in enumerate(e["bonuses"], start=1):
-                T.insert("end", f"{i + (1 if e['cat'] == 'gear_set' else 0)} ▸ ", "sub"); T.insert("end", b + "\n")
+                T.insert("end", f"{i + (1 if e['cat'] == 'gear_set' else 0)} â–¸ ", "sub"); T.insert("end", b + "\n")
         if e.get("pieces"):
             T.insert("end", t("enc.pieces") + "\n", "h2")
             T.insert("end", ", ".join(f"{n} ({slot_name(sl)})" for n, sl in e["pieces"]) + "\n")
@@ -3237,7 +3237,7 @@ class App:
             T.insert("end", t("enc.related") + "\n", "h2")
             for r in rel:
                 tag = f"rel{id(r)}"
-                T.insert("end", "• ", "sub"); T.insert("end", r["name"], ("link", tag)); T.insert("end", f"  ({t('enc.c_' + r['cat'])})\n", "sub")
+                T.insert("end", "â€¢ ", "sub"); T.insert("end", r["name"], ("link", tag)); T.insert("end", f"  ({t('enc.c_' + r['cat'])})\n", "sub")
                 T.tag_bind(tag, "<Button-1>", lambda ev, r=r: self._enc_show(r))
                 T.tag_bind(tag, "<Enter>", lambda ev: T.config(cursor="hand2")); T.tag_bind(tag, "<Leave>", lambda ev: T.config(cursor="arrow"))
         T.config(state="disabled")
@@ -3246,7 +3246,7 @@ class App:
         self.enc_status.config(text="")
 
     def enc_open(self, name):
-        """Başka bir yerden (yarışma, haber) bir girişi aç."""
+        """BaÅŸka bir yerden (yarÄ±ÅŸma, haber) bir giriÅŸi aÃ§."""
         self.select_page("info"); self.info_nb.select(0)
         e = next((x for x in self.encyclopedia().entries if x["name"] == name), None)
         if e: self._enc_show(e)
@@ -3287,8 +3287,8 @@ class App:
                 if err: return self.enc_status.config(text=t("drops.send_failed", e=err), foreground=PAL["danger"])
                 w = (d or {}).get("where") or []
                 if not w: return self.enc_status.config(text=t("enc.where_none"), foreground=PAL["muted"])
-                self.enc_status.config(text=t("enc.where_res") + "  " + "  ·  ".join(
-                    f"{t('act.' + x['activity'])} {x['per1000']}‰" for x in w[:5]), foreground=PAL["success"])
+                self.enc_status.config(text=t("enc.where_res") + "  " + "  Â·  ".join(
+                    f"{t('act.' + x['activity'])} {x['per1000']}â€°" for x in w[:5]), foreground=PAL["success"])
             self.root.after(0, show)
         threading.Thread(target=go, daemon=True).start()
 
@@ -3323,7 +3323,7 @@ class App:
         sb = ttk.Combobox(top, textvariable=self.mg_sort, values=[t("mg.s_" + x) for x in self._mg_sorts], state="readonly", width=16)
         sb.pack(side="left", padx=6); sb.bind("<<ComboboxSelected>>", lambda e: self.refresh_meta_gallery())
         self.mg_favs = tk.BooleanVar(value=False)
-        ttk.Checkbutton(top, text="★ " + t("mg.only_favs"), variable=self.mg_favs, command=self.refresh_meta_gallery).pack(side="left", padx=6)
+        ttk.Checkbutton(top, text="â˜… " + t("mg.only_favs"), variable=self.mg_favs, command=self.refresh_meta_gallery).pack(side="left", padx=6)
         self.mg_info = ttk.Label(top, text="", foreground=PAL["muted"]); self.mg_info.pack(side="right")
         holder = ttk.Frame(f); holder.pack(fill="both", expand=True, pady=(8, 0))
         self.mg_area = ui_theme.scrollable(holder, PAL["bg"])
@@ -3364,9 +3364,9 @@ class App:
         card = tk.Frame(parent, bg=PAL["surface"], highlightthickness=1, highlightbackground=PAL["accent"] if fav else PAL["surface"])
         head = tk.Frame(card, bg=PAL["surface"]); head.pack(fill="x", padx=12, pady=(10, 2))
         tk.Label(head, text=b["name"], bg=PAL["surface"], fg=PAL["fg"], font=(ui_theme.FONT_SEMI, 12), anchor="w").pack(side="left")
-        trc = {"up": ("▲ " + t("mg.up"), PAL["success"]), "down": ("▼ " + t("mg.down"), PAL["danger"]), "new": ("✦ " + t("mg.new"), PAL["accent"])}.get(tr)
+        trc = {"up": ("â–² " + t("mg.up"), PAL["success"]), "down": ("â–¼ " + t("mg.down"), PAL["danger"]), "new": ("âœ¦ " + t("mg.new"), PAL["accent"])}.get(tr)
         if trc: tk.Label(head, text=trc[0], bg=PAL["surface"], fg=trc[1], font=(ui_theme.FONT_SEMI, 9)).pack(side="right")
-        tk.Label(card, text=" · ".join(x for x in (m.get("mode"), t("mg.t_" + m["role"]) if m.get("role") in self._mg_tags else m.get("role")) if x),
+        tk.Label(card, text=" Â· ".join(x for x in (m.get("mode"), t("mg.t_" + m["role"]) if m.get("role") in self._mg_tags else m.get("role")) if x),
                  bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 9), anchor="w").pack(fill="x", padx=12)
         chips = tk.Frame(card, bg=PAL["surface"]); chips.pack(fill="x", padx=12, pady=(4, 0))
         for tg in tags[:5]:
@@ -3383,11 +3383,11 @@ class App:
                  justify="left", anchor="w", wraplength=380).pack(fill="x", padx=12, pady=(6, 0))
         src = m.get("sources") or []
         if src:
-            lk = tk.Label(card, text=f"🔗 {src[0]['title']}" + (f"  (+{len(src) - 1})" if len(src) > 1 else ""), bg=PAL["surface"], fg="#7cb7ff",
+            lk = tk.Label(card, text=f"ğŸ”— {src[0]['title']}" + (f"  (+{len(src) - 1})" if len(src) > 1 else ""), bg=PAL["surface"], fg="#7cb7ff",
                           cursor="hand2", font=(ui_theme.FONT, 8), anchor="w")
             lk.pack(fill="x", padx=12, pady=(4, 0)); lk.bind("<Button-1>", lambda e, u=src[0]["url"]: webbrowser_open(u))
         btns = tk.Frame(card, bg=PAL["surface"]); btns.pack(fill="x", padx=12, pady=(8, 10))
-        ttk.Button(btns, text=("★ " if fav else "☆ ") + t("mg.fav"), command=lambda: self.meta_toggle_fav(b["meta_id"])).pack(side="left")
+        ttk.Button(btns, text=("â˜… " if fav else "â˜† ") + t("mg.fav"), command=lambda: self.meta_toggle_fav(b["meta_id"])).pack(side="left")
         ttk.Button(btns, text=(t("mg.show") if hidden else t("mg.hide")), command=lambda: self.meta_toggle_hidden(b)).pack(side="left", padx=6)
         return card
 
@@ -3399,11 +3399,11 @@ class App:
     def meta_toggle_hidden(self, b):
         st = self.cfg["settings"]; hid = st.setdefault("meta_hidden", [])
         mid = b["meta_id"]
-        if mid in hid:                                         # tekrar göster: build listesine hemen ekle
+        if mid in hid:                                         # tekrar gÃ¶ster: build listesine hemen ekle
             hid.remove(mid)
             if not any(x.get("meta_id") == mid for x in self.cfg["builds"]):
                 nb_ = dict(b)
-                while any(x["name"] == nb_["name"] for x in self.cfg["builds"]): nb_["name"] += " ★"
+                while any(x["name"] == nb_["name"] for x in self.cfg["builds"]): nb_["name"] += " â˜…"
                 self.cfg["builds"].append(nb_)
         else:
             hid.append(mid)
@@ -3422,7 +3422,7 @@ class App:
         self.news_clock = {}
         for k in ("daily", "weekly", "tasks"):
             box = tk.Frame(row, bg=PAL["bg"]); box.pack(side="left", padx=(0, 10), ipadx=10, ipady=4)
-            self.news_clock[k] = tk.Label(box, text="–", bg=PAL["bg"], fg=PAL["accent"], font=(ui_theme.FONT_SEMI, 16))
+            self.news_clock[k] = tk.Label(box, text="â€“", bg=PAL["bg"], fg=PAL["accent"], font=(ui_theme.FONT_SEMI, 16))
             self.news_clock[k].pack(anchor="w", padx=8)
             tk.Label(box, text=t("news.c_" + k), bg=PAL["bg"], fg=PAL["muted"], font=(ui_theme.FONT, 9)).pack(anchor="w", padx=8)
         holder = ttk.Frame(f); holder.pack(fill="both", expand=True, pady=(8, 0))
@@ -3454,13 +3454,13 @@ class App:
         lang = i18n.current_language()
         feed = self.news or {"items": [], "season": ""}
         season = feed.get("season") or self.tasks.get("season") or ""
-        self.news_season.config(text="🗓 " + (season or t("news.no_season")))
+        self.news_season.config(text="ğŸ—“ " + (season or t("news.no_season")))
         seen = set(self.cfg["settings"].get("news_seen", []))
         rows = knowledge.news_sorted(feed["items"])
         if not rows:
             ttk.Label(self.news_area, text=t("news.empty"), foreground=PAL["muted"]).pack(anchor="w", padx=10, pady=10); return
         now = datetime.now(timezone.utc)
-        icons = {"patch": "🛠", "event": "🎉", "season": "🗺", "maintenance": "🔧", "dlc": "🆕", "community": "💬"}
+        icons = {"patch": "ğŸ› ", "event": "ğŸ‰", "season": "ğŸ—º", "maintenance": "ğŸ”§", "dlc": "ğŸ†•", "community": "ğŸ’¬"}
         colors = {"live": PAL["success"], "upcoming": PAL["accent"], "news": PAL["muted"], "ended": PAL["muted"]}
         for it, stt in rows:
             card = tk.Frame(self.news_area, bg=PAL["surface"]); card.pack(fill="x", padx=6, pady=5)
@@ -3470,7 +3470,7 @@ class App:
                 tk.Label(head, text=t("news.new"), bg=PAL["accent"], fg=PAL["bg"], font=(ui_theme.FONT_SEMI, 8), padx=6).pack(side="left", padx=4)
             title = it["title"].get(lang) or self.ai_localize(knowledge.pick_lang(it["title"], "en"), lang, lambda _t: self.refresh_info_news()) \
                 or knowledge.pick_lang(it["title"], lang)
-            tk.Label(head, text=f" {icons.get(it['kind'], '•')} " + title, bg=PAL["surface"], fg=PAL["fg"],
+            tk.Label(head, text=f" {icons.get(it['kind'], 'â€¢')} " + title, bg=PAL["surface"], fg=PAL["fg"],
                      font=(ui_theme.FONT_SEMI, 11), anchor="w").pack(side="left")
             when = ""
             if stt == "live" and it.get("end"): when = t("news.ends_in", t=knowledge.fmt_left(it["end"] - now, t("news.d"))[0])
@@ -3483,7 +3483,7 @@ class App:
                 tk.Label(card, text=txt, bg=PAL["surface"], fg=PAL["fg"] if stt != "ended" else PAL["muted"], font=(ui_theme.FONT, 10),
                          justify="left", anchor="w", wraplength=900).pack(fill="x", padx=12, pady=(4, 0))
             if it.get("url"):
-                lk = tk.Label(card, text="🔗 " + (it.get("source") or t("news.source")), bg=PAL["surface"], fg="#7cb7ff", cursor="hand2",
+                lk = tk.Label(card, text="ğŸ”— " + (it.get("source") or t("news.source")), bg=PAL["surface"], fg="#7cb7ff", cursor="hand2",
                               font=(ui_theme.FONT, 9), anchor="w")
                 lk.pack(fill="x", padx=12, pady=(2, 8)); lk.bind("<Button-1>", lambda e, u=it["url"]: webbrowser_open(u))
             else:
@@ -3497,7 +3497,7 @@ class App:
             st["news_seen"] = ids[-100:]; save_cfg(self.cfg)
         self._info_badge()
 
-    # --- bilgi yarışması
+    # --- bilgi yarÄ±ÅŸmasÄ±
     def _build_quiz(self, f):
         st = self.cfg["settings"]
         top = tk.Frame(f, bg=PAL["surface"]); top.pack(fill="x")
@@ -3554,7 +3554,7 @@ class App:
             for bb, oo in btns:
                 bb.config(bg=PAL["success"] if oo == q["right"] else (PAL["danger"] if bb is b else PAL["bg"]),
                           fg=PAL["bg"] if oo == q["right"] or bb is b else PAL["muted"])
-            fb.config(text=("✔ " + t("quiz.right")) if ok else ("✖ " + t("quiz.wrong", a=self._quiz_opt(q, q["right"]))),
+            fb.config(text=("âœ” " + t("quiz.right")) if ok else ("âœ– " + t("quiz.wrong", a=self._quiz_opt(q, q["right"]))),
                       fg=PAL["success"] if ok else PAL["danger"])
             if hasattr(self, "quiz_lvl") and self.quiz_lvl.winfo_exists(): self._quiz_render_level()
             if hasattr(self, "sounds"): self.sounds.play("KEEP" if ok else "DISMANTLE", force=False)
@@ -3567,14 +3567,14 @@ class App:
             btns.append((b, o))
         fb.pack(fill="x", padx=14, pady=(6, 0))
         nav = tk.Frame(card, bg=PAL["surface"]); nav.pack(fill="x", padx=14, pady=(6, 12))
-        ttk.Button(nav, text="➜ " + t("quiz.next"), command=lambda: self.quiz_next(box, compact), style="Accent.TButton").pack(side="left")
+        ttk.Button(nav, text="âœ " + t("quiz.next"), command=lambda: self.quiz_next(box, compact), style="Accent.TButton").pack(side="left")
         subj = q["args"].get("name") or (q["right"] if q["kind"] == "talent_desc" else None)
         if subj and not compact:
-            ttk.Button(nav, text="📖 " + t("quiz.open_enc"), command=lambda: self.enc_open(subj)).pack(side="left", padx=6)
+            ttk.Button(nav, text="ğŸ“– " + t("quiz.open_enc"), command=lambda: self.enc_open(subj)).pack(side="left", padx=6)
         self._quiz_card = card
 
     def quiz_popup(self):
-        """Yükleme ekranında küçük yarışma penceresi (isteğe bağlı). Yükleme bitince kendiliğinden kapanır."""
+        """YÃ¼kleme ekranÄ±nda kÃ¼Ã§Ã¼k yarÄ±ÅŸma penceresi (isteÄŸe baÄŸlÄ±). YÃ¼kleme bitince kendiliÄŸinden kapanÄ±r."""
         w = getattr(self, "_quiz_pop", None)
         if w and w.winfo_exists(): return
         w = self._quiz_pop = tk.Toplevel(self.root); w.overrideredirect(True); w.attributes("-topmost", True)
@@ -3582,14 +3582,14 @@ class App:
         try: w.attributes("-alpha", 0.95)
         except tk.TclError: pass
         head = tk.Frame(w, bg=PAL["surface"]); head.pack(fill="x")
-        tk.Label(head, text="❓ " + t("quiz.pop_title"), bg=PAL["surface"], fg=PAL["accent"], font=(ui_theme.FONT_SEMI, 10)).pack(side="left", padx=10, pady=6)
-        tk.Button(head, text="✕", command=w.destroy, bg=PAL["surface"], fg=PAL["muted"], relief="flat", cursor="hand2").pack(side="right", padx=4)
+        tk.Label(head, text="â“ " + t("quiz.pop_title"), bg=PAL["surface"], fg=PAL["accent"], font=(ui_theme.FONT_SEMI, 10)).pack(side="left", padx=10, pady=6)
+        tk.Button(head, text="âœ•", command=w.destroy, bg=PAL["surface"], fg=PAL["muted"], relief="flat", cursor="hand2").pack(side="right", padx=4)
         box = tk.Frame(w, bg=PAL["bg"]); box.pack(fill="both", expand=True)
         self.quiz_next(box, compact=True)
         w.update_idletasks()
         sw = w.winfo_screenwidth(); w.geometry(f"+{sw - w.winfo_reqwidth() - 30}+{80}")
 
-    # ---------- Hizmet: oyun algılama, akıllı tarama, yerel API, Discord durumu, bildirimler, tepsi ----------
+    # ---------- Hizmet: oyun algÄ±lama, akÄ±llÄ± tarama, yerel API, Discord durumu, bildirimler, tepsi ----------
     def service_start(self):
         st = self.cfg["settings"]
         if not st.get("api_token"): st["api_token"] = __import__("secrets").token_urlsafe(16); save_cfg(self.cfg)
@@ -3617,55 +3617,55 @@ class App:
         if kind == "game" and value == "started":
             self.game_on = True; self.sessions.begin()
             low = st.get("svc_low_priority", True) and service.set_low_priority(True)
-            log.info("Game started — session begins%s", " (program priority: below normal)" if low else "")
+            log.info("Game started â€” session begins%s", " (program priority: below normal)" if low else "")
             if st.get("svc_auto_run", True) and not self.running:
                 self._auto_started = True; self.start(quiet=True); self.toast(t("svc.auto_started"))
         elif kind == "game" and value == "stopped":
             self.game_on = False; self.game_state = "unknown"
             service.set_low_priority(False)
             c = self.sessions.end()
-            log.info("Game stopped — session %s", c and {k: c[k] for k in ("scanned", "keep", "dismantle", "exotic")})
+            log.info("Game stopped â€” session %s", c and {k: c[k] for k in ("scanned", "keep", "dismantle", "exotic")})
             if self._auto_started and self.running: self.stop(quiet=True)
             self._auto_started = False
             if c and c["scanned"]:
                 self._last_session = c
                 mins = max(1, (c["end"] - c["start"]) // 60)
                 body = t("push.session_body", mins=mins, n=c["scanned"], keep=c["keep"], dis=c["dismantle"], ex=c["exotic"], named=c["named"])
-                if c["highlights"]: body += "\n" + " · ".join(c["highlights"][-6:])
-                self._push("session", "🎮 " + t("push.session_title"), body)
-                # "Bu oturumda ne kazandın?" penceresi: sessiz tepside çalışırken (pencere
-                # withdraw edilmişken) odağı çalmamak için pop-up'ı atlıyoruz; özet
-                # _last_session'da tutulur, tepsi menüsünden her zaman tekrar açılabilir.
+                if c["highlights"]: body += "\n" + " Â· ".join(c["highlights"][-6:])
+                self._push("session", "ğŸ® " + t("push.session_title"), body)
+                # "Bu oturumda ne kazandÄ±n?" penceresi: sessiz tepside Ã§alÄ±ÅŸÄ±rken (pencere
+                # withdraw edilmiÅŸken) odaÄŸÄ± Ã§almamak iÃ§in pop-up'Ä± atlÄ±yoruz; Ã¶zet
+                # _last_session'da tutulur, tepsi menÃ¼sÃ¼nden her zaman tekrar aÃ§Ä±labilir.
                 if st.get("svc_session_popup", True) and self.root.state() != "withdrawn":
                     self.root.after(500, lambda cc=c: self._show_session_summary(cc))
         self._service_publish(kind="game")
         self.refresh_header()
 
-    # --- "Bu oturumda ne kazandın?" özeti
+    # --- "Bu oturumda ne kazandÄ±n?" Ã¶zeti
     def _session_time_saved_min(self, c):
-        """Elle inceleme süresine kıyasla tahmini kazanılan süre (dakika).
-        Varsayım: taranan her eşyayı elle inceleyip build'e göre karar vermek
-        (istatistikleri okuma + karşılaştırma) ortalama SESSION_SAVE_SEC_PER_ITEM
-        saniye sürer; programın kararı anında geldiği için bu süre kazanılmış
-        sayılır. Kesin bir ölçüm değildir — yalnızca kaba bir gösterge, bu yüzden
-        arayüzde her zaman "tahmini" etiketiyle gösterilir."""
+        """Elle inceleme sÃ¼resine kÄ±yasla tahmini kazanÄ±lan sÃ¼re (dakika).
+        VarsayÄ±m: taranan her eÅŸyayÄ± elle inceleyip build'e gÃ¶re karar vermek
+        (istatistikleri okuma + karÅŸÄ±laÅŸtÄ±rma) ortalama SESSION_SAVE_SEC_PER_ITEM
+        saniye sÃ¼rer; programÄ±n kararÄ± anÄ±nda geldiÄŸi iÃ§in bu sÃ¼re kazanÄ±lmÄ±ÅŸ
+        sayÄ±lÄ±r. Kesin bir Ã¶lÃ§Ã¼m deÄŸildir â€” yalnÄ±zca kaba bir gÃ¶sterge, bu yÃ¼zden
+        arayÃ¼zde her zaman "tahmini" etiketiyle gÃ¶sterilir."""
         return max(0, round((c or {}).get("scanned", 0) * SESSION_SAVE_SEC_PER_ITEM / 60, 1))
 
     def _show_last_session_summary(self):
-        """Tepsi menüsünden: en son tamamlanmış oturumun özetini (varsa) tekrar gösterir."""
+        """Tepsi menÃ¼sÃ¼nden: en son tamamlanmÄ±ÅŸ oturumun Ã¶zetini (varsa) tekrar gÃ¶sterir."""
         self.tray_show()
         self._show_session_summary(self._last_session)
 
     def _show_session_summary(self, c):
-        """Bir oyun oturumu bittiğinde (veya tepsi menüsünden istenince) özet penceresi.
-        SessionLog.end()'in döndürdüğü veriyi kullanır, yeni bir ölçüm yapmaz."""
+        """Bir oyun oturumu bittiÄŸinde (veya tepsi menÃ¼sÃ¼nden istenince) Ã¶zet penceresi.
+        SessionLog.end()'in dÃ¶ndÃ¼rdÃ¼ÄŸÃ¼ veriyi kullanÄ±r, yeni bir Ã¶lÃ§Ã¼m yapmaz."""
         if not c:
             return self.toast(t("session.none_yet"))
         w = tk.Toplevel(self.root); w.title(t("session.summary_title")); w.geometry("480x540")
         w.minsize(440, 460); w.transient(self.root); w.configure(bg=PAL["bg"])
         mins = max(1, (c["end"] - c["start"]) // 60) if c.get("end") and c.get("start") else 0
         saved = self._session_time_saved_min(c)
-        ttk.Label(w, text="🎮 " + t("session.summary_title"), style="Title.TLabel").pack(anchor="w", padx=16, pady=(14, 2))
+        ttk.Label(w, text="ğŸ® " + t("session.summary_title"), style="Title.TLabel").pack(anchor="w", padx=16, pady=(14, 2))
         ttk.Label(w, text=t("session.duration", mins=mins), foreground=PAL["muted"]).pack(anchor="w", padx=16)
         saved_box = ttk.Frame(w); saved_box.pack(fill="x", padx=16, pady=(10, 6))
         ttk.Label(saved_box, text=t("session.time_saved", mins=saved), style="Title.TLabel",
@@ -3683,7 +3683,7 @@ class App:
         if c.get("named"): bits.append(t("session.named_n", n=c["named"]))
         if c.get("upgrades"): bits.append(t("session.upgrades_n", n=c["upgrades"]))
         if bits:
-            ttk.Label(w, text=" · ".join(bits), foreground=PAL["accent"]).pack(anchor="w", padx=16, pady=(2, 6))
+            ttk.Label(w, text=" Â· ".join(bits), foreground=PAL["accent"]).pack(anchor="w", padx=16, pady=(2, 6))
         if c.get("highlights"):
             hl = ttk.LabelFrame(w, text=t("session.highlights_label")); hl.pack(fill="both", expand=True, padx=16, pady=(4, 8))
             txt = tk.Text(hl, bg=PAL["surface"], fg=PAL["fg"], wrap="word", height=5,
@@ -3694,7 +3694,7 @@ class App:
         ttk.Button(w, text=t("upd.close"), command=w.destroy, style="Accent.TButton").pack(anchor="e", padx=16, pady=(0, 14))
 
     def _screen_observe(self, small):
-        """Tarama döngüsünden (arka plan) — ekran durumu; değişince arayüze bildirir."""
+        """Tarama dÃ¶ngÃ¼sÃ¼nden (arka plan) â€” ekran durumu; deÄŸiÅŸince arayÃ¼ze bildirir."""
         self._last_small = small
         before = self.screen.state
         stt = self.screen.observe(small)
@@ -3726,13 +3726,13 @@ class App:
                     log.info("Screen state: learned menu signature #%d", self.screen.learned(sm))
             if act:
                 self.sessions.add_upgrade(item.get("name"))
-                self._push("build", "⬆ " + t("push.build_title"),
+                self._push("build", "â¬† " + t("push.build_title"),
                            t("push.build_body", build=act[0], slot=slot_name(act[1]), item=item.get("name"), q=act[2]))
             rar = " ".join(item.get("rarity") or []).upper()
             if verdict == "KEEP" and ("EXOTIC" in rar or "NAMED" in rar):
                 kind = t("push.exotic") if "EXOTIC" in rar else t("push.named")
-                self._push("drop", "⭐ " + t("push.drop_title", kind=kind),
-                           f"{item.get('name')} — {verdict_label(verdict)}" + (f"\n{res[0][1]} {res[0][0]}%" if res else ""))
+                self._push("drop", "â­ " + t("push.drop_title", kind=kind),
+                           f"{item.get('name')} â€” {verdict_label(verdict)}" + (f"\n{res[0][1]} {res[0][0]}%" if res else ""))
             ev = {"type": "scan", **{k: v for k, v in self.comp_state.items() if k in ("verdict", "verdict_label", "best", "item", "note")}}
             self._service_publish(extra=ev)
         except Exception:
@@ -3770,7 +3770,7 @@ class App:
         if self.presence: self._rpc_update()
 
     def api_command(self, cmd, args):
-        """Yerel API'den (arka plan iş parçacığı) — işi arayüz iş parçacığında yapıp sonucu bekler."""
+        """Yerel API'den (arka plan iÅŸ parÃ§acÄ±ÄŸÄ±) â€” iÅŸi arayÃ¼z iÅŸ parÃ§acÄ±ÄŸÄ±nda yapÄ±p sonucu bekler."""
         done, out = threading.Event(), {}
         def run():
             try:
@@ -3806,7 +3806,7 @@ class App:
         if not st.get("rpc_on") or not self.ent.has("discord_presence"): return
         cid = st.get("rpc_client_id") or ""
         if not cid.isdigit():
-            def fetch():                                     # Discord uygulama kimliği sunucudan (herkese açık bilgi)
+            def fetch():                                     # Discord uygulama kimliÄŸi sunucudan (herkese aÃ§Ä±k bilgi)
                 try:
                     with urllib.request.urlopen(self._acc_url().rstrip("/") + "/v1/health", timeout=8) as r:
                         got = str(json.loads(r.read()).get("discord_app") or "")
@@ -3845,8 +3845,8 @@ class App:
     # --- tepsi
     def _tray_title(self):
         s = self.sessions.stats()
-        return f"{APP_NAME} — " + (t("svc.st_" + self.game_state) if self.game_on else t("svc.no_game")) + \
-               (f" · {s['scanned']}" if s["scanned"] else "")
+        return f"{APP_NAME} â€” " + (t("svc.st_" + self.game_state) if self.game_on else t("svc.no_game")) + \
+               (f" Â· {s['scanned']}" if s["scanned"] else "")
 
     def tray_start(self):
         if self.tray: return
@@ -3865,7 +3865,7 @@ class App:
 
     def tray_show(self):
         self.root.deiconify(); self.root.lift()
-        try:                                     # tam ekran oyunun önüne de gelsin (kısa süre en üstte)
+        try:                                     # tam ekran oyunun Ã¶nÃ¼ne de gelsin (kÄ±sa sÃ¼re en Ã¼stte)
             self.root.attributes("-topmost", True)
             self.root.after(600, lambda: self.root.attributes("-topmost", False))
         except tk.TclError:
@@ -3879,7 +3879,7 @@ class App:
         except OSError as e:
             var.set(service.autostart_get()); messagebox.showerror(APP_NAME, str(e))
 
-    # --- ayarlar sayfası
+    # --- ayarlar sayfasÄ±
     def build_service_page(self, f, st):
         P = lambda parent, txt: ttk.Label(parent, text=txt, foreground=PAL["muted"], wraplength=900, justify="left")
         def chk(parent, key, label, cmd=None, feature=None):
@@ -3887,11 +3887,11 @@ class App:
             def ch():
                 st[key] = bool(v.get()); save_cfg(self.cfg)
                 if cmd: cmd()
-            cb = ttk.Checkbutton(parent, text=label + ("" if not feature or self.ent.has(feature) else "  ⭐"), variable=v, command=ch)
+            cb = ttk.Checkbutton(parent, text=label + ("" if not feature or self.ent.has(feature) else "  â­"), variable=v, command=ch)
             if feature and not self.ent.has(feature): cb.state(["disabled"])
             cb.pack(anchor="w", padx=10, pady=1); return v
         # 1) arka plan
-        g = ttk.LabelFrame(f, text="🎮 " + t("svc.box_game")); g.pack(fill="x", padx=10, pady=(10, 6))
+        g = ttk.LabelFrame(f, text="ğŸ® " + t("svc.box_game")); g.pack(fill="x", padx=10, pady=(10, 6))
         chk(g, "svc_auto_run", t("svc.auto_run"))
         chk(g, "svc_session_popup", t("svc.session_popup"))
         chk(g, "svc_tray", t("svc.tray"), cmd=lambda: (self.tray_start() if st.get("svc_tray") else (self.tray and self.tray.stop(), setattr(self, "tray", None))))
@@ -3903,15 +3903,15 @@ class App:
         tot = self.sessions.totals(7)
         P(g, t("svc.week", n=tot["sessions"], h=round(tot["seconds"] / 3600, 1), scanned=tot["scanned"], keep=tot["keep"],
                ex=tot["exotic"])).pack(anchor="w", padx=12, pady=(4, 8))
-        # 2) akıllı tarama
-        sm = ttk.LabelFrame(f, text="🧠 " + t("svc.box_smart")); sm.pack(fill="x", padx=10, pady=6)
+        # 2) akÄ±llÄ± tarama
+        sm = ttk.LabelFrame(f, text="ğŸ§  " + t("svc.box_smart")); sm.pack(fill="x", padx=10, pady=6)
         chk(sm, "smart_scan", t("svc.smart"))
         n = self.screen.learned()
         P(sm, t("svc.smart_hint") + "  " + (t("svc.smart_learned", n=n) if n else t("svc.smart_none"))).pack(anchor="w", padx=12)
         rr = ttk.Frame(sm); rr.pack(anchor="w", padx=10, pady=(4, 8))
         ttk.Button(rr, text=t("svc.smart_reset"), command=lambda: (self.screen.reset(), self.toast(t("svc.smart_reset_done")))).pack(side="left")
         # 3) yerel API
-        ap = ttk.LabelFrame(f, text="🔌 " + t("svc.box_api") + ("" if self.ent.has("local_api") else "  ⭐")); ap.pack(fill="x", padx=10, pady=6)
+        ap = ttk.LabelFrame(f, text="ğŸ”Œ " + t("svc.box_api") + ("" if self.ent.has("local_api") else "  â­")); ap.pack(fill="x", padx=10, pady=6)
         chk(ap, "api_on", t("svc.api_on"), cmd=lambda: (self.api_apply(), self.rebuild_ui(tab="settings")), feature="local_api")
         chk(ap, "api_control", t("svc.api_control"), cmd=self.api_apply, feature="local_api")
         chk(ap, "api_lan", t("svc.api_lan"), cmd=lambda: (self.api_apply(), self.rebuild_ui(tab="settings")), feature="local_api")
@@ -3921,16 +3921,16 @@ class App:
                 r = ttk.Frame(ap); r.pack(fill="x", padx=10, pady=1)
                 ttk.Label(r, text=label, width=16).pack(side="left")
                 e = ttk.Entry(r); e.insert(0, val); e.config(state="readonly"); e.pack(side="left", fill="x", expand=True)
-                ttk.Button(r, text="📋", width=3, command=lambda v=val: (self.root.clipboard_clear(), self.root.clipboard_append(v),
+                ttk.Button(r, text="ğŸ“‹", width=3, command=lambda v=val: (self.root.clipboard_clear(), self.root.clipboard_append(v),
                                                                        self.toast(t("svc.copied")))).pack(side="left", padx=4)
             P(ap, t("svc.api_hint")).pack(anchor="w", padx=12, pady=(2, 8))
         else:
             P(ap, t("svc.api_off_hint")).pack(anchor="w", padx=12, pady=(2, 8))
         # 4) Discord + bildirimler
-        dc = ttk.LabelFrame(f, text="💬 " + t("svc.box_discord")); dc.pack(fill="x", padx=10, pady=6)
+        dc = ttk.LabelFrame(f, text="ğŸ’¬ " + t("svc.box_discord")); dc.pack(fill="x", padx=10, pady=6)
         chk(dc, "rpc_on", t("svc.rpc_on"), cmd=self.rpc_apply, feature="discord_presence")
         P(dc, t("svc.rpc_hint")).pack(anchor="w", padx=12, pady=(0, 8))
-        pn = ttk.LabelFrame(f, text="📱 " + t("svc.box_push") + ("" if self.ent.has("push_notify") else "  ⭐")); pn.pack(fill="x", padx=10, pady=6)
+        pn = ttk.LabelFrame(f, text="ğŸ“± " + t("svc.box_push") + ("" if self.ent.has("push_notify") else "  â­")); pn.pack(fill="x", padx=10, pady=6)
         chk(pn, "push_on", t("svc.push_on"), cmd=self._push_configure, feature="push_notify")
         r1 = ttk.Frame(pn); r1.pack(fill="x", padx=10, pady=2)
         ttk.Label(r1, text=t("svc.push_topic"), width=16).pack(side="left")
@@ -3940,7 +3940,7 @@ class App:
         r2 = ttk.Frame(pn); r2.pack(fill="x", padx=10, pady=2)
         ttk.Label(r2, text=t("svc.push_webhook"), width=16).pack(side="left")
         wv = tk.StringVar(value=st.get("push_webhook", ""))
-        ttk.Entry(r2, textvariable=wv, show="•").pack(side="left", fill="x", expand=True)
+        ttk.Entry(r2, textvariable=wv, show="â€¢").pack(side="left", fill="x", expand=True)
         ev_row = ttk.Frame(pn); ev_row.pack(anchor="w", padx=6, pady=2)
         for k in ("drop", "build", "vendor", "session", "news"):
             v = tk.BooleanVar(value=st.get("push_" + k, True))
@@ -3960,14 +3960,14 @@ class App:
             if not self.notifier.enabled: return res_lbl.config(text=t("svc.push_need"), foreground=PAL["warning"])
             res_lbl.config(text=t("acc.working"), foreground=PAL["muted"])
             def go():
-                r = self.notifier.send_now("✅ " + t("push.test_title"), t("push.test_body"))
-                txt = " · ".join(f"{n}: {'✔' if v else '✖'}" for n, v in zip(("ntfy", "Discord"), r) if v is not None)
+                r = self.notifier.send_now("âœ… " + t("push.test_title"), t("push.test_body"))
+                txt = " Â· ".join(f"{n}: {'âœ”' if v else 'âœ–'}" for n, v in zip(("ntfy", "Discord"), r) if v is not None)
                 self.root.after(0, lambda: res_lbl.config(text=txt + (f"  ({self.notifier.last_error})" if self.notifier.last_error else ""),
                                                          foreground=PAL["success"] if all(v is not False for v in r) else PAL["danger"]))
             threading.Thread(target=go, daemon=True).start()
         br = ttk.Frame(pn); br.pack(anchor="w", padx=10, pady=4)
-        ttk.Button(br, text="💾 " + t("svc.save"), command=save_push).pack(side="left")
-        ttk.Button(br, text="🔔 " + t("svc.push_test"), command=lambda: save_push(True), style="Accent.TButton").pack(side="left", padx=6)
+        ttk.Button(br, text="ğŸ’¾ " + t("svc.save"), command=save_push).pack(side="left")
+        ttk.Button(br, text="ğŸ”” " + t("svc.push_test"), command=lambda: save_push(True), style="Accent.TButton").pack(side="left", padx=6)
         res_lbl.pack(anchor="w", padx=12)
         P(pn, t("svc.push_hint")).pack(anchor="w", padx=12, pady=(2, 8))
         if self.notifier.topic: save_push()
@@ -3977,13 +3977,13 @@ class App:
                     try: c.state(["disabled"])
                     except Exception: pass
 
-    # ---------- Hesap (isteğe bağlı: Discord ile giriş, anahtar / davet / satın alma) ----------
+    # ---------- Hesap (isteÄŸe baÄŸlÄ±: Discord ile giriÅŸ, anahtar / davet / satÄ±n alma) ----------
     def _acc_url(self):
         st = self.cfg["settings"]
         return os.environ.get("TD2_ACCOUNT_URL") or st.get("account_server") or st.get("drop_server") or dropstats.DEFAULT_URL
 
     def _acc_apply(self):
-        """Hesaptaki yetki belgesini doğrula; premium durumu değiştiyse True."""
+        """Hesaptaki yetki belgesini doÄŸrula; premium durumu deÄŸiÅŸtiyse True."""
         before = self.ent.tier
         self.ent.set_entitlement(self.account.entitlement, account.device_pub(),
                                  os.environ.get("TD2_ENT_PUBKEY") or None)
@@ -3991,17 +3991,17 @@ class App:
 
     def _acc_chip_text(self):
         a = getattr(self, "account", None)
-        if not a or not a.signed_in: return "👤 " + t("acc.login_short")
-        return "👤 " + a.username[:16] + (" ⭐" if self.ent.source == "account" or self.ent.valid else "")
+        if not a or not a.signed_in: return "ğŸ‘¤ " + t("acc.login_short")
+        return "ğŸ‘¤ " + a.username[:16] + (" â­" if self.ent.source == "account" or self.ent.valid else "")
 
     def _acc_changed(self):
-        """Hesap / yetki değişti: başlığı güncelle, premium değiştiyse arayüzü yeniden kur."""
+        """Hesap / yetki deÄŸiÅŸti: baÅŸlÄ±ÄŸÄ± gÃ¼ncelle, premium deÄŸiÅŸtiyse arayÃ¼zÃ¼ yeniden kur."""
         win = getattr(self, "_acc_win", None)
         was_open = bool(win and win.winfo_exists())
         if self._acc_apply() or getattr(self, "_acc_restart", False):
-            # Giriş / premium değişti: arayüz yerinde yeniden kurulunca menüler ve boyut bozulabiliyordu —
-            # program aynı sekmeyle yeniden açılır ve hesap penceresi sonuç mesajıyla tekrar gösterilir.
-            log.info("Account changed (tier=%s) — restarting the app", self.ent.tier)
+            # GiriÅŸ / premium deÄŸiÅŸti: arayÃ¼z yerinde yeniden kurulunca menÃ¼ler ve boyut bozulabiliyordu â€”
+            # program aynÄ± sekmeyle yeniden aÃ§Ä±lÄ±r ve hesap penceresi sonuÃ§ mesajÄ±yla tekrar gÃ¶sterilir.
+            log.info("Account changed (tier=%s) â€” restarting the app", self.ent.tier)
             self._acc_restart = False
             msg = getattr(self, "_acc_msg", None)
             st = self.cfg["settings"]
@@ -4016,7 +4016,7 @@ class App:
 
     def account_startup(self):
         st = self.cfg["settings"]
-        if st.pop("_acc_reopen", False):                       # giriş / premium sonrası yeniden açıldı
+        if st.pop("_acc_reopen", False):                       # giriÅŸ / premium sonrasÄ± yeniden aÃ§Ä±ldÄ±
             m = st.pop("_acc_reopen_msg", None); save_cfg(self.cfg)
             self.open_account()
             if m: self._acc_msg = tuple(m); self._acc_fill()
@@ -4047,7 +4047,7 @@ class App:
     def open_account(self, welcome=False):
         if getattr(self, "_acc_win", None) and self._acc_win.winfo_exists():
             self._acc_win.lift(); return
-        w = self._acc_win = tk.Toplevel(self.root); w.title("👤 " + t("acc.title")); w.configure(bg=PAL["bg"])
+        w = self._acc_win = tk.Toplevel(self.root); w.title("ğŸ‘¤ " + t("acc.title")); w.configure(bg=PAL["bg"])
         w.transient(self.root)
         k = getattr(self, "ui_factor", 1.0)
         w.geometry(f"{int(560 * k)}x{int(600 * k)}"); w.minsize(int(480 * k), int(460 * k))
@@ -4065,15 +4065,15 @@ class App:
         P = lambda txt, fg=None: tk.Label(b, text=txt, bg=PAL["bg"], fg=fg or PAL["muted"], font=(ui_theme.FONT, 10),
                                           anchor="w", justify="left", wraplength=int(500 * getattr(self, "ui_factor", 1.0)))
         if not a.signed_in:
-            H("👤 " + t("acc.welcome_title" if self._acc_welcome else "acc.title")).pack(fill="x")
+            H("ğŸ‘¤ " + t("acc.welcome_title" if self._acc_welcome else "acc.title")).pack(fill="x")
             P(t("acc.intro")).pack(fill="x", pady=(6, 12))
             card = tk.Frame(b, bg=PAL["surface"], highlightthickness=1, highlightbackground=PAL["accent"])
             card.pack(fill="x", pady=4)
             for line in ("acc.why_1", "acc.why_2", "acc.why_3"):
-                tk.Label(card, text="⭐  " + t(line), bg=PAL["surface"], fg=PAL["fg"], font=(ui_theme.FONT, 10), anchor="w",
+                tk.Label(card, text="â­  " + t(line), bg=PAL["surface"], fg=PAL["fg"], font=(ui_theme.FONT, 10), anchor="w",
                          justify="left").pack(fill="x", padx=12, pady=(6, 0))
             tk.Frame(card, height=8, bg=PAL["surface"]).pack()
-            self._acc_btn = ttk.Button(b, text="🎮  " + t("acc.discord"), style="Accent.TButton", command=self._acc_login)
+            self._acc_btn = ttk.Button(b, text="ğŸ®  " + t("acc.discord"), style="Accent.TButton", command=self._acc_login)
             self._acc_btn.pack(fill="x", pady=(16, 4), ipady=6)
             P(t("acc.register_note")).pack(fill="x")
             self._acc_status = tk.Label(b, text="", bg=PAL["bg"], fg=PAL["muted"], font=(ui_theme.FONT, 10), anchor="w",
@@ -4081,22 +4081,22 @@ class App:
             self._acc_status.pack(fill="x", pady=(8, 0))
             sec = tk.Frame(b, bg=PAL["bg"]); sec.pack(fill="x", side="bottom")
             for line in ("acc.sec_1", "acc.sec_2", "acc.sec_3"):
-                tk.Label(sec, text="🔒 " + t(line), bg=PAL["bg"], fg=PAL["muted"], font=(ui_theme.FONT, 9), anchor="w").pack(fill="x")
+                tk.Label(sec, text="ğŸ”’ " + t(line), bg=PAL["bg"], fg=PAL["muted"], font=(ui_theme.FONT, 9), anchor="w").pack(fill="x")
             if self._acc_welcome:
                 ttk.Button(b, text=t("acc.skip"), command=self._acc_win.destroy).pack(anchor="e", pady=(10, 6), side="bottom")
         else:
             prem = e.source == "account"
-            H("👤 " + a.username).pack(fill="x")
-            badge = ("⭐ " + t("prem.premium")) if prem else (("⭐ " + t("acc.via_key")) if e.valid else t("prem.free"))
+            H("ğŸ‘¤ " + a.username).pack(fill="x")
+            badge = ("â­ " + t("prem.premium")) if prem else (("â­ " + t("acc.via_key")) if e.valid else t("prem.free"))
             tk.Label(b, text=badge, bg=PAL["accent"] if (prem or e.valid) else PAL["surface"],
                      fg=PAL["bg"] if (prem or e.valid) else PAL["muted"], font=(ui_theme.FONT_SEMI, 10), padx=10, pady=2).pack(anchor="w", pady=(4, 8))
             lic = a.data.get("license") or {}
             if lic:
                 exp = lic.get("expires")
-                when = (t("prem.never") if not exp else t("prem.exp", date=time.strftime("%Y-%m-%d", time.localtime(exp)))).strip(" ·")
+                when = (t("prem.never") if not exp else t("prem.exp", date=time.strftime("%Y-%m-%d", time.localtime(exp)))).strip(" Â·")
                 P(t("acc.license_line", src=t("acc.src_" + lic.get("source", "admin")), hint=lic.get("hint", ""), exp=when)).pack(fill="x")
             if a.data.get("device_limit"):
-                P("⚠ " + t("acc.device_limit"), fg=PAL["warning"]).pack(fill="x", pady=(6, 0))
+                P("âš  " + t("acc.device_limit"), fg=PAL["warning"]).pack(fill="x", pady=(6, 0))
             elif prem:
                 left = max(0, int((e.ent_payload.get("exp", 0) - time.time()) / 86400))
                 P(t("acc.offline_days", n=left)).pack(fill="x", pady=(2, 0))
@@ -4107,19 +4107,19 @@ class App:
             rr = tk.Frame(b, bg=PAL["bg"]); rr.pack(fill="x", pady=6)
             self._acc_code = ttk.Entry(rr); self._acc_code.pack(side="left", fill="x", expand=True)
             self._acc_code.bind("<Return>", lambda ev: self._acc_redeem())
-            self._acc_btn = ttk.Button(rr, text="✔ " + t("acc.redeem"), style="Accent.TButton", command=self._acc_redeem)
+            self._acc_btn = ttk.Button(rr, text="âœ” " + t("acc.redeem"), style="Accent.TButton", command=self._acc_redeem)
             self._acc_btn.pack(side="left", padx=(6, 0))
             self._acc_status = tk.Label(b, text="", bg=PAL["bg"], fg=PAL["muted"], font=(ui_theme.FONT, 10), anchor="w",
                                         justify="left", wraplength=int(500 * getattr(self, "ui_factor", 1.0)))
             self._acc_status.pack(fill="x")
             P(t("acc.one_device")).pack(fill="x", pady=(14, 0))
             P(t("acc.mobile_hint")).pack(fill="x", pady=(16, 2))
-            ttk.Button(b, text="📱 " + t("acc.mobile_pair"), command=self._acc_pair_phone).pack(fill="x", pady=(2, 0))
+            ttk.Button(b, text="ğŸ“± " + t("acc.mobile_pair"), command=self._acc_pair_phone).pack(fill="x", pady=(2, 0))
             bar = tk.Frame(b, bg=PAL["bg"]); bar.pack(fill="x", side="bottom", pady=(10, 0))
-            ttk.Button(bar, text="🔄 " + t("acc.refresh"), command=lambda: (self._acc_set_status(t("acc.working")), self.account_refresh())).pack(side="left")
-            ttk.Button(bar, text="🐞 " + t("acc.support"), command=lambda: self.open_feedback(
+            ttk.Button(bar, text="ğŸ”„ " + t("acc.refresh"), command=lambda: (self._acc_set_status(t("acc.working")), self.account_refresh())).pack(side="left")
+            ttk.Button(bar, text="ğŸ " + t("acc.support"), command=lambda: self.open_feedback(
                 prefill={"type": "question", "title": t("acc.support_title")})).pack(side="left", padx=6)
-            ttk.Button(bar, text="⎋ " + t("acc.logout"), command=self._acc_logout).pack(side="right")
+            ttk.Button(bar, text="â‹ " + t("acc.logout"), command=self._acc_logout).pack(side="right")
         if getattr(self, "_acc_msg", None):
             self._acc_set_status(*self._acc_msg)
 
@@ -4128,13 +4128,13 @@ class App:
             self._acc_status.config(text=text, fg=PAL.get(kind, PAL["muted"]))
 
     def _acc_login(self):
-        if getattr(self, "_acc_cancel", None) and not self._acc_cancel.is_set():   # ikinci tık: iptal
+        if getattr(self, "_acc_cancel", None) and not self._acc_cancel.is_set():   # ikinci tÄ±k: iptal
             self._acc_cancel.set(); return
         cancel = self._acc_cancel = threading.Event()
-        self._acc_btn.config(text="✖ " + t("acc.cancel"))
+        self._acc_btn.config(text="âœ– " + t("acc.cancel"))
         self._acc_set_status(t("acc.waiting"))
         opener = webbrowser_open
-        if os.environ.get("TD2_ACCOUNT_TEST_BROWSER"):                 # UI testi: tarayıcı yerine sahte onay
+        if os.environ.get("TD2_ACCOUNT_TEST_BROWSER"):                 # UI testi: tarayÄ±cÄ± yerine sahte onay
             opener = lambda u: threading.Thread(target=_test_browser, args=(u,), daemon=True).start()
         def work():
             try: self.account.login(open_url=opener, cancel=cancel); err = None
@@ -4158,7 +4158,7 @@ class App:
         threading.Thread(target=work, daemon=True).start()
 
     def _acc_pair_phone(self):
-        """TD2 Loot Advisor Companion (mobil) eşleştirme kodu üretir; kod 5 dakika geçerlidir."""
+        """TD2 Loot Advisor Companion (mobil) eÅŸleÅŸtirme kodu Ã¼retir; kod 5 dakika geÃ§erlidir."""
         def work():
             try: j = self.account.create_mobile_pairing(); err = None
             except account.AuthError as e: err, j = e, {}
@@ -4176,18 +4176,18 @@ class App:
         if not messagebox.askyesno(APP_NAME, t("acc.logout_q"), parent=self._acc_win): return
         threading.Thread(target=lambda: (self.account.logout(), self.root.after(0, self._acc_changed)), daemon=True).start()
 
-    # ---------- Ekran kartıyla OCR (DirectML) ----------
+    # ---------- Ekran kartÄ±yla OCR (DirectML) ----------
     def _gpu_key(self):
         return f"{APP_VERSION}|{sys.version_info.major}.{sys.version_info.minor}"
 
     def gpu_apply_cached(self):
-        """Bu sürümde daha önce yapılmış denemenin sonucunu uygula (yeniden deneme yok). Uygulandıysa True."""
+        """Bu sÃ¼rÃ¼mde daha Ã¶nce yapÄ±lmÄ±ÅŸ denemenin sonucunu uygula (yeniden deneme yok). UygulandÄ±ysa True."""
         st = self.cfg["settings"]; mode = st.get("ocr_gpu", "auto")
         pr = st.get("ocr_gpu_probe") or {}
         if mode == "off" or OCR is None or OCR.name != "rapidocr" or sys.platform != "win32": return False
         if pr.get("key") == self._gpu_key() and (pr.get("ok") or mode == "on"):
             ocr_backend.USE_DML = True; ocr_backend.reset_rapid(); OCR.warm_up()
-            log.info("OCR: DirectML (GPU) on — cached probe cpu %s ms -> gpu %s ms", pr.get("cpu_ms"), pr.get("dml_ms"))
+            log.info("OCR: DirectML (GPU) on â€” cached probe cpu %s ms -> gpu %s ms", pr.get("cpu_ms"), pr.get("dml_ms"))
             return True
         return False
 
@@ -4200,7 +4200,7 @@ class App:
         return t("ocr.gpu_st_none", why=pr.get("reason", "?"))
 
     def gpu_check(self):
-        """İlk açılışta (her sürümde bir kez) DirectML'i ayrı süreçte dene; aynı sonuç + daha hızlıysa aç."""
+        """Ä°lk aÃ§Ä±lÄ±ÅŸta (her sÃ¼rÃ¼mde bir kez) DirectML'i ayrÄ± sÃ¼reÃ§te dene; aynÄ± sonuÃ§ + daha hÄ±zlÄ±ysa aÃ§."""
         st = self.cfg["settings"]; mode = st.get("ocr_gpu", "auto")
         if mode == "off" or OCR is None or OCR.name != "rapidocr" or sys.platform != "win32": return
         if (st.get("ocr_gpu_probe") or {}).get("key") == self._gpu_key(): return
@@ -4226,11 +4226,11 @@ class App:
             with self.lock:
                 ocr_backend.USE_DML = True; ocr_backend.reset_rapid()
             OCR.warm_up()
-            log.info("OCR: DirectML (GPU) on — cpu %s ms -> gpu %s ms", res.get("cpu_ms"), res.get("dml_ms"))
+            log.info("OCR: DirectML (GPU) on â€” cpu %s ms -> gpu %s ms", res.get("cpu_ms"), res.get("dml_ms"))
 
     def set_app_icon(self):
-        """Pencere ve görev çubuğu simgesi (icon/td2.ico, td2.png). Windows'ta görev çubuğunda Python simgesi yerine
-        uygulamanın kendi simgesi görünsün diye ayrı bir AppUserModelID verilir."""
+        """Pencere ve gÃ¶rev Ã§ubuÄŸu simgesi (icon/td2.ico, td2.png). Windows'ta gÃ¶rev Ã§ubuÄŸunda Python simgesi yerine
+        uygulamanÄ±n kendi simgesi gÃ¶rÃ¼nsÃ¼n diye ayrÄ± bir AppUserModelID verilir."""
         if os.name == "nt":
             try: ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("FEDERALTURK.TD2LootAdvisor")
             except Exception: pass
@@ -4246,7 +4246,7 @@ class App:
                 log.debug("icon failed", exc_info=True)
 
     def restart_app(self, tab=None, page=None):
-        """Programı aynı ayarlarla yeniden açar (pencere/yazı ölçeği değişince)."""
+        """ProgramÄ± aynÄ± ayarlarla yeniden aÃ§ar (pencere/yazÄ± Ã¶lÃ§eÄŸi deÄŸiÅŸince)."""
         st = self.cfg["settings"]
         st["_start_tab"], st["_start_page"] = tab or "", page or ""
         save_cfg(self.cfg)
@@ -4254,7 +4254,7 @@ class App:
             args = [sys.executable]
         else:
             args = [sys.executable, str(Path(__file__).resolve())]
-        args += [a for a in sys.argv[1:] if a not in ("--restart", "--tray")] + ["--restart"]   # yeni kopya bu kopyanın kapanmasını bekler
+        args += [a for a in sys.argv[1:] if a not in ("--restart", "--tray")] + ["--restart"]   # yeni kopya bu kopyanÄ±n kapanmasÄ±nÄ± bekler
         log.info("Restarting: %s", args)
         try:
             subprocess.Popen(args, cwd=str(BASE), creationflags=getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0))
@@ -4263,15 +4263,15 @@ class App:
         self.on_close(force=True)
 
     def apply_window_profile(self, initial=False):
-        """Pencereyi seçilen çözünürlük profiline göre boyutlandırır: 240p'den 4K'ya kadar her ekranda sığar.
-        Küçük ekranlarda yazılar/boşluklar küçülür (tk scaling), başlık bandı incelir (kompakt mod)."""
+        """Pencereyi seÃ§ilen Ã§Ã¶zÃ¼nÃ¼rlÃ¼k profiline gÃ¶re boyutlandÄ±rÄ±r: 240p'den 4K'ya kadar her ekranda sÄ±ÄŸar.
+        KÃ¼Ã§Ã¼k ekranlarda yazÄ±lar/boÅŸluklar kÃ¼Ã§Ã¼lÃ¼r (tk scaling), baÅŸlÄ±k bandÄ± incelir (kompakt mod)."""
         st = self.cfg["settings"]
         key, prof = active_profile(st)
         try: pw, ph = map(int, key.split("x"))
         except ValueError: pw, ph = self.root.winfo_screenwidth(), self.root.winfo_screenheight()
         sw, sh = self.root.winfo_screenwidth(), self.root.winfo_screenheight()
-        tw, th = min(pw, sw), min(ph, sh)                 # profil ekrandan büyükse ekran sınırı
-        # yazı ölçeği: 1080p = 1.0 → 720p ≈ 0.8, 480p ≈ 0.62, 240p ≈ 0.5, 1440p ≈ 1.1, 4K ≈ 1.3
+        tw, th = min(pw, sw), min(ph, sh)                 # profil ekrandan bÃ¼yÃ¼kse ekran sÄ±nÄ±rÄ±
+        # yazÄ± Ã¶lÃ§eÄŸi: 1080p = 1.0 â†’ 720p â‰ˆ 0.8, 480p â‰ˆ 0.62, 240p â‰ˆ 0.5, 1440p â‰ˆ 1.1, 4K â‰ˆ 1.3
         f = max(0.5, min(1.35, (th / 1080) ** 0.55))
         self.ui_factor = f
         self.compact = th < 800
@@ -4285,25 +4285,25 @@ class App:
         log.info("Window profile %s: %dx%d, ui scale %.2f, compact=%s", key, ww, wh, f, self.compact)
 
     def apply_fx(self):
-        """İmleç, fare izi ve arka plan videosunu ayarlara göre aç/kapat."""
+        """Ä°mleÃ§, fare izi ve arka plan videosunu ayarlara gÃ¶re aÃ§/kapat."""
         st = self.cfg["settings"]
         if not hasattr(self, "cursor_fx"): self.cursor_fx = fx.CursorFX(self.root, ART_DIR / "cursors")
         ok = self.cursor_fx.apply(st.get("fx_cursor", True), st.get("fx_cursor_style", "crosshair"),
                                   st.get("fx_cursor_color", "#ff6d10"), st.get("fx_cursor_custom", ""), getattr(self, "ui_factor", 1.0))
         if not ok: log.warning("Custom cursor could not be applied")
         tr = getattr(self, "trail_fx", None)
-        # Fare izi devre dışı: tam pencere Canvas denemesi Windows şeffaf
-        # arka planıyla çakışarak arayüz katmanını görünmez yapabildi.
+        # Fare izi devre dÄ±ÅŸÄ±: tam pencere Canvas denemesi Windows ÅŸeffaf
+        # arka planÄ±yla Ã§akÄ±ÅŸarak arayÃ¼z katmanÄ±nÄ± gÃ¶rÃ¼nmez yapabildi.
         if tr:
             tr.stop()
             self.trail_fx = None
-        if float(st.get("fx_video_dim", 0.35)) > 0.7: st["fx_video_dim"] = 0.35     # eski sürümden kalan çok koyu ayar
-        # tüm pencere arka planı: ajan saati (Windows, koyu temalar)
+        if float(st.get("fx_video_dim", 0.35)) > 0.7: st["fx_video_dim"] = 0.35     # eski sÃ¼rÃ¼mden kalan Ã§ok koyu ayar
+        # tÃ¼m pencere arka planÄ±: ajan saati (Windows, koyu temalar)
         wb = getattr(self, "watch_bg", None)
-        # Küçük pencerede saydam arka plan katmanı ttk düğmelerinin olayını
-        # yanlış alt çerçeveye yönlendirebildiği için dekoratif saati kapat.
-        # Büyük görünümde efekt aynen korunur; küçük görünümde tıklama yüzeyi
-        # doğrudan ana pencereye ait olur.
+        # KÃ¼Ã§Ã¼k pencerede saydam arka plan katmanÄ± ttk dÃ¼ÄŸmelerinin olayÄ±nÄ±
+        # yanlÄ±ÅŸ alt Ã§erÃ§eveye yÃ¶nlendirebildiÄŸi iÃ§in dekoratif saati kapat.
+        # BÃ¼yÃ¼k gÃ¶rÃ¼nÃ¼mde efekt aynen korunur; kÃ¼Ã§Ã¼k gÃ¶rÃ¼nÃ¼mde tÄ±klama yÃ¼zeyi
+        # doÄŸrudan ana pencereye ait olur.
         want = (bool(st.get("fx_bgwatch", True)) and os.name == "nt"
                 and PAL.get("mode") != "light" and not getattr(self, "compact", False))
         variant = st.get("event_fx", "standard")
@@ -4314,7 +4314,7 @@ class App:
             if not self.watch_bg.start():
                 log.info("Agent watch background unavailable"); self.watch_bg = None
         watch_on = bool(getattr(self, "watch_bg", None))
-        if watch_on:                                            # boşluklarda da programın imleci
+        if watch_on:                                            # boÅŸluklarda da programÄ±n imleci
             self.watch_bg.set_cursor(self.root.cget("cursor"))
         if hasattr(self, "banner"): self.banner.set_transparent(watch_on)
         v = getattr(self, "video", None)
@@ -4331,11 +4331,11 @@ class App:
                 else:
                     log.info("Background video off: %s", self.video.error)
                     if self.video.error == "no_videos":
-                        self.make_videos()                         # ilk açılış: özgün arka plan videolarını üret
+                        self.make_videos()                         # ilk aÃ§Ä±lÄ±ÅŸ: Ã¶zgÃ¼n arka plan videolarÄ±nÄ± Ã¼ret
                     self.video = None
 
     def normalize_builds(self):
-        """Build'lerdeki talent/eşya karışıklığını oyun kütüphanesine göre düzeltir (Equalizer → items)."""
+        """Build'lerdeki talent/eÅŸya karÄ±ÅŸÄ±klÄ±ÄŸÄ±nÄ± oyun kÃ¼tÃ¼phanesine gÃ¶re dÃ¼zeltir (Equalizer â†’ items)."""
         changed = False
         for b in self.cfg["builds"]:
             ch, unk = engine.normalize_build(b, GAME)
@@ -4345,7 +4345,7 @@ class App:
             save_cfg(self.cfg); log.info("Builds normalized against game library")
 
     def build_ui(self):
-        """ISAC kabuk + sabit ana gezinme + özellik gruplarının alt sekmeleri."""
+        """ISAC kabuk + sabit ana gezinme + Ã¶zellik gruplarÄ±nÄ±n alt sekmeleri."""
         self._ui_build_errors = []
         set_palette(ui_theme.apply(self.root, self.cfg["settings"].get("ui_theme", "default")))
         self.build_header()
@@ -4359,22 +4359,22 @@ class App:
         }
         self.group_keys = ("home", "gear", "intel", "tools", "settings", "system")
         tr_ui = i18n.current_language() == "tr"
-        self.group_labels = {"home": "⌂  " + t("tab.dash"), "gear": "🎒  " + t("nav.gear"),
-                             "intel": "🛰  " + t("nav.intel"), "tools": "🧰  " + t("nav.tools"),
-                             "settings": "⚙  " + t("nav.settings"), "system": "☰  " + t("nav.system")}
+        self.group_labels = {"home": "âŒ‚  " + t("tab.dash"), "gear": "ğŸ’  " + t("nav.gear"),
+                             "intel": "ğŸ›°  " + t("nav.intel"), "tools": "ğŸ§°  " + t("nav.tools"),
+                             "settings": "âš™  " + t("nav.settings"), "system": "â˜°  " + t("nav.system")}
         if self.cfg["settings"].get("ui_layout") == "field_command":
             return self._build_field_command_shell()
         if self.cfg["settings"].get("ui_layout") == "shd_terminal":
             return self._build_shd_terminal_shell()
 
-        # ISAC ana kabuğu: dikey sol navigasyon yok; tüm menü üstte yatay bir şeritte,
-        # içerik alanı tüm genişliği kullanır.
+        # ISAC ana kabuÄŸu: dikey sol navigasyon yok; tÃ¼m menÃ¼ Ã¼stte yatay bir ÅŸeritte,
+        # iÃ§erik alanÄ± tÃ¼m geniÅŸliÄŸi kullanÄ±r.
         self.workspace = ttk.Frame(self.root)
         self.workspace.pack(fill="both", expand=True, padx=10, pady=(4, 10))
         self.main_area = ttk.Frame(self.workspace)
         self.main_area.pack(side="left", fill="both", expand=True)
-        # Pencere elle küçültüldüğünde de kompakt menü davranışını uygula;
-        # yalnızca açılış ekran profiline güvenme.
+        # Pencere elle kÃ¼Ã§Ã¼ltÃ¼ldÃ¼ÄŸÃ¼nde de kompakt menÃ¼ davranÄ±ÅŸÄ±nÄ± uygula;
+        # yalnÄ±zca aÃ§Ä±lÄ±ÅŸ ekran profiline gÃ¼venme.
         self._responsive_job = None
         self.root.bind("<Configure>", self._responsive_configure, add="+")
         self.fxbar = fx.Transition(
@@ -4382,9 +4382,9 @@ class App:
             duration_ms=int(self.cfg["settings"].get("fx_transition_ms", 260)),
             style=self.cfg["settings"].get("fx_transition_style", "tactical"),
         )
-        # Üst yatay menü şeridi: arka planında aşağı akan kod animasyonu var,
-        # menü düğmeleri bu canvas'a gömülü (create_window) — aralarındaki
-        # boşluklarda animasyon görünür kalır. Sol/dikey bir sidebar yoktur.
+        # Ãœst yatay menÃ¼ ÅŸeridi: arka planÄ±nda aÅŸaÄŸÄ± akan kod animasyonu var,
+        # menÃ¼ dÃ¼ÄŸmeleri bu canvas'a gÃ¶mÃ¼lÃ¼ (create_window) â€” aralarÄ±ndaki
+        # boÅŸluklarda animasyon gÃ¶rÃ¼nÃ¼r kalÄ±r. Sol/dikey bir sidebar yoktur.
         self.nav_motif = None
         self.topnav = fx.DigitalRain(self.main_area, bg=PAL["bg"],
                                      dim=PAL.get("ov_border", PAL["border"]), bright=PAL["accent"],
@@ -4398,12 +4398,12 @@ class App:
             self._topnav_windows[group] = self.topnav.create_window(0, 0, window=btn, anchor="w", tags=("navbtn",))
             self._sidebar_buttons[group] = btn
         self._topnav_version_id = self.topnav.create_text(
-            0, 0, text=("SÜRÜM " if tr_ui else "VERSION ") + APP_VERSION,
+            0, 0, text=("SÃœRÃœM " if tr_ui else "VERSION ") + APP_VERSION,
             fill=PAL["muted"], font=(ui_theme.FONT, 8), anchor="e", tags=("navbtn",))
         self.topnav.bind("<Configure>", self._layout_topnav_buttons, add="+")
         self.topnav.after_idle(self._layout_topnav_buttons)
-        # Ana içerik menülerinin üstünde görünür bir operasyon şeridi. Bu,
-        # yalnız dekoratif bir Canvas'tır; tıklama alanı veya sayfa düzeni
+        # Ana iÃ§erik menÃ¼lerinin Ã¼stÃ¼nde gÃ¶rÃ¼nÃ¼r bir operasyon ÅŸeridi. Bu,
+        # yalnÄ±z dekoratif bir Canvas'tÄ±r; tÄ±klama alanÄ± veya sayfa dÃ¼zeni
         # hareket etmez.
         self.command_ribbon = fx.CommandRibbon(self.main_area, accent=PAL["accent"], bg=PAL["bg"],
                                                 surface=PAL["surface"], muted=PAL["border"])
@@ -4425,9 +4425,9 @@ class App:
             title = "The Division 3" if k == "division3" else t(f"tab.{k}")
             parent.add(self.tabs[k], text=ui_theme.with_icon(title, ui_theme.TAB_ICONS.get(k, "")))
 
-        # Her sayfayı tek büyük senkron blokta kurmak, açılış sahnesinin
-        # 3–4 saniye donuk görünmesine yol açıyordu.  Sayfalar event loop'a
-        # sırayla bırakılır; splash arada 30 FPS bütçesinden kare çizebilir.
+        # Her sayfayÄ± tek bÃ¼yÃ¼k senkron blokta kurmak, aÃ§Ä±lÄ±ÅŸ sahnesinin
+        # 3â€“4 saniye donuk gÃ¶rÃ¼nmesine yol aÃ§Ä±yordu.  Sayfalar event loop'a
+        # sÄ±rayla bÄ±rakÄ±lÄ±r; splash arada 30 FPS bÃ¼tÃ§esinden kare Ã§izebilir.
         self._ui_builders = [
             self.build_dash, self.build_builds, self.build_prog, self.build_stash,
             self.build_stats, self.build_info, self.build_division3, self.build_translate,
@@ -4443,7 +4443,7 @@ class App:
         self.root.after_idle(self._build_next_ui_page)
 
     def _build_field_command_shell(self):
-        """Yeni tam-genişlikli saha terminali: sol sidebar yok, üst operasyon menüsü var."""
+        """Yeni tam-geniÅŸlikli saha terminali: sol sidebar yok, Ã¼st operasyon menÃ¼sÃ¼ var."""
         self.workspace = ttk.Frame(self.root); self.workspace.pack(fill="both", expand=True, padx=12, pady=(4, 12))
         self.main_area = ttk.Frame(self.workspace); self.main_area.pack(fill="both", expand=True)
         self._responsive_job = None; self.root.bind("<Configure>", self._responsive_configure, add="+")
@@ -4478,7 +4478,7 @@ class App:
         self._sidebar_activate("home"); self.root.after_idle(self._build_next_ui_page)
 
     def _build_shd_terminal_shell(self):
-        """Turuncu SHD terminal kabuğu: header, kodlu dikey nav, workspace, canlı footer."""
+        """Turuncu SHD terminal kabuÄŸu: header, kodlu dikey nav, workspace, canlÄ± footer."""
         self.shd_header = fx.SHDStatusBar(self.root, accent=PAL["accent"], bg=PAL["bg"], fg=PAL["fg"], muted=PAL["muted"]); self.shd_header.pack(fill="x")
         self.workspace = ttk.Frame(self.root); self.workspace.pack(fill="both", expand=True, padx=10, pady=8)
         self.sidebar = ttk.Frame(self.workspace, style="Sidebar.TFrame", width=230); self.sidebar.pack(side="left", fill="y", padx=(0,8)); self.sidebar.pack_propagate(False)
@@ -4489,7 +4489,7 @@ class App:
         self.command_ribbon=fx.CommandRibbon(self.main_area,accent=PAL["accent"],bg=PAL["bg"],surface=PAL["surface"],muted=PAL["border"]); self.command_ribbon.pack(fill="x",pady=(0,5))
         self._sidebar_buttons={}; codes=("01","02","03","04","05","06")
         for index,group in enumerate(self.group_keys):
-            label="> "+codes[index]+". "+self.group_labels[group].replace("⌂  ","").upper()
+            label="> "+codes[index]+". "+self.group_labels[group].replace("âŒ‚  ","").upper()
             button=ttk.Button(self.sidebar,text=label,style="Nav.TButton",command=lambda g=group:self._sidebar_select_group(g)); button.pack(fill="x",padx=(10,8),pady=3); self._sidebar_buttons[group]=button
         ttk.Label(self.sidebar,text="[ STATUS ]\nLINK: SECURE\nNODE: LOCAL\nMODE: ADVISOR",style="Muted.TLabel",justify="left",font=("Consolas",8)).pack(side="bottom",anchor="w",padx=12,pady=12)
         nb=self.nb=ttk.Notebook(self.main_area,style="NoTabs.TNotebook"); nb.pack(fill="both",expand=True)
@@ -4505,11 +4505,11 @@ class App:
         self._sidebar_activate("home"); self.shd_footer=fx.SHDStatusBar(self.root,accent=PAL["accent"],bg=PAL["bg"],fg=PAL["fg"],muted=PAL["muted"],footer=True); self.shd_footer.pack(fill="x",side="bottom"); self.root.after_idle(self._build_next_ui_page)
 
     def _build_critical_ui_pages(self):
-        """Ayarlar, Sandık, Çeviri ve Asistan ilk tıklamada hazır olmalı.
+        """Ayarlar, SandÄ±k, Ã‡eviri ve Asistan ilk tÄ±klamada hazÄ±r olmalÄ±.
 
-        Ağır ve nadiren açılan sayfalar sonraki karelerde kurulur. Bu denge
-        açılışın akıcılığını korurken kullanıcının ilk menü tıklamasında boş
-        bir sayfa görmesini engeller.
+        AÄŸÄ±r ve nadiren aÃ§Ä±lan sayfalar sonraki karelerde kurulur. Bu denge
+        aÃ§Ä±lÄ±ÅŸÄ±n akÄ±cÄ±lÄ±ÄŸÄ±nÄ± korurken kullanÄ±cÄ±nÄ±n ilk menÃ¼ tÄ±klamasÄ±nda boÅŸ
+        bir sayfa gÃ¶rmesini engeller.
         """
         critical = {"build_stash", "build_translate", "build_asistan", "build_settings"}
         remaining = []
@@ -4557,7 +4557,7 @@ class App:
             save_cfg(self.cfg)
 
     def _show_startup_recovery(self):
-        """Bir sayfa oluşturulamadıysa kullanıcıyı boş ekranla bırakma."""
+        """Bir sayfa oluÅŸturulamadÄ±ysa kullanÄ±cÄ±yÄ± boÅŸ ekranla bÄ±rakma."""
         if getattr(self, "_recovery_window", None):
             try:
                 if self._recovery_window.winfo_exists(): return
@@ -4565,21 +4565,21 @@ class App:
                 pass
         failed = ", ".join(getattr(self, "_ui_build_errors", [])[:5])
         w = self._recovery_window = tk.Toplevel(self.root)
-        w.title("TD2 Loot Advisor — Başlangıç kurtarma")
+        w.title("TD2 Loot Advisor â€” BaÅŸlangÄ±Ã§ kurtarma")
         w.transient(self.root); w.geometry("640x300"); w.resizable(False, False)
-        ttk.Label(w, text="Arayüz güvenli kipte açılabilir", font=(ui_theme.FONT_SEMI, 14), foreground=PAL["warning"]).pack(anchor="w", padx=18, pady=(18, 8))
-        ttk.Label(w, text=f"Bazı arayüz bölümleri oluşturulamadı: {failed}\nBu, oyun verilerinizi silmez. Güvenli görünüm animasyon, video, özel imleç ve fare izi katmanlarını kapatır.",
+        ttk.Label(w, text="ArayÃ¼z gÃ¼venli kipte aÃ§Ä±labilir", font=(ui_theme.FONT_SEMI, 14), foreground=PAL["warning"]).pack(anchor="w", padx=18, pady=(18, 8))
+        ttk.Label(w, text=f"BazÄ± arayÃ¼z bÃ¶lÃ¼mleri oluÅŸturulamadÄ±: {failed}\nBu, oyun verilerinizi silmez. GÃ¼venli gÃ¶rÃ¼nÃ¼m animasyon, video, Ã¶zel imleÃ§ ve fare izi katmanlarÄ±nÄ± kapatÄ±r.",
                   foreground=PAL["fg"], wraplength=600, justify="left").pack(anchor="w", padx=18)
-        ttk.Label(w, text="Rapor önizlemesi kişisel yol, e-posta, anahtar ve token bilgilerini maskeler; GitHub'a otomatik bir şey gönderilmez.",
+        ttk.Label(w, text="Rapor Ã¶nizlemesi kiÅŸisel yol, e-posta, anahtar ve token bilgilerini maskeler; GitHub'a otomatik bir ÅŸey gÃ¶nderilmez.",
                   foreground=PAL["muted"], wraplength=600, justify="left").pack(anchor="w", padx=18, pady=(8, 14))
         bar = ttk.Frame(w); bar.pack(fill="x", padx=18, pady=8)
-        ttk.Button(bar, text="Güvenli görünümle yeniden kur", style="Accent.TButton",
+        ttk.Button(bar, text="GÃ¼venli gÃ¶rÃ¼nÃ¼mle yeniden kur", style="Accent.TButton",
                    command=lambda: (w.destroy(), self.activate_safe_view())).pack(side="left")
-        ttk.Button(bar, text="Rapor önizle", command=lambda: self.preview_github_report()).pack(side="left", padx=7)
+        ttk.Button(bar, text="Rapor Ã¶nizle", command=lambda: self.preview_github_report()).pack(side="left", padx=7)
         ttk.Button(bar, text="Kapat", command=w.destroy).pack(side="right")
 
     def _responsive_configure(self, _event=None):
-        """Boyut değişikliklerini gecikmeli uygula; her piksel hareketinde UI kurma."""
+        """Boyut deÄŸiÅŸikliklerini gecikmeli uygula; her piksel hareketinde UI kurma."""
         if getattr(self, "_responsive_job", None):
             try: self.root.after_cancel(self._responsive_job)
             except tk.TclError: pass
@@ -4594,23 +4594,23 @@ class App:
                 return
             self._responsive_compact = compact_now
             self.compact = compact_now
-            if hasattr(self, "sidebar"):          # eski dikey kabuklar (shd_terminal) için korunur
+            if hasattr(self, "sidebar"):          # eski dikey kabuklar (shd_terminal) iÃ§in korunur
                 sidebar_w = 76 if compact_now else max(164, int(188 * getattr(self, "ui_factor", 1.0)))
                 self.sidebar.configure(width=sidebar_w)
-            icons = {"home": "⌂", "gear": "🎒", "intel": "🛰", "tools": "🧰", "settings": "⚙", "system": "☰"}
+            icons = {"home": "âŒ‚", "gear": "ğŸ’", "intel": "ğŸ›°", "tools": "ğŸ§°", "settings": "âš™", "system": "â˜°"}
             for key, button in getattr(self, "_sidebar_buttons", {}).items():
                 button.configure(text=icons[key] if compact_now else self.group_labels[key])
             self._layout_topnav_buttons()
-            # Küçük modda saydam üst efektleri kapatıp menü yüzeyini güvenilir
-            # bırak; büyük modda seçili görsel paketi aynen kullan.
+            # KÃ¼Ã§Ã¼k modda saydam Ã¼st efektleri kapatÄ±p menÃ¼ yÃ¼zeyini gÃ¼venilir
+            # bÄ±rak; bÃ¼yÃ¼k modda seÃ§ili gÃ¶rsel paketi aynen kullan.
             self.apply_fx()
         except (tk.TclError, AttributeError):
             return
 
     def _layout_topnav_buttons(self, _event=None):
-        """Üst yatay menüdeki düğmeleri (DigitalRain canvas'ına gömülü) soldan sağa diz.
+        """Ãœst yatay menÃ¼deki dÃ¼ÄŸmeleri (DigitalRain canvas'Ä±na gÃ¶mÃ¼lÃ¼) soldan saÄŸa diz.
 
-        Düğmeler arasında kalan boşluklarda arka plandaki kod animasyonu görünür kalır.
+        DÃ¼ÄŸmeler arasÄ±nda kalan boÅŸluklarda arka plandaki kod animasyonu gÃ¶rÃ¼nÃ¼r kalÄ±r.
         """
         canvas = getattr(self, "topnav", None)
         if not canvas:
@@ -4630,7 +4630,7 @@ class App:
                 x += btn.winfo_reqwidth() + 8
             if getattr(self, "_topnav_version_id", None) is not None:
                 canvas.coords(self._topnav_version_id, max(x + 10, canvas.winfo_width() - 14), h / 2)
-                # Arkadaki kod animasyonu metnin içinden geçip karışmasın diye küçük bir dolgu arkaplanı.
+                # Arkadaki kod animasyonu metnin iÃ§inden geÃ§ip karÄ±ÅŸmasÄ±n diye kÃ¼Ã§Ã¼k bir dolgu arkaplanÄ±.
                 bbox = canvas.bbox(self._topnav_version_id)
                 if bbox:
                     pad = 4
@@ -4646,7 +4646,7 @@ class App:
             return
 
     def _sidebar_activate(self, group):
-        field_style = not hasattr(self, "sidebar")      # yatay üst menü (ana kabuk + eski field_command) FieldNav stili kullanır
+        field_style = not hasattr(self, "sidebar")      # yatay Ã¼st menÃ¼ (ana kabuk + eski field_command) FieldNav stili kullanÄ±r
         for key, button in getattr(self, "_sidebar_buttons", {}).items():
             try:
                 if field_style:
@@ -4662,8 +4662,8 @@ class App:
             self.select_page(page)
 
     def rebuild_ui(self, tab=None):
-        """Yeniden başlatmadan arayüzü yeni tema/dille kurar.
-        Tarama durumu, sayaçlar, son eşya ve sohbet korunur."""
+        """Yeniden baÅŸlatmadan arayÃ¼zÃ¼ yeni tema/dille kurar.
+        Tarama durumu, sayaÃ§lar, son eÅŸya ve sohbet korunur."""
         tab = tab or self.current_tab()
         was_running = self.running
         if was_running: self.stop(quiet=True)
@@ -4682,7 +4682,7 @@ class App:
         except Exception: pass
         if getattr(self, "workspace", None):
             self.workspace.destroy()
-        # Yok edilen eski widget referanslarını temizle (hasattr kontrolleri yeni widget'ı beklesin)
+        # Yok edilen eski widget referanslarÄ±nÄ± temizle (hasattr kontrolleri yeni widget'Ä± beklesin)
         for k, v in list(vars(self).items()):
             if isinstance(v, tk.Misc) and v is not self.root:
                 delattr(self, k)
@@ -4693,7 +4693,7 @@ class App:
         log.info("UI rebuilt (theme=%s, language=%s)", self.cfg["settings"].get("ui_theme"), i18n.current_language())
 
     def current_tab(self):
-        """Seçili sekmenin kimliği (görünen adı değil)."""
+        """SeÃ§ili sekmenin kimliÄŸi (gÃ¶rÃ¼nen adÄ± deÄŸil)."""
         try:
             group = self.group_keys[self.nb.index(self.nb.select())]
             inner = self.group_nbs[group]
@@ -4703,7 +4703,7 @@ class App:
             return ""
 
     def select_page(self, key):
-        """Belirtilen içerik sayfasını kendi üst menü grubu ve alt sekmesiyle aç."""
+        """Belirtilen iÃ§erik sayfasÄ±nÄ± kendi Ã¼st menÃ¼ grubu ve alt sekmesiyle aÃ§."""
         if key not in self.tabs: return
         group = self.tab_groups[key]; self.nb.select(self.group_keys.index(group))
         inner = self.group_nbs[group]; inner.select(self.tabs[key])
@@ -4716,20 +4716,20 @@ class App:
         self.set_group_nbs[group].select(page)
 
     def build_header(self):
-        """Üst bant: dönen arka planlar, marka ve durum rozetleri (ui_art.Banner)."""
+        """Ãœst bant: dÃ¶nen arka planlar, marka ve durum rozetleri (ui_art.Banner)."""
         st = self.cfg["settings"]
         self.banner = ui_art.Banner(self.root, PAL, ART_DIR / "backgrounds", interval_s=st.get("bg_interval", 15),
-                                    title="◆ TD2 LOOT ADVISOR", subtitle=f"v{APP_VERSION}",
+                                    title="â—† TD2 LOOT ADVISOR", subtitle=f"v{APP_VERSION}",
                                     height=max(44, int(118 * getattr(self, "ui_factor", 1.0) * (0.6 if getattr(self, "compact", False) else 1.0))))
         self.refresh_header()
 
     def toast(self, text):
-        """Kısa onay mesajı (başlık bandında, pencere açmadan)."""
-        try: self.banner.toast("✔ " + text)
+        """KÄ±sa onay mesajÄ± (baÅŸlÄ±k bandÄ±nda, pencere aÃ§madan)."""
+        try: self.banner.toast("âœ” " + text)
         except Exception: messagebox.showinfo(APP_NAME, text)
 
     def flash_build(self, b):
-        """Seçilen build'in amblemini bantta 5 sn gösterir."""
+        """SeÃ§ilen build'in amblemini bantta 5 sn gÃ¶sterir."""
         try:
             sets = b.get("sets_or_brands", []) or []
             img = ui_art.emblem(b["name"], sets, ART_DIR / "emblems", size=320)
@@ -4738,7 +4738,7 @@ class App:
             log.debug("Emblem flash failed: %s", e)
 
     def flash_language(self, code):
-        """Seçilen dilin bayrağını bantta 5 sn gösterir."""
+        """SeÃ§ilen dilin bayraÄŸÄ±nÄ± bantta 5 sn gÃ¶sterir."""
         try:
             img = ui_art.flag(code, ART_DIR / "flags", height=240)
             if img is None: return
@@ -4751,38 +4751,38 @@ class App:
         st = self.cfg["settings"]
         prov = st.get("ai_provider", "builtin")
         self.banner.set_chips([(self._acc_chip_text(), "btn" if not self.account.signed_in else "on", self.open_account),
-                               ("🐞 " + t("fb.btn_short"), "off", self.open_feedback),
-                               ("🔄 " + t("sync.btn_short"), "btn", self.run_sync),
-                                ("⚖ " + t("perf." + st.get("perf_mode", "balanced")), "btn", self.toggle_performance),
-                               *([("🎮 " + t("svc.st_" + self.game_state), "on")] if getattr(self, "game_on", False) else []),
-                               (("● " + t("state.running")) if self.running else ("○ " + t("state.stopped")),
+                               ("ğŸ " + t("fb.btn_short"), "off", self.open_feedback),
+                               ("ğŸ”„ " + t("sync.btn_short"), "btn", self.run_sync),
+                                ("âš– " + t("perf." + st.get("perf_mode", "balanced")), "btn", self.toggle_performance),
+                               *([("ğŸ® " + t("svc.st_" + self.game_state), "on")] if getattr(self, "game_on", False) else []),
+                               (("â— " + t("state.running")) if self.running else ("â—‹ " + t("state.stopped")),
                                 "on" if self.running else "off"),
-                               ("🤖 " + provider_label(prov if prov in PROVIDER_KEYS else "builtin"), "off")])
+                               ("ğŸ¤– " + provider_label(prov if prov in PROVIDER_KEYS else "builtin"), "off")])
 
     def on_tab(self, event=None):
         if hasattr(self, "sounds"): self.sounds.play("tab")
         cur = (self.nb.index(self.nb.select()), self.current_tab()) if hasattr(self, "nb") else None
         prev, self._tab_prev = getattr(self, "_tab_prev", cur), cur
-        # İç sekme değişimlerinde dış notebook aynı kalır; ana sekme animasyonunu yeniden oynatma.
+        # Ä°Ã§ sekme deÄŸiÅŸimlerinde dÄ±ÅŸ notebook aynÄ± kalÄ±r; ana sekme animasyonunu yeniden oynatma.
         outer_changed = event is None or getattr(event, "widget", None) is self.nb
         anim = (outer_changed and self.cfg["settings"].get("fx_transitions", True)
                 and hasattr(self, "fxbar"))
         if anim:
             self.fxbar.play(self.nb, prev[0] if isinstance(prev, tuple) else prev, cur[0])
             if getattr(self, "nav_motif", None): self.nav_motif.flash()
-        # Seçilen grubu ve sekmeyi komuta şeridinde açıkça göster. Böylece
-        # menü hiyerarşisi oyundaki operasyon ekranları gibi okunur.
+        # SeÃ§ilen grubu ve sekmeyi komuta ÅŸeridinde aÃ§Ä±kÃ§a gÃ¶ster. BÃ¶ylece
+        # menÃ¼ hiyerarÅŸisi oyundaki operasyon ekranlarÄ± gibi okunur.
         try:
             page = cur[1] if isinstance(cur, tuple) else ""
             group = self.tab_groups.get(page, "home")
-            group_text = self.group_labels.get(group, group).replace("⌂  ", "").strip()
+            group_text = self.group_labels.get(group, group).replace("âŒ‚  ", "").strip()
             page_text = "The Division 3" if page == "division3" else t(f"tab.{page}")
             self.command_ribbon.set_context(f"ISAC // {group_text}", page_text)
             if anim: self.command_ribbon.pulse()
         except Exception:
             pass
         k = self.current_tab()
-        # sekmenin verisini yenilemek zaman alabilir: kayma animasyonu donmasın diye bittikten sonra
+        # sekmenin verisini yenilemek zaman alabilir: kayma animasyonu donmasÄ±n diye bittikten sonra
         def refresh(k=k):
             if self.current_tab() != k: return
             if k == "history": self.load_history()
@@ -4795,14 +4795,14 @@ class App:
 
     # ---------- Panel ----------
     def build_dash(self):
-        """Panel v2 — geniş ekran (21:9) için iki sütun: solda kontrol + karar, sağda eşya kartı ve build eşleşmeleri."""
+        """Panel v2 â€” geniÅŸ ekran (21:9) iÃ§in iki sÃ¼tun: solda kontrol + karar, saÄŸda eÅŸya kartÄ± ve build eÅŸleÅŸmeleri."""
         f = self.tabs["dash"]
         st = self.cfg["settings"]
-        # Ana ekranın üstündeki sahne mevcut OCR/çeviri verisinin görsel özeti; kartlar aşağıda ayrıntılı kalır.
+        # Ana ekranÄ±n Ã¼stÃ¼ndeki sahne mevcut OCR/Ã§eviri verisinin gÃ¶rsel Ã¶zeti; kartlar aÅŸaÄŸÄ±da ayrÄ±ntÄ±lÄ± kalÄ±r.
         self.dash_scene = ui_hud.DashboardScene(
-            # HUD sahnesi, kullanıcı eklediği dönen arka planlardan ayrı olarak
-            # paketle gelen seçili ISAC/Rogue kompozisyonunu kullanır. Böylece
-            # eski bir kullanici art/ klasörü yeni tasarım katmanını gölgeleyemez.
+            # HUD sahnesi, kullanÄ±cÄ± eklediÄŸi dÃ¶nen arka planlardan ayrÄ± olarak
+            # paketle gelen seÃ§ili ISAC/Rogue kompozisyonunu kullanÄ±r. BÃ¶ylece
+            # eski bir kullanici art/ klasÃ¶rÃ¼ yeni tasarÄ±m katmanÄ±nÄ± gÃ¶lgeleyemez.
             f, PAL, (BUNDLE / "art") if (BUNDLE / "art").exists() else ART_DIR,
             mode="rogue" if st.get("event_fx") == "rogue" else "isac",
             on_scan=self.trigger, on_translate=lambda: self.select_page("translate"))
@@ -4813,11 +4813,11 @@ class App:
 
         top = ttk.Frame(left); top.pack(fill="x")
         self.btn_run = ttk.Button(top, text=t("btn.start"), command=self.toggle, style="Success.TButton"); self.btn_run.pack(side="left")
-        ttk.Button(top, text="🔍 " + t("btn.scan_now"), command=self.trigger, style="Accent.TButton").pack(side="left", padx=6)
-        ttk.Button(top, text=ui_theme.with_icon(t("btn.pick_region"), "⛶"), command=self.calibrate).pack(side="left")
-        ttk.Button(top, text=ui_theme.with_icon(t("btn.test_image"), "🖼"), command=self.test_image).pack(side="left", padx=6)
+        ttk.Button(top, text="ğŸ” " + t("btn.scan_now"), command=self.trigger, style="Accent.TButton").pack(side="left", padx=6)
+        ttk.Button(top, text=ui_theme.with_icon(t("btn.pick_region"), "â›¶"), command=self.calibrate).pack(side="left")
+        ttk.Button(top, text=ui_theme.with_icon(t("btn.test_image"), "ğŸ–¼"), command=self.test_image).pack(side="left", padx=6)
         perf_row = ttk.Frame(left); perf_row.pack(fill="x", pady=(6, 0))
-        self.perf_btn = ttk.Button(perf_row, text="⚖ " + t("perf." + st.get("perf_mode", "balanced")), command=self.toggle_performance)
+        self.perf_btn = ttk.Button(perf_row, text="âš– " + t("perf." + st.get("perf_mode", "balanced")), command=self.toggle_performance)
         self.perf_btn.pack(side="left")
         ttk.Button(perf_row, text=t("perf.measure"), command=self.show_performance).pack(side="left", padx=6)
 
@@ -4832,7 +4832,7 @@ class App:
         for txt, val in ((t("mode.hotkey"), "hotkey"), (t("mode.auto"), "auto")):
             ttk.Radiobutton(mode, text=txt, value=val, variable=self.mode_var, command=self.change_mode).pack(side="left", padx=6)
         ab = ttk.Frame(left); ab.pack(fill="x", pady=(4, 0))
-        ttk.Label(ab, text="⭐ " + t("plan.active"), foreground=PAL["accent"]).pack(side="left")
+        ttk.Label(ab, text="â­ " + t("plan.active"), foreground=PAL["accent"]).pack(side="left")
         self.act_cb = ttk.Combobox(ab, state="readonly", width=44, values=[b["name"] for b in self.cfg["builds"]])
         a0 = active_build(self.cfg)
         if a0: self.act_cb.set(a0["name"])
@@ -4840,7 +4840,7 @@ class App:
         self.act_cb.bind("<<ComboboxSelected>>", lambda e: self.set_active_build(self.act_cb.get()))
         self.act_prog = ttk.Label(ab, text="", foreground=PAL["muted"]); self.act_prog.pack(side="left", padx=6)
         ac = ttk.Frame(left); ac.pack(fill="x", pady=(4, 0))
-        ttk.Label(ac, text="🎮 " + t("drops.activity")).pack(side="left")
+        ttk.Label(ac, text="ğŸ® " + t("drops.activity")).pack(side="left")
         self._acts = {k: t("act." + k) for k in dropstats.ACTIVITIES}
         self.drop_act = ttk.Combobox(ac, state="readonly", width=22, values=list(self._acts.values()))
         self.drop_act.set(self._acts.get(st.get("drop_activity", "none"), self._acts["none"]))
@@ -4848,17 +4848,17 @@ class App:
         self.drop_act.bind("<<ComboboxSelected>>", lambda e=None: self._set_activity())
         ttk.Label(ac, text=t("drops.activity_hint"), foreground=PAL["muted"]).pack(side="left", padx=4)
         tb = ttk.Frame(left); tb.pack(fill="x", pady=(4, 0))
-        ttk.Button(tb, text="🤖 " + t("ai.ask_item"), command=self.ask_about_item).pack(side="left")
-        ttk.Button(tb, text="👁 " + t("ai.vision_read"), command=self.vision_read).pack(side="left", padx=6)
-        ttk.Button(tb, text="⚑ " + t("report.wrong"), command=self.report_wrong).pack(side="left")
-        ttk.Button(tb, text="⚠ " + t("vf.btn"), command=self.report_wrong_verdict).pack(side="left", padx=6)
+        ttk.Button(tb, text="ğŸ¤– " + t("ai.ask_item"), command=self.ask_about_item).pack(side="left")
+        ttk.Button(tb, text="ğŸ‘ " + t("ai.vision_read"), command=self.vision_read).pack(side="left", padx=6)
+        ttk.Button(tb, text="âš‘ " + t("report.wrong"), command=self.report_wrong).pack(side="left")
+        ttk.Button(tb, text="âš  " + t("vf.btn"), command=self.report_wrong_verdict).pack(side="left", padx=6)
         self.status = ttk.Label(left, foreground=PAL["muted"], wraplength=560, justify="left"); self.status.pack(anchor="w", pady=(4, 2))
 
         card = ttk.Frame(left, style="Card.TFrame", padding=(0, 0, 0, 12)); card.pack(fill="x", pady=(6, 8))
         self.verdict_lbl = tk.Label(card, text=verdict_label("IDLE"), bg=COLORS["IDLE"], fg="white",
                                     font=(ui_theme.FONT_SEMI, 34), pady=20)
         self.verdict_lbl.pack(fill="x")
-        self.item_lbl = ttk.Label(card, text="—", style="Item.TLabel", wraplength=560); self.item_lbl.pack(anchor="w", padx=16, pady=(10, 0))
+        self.item_lbl = ttk.Label(card, text="â€”", style="Item.TLabel", wraplength=560); self.item_lbl.pack(anchor="w", padx=16, pady=(10, 0))
         self.note_lbl = ttk.Label(card, text="", style="Note.TLabel", wraplength=560, justify="left"); self.note_lbl.pack(anchor="w", padx=16)
         self.fit_lbl = tk.Label(card, text="", wraplength=560, justify="left", bg=PAL["surface"], fg=PAL["muted"],
                                 font=(ui_theme.FONT, 10)); self.fit_lbl.pack(anchor="w", padx=16, pady=(4, 0))
@@ -4891,7 +4891,7 @@ class App:
         self.refresh_counts(); self.refresh_status()
 
     def show_fit(self, item):
-        """Panel: bu eşya aktif build'in ilgili yuvasının şartlarını karşılıyor mu?"""
+        """Panel: bu eÅŸya aktif build'in ilgili yuvasÄ±nÄ±n ÅŸartlarÄ±nÄ± karÅŸÄ±lÄ±yor mu?"""
         if not hasattr(self, "fit_lbl"): return
         b = active_build(self.cfg)
         stt = self.build_status(b) if b else {}
@@ -4917,30 +4917,30 @@ class App:
         self.verdict_lbl.config(text=verdict_label(verdict), bg=COLORS[verdict])
         kind = t("kind." + item["kind"]) if item.get("kind") else ""
         self.item_lbl.config(text=item["name"] + ("  [" + ", ".join(item["rarity"]) + "]" if item["rarity"] else "") +
-                             (f"  ·  {slot_name(item['slot'])}" if item.get("slot") else "") + (f"  ·  {kind}" if kind else ""))
-        notes = [n for n in (item.get("_note"), note) if n and "  ·  " not in n]
-        notes += [n.split("  ·  ")[0] for n in (note,) if n and "  ·  " in n]
-        self.note_lbl.config(text="\n".join("» " + n for n in notes))
+                             (f"  Â·  {slot_name(item['slot'])}" if item.get("slot") else "") + (f"  Â·  {kind}" if kind else ""))
+        notes = [n for n in (item.get("_note"), note) if n and "  Â·  " not in n]
+        notes += [n.split("  Â·  ")[0] for n in (note,) if n and "  Â·  " in n]
+        self.note_lbl.config(text="\n".join("Â» " + n for n in notes))
         if hasattr(self, "dash_scene"):
-            best = f"{res[0][0]}%" if res else "—"
-            self.dash_scene.set_snapshot(name=item.get("name") or "—", verdict=verdict_label(verdict), score=best)
+            best = f"{res[0][0]}%" if res else "â€”"
+            self.dash_scene.set_snapshot(name=item.get("name") or "â€”", verdict=verdict_label(verdict), score=best)
         self.show_fit(item)
         self.item_tv.delete(*self.item_tv.get_children())
         proto = "PROTOTYPE" in item.get("rarity", [])
         for k, v in item.get("attrs", {}).items():
             mx = GAME.max_of(k, proto) if GAME.ok else None
             q = item.get("quality", {}).get(k)
-            bar = ("█" * round((q or 0) / 10)).ljust(10, "░") + f"  {q}%" if q is not None else "—"
-            self.item_tv.insert("", "end", values=(attr_name(k), f"{v:g}", f"{mx:g}" if mx else "—", bar))
+            bar = ("â–ˆ" * round((q or 0) / 10)).ljust(10, "â–‘") + f"  {q}%" if q is not None else "â€”"
+            self.item_tv.insert("", "end", values=(attr_name(k), f"{v:g}", f"{mx:g}" if mx else "â€”", bar))
         bits = []
         if item.get("gear_set") or item.get("brand"):
-            bits.append("🏷 " + " / ".join(x for x in (item.get("gear_set"), item.get("brand")) if x))
-        if item.get("talents"): bits.append("✦ " + ", ".join(item["talents"]))
+            bits.append("ğŸ· " + " / ".join(x for x in (item.get("gear_set"), item.get("brand")) if x))
+        if item.get("talents"): bits.append("âœ¦ " + ", ".join(item["talents"]))
         if "confidence" in item: bits.append(t("panel.confidence", pct=round(item["confidence"] * 100)))
         self.tal_lbl.config(text="     ".join(bits))
         self.match_tv.delete(*self.match_tv.get_children())
         for p, n, w in res[:8]:
-            self.match_tv.insert("", "end", values=(p, n, ", ".join(w) if w else "—"))
+            self.match_tv.insert("", "end", values=(p, n, ", ".join(w) if w else "â€”"))
         body = ""
         if diff: body += t("panel.roll_header").strip() + "\n" + "\n".join("  " + d for d in diff) + "\n"
         if debug or (hasattr(self, "dbg_var") and self.dbg_var.get()):
@@ -4975,7 +4975,7 @@ class App:
         for v, lb in getattr(self, "count_chips", {}).items():
             lb.config(text=f"{verdict_label(v)}  {c[v]}")
 
-    # ---------- çalıştırma ----------
+    # ---------- Ã§alÄ±ÅŸtÄ±rma ----------
     def change_mode(self):
         self.cfg["settings"]["scan_mode"] = self.mode_var.get(); save_cfg(self.cfg)
         if self.running:
@@ -5024,7 +5024,7 @@ class App:
         except Exception:
             return False
 
-    def trigger(self):  # pynput thread'inden de çağrılır: tk'ya dokunma
+    def trigger(self):  # pynput thread'inden de Ã§aÄŸrÄ±lÄ±r: tk'ya dokunma
         region = self.scan_area()
         if region and self.cfg["settings"].get("only_game_active", True) and not game_active():
             return log.info("Hotkey ignored: game window is not in front")
@@ -5070,8 +5070,8 @@ class App:
                 box = find_card(img)
             tried_fresh = True
         if box is None and auto and img.width >= 1600:
-            # Tüm oyun ekranında eşya kartı yok (dünya / harita / başka menü): ekranın tamamını tam çözünürlükte
-            # okumak (ve last_card.png olarak kaydetmek) boşa ekran kartı / disk yükü — otomatik taramada atlanır.
+            # TÃ¼m oyun ekranÄ±nda eÅŸya kartÄ± yok (dÃ¼nya / harita / baÅŸka menÃ¼): ekranÄ±n tamamÄ±nÄ± tam Ã§Ã¶zÃ¼nÃ¼rlÃ¼kte
+            # okumak (ve last_card.png olarak kaydetmek) boÅŸa ekran kartÄ± / disk yÃ¼kÃ¼ â€” otomatik taramada atlanÄ±r.
             self.card_box = None
             return False
         card = img.crop(box) if box else img
@@ -5081,7 +5081,7 @@ class App:
         self._note_ocr_time(ocr_elapsed)
         with timings.measure("evaluate") if timings is not None else nullcontext():
             item, verdict, res = evaluate(text, self.cfg)
-        if not valid_item(item) and not tried_fresh:                  # kart yer değiştirmiş / bölge belirsiz
+        if not valid_item(item) and not tried_fresh:                  # kart yer deÄŸiÅŸtirmiÅŸ / bÃ¶lge belirsiz
             with timings.measure("card_locate") if timings is not None else nullcontext():
                 box = find_card(img)
             if box or not region_first:
@@ -5090,7 +5090,7 @@ class App:
                 item, verdict, res = evaluate(text, self.cfg)
         self.card_box = box if valid_item(item) else None
         if s.get("ocr_passes_auto", True):
-            passes = self.auto_passes()                      # bilgisayarın hızına göre 1-3 okuma
+            passes = self.auto_passes()                      # bilgisayarÄ±n hÄ±zÄ±na gÃ¶re 1-3 okuma
         else:
             try: passes = max(1, min(3, int(s.get("ocr_passes", 3))))
             except (TypeError, ValueError): passes = 3
@@ -5102,8 +5102,8 @@ class App:
         if skip:
             log.debug("OCR multi-pass skipped: first read confident (%s)", item.get("name"))
         if passes > 1 and valid_item(item) and fresh and not skip:
-            # çoklu geçiş: aynı kart farklı eşik (Tesseract) ya da ölçekle (RapidOCR) yeniden okunur,
-            # en çok bilgi tanınan metin seçilir (gerçek 3440×1440 kartta tek okuma bazen bir satırı kaçırıyor)
+            # Ã§oklu geÃ§iÅŸ: aynÄ± kart farklÄ± eÅŸik (Tesseract) ya da Ã¶lÃ§ekle (RapidOCR) yeniden okunur,
+            # en Ã§ok bilgi tanÄ±nan metin seÃ§ilir (gerÃ§ek 3440Ã—1440 kartta tek okuma bazen bir satÄ±rÄ± kaÃ§Ä±rÄ±yor)
             best_q, best_t = ocr_quality(text), text
             base = gamedata.THRESHOLD
             try:
@@ -5125,7 +5125,7 @@ class App:
                 text = best_t
                 item, verdict, res = evaluate(text, self.cfg)
             log.debug("OCR multi-pass: %d passes, quality %.1f", passes, best_q)
-        # Kart aşağı kaydırıldıysa adı görünmez: ad ve marka/set, envanter listesindeki seçili satırdan okunur
+        # Kart aÅŸaÄŸÄ± kaydÄ±rÄ±ldÄ±ysa adÄ± gÃ¶rÃ¼nmez: ad ve marka/set, envanter listesindeki seÃ§ili satÄ±rdan okunur
         if box and (item["name"] in ("?", "") or item.get("partial") or not (item.get("_learn") or {}).get("title")):
             try:
                 hint = engine.list_hint(img, box, lambda im: OCR.lines(im, ocr_scale()))
@@ -5143,8 +5143,8 @@ class App:
             learned = GAME.learn(item) if GAME.ok else []
             if learned:
                 log.info("Library learned: %s", "; ".join(learned))
-                item, verdict, res = evaluate(text, self.cfg)      # yeni bilgiyle yeniden değerlendir
-                self.root.after(0, lambda m="; ".join(learned): self.toast("📚 " + m))
+                item, verdict, res = evaluate(text, self.cfg)      # yeni bilgiyle yeniden deÄŸerlendir
+                self.root.after(0, lambda m="; ".join(learned): self.toast("ğŸ“š " + m))
         except Exception:
             log.debug("library learn failed", exc_info=True)
         verdict = itempolicy.protect_verdict(item, color_hints(card, lines, item, verdict))
@@ -5174,7 +5174,7 @@ class App:
                 except Exception: log.debug("scan debug save", exc_info=True)
             self._debug_jobs.submit(save_debug)
         self.last_card_img = card
-        try:                                              # kartın ekrandaki yeri: bindirme yanına konur
+        try:                                              # kartÄ±n ekrandaki yeri: bindirme yanÄ±na konur
             a = self.scan_area()
             bx = box or (0, 0, img.width, img.height)
             self.last_card_screen = (a["left"] + bx[0], a["top"] + bx[1], a["left"] + bx[2], a["top"] + bx[3])
@@ -5185,8 +5185,8 @@ class App:
         return True
 
     def save_ocr_history(self, text, item, verdict):
-        """Tanı için son 200 okuma: logs/ocr_history/<zaman>.txt (okunan metin + programın yorumu).
-        Yalnız kart metni; ekran görüntüsü ya da kişisel bilgi yok."""
+        """TanÄ± iÃ§in son 200 okuma: logs/ocr_history/<zaman>.txt (okunan metin + programÄ±n yorumu).
+        YalnÄ±z kart metni; ekran gÃ¶rÃ¼ntÃ¼sÃ¼ ya da kiÅŸisel bilgi yok."""
         try:
             d = APPLOG_DIR / "ocr_history"; d.mkdir(parents=True, exist_ok=True)
             sig = signature(item)
@@ -5208,7 +5208,7 @@ class App:
         return os.environ.get("TD2_REPORT_URL") or st.get("report_server") or st.get("drop_server") or dropstats.DEFAULT_URL
 
     def open_feedback(self, prefill=None):
-        """Kullanıcının hata raporu, istek ya da soru gönderdiği pencere (GitHub hesabı gerekmez)."""
+        """KullanÄ±cÄ±nÄ±n hata raporu, istek ya da soru gÃ¶nderdiÄŸi pencere (GitHub hesabÄ± gerekmez)."""
         if getattr(self, "_fb_win", None) and self._fb_win.winfo_exists():
             self._fb_win.lift(); return
         st = self.cfg["settings"]
@@ -5218,8 +5218,8 @@ class App:
         k = getattr(self, "ui_factor", 1.0)
         w.geometry(f"{int(760 * k)}x{int(620 * k)}")
         nb = ttk.Notebook(w); nb.pack(fill="both", expand=True, padx=10, pady=10)
-        f = ttk.Frame(nb, padding=10); nb.add(f, text="📝 " + t("fb.tab_new"))
-        g = ttk.Frame(nb, padding=10); nb.add(g, text="📬 " + t("fb.tab_mine"))
+        f = ttk.Frame(nb, padding=10); nb.add(f, text="ğŸ“ " + t("fb.tab_new"))
+        g = ttk.Frame(nb, padding=10); nb.add(g, text="ğŸ“¬ " + t("fb.tab_mine"))
         # --- yeni rapor
         r0 = ttk.Frame(f); r0.pack(fill="x")
         ttk.Label(r0, text=t("fb.type")).pack(side="left")
@@ -5293,10 +5293,10 @@ class App:
         def p_type_title():
             return f"[{tv.get()}] {title.get()[:60]!r}"
 
-        ttk.Button(bar, text="👁 " + t("fb.preview"), command=preview).pack(side="left")
-        send_btn = ttk.Button(bar, text="📨 " + t("fb.send"), command=send, style="Accent.TButton"); send_btn.pack(side="right")
+        ttk.Button(bar, text="ğŸ‘ " + t("fb.preview"), command=preview).pack(side="left")
+        send_btn = ttk.Button(bar, text="ğŸ“¨ " + t("fb.send"), command=send, style="Accent.TButton"); send_btn.pack(side="right")
         self._fb_send = send; self._fb_fields = (tv, title, body, contact)
-        # --- raporlarım
+        # --- raporlarÄ±m
         cols = ("no", "type", "title", "time", "status")
         tree = ttk.Treeview(g, columns=cols, show="headings", height=10)
         for c, wd in zip(cols, (60, 70, 330, 120, 110)):
@@ -5310,7 +5310,7 @@ class App:
         def fill_mine():
             tree.delete(*tree.get_children())
             for i, r in enumerate(store.sent):
-                tree.insert("", "end", iid=str(i), values=("#%s" % (r.get("number") or "—"), t("fb.type_" + r.get("type", "bug")),
+                tree.insert("", "end", iid=str(i), values=("#%s" % (r.get("number") or "â€”"), t("fb.type_" + r.get("type", "bug")),
                                                            r.get("title", ""), r.get("time", ""), t("fb.st_" + r.get("status", "new"))))
             q = len(store.queue)
             info.config(text=t("fb.in_queue", n=q) if q else "")
@@ -5336,20 +5336,20 @@ class App:
                     msg = t("fb.failed", e=e)
                 self.root.after(0, lambda: (w.winfo_exists() and (fill_mine(), info.config(text=msg))))
             threading.Thread(target=work, daemon=True).start()
-        ttk.Button(gb, text="🔄 " + t("fb.refresh"), command=refresh).pack(side="right")
+        ttk.Button(gb, text="ğŸ”„ " + t("fb.refresh"), command=refresh).pack(side="right")
         self._fb_refresh = refresh
         fill_mine()
         if store.sent or store.queue: w.after(300, refresh)
         if pre.get("tab") == "mine": nb.select(1)
 
-    # ---------- Güncelleme merkezi (her açılışta) ----------
+    # ---------- GÃ¼ncelleme merkezi (her aÃ§Ä±lÄ±ÅŸta) ----------
     def _lib_urls(self):
         st = self.cfg["settings"]
         return [u.replace("meta_builds.json", "game_data.json") for u in meta_sync.configured_urls(st.get("meta_feed_url", ""))
                 if u.endswith("meta_builds.json")]
 
     def _game_version_watch(self):
-        """Oyun penceresi ilk görüldüğünde: oyun güncellenmiş mi? (exe'nin dosya sürümü; oyuna dokunulmaz)"""
+        """Oyun penceresi ilk gÃ¶rÃ¼ldÃ¼ÄŸÃ¼nde: oyun gÃ¼ncellenmiÅŸ mi? (exe'nin dosya sÃ¼rÃ¼mÃ¼; oyuna dokunulmaz)"""
         try:
             gi = gameinfo.current()
         except Exception:
@@ -5361,7 +5361,7 @@ class App:
             self.cfg["settings"]["game_install"] = gi; save_cfg(self.cfg)
 
     def update_center(self, reason="startup"):
-        """Program, eşya kütüphanesi ve oyunun kendi sürümünü denetler; yenilik varsa tek pencerede sorar."""
+        """Program, eÅŸya kÃ¼tÃ¼phanesi ve oyunun kendi sÃ¼rÃ¼mÃ¼nÃ¼ denetler; yenilik varsa tek pencerede sorar."""
         if getattr(self, "_uc_busy", False) or getattr(self, "_uc_open", False): return
         self._uc_busy = True
         st = self.cfg["settings"]
@@ -5413,27 +5413,27 @@ class App:
         self._uc_open = True
         w = tk.Toplevel(self.root); w.title(t("uc.title")); w.configure(bg=PAL["bg"]); w.transient(self.root)
         w.protocol("WM_DELETE_WINDOW", lambda: close())
-        ttk.Label(w, text="⬆ " + t("uc.title"), font=(ui_theme.FONT_SEMI, 15)).pack(anchor="w", padx=16, pady=(14, 6))
+        ttk.Label(w, text="â¬† " + t("uc.title"), font=(ui_theme.FONT_SEMI, 15)).pack(anchor="w", padx=16, pady=(14, 6))
         body = ttk.Frame(w); body.pack(fill="both", expand=True, padx=16)
         wrap = int(640 * getattr(self, "ui_factor", 1.0))
         v_prog = tk.BooleanVar(value=True); v_lib = tk.BooleanVar(value=True)
         if res.get("game"):
             old, new = res["game"]
-            box = ttk.LabelFrame(body, text="🎮 " + t("uc.game_box")); box.pack(fill="x", pady=4)
+            box = ttk.LabelFrame(body, text="ğŸ® " + t("uc.game_box")); box.pack(fill="x", pady=4)
             msg = t("uc.game_updated", old=gameinfo.label(old), new=gameinfo.label(new)) + "\n" + \
                   (t("uc.game_lib_new") if res.get("lib") else t("uc.game_lib_ok"))
             ttk.Label(box, text=msg, wraplength=wrap, justify="left").pack(anchor="w", padx=8, pady=6)
         if res.get("lib"):
             gd, diff, cur = res["lib"]
-            box = ttk.LabelFrame(body, text="📚 " + t("uc.lib_box")); box.pack(fill="x", pady=4)
-            ttk.Checkbutton(box, variable=v_lib, text=t("uc.lib", old=cur or "—", new=gd.get("version"), n=diff["total"])).pack(anchor="w", padx=8, pady=(6, 2))
+            box = ttk.LabelFrame(body, text="ğŸ“š " + t("uc.lib_box")); box.pack(fill="x", pady=4)
+            ttk.Checkbutton(box, variable=v_lib, text=t("uc.lib", old=cur or "â€”", new=gd.get("version"), n=diff["total"])).pack(anchor="w", padx=8, pady=(6, 2))
             names, more = updates.diff_summary(diff)
             if names:
                 ttk.Label(box, text=t("uc.lib_new", names=", ".join(names)) + (" " + t("uc.lib_more", n=more) if more else ""),
                           foreground=PAL["muted"], wraplength=wrap, justify="left").pack(anchor="w", padx=28, pady=(0, 6))
         if res.get("prog"):
             info = res["prog"]
-            box = ttk.LabelFrame(body, text="⬆ " + t("uc.prog_box")); box.pack(fill="x", pady=4)
+            box = ttk.LabelFrame(body, text="â¬† " + t("uc.prog_box")); box.pack(fill="x", pady=4)
             ttk.Checkbutton(box, variable=v_prog, text=t("uc.prog", old=APP_VERSION, new=info["version"])).pack(anchor="w", padx=8, pady=(6, 2))
             notes = updates.release_highlights(info.get("notes", ""), info.get("version"))
             if notes:
@@ -5442,7 +5442,7 @@ class App:
         bar = ttk.Frame(w); bar.pack(fill="x", padx=16, pady=12)
         can_install = bool(res.get("lib") or res.get("prog"))
         if can_install:
-            ttk.Button(bar, text="✔ " + t("uc.install"), style="Accent.TButton", command=lambda: install()).pack(side="left")
+            ttk.Button(bar, text="âœ” " + t("uc.install"), style="Accent.TButton", command=lambda: install()).pack(side="left")
             ttk.Button(bar, text=t("uc.later"), command=lambda: close()).pack(side="left", padx=8)
         else:
             ttk.Button(bar, text="OK", style="Accent.TButton", command=lambda: close()).pack(side="left")
@@ -5450,7 +5450,7 @@ class App:
 
         def close(ack_game=True):
             self._uc_open = False
-            if ack_game and res.get("game"):                 # oyun güncellemesi bildirildi: bir daha aynısı için sorma
+            if ack_game and res.get("game"):                 # oyun gÃ¼ncellemesi bildirildi: bir daha aynÄ±sÄ± iÃ§in sorma
                 st["game_install"] = res["game"][1]; save_cfg(self.cfg)
             try: w.destroy()
             except Exception: pass
@@ -5477,7 +5477,7 @@ class App:
 
     # ---------- PC ve oyun senkronizasyonu ----------
     def check_new_pc(self):
-        """Açılışta: bu bilgisayar / monitör düzeni / oyun çözünürlüğü son senkrondan farklıysa senkron öner."""
+        """AÃ§Ä±lÄ±ÅŸta: bu bilgisayar / monitÃ¶r dÃ¼zeni / oyun Ã§Ã¶zÃ¼nÃ¼rlÃ¼ÄŸÃ¼ son senkrondan farklÄ±ysa senkron Ã¶ner."""
         st = self.cfg["settings"]
         def work():
             try: need = syncer.needs_sync(st)
@@ -5487,7 +5487,7 @@ class App:
             log.info("Sync: new PC / monitor layout / game resolution detected (fingerprint %s)", st.get("sync_fp") or "none")
             if messagebox.askyesno(APP_NAME, t("sync.new_pc_ask")):
                 self.run_sync()
-            else:                                         # bir daha bu düzen için sorma
+            else:                                         # bir daha bu dÃ¼zen iÃ§in sorma
                 try:
                     st["sync_fp"] = syncer.fingerprint(syncer.scan_pc(), {"settings": display.read_game_settings() or {}})
                     save_cfg(self.cfg)
@@ -5496,7 +5496,7 @@ class App:
         threading.Thread(target=work, daemon=True).start()
 
     def run_sync(self):
-        """PC'yi ve oyun ayarlarını tara, kart okuma hızını ölç, programın ayarlarını bu PC'ye göre öner ve uygula."""
+        """PC'yi ve oyun ayarlarÄ±nÄ± tara, kart okuma hÄ±zÄ±nÄ± Ã¶lÃ§, programÄ±n ayarlarÄ±nÄ± bu PC'ye gÃ¶re Ã¶ner ve uygula."""
         if getattr(self, "_sync_win", None) and self._sync_win.winfo_exists():
             self._sync_win.lift(); return
         w = self._sync_win = tk.Toplevel(self.root)
@@ -5504,7 +5504,7 @@ class App:
         try: w.geometry(f"{int(860 * self.ui_factor)}x{int(640 * self.ui_factor)}")
         except Exception: w.geometry("860x640")
         w.transient(self.root)
-        ttk.Label(w, text="🔄 " + t("sync.title"), font=(ui_theme.FONT_SEMI, 15)).pack(anchor="w", padx=14, pady=(12, 2))
+        ttk.Label(w, text="ğŸ”„ " + t("sync.title"), font=(ui_theme.FONT_SEMI, 15)).pack(anchor="w", padx=14, pady=(12, 2))
         status = ttk.Label(w, text=t("sync.scanning"), foreground=PAL["muted"]); status.pack(anchor="w", padx=14)
         pb = ttk.Progressbar(w, mode="indeterminate"); pb.pack(fill="x", padx=14, pady=6); pb.start(12)
         txt = tk.Text(w, bg=PAL["surface"], fg=PAL["fg"], relief="flat", wrap="word", font=(ui_theme.FONT, 10),
@@ -5515,9 +5515,9 @@ class App:
             txt.tag_configure(tag, foreground=col)
         txt.tag_configure("h", font=(ui_theme.FONT_SEMI, 12))
         bar = ttk.Frame(w); bar.pack(fill="x", padx=14, pady=(0, 12))
-        apply_btn = ttk.Button(bar, text="✔ " + t("sync.apply"), style="Accent.TButton", state="disabled")
+        apply_btn = ttk.Button(bar, text="âœ” " + t("sync.apply"), style="Accent.TButton", state="disabled")
         apply_btn.pack(side="left"); self._sync_apply_btn = apply_btn
-        copy_btn = ttk.Button(bar, text="📋 " + t("sync.copy"), state="disabled"); copy_btn.pack(side="left", padx=8)
+        copy_btn = ttk.Button(bar, text="ğŸ“‹ " + t("sync.copy"), state="disabled"); copy_btn.pack(side="left", padx=8)
         ttk.Button(bar, text=t("sync.close"), command=w.destroy).pack(side="right")
         st = self.cfg["settings"]
 
@@ -5541,31 +5541,31 @@ class App:
             if res.get("error"):
                 status.config(text=t("sync.bench_fail", e=res["error"])); return
             F, C = res["findings"], res["changes"]
-            # yalnız gerçekten değişenler: hiç ayarlanmamış (varsayılan) bir anahtarın varsayılanı yazılıyorsa gösterme
+            # yalnÄ±z gerÃ§ekten deÄŸiÅŸenler: hiÃ§ ayarlanmamÄ±ÅŸ (varsayÄ±lan) bir anahtarÄ±n varsayÄ±lanÄ± yazÄ±lÄ±yorsa gÃ¶sterme
             defaults = {"res_profile_lock": False, "ocr_tuned": False, "ocr_passes_auto": True, "only_game_active": True}
             diff = {k: v for k, v in C.items() if st.get(k, defaults.get(k)) != v}
             status.config(text=time.strftime("%H:%M:%S"))
-            icon = {"ok": "✔", "info": "•", "warn": "⚠", "bad": "✖"}
+            icon = {"ok": "âœ”", "info": "â€¢", "warn": "âš ", "bad": "âœ–"}
             txt.insert("end", t("sync.findings") + "\n", "h")
             for lvl, key, kw in F:
-                txt.insert("end", f"{icon.get(lvl, '•')} {t(key, **kw)}\n", lvl)
+                txt.insert("end", f"{icon.get(lvl, 'â€¢')} {t(key, **kw)}\n", lvl)
             txt.insert("end", "\n" + t("sync.changes") + "\n", "h")
             if not diff:
                 txt.insert("end", t("sync.no_changes") + "\n", "ok")
             def fmt(x):
-                if isinstance(x, bool): return "✔" if x else "✖"
-                if x in (None, ""): return "—"
+                if isinstance(x, bool): return "âœ”" if x else "âœ–"
+                if x in (None, ""): return "â€”"
                 if x == "auto": return t("ocr.auto")
                 return {"screen": t("panel.src_screen"), "region": t("panel.src_region")}.get(x, str(x))
             for k, v in diff.items():
-                txt.insert("end", f"  {t('syncset.' + k)}:  {fmt(st.get(k))}  →  {fmt(v)}\n")
+                txt.insert("end", f"  {t('syncset.' + k)}:  {fmt(st.get(k))}  â†’  {fmt(v)}\n")
             txt.config(state="disabled")
             report = syncer.report_text(res["pc"], res["game"], res["bench"], F, t)
             try: (APPLOG_DIR / "sync_report.txt").write_text(report, encoding="utf-8")
             except Exception: pass
             log.info("Sync scan: %s", "; ".join(f"{lvl}:{key}" for lvl, key, _ in F))
             log.info("Sync proposed changes: %s", diff or "none")
-            copy_btn.config(state="normal", command=lambda: (self.root.clipboard_clear(), self.root.clipboard_append(report), self.toast("📋")))
+            copy_btn.config(state="normal", command=lambda: (self.root.clipboard_clear(), self.root.clipboard_append(report), self.toast("ğŸ“‹")))
             apply_btn.config(state="normal", command=lambda: do_apply(res, diff))
 
         def do_apply(res, diff):
@@ -5578,15 +5578,15 @@ class App:
             self.toast(t("sync.applied"))
             w.destroy()
             if old_prof not in (None, "auto") and st.get("res_profile") == "auto":
-                self.restart_app(tab="settings", page="display")       # arayüz ölçeği yeni profile göre
+                self.restart_app(tab="settings", page="display")       # arayÃ¼z Ã¶lÃ§eÄŸi yeni profile gÃ¶re
             elif hasattr(self, "src_var"):
                 self.src_var.set(st.get("scan_source", "screen")); self.refresh_status()
 
         threading.Thread(target=work, daemon=True).start()
 
-    # ---------- bilgisayar hızına uyum ----------
+    # ---------- bilgisayar hÄ±zÄ±na uyum ----------
     def _note_ocr_time(self, dt):
-        """Tek kart okumasının süresi (sn): kayan ortalama. Zayıf işlemcide okuma sayısı azaltılır."""
+        """Tek kart okumasÄ±nÄ±n sÃ¼resi (sn): kayan ortalama. ZayÄ±f iÅŸlemcide okuma sayÄ±sÄ± azaltÄ±lÄ±r."""
         ema = getattr(self, "ocr_ema", None)
         self.ocr_ema = dt if ema is None else ema * 0.7 + dt * 0.3
 
@@ -5602,18 +5602,18 @@ class App:
         return n
 
     def merge_scrolled(self, text, item, verdict, res):
-        """Uzun kartlar ekrana sığmaz; oyuncu kartı kaydırır. Aynı eşyanın ardışık okumaları birleştirilir:
-        önce üst kısım (ad, set, çekirdek), sonra alt kısım (attribute, mod, talent) okunur → tek eşya."""
+        """Uzun kartlar ekrana sÄ±ÄŸmaz; oyuncu kartÄ± kaydÄ±rÄ±r. AynÄ± eÅŸyanÄ±n ardÄ±ÅŸÄ±k okumalarÄ± birleÅŸtirilir:
+        Ã¶nce Ã¼st kÄ±sÄ±m (ad, set, Ã§ekirdek), sonra alt kÄ±sÄ±m (attribute, mod, talent) okunur â†’ tek eÅŸya."""
         now = time.time()
         prev = getattr(self, "card_session", None)
         kind_ok = item.get("kind") in ("gear", "weapon")
         if prev and now - prev["t"] < 60 and kind_ok:
-            # aynı set/markanın farklı parçaları aynı adla okunur (ör. Striker eldiveni ve dizliği): yuva farklıysa ayrı eşya
+            # aynÄ± set/markanÄ±n farklÄ± parÃ§alarÄ± aynÄ± adla okunur (Ã¶r. Striker eldiveni ve dizliÄŸi): yuva farklÄ±ysa ayrÄ± eÅŸya
             slot_ok = item.get("slot") == prev["item"].get("slot") or (item.get("partial") and not item.get("slot"))
             kind_same = item.get("kind") == prev["item"].get("kind")
             same = item["name"] not in ("?", "") and gamedata.nrm(item["name"]) == gamedata.nrm(prev["item"]["name"])
-            # devam parçası: adı görünmeyen alt kısım. Aynı türde olmalı (silah ≠ zırh) ve kendi başlığı
-            # (nadirlik satırı: Exotic / High-End …) görünmemeli — başlık varsa bu yeni bir kartın üstüdür.
+            # devam parÃ§asÄ±: adÄ± gÃ¶rÃ¼nmeyen alt kÄ±sÄ±m. AynÄ± tÃ¼rde olmalÄ± (silah â‰  zÄ±rh) ve kendi baÅŸlÄ±ÄŸÄ±
+            # (nadirlik satÄ±rÄ±: Exotic / High-End â€¦) gÃ¶rÃ¼nmemeli â€” baÅŸlÄ±k varsa bu yeni bir kartÄ±n Ã¼stÃ¼dÃ¼r.
             cont = item.get("partial") and not prev["item"].get("partial") and not item.get("rarity")
             if (same or cont) and kind_same and slot_ok and prev["text"].strip() != text.strip():
                 merged_text = prev["text"] + "\n" + text
@@ -5628,8 +5628,8 @@ class App:
         return text, item, verdict, res
 
     def scan_area(self):
-        """Taranacak alan: oyun penceresinin kendisi (hangi monitörde / modda olursa olsun), seçilmiş bölge,
-        ya da oyun bulunamazsa ana monitör. Oyunun boyutu değişince okuma ayarları yeniden uygulanır."""
+        """Taranacak alan: oyun penceresinin kendisi (hangi monitÃ¶rde / modda olursa olsun), seÃ§ilmiÅŸ bÃ¶lge,
+        ya da oyun bulunamazsa ana monitÃ¶r. Oyunun boyutu deÄŸiÅŸince okuma ayarlarÄ± yeniden uygulanÄ±r."""
         st = self.cfg["settings"]
         if st.get("scan_source", "screen") == "region" and st.get("region"):
             return st["region"]
@@ -5648,7 +5648,7 @@ class App:
             src = "game window" if g else "primary monitor (game not found)"
             log.info("Capture area: %s %dx%d at (%d,%d)", src, area["width"], area["height"], area["left"], area["top"])
             size = (area["width"], area["height"]) if g else None
-            if g and size != getattr(self, "_area_size", None):    # yalnız boyut değişince (taşımak yetmez)
+            if g and size != getattr(self, "_area_size", None):    # yalnÄ±z boyut deÄŸiÅŸince (taÅŸÄ±mak yetmez)
                 first = getattr(self, "_area_size", None) is None
                 self._area_size = size
                 k0 = getattr(self, "_prof_key", None)
@@ -5660,13 +5660,13 @@ class App:
         return area
 
     def screen_monitor(self):
-        """Tam ekran seçimleri (kalibrasyon, görev bölgesi) için oyunun bulunduğu monitör."""
+        """Tam ekran seÃ§imleri (kalibrasyon, gÃ¶rev bÃ¶lgesi) iÃ§in oyunun bulunduÄŸu monitÃ¶r."""
         with mss.mss() as sct:
             g = display.game_window()
             return dict(display.monitor_of(g, sct.monitors) if g else sct.monitors[1])
 
     def auto_loop(self, stop):  # noqa: D401
-        capture.default().keep()                         # bu döngü boyunca tek, kalıcı yakalayıcı
+        capture.default().keep()                         # bu dÃ¶ngÃ¼ boyunca tek, kalÄ±cÄ± yakalayÄ±cÄ±
         try:
             self._auto_loop(stop)
         finally:
@@ -5674,7 +5674,7 @@ class App:
 
     def _auto_loop(self, stop):
         prev = last_done = None; stable = 0; last_t = 0.0
-        idle = 0                                          # art arda kart bulunamayan dünya okumaları
+        idle = 0                                          # art arda kart bulunamayan dÃ¼nya okumalarÄ±
         while not stop.is_set():
             policy = self._policy()
             runtime = game_runtime.plan(self.cfg["settings"])
@@ -5682,7 +5682,7 @@ class App:
                 region = self.scan_area()
                 runtime = game_runtime.plan(self.cfg["settings"], game_focused=game_active())
                 if region and not runtime.passive_capture:
-                    prev = None; stable = 0                     # oyun önde değil: okuma yapma
+                    prev = None; stable = 0                     # oyun Ã¶nde deÄŸil: okuma yapma
                 elif region:
                     smart = self.cfg["settings"].get("smart_scan", True)
                     h, small = capture.default().sample(region, screenstate.W if smart else None)   # tek yakalama
@@ -5690,11 +5690,11 @@ class App:
                     prev = h
                     gs = self._screen_observe(small) if small is not None else "unknown"
                     changed = last_done is None or dist(h, last_done) >= AUTO_CHANGE
-                    if gs == "loading": go = False                        # yükleme ekranı: okuma yok
-                    elif gs == "world":                                   # dünyada: seyrek (tamamen kapatma — yeni
-                        # menü türleri öğrenilebilsin); kart çıkmadıkça aralık 4 → 8 → 16 → 30 sn'ye uzar
+                    if gs == "loading": go = False                        # yÃ¼kleme ekranÄ±: okuma yok
+                    elif gs == "world":                                   # dÃ¼nyada: seyrek (tamamen kapatma â€” yeni
+                        # menÃ¼ tÃ¼rleri Ã¶ÄŸrenilebilsin); kart Ã§Ä±kmadÄ±kÃ§a aralÄ±k 4 â†’ 8 â†’ 16 â†’ 30 sn'ye uzar
                         go = changed and stable >= 3 and time.time() - last_t > world_wait(idle)
-                    else:                                                 # menü / bilinmiyor: eski davranış
+                    else:                                                 # menÃ¼ / bilinmiyor: eski davranÄ±ÅŸ
                         go = changed and stable >= 2 and time.time() - last_t >= policy.auto_interval_s
                         idle = 0
                     if go and self.lock.acquire(blocking=False):
@@ -5716,9 +5716,9 @@ class App:
             stop.wait(max(policy.scan_poll_s, runtime.wait_s))
 
     def poll(self):
-        # Arka plan işlerinden çok sayıda sonuç aynı anda gelirse Tk ana
-        # döngüsünü sınırsız süre işgal etme. Kalan sonuçlar bir sonraki turda
-        # işlenir; böylece menü tıklamaları ve pencere boyama önceliğini korur.
+        # Arka plan iÅŸlerinden Ã§ok sayÄ±da sonuÃ§ aynÄ± anda gelirse Tk ana
+        # dÃ¶ngÃ¼sÃ¼nÃ¼ sÄ±nÄ±rsÄ±z sÃ¼re iÅŸgal etme. Kalan sonuÃ§lar bir sonraki turda
+        # iÅŸlenir; bÃ¶ylece menÃ¼ tÄ±klamalarÄ± ve pencere boyama Ã¶nceliÄŸini korur.
         poll_deadline = time.perf_counter() + 0.012
         poll_count = 0
         try:
@@ -5821,7 +5821,7 @@ class App:
         if key != "none" and not st.get("drop_share"):
             self.toast(t("drops.share_off"))
 
-    # ---------- Yapay zekâ / hata bildirimi ----------
+    # ---------- Yapay zekÃ¢ / hata bildirimi ----------
     def _last_item(self):
         return (self.last_scan or (None,))[0] if getattr(self, "last_scan", None) else None
 
@@ -5839,7 +5839,7 @@ class App:
         self.ask(q)
 
     def vision_read(self):
-        """Okunamayan kartı Claude Code'a resim olarak okut (isteğe bağlı; kart görüntüsü Anthropic'e gider)."""
+        """Okunamayan kartÄ± Claude Code'a resim olarak okut (isteÄŸe baÄŸlÄ±; kart gÃ¶rÃ¼ntÃ¼sÃ¼ Anthropic'e gider)."""
         img = getattr(self, "last_card_img", None)
         if img is None: return messagebox.showinfo(APP_NAME, t("ocr.need_card"))
         st = self.cfg["settings"]
@@ -5865,13 +5865,13 @@ class App:
         threading.Thread(target=go, daemon=True).start()
 
     def report_wrong(self):
-        """Yanlış okunan kart: programdaki rapor formu, okunan kart metni ve programın yorumu eklenmiş olarak."""
+        """YanlÄ±ÅŸ okunan kart: programdaki rapor formu, okunan kart metni ve programÄ±n yorumu eklenmiÅŸ olarak."""
         img = getattr(self, "last_card_img", None)
         if img is None: return messagebox.showinfo(APP_NAME, t("ocr.need_card"))
         it = self._last_item() or {}
         try:
             d = REPORTS_DIR / datetime.now().strftime("%Y%m%d_%H%M%S"); d.mkdir(parents=True, exist_ok=True)
-            img.save(d / "card.png")                         # yerel kopya (test setine eklemek için)
+            img.save(d / "card.png")                         # yerel kopya (test setine eklemek iÃ§in)
         except Exception:
             pass
         read_as = {k: it.get(k) for k in ("name", "kind", "slot", "brand", "gear_set", "rarity", "attrs", "talents")}
@@ -5880,18 +5880,18 @@ class App:
                                     "card": True})
 
     def report_wrong_verdict(self):
-        """'Bu karar yanlıştı': eşya doğru okunmuş ama SAKLA/DÜŞÜN/KIR kararı kullanıcıya göre hatalıysa,
-        doğrusunu işaretlemesini sağlar. Program bunu kendiliğinden kurallara işleyen bir öğrenme sistemi
-        DEĞİLDİR (öyle bir altyapı yok) — yalnızca yerel bir kayıt tutar (Tanılama Merkezi'nden görülebilir,
-        bkz. show_verdict_feedback_log) ve istenirse mevcut geri bildirim kanalıyla geliştiriciye iletilir;
-        kullanıcı kendi build'indeki attribute/weight ayarlarını bu kayda bakarak elle ince ayar yapabilir."""
+        """'Bu karar yanlÄ±ÅŸtÄ±': eÅŸya doÄŸru okunmuÅŸ ama SAKLA/DÃœÅÃœN/KIR kararÄ± kullanÄ±cÄ±ya gÃ¶re hatalÄ±ysa,
+        doÄŸrusunu iÅŸaretlemesini saÄŸlar. Program bunu kendiliÄŸinden kurallara iÅŸleyen bir Ã¶ÄŸrenme sistemi
+        DEÄÄ°LDÄ°R (Ã¶yle bir altyapÄ± yok) â€” yalnÄ±zca yerel bir kayÄ±t tutar (TanÄ±lama Merkezi'nden gÃ¶rÃ¼lebilir,
+        bkz. show_verdict_feedback_log) ve istenirse mevcut geri bildirim kanalÄ±yla geliÅŸtiriciye iletilir;
+        kullanÄ±cÄ± kendi build'indeki attribute/weight ayarlarÄ±nÄ± bu kayda bakarak elle ince ayar yapabilir."""
         if not self.last_shown: return messagebox.showinfo(APP_NAME, t("ocr.need_card"))
         text, item, verdict, res, note, debug, diff = self.last_shown
         if not valid_item(item): return messagebox.showinfo(APP_NAME, t("ocr.need_card"))
         w = tk.Toplevel(self.root); w.title(t("vf.title")); w.configure(bg=PAL["bg"]); w.transient(self.root)
         w.geometry("460x400"); w.minsize(420, 360)
         ttk.Label(w, text=t("vf.title"), style="Title.TLabel").pack(anchor="w", padx=16, pady=(14, 2))
-        sub = (item.get("name") or "?") + ("  ·  " + verdict_label(verdict) if verdict else "")
+        sub = (item.get("name") or "?") + ("  Â·  " + verdict_label(verdict) if verdict else "")
         ttk.Label(w, text=sub, wraplength=420, justify="left", foreground=PAL["muted"]).pack(anchor="w", padx=16)
         ttk.Label(w, text=t("vf.ask"), wraplength=420, justify="left").pack(anchor="w", padx=16, pady=(10, 4))
         vv = tk.StringVar(value="")
@@ -5932,11 +5932,11 @@ class App:
                 "body": t("vf.fb_body") + "\n\n" + json.dumps(rec, ensure_ascii=False, indent=1)})
 
         ttk.Button(bar, text=t("vf.save_local"), command=save_only).pack(side="left")
-        ttk.Button(bar, text="📨 " + t("vf.save_send"), command=save_and_send, style="Accent.TButton").pack(side="right")
+        ttk.Button(bar, text="ğŸ“¨ " + t("vf.save_send"), command=save_and_send, style="Accent.TButton").pack(side="right")
         ttk.Button(bar, text=t("upd.close"), command=w.destroy).pack(side="right", padx=(0, 8))
 
     def show_verdict_feedback_log(self):
-        """'Bu karar yanlıştı' ile yerel olarak kaydedilen bildirimleri listeler (bkz. report_wrong_verdict)."""
+        """'Bu karar yanlÄ±ÅŸtÄ±' ile yerel olarak kaydedilen bildirimleri listeler (bkz. report_wrong_verdict)."""
         items = load_verdict_feedback()
         w = tk.Toplevel(self.root); w.title(t("vf.log_title")); w.geometry("860x480"); w.minsize(640, 360)
         w.transient(self.root); w.configure(bg=PAL["bg"])
@@ -5954,14 +5954,14 @@ class App:
         for rec in reversed(items[-200:]):
             tree.insert("", "end", values=(
                 rec.get("time", ""), (rec.get("item") or {}).get("name") or "?",
-                verdict_label(rec["given_verdict"]) if rec.get("given_verdict") else "—",
-                verdict_label(rec["correct_verdict"]) if rec.get("correct_verdict") else "—",
-                rec.get("build") or "—", (rec.get("note") or "")[:80]))
+                verdict_label(rec["given_verdict"]) if rec.get("given_verdict") else "â€”",
+                verdict_label(rec["correct_verdict"]) if rec.get("correct_verdict") else "â€”",
+                rec.get("build") or "â€”", (rec.get("note") or "")[:80]))
         if not items:
             ttk.Label(w, text=t("vf.log_empty"), foreground=PAL["muted"]).pack(anchor="w", padx=12, pady=(0, 10))
 
     def report_wrong_github(self):
-        """(eski yol) Yanlış okunan kartı kaydet ve GitHub'da hata bildirimi aç."""
+        """(eski yol) YanlÄ±ÅŸ okunan kartÄ± kaydet ve GitHub'da hata bildirimi aÃ§."""
         img = getattr(self, "last_card_img", None)
         if img is None: return messagebox.showinfo(APP_NAME, t("ocr.need_card"))
         it = self._last_item() or {}
@@ -5973,15 +5973,15 @@ class App:
         (d / "report.json").write_text(json.dumps(info, ensure_ascii=False, indent=2), encoding="utf-8")
         import webbrowser
         title = f"OCR: {it.get('name') or '?'} read wrong"
-        body = (f"Engine: {OCR.name} · App {APP_VERSION} · {info['resolution']}\n\nRead as: `{json.dumps(info['read_as'], ensure_ascii=False)}`\n\n"
+        body = (f"Engine: {OCR.name} Â· App {APP_VERSION} Â· {info['resolution']}\n\nRead as: `{json.dumps(info['read_as'], ensure_ascii=False)}`\n\n"
                 "Correct values: (please write them here)\n\nPlease attach card.png from: " + str(d))
         webbrowser.open(ISSUES_URL + "?" + urllib.parse.urlencode({"title": title, "body": body, "labels": "ocr"}))
-        try: os.startfile(str(d))                  # Windows: klasörü aç, kart sürüklenip eklensin
+        try: os.startfile(str(d))                  # Windows: klasÃ¶rÃ¼ aÃ§, kart sÃ¼rÃ¼klenip eklensin
         except Exception: pass
         self.toast(t("report.saved"))
 
     def _drop_report(self, item):
-        """Sandığa ilk kez giren eşya, oyuncu bir aktivite seçtiyse o aktivitenin düşüşü sayılır (gönüllü)."""
+        """SandÄ±ÄŸa ilk kez giren eÅŸya, oyuncu bir aktivite seÃ§tiyse o aktivitenin dÃ¼ÅŸÃ¼ÅŸÃ¼ sayÄ±lÄ±r (gÃ¶nÃ¼llÃ¼)."""
         st = self.cfg["settings"]
         if not st.get("drop_share") or st.get("drop_activity", "none") == "none": return
         if self.dropq.add(dropstats.record(item, st["drop_activity"])) and hasattr(self, "drop_lbl"):
@@ -6038,7 +6038,7 @@ class App:
         if self.current_tab() == "builds" and getattr(self, "cur", None) and self.cur.get("name") == bname: self.draw_sheet()
 
     def build_status(self, b):
-        """{slot: ("done"|"partial"|"missing"|"off", kayıt, şartlar)} — Build'ler, Eksik Parça ve Panel ortak kullanır."""
+        """{slot: ("done"|"partial"|"missing"|"off", kayÄ±t, ÅŸartlar)} â€” Build'ler, Eksik ParÃ§a ve Panel ortak kullanÄ±r."""
         plan = plan_of(b)
         prog = self.progress.get(b["name"], {})
         out = {}
@@ -6087,10 +6087,10 @@ class App:
 
     # ---------- overlay ----------
     def popup(self, verdict, item, res, note):
-        """Oyun üstü bilgi kartı: kartın hemen yanında (ya da seçilen köşede), rulo çubukları ve en iyi build ile."""
-        # OCR menü/harita/boş ekranı eşya sanmışsa boş siyah bir pencere açma.
-        # Sonuç paneli yine tanı bilgisi gösterebilir; oyun üstü overlay yalnızca
-        # doğrulanmış bir eşya için oluşturulmalıdır.
+        """Oyun Ã¼stÃ¼ bilgi kartÄ±: kartÄ±n hemen yanÄ±nda (ya da seÃ§ilen kÃ¶ÅŸede), rulo Ã§ubuklarÄ± ve en iyi build ile."""
+        # OCR menÃ¼/harita/boÅŸ ekranÄ± eÅŸya sanmÄ±ÅŸsa boÅŸ siyah bir pencere aÃ§ma.
+        # SonuÃ§ paneli yine tanÄ± bilgisi gÃ¶sterebilir; oyun Ã¼stÃ¼ overlay yalnÄ±zca
+        # doÄŸrulanmÄ±ÅŸ bir eÅŸya iÃ§in oluÅŸturulmalÄ±dÄ±r.
         if not valid_item(item):
             self.toast(t("note.no_item"))
             return
@@ -6105,20 +6105,20 @@ class App:
         except (TypeError, ValueError): k = prof.get("ui", 1.0)
         fz = lambda n: max(7, int(round(n * k)))
         col = COLORS[verdict]
-        dark, dark2, fg, mu = "#14161b", "#1e2129", "#eceef2", "#9aa1ae"   # oyun üstünde hep koyu kart
-        # Toplevel dış çerçevesi de kartla aynı renkte olsun; bazı Windows
-        # bileşimlerinde siyah bir dikdörtgen olarak kalmasını önler.
+        dark, dark2, fg, mu = "#14161b", "#1e2129", "#eceef2", "#9aa1ae"   # oyun Ã¼stÃ¼nde hep koyu kart
+        # Toplevel dÄ±ÅŸ Ã§erÃ§evesi de kartla aynÄ± renkte olsun; bazÄ± Windows
+        # bileÅŸimlerinde siyah bir dikdÃ¶rtgen olarak kalmasÄ±nÄ± Ã¶nler.
         w.configure(bg=dark)
         shell = tk.Frame(w, bg=dark, highlightthickness=1, highlightbackground="#2c313d"); shell.pack(fill="both", expand=True)
-        tk.Frame(shell, bg=col, width=max(5, int(7 * k))).pack(side="left", fill="y")      # renkli şerit
+        tk.Frame(shell, bg=col, width=max(5, int(7 * k))).pack(side="left", fill="y")      # renkli ÅŸerit
         body = tk.Frame(shell, bg=dark, padx=int(16 * k), pady=int(12 * k)); body.pack(side="left", fill="both")
         tk.Label(body, text=verdict_label(verdict), fg=ui_theme.PALETTES["default"]["verdict_fg"].get(verdict, fg),
                  bg=dark, font=(ui_theme.FONT_SEMI, fz(18))).pack(anchor="w")
-        sub = item["name"][:42] + ("  ·  " + ", ".join(item["rarity"]) if item.get("rarity") else "")
+        sub = item["name"][:42] + ("  Â·  " + ", ".join(item["rarity"]) if item.get("rarity") else "")
         tk.Label(body, text=sub, fg=fg, bg=dark, font=(ui_theme.FONT_SEMI, fz(11))).pack(anchor="w")
         tag = " / ".join(x for x in (item.get("gear_set"), item.get("brand")) if x)
-        if tag: tk.Label(body, text="🏷 " + tag, fg=mu, bg=dark, font=(ui_theme.FONT, fz(10))).pack(anchor="w")
-        # rulo kalitesi çubukları (oyundaki en yüksek değere göre)
+        if tag: tk.Label(body, text="ğŸ· " + tag, fg=mu, bg=dark, font=(ui_theme.FONT, fz(10))).pack(anchor="w")
+        # rulo kalitesi Ã§ubuklarÄ± (oyundaki en yÃ¼ksek deÄŸere gÃ¶re)
         q = item.get("quality", {})
         if q:
             bars = tk.Canvas(body, bg=dark, highlightthickness=0, width=int(340 * k), height=int(20 * k) * min(4, len(q)) + 4)
@@ -6131,11 +6131,11 @@ class App:
                 bars.create_rectangle(x0, y + 3, x0 + bw * min(100, v) / 100, y + int(14 * k), fill=c, outline="")
                 bars.create_text(x0 + bw + 6, y + int(8 * k), text=f"{v}%", fill=fg, anchor="w", font=(ui_theme.FONT, fz(9)))
         L = []
-        if item.get("_note"): L.append("» " + item["_note"])
-        if note: L.append("» " + note)
+        if item.get("_note"): L.append("Â» " + item["_note"])
+        if note: L.append("Â» " + note)
         if verdict == "REVIEW": L.append(t("panel.rare_warning"))
         for p, n, _ in res[:3]:
-            if p > 0: L.append(f"▸ {n}: {p}%")
+            if p > 0: L.append(f"â–¸ {n}: {p}%")
         if res and res[0][2]: L.append("  " + ", ".join(res[0][2][:4]))
         if verdict == "DISMANTLE": L.append(t("panel.no_build_match"))
         if L:
@@ -6148,7 +6148,7 @@ class App:
         card = getattr(self, "last_card_screen", None)
         if st.get("overlay_mode", "card") == "card" and card:
             gap = int(14 * k)
-            if card[2] + gap + ww <= sw: x = card[2] + gap                       # kartın sağı
+            if card[2] + gap + ww <= sw: x = card[2] + gap                       # kartÄ±n saÄŸÄ±
             elif card[0] - gap - ww >= 0: x = card[0] - gap - ww                 # yer yoksa solu
             if x is not None:
                 y = max(10, min(sh - wh - 10, card[1] + int(40 * k)))
@@ -6158,7 +6158,7 @@ class App:
             corners = [want] + [c for c in ("top_left", "bottom_left", "bottom_right", "top_right") if c != want]
             reg = card or self.region_rect()
             c = next((c for c in corners if not self.rects_overlap((*pos(c), pos(c)[0] + ww, pos(c)[1] + wh), reg)), want)
-            x, y = pos(c)                                     # kart, okunan bölgenin üstüne düşmesin
+            x, y = pos(c)                                     # kart, okunan bÃ¶lgenin Ã¼stÃ¼ne dÃ¼ÅŸmesin
         w.geometry(f"+{int(x)}+{int(y)}")
         click_through(w)
         if not exclude_from_capture(w):
@@ -6203,7 +6203,7 @@ class App:
         if not p: return
         try:
             img = Image.open(p).convert("RGB")
-            box = find_card(img)                                  # taramayla aynı yol: kartı bul, kırp, oku
+            box = find_card(img)                                  # taramayla aynÄ± yol: kartÄ± bul, kÄ±rp, oku
             card = img.crop(box) if box else img
             text, lines = read_card(card)
             item, verdict, res = evaluate(text, self.cfg)
@@ -6213,9 +6213,9 @@ class App:
         except Exception as e:
             messagebox.showerror(APP_NAME, str(e))
 
-    # ---------- Build editörü (v2) ----------
+    # ---------- Build editÃ¶rÃ¼ (v2) ----------
     def build_builds(self):
-        """Build'ler v2: oyun verisinden seçmeli set/marka, attribute (oyun max'ı ile), talent ve silah türü."""
+        """Build'ler v2: oyun verisinden seÃ§meli set/marka, attribute (oyun max'Ä± ile), talent ve silah tÃ¼rÃ¼."""
         f = self.tabs["builds"]
         paned = ttk.Panedwindow(f, orient="horizontal"); paned.pack(fill="both", expand=True, padx=8, pady=8)
         left = ttk.Frame(paned); paned.add(left, weight=1)
@@ -6225,25 +6225,25 @@ class App:
         self.lb = tk.Listbox(left, exportselection=False, font=(ui_theme.FONT, 11))
         self.lb.pack(fill="both", expand=True); self.lb.bind("<<ListboxSelect>>", self.on_pick)
         bb = ttk.Frame(left); bb.pack(fill="x", pady=4)
-        ttk.Button(bb, text=ui_theme.with_icon(t("build.new"), "➕"), command=self.new_build).pack(side="left", fill="x", expand=True)
-        ttk.Button(bb, text=ui_theme.with_icon(t("build.duplicate"), "⧉"), command=self.dup_build).pack(side="left", fill="x", expand=True, padx=4)
-        ttk.Button(bb, text=ui_theme.with_icon(t("build.delete"), "🗑"), command=self.del_build).pack(side="left", fill="x", expand=True)
+        ttk.Button(bb, text=ui_theme.with_icon(t("build.new"), "â•"), command=self.new_build).pack(side="left", fill="x", expand=True)
+        ttk.Button(bb, text=ui_theme.with_icon(t("build.duplicate"), "â§‰"), command=self.dup_build).pack(side="left", fill="x", expand=True, padx=4)
+        ttk.Button(bb, text=ui_theme.with_icon(t("build.delete"), "ğŸ—‘"), command=self.del_build).pack(side="left", fill="x", expand=True)
         bb2 = ttk.Frame(left); bb2.pack(fill="x")
         ttk.Button(bb2, text=t("build.export"), command=self.export_builds).pack(side="left", fill="x", expand=True)
         ttk.Button(bb2, text=t("build.import"), command=self.import_builds).pack(side="left", fill="x", expand=True, padx=(4, 0))
         bb3 = ttk.Frame(left); bb3.pack(fill="x", pady=(4, 0))
-        ttk.Button(bb3, text="🔗 " + t("share.share"), command=self.share_build).pack(side="left", fill="x", expand=True)
-        ttk.Button(bb3, text="📥 " + t("share.paste"), command=self.import_build_code).pack(side="left", fill="x", expand=True, padx=(4, 0))
-        ttk.Button(left, text="🆚 " + t("cmp.compare_btn"), command=self.show_build_compare).pack(fill="x", pady=(6, 0))
-        ttk.Button(left, text=ui_theme.with_icon(t("meta.sync_now"), "⭐"), command=lambda: self.meta_sync_start(force=True, what=("builds",)),
+        ttk.Button(bb3, text="ğŸ”— " + t("share.share"), command=self.share_build).pack(side="left", fill="x", expand=True)
+        ttk.Button(bb3, text="ğŸ“¥ " + t("share.paste"), command=self.import_build_code).pack(side="left", fill="x", expand=True, padx=(4, 0))
+        ttk.Button(left, text="ğŸ†š " + t("cmp.compare_btn"), command=self.show_build_compare).pack(fill="x", pady=(6, 0))
+        ttk.Button(left, text=ui_theme.with_icon(t("meta.sync_now"), "â­"), command=lambda: self.meta_sync_start(force=True, what=("builds",)),
                    style="Accent.TButton").pack(fill="x", pady=(6, 0))
         self.meta_info = ttk.Label(left, text=self.meta_status_text(), foreground=PAL["muted"], wraplength=300, justify="left")
         self.meta_info.pack(fill="x", pady=(4, 0))
 
         right = ttk.Frame(paned); paned.add(right, weight=3)
         self.b_nb = ttk.Notebook(right); self.b_nb.pack(fill="both", expand=True)
-        sh = ttk.Frame(self.b_nb); self.b_nb.add(sh, text=" 📋 " + t("plan.tab_sheet") + " ")
-        holder = ttk.Frame(self.b_nb); self.b_nb.add(holder, text=" ✏ " + t("plan.tab_edit") + " ")
+        sh = ttk.Frame(self.b_nb); self.b_nb.add(sh, text=" ğŸ“‹ " + t("plan.tab_sheet") + " ")
+        holder = ttk.Frame(self.b_nb); self.b_nb.add(holder, text=" âœ " + t("plan.tab_edit") + " ")
         self.sheet_box = ui_theme.scrollable(sh, PAL["bg"])
         r = ui_theme.scrollable(holder, PAL["bg"])
         names = (GAME.data.get("gear_sets", []) + GAME.data.get("brands", [])) if GAME.ok else []
@@ -6257,8 +6257,8 @@ class App:
         self.v_setpick = tk.StringVar()
         ttk.Combobox(g, textvariable=self.v_setpick, values=names, width=30).grid(row=1, column=2, sticky="w", padx=6)
         sb = ttk.Frame(g); sb.grid(row=2, column=2, sticky="w", padx=6)
-        ttk.Button(sb, text="✚", width=3, command=self.add_set).pack(side="left")
-        ttk.Button(sb, text="🗑", width=3, command=self.del_set).pack(side="left", padx=4)
+        ttk.Button(sb, text="âœš", width=3, command=self.add_set).pack(side="left")
+        ttk.Button(sb, text="ğŸ—‘", width=3, command=self.del_set).pack(side="left", padx=4)
         ttk.Label(g, text=t("build.set_bonus")).grid(row=3, column=0, sticky="w", padx=8, pady=4)
         ttk.Spinbox(g, textvariable=self.v_bonus, from_=0, to=50, width=6).grid(row=3, column=1, sticky="w")
         ttk.Label(g, text=t("plan.items")).grid(row=5, column=0, sticky="nw", padx=8, pady=4)
@@ -6267,9 +6267,9 @@ class App:
         ip = ttk.Frame(g); ip.grid(row=5, column=2, sticky="w", padx=6)
         ttk.Combobox(ip, textvariable=self.v_itempick, width=30,
                      values=sorted(set(GAME.data.get("exotics", []) + GAME.data.get("named", []))) if GAME.ok else []).pack(side="left")
-        ttk.Button(ip, text="✚", width=3, command=lambda: self.v_itempick.get().strip() and self.v_itempick.get().strip() not in self.items_lb.get(0, "end")
+        ttk.Button(ip, text="âœš", width=3, command=lambda: self.v_itempick.get().strip() and self.v_itempick.get().strip() not in self.items_lb.get(0, "end")
                    and self.items_lb.insert("end", self.v_itempick.get().strip())).pack(side="left", padx=4)
-        ttk.Button(ip, text="🗑", width=3, command=lambda: [self.items_lb.delete(x) for x in reversed(self.items_lb.curselection())]).pack(side="left")
+        ttk.Button(ip, text="ğŸ—‘", width=3, command=lambda: [self.items_lb.delete(x) for x in reversed(self.items_lb.curselection())]).pack(side="left")
         ttk.Label(g, text=t("build.slots")).grid(row=4, column=0, sticky="nw", padx=8, pady=4)
         slf = ttk.Frame(g); slf.grid(row=4, column=1, columnspan=3, sticky="w")
         self.v_slots = {}
@@ -6291,8 +6291,8 @@ class App:
         ttk.Spinbox(af, textvariable=self.v_aw, from_=0, to=5, increment=0.5, width=5).pack(side="left")
         ttk.Label(af, text=t("build.goodval")).pack(side="left", padx=(10, 2))
         ttk.Entry(af, textvariable=self.v_ag, width=9).pack(side="left")
-        ttk.Button(af, text=ui_theme.with_icon(t("btn.add_update"), "✚"), command=self.set_attr).pack(side="left", padx=6)
-        ttk.Button(af, text=ui_theme.with_icon(t("btn.delete"), "🗑"), command=self.del_attr).pack(side="left")
+        ttk.Button(af, text=ui_theme.with_icon(t("btn.add_update"), "âœš"), command=self.set_attr).pack(side="left", padx=6)
+        ttk.Button(af, text=ui_theme.with_icon(t("btn.delete"), "ğŸ—‘"), command=self.del_attr).pack(side="left")
 
         tl = ttk.LabelFrame(r, text=t("build.talents")); tl.pack(fill="x", padx=6, pady=8)
         self.tt = ttk.Treeview(tl, columns=("n", "k", "w"), show="headings", height=6)
@@ -6309,8 +6309,8 @@ class App:
         ttk.Combobox(tf, textvariable=self.v_tn, width=32, values=sorted(set(tal_names))).pack(side="left")
         ttk.Label(tf, text=t("build.weight")).pack(side="left", padx=(10, 2))
         ttk.Spinbox(tf, textvariable=self.v_tw, from_=0, to=10, increment=0.5, width=5).pack(side="left")
-        ttk.Button(tf, text=ui_theme.with_icon(t("btn.add_update"), "✚"), command=self.set_tal).pack(side="left", padx=6)
-        ttk.Button(tf, text=ui_theme.with_icon(t("btn.delete"), "🗑"), command=self.del_tal).pack(side="left")
+        ttk.Button(tf, text=ui_theme.with_icon(t("btn.add_update"), "âœš"), command=self.set_tal).pack(side="left", padx=6)
+        ttk.Button(tf, text=ui_theme.with_icon(t("btn.delete"), "ğŸ—‘"), command=self.del_tal).pack(side="left")
 
         wp = ttk.LabelFrame(r, text=t("build.weapons")); wp.pack(fill="x", padx=6, pady=8)
         wf = ttk.Frame(wp); wf.pack(fill="x", padx=8, pady=6)
@@ -6322,7 +6322,7 @@ class App:
 
         act = ttk.Frame(r); act.pack(fill="x", padx=6, pady=(4, 6))
         ttk.Button(act, text=t("btn.save"), command=self.save_build, style="Accent.TButton").pack(side="left")
-        ttk.Button(act, text=ui_theme.with_icon(t("build.test_last"), "🧪"), command=self.test_build_last).pack(side="left", padx=8)
+        ttk.Button(act, text=ui_theme.with_icon(t("build.test_last"), "ğŸ§ª"), command=self.test_build_last).pack(side="left", padx=8)
         self.test_lbl = ttk.Label(r, text="", wraplength=900, justify="left"); self.test_lbl.pack(anchor="w", padx=8)
         self.meta_detail = ttk.Label(r, text="", foreground=PAL["muted"], wraplength=900, justify="left")
         self.meta_detail.pack(anchor="w", padx=8, pady=(6, 0))
@@ -6371,10 +6371,10 @@ class App:
 
     @staticmethod
     def build_label(b):
-        """Listede görünen ad: ⭐ meta, 🔒 düzenlenmiş meta, 🔥 popülerlik."""
+        """Listede gÃ¶rÃ¼nen ad: â­ meta, ğŸ”’ dÃ¼zenlenmiÅŸ meta, ğŸ”¥ popÃ¼lerlik."""
         if not b.get("meta_id"): return b["name"]
         pop = b.get("meta", {}).get("popularity", 0)
-        return f"{'🔒' if b.get('meta_locked') else '⭐'} {b['name']}" + (f"  🔥{pop}" if pop else "")
+        return f"{'ğŸ”’' if b.get('meta_locked') else 'â­'} {b['name']}" + (f"  ğŸ”¥{pop}" if pop else "")
 
     def selected_build_index(self):
         s = self.lb.curselection()
@@ -6384,7 +6384,7 @@ class App:
         i = self.selected_build_index()
         if i is None: return
         self.cur = self.cfg["builds"][i]
-        if event is not None: self.flash_build(self.cur)   # kullanıcı tıkladıysa amblem 5 sn
+        if event is not None: self.flash_build(self.cur)   # kullanÄ±cÄ± tÄ±kladÄ±ysa amblem 5 sn
         self.v_name.set(self.cur["name"]); self.v_bonus.set(str(self.cur.get("set_bonus", 0)))
         self.sets_lb.delete(0, "end")
         for s in self.cur.get("sets_or_brands", []): self.sets_lb.insert("end", s)
@@ -6402,7 +6402,7 @@ class App:
         self.draw_sheet()
 
     def draw_sheet(self):
-        """Build ayrıntısı: özet, kaynaklar, set/marka bonusu, 8 yuva (ne aranmalı + elindeki parça + ✔/✖), silahlar."""
+        """Build ayrÄ±ntÄ±sÄ±: Ã¶zet, kaynaklar, set/marka bonusu, 8 yuva (ne aranmalÄ± + elindeki parÃ§a + âœ”/âœ–), silahlar."""
         box = getattr(self, "sheet_box", None)
         b = getattr(self, "cur", None)
         if box is None or not b: return
@@ -6411,11 +6411,11 @@ class App:
         head = ttk.Frame(box); head.pack(fill="x", padx=8, pady=(8, 4))
         ttk.Label(head, text=b["name"], font=(ui_theme.FONT_SEMI, 16)).pack(side="left")
         if is_act:
-            tk.Label(head, text="⭐ " + t("plan.is_active"), bg=PAL["accent"], fg="white", font=(ui_theme.FONT_SEMI, 9), padx=8, pady=2).pack(side="left", padx=10)
+            tk.Label(head, text="â­ " + t("plan.is_active"), bg=PAL["accent"], fg="white", font=(ui_theme.FONT_SEMI, 9), padx=8, pady=2).pack(side="left", padx=10)
         else:
-            ttk.Button(head, text="⭐ " + t("plan.make_active"), style="Accent.TButton",
+            ttk.Button(head, text="â­ " + t("plan.make_active"), style="Accent.TButton",
                        command=lambda: (self.set_active_build(b["name"]), self.refresh_builds(keep=True))).pack(side="left", padx=10)
-        ttk.Button(head, text="🧍 " + t("plan.open_progress"), command=lambda: (self.pb.set(b["name"]), self.refresh_prog(),
+        ttk.Button(head, text="ğŸ§ " + t("plan.open_progress"), command=lambda: (self.pb.set(b["name"]), self.refresh_prog(),
                                                                               self.select_page("progress"))).pack(side="right")
         stt = self.build_status(b)
         have = sum(1 for v in stt.values() if v[0] in ("done", "partial")); full = sum(1 for v in stt.values() if v[0] == "done")
@@ -6426,7 +6426,7 @@ class App:
         summ = m.get("summary", {}) if isinstance(m.get("summary"), dict) else {}
         line = summ.get(i18n.current_language()) or summ.get("en") or ""
         info = []
-        if m.get("mode") or m.get("role"): info.append(" · ".join(x for x in (m.get("mode"), m.get("role"), f"🔥 {m.get('popularity')}" if m.get("popularity") else "") if x))
+        if m.get("mode") or m.get("role"): info.append(" Â· ".join(x for x in (m.get("mode"), m.get("role"), f"ğŸ”¥ {m.get('popularity')}" if m.get("popularity") else "") if x))
         if line: info.append(line)
         sets = b.get("sets_or_brands", [])
         if sets: info.append(t("plan.sets_line", s=", ".join(sets)))
@@ -6436,16 +6436,16 @@ class App:
             bon = bonus_table.get(br) if GAME.ok else None
             if bon:
                 start = 2 if is_set else 1
-                info.append(f"   {br}: " + " · ".join(f"{i + start}pc {x}" for i, x in enumerate(bon)))
+                info.append(f"   {br}: " + " Â· ".join(f"{i + start}pc {x}" for i, x in enumerate(bon)))
         if b.get("items"): info.append(t("plan.items_line", s=", ".join(b["items"])))
         if b.get("talents"): info.append(t("plan.talents_line", s=", ".join(f"{n} ({w:g})" for n, w in sorted(b["talents"].items(), key=lambda kv: -kv[1]))))
         if b.get("attributes"):
-            info.append(t("plan.attrs_line", s=", ".join(f"{attr_name(k)} ≥{r.get('good_at') or '—'}" for k, r in
+            info.append(t("plan.attrs_line", s=", ".join(f"{attr_name(k)} â‰¥{r.get('good_at') or 'â€”'}" for k, r in
                                                            sorted(b["attributes"].items(), key=lambda kv: -float(kv[1].get("weight", 1))))))
         if info:
             ttk.Label(box, text="\n".join(info), wraplength=1100, justify="left").pack(anchor="w", padx=10, pady=(6, 4))
         for src in m.get("sources", [])[:4]:
-            lk = ttk.Label(box, text="🔗 " + (src.get("title") or src.get("url")), foreground=PAL["accent"], cursor="hand2")
+            lk = ttk.Label(box, text="ğŸ”— " + (src.get("title") or src.get("url")), foreground=PAL["accent"], cursor="hand2")
             lk.pack(anchor="w", padx=14); lk.bind("<Button-1>", lambda e, u=src.get("url"): __import__("webbrowser").open(u))
         grid = ttk.Frame(box); grid.pack(fill="x", padx=4, pady=8)
         for c in range(4): grid.columnconfigure(c, weight=1, uniform="sheet")
@@ -6455,12 +6455,12 @@ class App:
             state, rec, checks = stt[slot]
             card = elevated(grid, row=i // 4, column=i % 4, depth=self.cfg["settings"].get("ui_depth", True))
             card.config(highlightbackground=colors[state])
-            tk.Label(card, text=f"{SLOT_ICONS.get(slot, '•')}  {slot_name(slot)}   " + t("plan.st_" + state), bg=PAL["surface"],
+            tk.Label(card, text=f"{SLOT_ICONS.get(slot, 'â€¢')}  {slot_name(slot)}   " + t("plan.st_" + state), bg=PAL["surface"],
                      fg=colors[state] if state != "off" else PAL["muted"], font=(ui_theme.FONT_SEMI, 11), anchor="w").pack(fill="x")
             tk.Label(card, text="\n".join(req_lines(plan.get(slot))), bg=PAL["surface"], fg=PAL["fg"], justify="left", anchor="w",
                      font=(ui_theme.FONT, 9), wraplength=300).pack(fill="x", pady=(4, 2))
             if rec:
-                tk.Label(card, text="🎒 " + t("plan.have", item=rec.get("item"), score=rec.get("score")), bg=PAL["surface"], fg=PAL["accent"],
+                tk.Label(card, text="ğŸ’ " + t("plan.have", item=rec.get("item"), score=rec.get("score")), bg=PAL["surface"], fg=PAL["accent"],
                          justify="left", anchor="w", font=(ui_theme.FONT_SEMI, 9), wraplength=300).pack(fill="x")
                 tk.Label(card, text="\n".join(check_lines(checks)), bg=PAL["surface"], fg=PAL["muted"], justify="left", anchor="w",
                          font=(ui_theme.FONT, 9), wraplength=300).pack(fill="x")
@@ -6470,11 +6470,11 @@ class App:
             card.bind("<Configure>", lambda e, c=card: [w.config(wraplength=max(120, e.width - 26))
                                                        for w in c.winfo_children() if isinstance(w, tk.Label)])
 
-    # ---------- build karşılaştırma ----------
+    # ---------- build karÅŸÄ±laÅŸtÄ±rma ----------
     def _slots_shareable(self, req1, req2):
-        """İki yuva şartının AYNI fiziksel eşyayla karşılanıp karşılanamayacağının kaba tahmini:
-        ikisi de aktifse ve (aynı özel eşya) ya da (aynı çekirdek attribute + ortak set/marka) varsa
-        'ortak kullanılabilir' sayılır. Kesin bir garanti değildir — yalnızca bir gösterge."""
+        """Ä°ki yuva ÅŸartÄ±nÄ±n AYNI fiziksel eÅŸyayla karÅŸÄ±lanÄ±p karÅŸÄ±lanamayacaÄŸÄ±nÄ±n kaba tahmini:
+        ikisi de aktifse ve (aynÄ± Ã¶zel eÅŸya) ya da (aynÄ± Ã§ekirdek attribute + ortak set/marka) varsa
+        'ortak kullanÄ±labilir' sayÄ±lÄ±r. Kesin bir garanti deÄŸildir â€” yalnÄ±zca bir gÃ¶sterge."""
         if not req1 or not req2 or req1.get("kind") == "off" or req2.get("kind") == "off":
             return False
         if req1.get("kind") == "item" and req2.get("kind") == "item":
@@ -6486,9 +6486,9 @@ class App:
         return same_core and bool(shared_src)
 
     def show_build_compare(self):
-        """İki build'i yan yana karşılaştırır: tamamlanma oranı, yuva yuva durum ve hangi yuvaların
-        aynı fiziksel eşyayla paylaşılabileceğine dair kaba bir tahmin (bkz. _slots_shareable).
-        Yeni bir ölçüm sistemi kurmaz — mevcut build_status/plan_of/self.progress verisini kullanır."""
+        """Ä°ki build'i yan yana karÅŸÄ±laÅŸtÄ±rÄ±r: tamamlanma oranÄ±, yuva yuva durum ve hangi yuvalarÄ±n
+        aynÄ± fiziksel eÅŸyayla paylaÅŸÄ±labileceÄŸine dair kaba bir tahmin (bkz. _slots_shareable).
+        Yeni bir Ã¶lÃ§Ã¼m sistemi kurmaz â€” mevcut build_status/plan_of/self.progress verisini kullanÄ±r."""
         names = [b["name"] for b in self.cfg["builds"]]
         if len(names) < 2:
             return self.toast(t("cmp.need_two"))
@@ -6532,15 +6532,15 @@ class App:
                 r1, r2 = plan1.get(slot, {"kind": "off"}), plan2.get(slot, {"kind": "off"})
                 s1, s2 = stt1[slot][0], stt2[slot][0]
                 if s1 != "off" and s2 != "off" and not self._slots_shareable(r1, r2): mismatched += 1
-                ttk.Label(grid, text=f"{SLOT_ICONS.get(slot, '•')} {slot_name(slot)}").grid(row=i, column=0, sticky="w", padx=(0, 10), pady=3)
+                ttk.Label(grid, text=f"{SLOT_ICONS.get(slot, 'â€¢')} {slot_name(slot)}").grid(row=i, column=0, sticky="w", padx=(0, 10), pady=3)
                 for col, (req, state) in enumerate(((r1, s1), (r2, s2))):
                     cell = tk.Frame(grid, bg=PAL["surface"], highlightthickness=1, highlightbackground=colors[state])
                     cell.grid(row=i, column=1 + col, sticky="ew", padx=(0, 10) if col == 0 else 0, pady=3)
-                    txt = t("plan.st_" + state) + ("  —  " + req_lines_short(req) if state != "off" else "")
+                    txt = t("plan.st_" + state) + ("  â€”  " + req_lines_short(req) if state != "off" else "")
                     tk.Label(cell, text=txt, bg=PAL["surface"], fg=colors[state] if state != "off" else PAL["muted"],
                              font=(ui_theme.FONT, 9), anchor="w", justify="left", wraplength=320).pack(fill="x", padx=8, pady=4)
                 if s1 != "off" and s2 != "off" and self._slots_shareable(r1, r2):
-                    ttk.Label(grid, text="🔁 " + t("cmp.shareable"), foreground=PAL["accent"], font=(ui_theme.FONT, 8)).grid(
+                    ttk.Label(grid, text="ğŸ” " + t("cmp.shareable"), foreground=PAL["accent"], font=(ui_theme.FONT, 8)).grid(
                         row=i, column=3, sticky="w", padx=(6, 0))
             shared_sets = sorted(set(b1.get("sets_or_brands", [])) & set(b2.get("sets_or_brands", [])))
             shared_items = sorted(set(b1.get("items", [])) & set(b2.get("items", [])))
@@ -6558,7 +6558,7 @@ class App:
             else:
                 closer, pct = (b1["name"], pct1) if pct1 > pct2 else (b2["name"], pct2)
                 vtxt = t("cmp.verdict_closer", name=closer, pct=pct)
-            ttk.Label(verdict, text="⚖ " + vtxt, font=(ui_theme.FONT_SEMI, 10), foreground=PAL["accent"]).pack(anchor="w", pady=(0, 2))
+            ttk.Label(verdict, text="âš– " + vtxt, font=(ui_theme.FONT_SEMI, 10), foreground=PAL["accent"]).pack(anchor="w", pady=(0, 2))
             ttk.Label(verdict, text=t("cmp.switch_cost", n=mismatched), foreground=PAL["muted"], wraplength=880, justify="left").pack(anchor="w")
 
         cba.bind("<<ComboboxSelected>>", redraw); cbb.bind("<<ComboboxSelected>>", redraw)
@@ -6572,7 +6572,7 @@ class App:
         summ = m.get("summary", {})
         line = summ.get(lang) or summ.get("en") or ""
         src = ", ".join(x["title"] or x["url"] for x in m.get("sources", [])[:3])
-        parts = [t("meta.detail", mode=m.get("mode") or "—", pop=m.get("popularity", 0))]
+        parts = [t("meta.detail", mode=m.get("mode") or "â€”", pop=m.get("popularity", 0))]
         if line: parts.append(line)
         if src: parts.append(t("meta.sources", src=src))
         if b.get("meta_locked"): parts.append(t("meta.locked"))
@@ -6582,7 +6582,7 @@ class App:
         self.ta.delete(*self.ta.get_children()); self.tt.delete(*self.tt.get_children())
         for k, r in self.cur["attributes"].items():
             mx = GAME.max_of(k) if GAME.ok else None
-            self.ta.insert("", "end", iid=k, values=(attr_name(k), r["weight"], r.get("good_at", ""), f"{mx:g}" if mx else "—"))
+            self.ta.insert("", "end", iid=k, values=(attr_name(k), r["weight"], r.get("good_at", ""), f"{mx:g}" if mx else "â€”"))
         wnames = {gamedata.nrm(n) for n in GAME.data.get("weapon_talents", [])} if GAME.ok else set()
         augments = {gamedata.nrm(n) for n in GAME.data.get("prototype_augments", [])} if GAME.ok else set()
         for n, w in self.cur["talents"].items():
@@ -6677,7 +6677,7 @@ class App:
         if types: self.cur.setdefault("weapons", {})["types"] = types
         elif "weapons" in self.cur: self.cur["weapons"].pop("types", None)
         self.cur["items"] = list(self.items_lb.get(0, "end"))
-        if self.cur.get("meta_id"): self.cur["meta_locked"] = True   # artık senkron bu build'i değiştirmez
+        if self.cur.get("meta_id"): self.cur["meta_locked"] = True   # artÄ±k senkron bu build'i deÄŸiÅŸtirmez
         if old != new and old in self.progress:
             self.progress[new] = self.progress.pop(old); save_progress(self.progress)
         save_cfg(self.cfg); self.refresh_builds(i); self.toast(t("msg.saved"))
@@ -6690,9 +6690,9 @@ class App:
             pct, why = engine.score_weapon(item, self.cur, text, GAME)
         else:
             pct, why = engine.score_gear(item, self.cur, gamedata.nrm(text), GAME)
-        self.test_lbl.config(text=t("build.test_result", item=item["name"], pct=pct) + "\n" + (", ".join(why) or "—"))
+        self.test_lbl.config(text=t("build.test_result", item=item["name"], pct=pct) + "\n" + (", ".join(why) or "â€”"))
 
-    # ---------- 3D ajan görünümü: model, kıyafet, ten ----------
+    # ---------- 3D ajan gÃ¶rÃ¼nÃ¼mÃ¼: model, kÄ±yafet, ten ----------
     def _build_agent_look(self, bar):
         st, av = self.cfg["settings"], self.agent3d
         sprite = getattr(av, "sprite", False)
@@ -6709,10 +6709,10 @@ class App:
 
         def cycle(step):
             av.cycle(step); lbl.config(text=names[av.model]); save()
-        tk.Button(bar, text="◀", command=lambda: cycle(-1), **btn).pack(side="left")
+        tk.Button(bar, text="â—€", command=lambda: cycle(-1), **btn).pack(side="left")
         lbl.pack(side="left", padx=2)
-        tk.Button(bar, text="▶", command=lambda: cycle(1), **btn).pack(side="left")
-        if sprite:                                       # gerçekçi ajanlarda renk/ten seçimi yok (kıyafet = model)
+        tk.Button(bar, text="â–¶", command=lambda: cycle(1), **btn).pack(side="left")
+        if sprite:                                       # gerÃ§ekÃ§i ajanlarda renk/ten seÃ§imi yok (kÄ±yafet = model)
             self._agent_look = {"cycle": cycle, "outfit": None, "pick_outfit": lambda *_: None, "label": lbl}
             return
         skins = tk.Frame(bar, bg=PAL["surface"]); skins.pack(side="right")
@@ -6732,9 +6732,9 @@ class App:
         cb.bind("<<ComboboxSelected>>", pick_outfit)
         self._agent_look = {"cycle": cycle, "outfit": cb, "pick_outfit": pick_outfit, "label": lbl}
 
-    # ---------- Eksik parça (v2) ----------
+    # ---------- Eksik parÃ§a (v2) ----------
     def build_prog(self):
-        """Eksik Parça v2: seçili build'in 8 yuvası kart olarak; her kartta parça, set/marka, puan ve rulolar."""
+        """Eksik ParÃ§a v2: seÃ§ili build'in 8 yuvasÄ± kart olarak; her kartta parÃ§a, set/marka, puan ve rulolar."""
         f = self.tabs["progress"]
         bar = ttk.Frame(f); bar.pack(fill="x", padx=10, pady=10)
         ttk.Label(bar, text=t("label.build")).pack(side="left")
@@ -6742,17 +6742,17 @@ class App:
         self.pb.pack(side="left", padx=6); self.pb.bind("<<ComboboxSelected>>", lambda e: (self.set_active_build(self.pb.get()), self.refresh_prog()))
         a0 = active_build(self.cfg)
         if a0: self.pb.set(a0["name"])
-        ttk.Button(bar, text=ui_theme.with_icon(t("prog.reset_build"), "↺"), command=self.reset_build_prog).pack(side="right")
+        ttk.Button(bar, text=ui_theme.with_icon(t("prog.reset_build"), "â†º"), command=self.reset_build_prog).pack(side="right")
         self.pg_lbl = ttk.Label(f, style="Section.TLabel"); self.pg_lbl.pack(anchor="w", padx=12)
         self.pbar = ttk.Progressbar(f, maximum=100); self.pbar.pack(fill="x", padx=12, pady=6)
         mid = ttk.Frame(f); mid.pack(fill="x", padx=8, pady=4)
         av_box = tk.Frame(mid, bg=PAL["surface"], highlightthickness=1, highlightbackground=PAL["border"])
         av_box.pack(side="left", fill="y", padx=(4, 8), pady=6)
-        tk.Label(av_box, text="🧍 " + t("v3d.agent"), bg=PAL["surface"], fg=PAL["fg"], font=(ui_theme.FONT_SEMI, 11)).pack(anchor="w", padx=10, pady=(8, 0))
+        tk.Label(av_box, text="ğŸ§ " + t("v3d.agent"), bg=PAL["surface"], fg=PAL["fg"], font=(ui_theme.FONT_SEMI, 11)).pack(anchor="w", padx=10, pady=(8, 0))
         stg_ = self.cfg["settings"]
         look = tk.Frame(av_box, bg=PAL["surface"]); look.pack(fill="x", padx=8, pady=(6, 0))
         agents_dir = next((d for d in (BUNDLE / "meta" / "agents", BASE / "meta" / "agents") if view3d.sprite_models(d)), None)
-        if agents_dir:                                   # gerçekçi ajanlar (önceden render edilmiş kareler)
+        if agents_dir:                                   # gerÃ§ekÃ§i ajanlar (Ã¶nceden render edilmiÅŸ kareler)
             self.agent3d = view3d.SpriteAgentView(av_box, agents_dir, model=stg_.get("agent_model", "operator"),
                                                   bg=PAL["surface"], width=360, height=440)
         else:
@@ -6772,7 +6772,7 @@ class App:
         self.slot_cards = {}
         for i, s in enumerate(engine.ALL_SLOTS):
             box = elevated(self.slot_grid, row=i // cols, column=i % cols, depth=self.cfg["settings"].get("ui_depth", True))
-            head = tk.Label(box, text=SLOT_ICONS.get(s, "•") + "  " + slot_name(s), bg=PAL["surface"], fg=PAL["fg"],
+            head = tk.Label(box, text=SLOT_ICONS.get(s, "â€¢") + "  " + slot_name(s), bg=PAL["surface"], fg=PAL["fg"],
                             font=(ui_theme.FONT_SEMI, 12), anchor="w")
             head.pack(fill="x")
             body = tk.Label(box, text="", bg=PAL["surface"], fg=PAL["muted"], justify="left", anchor="w",
@@ -6780,8 +6780,8 @@ class App:
             body.pack(fill="x", pady=(4, 6))
             box.bind("<Configure>", lambda e, b=body: b.config(wraplength=max(120, e.width - 30)))
             btns = tk.Frame(box, bg=PAL["surface"]); btns.pack(fill="x")
-            ttk.Button(btns, text="📥 " + t("prog.put_last"), command=lambda s=s: self.save_last_scan(s)).pack(side="left")
-            ttk.Button(btns, text="✖", width=3, command=lambda s=s: self.clear_slot(s)).pack(side="left", padx=6)
+            ttk.Button(btns, text="ğŸ“¥ " + t("prog.put_last"), command=lambda s=s: self.save_last_scan(s)).pack(side="left")
+            ttk.Button(btns, text="âœ–", width=3, command=lambda s=s: self.clear_slot(s)).pack(side="left", padx=6)
             self.slot_cards[s] = (box, head, body)
         ttk.Label(f, text=t("prog.all_builds"), style="Section.TLabel").pack(anchor="w", padx=12, pady=(10, 2))
         low = ttk.Frame(f); low.pack(fill="both", expand=True, padx=12, pady=(0, 10))
@@ -6790,7 +6790,7 @@ class App:
             self.allp.heading(c, text=hd); self.allp.column(c, width=w, anchor="center" if c == "n" else "w")
         self.allp.pack(side="left", fill="both", expand=True)
         bx = tk.Frame(low, bg=PAL["surface"], highlightthickness=1, highlightbackground=PAL["border"]); bx.pack(side="left", fill="both", padx=(10, 0))
-        tk.Label(bx, text="📊 " + t("v3d.bars"), bg=PAL["surface"], fg=PAL["fg"], font=(ui_theme.FONT_SEMI, 11)).pack(anchor="w", padx=10, pady=(8, 0))
+        tk.Label(bx, text="ğŸ“Š " + t("v3d.bars"), bg=PAL["surface"], fg=PAL["fg"], font=(ui_theme.FONT_SEMI, 11)).pack(anchor="w", padx=10, pady=(8, 0))
         self.bars3d = view3d.Bars3D(bx, bg=PAL["surface"], width=520, height=260)
         self.bars3d.pack(padx=6, pady=4)
         self.bars3d.on_pick = lambda tag: self.bars_info.config(text=tag)
@@ -6800,7 +6800,7 @@ class App:
         self.refresh_prog()
 
     def _pick_slot3d(self, slot):
-        """3D ajanda tıklanan yuva: ilgili kart vurgulanır."""
+        """3D ajanda tÄ±klanan yuva: ilgili kart vurgulanÄ±r."""
         self.sel_slot = None if self.sel_slot == slot else slot
         for s2, (box, head, body) in self.slot_cards.items():
             box.config(highlightbackground=PAL["accent"] if s2 == self.sel_slot else box._base_border)
@@ -6831,8 +6831,8 @@ class App:
             need = "\n".join(req_lines(plan.get(s)))
             if d:
                 have += 1
-                body.config(text=f"✔ {d['item']}  ·  {t('col.score')}: {d['score']}%  ·  {d.get('time', '')[:10]}\n"
-                                 + "\n".join(check_lines(checks)) + "\n— " + t("plan.wanted") + " —\n" + need, fg=PAL["fg"])
+                body.config(text=f"âœ” {d['item']}  Â·  {t('col.score')}: {d['score']}%  Â·  {d.get('time', '')[:10]}\n"
+                                 + "\n".join(check_lines(checks)) + "\nâ€” " + t("plan.wanted") + " â€”\n" + need, fg=PAL["fg"])
             else:
                 body.config(text=t("plan.missing_title") + "\n" + need, fg=PAL["muted"])
         self.agent3d.set_status(status3d, self.sel_slot)
@@ -6869,14 +6869,14 @@ class App:
         if messagebox.askyesno(APP_NAME, t("prog.reset_confirm")):
             self.progress.pop(self.pb.get(), None); save_progress(self.progress); self.refresh_prog()
 
-    # ---------- İstatistik ----------
+    # ---------- Ä°statistik ----------
     def build_stats(self):
         f = self.tabs["stats"]
         bar = ttk.Frame(f); bar.pack(fill="x", padx=10, pady=10)
         ttk.Label(bar, text=t("label.period")).pack(side="left")
         self.stats_period = ttk.Combobox(bar, state="readonly", width=14, values=[t("period.today"), t("period.7d"), t("period.30d"), t("period.all")]); self.stats_period.current(1)
         self.stats_period.pack(side="left", padx=6); self.stats_period.bind("<<ComboboxSelected>>", lambda e: self.refresh_stats_tab())
-        ttk.Button(bar, text=ui_theme.with_icon(t("btn.refresh"), "⟳"), command=self.refresh_stats_tab).pack(side="left")
+        ttk.Button(bar, text=ui_theme.with_icon(t("btn.refresh"), "âŸ³"), command=self.refresh_stats_tab).pack(side="left")
         self.sum_lbl = ttk.Label(f, style="Section.TLabel"); self.sum_lbl.pack(anchor="w", padx=12)
         self._build_community(f)
         grid = ttk.Frame(f); grid.pack(fill="both", expand=True, padx=8, pady=6)
@@ -6889,16 +6889,16 @@ class App:
 
     def _build_community(self, f):
         st = self.cfg["settings"]
-        cb = ttk.LabelFrame(f, text="🌐 " + t("drops.box")); cb.pack(fill="x", padx=10, pady=(6, 2))
+        cb = ttk.LabelFrame(f, text="ğŸŒ " + t("drops.box")); cb.pack(fill="x", padx=10, pady=(6, 2))
         r = ttk.Frame(cb); r.pack(fill="x", padx=8, pady=4)
         self.drop_var = tk.BooleanVar(value=bool(st.get("drop_share")))
         ttk.Checkbutton(r, text=t("drops.share"), variable=self.drop_var, command=self._drop_toggle).pack(side="left")
         ttk.Label(r, text=t("drops.server")).pack(side="left", padx=(16, 2))
         self.drop_srv = tk.StringVar(value=st.get("drop_server") or dropstats.DEFAULT_URL)
         ttk.Entry(r, textvariable=self.drop_srv, width=40).pack(side="left")
-        ttk.Button(r, text="💾", width=3, command=self._drop_server_save).pack(side="left", padx=4)
-        ttk.Button(r, text="⇪ " + t("drops.send_now"), command=self.drops_flush).pack(side="left", padx=4)
-        ttk.Button(r, text="Σ " + t("drops.summary_btn"), command=self.drops_summary).pack(side="left")
+        ttk.Button(r, text="ğŸ’¾", width=3, command=self._drop_server_save).pack(side="left", padx=4)
+        ttk.Button(r, text="â‡ª " + t("drops.send_now"), command=self.drops_flush).pack(side="left", padx=4)
+        ttk.Button(r, text="Î£ " + t("drops.summary_btn"), command=self.drops_summary).pack(side="left")
         self.drop_lbl = ttk.Label(cb, text="", foreground=PAL["muted"]); self.drop_lbl.pack(anchor="w", padx=12)
         self._drops_label()
         hold = ttk.Frame(cb); hold.pack(fill="x", padx=8, pady=(2, 6))
@@ -6909,7 +6909,7 @@ class App:
             self.cs_act.pack(side="left")
             ttk.Label(r2, text=t("drops.search")).pack(side="left", padx=(12, 2))
             self.cs_q = tk.StringVar(); ttk.Entry(r2, textvariable=self.cs_q, width=28).pack(side="left")
-            ttk.Button(r2, text="🔍 " + t("drops.show"), command=self.community_stats).pack(side="left", padx=6)
+            ttk.Button(r2, text="ğŸ” " + t("drops.show"), command=self.community_stats).pack(side="left", padx=6)
             self.cs_out = tk.Text(hold, height=7, bg=PAL["surface"], fg=PAL["fg"], relief="flat", wrap="word", font=(ui_theme.FONT, 10))
             self.cs_out.pack(fill="x", pady=(4, 0))
         ttk.Label(cb, text=t("drops.privacy"), foreground=PAL["muted"], wraplength=1000, justify="left").pack(anchor="w", padx=12, pady=(0, 6))
@@ -6950,14 +6950,14 @@ class App:
         else:
             T.insert("end", t("drops.weeks", n=d.get("weeks"), since=d.get("since")) + "\n")
             for a in d.get("activities", [])[:8]:
-                T.insert("end", f"  {self._acts.get(a['activity'], a['activity'])}: {a['drops']}  ·  ★{a.get('named') or 0}  ⬢{a.get('exotic') or 0}  ·  {a.get('players')}👤\n")
+                T.insert("end", f"  {self._acts.get(a['activity'], a['activity'])}: {a['drops']}  Â·  â˜…{a.get('named') or 0}  â¬¢{a.get('exotic') or 0}  Â·  {a.get('players')}ğŸ‘¤\n")
             if d.get("top"):
                 T.insert("end", "\n" + t("drops.top", act=self._acts.get(d["activity"], d["activity"])) + "\n")
                 for x in d["top"][:15]: T.insert("end", f"  {x['n']:4d}  {x['item']}  ({x.get('slot') or x.get('kind')})\n")
             if d.get("where") is not None and d.get("q"):
                 T.insert("end", "\n" + t("drops.where", q=d["q"]) + "\n")
-                for w in d["where"]: T.insert("end", f"  {self._acts.get(w['activity'], w['activity'])}: {w['n']}  ({w['per1000']}‰)\n")
-                if not d["where"]: T.insert("end", "  —\n")
+                for w in d["where"]: T.insert("end", f"  {self._acts.get(w['activity'], w['activity'])}: {w['n']}  ({w['per1000']}â€°)\n")
+                if not d["where"]: T.insert("end", "  â€”\n")
         T.config(state="disabled")
 
     def refresh_stats_tab(self):
@@ -6985,7 +6985,7 @@ class App:
     # ---------- Asistan ----------
     def build_asistan(self):
         f, st = ui_theme.scrollable(self.tabs["assistant"], PAL["bg"]), self.cfg["settings"]
-        quick = ttk.LabelFrame(f, text="🎮 " + t("ga.title")); quick.pack(fill="x", padx=10, pady=(8, 0))
+        quick = ttk.LabelFrame(f, text="ğŸ® " + t("ga.title")); quick.pack(fill="x", padx=10, pady=(8, 0))
         self.ga_help = ttk.Label(quick, text=t("ga.help", voice=st.get("voice_hotkey", "<f9>"),
                                 pause=st.get("tr_toggle_hotkey", "<f6>"), cancel=st.get("assistant_cancel_hotkey", "<f12>")),
                                 wraplength=880, justify="left")
@@ -7007,10 +7007,10 @@ class App:
         row = ttk.Frame(f); row.pack(fill="x", padx=10)
         self.chat_in = ttk.Entry(row); self.chat_in.pack(side="left", fill="x", expand=True)
         self.chat_in.bind("<Return>", lambda e: self.send_chat())
-        ttk.Button(row, text=ui_theme.with_icon(t("btn.send"), "➤"), command=self.send_chat, style="Accent.TButton").pack(side="left", padx=4)
+        ttk.Button(row, text=ui_theme.with_icon(t("btn.send"), "â¤"), command=self.send_chat, style="Accent.TButton").pack(side="left", padx=4)
         ttk.Button(row, text=t("ai.talk"), command=self.toggle_voice).pack(side="left")
-        ttk.Button(row, text=ui_theme.with_icon(t("ai.diag"), "🩺"), command=self.run_voice_diag).pack(side="left", padx=(4, 0))
-        ttk.Button(row, text=ui_theme.with_icon(t("btn.clear"), "🧹"), command=self.clear_chat).pack(side="left", padx=4)
+        ttk.Button(row, text=ui_theme.with_icon(t("ai.diag"), "ğŸ©º"), command=self.run_voice_diag).pack(side="left", padx=(4, 0))
+        ttk.Button(row, text=ui_theme.with_icon(t("btn.clear"), "ğŸ§¹"), command=self.clear_chat).pack(side="left", padx=4)
         self.vstatus = ttk.Label(f, text="", foreground=PAL["warning"]); self.vstatus.pack(anchor="w", padx=12)
 
         box = ttk.LabelFrame(f, text=t("ai.settings")); box.pack(fill="x", padx=10, pady=8)
@@ -7034,7 +7034,7 @@ class App:
         ttk.Button(box, text=t("ai.test_voice"), command=lambda: self.speak(t("ai.voice_test"))).grid(row=3, column=2, sticky="w", padx=16)
         ttk.Button(box, text=t("btn.save"), command=self.save_ai_settings, style="Accent.TButton").grid(row=4, column=2, sticky="w", padx=16)
         vp = ttk.Frame(box); vp.grid(row=5, column=2, rowspan=4, sticky="nw", padx=16, pady=(6, 0))
-        ttk.Label(vp, text="🎙 " + t("vp.pack")).pack(anchor="w")
+        ttk.Label(vp, text="ğŸ™ " + t("vp.pack")).pack(anchor="w")
         packs = list(voicepack.NATURAL_PACKS)
         selected = voicepack.natural_pack(st.get("voice_pack"), i18n.current_language())
         self.vp_var = tk.StringVar(value=t("vp.p_" + selected))
@@ -7047,17 +7047,17 @@ class App:
             self.set_online_voice(self.vp_online.get())
         cb.bind("<<ComboboxSelected>>", vp_save)
         ttk.Checkbutton(vp, text=t("vp.online"), variable=self.vp_online, command=vp_save).pack(anchor="w")
-        ttk.Button(vp, text="▶ " + t("vp.test"), command=self.voice_demo).pack(anchor="w", pady=(4, 0))
+        ttk.Button(vp, text="â–¶ " + t("vp.test"), command=self.voice_demo).pack(anchor="w", pady=(4, 0))
         ttk.Label(vp, text=t("vp.natural_hint"), foreground=PAL["muted"], wraplength=300, justify="left").pack(anchor="w", pady=(4, 0))
         ttk.Label(box, text=t("ai.key_warning"),
                  foreground=PAL["muted"]).grid(row=len(fields) + 1, column=0, columnspan=2, sticky="w", padx=8, pady=(6, 0))
         self.chat_add("sys", t("ai.examples"))
-        for m in getattr(self, "chat_hist", []):           # arayüz yeniden kurulduysa sohbeti geri yaz
+        for m in getattr(self, "chat_hist", []):           # arayÃ¼z yeniden kurulduysa sohbeti geri yaz
             self.chat_add("user" if m["role"] == "user" else "asistan", m["content"])
 
     def chat_add(self, role, text):
         self.chat.config(state="normal")
-        who = {"user": "Sen", "asistan": "Asistan", "sys": "•"}[role]
+        who = {"user": "Sen", "asistan": "Asistan", "sys": "â€¢"}[role]
         self.chat.insert("end", f"{who}: {text}\n\n", role)
         self.chat.see("end"); self.chat.config(state="disabled")
 
@@ -7137,8 +7137,8 @@ class App:
                            "son_taramalar": hist, "oturum_sayaclari": self.counts}, ensure_ascii=False, separators=(",", ":"))
 
     def quick_answer(self, text):
-        """Yapay zeka yokken çalışan basit yanıtlar. Anahtar kelimeler dil
-        dosyasından gelir (kw.missing / kw.stats / kw.last), böylece her dilde çalışır."""
+        """Yapay zeka yokken Ã§alÄ±ÅŸan basit yanÄ±tlar. Anahtar kelimeler dil
+        dosyasÄ±ndan gelir (kw.missing / kw.stats / kw.last), bÃ¶ylece her dilde Ã§alÄ±ÅŸÄ±r."""
         low = text.lower()
         def hit(key):
             return any(w.strip() and w.strip() in low for w in t(key).split("|"))
@@ -7259,14 +7259,14 @@ class App:
         self.refresh_header()
         self.toast(t("ai.saved"))
 
-    # ---------- Görevler (Günlük/Haftalık/Journey/Global Event/Manhunt) ----------
+    # ---------- GÃ¶revler (GÃ¼nlÃ¼k/HaftalÄ±k/Journey/Global Event/Manhunt) ----------
     def build_gorevler(self):
-        """Görevler v3: yalnızca arayüz dilinde, gruplu ve öz liste; çift tıkla → görselli ayrıntı penceresi.
-        Alt sekmeler: Görevler · Ekle/Ekrandan oku · Claude ile getir · Sıfırlama ve senkron."""
+        """GÃ¶revler v3: yalnÄ±zca arayÃ¼z dilinde, gruplu ve Ã¶z liste; Ã§ift tÄ±kla â†’ gÃ¶rselli ayrÄ±ntÄ± penceresi.
+        Alt sekmeler: GÃ¶revler Â· Ekle/Ekrandan oku Â· Claude ile getir Â· SÄ±fÄ±rlama ve senkron."""
         st = self.cfg["settings"]
         self.task_nb = ttk.Notebook(self.tabs["tasks"]); self.task_nb.pack(fill="both", expand=True, padx=8, pady=8)
         pg = {}
-        for key, icon in (("list", "🗂"), ("add", "➕"), ("claude", "🤖"), ("sync", "⏱")):
+        for key, icon in (("list", "ğŸ—‚"), ("add", "â•"), ("claude", "ğŸ¤–"), ("sync", "â±")):
             fr = ttk.Frame(self.task_nb); self.task_nb.add(fr, text=f" {icon} {t('tpage.' + key)} ")
             pg[key] = fr
 
@@ -7275,13 +7275,13 @@ class App:
         head = ttk.Frame(L); head.pack(fill="x", padx=6, pady=(8, 4))
         self.task_cat = tk.StringVar(value=TASK_CATS[0])
         self.cat_btns = {}
-        icons = {"projects": "📋", "journey": "🧭", "manhunt": "🎯"}
+        icons = {"projects": "ğŸ“‹", "journey": "ğŸ§­", "manhunt": "ğŸ¯"}
         for c in TASK_CATS:
             b = ttk.Radiobutton(head, text="", value=c, variable=self.task_cat, style="Toolbutton",
                                 command=self.refresh_tasks)
-            b.pack(side="left", padx=(0, 6)); self.cat_btns[c] = (b, icons.get(c, "•"))
+            b.pack(side="left", padx=(0, 6)); self.cat_btns[c] = (b, icons.get(c, "â€¢"))
         self.task_q = tk.StringVar()
-        ttk.Label(head, text="🔎").pack(side="left", padx=(14, 2))
+        ttk.Label(head, text="ğŸ”").pack(side="left", padx=(14, 2))
         qe = ttk.Entry(head, textvariable=self.task_q, width=24); qe.pack(side="left")
         qe.bind("<KeyRelease>", lambda e=None: self.refresh_tasks())
         self.hide_done = tk.BooleanVar(value=bool(st.get("tasks_hide_done", False)))
@@ -7294,7 +7294,7 @@ class App:
         body.add(lf, weight=3); body.add(rf, weight=2)
         self.task_tv = ttk.Treeview(lf, columns=("st", "src"), show="tree headings", selectmode="browse")
         self.task_tv.heading("#0", text=t("tasks.col_task")); self.task_tv.column("#0", width=560, anchor="w")
-        self.task_tv.heading("st", text="✔"); self.task_tv.column("st", width=44, anchor="center", stretch=False)
+        self.task_tv.heading("st", text="âœ”"); self.task_tv.column("st", width=44, anchor="center", stretch=False)
         self.task_tv.heading("src", text=t("col.source")); self.task_tv.column("src", width=90, anchor="center", stretch=False)
         self.task_tv.tag_configure("group", font=(ui_theme.FONT_SEMI, 10), foreground=PAL["accent"])
         self.task_tv.tag_configure("done", foreground=PAL["muted"])
@@ -7304,7 +7304,7 @@ class App:
         self.task_tv.bind("<Return>", self.on_task_double)
         self.task_tv.bind("<<TreeviewSelect>>", self.show_task_how)
         self.task_tv.bind("<space>", lambda e=None: e is not None and self.toggle_task_done())
-        # sağ: önizleme kartı
+        # saÄŸ: Ã¶nizleme kartÄ±
         card = tk.Frame(rf, bg=PAL["surface"], highlightthickness=1, highlightbackground=PAL["border"])
         card.pack(fill="both", expand=True, padx=(8, 0))
         self.prev_title = tk.Label(card, text=t("tasks.how_pick"), bg=PAL["surface"], fg=PAL["fg"], font=(ui_theme.FONT_SEMI, 13),
@@ -7317,14 +7317,14 @@ class App:
         self.how_lbl.pack(fill="both", expand=True, padx=14, pady=8)
         card.bind("<Configure>", lambda e=None: e is not None and [w.config(wraplength=max(160, e.width - 30)) for w in (self.prev_title, self.how_lbl)])
         pb = tk.Frame(card, bg=PAL["surface"]); pb.pack(fill="x", padx=12, pady=(0, 12))
-        ttk.Button(pb, text=ui_theme.with_icon(t("tasks.details"), "🔍"), style="Accent.TButton", command=self.on_task_double).pack(side="left")
-        self.how_btn = ttk.Button(pb, text=ui_theme.with_icon(t("tasks.open_source"), "🔗"), command=self.open_how_source, state="disabled")
+        ttk.Button(pb, text=ui_theme.with_icon(t("tasks.details"), "ğŸ”"), style="Accent.TButton", command=self.on_task_double).pack(side="left")
+        self.how_btn = ttk.Button(pb, text=ui_theme.with_icon(t("tasks.open_source"), "ğŸ”—"), command=self.open_how_source, state="disabled")
         self.how_btn.pack(side="left", padx=6)
         tb = ttk.Frame(L); tb.pack(fill="x", padx=6, pady=(2, 8))
-        ttk.Button(tb, text=ui_theme.with_icon(t("task.toggle_done"), "✔"), command=self.toggle_task_done).pack(side="left")
-        ttk.Button(tb, text=ui_theme.with_icon(t("btn.delete"), "🗑"), command=self.delete_task).pack(side="left", padx=6)
-        ttk.Button(tb, text=ui_theme.with_icon(t("task.clear_done"), "🧹"), command=self.clear_done_tasks).pack(side="left")
-        ttk.Button(tb, text=ui_theme.with_icon(t("task.clear_cat"), "🗑"), command=self.clear_all_tasks).pack(side="left", padx=6)
+        ttk.Button(tb, text=ui_theme.with_icon(t("task.toggle_done"), "âœ”"), command=self.toggle_task_done).pack(side="left")
+        ttk.Button(tb, text=ui_theme.with_icon(t("btn.delete"), "ğŸ—‘"), command=self.delete_task).pack(side="left", padx=6)
+        ttk.Button(tb, text=ui_theme.with_icon(t("task.clear_done"), "ğŸ§¹"), command=self.clear_done_tasks).pack(side="left")
+        ttk.Button(tb, text=ui_theme.with_icon(t("task.clear_cat"), "ğŸ—‘"), command=self.clear_all_tasks).pack(side="left", padx=6)
         ttk.Label(tb, text=t("tasks.dbl_hint"), foreground=PAL["muted"]).pack(side="right")
 
         # ---- ekle / ekrandan oku
@@ -7336,7 +7336,7 @@ class App:
         ttk.Combobox(row, textvariable=self.cat_var, values=[add_choice_name(*c) for c in ADD_CHOICES],
                      width=24, state="readonly").pack(side="left", padx=4)
         ttk.Button(row, text=t("task.read_screen"), command=self.capture_task_region).pack(side="left", padx=8)
-        ttk.Button(row, text=ui_theme.with_icon(t("tasks.read_projects"), "📋"), style="Accent.TButton",
+        ttk.Button(row, text=ui_theme.with_icon(t("tasks.read_projects"), "ğŸ“‹"), style="Accent.TButton",
                    command=self.read_projects_screen).pack(side="left")
         ttk.Button(row, text=t("tasks.reset_region"), command=lambda: self.read_projects_screen(reselect=True)).pack(side="left", padx=6)
         ttk.Label(add, text=t("tasks.projects_note"), foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=8)
@@ -7347,10 +7347,10 @@ class App:
 
         # ---- Claude ile getir (eski ChatGPT ekran makrosu yerine)
         C = ui_theme.scrollable(pg["claude"], PAL["bg"])
-        cb = ttk.LabelFrame(C, text="🤖 " + t("cl.box")); cb.pack(fill="x", padx=10, pady=10)
+        cb = ttk.LabelFrame(C, text="ğŸ¤– " + t("cl.box")); cb.pack(fill="x", padx=10, pady=10)
         ttk.Label(cb, text=t("cl.note"), wraplength=900, justify="left").pack(anchor="w", padx=8, pady=(6, 4))
         cr = ttk.Frame(cb); cr.pack(fill="x", padx=8, pady=6)
-        ttk.Button(cr, text=ui_theme.with_icon(t("cl.run"), "🌐"), style="Accent.TButton", command=self.run_claude_fetch).pack(side="left")
+        ttk.Button(cr, text=ui_theme.with_icon(t("cl.run"), "ğŸŒ"), style="Accent.TButton", command=self.run_claude_fetch).pack(side="left")
         self.cl_replace = tk.BooleanVar(value=bool(st.get("claude_tasks_replace", True)))
         ttk.Checkbutton(cr, text=t("cl.replace"), variable=self.cl_replace,
                         command=lambda: (st.__setitem__("claude_tasks_replace", bool(self.cl_replace.get())), save_cfg(self.cfg))).pack(side="left", padx=12)
@@ -7360,7 +7360,7 @@ class App:
         ttk.Label(cb, text=t("cl.raw"), foreground=PAL["muted"]).pack(anchor="w", padx=8, pady=(8, 0))
         self.cl_raw = tk.Text(cb, height=10, state="disabled", wrap="word", font=("Consolas", 9)); self.cl_raw.pack(fill="x", padx=8, pady=(0, 8))
 
-        # ---- sıfırlama ve senkron
+        # ---- sÄ±fÄ±rlama ve senkron
         S = ui_theme.scrollable(pg["sync"], PAL["bg"])
         top = ttk.LabelFrame(S, text=t("task.reset_box")); top.pack(fill="x", padx=10, pady=10)
         self.reset_lbl2 = ttk.Label(top, style="Section.TLabel"); self.reset_lbl2.pack(anchor="w", padx=8, pady=4)
@@ -7374,11 +7374,11 @@ class App:
         ttk.Combobox(rr, textvariable=self.rv["weekly_reset_day"], values=weekday_names(), width=10, state="readonly").pack(side="left", padx=2)
         ttk.Label(rr, text=t("task.hour")).pack(side="left")
         ttk.Entry(rr, textvariable=self.rv["weekly_reset_hour"], width=4).pack(side="left", padx=2)
-        ttk.Button(rr, text=ui_theme.with_icon(t("btn.save_short"), "💾"), command=self.save_reset_settings, style="Accent.TButton").pack(side="left", padx=8)
+        ttk.Button(rr, text=ui_theme.with_icon(t("btn.save_short"), "ğŸ’¾"), command=self.save_reset_settings, style="Accent.TButton").pack(side="left", padx=8)
         ttk.Label(top, text=t("task.reset_note"), foreground=PAL["muted"]).pack(anchor="w", padx=8, pady=(0, 4))
         fb = ttk.LabelFrame(S, text=t("tasks.feed_box")); fb.pack(fill="x", padx=10, pady=(0, 8))
         fr = ttk.Frame(fb); fr.pack(fill="x", padx=8, pady=6)
-        ttk.Button(fr, text=ui_theme.with_icon(t("tasks.sync_now"), "🌐"), style="Accent.TButton",
+        ttk.Button(fr, text=ui_theme.with_icon(t("tasks.sync_now"), "ğŸŒ"), style="Accent.TButton",
                    command=lambda: self.meta_sync_start(force=True, what=("tasks",))).pack(side="left")
         self.bv_tasks = {k: tk.BooleanVar(value=bool(st.get(k, True))) for k in ("tasks_sync", "auto_reset_times")}
         ttk.Checkbutton(fr, text=t("tasks.enable"), variable=self.bv_tasks["tasks_sync"], command=self.save_task_feed_flags).pack(side="left", padx=(14, 0))
@@ -7386,25 +7386,25 @@ class App:
         self.tasks_info = ttk.Label(fb, text=self.tasks_status_text(), foreground=PAL["muted"], wraplength=900, justify="left")
         self.tasks_info.pack(anchor="w", padx=8)
         wr = ttk.Frame(fb); wr.pack(fill="x", padx=8, pady=(6, 2))
-        ttk.Button(wr, text=ui_theme.with_icon(t("wiki.sync_now"), "📚"), style="Accent.TButton",
+        ttk.Button(wr, text=ui_theme.with_icon(t("wiki.sync_now"), "ğŸ“š"), style="Accent.TButton",
                    command=lambda: self.meta_sync_start(force=True, what=("wiki",))).pack(side="left")
         self.bv_tasks["wiki_sync"] = tk.BooleanVar(value=bool(st.get("wiki_sync", True)))
         ttk.Checkbutton(wr, text=t("wiki.enable"), variable=self.bv_tasks["wiki_sync"], command=self.save_task_feed_flags).pack(side="left", padx=(14, 0))
-        ttk.Button(wr, text=ui_theme.with_icon(t("wiki.open"), "🔗"), command=self.open_wiki_page).pack(side="left", padx=(14, 0))
+        ttk.Button(wr, text=ui_theme.with_icon(t("wiki.open"), "ğŸ”—"), command=self.open_wiki_page).pack(side="left", padx=(14, 0))
         self.wiki_lbl = ttk.Label(fb, text=self.wiki_status_text(), foreground=PAL["muted"], wraplength=900, justify="left")
         self.wiki_lbl.pack(anchor="w", padx=8)
         ttk.Label(fb, text=t("wiki.note") + "\n" + t("tasks.feed_note"), foreground=PAL["muted"], wraplength=900,
                   justify="left").pack(anchor="w", padx=8, pady=(4, 8))
-        sr = ttk.LabelFrame(S, text="Görev ve sezon verileri için güvenilir kaynaklar")
+        sr = ttk.LabelFrame(S, text="GÃ¶rev ve sezon verileri iÃ§in gÃ¼venilir kaynaklar")
         sr.pack(fill="x", padx=10, pady=(0, 10))
         task_sources = (
-            ("Ubisoft — The Division resmî haberleri", "https://www.ubisoft.com/en-gb/game/the-division/news-updates"),
-            ("Ubisoft News — oyun duyuruları", "https://news.ubisoft.com/en-us/"),
-            ("The Division Wiki — görev ve proje rehberleri", "https://thedivision.fandom.com/wiki/Projects_in_The_Division_2"),
+            ("Ubisoft â€” The Division resmÃ® haberleri", "https://www.ubisoft.com/en-gb/game/the-division/news-updates"),
+            ("Ubisoft News â€” oyun duyurularÄ±", "https://news.ubisoft.com/en-us/"),
+            ("The Division Wiki â€” gÃ¶rev ve proje rehberleri", "https://thedivision.fandom.com/wiki/Projects_in_The_Division_2"),
         )
         for title, url in task_sources:
-            ttk.Button(sr, text="🔗 " + title, command=lambda u=url: webbrowser.open(u)).pack(anchor="w", padx=8, pady=3)
-        ttk.Label(sr, text="Uygulamadaki görev listesi resmî akış, wiki eşlemesi ve (en az iki ayrı oyuncu bildirimiyle doğrulanan) topluluk akışını birleştirir. Süresi geçen sezon görevleri otomatik düşer; güncelleme için üstteki eşitleme düğmesini kullan.",
+            ttk.Button(sr, text="ğŸ”— " + title, command=lambda u=url: webbrowser.open(u)).pack(anchor="w", padx=8, pady=3)
+        ttk.Label(sr, text="Uygulamadaki gÃ¶rev listesi resmÃ® akÄ±ÅŸ, wiki eÅŸlemesi ve (en az iki ayrÄ± oyuncu bildirimiyle doÄŸrulanan) topluluk akÄ±ÅŸÄ±nÄ± birleÅŸtirir. SÃ¼resi geÃ§en sezon gÃ¶revleri otomatik dÃ¼ÅŸer; gÃ¼ncelleme iÃ§in Ã¼stteki eÅŸitleme dÃ¼ÄŸmesini kullan.",
                   foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=8, pady=(4, 8))
         self.refresh_tasks(); self.update_reset_label()
         self.root.after(1500, self.translate_wiki_tasks)
@@ -7418,7 +7418,7 @@ class App:
         save_cfg(self.cfg)
         self.toast(t("msg.settings_saved"))
 
-    def run_claude_fetch(self):  # pynput thread'inden de çağrılır: tk'ya dokunma
+    def run_claude_fetch(self):  # pynput thread'inden de Ã§aÄŸrÄ±lÄ±r: tk'ya dokunma
         if getattr(self, "_cl_busy", False): return
         self._cl_busy = True
         threading.Thread(target=self._claude_fetch_work, daemon=True).start()
@@ -7456,7 +7456,7 @@ class App:
                 if gamedata.nrm(x["en"]) in have: continue
                 cur.append(x); have.add(gamedata.nrm(x["en"])); added += 1
         save_tasks(self.tasks); self.refresh_tasks()
-        self.cl_status.config(text=t("cl.added", n=added, season=season or "—"))
+        self.cl_status.config(text=t("cl.added", n=added, season=season or "â€”"))
         log.info("Claude tasks: %d added (season %s)", added, season)
         self.translate_wiki_tasks()
 
@@ -7474,7 +7474,7 @@ class App:
             return messagebox.showerror(APP_NAME, t("task.err_hour"))
         st["daily_reset_hour"], st["weekly_reset_hour"] = dh, wh
         st["weekly_reset_day"] = weekday_names().index(self.rv["weekly_reset_day"].get())
-        st["auto_reset_times"] = False      # elle ayarladı: ortak liste artık saatleri değiştirmesin
+        st["auto_reset_times"] = False      # elle ayarladÄ±: ortak liste artÄ±k saatleri deÄŸiÅŸtirmesin
         if hasattr(self, "bv_tasks"): self.bv_tasks["auto_reset_times"].set(False)
         save_cfg(self.cfg); self.update_reset_label(); messagebox.showinfo(APP_NAME, t("task.reset_saved"))
 
@@ -7484,12 +7484,12 @@ class App:
         txt = t("task.reset_line", daily=fmt_remaining(nd, now), day=weekday_names()[st["weekly_reset_day"]],
                 weekly=fmt_remaining(nw, now))
         for w in (getattr(self, "reset_lbl", None), getattr(self, "reset_lbl2", None)):
-            try: w and w.config(text=("⏱ " + txt))
+            try: w and w.config(text=("â± " + txt))
             except tk.TclError: pass
 
     # ---------- Meta build senkronu ----------
     def meta_sync_start(self, force=False, quiet=False, what=("builds", "tasks", "wiki")):
-        """Arka planda meta build + görev listelerini indirir (günde bir; force=True ise hemen)."""
+        """Arka planda meta build + gÃ¶rev listelerini indirir (gÃ¼nde bir; force=True ise hemen)."""
         st = self.cfg["settings"]
         if self.meta_busy: return
         if not meta_sync.configured_urls(st.get("meta_feed_url", "")):
@@ -7516,7 +7516,7 @@ class App:
                 if not on: continue
                 try: out[kind] = (fn(self.cfg, cache, APP_VERSION, force=force), None)
                 except Exception as e: out[kind] = (None, e)
-            if False and do_b:   # oyun verisi artık açılıştaki güncelleme merkezinden, kullanıcıya sorularak yüklenir
+            if False and do_b:   # oyun verisi artÄ±k aÃ§Ä±lÄ±ÅŸtaki gÃ¼ncelleme merkezinden, kullanÄ±cÄ±ya sorularak yÃ¼klenir
                 try:
                     urls = [u.replace("meta_builds.json", "game_data.json") for u in meta_sync.configured_urls(st.get("meta_feed_url", ""))
                             if u.endswith("meta_builds.json")]
@@ -7526,7 +7526,7 @@ class App:
                         out["game"] = (gd.get("version"), None)
                 except Exception as e:
                     log.debug("Game data fetch failed: %s", e)
-            if do_w:     # wiki: ortak listenin söylediği sezon sayfasından başla (yeni sezona kendisi geçer)
+            if do_w:     # wiki: ortak listenin sÃ¶ylediÄŸi sezon sayfasÄ±ndan baÅŸla (yeni sezona kendisi geÃ§er)
                 res_t = out.get("tasks", (None, None))[0]          # (feed, kaynak) ya da None
                 start = res_t[0].get("wiki_season", "") if res_t else ""
                 start = start or self.tasks.get("wiki_season") or wiki_sync.DEFAULT_SEASON
@@ -7559,7 +7559,7 @@ class App:
             global GAME
             GAME = gamedata.GameData(GAME_DATA_CACHE, BASE / "meta" / "game_data.json", BUNDLE / "meta" / "game_data.json").attach_learned(LEARNED_LIB)
             log.info("Game data loaded: version %s", GAME.data.get("version"))
-        if msgs: self.toast("  ·  ".join(msgs))
+        if msgs: self.toast("  Â·  ".join(msgs))
 
     def tasks_sync_done(self, res, err, verbose):
         if err is not None:
@@ -7571,7 +7571,7 @@ class App:
         self.tasks["guides"] = feed.get("guides", [])
         if feed.get("wiki_season"): self.tasks["wiki_season"] = feed["wiki_season"]
         save_tasks(self.tasks)
-        if feed.get("resets") and st.get("auto_reset_times", True):     # resmî sıfırlama saatleri → yerel saat
+        if feed.get("resets") and st.get("auto_reset_times", True):     # resmÃ® sÄ±fÄ±rlama saatleri â†’ yerel saat
             dh, wd, wh = meta_sync.local_resets(feed["resets"])
             if (st["daily_reset_hour"], st["weekly_reset_day"], st["weekly_reset_hour"]) != (dh, wd, wh):
                 st["daily_reset_hour"], st["weekly_reset_day"], st["weekly_reset_hour"] = dh, wd, wh
@@ -7619,7 +7619,7 @@ class App:
         webbrowser.open((self.tasks.get("wiki_info") or {}).get("url") or wiki_sync.WIKI + "Seasons")
 
     def translate_wiki_tasks(self):
-        """Wiki metni İngilizce: bir yapay zekâ seçiliyse görevleri arka planda kullanıcının diline çevirir."""
+        """Wiki metni Ä°ngilizce: bir yapay zekÃ¢ seÃ§iliyse gÃ¶revleri arka planda kullanÄ±cÄ±nÄ±n diline Ã§evirir."""
         lang = i18n.current_language()
         if lang == "en" or self.cfg["settings"].get("ai_provider", "builtin") == "builtin" or getattr(self, "_wiki_tr_busy", False):
             return
@@ -7633,7 +7633,7 @@ class App:
             for x in todo:
                 try:
                     tr, src = translate_task_text(self, x["en"])
-                    if src != t("src.ai"): break                       # yapay zekâ yanıt vermiyor: sözlükle karıştırma
+                    if src != t("src.ai"): break                       # yapay zekÃ¢ yanÄ±t vermiyor: sÃ¶zlÃ¼kle karÄ±ÅŸtÄ±rma
                     how_en = (x.get("how") or {}).get("en", "")
                     how_tr = translate_task_text(self, how_en)[0] if how_en else ""
                     done[id(x)] = (tr.strip(), how_tr.strip())
@@ -7656,7 +7656,7 @@ class App:
 
     def tasks_status_text(self):
         n = sum(1 for c in self.tasks["items"].values() for x in c if x.get("feed_id"))
-        return t("tasks.status", n=n, version=self.cfg["settings"].get("tasks_version") or "—")
+        return t("tasks.status", n=n, version=self.cfg["settings"].get("tasks_version") or "â€”")
 
     def meta_sync_done(self, res, err, force):
         if err is not None:
@@ -7666,7 +7666,7 @@ class App:
         cur_name = self.cur["name"] if self.cur else None
         summary = meta_sync.apply(self.cfg, feed, source)
         self.normalize_builds()
-        for old, new in summary["renames"].items():         # ilerleme kayıtlarını yeni ada taşı
+        for old, new in summary["renames"].items():         # ilerleme kayÄ±tlarÄ±nÄ± yeni ada taÅŸÄ±
             if old in self.progress and new not in self.progress:
                 self.progress[new] = self.progress.pop(old)
         if summary["renames"]: save_progress(self.progress)
@@ -7686,12 +7686,12 @@ class App:
     def meta_status_text(self):
         st = self.cfg["settings"]
         n = sum(1 for b in self.cfg["builds"] if b.get("meta_id"))
-        try:   # UTC kaydedilir, yerel saatle gösterilir
+        try:   # UTC kaydedilir, yerel saatle gÃ¶sterilir
             from datetime import datetime as _dt
             when = _dt.fromisoformat(st.get("meta_last_sync")).astimezone().strftime("%Y-%m-%d %H:%M")
         except Exception:
             when = ""
-        return t("meta.status", n=n, version=st.get("meta_version") or "—", when=when or "—")
+        return t("meta.status", n=n, version=st.get("meta_version") or "â€”", when=when or "â€”")
 
     def check_resets(self):
         st, now = self.cfg["settings"], datetime.now()
@@ -7704,7 +7704,7 @@ class App:
             self.tasks["items"]["projects"] = [x for x in self.tasks["items"]["projects"] if x.get("kind") not in drop]
             changed = True
         reset_happened = changed
-        for c, lst in self.tasks["items"].items():          # süresi dolan ortak görevler
+        for c, lst in self.tasks["items"].items():          # sÃ¼resi dolan ortak gÃ¶revler
             keep = [x for x in lst if not meta_sync.task_expired(x)]
             if len(keep) != len(lst): self.tasks["items"][c] = keep; changed = True
         if reset_happened and self.cfg["settings"].get("tasks_sync", True):
@@ -7716,12 +7716,12 @@ class App:
         self.root.after(60000, self.check_resets)
 
     def selected_list_cat(self):
-        """Üstteki kategori düğmelerinde seçili olanın kimliği."""
+        """Ãœstteki kategori dÃ¼ÄŸmelerinde seÃ§ili olanÄ±n kimliÄŸi."""
         v = self.task_cat.get() if hasattr(self, "task_cat") else TASK_CATS[0]
         return v if v in TASK_CATS else TASK_CATS[0]
 
     def selected_task(self):
-        """(kategori, sıra) ya da (None, None) — grup satırı seçiliyse None."""
+        """(kategori, sÄ±ra) ya da (None, None) â€” grup satÄ±rÄ± seÃ§iliyse None."""
         sel = self.task_tv.selection() if hasattr(self, "task_tv") else ()
         if not sel or not sel[0].startswith("t:"): return None, None
         _, cat, i = sel[0].split(":", 2)
@@ -7740,7 +7740,7 @@ class App:
         self.task_tv.delete(*self.task_tv.get_children())
         groups = {}
         lst = self.tasks["items"].get(cat, [])
-        best = {}                                              # kopyalar: çevrili ve ortak listeden geleni göster
+        best = {}                                              # kopyalar: Ã§evrili ve ortak listeden geleni gÃ¶ster
         for i, task in enumerate(lst):
             k = task_dedupe_key(task)
             score = (task_text(task, lang)[1], task.get("src", "").lower() != "wiki", bool(task.get("how")))
@@ -7754,21 +7754,21 @@ class App:
             gkey, group = task_group(task, cat)
             _, short = split_title(text)
             if cat == "projects" and task.get("kind") in PROJECT_KINDS:
-                gkey, group = "k:" + task["kind"] + gkey, cat_name(task["kind"]) + (f" · {group}" if group != t("tasks.other_group") else "")
+                gkey, group = "k:" + task["kind"] + gkey, cat_name(task["kind"]) + (f" Â· {group}" if group != t("tasks.other_group") else "")
             if gkey not in groups:
                 groups[gkey] = self.task_tv.insert("", "end", iid=f"g:{len(groups)}", text=f"  {group}", open=True, tags=("group",))
             group = gkey
             src = task.get("src", "")
-            src = {"wiki": "📚 Wiki"}.get(src.lower(), src) + (" 💡" if self.task_how(task)[0] else "")
-            label = ("" if ok else "🌐 ") + (short if len(short) <= 110 else short[:107] + "…")
+            src = {"wiki": "ğŸ“š Wiki"}.get(src.lower(), src) + (" ğŸ’¡" if self.task_how(task)[0] else "")
+            label = ("" if ok else "ğŸŒ ") + (short if len(short) <= 110 else short[:107] + "â€¦")
             self.task_tv.insert(groups[group], "end", iid=f"t:{cat}:{i}", text=label,
-                                values=("✔" if task.get("done") else "○", src), tags=("done",) if task.get("done") else ())
+                                values=("âœ”" if task.get("done") else "â—‹", src), tags=("done",) if task.get("done") else ())
         for k in keep:
             if self.task_tv.exists(k): self.task_tv.selection_set(k); self.task_tv.see(k)
         self.show_task_how()
 
     def task_how(self, task):
-        """(ipucu metni, kaynak adresi) — yalnızca arayüz dilinde (yoksa İngilizce)."""
+        """(ipucu metni, kaynak adresi) â€” yalnÄ±zca arayÃ¼z dilinde (yoksa Ä°ngilizce)."""
         lang = i18n.current_language()
         how = task.get("how") or {}
         if how:
@@ -7794,9 +7794,9 @@ class App:
         tip, url = self.task_how(task)
         self.prev_title.config(text=short)
         meta = [cat_name(cat)] + ([cat_name(task["kind"])] if task.get("kind") in PROJECT_KINDS else []) + ([group] if group else [])
-        if task.get("done"): meta.append("✔ " + t("tasks.done"))
-        if not ok: meta.append("🌐 " + t("tasks.not_translated"))
-        self.prev_meta.config(text="  ·  ".join(meta))
+        if task.get("done"): meta.append("âœ” " + t("tasks.done"))
+        if not ok: meta.append("ğŸŒ " + t("tasks.not_translated"))
+        self.prev_meta.config(text="  Â·  ".join(meta))
         self.how_lbl.config(text=(tip or t("tasks.how_none")) + "\n\n" + t("tasks.dbl_hint")); self.how_url = url
         try: self.how_btn.config(state="normal" if url else "disabled")
         except Exception: pass
@@ -7804,14 +7804,14 @@ class App:
     def on_task_double(self, _=None):
         cat, i = self.selected_task()
         if cat is None:
-            sel = self.task_tv.selection()                    # grup satırı: aç/kapa
+            sel = self.task_tv.selection()                    # grup satÄ±rÄ±: aÃ§/kapa
             if sel: self.task_tv.item(sel[0], open=not self.task_tv.item(sel[0], "open"))
             return "break"
         self.open_task_detail(cat, i)
         return "break"
 
     def open_task_detail(self, cat, i):
-        """Ayrı pencere: başlık bandı, açıklama, adım adım nasıl yapılır, wiki görselleri, kaynak, tamamlandı."""
+        """AyrÄ± pencere: baÅŸlÄ±k bandÄ±, aÃ§Ä±klama, adÄ±m adÄ±m nasÄ±l yapÄ±lÄ±r, wiki gÃ¶rselleri, kaynak, tamamlandÄ±."""
         items = self.tasks["items"].get(cat, [])
         if i >= len(items): return
         task = items[i]
@@ -7819,18 +7819,18 @@ class App:
         group, short = split_title(text)
         tip, url = self.task_how(task)
         f = getattr(self, "ui_factor", 1.0)
-        w = tk.Toplevel(self.root); w.title(f"{cat_name(cat)} — {short[:60]}"); w.configure(bg=PAL["bg"])
+        w = tk.Toplevel(self.root); w.title(f"{cat_name(cat)} â€” {short[:60]}"); w.configure(bg=PAL["bg"])
         ww, wh = int(980 * max(0.6, f)), int(700 * max(0.6, f))
         w.geometry(f"{ww}x{wh}+{self.root.winfo_rootx() + 60}+{self.root.winfo_rooty() + 60}")
         w.transient(self.root)
-        # başlık bandı
+        # baÅŸlÄ±k bandÄ±
         hb = tk.Canvas(w, height=int(118 * max(0.6, f)), highlightthickness=0, bg="#0d0f13"); hb.pack(fill="x")
         accent = {"projects": "#ff6d10", "journey": "#38bdf8", "manhunt": "#ef4444"}.get(cat, PAL["accent"])
 
         def draw_head(_=None):
             hb.delete("all")
             W, H = max(200, hb.winfo_width()), int(hb["height"])
-            for k in range(24):                                  # koyu degrade + altıgen deseni
+            for k in range(24):                                  # koyu degrade + altÄ±gen deseni
                 c = int(13 + 10 * (1 - k / 24))
                 hb.create_rectangle(0, H * k / 24, W, H * (k + 1) / 24 + 1, fill=f"#{c:02x}{c + 2:02x}{c + 6:02x}", outline="")
             r = 18
@@ -7840,10 +7840,10 @@ class App:
                     hb.create_polygon([(x + r * math.cos(math.radians(60 * a + 30)), y + r * math.sin(math.radians(60 * a + 30))) for a in range(6)],
                                       outline="#1b2029", fill="")
             hb.create_rectangle(0, H - 4, W, H, fill=accent, outline="")
-            hb.create_text(24, 26, anchor="w", text=(cat_name(cat) + ("  ·  " + cat_name(task["kind"]) if task.get("kind") in PROJECT_KINDS else "")).upper(),
+            hb.create_text(24, 26, anchor="w", text=(cat_name(cat) + ("  Â·  " + cat_name(task["kind"]) if task.get("kind") in PROJECT_KINDS else "")).upper(),
                            fill=accent, font=(ui_theme.FONT_SEMI, 10))
             hb.create_text(24, 56, anchor="w", text=group or cat_name(cat), fill="#ffffff", font=(ui_theme.FONT_SEMI, 20))
-            st_txt = "✔ " + t("tasks.done") if task.get("done") else "○ " + t("tasks.open")
+            st_txt = "âœ” " + t("tasks.done") if task.get("done") else "â—‹ " + t("tasks.open")
             hb.create_text(W - 24, 26, anchor="e", text=st_txt, fill="#4ade80" if task.get("done") else "#c9ced8",
                            font=(ui_theme.FONT_SEMI, 11))
         hb.bind("<Configure>", draw_head)
@@ -7853,7 +7853,7 @@ class App:
         tk.Label(left, text=short, bg=PAL["bg"], fg=PAL["fg"], font=(ui_theme.FONT_SEMI, 14), wraplength=520,
                  justify="left", anchor="w").pack(fill="x", pady=(0, 6))
         if not ok:
-            tk.Label(left, text="🌐 " + t("tasks.not_translated"), bg=PAL["bg"], fg=PAL["warning"], font=(ui_theme.FONT, 9),
+            tk.Label(left, text="ğŸŒ " + t("tasks.not_translated"), bg=PAL["bg"], fg=PAL["warning"], font=(ui_theme.FONT, 9),
                      anchor="w").pack(fill="x")
         ttk.Label(left, text=t("tasks.how_title"), style="Section.TLabel").pack(anchor="w", pady=(10, 2))
         steps = [x.strip() for x in re.split(r"(?<=[.!?])\s+", tip or "") if x.strip()]
@@ -7871,20 +7871,20 @@ class App:
         if task.get("expires"): meta.append(t("tasks.expires", d=str(task["expires"])[:16]))
         if task.get("time"): meta.append(t("tasks.added_at", d=str(task["time"])[:16].replace("T", " ")))
         if meta:
-            tk.Label(left, text="   ·   ".join(meta), bg=PAL["bg"], fg=PAL["muted"], font=(ui_theme.FONT, 9), anchor="w").pack(fill="x", pady=(12, 0))
+            tk.Label(left, text="   Â·   ".join(meta), bg=PAL["bg"], fg=PAL["muted"], font=(ui_theme.FONT, 9), anchor="w").pack(fill="x", pady=(12, 0))
         bb = ttk.Frame(left); bb.pack(fill="x", pady=12)
 
         def toggle():
             task["done"] = not task.get("done"); save_tasks(self.tasks); self.refresh_tasks(); draw_head()
-            done_btn.config(text=ui_theme.with_icon(t("tasks.mark_open") if task.get("done") else t("tasks.mark_done"), "✔"))
-        done_btn = ttk.Button(bb, text=ui_theme.with_icon(t("tasks.mark_open") if task.get("done") else t("tasks.mark_done"), "✔"),
+            done_btn.config(text=ui_theme.with_icon(t("tasks.mark_open") if task.get("done") else t("tasks.mark_done"), "âœ”"))
+        done_btn = ttk.Button(bb, text=ui_theme.with_icon(t("tasks.mark_open") if task.get("done") else t("tasks.mark_done"), "âœ”"),
                               style="Accent.TButton", command=toggle)
         done_btn.pack(side="left")
         if url:
-            ttk.Button(bb, text=ui_theme.with_icon(t("tasks.open_source"), "🔗"), command=lambda: __import__("webbrowser").open(url)).pack(side="left", padx=6)
+            ttk.Button(bb, text=ui_theme.with_icon(t("tasks.open_source"), "ğŸ”—"), command=lambda: __import__("webbrowser").open(url)).pack(side="left", padx=6)
         ttk.Button(bb, text=t("btn.close"), command=w.destroy).pack(side="right")
-        # görseller (wiki) — arka planda yüklenir
-        ttk.Label(right, text="🖼 " + t("tasks.images"), style="Section.TLabel").pack(anchor="w")
+        # gÃ¶rseller (wiki) â€” arka planda yÃ¼klenir
+        ttk.Label(right, text="ğŸ–¼ " + t("tasks.images"), style="Section.TLabel").pack(anchor="w")
         galh = ttk.Frame(right); galh.pack(fill="both", expand=True, pady=(4, 0))
         gal = ui_theme.scrollable(galh, PAL["surface"])
         loading = tk.Label(gal, text=t("tasks.images_loading"), bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 10))
@@ -7909,7 +7909,7 @@ class App:
                 lb = tk.Label(gal, image=ph, bg=PAL["surface"], cursor="hand2" if page else "")
                 lb.pack(padx=8, pady=(8, 0), anchor="w")
                 if page:
-                    tk.Label(gal, text="📚 " + page + " — The Division Wiki", bg=PAL["surface"], fg=PAL["muted"],
+                    tk.Label(gal, text="ğŸ“š " + page + " â€” The Division Wiki", bg=PAL["surface"], fg=PAL["muted"],
                              font=(ui_theme.FONT, 8)).pack(anchor="w", padx=8)
                     lb.bind("<Button-1>", lambda e, pg_=page: __import__("webbrowser").open(wiki_sync.page_url(pg_)))
         threading.Thread(target=lambda: (lambda imgs: self.root.after(0, lambda: show(imgs)))(load_task_images(task)), daemon=True).start()
@@ -7922,8 +7922,8 @@ class App:
             import webbrowser; webbrowser.open(self.how_url)
 
     def read_projects_screen(self, reselect=False):
-        """Oyundaki Projeler ekranını kayıtlı bölgeden okuyup seçili kategoriye ekler.
-        Bölge yoksa (veya reselect) bir kez seçtirir; sonra tek tıkla okunur."""
+        """Oyundaki Projeler ekranÄ±nÄ± kayÄ±tlÄ± bÃ¶lgeden okuyup seÃ§ili kategoriye ekler.
+        BÃ¶lge yoksa (veya reselect) bir kez seÃ§tirir; sonra tek tÄ±kla okunur."""
         region = self.cfg["settings"].get("projects_region")
         if region and not reselect:
             def go():
@@ -8005,7 +8005,7 @@ class App:
         threading.Thread(target=work, daemon=True).start()
 
     def selected_add_cat(self):
-        """Ekleme kutusundaki açılır listede seçili kategorinin kimliği."""
+        """Ekleme kutusundaki aÃ§Ä±lÄ±r listede seÃ§ili kategorinin kimliÄŸi."""
         label = self.cat_var.get()
         return next((c for c in ADD_CHOICES if add_choice_name(*c) == label), ADD_CHOICES[0])
 
@@ -8032,9 +8032,9 @@ class App:
 
     def build_shortcuts(self, parent):
         st = self.cfg["settings"]
-        box = ttk.LabelFrame(parent, text="⌨ Kısayol tuşları")
+        box = ttk.LabelFrame(parent, text="âŒ¨ KÄ±sayol tuÅŸlarÄ±")
         box.pack(fill="x", padx=10, pady=10)
-        ttk.Label(box, text="Kısayollar uygulama açıkken genel olarak çalışır. Aynı tuş iki işlemde kullanılamaz.",
+        ttk.Label(box, text="KÄ±sayollar uygulama aÃ§Ä±kken genel olarak Ã§alÄ±ÅŸÄ±r. AynÄ± tuÅŸ iki iÅŸlemde kullanÄ±lamaz.",
                   foreground=PAL["muted"], wraplength=850, justify="left").grid(row=0, column=0, columnspan=3, sticky="w", padx=10, pady=8)
         self.shortcut_vars = {
             k: tk.StringVar(value=str(st.get(k, default)))
@@ -8042,18 +8042,18 @@ class App:
                                ("tasks_hotkey", "<f10>"), ("voice_hotkey", "<f9>"),
                                ("assistant_cancel_hotkey", "<f12>"))
         }
-        labels = (("hotkey", "Eşya tara"), ("tr_hotkey", "Ekranı bir kez çevir"),
-                  ("tr_toggle_hotkey", "Canlı çeviriyi durdur / sürdür"),
-                  ("tasks_hotkey", "Görev verilerini güncelle"),
-                  ("voice_hotkey", "Oyun içi AI asistana sesli soru"),
-                  ("assistant_cancel_hotkey", "Ses kaydını / yanıtı iptal et"))
+        labels = (("hotkey", "EÅŸya tara"), ("tr_hotkey", "EkranÄ± bir kez Ã§evir"),
+                  ("tr_toggle_hotkey", "CanlÄ± Ã§eviriyi durdur / sÃ¼rdÃ¼r"),
+                  ("tasks_hotkey", "GÃ¶rev verilerini gÃ¼ncelle"),
+                  ("voice_hotkey", "Oyun iÃ§i AI asistana sesli soru"),
+                  ("assistant_cancel_hotkey", "Ses kaydÄ±nÄ± / yanÄ±tÄ± iptal et"))
         for i, (key, label) in enumerate(labels, start=1):
             ttk.Label(box, text=label).grid(row=i, column=0, sticky="w", padx=10, pady=4)
             ttk.Entry(box, textvariable=self.shortcut_vars[key], width=18).grid(row=i, column=1, sticky="w", padx=8, pady=4)
-            ttk.Button(box, text="⌨", command=lambda k=key: self.capture_shortcut(k)).grid(row=i, column=2, padx=4)
-        ttk.Button(box, text=ui_theme.with_icon(t("set.save"), "💾"), command=self.save_shortcuts,
+            ttk.Button(box, text="âŒ¨", command=lambda k=key: self.capture_shortcut(k)).grid(row=i, column=2, padx=4)
+        ttk.Button(box, text=ui_theme.with_icon(t("set.save"), "ğŸ’¾"), command=self.save_shortcuts,
                    style="Accent.TButton").grid(row=7, column=0, sticky="w", padx=10, pady=10)
-        ttk.Label(parent, text="Örnek: <ctrl>+<shift>+t. Bir değişiklik kaydedildiğinde global kısayol dinleyicisi yenilenir.",
+        ttk.Label(parent, text="Ã–rnek: <ctrl>+<shift>+t. Bir deÄŸiÅŸiklik kaydedildiÄŸinde global kÄ±sayol dinleyicisi yenilenir.",
                   foreground=PAL["muted"], wraplength=850, justify="left").pack(anchor="w", padx=12, pady=(0, 10))
 
     def save_shortcuts(self):
@@ -8064,7 +8064,7 @@ class App:
             for key in self.shortcut_vars: check_hotkey(candidate[key])
             game_assistant.bindings(candidate, check_hotkey)
             normalized = [candidate[k].lower().replace(" ", "") for k in self.shortcut_vars]
-            if len(set(normalized)) != len(normalized): raise ValueError("Her işlem için farklı bir kısayol seçin.")
+            if len(set(normalized)) != len(normalized): raise ValueError("Her iÅŸlem iÃ§in farklÄ± bir kÄ±sayol seÃ§in.")
         except Exception as e:
             return messagebox.showerror(APP_NAME, t("err.bad_setting", e=e))
         st.update({k: v.get().strip() for k, v in self.shortcut_vars.items()})
@@ -8078,7 +8078,7 @@ class App:
         self.toast(t("msg.settings_saved"))
 
     def capture_shortcut(self, key):
-        self.shortcut_vars[key].set("Tuşa basın…")
+        self.shortcut_vars[key].set("TuÅŸa basÄ±nâ€¦")
         def on_key(event):
             if event.keysym in ("Shift_L", "Shift_R", "Control_L", "Control_R", "Alt_L", "Alt_R"): return
             mods = (["<ctrl>"] if event.state & 0x4 else []) + (["<shift>"] if event.state & 0x1 else []) + (["<alt>"] if event.state & 0x20000 else [])
@@ -8088,26 +8088,26 @@ class App:
         self.root.bind("<Key>", on_key)
 
     def build_diagnostics(self, parent):
-        """Yerel, kullanıcı kontrollü tanılama / iyileştirme merkezi."""
+        """Yerel, kullanÄ±cÄ± kontrollÃ¼ tanÄ±lama / iyileÅŸtirme merkezi."""
         top = ttk.Frame(parent); top.pack(fill="x", padx=10, pady=(10, 6))
-        ttk.Label(top, text="Sistem Tanılama Merkezi", font=(ui_theme.FONT_SEMI, 14), foreground=PAL["accent"]).pack(side="left")
+        ttk.Label(top, text="Sistem TanÄ±lama Merkezi", font=(ui_theme.FONT_SEMI, 14), foreground=PAL["accent"]).pack(side="left")
         self.diag_advanced = tk.BooleanVar(value=False)
-        ttk.Checkbutton(top, text="Gelişmiş görünüm", variable=self.diag_advanced,
+        ttk.Checkbutton(top, text="GeliÅŸmiÅŸ gÃ¶rÃ¼nÃ¼m", variable=self.diag_advanced,
                         command=self.refresh_diagnostics).pack(side="right", padx=6)
-        ttk.Button(top, text="⟳ Yenile", command=self.refresh_diagnostics).pack(side="right")
-        ttk.Button(top, text="Raporu dışa aktar", command=self.export_diagnostics).pack(side="right", padx=6)
-        actions = ttk.LabelFrame(parent, text="Hızlı müdahale"); actions.pack(fill="x", padx=10, pady=(0, 8))
-        ttk.Button(actions, text="◈ Güvenli Görünüm", command=self.activate_safe_view,
+        ttk.Button(top, text="âŸ³ Yenile", command=self.refresh_diagnostics).pack(side="right")
+        ttk.Button(top, text="Raporu dÄ±ÅŸa aktar", command=self.export_diagnostics).pack(side="right", padx=6)
+        actions = ttk.LabelFrame(parent, text="HÄ±zlÄ± mÃ¼dahale"); actions.pack(fill="x", padx=10, pady=(0, 8))
+        ttk.Button(actions, text="â—ˆ GÃ¼venli GÃ¶rÃ¼nÃ¼m", command=self.activate_safe_view,
                    style="Accent.TButton").pack(side="left", padx=8, pady=7)
-        ttk.Button(actions, text="🔎 Sorunları tara", command=self.run_diagnostic_engine,
+        ttk.Button(actions, text="ğŸ” SorunlarÄ± tara", command=self.run_diagnostic_engine,
                    style="Accent.TButton").pack(side="left", padx=4)
-        ttk.Button(actions, text="🛠 Bulunan güvenli hataları düzelt", command=self.apply_detected_repairs).pack(side="left", padx=4)
-        ttk.Button(actions, text="⚕ Sorun giderme sihirbazı", command=self.open_troubleshooter).pack(side="left", padx=4)
-        ttk.Button(actions, text="🧾 GitHub raporu önizle", command=self.preview_github_report).pack(side="left", padx=4)
-        ttk.Button(actions, text="⚠ " + t("vf.log_btn"), command=self.show_verdict_feedback_log).pack(side="left", padx=4)
-        ttk.Label(actions, text="Bu işlemler oyun dosyalarına, build/sandık verilerine veya GitHub'a otomatik olarak dokunmaz.",
+        ttk.Button(actions, text="ğŸ›  Bulunan gÃ¼venli hatalarÄ± dÃ¼zelt", command=self.apply_detected_repairs).pack(side="left", padx=4)
+        ttk.Button(actions, text="âš• Sorun giderme sihirbazÄ±", command=self.open_troubleshooter).pack(side="left", padx=4)
+        ttk.Button(actions, text="ğŸ§¾ GitHub raporu Ã¶nizle", command=self.preview_github_report).pack(side="left", padx=4)
+        ttk.Button(actions, text="âš  " + t("vf.log_btn"), command=self.show_verdict_feedback_log).pack(side="left", padx=4)
+        ttk.Label(actions, text="Bu iÅŸlemler oyun dosyalarÄ±na, build/sandÄ±k verilerine veya GitHub'a otomatik olarak dokunmaz.",
                   foreground=PAL["muted"]).pack(side="left", padx=10)
-        ttk.Label(parent, text="Tanılama verileri varsayılan olarak yalnızca bu bilgisayarda tutulur. GitHub raporu önce maskelenmiş Markdown taslağı olarak gösterilir.",
+        ttk.Label(parent, text="TanÄ±lama verileri varsayÄ±lan olarak yalnÄ±zca bu bilgisayarda tutulur. GitHub raporu Ã¶nce maskelenmiÅŸ Markdown taslaÄŸÄ± olarak gÃ¶sterilir.",
                   foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=10, pady=(0, 8))
         split = ttk.Panedwindow(parent, orient="vertical"); split.pack(fill="both", expand=True, padx=10, pady=(0, 10))
         summary = ttk.Frame(split); events = ttk.Frame(split); split.add(summary, weight=3); split.add(events, weight=2)
@@ -8115,11 +8115,11 @@ class App:
                                  relief="flat", wrap="word", state="disabled")
         self.diag_text.pack(fill="both", expand=True)
         event_bar = ttk.Frame(events); event_bar.pack(fill="x", pady=(6, 3))
-        ttk.Label(event_bar, text="Canlı olay kaydı", foreground=PAL["accent"], font=(ui_theme.FONT_SEMI, 10)).pack(side="left")
+        ttk.Label(event_bar, text="CanlÄ± olay kaydÄ±", foreground=PAL["accent"], font=(ui_theme.FONT_SEMI, 10)).pack(side="left")
         self.diag_event_filter = tk.StringVar(value="ALL")
         ttk.Combobox(event_bar, textvariable=self.diag_event_filter, state="readonly", width=10,
                      values=["ALL", "INFO", "WARNING", "ERROR"]).pack(side="right")
-        ttk.Button(event_bar, text="⟳", width=3, command=self.refresh_diagnostics).pack(side="right", padx=4)
+        ttk.Button(event_bar, text="âŸ³", width=3, command=self.refresh_diagnostics).pack(side="right", padx=4)
         self.diag_event_text = tk.Text(events, height=9, bg=PAL["text_bg"], fg=PAL["fg"], relief="flat", wrap="none", state="disabled")
         self.diag_event_text.pack(fill="both", expand=True)
         self.refresh_diagnostics()
@@ -8146,19 +8146,19 @@ class App:
             "ocr_ready": bool(getattr(OCR, "name", "")),
             "translation_ready": bool(local_ready or st.get("tr_engine") == "ai"),
             "game_found": game_found,
-            "sistem": [f"Python: {sys.version.split()[0]}", f"Platform: {sys.platform}", f"Çözünürlük: {self.root.winfo_screenwidth()}x{self.root.winfo_screenheight()}", f"Pencere: {self.root.winfo_width()}x{self.root.winfo_height()}", f"Mod: {'kompakt' if getattr(self, 'compact', False) else 'normal'}"],
-            "ocr": [f"Motor: {getattr(OCR, 'name', 'yok')}", f"Son OCR: {stat('ocr_total')}", f"Son tarama: {stat('scan_total')}", f"OCR geçişi: {getattr(self, 'auto_passes', lambda: '?')()}", f"Durum: {'çalışıyor' if getattr(self, 'running', False) else 'durduruldu'}"],
-            "ceviri": [f"Çeviri kuyruğu: active={trans.get('active', 0)} pending={trans.get('pending', 0)}", f"Çeviri ölçümü: {stat('translate_model')}", f"Canlı çeviri: {'açık' if st.get('tr_on') else 'kapalı'}"],
-            "asistan": [f"Asistan kuyruğu: active={assistant.get('active', 0)} pending={assistant.get('pending', 0)}", f"AI sağlayıcı: {st.get('ai_provider', 'builtin')}"],
-            "oyun_yardimcisi": [f"Çalışma planı: {runtime.state}",
-                                 f"Pasif OCR taraması: {'açık' if runtime.passive_capture else 'beklemede'}",
-                                 f"Pasif canlı çeviri: {'açık' if runtime.passive_translation else 'beklemede'}"],
-            "arayuz": [f"Tema: {st.get('ui_theme', 'isac')}", f"Animasyonlar: {'askıda' if getattr(self.root, '_td2_suspend_animations', False) else 'aktif'}", f"Fare izi overlay: {'aktif' if getattr(self, 'trail_fx', None) else 'kapalı/güvenli'}", f"Son hata: {self.last_err or 'yok'}"],
-            "hatalar": [f"Kayıt sayısı: {len(getattr(self, '_diag_errors', []))}"] + [f"{x['time']}  {x['message']}" for x in getattr(self, '_diag_errors', [])[-10:]],
+            "sistem": [f"Python: {sys.version.split()[0]}", f"Platform: {sys.platform}", f"Ã‡Ã¶zÃ¼nÃ¼rlÃ¼k: {self.root.winfo_screenwidth()}x{self.root.winfo_screenheight()}", f"Pencere: {self.root.winfo_width()}x{self.root.winfo_height()}", f"Mod: {'kompakt' if getattr(self, 'compact', False) else 'normal'}"],
+            "ocr": [f"Motor: {getattr(OCR, 'name', 'yok')}", f"Son OCR: {stat('ocr_total')}", f"Son tarama: {stat('scan_total')}", f"OCR geÃ§iÅŸi: {getattr(self, 'auto_passes', lambda: '?')()}", f"Durum: {'Ã§alÄ±ÅŸÄ±yor' if getattr(self, 'running', False) else 'durduruldu'}"],
+            "ceviri": [f"Ã‡eviri kuyruÄŸu: active={trans.get('active', 0)} pending={trans.get('pending', 0)}", f"Ã‡eviri Ã¶lÃ§Ã¼mÃ¼: {stat('translate_model')}", f"CanlÄ± Ã§eviri: {'aÃ§Ä±k' if st.get('tr_on') else 'kapalÄ±'}"],
+            "asistan": [f"Asistan kuyruÄŸu: active={assistant.get('active', 0)} pending={assistant.get('pending', 0)}", f"AI saÄŸlayÄ±cÄ±: {st.get('ai_provider', 'builtin')}"],
+            "oyun_yardimcisi": [f"Ã‡alÄ±ÅŸma planÄ±: {runtime.state}",
+                                 f"Pasif OCR taramasÄ±: {'aÃ§Ä±k' if runtime.passive_capture else 'beklemede'}",
+                                 f"Pasif canlÄ± Ã§eviri: {'aÃ§Ä±k' if runtime.passive_translation else 'beklemede'}"],
+            "arayuz": [f"Tema: {st.get('ui_theme', 'isac')}", f"Animasyonlar: {'askÄ±da' if getattr(self.root, '_td2_suspend_animations', False) else 'aktif'}", f"Fare izi overlay: {'aktif' if getattr(self, 'trail_fx', None) else 'kapalÄ±/gÃ¼venli'}", f"Son hata: {self.last_err or 'yok'}"],
+            "hatalar": [f"KayÄ±t sayÄ±sÄ±: {len(getattr(self, '_diag_errors', []))}"] + [f"{x['time']}  {x['message']}" for x in getattr(self, '_diag_errors', [])[-10:]],
         }
 
     def _diagnostic_context(self):
-        """Gerçek tanılama motoruna verilen salt-okunur anlık durum."""
+        """GerÃ§ek tanÄ±lama motoruna verilen salt-okunur anlÄ±k durum."""
         data = self._diagnostic_snapshot()
         try: game = display.game_window()
         except Exception: game = None
@@ -8167,11 +8167,11 @@ class App:
                 "last_error": self.last_err, "game_window": game}
 
     def run_diagnostic_engine(self):
-        """Disk, OCR komutu ve model durumunu arka planda gerçekten denetle."""
+        """Disk, OCR komutu ve model durumunu arka planda gerÃ§ekten denetle."""
         if getattr(self, "_diagnostic_busy", False): return
         self._diagnostic_busy = True
         context = self._diagnostic_context()
-        self.toast("Tanılama motoru çalışıyor")
+        self.toast("TanÄ±lama motoru Ã§alÄ±ÅŸÄ±yor")
         def work():
             try:
                 results = diagnostics_center.run_checks(context)
@@ -8179,19 +8179,19 @@ class App:
                     self._diagnostic_busy = False; self._diagnostic_results = results
                     errors = sum(x.status == "error" for x in results); warnings = sum(x.status == "warning" for x in results)
                     log.info("Diagnostic engine complete: %d error(s), %d warning(s)", errors, warnings)
-                    self.refresh_diagnostics(); self.toast(f"Tanılama bitti: {errors} hata, {warnings} uyarı")
+                    self.refresh_diagnostics(); self.toast(f"TanÄ±lama bitti: {errors} hata, {warnings} uyarÄ±")
                 self.root.after(0, done)
             except Exception as exc:
                 log.exception("Diagnostic engine failed")
                 exc_name = type(exc).__name__
-                self.root.after(0, lambda: (setattr(self, "_diagnostic_busy", False), self.toast(f"Tanılama hatası: {exc_name}")))
+                self.root.after(0, lambda: (setattr(self, "_diagnostic_busy", False), self.toast(f"TanÄ±lama hatasÄ±: {exc_name}")))
         threading.Thread(target=work, daemon=True, name="td2-diagnostics").start()
 
     def apply_detected_repairs(self):
-        """Son gerçek taramanın önerdiği geri alınabilir düzeltmeleri uygula."""
+        """Son gerÃ§ek taramanÄ±n Ã¶nerdiÄŸi geri alÄ±nabilir dÃ¼zeltmeleri uygula."""
         results = getattr(self, "_diagnostic_results", None)
         if not results:
-            self.toast("Önce ‘Sorunları tara’ ile gerçek tanılama çalıştırın")
+            self.toast("Ã–nce â€˜SorunlarÄ± taraâ€™ ile gerÃ§ek tanÄ±lama Ã§alÄ±ÅŸtÄ±rÄ±n")
             return
         changed, actions = diagnostics_center.apply_repairs(self.cfg["settings"], results)
         overlay_reset = actions.get("reset_overlay", False)
@@ -8201,7 +8201,7 @@ class App:
                 self.lt_stop(quiet=True)
                 if getattr(self, "overlay", None): self.overlay.destroy()
                 self.overlay = None
-                changed.append("çeviri bindirmesi sıfırlandı")
+                changed.append("Ã§eviri bindirmesi sÄ±fÄ±rlandÄ±")
             except Exception:
                 log.exception("Overlay reset failed")
         if "tesseract_cmd" in changed:
@@ -8209,14 +8209,14 @@ class App:
         if changed:
             save_cfg(self.cfg)
         log.warning("Diagnostic repairs applied: %s", ", ".join(changed) if changed else "none")
-        # Çeviri açıksa temiz kapatma sonrasında bir kez yeniden başlatılır.
+        # Ã‡eviri aÃ§Ä±ksa temiz kapatma sonrasÄ±nda bir kez yeniden baÅŸlatÄ±lÄ±r.
         if overlay_reset and was_translation:
             self.root.after(350, lambda: self.lt_start(quiet=True))
         if any(key in changed for key in diagnostics_center.SAFE_VIEW_CHANGES):
             self._set_page = "diagnostics"; self.rebuild_ui(tab="settings")
         else:
             self.refresh_diagnostics()
-        self.toast("Bulunan güvenli düzeltmeler uygulandı" if changed else "Uygulanacak güvenli hata bulunamadı")
+        self.toast("Bulunan gÃ¼venli dÃ¼zeltmeler uygulandÄ±" if changed else "Uygulanacak gÃ¼venli hata bulunamadÄ±")
 
     def refresh_diagnostics(self):
         if not getattr(self, "diag_text", None): return
@@ -8224,16 +8224,16 @@ class App:
         lines = []
         results = getattr(self, "_diagnostic_results", None)
         if results:
-            lines += ["[GERÇEK TANILAMA MOTORU]"]
+            lines += ["[GERÃ‡EK TANILAMA MOTORU]"]
             for result in results:
-                icon = {"ok": "✔", "warning": "⚠", "error": "✖", "info": "•"}.get(result.status, "•")
-                suffix = f" — {result.evidence}" if result.evidence else ""
-                fix = " [düzeltilebilir]" if result.repair else ""
+                icon = {"ok": "âœ”", "warning": "âš ", "error": "âœ–", "info": "â€¢"}.get(result.status, "â€¢")
+                suffix = f" â€” {result.evidence}" if result.evidence else ""
+                fix = " [dÃ¼zeltilebilir]" if result.repair else ""
                 lines.append(f"  {icon} {result.title}: {result.detail}{fix}{suffix}")
             lines.append("")
         lines += ["[HIZLI DURUM]"]
         for check in diagnostics_center.assess(data):
-            icon = {"ok": "✔", "warning": "⚠", "info": "•"}.get(check["status"], "•")
+            icon = {"ok": "âœ”", "warning": "âš ", "info": "â€¢"}.get(check["status"], "â€¢")
             lines.append(f"  {icon} {check['name']}: {check['detail']}")
         lines.append("")
         for title, values in data.items():
@@ -8261,7 +8261,7 @@ class App:
         log.warning("Safe View Mode applied: %s", ", ".join(changed) if changed else "already active")
         self._set_page = "diagnostics"
         self.rebuild_ui(tab="settings")
-        self.toast("Güvenli Görünüm etkin: animasyon ve etkileşim katmanları kapatıldı")
+        self.toast("GÃ¼venli GÃ¶rÃ¼nÃ¼m etkin: animasyon ve etkileÅŸim katmanlarÄ± kapatÄ±ldÄ±")
 
     def run_safe_autofix(self):
         st = self.cfg["settings"]
@@ -8275,31 +8275,31 @@ class App:
         save_cfg(self.cfg)
         log.warning("Safe automatic fixes applied: %s", ", ".join(fixed) if fixed else "none needed")
         self._set_page = "diagnostics"; self.rebuild_ui(tab="settings")
-        self.toast("Güvenli düzeltmeler uygulandı" if fixed else "Uygulanacak güvenli düzeltme yok")
+        self.toast("GÃ¼venli dÃ¼zeltmeler uygulandÄ±" if fixed else "Uygulanacak gÃ¼venli dÃ¼zeltme yok")
 
     def open_troubleshooter(self):
-        w = tk.Toplevel(self.root); w.title("Sorun giderme sihirbazı"); w.geometry("720x460")
-        ttk.Label(w, text="Sorun giderme sihirbazı", font=(ui_theme.FONT_SEMI, 14), foreground=PAL["accent"]).pack(anchor="w", padx=14, pady=(14, 6))
-        ttk.Label(w, text="Bir sorun seçin. Sihirbaz yalnız tanılama çalıştırır; düzeltme düğmesi açıkça seçilmeden ayar değiştirmez.", foreground=PAL["muted"], wraplength=680).pack(anchor="w", padx=14)
-        issue = tk.StringVar(value="Canlı çeviri / boş siyah kutu")
-        options = ["Canlı çeviri / boş siyah kutu", "Eşya OCR okuması", "Menü tıklanmıyor veya donuyor", "Kısayollar", "Oyun klasörü / senkron", "Sesli asistan", "Güncelleme"]
+        w = tk.Toplevel(self.root); w.title("Sorun giderme sihirbazÄ±"); w.geometry("720x460")
+        ttk.Label(w, text="Sorun giderme sihirbazÄ±", font=(ui_theme.FONT_SEMI, 14), foreground=PAL["accent"]).pack(anchor="w", padx=14, pady=(14, 6))
+        ttk.Label(w, text="Bir sorun seÃ§in. Sihirbaz yalnÄ±z tanÄ±lama Ã§alÄ±ÅŸtÄ±rÄ±r; dÃ¼zeltme dÃ¼ÄŸmesi aÃ§Ä±kÃ§a seÃ§ilmeden ayar deÄŸiÅŸtirmez.", foreground=PAL["muted"], wraplength=680).pack(anchor="w", padx=14)
+        issue = tk.StringVar(value="CanlÄ± Ã§eviri / boÅŸ siyah kutu")
+        options = ["CanlÄ± Ã§eviri / boÅŸ siyah kutu", "EÅŸya OCR okumasÄ±", "MenÃ¼ tÄ±klanmÄ±yor veya donuyor", "KÄ±sayollar", "Oyun klasÃ¶rÃ¼ / senkron", "Sesli asistan", "GÃ¼ncelleme"]
         ttk.Combobox(w, textvariable=issue, values=options, state="readonly", width=42).pack(anchor="w", padx=14, pady=10)
         result = tk.Text(w, height=14, bg=PAL["text_bg"], fg=PAL["fg"], relief="flat", wrap="word", state="disabled"); result.pack(fill="both", expand=True, padx=14, pady=6)
         def diagnose():
             data = self._diagnostic_snapshot(); text = []
             selected = issue.get()
-            if selected.startswith("Canlı çeviri"):
-                text = ["Çeviri motoru: " + ("hazır" if data["translation_ready"] else "hazır değil"), "Overlay boşsa önce Güvenli Görünüm ile arka plan/iz katmanlarını kapatın.", "Sonra Ayarlar > Canlı çeviri > Şimdi çevir ile tekrar deneyin."]
-            elif selected.startswith("Eşya"):
-                text = ["OCR motoru: " + ("algılandı" if data["ocr_ready"] else "algılanmadı"), "Oyun HDR durumunu uygulama otomatik olarak zorlamaz; kart görüntüsü üzerinden doğrulama yapılır.", "Güven skoru düşükse karar REVIEW olarak kalmalıdır."]
-            elif selected.startswith("Menü"):
-                text = ["Pencere modu: " + ("kompakt" if self.compact else "normal"), "Fare izi ve saydam arka plan katmanları etkileşim riski yaratabilir.", "Güvenli Görünüm bu katmanları kapatır."]
+            if selected.startswith("CanlÄ± Ã§eviri"):
+                text = ["Ã‡eviri motoru: " + ("hazÄ±r" if data["translation_ready"] else "hazÄ±r deÄŸil"), "Overlay boÅŸsa Ã¶nce GÃ¼venli GÃ¶rÃ¼nÃ¼m ile arka plan/iz katmanlarÄ±nÄ± kapatÄ±n.", "Sonra Ayarlar > CanlÄ± Ã§eviri > Åimdi Ã§evir ile tekrar deneyin."]
+            elif selected.startswith("EÅŸya"):
+                text = ["OCR motoru: " + ("algÄ±landÄ±" if data["ocr_ready"] else "algÄ±lanmadÄ±"), "Oyun HDR durumunu uygulama otomatik olarak zorlamaz; kart gÃ¶rÃ¼ntÃ¼sÃ¼ Ã¼zerinden doÄŸrulama yapÄ±lÄ±r.", "GÃ¼ven skoru dÃ¼ÅŸÃ¼kse karar REVIEW olarak kalmalÄ±dÄ±r."]
+            elif selected.startswith("MenÃ¼"):
+                text = ["Pencere modu: " + ("kompakt" if self.compact else "normal"), "Fare izi ve saydam arka plan katmanlarÄ± etkileÅŸim riski yaratabilir.", "GÃ¼venli GÃ¶rÃ¼nÃ¼m bu katmanlarÄ± kapatÄ±r."]
             else:
                 text = [x["name"] + ": " + x["detail"] for x in diagnostics_center.assess(data)]
             result.configure(state="normal"); result.delete("1.0", "end"); result.insert("end", "\n\n".join(text)); result.configure(state="disabled")
         row = ttk.Frame(w); row.pack(fill="x", padx=14, pady=(0, 12))
-        ttk.Button(row, text="Tanıla", command=diagnose, style="Accent.TButton").pack(side="left")
-        ttk.Button(row, text="Güvenli düzeltmeyi uygula", command=lambda: (self.run_safe_autofix(), w.destroy())).pack(side="left", padx=6)
+        ttk.Button(row, text="TanÄ±la", command=diagnose, style="Accent.TButton").pack(side="left")
+        ttk.Button(row, text="GÃ¼venli dÃ¼zeltmeyi uygula", command=lambda: (self.run_safe_autofix(), w.destroy())).pack(side="left", padx=6)
         ttk.Button(row, text="Kapat", command=w.destroy).pack(side="right")
         diagnose()
 
@@ -8308,13 +8308,13 @@ class App:
         text = diagnostics_center.markdown_report(APP_VERSION, {"settings": data["settings"], "system": data["system_dict"],
                                                                 "ocr_ready": data["ocr_ready"], "translation_ready": data["translation_ready"], "game_found": data["game_found"]},
                                                   self._diag_events.snapshot(100))
-        w = tk.Toplevel(self.root); w.title("Maskelenmiş GitHub raporu önizlemesi"); w.geometry("820x620")
-        ttk.Label(w, text="Maskelenmiş Markdown raporu", font=(ui_theme.FONT_SEMI, 13), foreground=PAL["accent"]).pack(anchor="w", padx=12, pady=(12, 4))
-        ttk.Label(w, text="Bu pencere raporu göndermez. Yalnızca kontrol edip isterseniz GitHub yeni kayıt sayfasını açabilirsiniz.", foreground=PAL["muted"]).pack(anchor="w", padx=12)
+        w = tk.Toplevel(self.root); w.title("MaskelenmiÅŸ GitHub raporu Ã¶nizlemesi"); w.geometry("820x620")
+        ttk.Label(w, text="MaskelenmiÅŸ Markdown raporu", font=(ui_theme.FONT_SEMI, 13), foreground=PAL["accent"]).pack(anchor="w", padx=12, pady=(12, 4))
+        ttk.Label(w, text="Bu pencere raporu gÃ¶ndermez. YalnÄ±zca kontrol edip isterseniz GitHub yeni kayÄ±t sayfasÄ±nÄ± aÃ§abilirsiniz.", foreground=PAL["muted"]).pack(anchor="w", padx=12)
         box = tk.Text(w, wrap="word", bg=PAL["text_bg"], fg=PAL["fg"], relief="flat"); box.pack(fill="both", expand=True, padx=12, pady=10); box.insert("1.0", text)
         bar = ttk.Frame(w); bar.pack(fill="x", padx=12, pady=(0, 12))
-        ttk.Button(bar, text="Panoya kopyala", command=lambda: (self.root.clipboard_clear(), self.root.clipboard_append(text), self.toast("Rapor panoya kopyalandı"))).pack(side="left")
-        ttk.Button(bar, text="GitHub kayıt sayfasını aç", command=lambda: webbrowser_open(ISSUES_URL)).pack(side="left", padx=6)
+        ttk.Button(bar, text="Panoya kopyala", command=lambda: (self.root.clipboard_clear(), self.root.clipboard_append(text), self.toast("Rapor panoya kopyalandÄ±"))).pack(side="left")
+        ttk.Button(bar, text="GitHub kayÄ±t sayfasÄ±nÄ± aÃ§", command=lambda: webbrowser_open(ISSUES_URL)).pack(side="left", padx=6)
         ttk.Button(bar, text="Kapat", command=w.destroy).pack(side="right")
 
     def export_diagnostics(self):
@@ -8322,23 +8322,23 @@ class App:
         if not path: return
         try:
             Path(path).write_text(json.dumps(self._diagnostic_snapshot(), ensure_ascii=False, indent=2), encoding="utf-8")
-            self.toast("Tanılama raporu kaydedildi")
+            self.toast("TanÄ±lama raporu kaydedildi")
         except Exception as e:
-            messagebox.showerror(APP_NAME, f"Rapor yazılamadı: {e}")
+            messagebox.showerror(APP_NAME, f"Rapor yazÄ±lamadÄ±: {e}")
 
     # ---------- Ayarlar ----------
     def build_settings(self):
         st = self.cfg["settings"]
-        # Ayarlar alt sekmelere ayrıldı: Genel · Tarama · Ekran ve oyun · OCR · Bindirme · Senkron · Kayıt
+        # Ayarlar alt sekmelere ayrÄ±ldÄ±: Genel Â· Tarama Â· Ekran ve oyun Â· OCR Â· Bindirme Â· Senkron Â· KayÄ±t
         outer = self.tabs["settings"]
         bar = ttk.Frame(outer); bar.pack(side="bottom", fill="x", padx=10, pady=8)
-        ttk.Button(bar, text=ui_theme.with_icon(t("set.save"), "💾"), command=self.save_settings, style="Accent.TButton").pack(side="left")
+        ttk.Button(bar, text=ui_theme.with_icon(t("set.save"), "ğŸ’¾"), command=self.save_settings, style="Accent.TButton").pack(side="left")
         ttk.Label(bar, text=t("set.save_hint"), foreground=PAL["muted"]).pack(side="left", padx=12)
         self.set_nb = ttk.Notebook(outer); self.set_nb.pack(fill="both", expand=True, padx=8, pady=(8, 0))
         tr_ui = i18n.current_language() == "tr"
         self.set_groups = ["basic", "capture", "display", "service"]
         set_group_labels = {"basic": "Temel" if tr_ui else "Basics", "capture": "Tarama" if tr_ui else "Capture",
-                            "display": "Görünüm" if tr_ui else "Display", "service": "Hizmetler" if tr_ui else "Services"}
+                            "display": "GÃ¶rÃ¼nÃ¼m" if tr_ui else "Display", "service": "Hizmetler" if tr_ui else "Services"}
         self.set_group_nbs = {}
         for group in self.set_groups:
             holder = ttk.Frame(self.set_nb); self.set_nb.add(holder, text=set_group_labels[group])
@@ -8347,11 +8347,11 @@ class App:
                          "fx": "display", "overlay": "display", "sync": "service", "service": "service",
                          "premium": "service", "logs": "service", "diagnostics": "service"}
         P = {}
-        for key, icon in (("general", "⚙"), ("shortcuts", "⌨"), ("fx", "✨"), ("scan", "🎯"), ("display", "🖥"), ("ocr", "🔍"), ("overlay", "🪟"),
-                          ("sync", "🔄"), ("service", "🛰"), ("premium", "⭐"), ("logs", "📝"), ("diagnostics", "🩺")):
+        for key, icon in (("general", "âš™"), ("shortcuts", "âŒ¨"), ("fx", "âœ¨"), ("scan", "ğŸ¯"), ("display", "ğŸ–¥"), ("ocr", "ğŸ”"), ("overlay", "ğŸªŸ"),
+                          ("sync", "ğŸ”„"), ("service", "ğŸ›°"), ("premium", "â­"), ("logs", "ğŸ“"), ("diagnostics", "ğŸ©º")):
             group = set_group_for[key]
             holder = ttk.Frame(self.set_group_nbs[group])
-            label = ("Kısayollar" if i18n.current_language() == "tr" else "Shortcuts") if key == "shortcuts" else t("setpage." + key)
+            label = ("KÄ±sayollar" if i18n.current_language() == "tr" else "Shortcuts") if key == "shortcuts" else t("setpage." + key)
             self.set_group_nbs[group].add(holder, text=f" {icon} {label} ")
             P[key] = ui_theme.scrollable(holder, PAL["bg"])
         self._set_keys = ["general", "shortcuts", "fx", "scan", "display", "ocr", "overlay", "sync", "service", "premium", "logs", "diagnostics"]
@@ -8381,19 +8381,19 @@ class App:
         lcb = ttk.Combobox(r0, textvariable=self.lang_var, values=[n for _, n in langs], width=24, state="readonly")
         lcb.pack(side="left", padx=6)
         lcb.bind("<<ComboboxSelected>>", lambda e: self.flash_language(self._selected_lang_code()))
-        ttk.Button(r0, text=ui_theme.with_icon(t("set.apply_language"), "✔"), command=self.apply_language).pack(side="left")
+        ttk.Button(r0, text=ui_theme.with_icon(t("set.apply_language"), "âœ”"), command=self.apply_language).pack(side="left")
         ttk.Label(lb, text=t("set.language_note"), foreground=PAL["muted"], wraplength=820,
                   justify="left").pack(anchor="w", padx=8, pady=(0, 6))
 
-        # ---- Güncellemeler ----
-        ub = ttk.LabelFrame(f, text="⬆ " + t("upd.box")); ub.pack(fill="x", padx=10, pady=6)
+        # ---- GÃ¼ncellemeler ----
+        ub = ttk.LabelFrame(f, text="â¬† " + t("upd.box")); ub.pack(fill="x", padx=10, pady=6)
         ur = ttk.Frame(ub); ur.pack(fill="x", padx=8, pady=6)
         ttk.Label(ur, text=t("upd.current", v=APP_VERSION, mode=t("upd.mode_exe") if FROZEN else t("upd.mode_src"))).pack(side="left")
-        ttk.Button(ur, text="🔎 " + t("upd.check"), command=lambda: (self.upd_lbl.config(text=t("upd.checking")),
+        ttk.Button(ur, text="ğŸ” " + t("upd.check"), command=lambda: (self.upd_lbl.config(text=t("upd.checking")),
                                                                      self.update_center(reason="manual"))).pack(side="left", padx=10)
-        ttk.Button(ur, text="🕘 " + t("upd.history"), command=self.show_version_history).pack(side="left", padx=4)
-        ttk.Button(ur, text="⚙ " + t("set.factory"), command=self.factory_reset).pack(side="left", padx=4)
-        self.upd_now_btn = ttk.Button(ur, text="⬆ " + t("upd.now"), command=self.do_update, style="Accent.TButton")
+        ttk.Button(ur, text="ğŸ•˜ " + t("upd.history"), command=self.show_version_history).pack(side="left", padx=4)
+        ttk.Button(ur, text="âš™ " + t("set.factory"), command=self.factory_reset).pack(side="left", padx=4)
+        self.upd_now_btn = ttk.Button(ur, text="â¬† " + t("upd.now"), command=self.do_update, style="Accent.TButton")
         self.upd_auto = tk.BooleanVar(value=bool(st.get("update_check", True)))
         ttk.Checkbutton(ur, text=t("upd.auto"), variable=self.upd_auto,
                         command=lambda: (st.__setitem__("update_check", bool(self.upd_auto.get())), save_cfg(self.cfg))).pack(side="right")
@@ -8402,8 +8402,8 @@ class App:
         if getattr(self, "upd_info", None) and updater.newer(self.upd_info["version"], APP_VERSION):
             self._upd_show(self.upd_info)
 
-        # ---- Telefon arkadaşı ----
-        cb_ = ttk.LabelFrame(P["sync"], text="📱 " + t("comp.box")); cb_.pack(fill="x", padx=10, pady=(10, 6))
+        # ---- Telefon arkadaÅŸÄ± ----
+        cb_ = ttk.LabelFrame(P["sync"], text="ğŸ“± " + t("comp.box")); cb_.pack(fill="x", padx=10, pady=(10, 6))
         if self.premium_gate(cb_, "companion"):
             r = ttk.Frame(cb_); r.pack(fill="x", padx=8, pady=6)
             self.comp_btn = ttk.Button(r, text="", command=self.toggle_companion, style="Accent.TButton"); self.comp_btn.pack(side="left")
@@ -8420,7 +8420,7 @@ class App:
         rm = ttk.Frame(mb); rm.pack(fill="x", padx=8, pady=6)
         self.bv["meta_sync"] = tk.BooleanVar(value=bool(st.get("meta_sync", True)))
         ttk.Checkbutton(rm, text=t("meta.enable"), variable=self.bv["meta_sync"]).pack(side="left")
-        ttk.Button(rm, text=ui_theme.with_icon(t("meta.sync_now"), "⭐"), command=lambda: self.meta_sync_start(force=True, what=("builds",))).pack(side="left", padx=12)
+        ttk.Button(rm, text=ui_theme.with_icon(t("meta.sync_now"), "â­"), command=lambda: self.meta_sync_start(force=True, what=("builds",))).pack(side="left", padx=12)
         if st.get("meta_hidden"):
             ttk.Button(rm, text=t("meta.restore_hidden"), command=self.meta_restore_hidden).pack(side="left")
         rm2 = ttk.Frame(mb); rm2.pack(fill="x", padx=8, pady=(0, 4))
@@ -8433,10 +8433,10 @@ class App:
         # ---- Ekran ve oyun / display & game ----
         self.build_display_box(P, st)
 
-        # ---- Görünüm / appearance ----
-        # Not: uygulamanın artık seçilebilir birden çok teması yok — tek, sabit bir görsel kimlik var.
-        # Bu yüzden eski tema galerisi/açılır listesi kaldırıldı; burada yalnızca tema-dışı görünüm
-        # ayarları (sesler, arka plan aralığı, özel sanat klasörü, 3B derinlik) kalıyor.
+        # ---- GÃ¶rÃ¼nÃ¼m / appearance ----
+        # Not: uygulamanÄ±n artÄ±k seÃ§ilebilir birden Ã§ok temasÄ± yok â€” tek, sabit bir gÃ¶rsel kimlik var.
+        # Bu yÃ¼zden eski tema galerisi/aÃ§Ä±lÄ±r listesi kaldÄ±rÄ±ldÄ±; burada yalnÄ±zca tema-dÄ±ÅŸÄ± gÃ¶rÃ¼nÃ¼m
+        # ayarlarÄ± (sesler, arka plan aralÄ±ÄŸÄ±, Ã¶zel sanat klasÃ¶rÃ¼, 3B derinlik) kalÄ±yor.
         ap = ttk.LabelFrame(f, text=t("set.appearance_box")); ap.pack(fill="x", padx=10, pady=6)
         ra = ttk.Frame(ap); ra.pack(fill="x", padx=8, pady=6)
         self.bv["ui_sounds"] = tk.BooleanVar(value=bool(st.get("ui_sounds", True)))
@@ -8445,7 +8445,7 @@ class App:
         ttk.Label(rb, text=t("set.bg_interval")).pack(side="left")
         self.sv["bg_interval"] = tk.StringVar(value=str(st.get("bg_interval", 15)))
         ttk.Entry(rb, textvariable=self.sv["bg_interval"], width=6).pack(side="left", padx=6)
-        ttk.Button(rb, text=ui_theme.with_icon(t("set.open_art"), "📂"), command=self.open_art_folder).pack(side="left", padx=(12, 0))
+        ttk.Button(rb, text=ui_theme.with_icon(t("set.open_art"), "ğŸ“‚"), command=self.open_art_folder).pack(side="left", padx=(12, 0))
         self.bv["ui_depth"] = tk.BooleanVar(value=bool(st.get("ui_depth", True)))
         ttk.Checkbutton(rb, text=t("v3d.depth"), variable=self.bv["ui_depth"]).pack(side="left", padx=(18, 0))
         ttk.Label(ap, text=t("set.art_note"), foreground=PAL["muted"], wraplength=820,
@@ -8472,7 +8472,7 @@ class App:
                                       (t("set.save_crop"), "save_debug_crop"), (t("set.log_csv"), "log_csv"))):
             ttk.Checkbutton(gb, text=lab, variable=self.bv[k]).grid(row=7 + i, column=0, columnspan=2, sticky="w", padx=10)
 
-        # ---- Günlük kayıt / logging ----
+        # ---- GÃ¼nlÃ¼k kayÄ±t / logging ----
         lg = ttk.LabelFrame(P["logs"], text=t("set.log_box")); lg.pack(fill="x", padx=10, pady=6)
         r1 = ttk.Frame(lg); r1.pack(fill="x", padx=8, pady=6)
         ttk.Label(r1, text=t("set.log_level")).pack(side="left")
@@ -8501,7 +8501,7 @@ class App:
         self.fx_dim = tk.DoubleVar(value=float(st.get("fx_video_dim", 0.45)))
         colors = ["#ff6d10", "#ffffff", "#22c55e", "#38bdf8", "#ef4444", "#eab308", "#a855f7"]
 
-        c = ttk.LabelFrame(f, text="🖱 " + t("fx.cursor_box")); c.pack(fill="x", padx=10, pady=(10, 6))
+        c = ttk.LabelFrame(f, text="ğŸ–± " + t("fx.cursor_box")); c.pack(fill="x", padx=10, pady=(10, 6))
         r1 = ttk.Frame(c); r1.pack(fill="x", padx=8, pady=6)
         ttk.Checkbutton(r1, text=t("fx.enable"), variable=self.fxv["fx_cursor"]).pack(side="left")
         ttk.Label(r1, text=t("fx.style")).pack(side="left", padx=(16, 4))
@@ -8524,7 +8524,7 @@ class App:
             b.bind("<Button-1>", lambda e, x=stl: self.fx_style.set(t("fx.cur_" + x)))
         ttk.Label(c, text=t("fx.cursor_note"), foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=12, pady=(0, 8))
 
-        tr = ttk.LabelFrame(f, text="☄ " + t("fx.trail_box")); tr.pack(fill="x", padx=10, pady=6)
+        tr = ttk.LabelFrame(f, text="â˜„ " + t("fx.trail_box")); tr.pack(fill="x", padx=10, pady=6)
         r3 = ttk.Frame(tr); r3.pack(fill="x", padx=8, pady=8)
         ttk.Checkbutton(r3, text=t("fx.enable"), variable=self.fxv["fx_trail"]).pack(side="left")
         ttk.Label(r3, text=t("fx.color")).pack(side="left", padx=(16, 4))
@@ -8532,7 +8532,7 @@ class App:
         ttk.Label(r3, text=t("fx.length")).pack(side="left", padx=(16, 4))
         ttk.Scale(r3, from_=6, to=40, variable=self.fx_tlen, length=160).pack(side="left")
 
-        an = ttk.LabelFrame(f, text="🎞 " + t("fx.anim_box")); an.pack(fill="x", padx=10, pady=6)
+        an = ttk.LabelFrame(f, text="ğŸ " + t("fx.anim_box")); an.pack(fill="x", padx=10, pady=6)
         ar = ttk.Frame(an); ar.pack(fill="x", padx=8, pady=8)
         ttk.Checkbutton(ar, text=t("fx.transitions"), variable=self.fxv["fx_transitions"]).pack(side="left")
         ttk.Label(ar, text=t("fx.speed")).pack(side="left", padx=(18, 4))
@@ -8541,26 +8541,26 @@ class App:
         ttk.Scale(ar, from_=120, to=450, variable=self.fx_tms, length=200,
                   command=lambda v: (self.fx_tms.set(int(float(v))), tl.config(text=f"{int(float(v))} ms"))).pack(side="left")
         tl.pack(side="left", padx=4)
-        ttk.Button(ar, text=ui_theme.with_icon(t("fx.preview"), "▶"),
+        ttk.Button(ar, text=ui_theme.with_icon(t("fx.preview"), "â–¶"),
                    command=lambda: (setattr(self.fxbar, "duration", max(120, min(450, int(self.fx_tms.get())))),
                                     self.fxbar.play(self.nb, 0, self.nb.index(self.nb.select())))).pack(side="left", padx=8)
         layout = ttk.Frame(an); layout.pack(fill="x", padx=8, pady=(0, 8))
-        ttk.Label(layout, text="Menü düzeni" if i18n.current_language() == "tr" else "Menu layout").pack(side="left")
+        ttk.Label(layout, text="MenÃ¼ dÃ¼zeni" if i18n.current_language() == "tr" else "Menu layout").pack(side="left")
         self.fx_nav_layout = tk.StringVar(value=st.get("ui_nav_layout", "tactical"))
         labels = {
-            "tactical": "Tactical HUD — hafif kademeli / çapraz" if i18n.current_language() == "tr" else "Tactical HUD — staggered / angled",
-            "flat": "Düz — klasik hizalama" if i18n.current_language() == "tr" else "Flat — classic alignment",
+            "tactical": "Tactical HUD â€” hafif kademeli / Ã§apraz" if i18n.current_language() == "tr" else "Tactical HUD â€” staggered / angled",
+            "flat": "DÃ¼z â€” klasik hizalama" if i18n.current_language() == "tr" else "Flat â€” classic alignment",
         }
         self._fx_nav_labels = labels
         self.fx_nav_pick = ttk.Combobox(layout, state="readonly", width=34,
                                         values=list(labels.values()))
         self.fx_nav_pick.set(labels.get(self.fx_nav_layout.get(), labels["tactical"]))
         self.fx_nav_pick.pack(side="left", padx=6)
-        ttk.Label(layout, text="Deneme düzeni; tıklama alanları dikdörtgen kalır." if i18n.current_language() == "tr" else "Trial layout; button hit areas remain rectangular.", foreground=PAL["muted"]).pack(side="left", padx=6)
+        ttk.Label(layout, text="Deneme dÃ¼zeni; tÄ±klama alanlarÄ± dikdÃ¶rtgen kalÄ±r." if i18n.current_language() == "tr" else "Trial layout; button hit areas remain rectangular.", foreground=PAL["muted"]).pack(side="left", padx=6)
 
         self.fxv["fx_bgwatch"] = tk.BooleanVar(value=bool(st.get("fx_bgwatch", True)))
         self.fx_wdim = tk.DoubleVar(value=float(st.get("fx_bgwatch_dim", 0.0)))
-        wbx = ttk.LabelFrame(f, text="⌚ " + t("fx.watch_box")); wbx.pack(fill="x", padx=10, pady=6)
+        wbx = ttk.LabelFrame(f, text="âŒš " + t("fx.watch_box")); wbx.pack(fill="x", padx=10, pady=6)
         wr_ = ttk.Frame(wbx); wr_.pack(fill="x", padx=8, pady=6)
         ttk.Checkbutton(wr_, text=t("fx.enable"), variable=self.fxv["fx_bgwatch"]).pack(side="left")
         ttk.Label(wr_, text=t("fx.dim")).pack(side="left", padx=(16, 4))
@@ -8571,22 +8571,22 @@ class App:
         self.fx_watch_style.current(modes.index(st.get("event_fx")) if st.get("event_fx") in modes else 0)
         self.fx_watch_style.pack(side="left")
         ttk.Label(wbx, text=t("fx.watch_note"), foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=12, pady=(0, 8))
-        vd = ttk.LabelFrame(f, text="🎬 " + t("fx.video_box")); vd.pack(fill="x", padx=10, pady=6)
+        vd = ttk.LabelFrame(f, text="ğŸ¬ " + t("fx.video_box")); vd.pack(fill="x", padx=10, pady=6)
         r4 = ttk.Frame(vd); r4.pack(fill="x", padx=8, pady=6)
         ttk.Checkbutton(r4, text=t("fx.enable"), variable=self.fxv["fx_video"]).pack(side="left")
         ttk.Label(r4, text=t("fx.dim")).pack(side="left", padx=(16, 4))
         ttk.Scale(r4, from_=0.0, to=0.7, variable=self.fx_dim, length=160).pack(side="left")
-        ttk.Button(r4, text=ui_theme.with_icon(t("fx.add_video"), "➕"), command=self.add_video).pack(side="left", padx=(16, 4))
-        ttk.Button(r4, text=ui_theme.with_icon(t("fx.open_videos"), "📂"), command=lambda: self.open_folder(ART_DIR / "videos")).pack(side="left")
-        ttk.Button(r4, text=ui_theme.with_icon(t("fx.multiply"), "🎬"), command=lambda: self.make_videos(count=6)).pack(side="left", padx=(8, 0))
+        ttk.Button(r4, text=ui_theme.with_icon(t("fx.add_video"), "â•"), command=self.add_video).pack(side="left", padx=(16, 4))
+        ttk.Button(r4, text=ui_theme.with_icon(t("fx.open_videos"), "ğŸ“‚"), command=lambda: self.open_folder(ART_DIR / "videos")).pack(side="left")
+        ttk.Button(r4, text=ui_theme.with_icon(t("fx.multiply"), "ğŸ¬"), command=lambda: self.make_videos(count=6)).pack(side="left", padx=(8, 0))
         n = len(fx.list_videos(ART_DIR / "videos"))
         be = fx.video_backend()
         mp4s = [x for x in (ART_DIR / "videos").glob("*") if x.suffix.lower() in fx.VIDEO_EXT] if (ART_DIR / "videos").exists() else []
-        state = t("fx.video_state", n=n, be=be) + ("  ·  " + t("fx.webp_note", n=len(mp4s)) if be == "pil" and mp4s else "")
+        state = t("fx.video_state", n=n, be=be) + ("  Â·  " + t("fx.webp_note", n=len(mp4s)) if be == "pil" and mp4s else "")
         self.fx_vstate = ttk.Label(vd, text=state, foreground=PAL["warning"] if not n else PAL["muted"])
         self.fx_vstate.pack(anchor="w", padx=12)
         ttk.Label(vd, text=t("fx.video_note"), foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=12, pady=(2, 8))
-        ttk.Button(f, text=ui_theme.with_icon(t("fx.apply"), "✨"), command=self.save_fx, style="Accent.TButton").pack(anchor="w", padx=12, pady=8)
+        ttk.Button(f, text=ui_theme.with_icon(t("fx.apply"), "âœ¨"), command=self.save_fx, style="Accent.TButton").pack(anchor="w", padx=12, pady=8)
 
     def _fx_from_ui(self):
         st = self.cfg["settings"]
@@ -8611,14 +8611,14 @@ class App:
     def save_fx(self):
         old_layout = self.cfg["settings"].get("ui_nav_layout", "tactical")
         self._fx_from_ui(); save_cfg(self.cfg); self.apply_fx()
-        # Kademeli menü, widget yeniden inşa edilmeden güvenli biçimde değişir.
+        # Kademeli menÃ¼, widget yeniden inÅŸa edilmeden gÃ¼venli biÃ§imde deÄŸiÅŸir.
         if old_layout != self.cfg["settings"].get("ui_nav_layout"):
             self._sync_responsive_layout()
             if getattr(self, "nav_motif", None): self.nav_motif.flash()
         self.toast(t("msg.settings_saved"))
 
     def make_videos(self, count=None):
-        """Özgün (koddan çizilen) arka plan videoları üretir; count verilirse yeni çeşitlerle çoğaltır."""
+        """Ã–zgÃ¼n (koddan Ã§izilen) arka plan videolarÄ± Ã¼retir; count verilirse yeni Ã§eÅŸitlerle Ã§oÄŸaltÄ±r."""
         if getattr(self, "_vid_busy", False): return
         self._vid_busy, self._vid_prog = True, 0.0
         def work():
@@ -8645,7 +8645,7 @@ class App:
         if n >= 0:
             self.toast(t("fx.generated", n=n))
             if hasattr(self, "fx_vstate"):
-                self.fx_vstate.config(text=t("fx.video_state", n=len(fx.list_videos(ART_DIR / "videos")), be=fx.video_backend() or "—"))
+                self.fx_vstate.config(text=t("fx.video_state", n=len(fx.list_videos(ART_DIR / "videos")), be=fx.video_backend() or "â€”"))
             if not getattr(self, "video", None): self.apply_fx()
 
     def add_video(self):
@@ -8665,18 +8665,18 @@ class App:
 
     # ---------- Ekran ve oyun ----------
     def build_display_box(self, P, st):
-        sb = ttk.LabelFrame(P["display"], text="🔄 " + t("sync.box")); sb.pack(fill="x", padx=10, pady=6)
+        sb = ttk.LabelFrame(P["display"], text="ğŸ”„ " + t("sync.box")); sb.pack(fill="x", padx=10, pady=6)
         ttk.Label(sb, text=t("sync.box_hint"), foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=8, pady=(6, 4))
         sr = ttk.Frame(sb); sr.pack(fill="x", padx=8, pady=(0, 8))
-        ttk.Button(sr, text="🔄 " + t("sync.btn"), command=self.run_sync, style="Accent.TButton").pack(side="left")
+        ttk.Button(sr, text="ğŸ”„ " + t("sync.btn"), command=self.run_sync, style="Accent.TButton").pack(side="left")
         ttk.Label(sr, text=t("sync.last", t=st["sync_time"]) if st.get("sync_time") else t("sync.never"),
                   foreground=PAL["muted"]).pack(side="left", padx=12)
         db = ttk.LabelFrame(P["display"], text=t("disp.box")); db.pack(fill="x", padx=10, pady=6)
         mw, mh, src = game_size(st)
         det_label = display.profile_for(mw, mh)[1]["label"]
         r1 = ttk.Frame(db); r1.pack(fill="x", padx=8, pady=(6, 2))
-        ttk.Label(r1, text=t("disp.monitor", res=f"{mw}×{mh}", prof=det_label) +
-                  {"window": "  ·  🎮 oyun penceresi / game window", "state.cfg": "  ·  oyun ayarı / game settings"}.get(src, "")).pack(side="left")
+        ttk.Label(r1, text=t("disp.monitor", res=f"{mw}Ã—{mh}", prof=det_label) +
+                  {"window": "  Â·  ğŸ® oyun penceresi / game window", "state.cfg": "  Â·  oyun ayarÄ± / game settings"}.get(src, "")).pack(side="left")
         r2 = ttk.Frame(db); r2.pack(fill="x", padx=8, pady=4)
         ttk.Label(r2, text=t("disp.profile")).pack(side="left")
         self._prof_keys = ["auto"] + list(display.PROFILES)
@@ -8690,10 +8690,10 @@ class App:
         self.prof_warn.pack(anchor="w", padx=12)
         self._profile_warn()
 
-        # oyun ayar dosyası (yalnız okuma)
+        # oyun ayar dosyasÄ± (yalnÄ±z okuma)
         gx = ttk.Frame(db); gx.pack(fill="x", padx=8, pady=(8, 2))
-        ttk.Label(gx, text="🎮 " + t("disp.game_settings"), style="Section.TLabel").pack(side="left")
-        ttk.Button(gx, text=ui_theme.with_icon(t("disp.reread"), "↻"), command=self.refresh_game_settings).pack(side="left", padx=10)
+        ttk.Label(gx, text="ğŸ® " + t("disp.game_settings"), style="Section.TLabel").pack(side="left")
+        ttk.Button(gx, text=ui_theme.with_icon(t("disp.reread"), "â†»"), command=self.refresh_game_settings).pack(side="left", padx=10)
         self.gfx_lbl = ttk.Label(db, text="", justify="left", wraplength=900); self.gfx_lbl.pack(anchor="w", padx=12)
         self.gfx_tips = ttk.Label(db, text="", justify="left", wraplength=900, foreground=PAL["muted"]); self.gfx_tips.pack(anchor="w", padx=12, pady=(2, 6))
         self.refresh_game_settings()
@@ -8707,7 +8707,7 @@ class App:
         ttk.Combobox(o1, textvariable=self.ocr_engine_var, values=list(self._ocr_engines.values()), width=26,
                      state="readonly").pack(side="left", padx=6)
         eng_txt = t("ocr.active", name="RapidOCR" if OCR.name == "rapidocr" else "Tesseract")
-        if not ocr_backend.rapid_available(): eng_txt += "  —  " + t("ocr.rapid_missing")
+        if not ocr_backend.rapid_available(): eng_txt += "  â€”  " + t("ocr.rapid_missing")
         ttk.Label(o1, text=eng_txt, foreground=PAL["muted"], wraplength=640, justify="left").pack(side="left", padx=10)
         og = ttk.Frame(ob); og.pack(fill="x", padx=8, pady=(2, 4))
         ttk.Label(og, text=t("ocr.gpu")).pack(side="left")
@@ -8733,9 +8733,9 @@ class App:
         self.ocr_pass_var = tk.StringVar(value=t("ocr.auto") if st.get("ocr_passes_auto", True) else str(st.get("ocr_passes", 3)))
         ttk.Combobox(o2, textvariable=self.ocr_pass_var, values=[t("ocr.auto"), "1", "2", "3"], width=9, state="readonly").pack(side="left")
         o3 = ttk.Frame(ob); o3.pack(fill="x", padx=8, pady=4)
-        ttk.Button(o3, text=ui_theme.with_icon(t("ocr.calibrate"), "🎯"), command=self.auto_calibrate_ocr).pack(side="left")
-        ttk.Button(o3, text=ui_theme.with_icon(t("ocr.preview"), "👁"), command=self.ocr_preview).pack(side="left", padx=8)
-        ttk.Button(o3, text="⚖ Motorları karşılaştır", command=self.ocr_lab_report).pack(side="left", padx=8)
+        ttk.Button(o3, text=ui_theme.with_icon(t("ocr.calibrate"), "ğŸ¯"), command=self.auto_calibrate_ocr).pack(side="left")
+        ttk.Button(o3, text=ui_theme.with_icon(t("ocr.preview"), "ğŸ‘"), command=self.ocr_preview).pack(side="left", padx=8)
+        ttk.Button(o3, text="âš– MotorlarÄ± karÅŸÄ±laÅŸtÄ±r", command=self.ocr_lab_report).pack(side="left", padx=8)
         self.ocr_msg = ttk.Label(o3, text="", foreground=PAL["muted"]); self.ocr_msg.pack(side="left", padx=8)
         ttk.Label(ob, text=t("ocr.note_rapid") if OCR.name == "rapidocr" else t("ocr.note"), foreground=PAL["muted"],
                   wraplength=900, justify="left").pack(anchor="w", padx=12, pady=(0, 4))
@@ -8753,16 +8753,16 @@ class App:
         ttk.Label(o4, text=t("overlay.size")).pack(side="left", padx=(16, 2))
         self.ov_size = tk.DoubleVar(value=float(st.get("overlay_size", 1.0)))
         ttk.Scale(o4, from_=0.7, to=1.6, variable=self.ov_size, length=120).pack(side="left")
-        ttk.Button(o4, text=ui_theme.with_icon(t("overlay.test"), "▶"), command=self.overlay_test).pack(side="left", padx=12)
+        ttk.Button(o4, text=ui_theme.with_icon(t("overlay.test"), "â–¶"), command=self.overlay_test).pack(side="left", padx=12)
         ttk.Label(ovb, text=t("overlay.note"), foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=12, pady=(0, 8))
 
     def _profile_warn(self):
         key = self._profile_key()
         w = display.profile_warning(key, *display.monitor_size()) if key != "auto" else None
         if w and w[0] == "disp.low_res":
-            self.prof_warn.config(text="ℹ " + t(w[0], **w[1]), foreground=PAL["muted"])
+            self.prof_warn.config(text="â„¹ " + t(w[0], **w[1]), foreground=PAL["muted"])
         else:
-            self.prof_warn.config(text=("⚠ " + t(w[0], **w[1])) if w else "", foreground=PAL["warning"])
+            self.prof_warn.config(text=("âš  " + t(w[0], **w[1])) if w else "", foreground=PAL["warning"])
 
     def _profile_key(self):
         try: return self._prof_keys[self._prof_labels.index(self.prof_var.get())]
@@ -8780,13 +8780,13 @@ class App:
         st["res_profile"], st["ocr_threshold"], st["ocr_scale"] = key, pr["threshold"], ("auto" if key == "auto" else pr["ocr_scale"])
         st["ocr_tuned"] = False
         save_cfg(self.cfg); apply_ocr_settings(st); self.card_box = None
-        # pencere ve arayüz yeni ekran boyutuna göre hemen yeniden kurulur (yeniden başlatma yok)
-        # Yazı tipleri Tk'da önbelleğe alındığı için ölçek değişimi en temiz yeniden açılışla uygulanır (~2 sn)
+        # pencere ve arayÃ¼z yeni ekran boyutuna gÃ¶re hemen yeniden kurulur (yeniden baÅŸlatma yok)
+        # YazÄ± tipleri Tk'da Ã¶nbelleÄŸe alÄ±ndÄ±ÄŸÄ± iÃ§in Ã¶lÃ§ek deÄŸiÅŸimi en temiz yeniden aÃ§Ä±lÄ±ÅŸla uygulanÄ±r (~2 sn)
         self.toast(t("disp.restarting", prof=pr["label"]))
         self.root.after(600, lambda: self.restart_app(tab="settings", page="display"))
 
     def refresh_game_settings(self):
-        """Oyunun kendi GFXSettings dosyasını OKUR (yazmaz) ve öneriler gösterir."""
+        """Oyunun kendi GFXSettings dosyasÄ±nÄ± OKUR (yazmaz) ve Ã¶neriler gÃ¶sterir."""
         mw, mh = display.monitor_size()
         try: g = display.read_game_settings()
         except Exception as e:
@@ -8794,20 +8794,20 @@ class App:
         self.game_settings = g
         if g and not g.get("error"):
             parts = [t("disp.file", f=Path(g["file"]).name)]
-            if g.get("width"): parts.append(t("disp.game_res", res=f"{g['width']}×{g['height']}" + (f" @{g['refresh']}Hz" if g.get("refresh") else "")))
+            if g.get("width"): parts.append(t("disp.game_res", res=f"{g['width']}Ã—{g['height']}" + (f" @{g['refresh']}Hz" if g.get("refresh") else "")))
             if g.get("display_mode"): parts.append(t("disp.mode", m=g["display_mode"]))
             if g.get("hdr") is not None: parts.append("HDR: " + (t("disp.on") if g["hdr"] else t("disp.off")))
             if g.get("dx12") is not None: parts.append("DX12: " + (t("disp.on") if g["dx12"] else t("disp.off")))
             if g.get("preset"): parts.append(t("disp.preset", p=g["preset"]))
             if g.get("view_scale") is not None: parts.append(t("disp.view_scale", v=f"{float(g['view_scale']) * 100:.0f}%"))
             if g.get("enlarge_ui") is not None: parts.append(t("disp.ui_enlarge", v=t("disp.on") if g["enlarge_ui"] else t("disp.off")))
-            self.gfx_lbl.config(text="   ·   ".join(parts))
+            self.gfx_lbl.config(text="   Â·   ".join(parts))
             log.info("Game settings: %s", {k: g.get(k) for k in ("file", "width", "height", "refresh", "display_mode", "hdr", "dx12", "language", "view_scale", "enlarge_ui")})
         else:
             self.gfx_lbl.config(text=t("disp.not_found"))
         tips = [x for x in display.recommendations(g, mw, mh) if x[0] != "disp.no_game_file"]
-        icon = {"disp.all_good": "✔ "}
-        self.gfx_tips.config(text="".join(icon.get(k, "⚠ ") + t(k, **kw) + "\n" for k, kw in tips) + t("disp.requirements"))
+        icon = {"disp.all_good": "âœ” "}
+        self.gfx_tips.config(text="".join(icon.get(k, "âš  ") + t(k, **kw) + "\n" for k, kw in tips) + t("disp.requirements"))
 
     def _calib_image(self):
         img = getattr(self, "last_card_img", None)
@@ -8816,7 +8816,7 @@ class App:
         return img
 
     def auto_calibrate_ocr(self):
-        """Son okunan kart üzerinde eşik × ölçek denenir, en çok bilgiyi tanıyan ayar seçilir."""
+        """Son okunan kart Ã¼zerinde eÅŸik Ã— Ã¶lÃ§ek denenir, en Ã§ok bilgiyi tanÄ±yan ayar seÃ§ilir."""
         img = self._calib_image()
         if img is None: return messagebox.showinfo(APP_NAME, t("ocr.need_card"))
         if OCR.name == "tesseract" and not self.tess: return messagebox.showwarning(APP_NAME, t("msg.no_tesseract"))
@@ -8826,7 +8826,7 @@ class App:
             old_t, old_s = gamedata.THRESHOLD, gamedata.SCALE
             best = (-1, old_t, None)
             try:
-                if OCR.name == "rapidocr":                # renkli görüntüyü okur: eşik yok, yalnız ölçek denenir
+                if OCR.name == "rapidocr":                # renkli gÃ¶rÃ¼ntÃ¼yÃ¼ okur: eÅŸik yok, yalnÄ±z Ã¶lÃ§ek denenir
                     for sc in (1.0, 1.25, 1.5, 2.0, 2.5):
                         q = ocr_quality(read_card(img, scale=sc)[0])
                         log.debug("calib rapidocr scale=%s quality=%.2f", sc, q)
@@ -8850,7 +8850,7 @@ class App:
         log.info("OCR auto-calibration: threshold=%s scale=%s quality=%.2f", th, sc, q)
 
     def ocr_lab_report(self):
-        """Aynı son kartta kurulu OCR yollarını ölç; ağ veya oyun gerekmez."""
+        """AynÄ± son kartta kurulu OCR yollarÄ±nÄ± Ã¶lÃ§; aÄŸ veya oyun gerekmez."""
         img = self._calib_image()
         if img is None:
             return messagebox.showinfo(APP_NAME, t("ocr.need_card"))
@@ -8868,13 +8868,13 @@ class App:
         out = APPLOG_DIR / "ocr_lab_latest.json"
         APPLOG_DIR.mkdir(parents=True, exist_ok=True)
         out.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
-        lines = [f"{name}: " + (f"{data['elapsed_ms']} ms, güven {data['mean_confidence']:.2f}" if data.get("available") else "kullanılamıyor")
+        lines = [f"{name}: " + (f"{data['elapsed_ms']} ms, gÃ¼ven {data['mean_confidence']:.2f}" if data.get("available") else "kullanÄ±lamÄ±yor")
                  for name, data in report["engines"].items()]
-        self.toast("OCR laboratuvarı: " + (report["winner"] or "uygun motor yok"))
+        self.toast("OCR laboratuvarÄ±: " + (report["winner"] or "uygun motor yok"))
         messagebox.showinfo(APP_NAME, "\n".join(lines) + f"\n\nRapor: {out}")
 
     def ocr_preview(self):
-        """Orijinal kart ↔ işlenmiş (siyah-beyaz) görüntü + OCR metni + tanınanlar; eşik kaydırıcısıyla canlı."""
+        """Orijinal kart â†” iÅŸlenmiÅŸ (siyah-beyaz) gÃ¶rÃ¼ntÃ¼ + OCR metni + tanÄ±nanlar; eÅŸik kaydÄ±rÄ±cÄ±sÄ±yla canlÄ±."""
         img = self._calib_image()
         if img is None: return messagebox.showinfo(APP_NAME, t("ocr.need_card"))
         w = tk.Toplevel(self.root); w.title(t("ocr.preview")); w.configure(bg=PAL["bg"])
@@ -8915,27 +8915,27 @@ class App:
             txt.delete("1.0", "end"); txt.insert("end", out)
             if GAME.ok and out:
                 r = GAME.recognize(out)
-                txt.insert("end", "\n────────────\n" + f"{r.get('name')}  [{r.get('known') or '?'}]  {t('panel.quality')}: {round(r.get('confidence', 0) * 100)}%\n")
+                txt.insert("end", "\nâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€\n" + f"{r.get('name')}  [{r.get('known') or '?'}]  {t('panel.quality')}: {round(r.get('confidence', 0) * 100)}%\n")
                 for a, v in r.get("attrs", {}).items():
                     txt.insert("end", f"  {attr_name(a)}: {v:g}  ({r.get('quality', {}).get(a, '?')}%)\n")
-                if r.get("talents"): txt.insert("end", "  ★ " + ", ".join(r["talents"]) + "\n")
+                if r.get("talents"): txt.insert("end", "  â˜… " + ", ".join(r["talents"]) + "\n")
                 txt.insert("end", t("ocr.score", q=round(ocr_quality(out), 1)))
         ttk.Scale(bar, from_=100, to=230, variable=thr, length=300, command=lambda v: thr.set(int(float(v)))).pack(side="left", padx=6)
         vl.pack(side="left")
-        ttk.Button(bar, text=ui_theme.with_icon(t("ocr.rerun"), "↻"), command=run).pack(side="left", padx=8)
-        ttk.Button(bar, text=ui_theme.with_icon(t("ocr.use_this"), "✔"),
+        ttk.Button(bar, text=ui_theme.with_icon(t("ocr.rerun"), "â†»"), command=run).pack(side="left", padx=8)
+        ttk.Button(bar, text=ui_theme.with_icon(t("ocr.use_this"), "âœ”"),
                    command=lambda: (self.ocr_thr.set(int(thr.get())), w.destroy())).pack(side="left")
         run()
 
     def overlay_test(self):
-        """Bindirmeyi örnek bir sonuçla gösterir (son kart ya da örnek)."""
+        """Bindirmeyi Ã¶rnek bir sonuÃ§la gÃ¶sterir (son kart ya da Ã¶rnek)."""
         st = self.cfg["settings"]
         backup = {k: st.get(k) for k in ("overlay_alpha", "overlay_size", "overlay_mode")}
         st["overlay_alpha"], st["overlay_size"] = float(self.ov_alpha.get()), float(self.ov_size.get())
         st["overlay_mode"] = "card" if self.ov_mode.get() == t("overlay.mode_card") else "corner"
         item = {"name": "Stoner LAMG", "rarity": ["HIGH-END"], "brand": None, "gear_set": None,
                 "quality": {"weapon_type_damage": 74, "crit_chance": 85, "headshot_damage": 52}, "_note": ""}
-        res = [(82, "Striker LMG", ["✔ Light Machine Gun", "talent Optimist"]), (55, "Heartbreaker", [])]
+        res = [(82, "Striker LMG", ["âœ” Light Machine Gun", "talent Optimist"]), (55, "Heartbreaker", [])]
         if not getattr(self, "last_card_screen", None):
             sw, sh = self.root.winfo_screenwidth(), self.root.winfo_screenheight()
             self.last_card_screen = (int(sw * 0.55), int(sh * 0.18), int(sw * 0.72), int(sh * 0.8))
@@ -8948,7 +8948,7 @@ class App:
         except ValueError: return i18n.current_language()
 
     def apply_language(self):
-        """Dili kaydeder ve arayüzü yeniden başlatmadan yeni dilde kurar."""
+        """Dili kaydeder ve arayÃ¼zÃ¼ yeniden baÅŸlatmadan yeni dilde kurar."""
         code = self._selected_lang_code()
         self.cfg["settings"]["language"] = code
         save_cfg(self.cfg)
@@ -8977,7 +8977,7 @@ class App:
             st["ocr_scale"] = "auto" if sc in ("", "auto", t("ocr.auto")) else float(sc)
             st["ocr_psm"] = int(self.ocr_psm_var.get())
             pv = self.ocr_pass_var.get()
-            st["ocr_passes_auto"] = pv == t("ocr.auto")       # otomatik: bilgisayarın okuma hızına göre 1-3
+            st["ocr_passes_auto"] = pv == t("ocr.auto")       # otomatik: bilgisayarÄ±n okuma hÄ±zÄ±na gÃ¶re 1-3
             if not st["ocr_passes_auto"]: st["ocr_passes"] = int(pv)
             st["ocr_engine"] = next((k for k, v in self._ocr_engines.items() if v == self.ocr_engine_var.get()), "auto")
             gm = next((k for k, v in self._gpu_modes.items() if v == self.ocr_gpu_var.get()), "auto")
@@ -9024,13 +9024,13 @@ class App:
         else:
             self.toast(str(ART_DIR))
 
-    # ---------- Geçmiş ----------
+    # ---------- GeÃ§miÅŸ ----------
     def build_hist(self):
         f = self.tabs["history"]
         bar = ttk.Frame(f); bar.pack(fill="x", padx=8, pady=8)
-        ttk.Button(bar, text=ui_theme.with_icon(t("btn.refresh"), "⟳"), command=self.load_history).pack(side="left")
-        ttk.Button(bar, text=ui_theme.with_icon(t("btn.open_folder"), "📂"), command=lambda: os.startfile(BASE) if os.name == "nt" else None).pack(side="left", padx=6)
-        ttk.Button(bar, text=ui_theme.with_icon(t("hist.clear"), "🗑"), command=self.clear_history).pack(side="left")
+        ttk.Button(bar, text=ui_theme.with_icon(t("btn.refresh"), "âŸ³"), command=self.load_history).pack(side="left")
+        ttk.Button(bar, text=ui_theme.with_icon(t("btn.open_folder"), "ğŸ“‚"), command=lambda: os.startfile(BASE) if os.name == "nt" else None).pack(side="left", padx=6)
+        ttk.Button(bar, text=ui_theme.with_icon(t("hist.clear"), "ğŸ—‘"), command=self.clear_history).pack(side="left")
         cols = (("time", t("col.time"), 140), ("item", t("col.item"), 230), ("verdict", t("col.verdict"), 90),
                 ("best_build", t("col.best_build"), 190), ("score", t("col.score"), 50), ("slot", t("col.slot"), 80))
         self.th = ttk.Treeview(f, columns=[c[0] for c in cols], show="headings")
@@ -9051,12 +9051,12 @@ class App:
     def build_logtab(self):
         f = self.tabs["log"]
         bar = ttk.Frame(f); bar.pack(fill="x", padx=10, pady=8)
-        ttk.Button(bar, text=ui_theme.with_icon(t("btn.refresh"), "⟳"), command=self.refresh_logtab).pack(side="left")
+        ttk.Button(bar, text=ui_theme.with_icon(t("btn.refresh"), "âŸ³"), command=self.refresh_logtab).pack(side="left")
         ttk.Button(bar, text=t("btn.open_folder"),
                    command=lambda: os.startfile(APPLOG_DIR) if os.name == "nt" else None).pack(side="left", padx=6)
-        ttk.Button(bar, text=ui_theme.with_icon(t("log.save_as"), "💾"), command=self.export_log).pack(side="left")
-        ttk.Button(bar, text=ui_theme.with_icon(t("log.clear"), "🧹"), command=self.clear_applog).pack(side="left", padx=6)
-        ttk.Button(bar, text="☁ " + t("log.send_github"), command=self.send_log_github, style="Accent.TButton").pack(side="left", padx=6)
+        ttk.Button(bar, text=ui_theme.with_icon(t("log.save_as"), "ğŸ’¾"), command=self.export_log).pack(side="left")
+        ttk.Button(bar, text=ui_theme.with_icon(t("log.clear"), "ğŸ§¹"), command=self.clear_applog).pack(side="left", padx=6)
+        ttk.Button(bar, text="â˜ " + t("log.send_github"), command=self.send_log_github, style="Accent.TButton").pack(side="left", padx=6)
         self.log_filter = tk.StringVar(value="ALL")
         ttk.Label(bar, text=t("log.level_filter")).pack(side="left", padx=(12, 2))
         cb = ttk.Combobox(bar, textvariable=self.log_filter, width=9, state="readonly",
@@ -9077,12 +9077,12 @@ class App:
         self.refresh_logtab()
 
     def send_log_github(self):
-        """Kullanıcı onayıyla maskelenmiş son logu topluluk GitHub paneline gönderir."""
+        """KullanÄ±cÄ± onayÄ±yla maskelenmiÅŸ son logu topluluk GitHub paneline gÃ¶nderir."""
         if not messagebox.askyesno(APP_NAME, t("log.send_github_ask"), parent=self.root): return
         try:
             st = self.cfg["settings"]
-            payload = reports.build("bug", f"TD2 Loot Advisor log — {APP_VERSION}",
-                                    "Kullanıcı tarafından uygulama içinden gönderilen tanılama kaydı.",
+            payload = reports.build("bug", f"TD2 Loot Advisor log â€” {APP_VERSION}",
+                                    "KullanÄ±cÄ± tarafÄ±ndan uygulama iÃ§inden gÃ¶nderilen tanÄ±lama kaydÄ±.",
                                     app_version=APP_VERSION, lang=i18n.current_language(),
                                     client=st.get("drop_client", ""),
                                     system=reports.system_info(APP_VERSION, {"ocr": getattr(OCR, "name", "")}),
@@ -9099,12 +9099,12 @@ class App:
             messagebox.showerror(APP_NAME, str(e), parent=self.root)
 
     def report_server(self):
-        """Rapor endpoint'i: yalnız kullanıcı gönderimi için, güvenli varsayım ile."""
+        """Rapor endpoint'i: yalnÄ±z kullanÄ±cÄ± gÃ¶nderimi iÃ§in, gÃ¼venli varsayÄ±m ile."""
         st = self.cfg.get("settings", {})
         return os.environ.get("TD2_REPORT_URL") or st.get("report_server") or st.get("drop_server") or dropstats.DEFAULT_URL
 
     def factory_reset(self):
-        """Ayarları varsayılana döndürür; kişisel build/sandık/geçmiş verisini silmez."""
+        """AyarlarÄ± varsayÄ±lana dÃ¶ndÃ¼rÃ¼r; kiÅŸisel build/sandÄ±k/geÃ§miÅŸ verisini silmez."""
         if not messagebox.askyesno(APP_NAME, t("set.factory_ask"), parent=self.root): return
         try:
             stamp = time.strftime("%Y%m%d_%H%M%S")
@@ -9122,7 +9122,7 @@ class App:
             messagebox.showerror(APP_NAME, str(e), parent=self.root)
 
     def refresh_logtab(self, limit=800):
-        """Günlük dosyasının son satırlarını gösterir."""
+        """GÃ¼nlÃ¼k dosyasÄ±nÄ±n son satÄ±rlarÄ±nÄ± gÃ¶sterir."""
         want = self.log_filter.get() if hasattr(self, "log_filter") else "ALL"
         try:
             lines = APPLOG_PATH.read_text(encoding="utf-8", errors="replace").splitlines()
@@ -9154,7 +9154,7 @@ class App:
 
     def clear_applog(self):
         if not messagebox.askyesno(APP_NAME, t("log.clear_confirm")): return
-        for h in list(log.handlers):            # dosyayı bırak ki Windows'ta silinebilsin
+        for h in list(log.handlers):            # dosyayÄ± bÄ±rak ki Windows'ta silinebilsin
             log.removeHandler(h)
             try: h.close()
             except Exception: pass
@@ -9167,8 +9167,8 @@ class App:
         log.info("Log cleared by user")
         self.refresh_logtab()
 
-    # ---------- Yardım / help ----------
-    # ---------- Güncelleme ----------
+    # ---------- YardÄ±m / help ----------
+    # ---------- GÃ¼ncelleme ----------
     def check_update(self, auto=False):
         st = self.cfg["settings"]
         if auto and (not st.get("update_check", True) or time.time() - float(st.get("update_last", 0) or 0) < 12 * 3600):
@@ -9231,7 +9231,7 @@ class App:
             except Exception: pass
 
     def show_version_history(self):
-        """Kullanıcının açık onayıyla istediği herhangi bir GitHub sürümünü (eski ya da yeni) kurmasını sağlar."""
+        """KullanÄ±cÄ±nÄ±n aÃ§Ä±k onayÄ±yla istediÄŸi herhangi bir GitHub sÃ¼rÃ¼mÃ¼nÃ¼ (eski ya da yeni) kurmasÄ±nÄ± saÄŸlar."""
         w = tk.Toplevel(self.root); w.title(t("upd.history_title")); w.geometry("640x560"); w.minsize(560, 460); w.transient(self.root)
         w.configure(bg=PAL["bg"])
         ttk.Label(w, text=t("upd.history_title"), style="Title.TLabel").pack(anchor="w", padx=14, pady=(12, 2))
@@ -9242,7 +9242,7 @@ class App:
         lb.pack(side="left", fill="both", expand=True); sb.pack(side="right", fill="y")
         status = ttk.Label(w, text=t("upd.history_loading"), foreground=PAL["muted"]); status.pack(anchor="w", padx=14, pady=4)
 
-        # ---- seçili sürümün notları / bilinen sorunları (GitHub release metni) ----
+        # ---- seÃ§ili sÃ¼rÃ¼mÃ¼n notlarÄ± / bilinen sorunlarÄ± (GitHub release metni) ----
         nb = ttk.LabelFrame(w, text=t("upd.notes_label")); nb.pack(fill="both", expand=True, padx=14, pady=(2, 6))
         notes_txt = tk.Text(nb, bg=PAL["surface"], fg=PAL["fg"], wrap="word", height=10, state="disabled",
                              relief="flat", padx=8, pady=6)
@@ -9269,8 +9269,8 @@ class App:
                     lb.delete(0, "end")
                     for x in releases:
                         mark = " [BETA]" if x.get("prerelease") else ""
-                        cur = " ✓" if updater.parse_version(x["version"]) == updater.parse_version(APP_VERSION) else ""
-                        lb.insert("end", f"{x['version']}{mark}{cur} — {x.get('name') or 'TD2 Loot Advisor'}")
+                        cur = " âœ“" if updater.parse_version(x["version"]) == updater.parse_version(APP_VERSION) else ""
+                        lb.insert("end", f"{x['version']}{mark}{cur} â€” {x.get('name') or 'TD2 Loot Advisor'}")
                     status.config(text=t("upd.history_ready", n=len(releases)))
                     install_btn.config(state="normal" if releases else "disabled")
                     if releases:
@@ -9296,7 +9296,7 @@ class App:
             self.do_update()
         install_btn = ttk.Button(bf, text=t("upd.rollback"), command=install_selected, style="Accent.TButton", state="disabled")
         install_btn.pack(side="left")
-        ttk.Button(bf, text="🐞 " + t("upd.known_issues"),
+        ttk.Button(bf, text="ğŸ " + t("upd.known_issues"),
                    command=lambda: webbrowser.open(f"https://github.com/{updater.REPO}/blob/main/BUGS.md")).pack(side="left", padx=8)
         lb.bind("<<ListboxSelect>>", on_select)
         lb.bind("<Double-Button-1>", lambda e: install_selected())
@@ -9328,12 +9328,12 @@ class App:
         threading.Thread(target=work, daemon=True).start()
 
     def _upd_quit_for_installer(self):
-        """Kurulum dosyası çalıştı: dosyaları değiştirebilsin diye program kapanır; kurulum bitince kendisi açar."""
+        """Kurulum dosyasÄ± Ã§alÄ±ÅŸtÄ±: dosyalarÄ± deÄŸiÅŸtirebilsin diye program kapanÄ±r; kurulum bitince kendisi aÃ§ar."""
         self.toast(t("upd.installing"))
         self.root.after(800, self._quit_for_update)
 
     def _quit_for_update(self):
-        """Güncelleme için TAMAMEN kapan: tepsiye küçülme yok; arka plan iş parçacığı kalırsa süreç yine biter."""
+        """GÃ¼ncelleme iÃ§in TAMAMEN kapan: tepsiye kÃ¼Ã§Ã¼lme yok; arka plan iÅŸ parÃ§acÄ±ÄŸÄ± kalÄ±rsa sÃ¼reÃ§ yine biter."""
         log.info("Quitting for update")
         threading.Timer(4.0, lambda: os._exit(0)).start()
         try: self.on_close(force=True)
@@ -9348,11 +9348,11 @@ class App:
 
     # ---------- Premium ----------
     def premium_gate(self, parent, feature):
-        """Özellik açıksa True. Değilse yerine kilit kartı koyar ve False döner."""
+        """Ã–zellik aÃ§Ä±ksa True. DeÄŸilse yerine kilit kartÄ± koyar ve False dÃ¶ner."""
         if self.ent.has(feature): return True
         box = tk.Frame(parent, bg=PAL["surface"], highlightthickness=1, highlightbackground=PAL["accent"])
         box.pack(fill="x", padx=4, pady=6)
-        tk.Label(box, text="⭐ " + t("prem.locked") + " — " + t("feat." + feature), bg=PAL["surface"], fg=PAL["accent"],
+        tk.Label(box, text="â­ " + t("prem.locked") + " â€” " + t("feat." + feature), bg=PAL["surface"], fg=PAL["accent"],
                  font=(ui_theme.FONT_SEMI, 11), anchor="w").pack(fill="x", padx=10, pady=(8, 2))
         tk.Label(box, text=t("prem.locked_hint"), bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 10),
                  anchor="w", justify="left", wraplength=700).pack(fill="x", padx=10)
@@ -9364,20 +9364,20 @@ class App:
         if "premium" in getattr(self, "_set_keys", []): self.select_settings_page("premium")
 
     def build_premium_box(self, f, st):
-        ab = ttk.LabelFrame(f, text="👤 " + t("acc.title")); ab.pack(fill="x", padx=10, pady=(10, 6))
+        ab = ttk.LabelFrame(f, text="ğŸ‘¤ " + t("acc.title")); ab.pack(fill="x", padx=10, pady=(10, 6))
         ar = ttk.Frame(ab); ar.pack(fill="x", padx=8, pady=8)
         a = self.account
-        txt = (t("acc.signed_as", name=a.username) + ("  ⭐ " + t("prem.premium") if self.ent.source == "account" else "")) if a.signed_in \
+        txt = (t("acc.signed_as", name=a.username) + ("  â­ " + t("prem.premium") if self.ent.source == "account" else "")) if a.signed_in \
             else t("acc.not_signed")
         ttk.Label(ar, text=txt).pack(side="left")
-        ttk.Button(ar, text=t("acc.open") if a.signed_in else "🎮 " + t("acc.discord"), command=self.open_account,
+        ttk.Button(ar, text=t("acc.open") if a.signed_in else "ğŸ® " + t("acc.discord"), command=self.open_account,
                    style="Accent.TButton").pack(side="right")
         pb = ttk.LabelFrame(f, text=t("prem.box")); pb.pack(fill="x", padx=10, pady=(4, 6))
         r = ttk.Frame(pb); r.pack(fill="x", padx=8, pady=8)
         ttk.Label(r, text=t("prem.key")).pack(side="left")
         self.lic_var = tk.StringVar(value=st.get("license_key", ""))
         ttk.Entry(r, textvariable=self.lic_var, width=70).pack(side="left", padx=6, fill="x", expand=True)
-        ttk.Button(r, text=ui_theme.with_icon(t("prem.activate"), "✔"), command=self.activate_license,
+        ttk.Button(r, text=ui_theme.with_icon(t("prem.activate"), "âœ”"), command=self.activate_license,
                    style="Accent.TButton").pack(side="left")
         self.lic_status = ttk.Label(pb, text="", foreground=PAL["muted"]); self.lic_status.pack(anchor="w", padx=12, pady=(0, 8))
         self._lic_status_text()
@@ -9386,7 +9386,7 @@ class App:
             row = tk.Frame(fb, bg=PAL["bg"]); row.pack(fill="x", padx=10, pady=1)
             ok = self.ent.has(name)
             soon = name in features.COMING
-            tk.Label(row, text=("⏳ " if soon else "✔ " if ok else "🔒 ") + t("feat." + name) + (f"  ({t('prem.soon')})" if soon else ""),
+            tk.Label(row, text=("â³ " if soon else "âœ” " if ok else "ğŸ”’ ") + t("feat." + name) + (f"  ({t('prem.soon')})" if soon else ""),
                      bg=PAL["bg"], fg=PAL["fg"] if ok and not soon else PAL["muted"],
                      font=(ui_theme.FONT, 10), anchor="w").pack(side="left")
             tk.Label(row, text=t("prem." + tier), bg=PAL["bg"], fg=PAL["accent"] if tier == "premium" else PAL["muted"],
@@ -9419,13 +9419,13 @@ class App:
         else:
             self._lic_status_text()
 
-    # ---------- Satıcılar ----------
+    # ---------- SatÄ±cÄ±lar ----------
     def _build_vendor_page(self, p):
         top = ttk.Frame(p); top.pack(fill="x", padx=8, pady=8)
         self.vend_mode = tk.BooleanVar(value=bool(self.cfg["settings"].get("vendor_mode")))
         ttk.Checkbutton(top, text=t("vend.mode"), variable=self.vend_mode, command=self._vendor_mode_toggle).pack(side="left")
-        ttk.Button(top, text="🧹 " + t("vend.clear_scans"), command=self._vendor_clear_scans).pack(side="left", padx=8)
-        self.vend_btn = ttk.Button(top, text="↻ " + t("vend.refresh"), command=lambda: self.vendor_refresh(force=True))
+        ttk.Button(top, text="ğŸ§¹ " + t("vend.clear_scans"), command=self._vendor_clear_scans).pack(side="left", padx=8)
+        self.vend_btn = ttk.Button(top, text="â†» " + t("vend.refresh"), command=lambda: self.vendor_refresh(force=True))
         self.vend_btn.pack(side="right")
         self.vend_info = ttk.Label(p, text="", foreground=PAL["muted"], wraplength=1000, justify="left"); self.vend_info.pack(anchor="w", padx=12)
         self.vend_tl = ttk.Label(p, text="", foreground=PAL["accent"], wraplength=1000, justify="left"); self.vend_tl.pack(anchor="w", padx=12, pady=(4, 0))
@@ -9440,7 +9440,7 @@ class App:
         src = ttk.Frame(p); src.pack(fill="x", padx=12, pady=(0, 8))
         ttk.Label(src, text=t("vend.source", src=vendor.SOURCE_NAME), foreground=PAL["muted"]).pack(side="left")
         import webbrowser
-        ttk.Button(src, text="🌐", width=3, command=lambda: webbrowser.open(vendor.SOURCE_URL)).pack(side="left", padx=6)
+        ttk.Button(src, text="ğŸŒ", width=3, command=lambda: webbrowser.open(vendor.SOURCE_URL)).pack(side="left", padx=6)
 
     def _vendor_mode_toggle(self):
         self.cfg["settings"]["vendor_mode"] = bool(self.vend_mode.get()); save_cfg(self.cfg)
@@ -9450,7 +9450,7 @@ class App:
         self.vendor_scans = []; self._vendor_match(); self.refresh_stash()
 
     def vendor_refresh(self, force=False, auto=False):
-        """Haftalık listeyi indir (Salı sıfırlamasından sonra bir kez ya da elle) ve eşleştir."""
+        """HaftalÄ±k listeyi indir (SalÄ± sÄ±fÄ±rlamasÄ±ndan sonra bir kez ya da elle) ve eÅŸleÅŸtir."""
         st = self.cfg["settings"]
         if self.vendor_busy: return
         if auto and not (st.get("vendor_auto", True) and self.ent.has("vendor_watch")): return
@@ -9494,9 +9494,9 @@ class App:
         if notify and mine and st.get("vendor_notified") != wk:
             st["vendor_notified"] = wk; save_cfg(self.cfg)
             self.toast(t("vend.notify", n=len(mine), build=act))
-            self._push("vendor", "🛒 " + t("push.vendor_title"),
+            self._push("vendor", "ğŸ›’ " + t("push.vendor_title"),
                        t("vend.notify", n=len(mine), build=act) + "\n" + "\n".join(
-                           f"• {slot_name(h['slot'])}: {h['item'].get('name')} ({h.get('vendor') or ''}, {h['fit']}%)" for h in mine[:6]))
+                           f"â€¢ {slot_name(h['slot'])}: {h['item'].get('name')} ({h.get('vendor') or ''}, {h['fit']}%)" for h in mine[:6]))
         self._companion_refresh_build()
 
     def _refresh_vendor(self):
@@ -9516,12 +9516,12 @@ class App:
         act = (active_build(self.cfg) or {}).get("name")
         for h in sorted(self.vendor_hits, key=lambda h: (h["build"] != act, -h["gain"])):
             it = h["item"]
-            tv.insert("", "end", values=(("★ " if h["build"] == act else "") + h["build"], slot_name(h["slot"]), it.get("name"),
-                                         h.get("vendor") or "", f"{h['fit']}% ← {h['have']}%", self._attrs_short(it)))
+            tv.insert("", "end", values=(("â˜… " if h["build"] == act else "") + h["build"], slot_name(h["slot"]), it.get("name"),
+                                         h.get("vendor") or "", f"{h['fit']}% â† {h['have']}%", self._attrs_short(it)))
         if not self.vendor_hits:
             tv.insert("", "end", values=("", "", t("vend.no_hits"), "", "", ""))
 
-    # ---------- Telefon arkadaşı ----------
+    # ---------- Telefon arkadaÅŸÄ± ----------
     def _companion_labels(self):
         return {"build": t("comp.h_build"), "vendor": t("comp.h_vendor"), "waiting": t("comp.waiting"),
                 "offline": t("comp.offline"), "no_vendor": t("vend.no_hits")}
@@ -9575,7 +9575,7 @@ class App:
     def _companion_ui(self):
         if not hasattr(self, "comp_btn"): return
         on = bool(self.companion and self.companion.running)
-        self.comp_btn.config(text=("⏹ " + t("comp.stop")) if on else ("▶ " + t("comp.start")))
+        self.comp_btn.config(text=("â¹ " + t("comp.stop")) if on else ("â–¶ " + t("comp.start")))
         self.comp_url.config(text=self.companion.url if on else "")
         img = companion.qr_image(self.companion.url, 5) if on else None
         if img is not None:
@@ -9583,7 +9583,7 @@ class App:
         else:
             self.comp_qr.config(image="", text=(t("comp.no_qr") if on else "")); self.comp_qr.image = None
 
-    # ---------- Build paylaşımı ----------
+    # ---------- Build paylaÅŸÄ±mÄ± ----------
     def share_build(self):
         b = getattr(self, "cur", None)
         if not b: return
@@ -9618,14 +9618,14 @@ class App:
             b.setdefault("sets_or_brands", []); b.setdefault("attributes", {}); b.setdefault("talents", {}); b.setdefault("set_bonus", 0)
             self.cfg["builds"].append(b); self.normalize_builds(); save_cfg(self.cfg)
             w.destroy(); self.refresh_builds(len(self.cfg["builds"]) - 1); self.toast(t("share.added", name=b["name"]))
-        ttk.Button(w, text="✔ " + t("share.add"), command=go, style="Accent.TButton").pack(anchor="w", padx=14, pady=10)
+        ttk.Button(w, text="âœ” " + t("share.add"), command=go, style="Accent.TButton").pack(anchor="w", padx=14, pady=10)
 
-    # ---------- Sandık (envanter) ----------
+    # ---------- SandÄ±k (envanter) ----------
     def build_stash(self):
         f = self.tabs["stash"]
         self.st_nb = ttk.Notebook(f); self.st_nb.pack(fill="both", expand=True, padx=8, pady=8)
         pages = {}
-        for key, icon in (("inv", "🗄"), ("opt", "🧮"), ("audit", "🧾"), ("vendor", "🏪"), ("command", "⌘")):
+        for key, icon in (("inv", "ğŸ—„"), ("opt", "ğŸ§®"), ("audit", "ğŸ§¾"), ("vendor", "ğŸª"), ("command", "âŒ˜")):
             holder = ttk.Frame(self.st_nb); self.st_nb.add(holder, text=f" {icon} {t('stash.page_' + key)} ")
             pages[key] = holder
         self.st_nb.bind("<<NotebookTabChanged>>", lambda e=None: self.refresh_stash())
@@ -9641,14 +9641,14 @@ class App:
         cb.pack(side="left"); cb.bind("<<ComboboxSelected>>", lambda e=None: self.refresh_stash())
         self.st_count = ttk.Label(bar, text="", foreground=PAL["muted"]); self.st_count.pack(side="left", padx=12)
         bar2 = ttk.Frame(p); bar2.pack(fill="x", padx=8)
-        ttk.Button(bar2, text="🔨 " + t("stash.dismantled"), command=lambda: self._stash_mark("dismantled")).pack(side="left")
-        ttk.Button(bar2, text="✖ " + t("stash.delete"), command=self._stash_delete).pack(side="left", padx=6)
-        ttk.Button(bar2, text="⇩ " + t("stash.import"), command=self._stash_import).pack(side="left")
-        ttk.Button(bar2, text="💾 Yedekle", command=self._stash_backup).pack(side="left", padx=6)
-        ttk.Button(bar2, text="↩ Geri yükle", command=self._stash_restore).pack(side="left")
-        ttk.Button(bar2, text="📤 " + t("stash.export") + ("" if self.ent.has("stash_export") else " ⭐"),
+        ttk.Button(bar2, text="ğŸ”¨ " + t("stash.dismantled"), command=lambda: self._stash_mark("dismantled")).pack(side="left")
+        ttk.Button(bar2, text="âœ– " + t("stash.delete"), command=self._stash_delete).pack(side="left", padx=6)
+        ttk.Button(bar2, text="â‡© " + t("stash.import"), command=self._stash_import).pack(side="left")
+        ttk.Button(bar2, text="ğŸ’¾ Yedekle", command=self._stash_backup).pack(side="left", padx=6)
+        ttk.Button(bar2, text="â†© Geri yÃ¼kle", command=self._stash_restore).pack(side="left")
+        ttk.Button(bar2, text="ğŸ“¤ " + t("stash.export") + ("" if self.ent.has("stash_export") else " â­"),
                    command=self._stash_export).pack(side="left", padx=6)
-        ttk.Button(bar2, text="🧹 " + t("stash.clear"), command=self._stash_clear).pack(side="right")
+        ttk.Button(bar2, text="ğŸ§¹ " + t("stash.clear"), command=self._stash_clear).pack(side="right")
         cols = ("slot", "item", "src", "attrs", "verdict", "best", "time")
         tv = self.st_tv = ttk.Treeview(p, columns=cols, show="headings", selectmode="extended")
         widths = {"slot": 90, "item": 200, "src": 170, "attrs": 330, "verdict": 120, "best": 220, "time": 130}
@@ -9690,8 +9690,8 @@ class App:
         # denetim
         p = pages["audit"]
         ab = ttk.Frame(p); ab.pack(fill="x", padx=8, pady=8)
-        ttk.Button(ab, text="↻ " + t("audit.refresh"), command=self.refresh_stash).pack(side="left")
-        ttk.Button(ab, text="🔨 " + t("audit.mark_all"), command=self._audit_mark_all).pack(side="left", padx=6)
+        ttk.Button(ab, text="â†» " + t("audit.refresh"), command=self.refresh_stash).pack(side="left")
+        ttk.Button(ab, text="ğŸ”¨ " + t("audit.mark_all"), command=self._audit_mark_all).pack(side="left", padx=6)
         self.audit_txt = tk.Text(p, bg=PAL["surface"], fg=PAL["fg"], relief="flat", wrap="word", font=(ui_theme.FONT, 10))
         self.audit_txt.tag_configure("h", font=(ui_theme.FONT_SEMI, 12), foreground=PAL["accent"])
         self.audit_txt.pack(fill="both", expand=True, padx=8, pady=(0, 8))
@@ -9704,15 +9704,15 @@ class App:
         tools = ttk.Frame(parent); tools.pack(fill="x", padx=10, pady=6)
         ttk.Button(tools, text=t("command.search"), command=self._universal_search_window).pack(side="left")
         ttk.Button(tools, text=t("command.audit"), command=self._library_report_window).pack(side="left", padx=6)
-        ttk.Button(tools, text="🧭 Karar merkezi", command=self._decision_center_window).pack(side="left", padx=6)
-        target_box = ttk.LabelFrame(parent, text="🎯 Kişisel hedef ve farm planı")
+        ttk.Button(tools, text="ğŸ§­ Karar merkezi", command=self._decision_center_window).pack(side="left", padx=6)
+        target_box = ttk.LabelFrame(parent, text="ğŸ¯ KiÅŸisel hedef ve farm planÄ±")
         target_box.pack(fill="x", padx=10, pady=(0, 6))
         target_tools = ttk.Frame(target_box); target_tools.pack(fill="x", padx=6, pady=4)
-        ttk.Button(target_tools, text="＋ Hedef ekle", command=self._target_add).pack(side="left")
-        ttk.Button(target_tools, text="↻ Farm planını yenile", command=self.refresh_stash).pack(side="left", padx=6)
+        ttk.Button(target_tools, text="ï¼‹ Hedef ekle", command=self._target_add).pack(side="left")
+        ttk.Button(target_tools, text="â†» Farm planÄ±nÄ± yenile", command=self.refresh_stash).pack(side="left", padx=6)
         ttk.Label(target_tools, text="Yerel hedefler; eski/verisi belirsiz kaynaklar REVIEW olur.", foreground=PAL["muted"]).pack(side="left", padx=8)
         self.target_tv = ttk.Treeview(target_box, columns=("name", "slot", "priority", "state"), show="headings", height=4)
-        for col, title, width in (("name", "Eşya", 230), ("slot", "Yuva", 120), ("priority", "Öncelik", 90), ("state", "Durum", 120)):
+        for col, title, width in (("name", "EÅŸya", 230), ("slot", "Yuva", 120), ("priority", "Ã–ncelik", 90), ("state", "Durum", 120)):
             self.target_tv.heading(col, text=title); self.target_tv.column(col, width=width, anchor="w")
         self.target_tv.pack(fill="x", padx=6, pady=(0, 5))
         self.command_txt = tk.Text(parent, bg=PAL["surface"], fg=PAL["fg"], relief="flat", wrap="word", font=(ui_theme.FONT, 11))
@@ -9720,13 +9720,13 @@ class App:
         ttk.Button(parent, text=t("command.refresh"), command=self.refresh_stash).pack(anchor="e", padx=10, pady=(0, 8))
 
     def _target_add(self):
-        name = simpledialog.askstring(APP_NAME, "Eşya adı:", parent=self.root)
+        name = simpledialog.askstring(APP_NAME, "EÅŸya adÄ±:", parent=self.root)
         if not name or not name.strip():
             return
-        slot = simpledialog.askstring(APP_NAME, "Yuva (ör. Weapon, Chest):", parent=self.root)
+        slot = simpledialog.askstring(APP_NAME, "Yuva (Ã¶r. Weapon, Chest):", parent=self.root)
         if not slot or not slot.strip():
             return
-        attrs = simpledialog.askstring(APP_NAME, "Attribute adları (virgülle ayır; isteğe bağlı):", parent=self.root) or ""
+        attrs = simpledialog.askstring(APP_NAME, "Attribute adlarÄ± (virgÃ¼lle ayÄ±r; isteÄŸe baÄŸlÄ±):", parent=self.root) or ""
         current = target_planner.load_targets(TARGETS_PATH)
         current.append(target_planner.normalize_target({"name": name.strip(), "slot": slot.strip(),
                                                         "attributes": [x.strip() for x in attrs.split(",") if x.strip()]}))
@@ -9768,11 +9768,11 @@ class App:
             state = "NO_MATCH" if not rows else rows[0]["status"]
             self.target_tv.insert("", "end", values=(target["name"], target["slot"], target["priority"], state))
         if getattr(self, "command_txt", None) and targets:
-            self.command_txt.insert("end", "\nKİŞİSEL HEDEF PLANI\n")
+            self.command_txt.insert("end", "\nKÄ°ÅÄ°SEL HEDEF PLANI\n")
             for row in matches:
                 name = row["target"]["name"]
-                detail = row["source"] or "kaynak bulunamadı"
-                self.command_txt.insert("end", f"• {name}: {row['status']} · {detail}\n")
+                detail = row["source"] or "kaynak bulunamadÄ±"
+                self.command_txt.insert("end", f"â€¢ {name}: {row['status']} Â· {detail}\n")
 
     def _universal_search_window(self):
         w = tk.Toplevel(self.root); w.title(t("command.search")); w.geometry("760x500")
@@ -9803,13 +9803,13 @@ class App:
 
     def _decision_center_window(self):
         if not self.last_scan:
-            return messagebox.showinfo(APP_NAME, "Önce bir eşya tarayın; son taranan eşya burada karşılaştırılır.", parent=self.root)
+            return messagebox.showinfo(APP_NAME, "Ã–nce bir eÅŸya tarayÄ±n; son taranan eÅŸya burada karÅŸÄ±laÅŸtÄ±rÄ±lÄ±r.", parent=self.root)
         item, _results, _signature = self.last_scan
         rows = decision_center.compare_item_to_targets(item, target_planner.load_targets(TARGETS_PATH))
         summary = decision_center.farm_summary(rows)
-        text = [f"Eşya: {item.get('name', '?')}", f"Özet: {summary}", ""]
+        text = [f"EÅŸya: {item.get('name', '?')}", f"Ã–zet: {summary}", ""]
         for row in rows:
-            text.append(f"• {row['target']['name']}: {row['recommendation']} · {row['status']} · {', '.join(row['reasons']) or 'eşleşme yok'}")
+            text.append(f"â€¢ {row['target']['name']}: {row['recommendation']} Â· {row['status']} Â· {', '.join(row['reasons']) or 'eÅŸleÅŸme yok'}")
         messagebox.showinfo("Karar merkezi", "\n".join(text), parent=self.root)
 
     def _refresh_command(self, items):
@@ -9829,14 +9829,14 @@ class App:
                 self.command_txt.insert("end", t("command.stale_loot") + "\n")
             if age is None or age > 7 * 86400:
                 self.command_txt.insert("end", t("command.stale_vendor") + "\n")
-            self.command_txt.insert("end", t("stash.page_command") + " — " + b.get('name','') + "\n\n")
+            self.command_txt.insert("end", t("stash.page_command") + " â€” " + b.get('name','') + "\n\n")
             farm = snap["farm"]
             self.command_txt.insert("end", t("command.completion", percent=farm['completion'], done=farm['done'], total=farm['total']) + "\n\n")
             self.command_txt.insert("end", t("command.priorities") + "\n")
             for row in farm["missing"]:
-                self.command_txt.insert("end", f"• {slot_name(row['slot'])}: {', '.join(row['wanted'])}\n")
+                self.command_txt.insert("end", f"â€¢ {slot_name(row['slot'])}: {', '.join(row['wanted'])}\n")
                 for route in row['routes']:
-                    self.command_txt.insert("end", f"    → {', '.join(map(str, route['missions'])) or route['event']} · {route['day']}\n")
+                    self.command_txt.insert("end", f"    â†’ {', '.join(map(str, route['missions'])) or route['event']} Â· {route['day']}\n")
                 if not row['routes']:
                     self.command_txt.insert("end", "    " + t("command.no_route") + "\n")
             self.command_txt.insert("end", "\n" + t("command.summary", protected=snap['protected'], duplicates=snap['duplicates'], library=len(snap['library'])) + "\n")
@@ -9889,13 +9889,13 @@ class App:
         for s, v in r["slots"].items():
             it = v["item"]
             tv.insert("", "end", tags=("done" if v["done"] else "miss" if not it else "",), values=(
-                slot_name(s), (it.get("name") if it else t("opt.none")), f"{v['fit']}%" if it else "—",
+                slot_name(s), (it.get("name") if it else t("opt.none")), f"{v['fit']}%" if it else "â€”",
                 "  ".join(check_lines(v["checks"])) if it else req_lines_short(v["req"])))
         if self.opt_recal is not None:
             self.opt_recal.config(state="normal"); self.opt_recal.delete("1.0", "end")
             adv = stash.recal_advice(r, items, GAME)
             for a in adv:
-                self.opt_recal.insert("end", "• " + t("opt.recal_line", slot=slot_name(a["slot"]), target=a["target"],
+                self.opt_recal.insert("end", "â€¢ " + t("opt.recal_line", slot=slot_name(a["slot"]), target=a["target"],
                                                        attr=attr_name(a["attr"]), have=a["have"], q=a["quality"], donor=a["donor"]) + "\n")
             if not adv: self.opt_recal.insert("end", t("opt.recal_none") + "\n")
             self.opt_recal.insert("end", "\n" + t("opt.recal_note")); self.opt_recal.config(state="disabled")
@@ -9912,16 +9912,16 @@ class App:
         a = self._audit = stash.audit(items, self.cfg["builds"], plan_of, GAME)
         T.insert("end", t("audit.title") + "\n", "h")
         T.insert("end", t("audit.summary", n=a["total"], prot=a["protected"]) + "\n")
-        T.insert("end", "  " + "  ·  ".join(f"{verdict_label(k)}: {v}" for k, v in a["counts"].items()) + "\n\n")
+        T.insert("end", "  " + "  Â·  ".join(f"{verdict_label(k)}: {v}" for k, v in a["counts"].items()) + "\n\n")
         T.insert("end", t("audit.dismantle", n=len(a["dismantle"])) + "\n", "h")
         for r in a["dismantle"]:
-            T.insert("end", f"  🔨 {r.get('name')} ({slot_name(r.get('slot') or '')}) — {self._attrs_short(r)}\n")
+            T.insert("end", f"  ğŸ”¨ {r.get('name')} ({slot_name(r.get('slot') or '')}) â€” {self._attrs_short(r)}\n")
         T.insert("end", "\n" + t("audit.dups", n=len(a["duplicates"])) + "\n", "h")
         for best, rest in a["duplicates"]:
             T.insert("end", "  " + t("audit.dup_line", name=best.get("name"), slot=slot_name(best.get("slot") or ""), n=len(rest)) + "\n")
         T.insert("end", "\n" + t("audit.library", n=len(a["library"])) + "\n", "h")
         for r, k, q in a["library"]:
-            T.insert("end", "  📚 " + t("audit.lib_line", name=r.get("name"), attr=attr_name(k), q=q) + "\n")
+            T.insert("end", "  ğŸ“š " + t("audit.lib_line", name=r.get("name"), attr=attr_name(k), q=q) + "\n")
         if a["ranks"]:
             T.insert("end", "\n" + t("opt.rank_title") + "\n", "h")
             for pct, name, rr in a["ranks"][:5]:
@@ -9988,52 +9988,52 @@ class App:
         self.stash.save(); self._audit = None; self.refresh_stash()
 
     def build_help(self):
-        """Yardım metni dil dosyasındaki help.body anahtarından gelir."""
+        """YardÄ±m metni dil dosyasÄ±ndaki help.body anahtarÄ±ndan gelir."""
         f = self.tabs["help"]
         hb = ttk.Frame(f); hb.pack(side="top", fill="x", padx=10, pady=(10, 0))
-        ttk.Button(hb, text="🐞 " + t("fb.btn"), command=self.open_feedback, style="Accent.TButton").pack(side="left")
+        ttk.Button(hb, text="ğŸ " + t("fb.btn"), command=self.open_feedback, style="Accent.TButton").pack(side="left")
         ttk.Label(hb, text=t("fb.help_hint"), foreground=PAL["muted"]).pack(side="left", padx=10)
         box = tk.Text(f, wrap="word", font=("Segoe UI", 10))
         sb = ttk.Scrollbar(f, orient="vertical", command=box.yview); box.configure(yscrollcommand=sb.set)
         sb.pack(side="right", fill="y", pady=10); box.pack(side="left", fill="both", expand=True, padx=10, pady=10)
         body = t("help.body")
-        if body == "help.body":          # dil dosyasında yoksa İngilizceye düşülmüş olmalı
+        if body == "help.body":          # dil dosyasÄ±nda yoksa Ä°ngilizceye dÃ¼ÅŸÃ¼lmÃ¼ÅŸ olmalÄ±
             body = "Help text is missing from this language file."
         box.configure(bg=PAL["surface"], fg=PAL["fg"], relief="flat", padx=18, pady=14, spacing3=4)
         box.tag_configure("h", foreground=PAL["accent"], font=(ui_theme.FONT_SEMI, 12), spacing1=10)
-        for line in body.splitlines(True):              # BÜYÜK HARFLİ satırlar başlık
+        for line in body.splitlines(True):              # BÃœYÃœK HARFLÄ° satÄ±rlar baÅŸlÄ±k
             plain = line.strip()
             box.insert("end", line, ("h",) if plain and plain == plain.upper() and any(c.isalpha() for c in plain) else ())
         box.config(state="disabled")
 
     def build_about(self):
-        """Program hakkında ve kurucu stüdyo (Kaivolt) bilgileri — about.body dil dosyasından gelir."""
+        """Program hakkÄ±nda ve kurucu stÃ¼dyo (Kaivolt) bilgileri â€” about.body dil dosyasÄ±ndan gelir."""
         f = self.tabs["about"]
         hb = ttk.Frame(f); hb.pack(side="top", fill="x", padx=10, pady=(10, 0))
-        ttk.Label(hb, text=f"{APP_NAME} — {APP_VERSION}", style="Item.TLabel").pack(side="left")
-        ttk.Button(hb, text=ui_theme.with_icon("GitHub", "🔗"), style="Accent.TButton",
+        ttk.Label(hb, text=f"{APP_NAME} â€” {APP_VERSION}", style="Item.TLabel").pack(side="left")
+        ttk.Button(hb, text=ui_theme.with_icon("GitHub", "ğŸ”—"), style="Accent.TButton",
                    command=lambda: webbrowser.open("https://github.com/FEDERALTURK/td2-loot-advisor")).pack(side="right")
-        ttk.Button(hb, text=ui_theme.with_icon(t("fb.btn"), "🐞"),
+        ttk.Button(hb, text=ui_theme.with_icon(t("fb.btn"), "ğŸ"),
                    command=self.open_feedback).pack(side="right", padx=(0, 8))
         box = tk.Text(f, wrap="word", font=("Segoe UI", 10))
         sb = ttk.Scrollbar(f, orient="vertical", command=box.yview); box.configure(yscrollcommand=sb.set)
         sb.pack(side="right", fill="y", pady=10); box.pack(side="left", fill="both", expand=True, padx=10, pady=10)
         body = t("about.body")
-        if body == "about.body":          # dil dosyasında yoksa İngilizceye düşülmüş olmalı
+        if body == "about.body":          # dil dosyasÄ±nda yoksa Ä°ngilizceye dÃ¼ÅŸÃ¼lmÃ¼ÅŸ olmalÄ±
             body = "About text is missing from this language file."
         box.configure(bg=PAL["surface"], fg=PAL["fg"], relief="flat", padx=18, pady=14, spacing3=4)
         box.tag_configure("h", foreground=PAL["accent"], font=(ui_theme.FONT_SEMI, 12), spacing1=10)
-        for line in body.splitlines(True):              # BÜYÜK HARFLİ satırlar başlık
+        for line in body.splitlines(True):              # BÃœYÃœK HARFLÄ° satÄ±rlar baÅŸlÄ±k
             plain = line.strip()
             box.insert("end", line, ("h",) if plain and plain == plain.upper() and any(c.isalpha() for c in plain) else ())
         box.config(state="disabled")
 
     def _tk_callback_exception(self, exc, val, tb):
-        """Tkinter varsayılanı (--noconsole build'de hiçbir yere görünmeyen stderr basımı) yerine:
-        her callback (buton komutu, after(), bind) hatasını app.log'a yazar. Böylece örn.
-        PAL[...] KeyError gibi sessiz GUI hataları bir daha hiç iz bırakmadan kaybolmaz."""
+        """Tkinter varsayÄ±lanÄ± (--noconsole build'de hiÃ§bir yere gÃ¶rÃ¼nmeyen stderr basÄ±mÄ±) yerine:
+        her callback (buton komutu, after(), bind) hatasÄ±nÄ± app.log'a yazar. BÃ¶ylece Ã¶rn.
+        PAL[...] KeyError gibi sessiz GUI hatalarÄ± bir daha hiÃ§ iz bÄ±rakmadan kaybolmaz."""
         try:
-            log.error("Tk callback hatası: %s", val, exc_info=(exc, val, tb))
+            log.error("Tk callback hatasÄ±: %s", val, exc_info=(exc, val, tb))
         except Exception:
             pass
 
@@ -10060,7 +10060,7 @@ class App:
         if st_.get("drop_share") and len(self.dropq) and (st_.get("drop_server") or dropstats.DEFAULT_URL):
             th = threading.Thread(target=lambda: self.dropq.flush(st_.get("drop_server"), st_["drop_client"], timeout=3), daemon=True)
             th.start(); th.join(4)
-        for name in ("video", "watch_bg", "trail_fx"):            # arka plan işleri / pencereleri
+        for name in ("video", "watch_bg", "trail_fx"):            # arka plan iÅŸleri / pencereleri
             obj = getattr(self, name, None)
             try: obj and obj.stop()
             except Exception: pass
@@ -10068,7 +10068,7 @@ class App:
 
 
 def _instance_poll(app, inst):
-    """Başka bir açılma denemesi geldiyse pencereyi öne getir (tarama sırasında küçültülmüş olsa bile)."""
+    """BaÅŸka bir aÃ§Ä±lma denemesi geldiyse pencereyi Ã¶ne getir (tarama sÄ±rasÄ±nda kÃ¼Ã§Ã¼ltÃ¼lmÃ¼ÅŸ olsa bile)."""
     try:
         if inst.poll_show():
             log.info("Second launch: showing the open window")
@@ -10087,14 +10087,14 @@ if __name__ == "__main__":
     _INSTANCE = single.SingleInstance()
     if not _INSTANCE.acquire(wait=20 if "--restart" in sys.argv else 0):
         if not START_IN_TRAY: _INSTANCE.signal_show()
-        log.info("Already running — %s", "left the open copy in the tray" if START_IN_TRAY else "showed the open window")
+        log.info("Already running â€” %s", "left the open copy in the tray" if START_IN_TRAY else "showed the open window")
         sys.exit(0)
     try:
         _APP = App()
         _instance_poll(_APP, _INSTANCE)
         _APP.root.mainloop()
     except Exception:
-        log.exception("Fatal error — application stopped")
+        log.exception("Fatal error â€” application stopped")
         raise
     finally:
         log.info("=== %s stopped ===", APP_NAME)
