@@ -150,7 +150,7 @@ import decision_center
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.1.5.39"
+APP_VERSION = "9.1.5.40"
 # "Bu oturumda ne kazandÄ±n?" Ã¶zeti iÃ§in kaba tahmin: bir eÅŸyayÄ± elle inceleyip
 # build'e gÃ¶re karar vermenin (istatistikleri okuma + karÅŸÄ±laÅŸtÄ±rma) ortalama
 # sÃ¼resi, saniye. GerÃ§ek bir Ã¶lÃ§Ã¼m deÄŸil â€” yalnÄ±zca arayÃ¼zde "tahmini" etiketiyle
