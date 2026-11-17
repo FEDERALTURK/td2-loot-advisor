@@ -1,9 +1,41 @@
 {
  "schema": 1,
- "version": "2026-11-16.1",
- "updated": "2026-11-16T01:43:54Z",
+ "version": "2026-11-17.1",
+ "updated": "2026-11-17T07:34:02Z",
  "season": "Year 8 Season 3 – Red Horizon",
  "items": [
+  {
+   "id": "console-crossplay-servers-maintenance-2026-11-17",
+   "kind": "maintenance",
+   "start": "2026-11-17T07:00:00Z",
+   "end": "2026-11-17T15:00:00Z",
+   "url": "https://x.com/TheDivisionGame/status/2122374137989456316",
+   "source": "Ubisoft (@TheDivisionGame)",
+   "title": {
+    "en": "Maintenance Nov 17: consoles move to Crossplay",
+    "tr": "17 Kasım bakımı: konsollar Crossplay'e geçiyor",
+    "de": "Wartung 17. Nov.: Konsolen wechseln zu Crossplay",
+    "fr": "Maintenance du 17 nov. : les consoles passent au Crossplay",
+    "es": "Mantenimiento 17 nov.: las consolas pasan a Crossplay",
+    "it": "Manutenzione 17 nov.: le console passano al Crossplay",
+    "pt": "Manutenção 17 nov.: consoles migram para o Crossplay",
+    "ru": "Техработы 17 нояб.: консоли переходят на Crossplay",
+    "pl": "Przerwa 17 lis.: konsole przechodzą na Crossplay",
+    "nl": "Onderhoud 17 nov.: consoles gaan naar Crossplay"
+   },
+   "text": {
+    "en": "Servers are down from 07:00 UTC for about 8 hours (longer than usual). PlayStation and Xbox players are moved to the Crossplay servers; after that, Crossplay works across PC, PlayStation and Xbox. The end time is an estimate.",
+    "tr": "Sunucular 07:00 UTC'den itibaren yaklaşık 8 saat kapalı (normalden uzun). PlayStation ve Xbox oyuncuları Crossplay sunucularına taşınıyor; ardından Crossplay PC, PlayStation ve Xbox arasında çalışacak. Bitiş saati tahminidir.",
+    "de": "Die Server sind ab 07:00 UTC für etwa 8 Stunden offline (länger als üblich). PlayStation- und Xbox-Spieler werden auf die Crossplay-Server verlegt; danach funktioniert Crossplay zwischen PC, PlayStation und Xbox. Das Ende ist geschätzt.",
+    "fr": "Serveurs indisponibles dès 07:00 UTC pendant environ 8 heures (plus long que d'habitude). Les joueurs PlayStation et Xbox passent sur les serveurs Crossplay ; ensuite, le Crossplay fonctionne entre PC, PlayStation et Xbox. L'heure de fin est estimée.",
+    "es": "Servidores caídos desde las 07:00 UTC durante unas 8 horas (más de lo habitual). Los jugadores de PlayStation y Xbox pasan a los servidores Crossplay; después, el Crossplay funcionará entre PC, PlayStation y Xbox. La hora de fin es estimada.",
+    "it": "Server offline dalle 07:00 UTC per circa 8 ore (più del solito). I giocatori PlayStation e Xbox vengono spostati sui server Crossplay; poi il Crossplay funzionerà tra PC, PlayStation e Xbox. L'orario di fine è stimato.",
+    "pt": "Servidores fora do ar a partir das 07:00 UTC por cerca de 8 horas (mais que o normal). Jogadores de PlayStation e Xbox migram para os servidores Crossplay; depois, o Crossplay funciona entre PC, PlayStation e Xbox. O horário de término é estimado.",
+    "ru": "Серверы недоступны с 07:00 UTC примерно 8 часов (дольше обычного). Игроков PlayStation и Xbox переводят на серверы Crossplay; после этого Crossplay заработает между ПК, PlayStation и Xbox. Время окончания примерное.",
+    "pl": "Serwery są wyłączone od 07:00 UTC na około 8 godzin (dłużej niż zwykle). Gracze PlayStation i Xbox są przenoszeni na serwery Crossplay; potem Crossplay działa między PC, PlayStation i Xbox. Godzina zakończenia jest szacunkowa.",
+    "nl": "Servers zijn vanaf 07:00 UTC ongeveer 8 uur offline (langer dan normaal). PlayStation- en Xbox-spelers gaan naar de Crossplay-servers; daarna werkt Crossplay tussen pc, PlayStation en Xbox. De eindtijd is een schatting."
+   }
+  },
   {
    "id": "pc-crossplay-servers-maintenance-2026-11-12",
    "kind": "maintenance",
