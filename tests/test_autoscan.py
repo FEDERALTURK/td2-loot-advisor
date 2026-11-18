@@ -79,6 +79,10 @@ if os.name == "nt":
 
 import display  # noqa: E402
 if os.name == "nt":
+    ok(display._looks_like_game_title("Tom Clancy's The Division 2"), "bilinen oyun başlığı tanınır")
+    ok(display._looks_like_game_title("The Division 2"), "kısa oyun başlığı tanınır")
+    ok(not display._looks_like_game_title(r"C:\Users\PC\Desktop\Thedivision2program\brag-output"),
+       "dosya yolu oyun penceresi sanılmaz")
     display._EXE_CACHE.clear()
     t0 = time.perf_counter(); display.find_game_hwnd(); cold = time.perf_counter() - t0
     t0 = time.perf_counter()

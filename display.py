@@ -88,6 +88,25 @@ _GW_CACHE = {"t": 0.0, "v": None}
 _EXE_CACHE = {}            # süreç no → exe adı (oyun izleyici 2 sn'de bir tüm pencerelere bakar; süreç açmak pahalı)
 
 
+def _looks_like_game_title(title):
+    """Başlık geri dönüşünü yalnızca doğrulanabilir oyun başlıklarıyla sınırla.
+
+    Explorer/IDE başlıkları çoğu zaman çalışma klasörünün tam yolunu içerir;
+    ``Thedivision2program`` gibi bir yolun içinde ``division2`` geçmesi,
+    oyunun kapalı olduğu halde ekranın oyun penceresi sanılmasına neden
+    oluyordu. Bilinen exe bulunamadığında yalnızca oyunun gerçek başlık
+    biçimlerini kabul ediyoruz; dosya yolu, exe adı veya rastgele sekme adı
+    eşleşmesi kabul edilmiyor.
+    """
+    normalized = re.sub(r"[^a-z0-9]+", " ", str(title).lower()).strip()
+    return normalized in {
+        "the division 2",
+        "the division2",
+        "tom clancy s the division 2",
+        "tom clancy s the division2",
+    } or normalized.startswith("tom clancy s the division 2 ")
+
+
 def _exe_of(hwnd):
     try:
         from ctypes import wintypes
@@ -136,7 +155,7 @@ def find_game_hwnd():
             title = buf.value.lower()
             if "loot advisor" in title: return True
             exe = _exe_of(h)
-            score = 2 if exe in GAME_EXES else (1 if ("division 2" in title or "division2" in title) else 0)
+            score = 2 if exe in GAME_EXES else (1 if _looks_like_game_title(title) else 0)
             if score: found.append((score, h))
             return True
         u.EnumWindows(CB(cb), 0)
