@@ -32,6 +32,10 @@ if (usePlaySigning) {
 // anahtarını paylaşmaz. Bkz. docs/mobile_beta_signing_tr.md.
 val betaSigningFile = rootProject.file("beta-key.properties")
 val useBetaSigning = providers.gradleProperty("githubBetaRelease").orNull == "true"
+val runningOnGitHubActions = System.getenv("GITHUB_ACTIONS") == "true"
+if (runningOnGitHubActions && !usePlaySigning && !useBetaSigning) {
+    error("GitHub release builds require beta signing secrets; refusing debug signing fallback.")
+}
 val betaSigningProperties = Properties()
 if (useBetaSigning) {
     require(betaSigningFile.isFile) {

@@ -40,13 +40,14 @@ Bu oturumun GitHub Actions secret'larını ayarlama izni yok (proxy engelliyor),
 bu yüzden şu adımları **senin** tamamlaman gerekiyor:
 
 1. GitHub'da repo → **Settings → Secrets and variables → Actions → New repository secret**.
-2. Üç secret ekle (sana ayrıca gönderilen `td2-companion-beta.jks` dosyası ve
-   parolayla):
+2. Dört secret ekle (sana ayrıca gönderilen `td2-companion-beta.jks` dosyası ve
+   parolalarıyla):
    - `TD2_BETA_KEYSTORE_BASE64` — keystore dosyasının base64 hâli (sana
      gönderilen `.b64` dosyasının içeriği, tek satır).
-   - `TD2_BETA_KEYSTORE_PASSWORD` — keystore/anahtar parolası (sana ayrıca
-     gönderildi; bu modern PKCS12 formatında store ve key parolası aynıdır).
+   - `TD2_BETA_KEYSTORE_PASSWORD` — keystore (store) parolası.
    - `TD2_BETA_KEY_ALIAS` — değeri: `td2-companion-beta`.
+   - `TD2_BETA_KEY_PASSWORD` — alias/private-key parolası. Store ve key
+     parolaları aynıysa aynı değeri kullanabilirsin; secret yine ayrı tutulur.
 3. **Keystore dosyasını ve parolasını güvenli bir yerde (parola yöneticisi
    vb.) ayrıca yedekle.** Bu dosya kaybolursa bir daha hiçbir güncelleme eski
    kurulumların üstüne gitmez — herkesin tekrar elle kaldırıp kurması gerekir.
