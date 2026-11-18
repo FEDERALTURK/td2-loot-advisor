@@ -1,5 +1,12 @@
 ## TD2 Loot Advisor — Windows
 
+**9.1.5.48 — Yatay menü çubuğu kaldırıldı**
+
+- Eski saha terminali ve SHD terminal görünümlerindeki yatay menü çubukları kaldırıldı.
+- Gezinme tek dikey panelde birleştirildi; standart görünümdeki mevcut dikey menü korunmuştur.
+- Sekme geçişlerinde yatay komut şeridi bulunmadığında oluşabilecek erişim hatası güvenli kontrolle engellendi.
+
+
 **9.1.5.43 — UTF-8 UI simge ve emoji düzeltmesi**
 
 - Menü, sekme, buton ve tanılama metinlerinde görülen `Ã`, `Ä`, `Å`, `ğŸ` ve benzeri bozuk karakterler düzeltildi.
