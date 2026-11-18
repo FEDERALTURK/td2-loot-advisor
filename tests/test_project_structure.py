@@ -58,17 +58,29 @@ class ProjectStructureTests(unittest.TestCase):
         self.assertIn('style="soft"', source)
         self.assertIn('(\"soft\", \"tactical\")', source)
 
-    def test_single_theme_applies_tactical_nav_and_transitions(self):
-        """Tek, sabit tema (eski çoklu tema/paket sistemi kaldırıldı): uygulanınca
-        Division 2'ye benzer kademeli (tactical) kenar çubuğu ve geçiş temposu gelir."""
-        self.assertEqual(tuple(packaged_theme.PALETTES.keys()), ("default",))
-        self.assertEqual(packaged_theme.THEME_MODES, ("default",))
-        settings = {}
-        self.assertTrue(packaged_theme.apply_pack(settings, "default"))
-        self.assertEqual(settings["ui_nav_layout"], "tactical")
-        self.assertEqual(settings["fx_transition_style"], "tactical")
-        self.assertEqual(settings["ui_layout"], "standard")
-        self.assertFalse(packaged_theme.apply_pack({}, "field_terminal"))   # kaldırılan eski paket adı artık geçersiz
+    def test_three_selectable_themes_apply_and_keep_legacy_default(self):
+        """Üç tema seçilebilir; eski default kaydı SHD temasına eşlenir."""
+        modes = ("shd_tactical", "kaivolt", "clean_console")
+        self.assertEqual(packaged_theme.THEME_MODES[:3], modes)
+        self.assertTrue(set(modes).issubset(packaged_theme.THEME_LABELS))
+        self.assertEqual(packaged_theme.canonical_mode("default"), "shd_tactical")
+        accents = set()
+        for mode in modes:
+            settings = {}
+            self.assertTrue(packaged_theme.apply_pack(settings, mode))
+            self.assertEqual(settings["ui_theme"], mode)
+            expected_nav = "flat" if mode == "kaivolt" else "tactical"
+            expected_style = "soft" if mode == "kaivolt" else "tactical"
+            self.assertEqual(settings["ui_nav_layout"], expected_nav)
+            self.assertEqual(settings["fx_transition_style"], expected_style)
+            self.assertEqual(settings["ui_layout"], "standard")
+            accents.add(settings["fx_trail_color"])
+        self.assertEqual(len(accents), 3)
+        self.assertTrue(packaged_theme.apply_pack({}, "default"))
+        legacy = {}
+        self.assertTrue(packaged_theme.apply_pack(legacy, "field_terminal"))
+        self.assertEqual(legacy["ui_layout"], "field_command")
+        self.assertFalse(packaged_theme.apply_pack({}, "not-a-theme"))
 
     def test_field_command_shell_code_still_supports_map_scan_variant(self):
         """`_build_field_command_shell` kod olarak kapsam dışı bırakıldı (silinmedi); fx.py'deki

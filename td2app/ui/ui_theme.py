@@ -2,8 +2,8 @@
 Görünüm ve arayüz sesleri / look & feel and UI sounds for TD2 Loot Advisor.
 
 Harici kütüphane gerektirmez: Tk'nın yerleşik "clam" temasını kendi renk
-paletimizle boyar. Uygulamanın tek, sabit bir görsel kimliği vardır
-("default") — seçilebilir başka tema veya palet yoktur.
+paletimizle boyar. Kullanıcı üç yerleşik görünüm arasından seçim yapabilir;
+eski "default" ayarı geriye dönük uyumluluk için SHD temasına eşlenir.
 No third-party dependency: restyles Tk's built-in "clam" theme.
 
 Sesler ilk açılışta küçük WAV dosyaları olarak üretilir (sounds/ klasörü) ve
@@ -35,10 +35,10 @@ def on_color(bg):
 
 
 # ───────────── renk paleti / palette ─────────────
-# Tek, sabit görsel kimlik: Division 2 Taktik HUD — siyah-zift zemin + yanık turuncu (amber) vurgu.
-# Eski çoklu tema/paket sistemi (dark/light/classic + 14 oyun-atmosferi paketi) tamamen kaldırıldı.
+# Yerleşik görünüm kimlikleri. Renkler yalnızca bu modülden uygulanır; uygulama
+# içindeki widget'lar ortak PAL sözlüğünü kullanmaya devam eder.
 PALETTES = {
-    "default": {
+    "shd_tactical": {
         "bg": "#0b0e13", "surface": "#141a22", "surface2": "#1c242f", "border": "#2a3542",
         "fg": "#e8edf2", "muted": "#8795a6", "accent": "#ff6d10", "accent_hover": "#ff9440",
         "accent_fg": on_color("#ff6d10"), "success": "#3fb950", "danger": "#f0534a", "warning": "#ffc247",
@@ -49,22 +49,100 @@ PALETTES = {
         "verdict_fg": {"KEEP": "#4ade80", "CONSIDER": "#ffc247", "DISMANTLE": "#f87171",
                        "REVIEW": "#60a5fa", "ERROR": "#9ca3af", "IDLE": "#8795a6"},
     },
+    "kaivolt": {
+        "bg": "#0b0d18", "surface": "#15152a", "surface2": "#211b3b", "border": "#3d3264",
+        "fg": "#eef0ff", "muted": "#a59ac6", "accent": "#a56bff", "accent_hover": "#c091ff",
+        "accent_fg": on_color("#a56bff"), "success": "#45d483", "danger": "#f06478", "warning": "#ffd166",
+        "info": "#72b7ff", "select": "#33205b", "entry": "#070913", "text_bg": "#070913",
+        "ov_bg": "#0c0d1b", "ov_fg": "#ffffff", "ov_border": "#8e54e8",
+        "verdict": {"KEEP": "#176b45", "CONSIDER": "#8b5a16", "DISMANTLE": "#8f2d35",
+                    "REVIEW": "#245a9b", "ERROR": "#4b5563", "IDLE": "#26313d"},
+        "verdict_fg": {"KEEP": "#4ade80", "CONSIDER": "#ffd166", "DISMANTLE": "#ff7b8d",
+                       "REVIEW": "#72b7ff", "ERROR": "#b4b8c8", "IDLE": "#a59ac6"},
+    },
+    "clean_console": {
+        "bg": "#10161b", "surface": "#192329", "surface2": "#22333b", "border": "#3c5660",
+        "fg": "#e9f5f7", "muted": "#9ab0b8", "accent": "#00c2d1", "accent_hover": "#3de7ef",
+        "accent_fg": on_color("#00c2d1"), "success": "#43d17d", "danger": "#f26b6b", "warning": "#f4c95d",
+        "info": "#64b5f6", "select": "#123d45", "entry": "#0b1115", "text_bg": "#0b1115",
+        "ov_bg": "#101b20", "ov_fg": "#ffffff", "ov_border": "#00aeba",
+        "verdict": {"KEEP": "#176b45", "CONSIDER": "#8b5a16", "DISMANTLE": "#8f2d35",
+                    "REVIEW": "#245a9b", "ERROR": "#4b5563", "IDLE": "#26313d"},
+        "verdict_fg": {"KEEP": "#4ade80", "CONSIDER": "#f4c95d", "DISMANTLE": "#ff8585",
+                       "REVIEW": "#64b5f6", "ERROR": "#b2c0c6", "IDLE": "#9ab0b8"},
+    },
 }
-THEME_MODES = ("default",)
+
+# Eski sürümlerde bulunan tema/paket seçenekleri. Ortak karar renkleri SHD
+# tabanından gelir; her paket kendi arka plan, vurgu ve overlay renklerini taşır.
+_LEGACY_PACKS = {
+    "dark": {"bg": "#0f1116", "surface": "#171a21", "surface2": "#212530", "border": "#2c313d", "fg": "#e8eaef", "muted": "#8d95a5", "accent": "#ff6d10", "accent_hover": "#ff8a3d", "select": "#4a2a12", "entry": "#0b0d11", "text_bg": "#0b0d11", "ov_bg": "#111318", "ov_fg": "#ffffff", "ov_border": "#5a3417"},
+    "light": {"bg": "#f2f3f6", "surface": "#ffffff", "surface2": "#e6e8ed", "border": "#d3d7df", "fg": "#1a1e26", "muted": "#687082", "accent": "#e35d00", "accent_hover": "#ff7a1f", "select": "#ffe1c7", "entry": "#ffffff", "text_bg": "#ffffff", "ov_bg": "#14161b", "ov_fg": "#ffffff", "ov_border": "#5a3417"},
+    "classic": {"bg": "#dcdad5", "surface": "#ffffff", "surface2": "#dcdad5", "border": "#cccccc", "fg": "#000000", "muted": "#888888", "accent": "#1f6fb2", "accent_hover": "#1f6fb2", "select": "#4a6984", "entry": "#ffffff", "text_bg": "#ffffff", "ov_bg": "#101010", "ov_fg": "#ffffff", "ov_border": "#1f6fb2"},
+    "darkzone": {"bg": "#0e0b14", "surface": "#17121f", "surface2": "#221a2e", "border": "#33274a", "fg": "#ece8f4", "muted": "#9a8fb0", "accent": "#a855f7", "accent_hover": "#c084fc", "select": "#3b1f5c", "entry": "#0a0810", "ov_bg": "#140f1d", "ov_fg": "#f3eefe", "ov_border": "#5b3a8a"},
+    "blacktusk": {"bg": "#0b0c0e", "surface": "#141619", "surface2": "#1d2024", "border": "#2e3238", "fg": "#e9ebee", "muted": "#8a9099", "accent": "#e11d2e", "accent_hover": "#f43f4e", "select": "#4a1016", "entry": "#08090a", "ov_bg": "#121417", "ov_fg": "#ffffff", "ov_border": "#5c1a20"},
+    "hunter": {"bg": "#100e0d", "surface": "#1a1715", "surface2": "#25211e", "border": "#3a332d", "fg": "#eee7df", "muted": "#a39788", "accent": "#dd4560", "accent_hover": "#ec6178", "select": "#4c1520", "entry": "#0b0a09", "ov_bg": "#171412", "ov_fg": "#f6efe6", "ov_border": "#6a2a34"},
+    "winter_ny": {"bg": "#0d1317", "surface": "#141c22", "surface2": "#1c2830", "border": "#2b3a45", "fg": "#f2f6f8", "muted": "#93a5b1", "accent": "#ff7a1a", "accent_hover": "#ff9447", "select": "#4a2a12", "entry": "#091014", "ov_bg": "#111a20", "ov_fg": "#ffffff", "ov_border": "#3b5363"},
+    "nightops": {"bg": "#080d18", "surface": "#0e1626", "surface2": "#152036", "border": "#22324f", "fg": "#e6f1ff", "muted": "#8aa0bf", "accent": "#22d3ee", "accent_hover": "#67e8f9", "select": "#0f3a4a", "entry": "#060a12", "ov_bg": "#0b1322", "ov_fg": "#eaf7ff", "ov_border": "#1f6b80"},
+    "kenly": {"bg": "#0b110d", "surface": "#121a15", "surface2": "#1a251e", "border": "#2a3a2f", "fg": "#e7f2ea", "muted": "#8fa597", "accent": "#4ade80", "accent_hover": "#86efac", "select": "#173d26", "entry": "#080d0a", "ov_bg": "#101812", "ov_fg": "#f0fbf3", "ov_border": "#2f6b45"},
+    "isac": {"bg": "#0a1720", "surface": "#102430", "surface2": "#18313d", "border": "#294b58", "fg": "#e8f5f6", "muted": "#94adb4", "accent": "#56d8df", "accent_hover": "#88e9ee", "select": "#173a45", "entry": "#09151d", "ov_bg": "#0b1c26", "ov_fg": "#effdff", "ov_border": "#347687"},
+    "tactical": {"bg": "#111619", "surface": "#1a2225", "surface2": "#263135", "border": "#354348", "fg": "#edf2ef", "muted": "#9baaaa", "accent": "#b5c6aa", "accent_hover": "#d1dfc9", "select": "#39483c", "entry": "#0c1113", "ov_bg": "#11191c", "ov_fg": "#f3f7f3", "ov_border": "#899d7d"},
+    "rogue_signal": {"bg": "#120b15", "surface": "#211421", "surface2": "#30192c", "border": "#56304f", "fg": "#f6eaf5", "muted": "#b99ab5", "accent": "#f04b9c", "accent_hover": "#ff86c4", "select": "#512344", "entry": "#0c0710", "ov_bg": "#180d1c", "ov_fg": "#fff2fa", "ov_border": "#a33d80"},
+    "isac_operations": {"bg": "#071722", "surface": "#0b2130", "surface2": "#123247", "border": "#1b5d72", "fg": "#e5fbff", "muted": "#8eb6c0", "accent": "#39d7ef", "accent_hover": "#8df4ff", "select": "#113d4e", "entry": "#06131d", "ov_bg": "#071d2a", "ov_fg": "#eaffff", "ov_border": "#25a4bb"},
+    "darkzone_rogue": {"bg": "#170b0d", "surface": "#241215", "surface2": "#35191d", "border": "#713333", "fg": "#fff0ed", "muted": "#d0a29c", "accent": "#ff4d3d", "accent_hover": "#ff897d", "select": "#572120", "entry": "#100708", "ov_bg": "#210d10", "ov_fg": "#fff4f1", "ov_border": "#bf3b32"},
+    "field_terminal": {"bg": "#171913", "surface": "#20241a", "surface2": "#303627", "border": "#58614a", "fg": "#f0f1df", "muted": "#b0b49b", "accent": "#d8c46b", "accent_hover": "#eee19a", "select": "#4c5231", "entry": "#11130f", "ov_bg": "#1b1e15", "ov_fg": "#fbfbe9", "ov_border": "#858c5d"},
+    "shd_terminal": {"bg": "#0b0e14", "surface": "#111720", "surface2": "#18212c", "border": "#34404c", "fg": "#ffffff", "muted": "#a0aab2", "accent": "#ff5a00", "accent_hover": "#ff7b38", "select": "#54250d", "entry": "#080b10", "ov_bg": "#0d121a", "ov_fg": "#ffffff", "ov_border": "#ff5a00", "info": "#00e5ff"},
+}
+for _name, _overrides in _LEGACY_PACKS.items():
+    PALETTES[_name] = {**PALETTES["shd_tactical"], **_overrides}
+    PALETTES[_name]["accent_fg"] = on_color(PALETTES[_name]["accent"])
+
+PALETTES["default"] = PALETTES["shd_tactical"]  # eski ayar dosyaları için alias
+PACKS = tuple(_LEGACY_PACKS)
+THEME_MODES = ("shd_tactical", "kaivolt", "clean_console") + PACKS + ("default",)
+THEME_LABELS = {
+    "shd_tactical": "SHD Tactical HUD",
+    "kaivolt": "Kaivolt Night Operations",
+    "clean_console": "Clean Tactical Console",
+    "dark": "Dark (SHD Orange)", "light": "Light", "classic": "Classic",
+    "darkzone": "Dark Zone", "blacktusk": "Black Tusk", "hunter": "Hunter",
+    "winter_ny": "Winter New York", "nightops": "Night Operations", "kenly": "Kenly",
+    "isac": "ISAC", "tactical": "Tactical", "rogue_signal": "Rogue Signal",
+    "isac_operations": "ISAC Operations", "darkzone_rogue": "Dark Zone Rogue",
+    "field_terminal": "SHD Field Terminal", "shd_terminal": "SHD Terminal",
+}
+
+
+def canonical_mode(mode):
+    """Eski kayıtları yeni üçlü tema seçimine güvenli biçimde eşleştirir."""
+    return "shd_tactical" if mode == "default" else mode if mode in THEME_LABELS else "shd_tactical"
 
 
 def apply_pack(settings, mode):
-    """Apply the (single) appearance preset to persisted UI/effect settings."""
+    """Apply one of the selectable appearance presets to persisted settings."""
     if mode not in THEME_MODES:
         return False
+    mode = canonical_mode(mode)
     accent = PALETTES[mode]["accent"]
     settings["ui_theme"] = mode
     # Keep the pointer and trail coordinated with the palette's accent.
     settings["fx_cursor_color"] = accent
     settings["fx_trail_color"] = accent
-    # Division 2 Taktik HUD — kademeli turuncu kenarlık, hızlı geçiş temposu.
     settings.update({"event_fx": "standard", "fx_bgwatch": False, "fx_transition_ms": 180,
                      "fx_transition_style": "tactical", "ui_nav_layout": "tactical", "ui_layout": "standard"})
+    if mode == "isac_operations":
+        settings.update({"event_fx": "isac", "fx_bgwatch": True, "fx_bgwatch_dim": 0.08,
+                         "fx_transition_ms": 320, "fx_trail_len": 22})
+    elif mode == "darkzone_rogue":
+        settings.update({"event_fx": "rogue", "fx_bgwatch": True, "fx_bgwatch_dim": 0.12,
+                         "fx_transition_ms": 340, "fx_trail_len": 24})
+    elif mode == "field_terminal":
+        settings.update({"event_fx": "field", "fx_bgwatch": True, "fx_bgwatch_dim": 0.10,
+                         "fx_transition_ms": 220, "fx_trail_len": 12, "ui_layout": "field_command"})
+    elif mode == "shd_terminal":
+        settings.update({"fx_transition_ms": 240, "fx_transition_style": "tactical", "ui_layout": "shd_terminal"})
+    elif mode == "kaivolt":
+        settings.update({"fx_transition_ms": 220, "fx_transition_style": "soft", "ui_nav_layout": "flat"})
     return True
 
 FONT = "Segoe UI"
@@ -84,7 +162,7 @@ def with_icon(text, icon):
 
 def apply(root, mode="default"):
     """Temayı uygular ve kullanılan paleti (sözlük) döndürür."""
-    mode = mode if mode in PALETTES else "default"
+    mode = canonical_mode(mode)
     p = dict(PALETTES[mode], mode=mode)
     s = ttk.Style(root)
     root.option_clear()                    # önceki tk ayarlarını temizle (anlık tema yeniden kurulumu)

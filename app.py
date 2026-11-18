@@ -150,7 +150,7 @@ import decision_center
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.1.5.43"
+APP_VERSION = "9.1.5.44"
 # "Bu oturumda ne kazandın?" özeti için kaba tahmin: bir eşyayı elle inceleyip
 # build'e göre karar vermenin (istatistikleri okuma + karşılaştırma) ortalama
 # süresi, saniye. Gerçek bir ölçüm değil — yalnızca arayüzde "tahmini" etiketiyle
@@ -301,9 +301,8 @@ def _cfg_defaults(cfg):
     for k, v in DEFAULTS.items():
         st.setdefault(k, v)
     if st.get("perf_mode") not in performance.MODES: st["perf_mode"] = "balanced"
-    # Eski çoklu tema sistemi kaldırıldı (tek sabit tema): eski kayıtlı tema adlarını ("kaivolt",
-    # "isac", "shd_terminal" vb.) ve onlara bağlı özel kabuk düzenini sessizce yeni varsayılana taşı.
-    if st.get("ui_theme") not in ui_theme.THEME_MODES: st["ui_theme"] = DEFAULTS["ui_theme"]
+    # Eski/legacy tema adlarını güvenli biçimde SHD görünümüne eşle; mevcut üç tema korunur.
+    st["ui_theme"] = ui_theme.canonical_mode(st.get("ui_theme", DEFAULTS["ui_theme"]))
     if st.get("ui_layout") != "standard": st["ui_layout"] = "standard"
     try:
         st["keep_threshold"], st["consider_threshold"] = itempolicy.validate_thresholds(st["keep_threshold"], st["consider_threshold"])
@@ -6113,7 +6112,7 @@ class App:
         shell = tk.Frame(w, bg=dark, highlightthickness=1, highlightbackground="#2c313d"); shell.pack(fill="both", expand=True)
         tk.Frame(shell, bg=col, width=max(5, int(7 * k))).pack(side="left", fill="y")      # renkli şerit
         body = tk.Frame(shell, bg=dark, padx=int(16 * k), pady=int(12 * k)); body.pack(side="left", fill="both")
-        tk.Label(body, text=verdict_label(verdict), fg=ui_theme.PALETTES["default"]["verdict_fg"].get(verdict, fg),
+        tk.Label(body, text=verdict_label(verdict), fg=PAL["verdict_fg"].get(verdict, fg),
                  bg=dark, font=(ui_theme.FONT_SEMI, fz(18))).pack(anchor="w")
         sub = item["name"][:42] + ("  ·  " + ", ".join(item["rarity"]) if item.get("rarity") else "")
         tk.Label(body, text=sub, fg=fg, bg=dark, font=(ui_theme.FONT_SEMI, fz(11))).pack(anchor="w")
@@ -8435,10 +8434,17 @@ class App:
         self.build_display_box(P, st)
 
         # ---- Görünüm / appearance ----
-        # Not: uygulamanın artık seçilebilir birden çok teması yok — tek, sabit bir görsel kimlik var.
-        # Bu yüzden eski tema galerisi/açılır listesi kaldırıldı; burada yalnızca tema-dışı görünüm
-        # ayarları (sesler, arka plan aralığı, özel sanat klasörü, 3B derinlik) kalıyor.
         ap = ttk.LabelFrame(f, text=t("set.appearance_box")); ap.pack(fill="x", padx=10, pady=6)
+        theme_row = ttk.Frame(ap); theme_row.pack(fill="x", padx=8, pady=(8, 4))
+        ttk.Label(theme_row, text="Tema / Theme").pack(side="left")
+        current_theme = ui_theme.canonical_mode(st.get("ui_theme", "default"))
+        self.theme_var = tk.StringVar(value=ui_theme.THEME_LABELS[current_theme])
+        self.theme_modes_by_label = {label: mode for mode, label in ui_theme.THEME_LABELS.items()}
+        ttk.Combobox(theme_row, textvariable=self.theme_var,
+                     values=list(ui_theme.THEME_LABELS.values()), width=30,
+                     state="readonly").pack(side="left", padx=8)
+        ttk.Label(ap, text="SHD Tactical HUD, Kaivolt Night Operations veya Clean Tactical Console seçebilirsiniz.",
+                  foreground=PAL["muted"]).pack(anchor="w", padx=8, pady=(0, 6))
         ra = ttk.Frame(ap); ra.pack(fill="x", padx=8, pady=6)
         self.bv["ui_sounds"] = tk.BooleanVar(value=bool(st.get("ui_sounds", True)))
         ttk.Checkbutton(ra, text=t("set.ui_sounds"), variable=self.bv["ui_sounds"]).pack(side="left")
@@ -8962,6 +8968,10 @@ class App:
 
     def save_settings(self):
         st = dict(self.cfg["settings"])
+        old_theme = ui_theme.canonical_mode(st.get("ui_theme", "default"))
+        selected_theme = old_theme
+        if hasattr(self, "theme_var"):
+            selected_theme = self.theme_modes_by_label.get(self.theme_var.get(), old_theme)
         try:
             st["keep_threshold"], st["consider_threshold"] = itempolicy.validate_thresholds(
                 self.sv["keep_threshold"].get(), self.sv["consider_threshold"].get())
@@ -8993,6 +9003,8 @@ class App:
         except Exception as e:
             return messagebox.showerror(APP_NAME, t("err.bad_setting", e=e))
         current_settings = self.cfg["settings"]
+        if selected_theme != old_theme:
+            ui_theme.apply_pack(st, selected_theme)
         current_settings.update(st)
         st = current_settings
         for k in ("overlay_corner", "ocr_lang", "tesseract_cmd", "log_level", "meta_feed_url"): st[k] = self.sv[k].get().strip()
@@ -9011,6 +9023,9 @@ class App:
         self.banner.set_interval(st["bg_interval"])
         self.refresh_status()
         self.apply_fx()
+        if selected_theme != old_theme:
+            self.rebuild_ui(tab="settings")
+            return
         self.toast(t("msg.settings_saved"))
 
     def meta_restore_hidden(self):

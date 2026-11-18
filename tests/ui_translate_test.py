@@ -32,6 +32,7 @@ game = subprocess.Popen([sys.executable, str(fp), str(img_path)])
 time.sleep(3)
 
 import app  # noqa: E402
+from td2app.ui import ui_theme  # noqa: E402
 app.messagebox.askyesno = lambda *a, **k: False
 app.messagebox.showinfo = app.messagebox.showwarning = lambda *a, **k: None
 a = app.App()
@@ -130,9 +131,10 @@ def s6():
     tops = [w for w in a.root.winfo_children() if isinstance(w, app.tk.Toplevel)]
     step("düzeltme önerisi penceresi", bool(tops))
     if tops: shot("07_suggest", w=tops[-1]); tops[-1].destroy()
-    # Not: uygulamanın artık seçilebilir birden çok teması yok (tek, sabit görsel kimlik);
-    # eski tema-paketi geçiş adımları kaldırıldı. Burada yalnızca sabit temanın kendisini doğrularız.
-    step("tema sabit uygulandı", a.cfg["settings"]["ui_theme"] == "default" and app.PAL["accent"] == "#ff6d10")
+    # Canlı UI testi seçilebilir temalardan hangisi kayıtlıysa onun uygulanabildiğini doğrular.
+    step("tema uygulandı", a.cfg["settings"]["ui_theme"] in ui_theme.THEME_MODES and app.PAL["accent"] in {
+        palette["accent"] for palette in ui_theme.PALETTES.values()
+    })
     shot("08_theme_default")
     a.root.after(2500, s7)
 def s7():
