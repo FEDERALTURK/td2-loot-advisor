@@ -150,7 +150,7 @@ import decision_center
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.1.5.46"
+APP_VERSION = "9.1.5.47"
 # "Bu oturumda ne kazandın?" özeti için kaba tahmin: bir eşyayı elle inceleyip
 # build'e göre karar vermenin (istatistikleri okuma + karşılaştırma) ortalama
 # süresi, saniye. Gerçek bir ölçüm değil — yalnızca arayüzde "tahmini" etiketiyle
@@ -866,7 +866,7 @@ def click_through(win, *, layered=False):
             # WS_EX_TRANSPARENT, Tk/DWM ekran yakalamada glyph yüzeyini yok
             # edebiliyor. Boyamayı korumak için hit-test'i pencere prosedüründe
             # geçiriyoruz; NOACTIVATE odağı engeller.
-            flags = 0x08000000
+            flags = 0x00000020 | 0x08000000
             if layered:
                 flags |= 0x00080000
             ctypes.windll.user32.SetWindowLongW(hwnd, -20, st | flags)
