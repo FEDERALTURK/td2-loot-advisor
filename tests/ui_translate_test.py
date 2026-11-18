@@ -132,7 +132,7 @@ def s6():
     if tops: shot("07_suggest", w=tops[-1]); tops[-1].destroy()
     # Not: uygulamanın artık seçilebilir birden çok teması yok (tek, sabit görsel kimlik);
     # eski tema-paketi geçiş adımları kaldırıldı. Burada yalnızca sabit temanın kendisini doğrularız.
-    step("tema sabit uygulandı", a.cfg["settings"]["ui_theme"] == "default" and app.PAL["accent"] == "#ff5a00")
+    step("tema sabit uygulandı", a.cfg["settings"]["ui_theme"] == "default" and app.PAL["accent"] == "#ff6d10")
     shot("08_theme_default")
     a.root.after(2500, s7)
 def s7():
