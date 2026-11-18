@@ -1,5 +1,11 @@
 ## TD2 Loot Advisor — Windows
 
+**9.1.5.43 — UTF-8 UI simge ve emoji düzeltmesi**
+
+- Menü, sekme, buton ve tanılama metinlerinde görülen `Ã`, `Ä`, `Å`, `ğŸ` ve benzeri bozuk karakterler düzeltildi.
+- UTF-8 UI kaynaklarının tekrar Windows kod sayfası gibi çözülmesini engelleyen regresyon testi eklendi.
+- Bu sürüm oyun belleğine, oyun dosyalarına veya uzak OCR akışına dokunmaz.
+
 **9.1.5.34 — Faz 5 karar merkezi ve güncelleme denetimi**
 
 - Komuta Merkezi'ne kişisel hedeflerle son taranan eşyayı güvenli biçimde karşılaştıran karar merkezi eklendi.
