@@ -144,12 +144,21 @@ jobs:
           Write-Host "Assistant check:" (Get-Content $aj -Raw)
           if (-not (Get-Content $aj -Raw | ConvertFrom-Json).ok) { throw "assistant runtime missing" }
           $sj = Join-Path $env:RUNNER_TEMP "assistant-stt.json"
-          $sm = Join-Path $env:RUNNER_TEMP "assistant-model"
-          $sp = Start-Process $exe -ArgumentList "--assistant-stt-probe", "`"$sm`"", "`"$sj`"" -PassThru
-          if (-not $sp.WaitForExit(360000)) { Stop-Process -Id $sp.Id -Force; throw "packaged Turkish STT probe hung" }
-          if (-not (Test-Path $sj)) { throw "STT probe wrote no result" }
-          Write-Host "Packaged Turkish STT:" (Get-Content $sj -Raw)
-          if (-not (Get-Content $sj -Raw | ConvertFrom-Json).ok) { throw "packaged Turkish recognition failed" }
+          $sttOk = $false
+          for ($attempt = 1; $attempt -le 3; $attempt++) {
+            $sm = Join-Path $env:RUNNER_TEMP "assistant-model-$attempt"
+            Remove-Item $sm -Recurse -Force -ErrorAction SilentlyContinue
+            Remove-Item $sj -Force -ErrorAction SilentlyContinue
+            $sp = Start-Process $exe -ArgumentList "--assistant-stt-probe", "`"$sm`"", "`"$sj`"" -PassThru
+            if (-not $sp.WaitForExit(360000)) { Stop-Process -Id $sp.Id -Force; throw "packaged Turkish STT probe hung" }
+            if (Test-Path $sj) {
+              $stt = Get-Content $sj -Raw | ConvertFrom-Json
+              Write-Host "Packaged Turkish STT attempt ${attempt}:" (Get-Content $sj -Raw)
+              if ($stt.ok) { $sttOk = $true; break }
+            }
+            if ($attempt -lt 3) { Start-Sleep -Seconds (15 * $attempt) }
+          }
+          if (-not $sttOk) { throw "packaged Turkish recognition failed after 3 attempts" }
           # güncelleme, program sistem tepsisindeyken de kurulabilmeli (dosyalar kilitli kalmamalı)
           $cfg = Join-Path $dir "builds.json"
           $j = Get-Content $cfg -Raw | ConvertFrom-Json
