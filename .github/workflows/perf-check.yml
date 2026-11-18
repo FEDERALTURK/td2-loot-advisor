@@ -41,7 +41,7 @@ jobs:
           python new\tests\startup_time.py new
           python new\tests\startup_time.py old
           python new\tests\startup_time.py new
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: perf
           path: "*_bench.json"

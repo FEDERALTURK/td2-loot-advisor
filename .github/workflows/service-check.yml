@@ -54,7 +54,7 @@ jobs:
         if: always()
         shell: pwsh
         run: if (Test-Path tests\.service_result.json) { Get-Content tests\.service_result.json }; if (Test-Path logs\app.log) { Get-Content logs\app.log -Tail 60 }
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: service-shots

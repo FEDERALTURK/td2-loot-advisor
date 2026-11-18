@@ -38,7 +38,7 @@ jobs:
           Start-Sleep 10; Shot "03_after_18s"
           if (Test-Path logs\app.log) { Get-Content logs\app.log -Tail 30 }
           if (-not $p.HasExited) { Stop-Process -Id $p.Id -Force }
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: ui-shots
           path: shots/*

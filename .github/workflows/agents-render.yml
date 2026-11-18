@@ -44,7 +44,7 @@ jobs:
             --turntable ${{ github.event.inputs.frames }} --size 480x560 --samples ${{ github.event.inputs.samples }} --out render
       - name: Pack frames
         run: python scripts/agents3d/pack_frames.py render meta/agents/${{ matrix.outfit }} ${{ matrix.outfit }}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: agent-${{ matrix.outfit }}
           path: meta/agents/${{ matrix.outfit }}

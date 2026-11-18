@@ -111,7 +111,7 @@ jobs:
       - name: Inventory - name/set from the selected list row (scrolled card)
         shell: cmd
         run: set PYTHONIOENCODING=utf-8&& python tests/test_inventory.py
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: sync-shots

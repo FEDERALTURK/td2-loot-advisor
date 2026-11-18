@@ -60,7 +60,7 @@ jobs:
         run: |
           cp build/app/outputs/flutter-apk/app-release.apk "TD2LootAdvisor_Companion_${GITHUB_REF_NAME#companion-v}.apk"
           sha256sum "TD2LootAdvisor_Companion_${GITHUB_REF_NAME#companion-v}.apk" > SHA256SUMS.sha256
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: TD2LootAdvisor-companion-apk
           path: |
@@ -68,7 +68,7 @@ jobs:
             mobile/SHA256SUMS.sha256
       - name: Publish companion release
         if: startsWith(github.ref, 'refs/tags/companion-v')
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           token: ${{ secrets.TD2_RELEASE_TOKEN || github.token }}
           tag_name: ${{ github.ref_name }}

@@ -232,6 +232,13 @@ class InPlace:
             y = PAD
             for line in lines:
                 cv.create_text(PAD + 4, y, text=line, fill=s["fg"], font=f, anchor="nw")
+                # Windows/DWM can omit GDI Canvas glyphs after the parent is
+                # made click-through. Keep the Canvas item for measurement and
+                # use a native Label glyph as a paint fallback in that path.
+                if self.on_window:
+                    tk.Label(w, text=line, bg=s["bg"], fg=s["fg"], font=f,
+                             anchor="nw", justify="left", bd=0, padx=0, pady=0
+                             ).place(x=PAD + 4, y=int(y), anchor="nw")
                 y += lh
             w.update_idletasks()
             boxes += 1
@@ -239,6 +246,11 @@ class InPlace:
             glyph_items += len(lines)
             if self.on_window:
                 self.on_window(w)
+                # Apply the native style before the test/game compositor
+                # samples the box; without this second paint DWM may retain a
+                # dark pre-click-through surface with no glyphs.
+                w.update_idletasks()
+                w.update()
         self.win = self._wins[0] if self._wins else None
         self.last_metrics = {"boxes": boxes, "canvas_items": canvas_items, "glyph_items": glyph_items}
         return self.win

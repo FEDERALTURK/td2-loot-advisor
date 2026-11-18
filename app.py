@@ -150,7 +150,7 @@ import decision_center
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.1.5.45"
+APP_VERSION = "9.1.5.46"
 # "Bu oturumda ne kazandın?" özeti için kaba tahmin: bir eşyayı elle inceleyip
 # build'e göre karar vermenin (istatistikleri okuma + karşılaştırma) ortalama
 # süresi, saniye. Gerçek bir ölçüm değil — yalnızca arayüzde "tahmini" etiketiyle
@@ -844,6 +844,9 @@ def slot_name(slot):
     """Slot adının çevirisi; bilinmeyen slot olduğu gibi döner."""
     return t(f"slot.{slot.lower()}") if slot else ""
 
+_CLICK_THROUGH_PROCS = {}
+
+
 def click_through(win, *, layered=False):
     if os.name != "nt":
         return
@@ -854,19 +857,43 @@ def click_through(win, *, layered=False):
         # penceresi menülerin üzerine tıklama yakalayabiliyordu.
         wid = int(win.winfo_id())
         parent = int(ctypes.windll.user32.GetParent(wid) or 0)
-        handles = [wid] + ([parent] if parent and parent != wid else [])
+        # Tk often returns the child HWND (Canvas) for winfo_id(); applying
+        # WS_EX_TRANSPARENT to that child can hide GDI glyphs. The top-level
+        # parent is the only hit-test boundary we need to change.
+        handles = [parent] if parent and parent != wid else [wid]
         for hwnd in handles:
             st = ctypes.windll.user32.GetWindowLongW(hwnd, -20)
-            # WS_EX_TRANSPARENT + WS_EX_NOACTIVATE fareyi oyuna geçirir.
-            # WS_EX_LAYERED click-through için gerekli değildir; Tk Canvas ve
-            # Label metnini bazı Windows/DWM + DX12 bileşimlerinde görünmez
-            # yapabiliyor (koyu panel/kutu kalıp yazı kaybolur).  Bu yüzden
-            # oyun üstü opak sonuç, asistan ve çeviri kartlarının varsayılanı
-            # güvenli non-layered yoldur.
-            flags = 0x00000020 | 0x08000000
+            # WS_EX_TRANSPARENT, Tk/DWM ekran yakalamada glyph yüzeyini yok
+            # edebiliyor. Boyamayı korumak için hit-test'i pencere prosedüründe
+            # geçiriyoruz; NOACTIVATE odağı engeller.
+            flags = 0x08000000
             if layered:
                 flags |= 0x00080000
             ctypes.windll.user32.SetWindowLongW(hwnd, -20, st | flags)
+            if hwnd not in _CLICK_THROUGH_PROCS:
+                get_proc = ctypes.windll.user32.GetWindowLongPtrW
+                set_proc = ctypes.windll.user32.SetWindowLongPtrW
+                call_proc = ctypes.windll.user32.CallWindowProcW
+                get_proc.restype = ctypes.c_void_p
+                get_proc.argtypes = [ctypes.c_void_p, ctypes.c_int]
+                set_proc.restype = ctypes.c_void_p
+                set_proc.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p]
+                call_proc.restype = ctypes.c_ssize_t
+                call_proc.argtypes = [ctypes.c_void_p, ctypes.c_void_p,
+                                      ctypes.c_uint, ctypes.c_void_p, ctypes.c_void_p]
+                proc_type = ctypes.WINFUNCTYPE(ctypes.c_ssize_t, ctypes.c_void_p,
+                                               ctypes.c_uint, ctypes.c_void_p,
+                                               ctypes.c_void_p)
+                original = get_proc(hwnd, -4)
+
+                def _proc(h, msg, wparam, lparam, original=original):
+                    if msg == 0x0084:  # WM_NCHITTEST / HTTRANSPARENT
+                        return -1
+                    return call_proc(original, h, msg, wparam, lparam)
+
+                callback = proc_type(_proc)
+                set_proc(hwnd, -4, ctypes.cast(callback, ctypes.c_void_p))
+                _CLICK_THROUGH_PROCS[hwnd] = (original, callback)
     except Exception:
         pass
 
@@ -4357,7 +4384,6 @@ class App:
             "history": "system", "log": "system", "help": "system", "about": "system",
         }
         self.group_keys = ("home", "gear", "intel", "tools", "settings", "system")
-        tr_ui = i18n.current_language() == "tr"
         self.group_labels = {"home": "⌂  " + t("tab.dash"), "gear": "🎒  " + t("nav.gear"),
                              "intel": "🛰  " + t("nav.intel"), "tools": "🧰  " + t("nav.tools"),
                              "settings": "⚙  " + t("nav.settings"), "system": "☰  " + t("nav.system")}
@@ -4366,12 +4392,16 @@ class App:
         if self.cfg["settings"].get("ui_layout") == "shd_terminal":
             return self._build_shd_terminal_shell()
 
-        # ISAC ana kabuğu: dikey sol navigasyon yok; tüm menü üstte yatay bir şeritte,
-        # içerik alanı tüm genişliği kullanır.
+        # ISAC ana kabuğu: tek bir sol navigasyon paneli kullanır; grup ve sayfa
+        # sekmeleri ayrı satırlara yayılmaz.
         self.workspace = ttk.Frame(self.root)
         self.workspace.pack(fill="both", expand=True, padx=10, pady=(4, 10))
+        self.nav_panel = ttk.Frame(self.workspace, style="Sidebar.TFrame", width=224)
+        self.nav_panel.pack(side="left", fill="y", padx=(0, 8))
+        self.nav_panel.pack_propagate(False)
         self.main_area = ttk.Frame(self.workspace)
         self.main_area.pack(side="left", fill="both", expand=True)
+        self._build_single_nav(self.nav_panel)
         # Pencere elle küçültüldüğünde de kompakt menü davranışını uygula;
         # yalnızca açılış ekran profiline güvenme.
         self._responsive_job = None
@@ -4381,32 +4411,6 @@ class App:
             duration_ms=int(self.cfg["settings"].get("fx_transition_ms", 260)),
             style=self.cfg["settings"].get("fx_transition_style", "tactical"),
         )
-        # Üst yatay menü şeridi: arka planında aşağı akan kod animasyonu var,
-        # menü düğmeleri bu canvas'a gömülü (create_window) — aralarındaki
-        # boşluklarda animasyon görünür kalır. Sol/dikey bir sidebar yoktur.
-        self.nav_motif = None
-        self.topnav = fx.DigitalRain(self.main_area, bg=PAL["bg"],
-                                     dim=PAL.get("ov_border", PAL["border"]), bright=PAL["accent"],
-                                     height=max(46, int(50 * getattr(self, "ui_factor", 1.0))))
-        self.topnav.pack(fill="x", padx=2, pady=(2, 4))
-        self._sidebar_buttons = {}
-        self._topnav_windows = {}
-        for group in self.group_keys:
-            btn = ttk.Button(self.topnav, text=self.group_labels[group], style="FieldNav.TButton",
-                             command=lambda g=group: self._sidebar_select_group(g))
-            self._topnav_windows[group] = self.topnav.create_window(0, 0, window=btn, anchor="w", tags=("navbtn",))
-            self._sidebar_buttons[group] = btn
-        self._topnav_version_id = self.topnav.create_text(
-            0, 0, text=("SÜRÜM " if tr_ui else "VERSION ") + APP_VERSION,
-            fill=PAL["muted"], font=(ui_theme.FONT, 8), anchor="e", tags=("navbtn",))
-        self.topnav.bind("<Configure>", self._layout_topnav_buttons, add="+")
-        self.topnav.after_idle(self._layout_topnav_buttons)
-        # Ana içerik menülerinin üstünde görünür bir operasyon şeridi. Bu,
-        # yalnız dekoratif bir Canvas'tır; tıklama alanı veya sayfa düzeni
-        # hareket etmez.
-        self.command_ribbon = fx.CommandRibbon(self.main_area, accent=PAL["accent"], bg=PAL["bg"],
-                                                surface=PAL["surface"], muted=PAL["border"])
-        self.command_ribbon.pack(fill="x", padx=2, pady=(2, 4))
         nb = self.nb = ttk.Notebook(self.main_area, style="NoTabs.TNotebook")
         nb.pack(fill="both", expand=True, padx=2, pady=2)
 
@@ -4414,7 +4418,7 @@ class App:
         for group in self.group_keys:
             holder = ttk.Frame(nb)
             nb.add(holder, text=self.group_labels[group])
-            self.group_nbs[group] = ttk.Notebook(holder)
+            self.group_nbs[group] = ttk.Notebook(holder, style="NoTabs.TNotebook")
             self.group_nbs[group].pack(fill="both", expand=True, padx=3, pady=3)
         self.tabs = {}
         for k in self.tab_keys:
@@ -4596,9 +4600,13 @@ class App:
             if hasattr(self, "sidebar"):          # eski dikey kabuklar (shd_terminal) için korunur
                 sidebar_w = 76 if compact_now else max(164, int(188 * getattr(self, "ui_factor", 1.0)))
                 self.sidebar.configure(width=sidebar_w)
+            if hasattr(self, "nav_panel"):
+                self.nav_panel.configure(width=82 if compact_now else max(190, int(224 * getattr(self, "ui_factor", 1.0))))
             icons = {"home": "⌂", "gear": "🎒", "intel": "🛰", "tools": "🧰", "settings": "⚙", "system": "☰"}
             for key, button in getattr(self, "_sidebar_buttons", {}).items():
                 button.configure(text=icons[key] if compact_now else self.group_labels[key])
+            for key, button in getattr(self, "_nav_page_buttons", {}).items():
+                button.configure(text=ui_theme.TAB_ICONS.get(key, "•") if compact_now else self._nav_page_labels[key])
             self._layout_topnav_buttons()
             # Küçük modda saydam üst efektleri kapatıp menü yüzeyini güvenilir
             # bırak; büyük modda seçili görsel paketi aynen kullan.
@@ -4644,7 +4652,38 @@ class App:
         except tk.TclError:
             return
 
-    def _sidebar_activate(self, group):
+    def _build_single_nav(self, parent):
+        """Tek menü yüzeyi: grup başlıkları ve tüm sayfa düğmeleri aynı panelde."""
+        self._nav_page_buttons = {}
+        self._nav_page_labels = {}
+        group_titles = {"home": "ANA SAYFA", "gear": "EKİPMAN", "intel": "İSTİHBARAT",
+                        "tools": "ARAÇLAR", "settings": "AYARLAR", "system": "SİSTEM"}
+        ttk.Label(parent, text="[ NAVIGATION ]", style="Brand.TLabel").pack(anchor="w", padx=12, pady=(14, 8))
+        for group_index, group in enumerate(self.group_keys, 1):
+            ttk.Label(parent, text=f"{group_index:02d}  {group_titles[group]}",
+                      style="Section.TLabel").pack(anchor="w", padx=12, pady=(8, 3))
+            for key in self.tab_keys:
+                if self.tab_groups[key] != group:
+                    continue
+                title = "The Division 3" if key == "division3" else t(f"tab.{key}")
+                label = f"    {title}"
+                self._nav_page_labels[key] = label
+                button = ttk.Button(parent, text=label, style="Nav.TButton",
+                                    command=lambda page=key: self.select_page(page))
+                button.pack(fill="x", padx=8, pady=1)
+                self._nav_page_buttons[key] = button
+        ttk.Label(parent, text="LINK: SECURE\nNODE: LOCAL", style="Muted.TLabel",
+                  justify="left", font=("Consolas", 8)).pack(side="bottom", anchor="w", padx=12, pady=12)
+
+    def _sidebar_activate(self, group, page=None):
+        if getattr(self, "_nav_page_buttons", None):
+            active_page = page or next((key for key in self.tab_keys if self.tab_groups.get(key) == group), None)
+            for key, button in self._nav_page_buttons.items():
+                try:
+                    button.configure(style="NavActive.TButton" if key == active_page else "Nav.TButton")
+                except tk.TclError:
+                    pass
+            return
         field_style = not hasattr(self, "sidebar")      # yatay üst menü (ana kabuk + eski field_command) FieldNav stili kullanır
         for key, button in getattr(self, "_sidebar_buttons", {}).items():
             try:
@@ -4706,7 +4745,7 @@ class App:
         if key not in self.tabs: return
         group = self.tab_groups[key]; self.nb.select(self.group_keys.index(group))
         inner = self.group_nbs[group]; inner.select(self.tabs[key])
-        self._sidebar_activate(group)
+        self._sidebar_activate(group, key)
 
     def select_settings_page(self, key):
         if key not in getattr(self, "set_pages", {}): return
@@ -8440,11 +8479,18 @@ class App:
         current_theme = ui_theme.canonical_mode(st.get("ui_theme", "default"))
         self.theme_var = tk.StringVar(value=ui_theme.THEME_LABELS[current_theme])
         self.theme_modes_by_label = {label: mode for mode, label in ui_theme.THEME_LABELS.items()}
-        ttk.Combobox(theme_row, textvariable=self.theme_var,
-                     values=list(ui_theme.THEME_LABELS.values()), width=30,
-                     state="readonly").pack(side="left", padx=8)
-        ttk.Label(ap, text="SHD Tactical HUD, Kaivolt Night Operations veya Clean Tactical Console seçebilirsiniz.",
+        theme_cb = ttk.Combobox(theme_row, textvariable=self.theme_var,
+                                values=list(ui_theme.THEME_LABELS.values()), width=30,
+                                state="readonly")
+        theme_cb.pack(side="left", padx=8)
+        theme_cb.bind("<<ComboboxSelected>>", self._theme_preview_selected)
+        ttk.Label(ap, text="Önizlemeyi görerek tema seçin; kaydettiğinizde uygulama yeni temayla yeniden kurulur.",
                   foreground=PAL["muted"]).pack(anchor="w", padx=8, pady=(0, 6))
+        self.theme_preview = tk.Canvas(ap, height=128, highlightthickness=1,
+                                       highlightbackground=PAL["border"],
+                                       bg=PAL["bg"])
+        self.theme_preview.pack(fill="x", padx=8, pady=(0, 8))
+        self._draw_theme_preview(current_theme)
         ra = ttk.Frame(ap); ra.pack(fill="x", padx=8, pady=6)
         self.bv["ui_sounds"] = tk.BooleanVar(value=bool(st.get("ui_sounds", True)))
         ttk.Checkbutton(ra, text=t("set.ui_sounds"), variable=self.bv["ui_sounds"]).pack(side="left")
@@ -8965,6 +9011,46 @@ class App:
         self.flash_language(code)
         self.toast(t("set.language_changed", lang=i18n.language_name(code)))
         self.translate_wiki_tasks()
+
+    def _theme_preview_selected(self, _event=None):
+        mode = self.theme_modes_by_label.get(self.theme_var.get(), "shd_tactical")
+        self._draw_theme_preview(mode)
+
+    def _draw_theme_preview(self, mode):
+        """Seçili temanın ayarlar içinde hafif bir, gerçek renk önizlemesini çiz."""
+        canvas = getattr(self, "theme_preview", None)
+        if not canvas or not canvas.winfo_exists():
+            return
+        palette = ui_theme.PALETTES[ui_theme.canonical_mode(mode)]
+        canvas.delete("all")
+        width = max(canvas.winfo_width(), 620)
+        canvas.configure(bg=palette["bg"], highlightbackground=palette["border"])
+        canvas.create_rectangle(0, 0, width, 26, fill=palette["surface"], outline="")
+        canvas.create_text(14, 13, anchor="w", text=ui_theme.THEME_LABELS.get(mode, mode),
+                          fill=palette["accent"], font=(ui_theme.FONT_SEMI, 10))
+        canvas.create_rectangle(0, 26, 112, 128, fill=palette["surface"], outline="")
+        for index, label in enumerate(("DASHBOARD", "INVENTORY", "SETTINGS")):
+            y = 44 + index * 24
+            active = index == 0
+            canvas.create_rectangle(8, y - 9, 104, y + 9,
+                                    fill=palette["select"] if active else palette["surface2"], outline="")
+            canvas.create_text(16, y, anchor="w", text=label,
+                              fill=palette["accent"] if active else palette["muted"],
+                              font=(ui_theme.FONT_SEMI, 8))
+        canvas.create_rectangle(130, 40, width - 16, 112, fill=palette["surface"],
+                                outline=palette["border"])
+        canvas.create_text(148, 57, anchor="w", text="SYSTEM STATUS  //  ONLINE",
+                          fill=palette["fg"], font=(ui_theme.FONT_SEMI, 10))
+        canvas.create_text(148, 78, anchor="w", text="OCR READY   |   OVERLAY READY",
+                          fill=palette["muted"], font=(ui_theme.FONT, 9))
+        canvas.create_rectangle(width - 190, 91, width - 34, 104,
+                                fill=palette["accent"], outline="")
+        canvas.create_text(width - 112, 97, text="ACTIVE THEME",
+                          fill=palette["accent_fg"], font=(ui_theme.FONT_SEMI, 8))
+        x = 148
+        for key in ("accent", "surface2", "info", "success", "warning"):
+            canvas.create_rectangle(x, 93, x + 12, 105, fill=palette[key], outline="")
+            x += 20
 
     def save_settings(self):
         st = dict(self.cfg["settings"])

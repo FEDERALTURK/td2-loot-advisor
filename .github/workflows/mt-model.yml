@@ -36,7 +36,7 @@ jobs:
       - name: Seed Turkish encyclopedia descriptions
         run: python scripts/mt/translate_descriptions.py out/model out/descriptions_i18n.json
       - name: Upload artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: mt-model
           path: |
