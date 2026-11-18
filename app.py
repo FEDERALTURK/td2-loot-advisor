@@ -4446,21 +4446,15 @@ class App:
         self.root.after_idle(self._build_next_ui_page)
 
     def _build_field_command_shell(self):
-        """Yeni tam-genişlikli saha terminali: sol sidebar yok, üst operasyon menüsü var."""
+        """Saha terminali: yatay menü yerine tek dikey gezinme paneli kullanır."""
         self.workspace = ttk.Frame(self.root); self.workspace.pack(fill="both", expand=True, padx=12, pady=(4, 12))
-        self.main_area = ttk.Frame(self.workspace); self.main_area.pack(fill="both", expand=True)
+        self.nav_panel = ttk.Frame(self.workspace, style="Sidebar.TFrame", width=224)
+        self.nav_panel.pack(side="left", fill="y", padx=(0, 8)); self.nav_panel.pack_propagate(False)
+        self.main_area = ttk.Frame(self.workspace); self.main_area.pack(side="left", fill="both", expand=True)
         self._responsive_job = None; self.root.bind("<Configure>", self._responsive_configure, add="+")
         self.fxbar = fx.Transition(self.root, self.root, color=PAL["accent"], bg=PAL["bg"],
                                    duration_ms=int(self.cfg["settings"].get("fx_transition_ms", 220)), style="tactical")
-        self.command_ribbon = fx.FieldConsole(self.main_area, accent=PAL["accent"], bg=PAL["bg"], surface=PAL["surface"], muted=PAL["border"])
-        self.command_ribbon.pack(fill="x", pady=(2, 6))
-        nav = ttk.Frame(self.main_area); nav.pack(fill="x", pady=(0, 6)); self._field_nav = nav
-        self._sidebar_buttons = {}
-        for group in self.group_keys:
-            button = ttk.Button(nav, text=self.group_labels[group], style="FieldNav.TButton", command=lambda g=group: self._sidebar_select_group(g))
-            button.pack(side="left", fill="x", expand=True, padx=2)
-            self._sidebar_buttons[group] = button
-        self.nav_motif = None
+        self._build_single_nav(self.nav_panel)
         nb = self.nb = ttk.Notebook(self.main_area, style="NoTabs.TNotebook"); nb.pack(fill="both", expand=True, padx=2, pady=2)
         self.group_nbs = {}
         for group in self.group_keys:
@@ -4489,7 +4483,6 @@ class App:
         self.main_area=ttk.Frame(self.workspace); self.main_area.pack(side="left",fill="both",expand=True)
         self._responsive_job=None; self.root.bind("<Configure>",self._responsive_configure,add="+")
         self.fxbar=fx.Transition(self.root,self.root,color=PAL["accent"],bg=PAL["bg"],duration_ms=240,style="tactical")
-        self.command_ribbon=fx.CommandRibbon(self.main_area,accent=PAL["accent"],bg=PAL["bg"],surface=PAL["surface"],muted=PAL["border"]); self.command_ribbon.pack(fill="x",pady=(0,5))
         self._sidebar_buttons={}; codes=("01","02","03","04","05","06")
         for index,group in enumerate(self.group_keys):
             label="> "+codes[index]+". "+self.group_labels[group].replace("⌂  ","").upper()
@@ -4815,8 +4808,9 @@ class App:
             group = self.tab_groups.get(page, "home")
             group_text = self.group_labels.get(group, group).replace("⌂  ", "").strip()
             page_text = "The Division 3" if page == "division3" else t(f"tab.{page}")
-            self.command_ribbon.set_context(f"ISAC // {group_text}", page_text)
-            if anim: self.command_ribbon.pulse()
+            if getattr(self, "command_ribbon", None):
+                self.command_ribbon.set_context(f"ISAC // {group_text}", page_text)
+                if anim: self.command_ribbon.pulse()
         except Exception:
             pass
         k = self.current_tab()
