@@ -9,12 +9,37 @@ import json
 import zlib
 
 PREFIX = "TD2B-"
-FIELDS = ("name", "sets_or_brands", "items", "attributes", "talents", "weapons", "slots", "summary")
+FIELDS = ("name", "sets_or_brands", "items", "attributes", "talents", "weapons", "slots", "summary", "build_tool")
 MAX_RAW = 32 * 1024
+
+
+def _bounded_int(value, default=0, low=0, high=1000):
+    try: return max(low, min(high, int(value)))
+    except (TypeError, ValueError, OverflowError): return default
 
 
 def _clean(build):
     b = {k: build[k] for k in FIELDS if k in build and build[k] not in (None, "", [], {})}
+    tool = b.get("build_tool")
+    if isinstance(tool, dict):
+        slots = tool.get("slots") if isinstance(tool.get("slots"), dict) else {}
+        levels = tool.get("shd_levels") if isinstance(tool.get("shd_levels"), dict) else {}
+        import build_tool
+        slots = dict(slots)
+        if "Sidearm" in slots and "SideArm" not in slots:
+            slots["SideArm"] = slots.pop("Sidearm")
+        normalized = build_tool.normalize_build({"slots": slots})
+        share_slots = normalized["slots"]
+        if "SideArm" in share_slots:
+            share_slots["Sidearm"] = share_slots.pop("SideArm")
+        b["build_tool"] = {
+            "schema": 1,
+            "specialization": str(tool.get("specialization") or "")[:60],
+            "watch": _bounded_int(tool.get("watch", 0)),
+            "enemy_hp": _bounded_int(tool.get("enemy_hp", 2_000_000), 2_000_000, 1, 100_000_000),
+            "shd_levels": {str(k)[:40]: _bounded_int(v, 0, 0, 10) for k, v in list(levels.items())[:8]},
+            "slots": {str(k): v for k, v in share_slots.items() if v is not None},
+        }
     summ = (build.get("meta") or {}).get("summary") or build.get("summary")
     if summ: b["summary"] = summ if isinstance(summ, dict) else {"en": str(summ)}
     return b
@@ -22,6 +47,8 @@ def _clean(build):
 
 def encode(build):
     raw = json.dumps(_clean(build), ensure_ascii=False, separators=(",", ":"), sort_keys=True).encode("utf-8")
+    if len(raw) > MAX_RAW:
+        raise ValueError("build share data exceeds the 32 KiB limit")
     return PREFIX + base64.urlsafe_b64encode(zlib.compress(raw, 9)).decode().rstrip("=")
 
 
@@ -57,4 +84,13 @@ def decode(code):
         w = b["weapons"]; out["weapons"] = {"types": [str(x)[:30] for x in (w.get("types") or [])[:4]]}
     if isinstance(b.get("summary"), dict):
         out["meta"] = {"summary": {str(k)[:5]: str(v)[:600] for k, v in list(b["summary"].items())[:12]}, "shared": True}
+    if isinstance(b.get("build_tool"), dict):
+        tool = b["build_tool"]
+        slots = tool.get("slots") if isinstance(tool.get("slots"), dict) else {}
+        levels = tool.get("shd_levels") if isinstance(tool.get("shd_levels"), dict) else {}
+        out["build_tool"] = {"schema": 1, "specialization": str(tool.get("specialization") or "")[:60],
+                              "watch": _bounded_int(tool.get("watch", 0)),
+                              "enemy_hp": _bounded_int(tool.get("enemy_hp", 2_000_000), 2_000_000, 1, 100_000_000),
+                              "shd_levels": {str(k)[:40]: _bounded_int(v, 0, 0, 10) for k, v in list(levels.items())[:8]},
+                              "slots": {str(k): v for k, v in slots.items() if str(k) in ("Mask", "Backpack", "Chest", "Gloves", "Holster", "Kneepads", "Primary", "Secondary", "Sidearm", "Specialization", "Skill1", "Skill2") and isinstance(v, (str, dict))}}
     return out

@@ -25,9 +25,10 @@ async function call(method, path, headers = {}, body) {
   return [r.status, await r.json().catch(() => null)];
 }
 
-ok(parseVersion("TD2LootAdvisor/6.0.1") === "6.0.1", "sürüm okunur");
+ok(parseVersion("TD2LootAdvisor/6.0.1") === "6.0.1", "üç parçalı eski sürüm okunur");
+ok(parseVersion("TD2LootAdvisor/9.1.5.51") === "9.1.5.51", "dört parçalı masaüstü sürümü okunur");
 ok(parseVersion("TD2LootAdvisor") === null && parseVersion("TD2LootAdvisor/6.0.1; DROP TABLE") === null
-   && parseVersion("Mozilla/5.0") === null && parseVersion("TD2LootAdvisor/1.2.3.4") === null, "geçersiz / eski UA sayılmaz");
+   && parseVersion("Mozilla/5.0") === null && parseVersion("TD2LootAdvisor/1.2.3.4.5") === null, "geçersiz / eski UA sayılmaz");
 
 for (let i = 0; i < 3; i++) await call("GET", "/v1/tasks/live", { "user-agent": "TD2LootAdvisor/6.0.1", "x-td2-run": "start" });
 for (let i = 0; i < 5; i++) await call("GET", "/v1/tasks/live", { "user-agent": "TD2LootAdvisor/6.0.1" });

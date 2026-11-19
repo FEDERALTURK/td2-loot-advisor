@@ -239,7 +239,7 @@ def fetch_live(url, raw_url=None, opener=None, timeout=10, app_version=None, sta
     """
     opener = opener or urllib.request.urlopen
     last = None
-    ua = "TD2LootAdvisor/" + app_version if app_version and re.fullmatch(r"\d{1,2}\.\d{1,2}\.\d{1,3}", app_version) else "TD2LootAdvisor"
+    ua = "TD2LootAdvisor/" + app_version if app_version and re.fullmatch(r"\d{1,2}\.\d{1,2}\.\d{1,3}(?:\.\d{1,3})?", app_version) else "TD2LootAdvisor"
     for u in [x for x in ((url or "").rstrip("/") + "/v1/tasks/live" if url else None, raw_url) if x]:
         try:
             h = {"user-agent": ua}

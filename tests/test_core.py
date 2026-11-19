@@ -144,6 +144,87 @@ def test_share_roundtrip():
     for bad in ("hello", "TD2B-!!!!"):
         try: share.decode(bad); raise AssertionError("accepted " + bad)
         except ValueError: pass
+    assert share._bounded_int(float("inf"), default=7) == 7
+    oversized = {"name": "Large", "build_tool": {"slots": {
+        slot: {"fixed_attributes": [{"slot": "x" * 120, "name": "y" * 120, "stats": "z" * 120,
+                                     "value": "1", "unit": "%"} for _ in range(24)]}
+        for slot in __import__("build_tool").SLOTS}}}
+    try: share.encode(oversized); raise AssertionError("accepted oversized share payload")
+    except ValueError: pass
+
+def test_build_tool_state_stats_and_migration_are_bounded():
+    import engine
+    original = {"name": "T" * 120, "spec": "Gunner" * 20, "watch": float("inf"),
+                "tool_slots": {"Mask": "Coyote's Mask", "Unknown Slot": "ignored"},
+                "build_tool": {"specialization": "T" * 80, "watch": float("inf"),
+                               "slots": {"Mask": {"name": "Coyote's Mask", "core": "Skill Tier",
+                                                   "attrs": {"crit_chance": 6},
+                                                   "unknown": "ignored"}, "Unknown Slot": {"name": "ignored"}}}}
+    before = json.dumps(original, sort_keys=True)
+    migrated = engine.migrate_build_tool_build(original)
+    assert json.dumps(original, sort_keys=True) == before
+    assert len(migrated["name"]) == 80 and len(migrated["build_tool"]["specialization"]) == 60
+    assert migrated["build_tool"]["watch"] == 0 and "Unknown Slot" not in migrated["build_tool"]["slots"]
+    assert migrated["build_tool"]["specialization"] == "T" * 60
+    assert migrated["build_tool"]["slots"]["Mask"]["cores"] == ["Skill Tier"]
+    assert migrated["build_tool"]["slots"]["Mask"]["name"] == "Coyote's Mask"
+    assert engine.build_tool_stats(migrated)["metrics"]["skill_tier"] == 1
+    migrated["build_tool"]["slots"]["Mask"].update({"cores": ["weapon_damage"], "attrs": {"crit_chance": 6}, "brand": "Providence"})
+    stats = engine.build_tool_stats(migrated)
+    assert stats["cores"]["offensive"] == 1 and stats["metrics"]["crit_chance"] == 6
+    assert stats["confidence"] == "estimated"
+    improved = engine.migrate_build_tool_build(original)
+    improved["build_tool"]["slots"]["Mask"] = {"attrs": {"crit_chance": 12}}
+    assert engine.build_tool_delta(migrated, improved)["crit_chance"]["delta"] == 6
+    migrated["build_tool"]["slots"]["Primary"] = {"name": "Test Rifle", "attrs": {"base_damage": 100, "rpm": 600, "magazine_size": 30, "reload_speed": 2}}
+    combat = engine.build_tool_combat_estimate(migrated)
+    assert combat["weapons"] and combat["weapons"][0]["dps"] > 0 and combat["confidence"] == "estimated"
+    code = __import__("share").encode(migrated)
+    decoded = __import__("share").decode(code)
+    assert decoded["build_tool"]["slots"]["Mask"]["name"] == "Coyote's Mask"
+    after = engine.migrate_build_tool_build({"build_tool": {"slots": {"Mask": {"attrs": {"reload_speed": 10}}}}})
+    assert engine.build_tool_delta({}, after)["reload_speed"]["after"] == 10
+    combat = engine.build_tool_combat_estimate({"build_tool": {"slots": {
+        "Primary": {"attrs": {"base_damage": 100, "rpm": 600, "magazine_size": 30,
+                                "reload_time": 2, "reload_speed": 100}}}}}, enemy_hp=3100)
+    assert combat["weapons"][0]["shots"] == 31 and combat["weapons"][0]["ttk"] == 4.0
+
+
+def test_build_tool_calculation_is_slot_scoped_and_uses_real_thresholds():
+    import build_tool, json
+    from pathlib import Path
+    catalog = json.loads((Path(__file__).parent.parent / "meta" / "game_data.json").read_text(encoding="utf-8"))
+    set_name, set_tiers = next(iter(catalog["gear_set_bonuses"].items()))
+    brand_name, brand_tiers = next(iter(catalog["brand_bonuses"].items()))
+    one_piece = build_tool.new_build("set threshold")
+    one_piece["slots"]["Mask"] = {"name": "Mask", "gear_set": set_name}
+    assert build_tool.calculate(one_piece, catalog)["bonuses"]["gear_sets"] == []
+    one_piece["slots"]["Backpack"] = {"name": "Backpack", "gear_set": set_name}
+    assert build_tool.calculate(one_piece, catalog)["bonuses"]["gear_sets"] == [
+        {"name": set_name, "tier": 2, "text": set_tiers[0]}]
+    brand = build_tool.new_build("brand threshold")
+    brand["slots"]["Mask"] = {"name": "Mask", "brand": brand_name}
+    assert build_tool.calculate(brand, catalog)["bonuses"]["brands"][0]["tier"] == 1
+
+    primary = {"name": "Test Rifle", "attrs": {"base_damage": 100, "rpm": 600,
+                "magazine_size": 30, "reload_time": 2}}
+    base = build_tool.new_build("primary only"); base["enemy_hp"] = 3100
+    base["slots"]["Primary"] = primary
+    alone = build_tool.calculate(base, catalog)["weapons"][0]
+    secondary = build_tool.new_build("with secondary"); secondary["enemy_hp"] = 3100
+    secondary["slots"]["Primary"] = primary
+    secondary["slots"]["Secondary"] = {"name": "Other", "attrs": {"base_damage": 100, "rpm": 600,
+        "magazine_size": 30, "reload_time": 2, "weapon_damage": 1000, "crit_chance": 60, "crit_damage": 300}}
+    with_secondary = build_tool.calculate(secondary, catalog)["weapons"][0]
+    assert with_secondary["dps"] == alone["dps"] and with_secondary["ttk"] == alone["ttk"]
+    assert alone["ttk"] == 5.0
+
+    faster = build_tool.new_build("fixed rate of fire")
+    faster["slots"]["Primary"] = {**primary, "attachments": [{"slot": "Muzzle", "name": "Test", "stats": "rate-of-fire:10%"}]}
+    assert build_tool.calculate(faster, catalog)["weapons"][0]["rpm"] == 660
+    faster["slots"]["Primary"]["attachments"] = []
+    faster["slots"]["Primary"]["attrs"]["reload_speed"] = 100
+    assert build_tool.calculate(faster, catalog)["weapons"][0]["reload"] == 1
 
 def test_vendor_record():
     import vendor

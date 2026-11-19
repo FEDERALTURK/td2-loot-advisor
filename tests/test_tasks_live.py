@@ -135,6 +135,8 @@ def _op(req, timeout=10):
 T.fetch_live("http://srv", "https://raw/x.json", opener=_op, app_version="6.0.1", start=True)
 ok(seen[0][1].get("user-agent") == "TD2LootAdvisor/6.0.1" and seen[0][1].get("x-td2-run") == "start", "sunucuya sürüm + açılış işareti")
 ok("x-td2-run" not in seen[1][1], "GitHub yedeğine açılış işareti gitmez")
+seen.clear(); T.fetch_live(None, "https://raw/x.json", opener=_op, app_version="9.1.5.51")
+ok(seen[0][1].get("user-agent") == "TD2LootAdvisor/9.1.5.51", "dört parçalı uygulama sürümü korunur")
 seen.clear(); T.fetch_live(None, "https://raw/x.json", opener=_op, app_version="6.0.1; evil")
 ok(seen[0][1].get("user-agent") == "TD2LootAdvisor", "geçersiz sürüm metni gönderilmez")
 

@@ -8,6 +8,7 @@
 - decide(): SAKLA / DÜŞÜN / KIR / KONTROL ET kararı + kısa gerekçe.
 Oyunun belleğine dokunulmaz.
 """
+import math
 import re
 
 import gamedata
@@ -26,6 +27,117 @@ TYPE_LABEL = {"assault rifle": "Assault Rifle", "submachine gun": "Submachine Gu
               "shotgun": "Shotgun", "marksman rifle": "Marksman Rifle", "rifle": "Rifle", "pistol": "Pistol"}
 GEAR_SLOTS = ["Mask", "Chest", "Backpack", "Gloves", "Holster", "Kneepads"]
 ALL_SLOTS = GEAR_SLOTS + ["Weapon", "Sidearm"]
+
+# Build Tool uses the same names as the reference application.  Keep this
+# separate from ALL_SLOTS: the loot planner intentionally has a smaller,
+# backwards-compatible contract.
+BUILD_TOOL_SLOT_ORDER = ("Mask", "Backpack", "Chest", "Gloves", "Holster", "Kneepads",
+                         "Primary", "Secondary", "Sidearm", "Specialization", "Skill1", "Skill2")
+BUILD_TOOL_GEAR_SLOTS = BUILD_TOOL_SLOT_ORDER[:6]
+BUILD_TOOL_WEAPON_SLOTS = ("Primary", "Secondary", "Sidearm")
+BUILD_TOOL_SKILL_SLOTS = ("Skill1", "Skill2")
+
+
+def build_tool_state(build):
+    """Return a bounded, read-only Build Tool state for old and new builds."""
+    build = build if isinstance(build, dict) else {}
+    raw = build.get("build_tool") or build.get("tool") or {}
+    raw = raw if isinstance(raw, dict) else {}
+    slots = raw.get("slots") if isinstance(raw.get("slots"), dict) else {}
+    out = {"schema": 1, "slots": {}}
+    for slot in BUILD_TOOL_SLOT_ORDER:
+        value = slots.get(slot)
+        if isinstance(value, dict):
+            item = {str(k): value[k] for k in ("name", "type", "brand", "gear_set", "talent", "cores", "core", "attrs", "weapon_stats", "notes") if k in value}
+            if "cores" not in item and item.get("core"):
+                item["cores"] = [item.pop("core")]
+            out["slots"][slot] = item
+        elif isinstance(value, str) and value.strip():
+            out["slots"][slot] = {"name": value.strip()[:100]}
+    out["specialization"] = str(raw.get("specialization") or build.get("specialization") or build.get("spec") or "")[:60]
+    try: out["watch"] = max(0, min(1000, int(raw.get("watch", 0))))
+    except (TypeError, ValueError, OverflowError): out["watch"] = 0
+    return out
+
+
+def migrate_build_tool_build(build):
+    """Create a copy with a versioned tool state; never mutates the input."""
+    out = dict(build or {})
+    if "name" in out:
+        out["name"] = str(out.get("name") or "")[:80]
+    state = build_tool_state(out)
+    # Import legacy fields only when the new state is empty.
+    if not any(state["slots"].values()):
+        for slot, item in (build or {}).get("tool_slots", {}).items() if isinstance((build or {}).get("tool_slots"), dict) else ():
+            if slot in BUILD_TOOL_SLOT_ORDER and item:
+                state["slots"][slot] = {"name": str(item)[:100]}
+    out["build_tool"] = state
+    return out
+
+
+def build_tool_stats(build):
+    """Calculate explainable local estimates from selected slots (no game memory)."""
+    state = build_tool_state(build)
+    counts = {"offensive": 0, "defensive": 0, "utility": 0}
+    metrics = {"armor": 0.0, "weapon_damage": 0.0, "skill_haste": 0.0, "crit_chance": 0.0,
+               "crit_damage": 0.0, "headshot_damage": 0.0, "skill_damage": 0.0}
+    sets, brands, talents = [], [], []
+    for slot, item in state["slots"].items():
+        for key in ("cores",):
+            vals = item.get(key) if isinstance(item.get(key), list) else [item.get(key)]
+            for val in vals:
+                n = str(val or "").lower()
+                if "weapon" in n or "offensive" in n: counts["offensive"] += 1
+                elif "armor" in n or "defensive" in n: counts["defensive"] += 1
+                elif "skill" in n or "utility" in n: counts["utility"] += 1
+        if slot not in BUILD_TOOL_WEAPON_SLOTS:
+            for key, val in (item.get("attrs") or {}).items() if isinstance(item.get("attrs"), dict) else ():
+                try: metrics[str(key)] = metrics.get(str(key), 0.0) + float(val)
+                except (TypeError, ValueError): pass
+        for key, dest in (("gear_set", sets), ("brand", brands), ("talent", talents)):
+            if item.get(key): dest.append(str(item[key])[:80])
+    metrics["skill_tier"] = float(counts["utility"])
+    return {"cores": counts, "metrics": metrics, "gearsets": sorted(set(sets)), "brands": sorted(set(brands)),
+            "talents": sorted(set(talents)), "specialization": state["specialization"], "watch": state["watch"],
+            "confidence": "estimated"}
+
+
+def build_tool_delta(before, after):
+    """Compare numeric stats and core counts, returning a stable UI-friendly map."""
+    a, b = build_tool_stats(before or {}), build_tool_stats(after or {})
+    delta = {}
+    for key in a["metrics"].keys() | b["metrics"].keys():
+        old, new = a["metrics"].get(key, 0.0), b["metrics"].get(key, 0.0)
+        if old or new: delta[key] = {"before": old, "after": new, "delta": new - old}
+    for key in a["cores"]:
+        delta["core_" + key] = {"before": a["cores"][key], "after": b["cores"][key], "delta": b["cores"][key] - a["cores"][key]}
+    return delta
+
+
+def build_tool_combat_estimate(build, enemy_hp=2_000_000):
+    """Estimate weapon damage/DPS/TTK from explicit local slot values.
+
+    The reference tool uses the same magazine/rpm/reload model. Missing values
+    deliberately produce ``None`` instead of inventing a game value.
+    """
+    import build_tool
+
+    state = build_tool_state(build)
+    slots = {}
+    for slot, value in state["slots"].items():
+        item = dict(value)
+        cores = item.pop("cores", [])
+        if not item.get("core") and cores:
+            item["core"] = cores[0] if isinstance(cores, list) else cores
+        slots[slot] = item
+    result = build_tool.calculate({"slots": slots, "enemy_hp": enemy_hp})
+    rows = []
+    for weapon in result["weapons"]:
+        hit = weapon["dps"] * 60.0 / weapon["rpm"] if weapon["rpm"] else 0
+        rows.append({"slot": weapon["slot"], "name": weapon["name"], "damage_per_shot": hit,
+                     "dps": weapon["dps"], "ttk": weapon["ttk"],
+                     "shots": math.ceil(enemy_hp / hit) if hit else None, "confidence": "estimated"})
+    return {"enemy_hp": float(enemy_hp), "weapons": rows, "confidence": "estimated"}
 
 
 # ---------------------------------------------------------------- kart bulma

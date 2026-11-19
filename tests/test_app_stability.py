@@ -307,5 +307,26 @@ class AppStabilityTests(unittest.TestCase):
         obj._task_seen.assert_not_called()
 
 
+    def test_load_cfg_uses_only_structurally_valid_backup(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "builds.json"
+            backup = path.with_name(path.name + ".bak")
+            valid = {"builds": [{"name": "kept"}], "settings": {}, "attributes": {}}
+            malformed = ({"builds": [], "settings": None},
+                         {"builds": None, "settings": {}},
+                         {"builds": ["not an object"], "settings": {}})
+            with patch.object(self.app, "CFG_PATH", path), patch.object(self.app, "BUNDLE", Path(directory) / "missing"):
+                for bad in malformed:
+                    path.write_text(json.dumps(bad), encoding="utf-8")
+                    backup.write_text(json.dumps(valid), encoding="utf-8")
+                    loaded = self.app.load_cfg()
+                    self.assertEqual(loaded["builds"][0]["name"], "kept")
+                path.write_text(json.dumps(malformed[0]), encoding="utf-8")
+                backup.write_text(json.dumps(malformed[1]), encoding="utf-8")
+                loaded = self.app.load_cfg()
+                self.assertEqual(loaded["builds"], [])
+                self.assertIsInstance(loaded["settings"], dict)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -105,6 +105,7 @@ import meta_sync
 import wiki_sync
 import gamedata
 import engine
+import build_tool_ui
 import display
 import ocr_backend
 import ocr_lab
@@ -150,7 +151,7 @@ import decision_center
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.1.5.50"
+APP_VERSION = "9.1.5.51"
 # "Bu oturumda ne kazandın?" özeti için kaba tahmin: bir eşyayı elle inceleyip
 # build'e göre karar vermenin (istatistikleri okuma + karşılaştırma) ortalama
 # süresi, saniye. Gerçek bir ölçüm değil — yalnızca arayüzde "tahmini" etiketiyle
@@ -268,15 +269,22 @@ def setup_logging(level="INFO", max_kb=1024, backups=3):
 OBSOLETE_SETTINGS = ("chatgpt_window_title", "chatgpt_wait_seconds", "chatgpt_region", "chatgpt_prompt", "chatgpt_hotkey")
 
 
+def _valid_cfg_shape(cfg):
+    return (isinstance(cfg, dict) and isinstance(cfg.get("builds"), list)
+            and isinstance(cfg.get("settings", {}), dict)
+            and isinstance(cfg.get("attributes", {}), dict)
+            and all(isinstance(build, dict) for build in cfg["builds"]))
+
+
 def load_cfg():
     """builds.json'u okur; bozuksa yedekleyip varsayılanla başlar, eski ayarları taşır."""
     try:
         with open(CFG_PATH, encoding="utf-8") as f:
             cfg = json.load(f)
-        if not isinstance(cfg, dict) or "builds" not in cfg: raise ValueError("bad config")
+        if not _valid_cfg_shape(cfg): raise ValueError("invalid config structure")
     except Exception as e:
         bakc = safeio.read_json(CFG_PATH.with_name(CFG_PATH.name + ".bak"))      # önce günlük yedek
-        if isinstance(bakc, dict) and "builds" in bakc and CFG_PATH.exists():
+        if _valid_cfg_shape(bakc) and CFG_PATH.exists():
             logging.getLogger("td2").warning("builds.json unreadable (%s); restored from daily backup", e)
             try: shutil.copy(CFG_PATH, CFG_PATH.with_suffix(f".broken-{int(time.time())}.json"))
             except Exception: pass
@@ -286,7 +294,13 @@ def load_cfg():
         try: shutil.copy(CFG_PATH, bak)
         except Exception: pass
         src = BUNDLE / "builds.json"
-        cfg = json.loads(src.read_text(encoding="utf-8")) if src.exists() and src != CFG_PATH else {"builds": [], "attributes": {}, "settings": {}}
+        cfg = {"builds": [], "attributes": {}, "settings": {}}
+        if src.exists() and src != CFG_PATH:
+            try:
+                bundled = json.loads(src.read_text(encoding="utf-8"))
+                if _valid_cfg_shape(bundled): cfg = bundled
+            except (OSError, ValueError):
+                pass
         logging.getLogger("td2").warning("builds.json unreadable (%s); backup %s, starting from defaults", e, bak.name)
     return _cfg_defaults(cfg)
 
@@ -2215,7 +2229,7 @@ class App:
         st["tr_on"] = True; save_cfg(self.cfg)
         area = self.lt_area()
         startup_wait = 0.0
-        if area:
+        if area:                                            # program penceresi okunan alanı kapatıyorsa küçült
             try:
                 self.root.update_idletasks()
                 x, y = self.root.winfo_rootx(), self.root.winfo_rooty()
@@ -2276,7 +2290,7 @@ class App:
             self.toast(t("ga.translation_resumed" if restored else "ga.translation_unavailable"))
 
     def _lt_loop(self, stop, startup_wait=0.0):
-        if startup_wait and stop.wait(startup_wait): return   # yalnız pencere çakışınca küçülmeyi bekle
+        if startup_wait and stop.wait(startup_wait): return   # yalnız çakışan uygulama penceresi kapanana kadar bekle
         g = capture.Grabber(); g.keep()
         prev = last = None; stable = 0
         revision = getattr(self, "_lt_revision", 0)
@@ -4404,15 +4418,15 @@ class App:
         set_palette(ui_theme.apply(self.root, self.cfg["settings"].get("ui_theme", "default")))
         self.build_header()
 
-        self.tab_keys = ("dash", "builds", "progress", "stash", "stats", "info", "tasks", "division3", "translate", "assistant", "settings", "history", "log", "help", "about")
+        self.tab_keys = ("dash", "build_tool", "builds", "progress", "stash", "stats", "info", "tasks", "division3", "translate", "assistant", "settings", "history", "log", "help", "about")
         self.tab_groups = {
-            "dash": "home", "builds": "gear", "progress": "gear", "stash": "gear", "stats": "gear",
+            "dash": "home", "build_tool": "build_tool", "builds": "gear", "progress": "gear", "stash": "gear", "stats": "gear",
             "info": "intel", "tasks": "intel", "division3": "intel",
             "translate": "tools", "assistant": "tools", "settings": "settings",
             "history": "system", "log": "system", "help": "system", "about": "system",
         }
-        self.group_keys = ("home", "gear", "intel", "tools", "settings", "system")
-        self.group_labels = {"home": "⌂  " + t("tab.dash"), "gear": "🎒  " + t("nav.gear"),
+        self.group_keys = ("home", "build_tool", "gear", "intel", "tools", "settings", "system")
+        self.group_labels = {"home": "⌂  " + t("tab.dash"), "build_tool": "BUILD TOOL", "gear": "🎒  " + t("nav.gear"),
                              "intel": "🛰  " + t("nav.intel"), "tools": "🧰  " + t("nav.tools"),
                              "settings": "⚙  " + t("nav.settings"), "system": "☰  " + t("nav.system")}
         if self.cfg["settings"].get("ui_layout") == "field_command":
@@ -4453,14 +4467,14 @@ class App:
             group = self.tab_groups[k]
             parent = self.group_nbs[group]
             self.tabs[k] = ttk.Frame(parent)
-            title = "The Division 3" if k == "division3" else t(f"tab.{k}")
+            title = "The Division 3" if k == "division3" else ("BUILD TOOL" if k == "build_tool" else t(f"tab.{k}"))
             parent.add(self.tabs[k], text=ui_theme.with_icon(title, ui_theme.TAB_ICONS.get(k, "")))
 
         # Her sayfayı tek büyük senkron blokta kurmak, açılış sahnesinin
         # 3–4 saniye donuk görünmesine yol açıyordu.  Sayfalar event loop'a
         # sırayla bırakılır; splash arada 30 FPS bütçesinden kare çizebilir.
         self._ui_builders = [
-            self.build_dash, self.build_builds, self.build_prog, self.build_stash,
+            self.build_dash, self.build_build_tool, self.build_builds, self.build_prog, self.build_stash,
             self.build_stats, self.build_info, self.build_division3, self.build_translate,
             self.build_gorevler, self.build_asistan, self.build_settings, self.build_hist,
             self.build_logtab, self.build_help, self.build_about,
@@ -4491,9 +4505,9 @@ class App:
         self.tabs = {}
         for key in self.tab_keys:
             parent = self.group_nbs[self.tab_groups[key]]; self.tabs[key] = ttk.Frame(parent)
-            title = "The Division 3" if key == "division3" else t(f"tab.{key}")
+            title = "The Division 3" if key == "division3" else ("BUILD TOOL" if key == "build_tool" else t(f"tab.{key}"))
             parent.add(self.tabs[key], text=ui_theme.with_icon(title, ui_theme.TAB_ICONS.get(key, "")))
-        self._ui_builders = [self.build_dash, self.build_builds, self.build_prog, self.build_stash, self.build_stats,
+        self._ui_builders = [self.build_dash, self.build_build_tool, self.build_builds, self.build_prog, self.build_stash, self.build_stats,
                              self.build_info, self.build_division3, self.build_translate, self.build_gorevler,
                              self.build_asistan, self.build_settings, self.build_hist, self.build_logtab, self.build_help,
                              self.build_about]
@@ -4511,7 +4525,7 @@ class App:
         self.main_area=ttk.Frame(self.workspace); self.main_area.pack(side="left",fill="both",expand=True)
         self._responsive_job=None; self.root.bind("<Configure>",self._responsive_configure,add="+")
         self.fxbar=fx.Transition(self.root,self.root,color=PAL["accent"],bg=PAL["bg"],duration_ms=240,style="tactical")
-        self._sidebar_buttons={}; codes=("01","02","03","04","05","06")
+        self._sidebar_buttons={}; codes=("01","02","03","04","05","06","07")
         for index,group in enumerate(self.group_keys):
             label="> "+codes[index]+". "+self.group_labels[group].replace("⌂  ","").upper()
             button=ttk.Button(self.sidebar,text=label,style="Nav.TButton",command=lambda g=group:self._sidebar_select_group(g)); button.pack(fill="x",padx=(10,8),pady=3); self._sidebar_buttons[group]=button
@@ -4522,8 +4536,8 @@ class App:
             holder=ttk.Frame(nb); nb.add(holder,text=self.group_labels[group]); self.group_nbs[group]=ttk.Notebook(holder,style="NoTabs.TNotebook"); self.group_nbs[group].pack(fill="both",expand=True,padx=3,pady=3)
         self.tabs={}
         for key in self.tab_keys:
-            parent=self.group_nbs[self.tab_groups[key]]; self.tabs[key]=ttk.Frame(parent); parent.add(self.tabs[key],text=ui_theme.with_icon("The Division 3" if key=="division3" else t(f"tab.{key}"),ui_theme.TAB_ICONS.get(key,"")))
-        self._ui_builders=[self.build_dash,self.build_builds,self.build_prog,self.build_stash,self.build_stats,self.build_info,self.build_division3,self.build_translate,self.build_gorevler,self.build_asistan,self.build_settings,self.build_hist,self.build_logtab,self.build_help,self.build_about]; self._ui_build_index=0; self._ui_ready=False; self._build_critical_ui_pages()
+            parent=self.group_nbs[self.tab_groups[key]]; self.tabs[key]=ttk.Frame(parent); parent.add(self.tabs[key],text=ui_theme.with_icon("The Division 3" if key=="division3" else ("BUILD TOOL" if key=="build_tool" else t(f"tab.{key}")),ui_theme.TAB_ICONS.get(key,"")))
+        self._ui_builders=[self.build_dash,self.build_build_tool,self.build_builds,self.build_prog,self.build_stash,self.build_stats,self.build_info,self.build_division3,self.build_translate,self.build_gorevler,self.build_asistan,self.build_settings,self.build_hist,self.build_logtab,self.build_help,self.build_about]; self._ui_build_index=0; self._ui_ready=False; self._build_critical_ui_pages()
         nb.bind("<<NotebookTabChanged>>",self.on_tab)
         for inner in self.group_nbs.values(): inner.bind("<<NotebookTabChanged>>",self.on_tab)
         self._sidebar_activate("home"); self.shd_footer=fx.SHDStatusBar(self.root,accent=PAL["accent"],bg=PAL["bg"],fg=PAL["fg"],muted=PAL["muted"],footer=True); self.shd_footer.pack(fill="x",side="bottom"); self.root.after_idle(self._build_next_ui_page)
@@ -4623,9 +4637,9 @@ class App:
                 self.sidebar.configure(width=sidebar_w)
             if hasattr(self, "nav_panel"):
                 self.nav_panel.configure(width=82 if compact_now else max(190, int(224 * getattr(self, "ui_factor", 1.0))))
-            icons = {"home": "⌂", "gear": "🎒", "intel": "🛰", "tools": "🧰", "settings": "⚙", "system": "☰"}
+            icons = {"home": "⌂", "build_tool": "⬡", "gear": "🎒", "intel": "🛰", "tools": "🧰", "settings": "⚙", "system": "☰"}
             for key, button in getattr(self, "_sidebar_buttons", {}).items():
-                button.configure(text=icons[key] if compact_now else self.group_labels[key])
+                button.configure(text=icons.get(key, "•") if compact_now else self.group_labels[key])
             for key, button in getattr(self, "_nav_page_buttons", {}).items():
                 button.configure(text=ui_theme.TAB_ICONS.get(key, "•") if compact_now else self._nav_page_labels[key])
             self._layout_topnav_buttons()
@@ -4677,7 +4691,7 @@ class App:
         """Tek menü yüzeyi: grup başlıkları ve tüm sayfa düğmeleri aynı panelde."""
         self._nav_page_buttons = {}
         self._nav_page_labels = {}
-        group_titles = {"home": "ANA SAYFA", "gear": "EKİPMAN", "intel": "İSTİHBARAT",
+        group_titles = {"home": "ANA SAYFA", "build_tool": "BUILD TOOL", "gear": "EKİPMAN", "intel": "İSTİHBARAT",
                         "tools": "ARAÇLAR", "settings": "AYARLAR", "system": "SİSTEM"}
         ttk.Label(parent, text="[ NAVIGATION ]", style="Brand.TLabel").pack(anchor="w", padx=12, pady=(14, 8))
         for group_index, group in enumerate(self.group_keys, 1):
@@ -4686,7 +4700,7 @@ class App:
             for key in self.tab_keys:
                 if self.tab_groups[key] != group:
                     continue
-                title = "The Division 3" if key == "division3" else t(f"tab.{key}")
+                title = "The Division 3" if key == "division3" else ("BUILD TOOL" if key == "build_tool" else t(f"tab.{key}"))
                 label = f"    {title}"
                 self._nav_page_labels[key] = label
                 button = ttk.Button(parent, text=label, style="Nav.TButton",
@@ -4835,7 +4849,7 @@ class App:
             page = cur[1] if isinstance(cur, tuple) else ""
             group = self.tab_groups.get(page, "home")
             group_text = self.group_labels.get(group, group).replace("⌂  ", "").strip()
-            page_text = "The Division 3" if page == "division3" else t(f"tab.{page}")
+            page_text = "The Division 3" if page == "division3" else ("BUILD TOOL" if page == "build_tool" else t(f"tab.{page}"))
             if getattr(self, "command_ribbon", None):
                 self.command_ribbon.set_context(f"ISAC // {group_text}", page_text)
                 if anim: self.command_ribbon.pulse()
@@ -6294,6 +6308,15 @@ class App:
             self.show_result(text, item, verdict, res, debug=True)
         except Exception as e:
             messagebox.showerror(APP_NAME, str(e))
+
+    # ---------- The Division 2 Builds Tool ----------
+    def build_build_tool(self):
+        """Create the standalone planner backed by build_tool.json."""
+        frame = self.tabs["build_tool"]
+        for child in frame.winfo_children(): child.destroy()
+        self.bt_panel = build_tool_ui.BuildToolPanel(
+            frame, self.root, GAME.data if getattr(GAME, "ok", False) else {},
+            BASE / "build_tool.json", APP_VERSION, PAL)
 
     # ---------- Build editörü (v2) ----------
     def build_builds(self):

@@ -219,8 +219,7 @@ class Engine:
             except Exception as e:
                 log.exception("RapidOCR failed, falling back to Tesseract: %s", e)
                 self.name = "tesseract"
-        txt = self._tess_text(img)
-        return [(l, (0, 0, 0, 0), 1.0) for l in txt.splitlines() if l.strip()]
+        return group_lines(self._tess_boxes(img))
 
     def segments(self, img, scale=None):
         """Sütun duyarlı satırlar (canlı çeviri, görev okuma). Tesseract'ta lines() ile aynı."""
@@ -229,7 +228,8 @@ class Engine:
                 return group_lines(self._rapid_boxes(img, self.auto_scale(img) if scale is None else scale), max_gap=1.6)
             except Exception as e:
                 log.exception("RapidOCR failed: %s", e)
-        return self.lines(img, scale)
+                self.name = "tesseract"
+        return group_lines(self._tess_boxes(img), max_gap=1.6)
 
     def text(self, img, scale=None):
         return "\n".join(t for t, _, _ in self.lines(img, scale))
@@ -238,6 +238,37 @@ class Engine:
         import pytesseract
         pre = self.preprocess(img) if self.preprocess else img
         return pytesseract.image_to_string(pre, lang=self.tess_lang, config=self.tess_config)
+
+    def _tess_data(self, img, config=None):
+        import pytesseract
+        pre = self.preprocess(img) if self.preprocess else img
+        data = pytesseract.image_to_data(
+            pre, lang=self.tess_lang, config=config or self.tess_config,
+            output_type=pytesseract.Output.DICT)
+        if self.preprocess and pre.size != img.size:
+            sx, sy = img.width / pre.width, img.height / pre.height
+            data["left"] = [int(value * sx) for value in data["left"]]
+            data["width"] = [int(value * sx) for value in data["width"]]
+            data["top"] = [int(value * sy) for value in data["top"]]
+            data["height"] = [int(value * sy) for value in data["height"]]
+        return data
+
+    def _tess_boxes(self, img):
+        data = self._tess_data(img)
+        result = []
+        for i, value in enumerate(data.get("text", ())):
+            text = str(value).strip()
+            try:
+                confidence = float(data["conf"][i])
+                x, y = int(data["left"][i]), int(data["top"][i])
+                width, height = int(data["width"][i]), int(data["height"][i])
+            except (IndexError, TypeError, ValueError):
+                continue
+            if not text or confidence < 0 or width <= 0 or height <= 0:
+                continue
+            result.append((_fix(text), (x, y, x + width, y + height),
+                           max(0.0, min(1.0, confidence / 100.0))))
+        return result
 
     def data(self, img):
         """Kelime kutuları, pytesseract.Output.DICT biçiminde (text/conf/left/top/width/height)."""
@@ -258,14 +289,7 @@ class Engine:
             except Exception as e:
                 log.exception("RapidOCR data failed, falling back to Tesseract: %s", e)
                 self.name = "tesseract"
-        import pytesseract
-        pre = self.preprocess(img) if self.preprocess else img
-        d = pytesseract.image_to_data(pre, config="--psm 11", output_type=pytesseract.Output.DICT)
-        if self.preprocess and pre.size != img.size:  # ön işleme büyüttüyse kutuları geri ölçekle
-            k = img.width / pre.width
-            for key in ("left", "top", "width", "height"):
-                d[key] = [int(v * k) for v in d[key]]
-        return d
+        return self._tess_data(img, "--psm 11")
 
 
 # ---------------------------------------------------------------- renk ipuçları (simge/nadirlik)

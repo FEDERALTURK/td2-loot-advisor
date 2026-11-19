@@ -9,6 +9,28 @@ binding = "DB"
 database_name = "td2stats"
 database_id = "ff1ea665-e911-4048-9066-0e72de9589c8"   # td2stats (kendi hesabında: npx wrangler d1 create td2stats)
 
+# Previews use an isolated database so preview deployments cannot touch production data.
+[previews]
+[[previews.d1_databases]]
+binding = "DB"
+database_name = "td2stats-preview"
+database_id = "5187fec8-026e-40c1-9fdc-06822f301d83"
+
+[previews.vars]
+# Previews use staging-only data; external auth, reporting, admin, push, and Supabase integrations stay disabled.
+PUBLIC_URL = ""
+SITE_URL = ""
+DISCORD_CLIENT_ID = ""
+APNS_BUNDLE_ID = ""
+SUPABASE_URL = ""
+REPORTS_REPO = ""
+ADMIN_LOGIN = ""
+SUPABASE_PANEL_ENABLED = "false"
+ENT_PUBLIC_KEY = "06da3593d93eebb1a2df46d28577eca8b5c96364973194c900b337c1d74288a0"
+LICENSE_PUBKEY = "d70b17497241261ca45bcd05bbaedcd0fdeb3d866de4993d23db3c25274f633a"
+MAX_BATCH = "50"
+MAX_PER_HOUR = "600"
+
 [vars]
 PUBLIC_URL = "https://td2-stats.td2loot.workers.dev"
 # Web sitesinden Discord girişi için: Cloudflare Pages'e yayınlanan sitenin GERÇEK adresi (bkz. web/README.md).
