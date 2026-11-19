@@ -4459,7 +4459,7 @@ class App:
         self.group_nbs = {}
         for group in self.group_keys:
             holder = ttk.Frame(nb); nb.add(holder, text=self.group_labels[group])
-            self.group_nbs[group] = ttk.Notebook(holder); self.group_nbs[group].pack(fill="both", expand=True, padx=4, pady=4)
+            self.group_nbs[group] = ttk.Notebook(holder, style="NoTabs.TNotebook"); self.group_nbs[group].pack(fill="both", expand=True, padx=4, pady=4)
         self.tabs = {}
         for key in self.tab_keys:
             parent = self.group_nbs[self.tab_groups[key]]; self.tabs[key] = ttk.Frame(parent)
@@ -4491,7 +4491,7 @@ class App:
         nb=self.nb=ttk.Notebook(self.main_area,style="NoTabs.TNotebook"); nb.pack(fill="both",expand=True)
         self.group_nbs={}
         for group in self.group_keys:
-            holder=ttk.Frame(nb); nb.add(holder,text=self.group_labels[group]); self.group_nbs[group]=ttk.Notebook(holder); self.group_nbs[group].pack(fill="both",expand=True,padx=3,pady=3)
+            holder=ttk.Frame(nb); nb.add(holder,text=self.group_labels[group]); self.group_nbs[group]=ttk.Notebook(holder,style="NoTabs.TNotebook"); self.group_nbs[group].pack(fill="both",expand=True,padx=3,pady=3)
         self.tabs={}
         for key in self.tab_keys:
             parent=self.group_nbs[self.tab_groups[key]]; self.tabs[key]=ttk.Frame(parent); parent.add(self.tabs[key],text=ui_theme.with_icon("The Division 3" if key=="division3" else t(f"tab.{key}"),ui_theme.TAB_ICONS.get(key,"")))
