@@ -172,6 +172,10 @@ def apply(root, mode="default"):
         s.theme_create(name, parent="clam")
     s.theme_use(name)
     s.layout("NoTabs.TNotebook", [("Notebook.client", {"sticky": "nswe"})])
+    # ttk Notebook, bazı Windows temalarında sekme öğesini notebook stilinden
+    # ayrı çözer; özel sekme stilini de boşaltmak üst navigasyon satırının
+    # yeniden görünmesini engeller. Normal TNotebook sekmeleri etkilenmez.
+    s.layout("NoTabs.TNotebook.Tab", [])
 
     bg, sf, sf2, bd, fg, mu = p["bg"], p["surface"], p["surface2"], p["border"], p["fg"], p["muted"]
     ac, ach, ent = p["accent"], p["accent_hover"], p["entry"]
