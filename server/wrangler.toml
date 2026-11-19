@@ -9,6 +9,16 @@ binding = "DB"
 database_name = "td2stats"
 database_id = "ff1ea665-e911-4048-9066-0e72de9589c8"   # td2stats (kendi hesabında: npx wrangler d1 create td2stats)
 
+# Previews use an isolated database so preview deployments cannot touch production data.
+[previews]
+[[previews.d1_databases]]
+binding = "DB"
+database_name = "td2stats-preview"
+database_id = "5187fec8-026e-40c1-9fdc-06822f301d83"
+
+[previews.vars]
+SUPABASE_PANEL_ENABLED = "false"
+
 [vars]
 PUBLIC_URL = "https://td2-stats.td2loot.workers.dev"
 # Web sitesinden Discord girişi için: Cloudflare Pages'e yayınlanan sitenin GERÇEK adresi (bkz. web/README.md).
