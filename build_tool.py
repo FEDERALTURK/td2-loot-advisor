@@ -78,7 +78,7 @@ def _lookup(table, name):
     return "", {}
 
 
-def _attribute_key(slug, attributes):
+def _attribute_match(slug, attributes):
     normalized = re.sub(r"[^a-z0-9]+", "_", str(slug).casefold()).strip("_")
     candidates = {}
     for key, meta in attributes.items():
@@ -87,8 +87,14 @@ def _attribute_key(slug, attributes):
         for label in (key.replace("_", " "), *meta.get("aliases", [])):
             alias = re.sub(r"[^a-z0-9]+", "_", str(label).casefold()).strip("_")
             if alias and (normalized == alias or normalized.startswith(alias + "_")):
-                candidates[key] = max(candidates.get(key, 0), len(alias))
-    return max(candidates, key=candidates.get) if candidates else ""
+                if key not in candidates or len(alias) > candidates[key][0]:
+                    candidates[key] = (len(alias), str(label))
+    key = max(candidates, key=lambda candidate: candidates[candidate][0]) if candidates else ""
+    return key, candidates[key][1] if key else ""
+
+
+def _attribute_key(slug, attributes):
+    return _attribute_match(slug, attributes)[0]
 
 
 def _fixed_stats(value):
@@ -147,17 +153,18 @@ def auto_details(name, slot, catalog=None):
                 details["attachments"].append({"slot": str(mod_slot), "name": mod_name,
                                                 "stats": stats, "fixed": True})
                 for slug, raw_value, percent in _fixed_stats(stats):
-                    key = _attribute_key(slug, attrs)
+                    key, matched_label = _attribute_match(slug, attrs)
                     attribute = attrs.get(key, {}) if key else {}
                     aliases = attribute.get("aliases", []) if isinstance(attribute, dict) else []
-                    display = (aliases[0].title() if aliases else
+                    display = (matched_label.title() if matched_label else
                                key.replace("_", " ").title() if key else slug.replace("-", " ").title())
                     unit = (" rounds" if key == "magazine_size" and not percent else
                             "%" if percent else str(attribute.get("unit", "")))
                     details["fixed_attributes"].append({"slot": str(mod_slot), "name": display,
                                                         "value": raw_value, "unit": unit})
-                    if key == "magazine_size" and not percent:
-                        details["weapon_stats"]["magazine_bonus"] = float(raw_value)
+                    if key == "magazine_size":
+                        stat = "magazine_percent" if percent else "magazine_bonus"
+                        details["weapon_stats"][stat] = details["weapon_stats"].get(stat, 0) + float(raw_value)
             elif isinstance(raw, str) and raw.startswith("type:"):
                 details["mod_slots"].append(str(mod_slot))
     else:
@@ -231,9 +238,12 @@ def calculate(build, catalog=None):
                 cores["defensive"] += 1
             elif "skill" in core or "utility" in core:
                 cores["utility"] += 1
-        for key, value in item["attrs"].items():
-            if key in stats:
-                stats[key] += value
+        if slot not in ("Primary", "Secondary", "SideArm"):
+            for key, value in item["attrs"].items():
+                if key in stats:
+                    stats[key] += value
+            if "skill" in core or "utility" in core:
+                stats["skill_tier"] += 1
         if slot in SLOTS[:6]:
             for key, target in (("brand", brands), ("gear_set", sets)):
                 value = item.get(key)
@@ -252,19 +262,29 @@ def calculate(build, catalog=None):
         base_stats = weapon_meta.get("base_stats", {}) if isinstance(weapon_meta, dict) else {}
         damage = _number(attrs.get("base_damage", base_stats.get("base_damage")), 0)
         rpm = _number(attrs.get("rpm", base_stats.get("base_rpm")), 0)
-        magazine = _number(attrs.get("magazine_size", base_stats.get("base_mag_size")), 0)
-        magazine += _number(item.get("weapon_stats", {}).get("magazine_bonus"), 0)
+        magazine = _number(base_stats.get("base_mag_size", attrs.get("magazine_size")), 0)
+        weapon_stats = item.get("weapon_stats", {})
+        magazine += _number(weapon_stats.get("magazine_bonus"), 0)
+        magazine *= 1 + _number(weapon_stats.get("magazine_percent"), 0) / 100
         reload_time = _number(attrs.get("reload_time", base_stats.get("base_reload_time")), 0)
         weapon_mod_stats = {}
+        weapon_mod_magazine_percent = 0.0
         for attachment in item.get("attachments", []):
-            for key, value, _percent in _fixed_stats(attachment.get("stats", "")):
+            for key, value, percent in _fixed_stats(attachment.get("stats", "")):
                 attr_key = _attribute_key(key, catalog.get("attributes", {}))
                 if attr_key:
                     weapon_mod_stats[attr_key] = weapon_mod_stats.get(attr_key, 0) + float(value)
+                    if attr_key == "magazine_size" and percent:
+                        weapon_mod_magazine_percent += float(value)
         if damage and rpm:
-            weapon_damage = stats["weapon_damage"] + weapon_mod_stats.get("weapon_damage", 0)
-            crit_chance = stats["crit_chance"] + weapon_mod_stats.get("crit_chance", 0)
-            crit_damage = stats["crit_damage"] + weapon_mod_stats.get("crit_damage", 0)
+            weapon_damage = stats["weapon_damage"] + attrs.get("weapon_damage", 0) + weapon_mod_stats.get("weapon_damage", 0)
+            crit_chance = min(60, stats["crit_chance"] + attrs.get("crit_chance", 0) + weapon_mod_stats.get("crit_chance", 0))
+            crit_damage = stats["crit_damage"] + attrs.get("crit_damage", 0) + weapon_mod_stats.get("crit_damage", 0)
+            rate_of_fire = attrs.get("rate_of_fire", 0) + weapon_mod_stats.get("rate_of_fire", 0)
+            reload_speed = stats["reload_speed"] + attrs.get("reload_speed", 0) + weapon_mod_stats.get("reload_speed", 0)
+            rpm *= 1 + rate_of_fire / 100
+            reload_time = reload_time / (1 + reload_speed / 100) if reload_time else 0
+            magazine *= 1 + weapon_mod_magazine_percent / 100
             crit = 1 + (crit_chance / 100) * (crit_damage / 100)
             dps = damage * rpm / 60 * (1 + cores["offensive"] * .15 + weapon_damage / 100) * crit
             if magazine and reload_time:
@@ -279,12 +299,14 @@ def calculate(build, catalog=None):
     brand_bonus_data = catalog.get("brand_bonuses", {})
     gear_bonus_data = catalog.get("gear_set_bonuses", {})
     bonuses = {"brands": [], "gear_sets": []}
-    for key, counts, source, target in (("brand", brands, brand_bonus_data, "brands"),
-                                        ("gear_set", sets, gear_bonus_data, "gear_sets")):
-        for name, count in counts.items():
-            tiers = source.get(name, []) if isinstance(source, dict) else []
-            for tier, description in enumerate(tiers[:count], 1):
-                bonuses[target].append({"name": name, "tier": tier, "text": str(description)})
+    for name, count in brands.items():
+        tiers = brand_bonus_data.get(name, []) if isinstance(brand_bonus_data, dict) else []
+        for tier, description in enumerate(tiers[:count], 1):
+            bonuses["brands"].append({"name": name, "tier": tier, "text": str(description)})
+    for name, count in sets.items():
+        tiers = gear_bonus_data.get(name, []) if isinstance(gear_bonus_data, dict) else []
+        for tier, description in enumerate(tiers[:max(0, count - 1)], 2):
+            bonuses["gear_sets"].append({"name": name, "tier": tier, "text": str(description)})
     return {"stats": stats, "cores": cores, "armor": armor, "brands": brands, "gear_sets": sets,
             "bonuses": bonuses, "weapons": weapons, "enemy_hp": build["enemy_hp"]}
 

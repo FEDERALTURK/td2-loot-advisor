@@ -8,6 +8,7 @@
 - decide(): SAKLA / DÜŞÜN / KIR / KONTROL ET kararı + kısa gerekçe.
 Oyunun belleğine dokunulmaz.
 """
+import math
 import re
 
 import gamedata
@@ -47,19 +48,23 @@ def build_tool_state(build):
     for slot in BUILD_TOOL_SLOT_ORDER:
         value = slots.get(slot)
         if isinstance(value, dict):
-            item = {str(k): value[k] for k in ("name", "type", "brand", "gear_set", "talent", "cores", "attrs", "notes") if k in value}
+            item = {str(k): value[k] for k in ("name", "type", "brand", "gear_set", "talent", "cores", "core", "attrs", "weapon_stats", "notes") if k in value}
+            if "cores" not in item and item.get("core"):
+                item["cores"] = [item.pop("core")]
             out["slots"][slot] = item
         elif isinstance(value, str) and value.strip():
             out["slots"][slot] = {"name": value.strip()[:100]}
     out["specialization"] = str(raw.get("specialization") or build.get("specialization") or build.get("spec") or "")[:60]
     try: out["watch"] = max(0, min(1000, int(raw.get("watch", 0))))
-    except (TypeError, ValueError): out["watch"] = 0
+    except (TypeError, ValueError, OverflowError): out["watch"] = 0
     return out
 
 
 def migrate_build_tool_build(build):
     """Create a copy with a versioned tool state; never mutates the input."""
     out = dict(build or {})
+    if "name" in out:
+        out["name"] = str(out.get("name") or "")[:80]
     state = build_tool_state(out)
     # Import legacy fields only when the new state is empty.
     if not any(state["slots"].values()):
@@ -77,7 +82,7 @@ def build_tool_stats(build):
     metrics = {"armor": 0.0, "weapon_damage": 0.0, "skill_haste": 0.0, "crit_chance": 0.0,
                "crit_damage": 0.0, "headshot_damage": 0.0, "skill_damage": 0.0}
     sets, brands, talents = [], [], []
-    for item in state["slots"].values():
+    for slot, item in state["slots"].items():
         for key in ("cores",):
             vals = item.get(key) if isinstance(item.get(key), list) else [item.get(key)]
             for val in vals:
@@ -85,11 +90,13 @@ def build_tool_stats(build):
                 if "weapon" in n or "offensive" in n: counts["offensive"] += 1
                 elif "armor" in n or "defensive" in n: counts["defensive"] += 1
                 elif "skill" in n or "utility" in n: counts["utility"] += 1
-        for key, val in (item.get("attrs") or {}).items() if isinstance(item.get("attrs"), dict) else ():
-            try: metrics[str(key)] = metrics.get(str(key), 0.0) + float(val)
-            except (TypeError, ValueError): pass
+        if slot not in BUILD_TOOL_WEAPON_SLOTS:
+            for key, val in (item.get("attrs") or {}).items() if isinstance(item.get("attrs"), dict) else ():
+                try: metrics[str(key)] = metrics.get(str(key), 0.0) + float(val)
+                except (TypeError, ValueError): pass
         for key, dest in (("gear_set", sets), ("brand", brands), ("talent", talents)):
             if item.get(key): dest.append(str(item[key])[:80])
+    metrics["skill_tier"] = float(counts["utility"])
     return {"cores": counts, "metrics": metrics, "gearsets": sorted(set(sets)), "brands": sorted(set(brands)),
             "talents": sorted(set(talents)), "specialization": state["specialization"], "watch": state["watch"],
             "confidence": "estimated"}
@@ -99,7 +106,7 @@ def build_tool_delta(before, after):
     """Compare numeric stats and core counts, returning a stable UI-friendly map."""
     a, b = build_tool_stats(before or {}), build_tool_stats(after or {})
     delta = {}
-    for key in a["metrics"]:
+    for key in a["metrics"].keys() | b["metrics"].keys():
         old, new = a["metrics"].get(key, 0.0), b["metrics"].get(key, 0.0)
         if old or new: delta[key] = {"before": old, "after": new, "delta": new - old}
     for key in a["cores"]:
@@ -113,33 +120,23 @@ def build_tool_combat_estimate(build, enemy_hp=2_000_000):
     The reference tool uses the same magazine/rpm/reload model. Missing values
     deliberately produce ``None`` instead of inventing a game value.
     """
+    import build_tool
+
     state = build_tool_state(build)
-    stats = build_tool_stats(build)
-    red = stats["cores"]["offensive"]
-    weapon_damage = 1.0 + red * 0.15 + stats["metrics"].get("weapon_damage", 0.0) / 100.0
+    slots = {}
+    for slot, value in state["slots"].items():
+        item = dict(value)
+        cores = item.pop("cores", [])
+        if not item.get("core") and cores:
+            item["core"] = cores[0] if isinstance(cores, list) else cores
+        slots[slot] = item
+    result = build_tool.calculate({"slots": slots, "enemy_hp": enemy_hp})
     rows = []
-    for slot in BUILD_TOOL_WEAPON_SLOTS:
-        item = state["slots"].get(slot, {})
-        attrs = item.get("attrs") if isinstance(item.get("attrs"), dict) else {}
-        def number(*names):
-            for name in names:
-                try:
-                    if attrs.get(name) is not None: return float(attrs[name])
-                except (TypeError, ValueError): pass
-            return None
-        base = number("base_damage", "damage", "weapon_damage")
-        rpm = number("rpm", "rate_of_fire")
-        mag = number("mag", "magazine_size")
-        reload_s = number("reload", "reload_speed")
-        if not base or not rpm: continue
-        hit = base * weapon_damage * (1.0 + stats["metrics"].get("crit_damage", 0.0) / 100.0 *
-                                      min(1.0, stats["metrics"].get("crit_chance", 0.0) / 100.0))
-        dps = hit * rpm / 60.0
-        ttk = enemy_hp / dps if dps else None
-        if mag and reload_s and enemy_hp > hit * mag:
-            ttk += max(0.0, enemy_hp / (hit * mag) - 1.0) * reload_s
-        rows.append({"slot": slot, "name": item.get("name") or slot, "damage_per_shot": hit,
-                     "dps": dps, "ttk": ttk, "shots": (enemy_hp / hit if hit else None), "confidence": "estimated"})
+    for weapon in result["weapons"]:
+        hit = weapon["dps"] * 60.0 / weapon["rpm"] if weapon["rpm"] else 0
+        rows.append({"slot": weapon["slot"], "name": weapon["name"], "damage_per_shot": hit,
+                     "dps": weapon["dps"], "ttk": weapon["ttk"],
+                     "shots": math.ceil(enemy_hp / hit) if hit else None, "confidence": "estimated"})
     return {"enemy_hp": float(enemy_hp), "weapons": rows, "confidence": "estimated"}
 
 

@@ -4426,7 +4426,7 @@ class App:
             "history": "system", "log": "system", "help": "system", "about": "system",
         }
         self.group_keys = ("home", "build_tool", "gear", "intel", "tools", "settings", "system")
-        self.group_labels = {"home": "ANA SAYFA", "build_tool": "BUILD TOOL", "gear": "EKİPMAN",
+        self.group_labels = {"home": "⌂  " + t("tab.dash"), "build_tool": "BUILD TOOL", "gear": "🎒  " + t("nav.gear"),
                              "intel": "🛰  " + t("nav.intel"), "tools": "🧰  " + t("nav.tools"),
                              "settings": "⚙  " + t("nav.settings"), "system": "☰  " + t("nav.system")}
         if self.cfg["settings"].get("ui_layout") == "field_command":
@@ -4637,9 +4637,9 @@ class App:
                 self.sidebar.configure(width=sidebar_w)
             if hasattr(self, "nav_panel"):
                 self.nav_panel.configure(width=82 if compact_now else max(190, int(224 * getattr(self, "ui_factor", 1.0))))
-            icons = {"home": "⌂", "gear": "🎒", "intel": "🛰", "tools": "🧰", "settings": "⚙", "system": "☰"}
+            icons = {"home": "⌂", "build_tool": "⬡", "gear": "🎒", "intel": "🛰", "tools": "🧰", "settings": "⚙", "system": "☰"}
             for key, button in getattr(self, "_sidebar_buttons", {}).items():
-                button.configure(text=icons[key] if compact_now else self.group_labels[key])
+                button.configure(text=icons.get(key, "•") if compact_now else self.group_labels[key])
             for key, button in getattr(self, "_nav_page_buttons", {}).items():
                 button.configure(text=ui_theme.TAB_ICONS.get(key, "•") if compact_now else self._nav_page_labels[key])
             self._layout_topnav_buttons()

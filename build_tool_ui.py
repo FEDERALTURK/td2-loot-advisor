@@ -1,5 +1,6 @@
 """Standalone MX-style desktop build planner UI."""
 import tkinter as tk
+import copy
 import webbrowser
 from tkinter import filedialog, messagebox, ttk
 from td2app.ui import ui_theme
@@ -32,8 +33,10 @@ class BuildToolPanel:
         self.error = None
         try:
             self.builds = build_tool.load(path)
+            self._persisted_builds = copy.deepcopy(self.builds)
         except (OSError, ValueError) as exc:
             self.builds, self.error = [], exc
+            self._persisted_builds = []
             messagebox.showerror("Build Tool", f"Build data could not be loaded; the file was left unchanged.\n{exc}", parent=root)
         self.frame = ttk.Frame(parent)
         self.frame.pack(fill="both", expand=True)
@@ -71,7 +74,8 @@ class BuildToolPanel:
         self.chart.bind("<Configure>", lambda _e: self.refresh_chart())
         self.ttk_box = ttk.LabelFrame(f, text="Time to Kill · estimate")
         self.ttk_box.grid(row=5, column=0, columnspan=2, sticky="ew", padx=8, pady=4)
-        self.status = tk.StringVar(value="Independent local data: build_tool.json")
+        self.status = tk.StringVar(value=("Read-only · build data could not be loaded · original file preserved"
+                                          if self.error else "Independent local data: build_tool.json"))
         ttk.Label(f, textvariable=self.status, foreground=self.palette["muted"]).grid(
             row=6, column=0, columnspan=2, sticky="w", padx=10, pady=(0, 5))
         self.refresh()
@@ -82,33 +86,48 @@ class BuildToolPanel:
 
     def persist(self):
         if self.error:
+            self.status.set("Read-only · build data could not be loaded or saved · original file preserved")
             return False
         try:
             build_tool.save(self.path, self.builds)
+            self._persisted_builds = copy.deepcopy(self.builds)
             self.status.set(f"Saved locally · {len(self.builds)} build(s) · {self.path.name}")
             return True
         except OSError as exc:
+            self.builds = copy.deepcopy(self._persisted_builds)
+            self.error = exc
+            self.status.set("Read-only · build data could not be saved · last saved data restored")
             messagebox.showerror("Build Tool", f"Could not save build.\n{exc}", parent=self.root)
             return False
 
+    def can_edit(self):
+        if self.error:
+            self.status.set("Read-only · build data could not be loaded or saved · original file preserved")
+            return False
+        return True
+
     def new(self):
+        if not self.can_edit(): return
         self.builds.append(build_tool.new_build())
         self.persist(); self.refresh(len(self.builds) - 1)
 
     def save_current(self):
+        if not self.can_edit(): return
         build = self.current()
         if not build: return
         build["name"] = self.name.get().strip()[:80] or "Untitled build"
         build["specialization"] = self.spec.get().strip()
-        if self.persist(): self.refresh(self.choice.current())
+        self.persist(); self.refresh(self.choice.current())
 
     def update_meta(self):
+        if not self.can_edit(): return
         build = self.current()
         if build:
             build["specialization"] = self.spec.get().strip()
             self.persist(); self.refresh(self.choice.current())
 
     def clear(self):
+        if not self.can_edit(): return
         build = self.current()
         if build and messagebox.askyesno("Build Tool", "Clear all items and SHD values in this build?", parent=self.root):
             build["slots"] = {slot: None for slot in build_tool.SLOTS}
@@ -128,6 +147,7 @@ class BuildToolPanel:
         return sorted(set(str(v) for v in vals if str(v).strip()), key=str.casefold)[:1000]
 
     def edit_slot(self, slot):
+        if not self.can_edit(): return
         build = self.current()
         if not build: return
         old = build["slots"].get(slot) or {}
@@ -166,17 +186,18 @@ class BuildToolPanel:
         ttk.Label(win, textvariable=preview, wraplength=680, justify="left", foreground=self.palette["muted"]).pack(
             fill="x", padx=12, pady=4)
 
-        def select_item(_event=None):
+        def select_item(_event=None, reset=True):
             if not lb.curselection():
                 return
             selected = lb.get(lb.curselection()[0])
             auto = build_tool.auto_details(selected, slot, self.catalog)
-            core.set(auto["core"])
-            brand.set(auto["brand"])
-            gear.set(auto["gear_set"])
-            talent.set(auto["talent"])
-            for key, var in entries.items():
-                var.set(str(auto["attrs"].get(key, "")))
+            if reset and selected.casefold() != old.get("name", "").casefold():
+                core.set(auto["core"])
+                brand.set(auto["brand"])
+                gear.set(auto["gear_set"])
+                talent.set(auto["talent"])
+                for key, var in entries.items():
+                    var.set(str(auto["attrs"].get(key, "")))
             lines = []
             if auto["talent"]:
                 lines.append(f"Talent: {auto['talent']}")
@@ -195,8 +216,9 @@ class BuildToolPanel:
         if existing is not None:
             lb.selection_set(existing)
             lb.see(existing)
-            select_item()
+            select_item(reset=False)
         def apply():
+            if not self.can_edit(): return
             name = lb.get(lb.curselection()[0]) if lb.curselection() else query.get().strip()
             if not name:
                 messagebox.showerror("Build Tool", "Choose or type an item name.", parent=win); return
@@ -212,7 +234,11 @@ class BuildToolPanel:
                                     "talent": talent.get().strip(), "attrs": parsed}
             self.persist(); win.destroy(); self.refresh(self.choice.current())
         buttons = ttk.Frame(win); buttons.pack(fill="x", padx=10, pady=8)
-        ttk.Button(buttons, text="Remove", command=lambda: (build["slots"].__setitem__(slot, None), self.persist(), win.destroy(), self.refresh(self.choice.current()))).pack(side="left")
+        def remove():
+            if not self.can_edit(): return
+            build["slots"][slot] = None
+            self.persist(); win.destroy(); self.refresh(self.choice.current())
+        ttk.Button(buttons, text="Remove", command=remove).pack(side="left")
         ttk.Button(buttons, text="Apply", command=apply).pack(side="right", padx=4)
         ttk.Button(buttons, text="Cancel", command=win.destroy).pack(side="right")
         lb.bind("<Double-1>", lambda _e: apply())
@@ -236,9 +262,11 @@ class BuildToolPanel:
 
     def credits(self):
         messagebox.showinfo("Build Tool · Credits",
-            "MX Division Builds Tool is the reference for the layout and calculations. "
-            "This is an independent implementation. See docs/third_party/mx-division-builds-attribution.md "
-            "for the source and license notice.", parent=self.root)
+            "MX Division Builds Tool (mxswat) is the reference for the layout and game data. "
+            "This is an independent implementation with modifications. The referenced material is licensed "
+            "under CC BY-NC-SA 4.0; attribution and the same license terms apply to adapted material.\n\n"
+            "Source: https://github.com/mxswat/mx-division-builds\n"
+            "Full notice: docs/third_party/mx-division-builds-attribution.md", parent=self.root)
 
     def issues(self):
         webbrowser.open("https://github.com/FEDERALTURK/td2-loot-advisor/issues")
@@ -313,8 +341,8 @@ class BuildToolPanel:
             for bonus in values:
                 ttk.Label(panel, text=f"{bonus['name']} · {bonus['tier']} pc · {bonus['text']}", wraplength=460).pack(anchor="w", padx=6, pady=1)
             if not values: ttk.Label(panel, text="No active bonus", foreground=self.palette["muted"]).pack(anchor="w", padx=6, pady=2)
-        fixed = ttk.LabelFrame(self.detail, text="Selected item · catalog fixed details")
-        fixed.pack(fill="x", padx=4, pady=3)
+        fixed_frame = ttk.LabelFrame(self.detail, text="Selected item · catalog fixed details")
+        fixed_frame.pack(fill="x", padx=4, pady=3)
         any_details = False
         for slot, item in self.current()["slots"].items():
             if not item:
@@ -324,12 +352,12 @@ class BuildToolPanel:
             talent = item.get("talent") or current.get("talent")
             if talent:
                 lines.append(f"Talent: {talent}")
-            fixed = {(attr.get("slot", ""), attr.get("name", "")): attr
+            fixed_attributes = {(attr.get("slot", ""), attr.get("name", "")): attr
                      for attr in item.get("fixed_attributes", [])
                      if not str(attr.get("slot", "")).startswith("core_")}
-            fixed.update({(attr.get("slot", ""), attr.get("name", "")): attr
+            fixed_attributes.update({(attr.get("slot", ""), attr.get("name", "")): attr
                           for attr in current.get("fixed_attributes", [])})
-            for attr in fixed.values():
+            for attr in fixed_attributes.values():
                 lines.append(f"Fixed attribute · {attr['name']}: {_fixed_value_text(attr)}")
             attachments = {attachment.get("slot", ""): attachment
                            for attachment in item.get("attachments", [])}
@@ -344,20 +372,22 @@ class BuildToolPanel:
             lines.extend(f"Available {value} slot" for value in available_slots)
             if lines:
                 any_details = True
-                ttk.Label(fixed, text=f"{slot} · {item['name']}\n" + "\n".join(lines),
+                ttk.Label(fixed_frame, text=f"{slot} · {item['name']}\n" + "\n".join(lines),
                           wraplength=460, justify="left").pack(anchor="w", padx=6, pady=3)
         if not any_details:
-            ttk.Label(fixed, text="No catalogued fixed details for selected items.",
+            ttk.Label(fixed_frame, text="No catalogued fixed details for selected items.",
                       foreground=self.palette["muted"]).pack(anchor="w", padx=6, pady=2)
 
     def set_shd(self, name, value):
+        if not self.can_edit(): return
         build = self.current()
         if build:
             try: build.setdefault("shd_levels", {})[name] = max(0, min(10, int(value)))
             except (ValueError, TypeError): return
-            self.persist()
+            if not self.persist(): self.refresh(self.choice.current())
 
     def set_all_shd(self):
+        if not self.can_edit(): return
         build = self.current()
         if build:
             build["shd_levels"] = {name: 10 for name in self.SHD}
@@ -393,6 +423,7 @@ class BuildToolPanel:
                       foreground=self.palette["muted"]).grid(row=2, column=0, columnspan=7, sticky="w", padx=6)
 
     def update_enemy_hp(self):
+        if not self.can_edit(): return
         build = self.current()
         if not build: return
         try:

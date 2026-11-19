@@ -44,11 +44,17 @@ def main():
         data=Path(folder)
         shutil.copytree(source/"lang",data/"lang")
         cfg=json.loads((source/"scripts/default_builds.json").read_text(encoding="utf-8"))
-        cfg.setdefault("settings",{}).update(language="tr",perf_mode="balanced",meta_sync=False,tasks_sync=False,wiki_sync=False,
+        cfg.setdefault("settings",{}).update(language="tr",ui_layout="shd_terminal",perf_mode="balanced",meta_sync=False,tasks_sync=False,wiki_sync=False,
             task_live=False,news=False,vendor_auto=False,update_check=False,svc_auto_run=False,svc_tray=False,api_on=False,
             sp_on=False,tr_on=False,sound=False,ui_sounds=False,fx_cursor=False,fx_trail=False,fx_video=False,
             fx_bgwatch=False,fx_transitions=False,bg_interval=0)
         (data/"builds.json").write_text(json.dumps(cfg),encoding="utf-8")
+        import build_tool
+        stored = build_tool.new_build("Saved Build")
+        stored["slots"]["Primary"] = {"name": "St. Elmo's Engine", "talent": "Manual talent",
+            "attrs": {"base_damage": 50000, "rpm": 750, "magazine_size": 70, "reload_time": 2.2,
+                      "crit_chance": 6.2}}
+        build_tool.save(data/"build_tool.json", [stored])
         paths={"BASE":data,"BUNDLE":source,"ART_DIR":data/"art","APPLOG_DIR":data/"logs","APPLOG_PATH":data/"logs/app.log",
                "REPORTS_DIR":data/"reports","CFG_PATH":data/"builds.json","LOG_PATH":data/"loot_log.csv",
                "DEBUG_PATH":data/"last_crop.png","PROG_PATH":data/"progress.json","STASH_PATH":data/"stash.json",
@@ -85,9 +91,42 @@ def main():
             assert len(obj.set_nb.tabs())==4 and "shortcuts" in obj.set_pages
             obj.select_page("settings"); obj.select_settings_page("shortcuts"); obj.root.update_idletasks()
             assert obj.current_tab()=="settings"
-            obj.select_page("build_tool"); obj.root.update(); assert hasattr(obj, "bt_panel")
+            obj.select_page("build_tool")
+            deadline=time.monotonic()+2
+            while not hasattr(obj, "bt_panel") and time.monotonic()<deadline:
+                obj.root.update(); time.sleep(0.01)
+            assert hasattr(obj, "bt_panel")
             assert hasattr(obj.bt_panel, "choice")
             assert "BUILD TOOL" in obj.group_labels["build_tool"]
+            assert obj.bt_panel.current()["name"] == "Saved Build"
+            obj.bt_panel.edit_slot("Primary"); obj.root.update()
+            editor = next(child for child in obj.root.winfo_children()
+                          if isinstance(child, app.tk.Toplevel) and child.title().endswith("Primary"))
+            def descendants(widget):
+                for child in widget.winfo_children():
+                    yield child
+                    yield from descendants(child)
+            next(widget for widget in descendants(editor)
+                 if isinstance(widget, app.ttk.Button) and widget.cget("text") == "Apply").invoke()
+            obj.root.update()
+            saved_item = obj.bt_panel.current()["slots"]["Primary"]
+            assert saved_item["talent"] == "Manual talent"
+            assert saved_item["attrs"]["crit_chance"] == 6.2
+            compact_button = app.ttk.Button(obj.root, text="BUILD TOOL")
+            obj._sidebar_buttons = {"build_tool": compact_button}
+            with patch.object(obj.root, "winfo_width", return_value=900):
+                obj._responsive_compact = False
+                obj._sync_responsive_layout()
+            assert obj._responsive_compact
+            assert obj._sidebar_buttons["build_tool"].cget("text") == "⬡"
+            broken_path = data/"broken_build_tool.json"
+            broken_path.write_text("{invalid", encoding="utf-8")
+            from build_tool_ui import BuildToolPanel
+            read_only = BuildToolPanel(obj.root, obj.root, obj.bt_panel.catalog, broken_path,
+                                       app.APP_VERSION, obj.bt_panel.palette)
+            read_only.new()
+            assert not read_only.builds and "Read-only" in read_only.status.get()
+            assert broken_path.read_text(encoding="utf-8") == "{invalid"
             assert obj.shortcut_vars["voice_hotkey"].get()==obj.cfg["settings"]["voice_hotkey"]
             obj.fx_watch_style.current(1)
             obj._fx_from_ui()
