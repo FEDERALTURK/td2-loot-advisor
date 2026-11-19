@@ -1,5 +1,12 @@
 ## TD2 Loot Advisor — Windows
 
+**9.1.5.49 — The Division 2 Builds Tool stash/panel özeti**
+
+- Build detayında stash aday ekipmanları, tamamlanma oranı, eksik slotlar ve öncelikli hedef slotlar gösterilir.
+- Panel/Dashboard aktif build özetini aynı salt okunur Build Tool hesabıyla yeniler.
+- Yeni özet stash verisini değiştirmez, otomatik dismantle kararı üretmez ve mevcut Exotic/Named/Prototype/kilitli eşya korumalarını korur.
+- Build Tool bağlantısı için regresyon testi eklendi.
+
 **9.1.5.48 — Yatay menü çubuğu kaldırıldı**
 
 - Eski saha terminali ve SHD terminal görünümlerindeki yatay menü çubukları kaldırıldı.

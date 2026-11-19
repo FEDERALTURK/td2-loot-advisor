@@ -275,6 +275,27 @@ def optimize(build, plan, items, game=None):
             "set_slots": [s for s in slots if out[s]["req"].get("kind") == "set"]}
 
 
+def build_tool_summary(build, plan, items, game=None):
+    """Return the read-only Build Tool summary used by the build and panel UIs.
+
+    The summary reuses ``optimize`` so it cannot invent equipment or mutate the
+    stash.  Missing slots remain reviewable; no dismantle decision is produced.
+    """
+    result = optimize(build, plan, items, game)
+    slots = result["slots"]
+    missing = [slot for slot, value in slots.items() if not value.get("item")]
+    candidates = sum(1 for item in items if item.get("kind") in ITEM_KINDS and
+                    any(item.get("slot") == slot for slot in slots))
+    return {
+        "completion": result["completion"],
+        "done": result["done"],
+        "total": result["total"],
+        "missing_slots": missing,
+        "next_drop": result["next_drop"],
+        "candidate_count": candidates,
+    }
+
+
 def rank_builds(builds, plan_fn, items, game=None):
     """Sandığa göre hangi build'e en yakınsın: [(tamamlanma %, build adı, sonuç)] büyükten küçüğe."""
     res = []

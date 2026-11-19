@@ -150,7 +150,7 @@ import decision_center
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.1.5.48"
+APP_VERSION = "9.1.5.49"
 # "Bu oturumda ne kazandın?" özeti için kaba tahmin: bir eşyayı elle inceleyip
 # build'e göre karar vermenin (istatistikleri okuma + karşılaştırma) ortalama
 # süresi, saniye. Gerçek bir ölçüm değil — yalnızca arayüzde "tahmini" etiketiyle
@@ -4871,6 +4871,8 @@ class App:
         self.act_cb.pack(side="left", padx=6)
         self.act_cb.bind("<<ComboboxSelected>>", lambda e: self.set_active_build(self.act_cb.get()))
         self.act_prog = ttk.Label(ab, text="", foreground=PAL["muted"]); self.act_prog.pack(side="left", padx=6)
+        self.build_tool_lbl = ttk.Label(left, text="", foreground=PAL["muted"], wraplength=560, justify="left")
+        self.build_tool_lbl.pack(anchor="w", pady=(0, 4))
         ac = ttk.Frame(left); ac.pack(fill="x", pady=(4, 0))
         ttk.Label(ac, text="🎮 " + t("drops.activity")).pack(side="left")
         self._acts = {k: t("act." + k) for k in dropstats.ACTIVITIES}
@@ -4920,7 +4922,25 @@ class App:
         self.out = tk.Text(right, height=8, state="disabled", font=("Consolas", 10), wrap="word"); self.out.pack(fill="both", expand=True, pady=(4, 0))
         self.stats = ttk.Label(f)
         self.last_shown = None
-        self.refresh_counts(); self.refresh_status()
+        self.refresh_counts(); self.refresh_status(); self.refresh_build_tool_panel()
+
+    def refresh_build_tool_panel(self):
+        """Refresh the dashboard's read-only Build Tool summary."""
+        label = getattr(self, "build_tool_lbl", None)
+        if label is None:
+            return
+        build = active_build(self.cfg)
+        if not build:
+            label.config(text="Build Tool: aktif build yok")
+            return
+        try:
+            summary = stash.build_tool_summary(build, plan_of(build), self.stash.owned(), GAME)
+            missing = ", ".join(slot_name(s) for s in summary["missing_slots"]) or "yok"
+            label.config(text=(f"Build Tool · {build['name']} · {summary['completion']}% · "
+                               f"stash adayı {summary['candidate_count']} · eksik: {missing}"))
+        except Exception:
+            log.exception("Dashboard Build Tool summary failed")
+            label.config(text="Build Tool: özet alınamadı")
 
     def show_fit(self, item):
         """Panel: bu eşya aktif build'in ilgili yuvasının şartlarını karşılıyor mu?"""
@@ -6107,6 +6127,7 @@ class App:
         if hasattr(self, "pb") and self.pb.get() != name:
             self.pb.set(name); self.refresh_prog()
         if hasattr(self, "sheet_box"): self.draw_sheet()
+        self.refresh_build_tool_panel()
 
     def log(self, item, verdict, res):
         ensure_log()
@@ -6455,6 +6476,33 @@ class App:
         tot = sum(1 for v in stt.values() if v[0] != "off")
         pb = ttk.Progressbar(box, maximum=max(tot, 1), value=have); pb.pack(fill="x", padx=10, pady=(2, 0))
         ttk.Label(box, text=t("plan.progress", have=have, full=full, total=tot), foreground=PAL["muted"]).pack(anchor="w", padx=10)
+        # Build Tool summary: read-only bridge from the build definition to the
+        # local stash. It intentionally does not alter stash or loot decisions.
+        try:
+            tool = stash.build_tool_summary(b, plan_of(b), self.stash.owned(), GAME)
+            missing_text = ", ".join(slot_name(s) for s in tool["missing_slots"]) or "—"
+            tool_box = ttk.LabelFrame(box, text="The Division 2 Builds Tool")
+            tool_box.pack(fill="x", padx=10, pady=(6, 2))
+            ttk.Label(
+                tool_box,
+                text=(f"Stash adayları: {tool['candidate_count']}  ·  "
+                      f"Tamamlanma: {tool['completion']}%  ·  "
+                      f"Eksik slotlar: {missing_text}"),
+                foreground=PAL["muted"],
+                wraplength=1100,
+                justify="left",
+            ).pack(anchor="w", padx=8, pady=4)
+            if tool["next_drop"]:
+                next_text = ", ".join(slot_name(slot) for slot, _gain, _req in tool["next_drop"])
+                ttk.Label(
+                    tool_box,
+                    text=f"Öncelikli hedef slotlar: {next_text}",
+                    foreground=PAL["accent"],
+                    wraplength=1100,
+                    justify="left",
+                ).pack(anchor="w", padx=8, pady=(0, 4))
+        except Exception:
+            log.exception("Build Tool summary failed")
         m = b.get("meta", {})
         summ = m.get("summary", {}) if isinstance(m.get("summary"), dict) else {}
         line = summ.get(i18n.current_language()) or summ.get("en") or ""

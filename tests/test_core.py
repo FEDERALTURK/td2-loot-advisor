@@ -1,4 +1,5 @@
 """Lisans (Ed25519) ve sandık optimize edici testleri.   python tests/test_core.py"""
+import json
 import os, sys, time
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
@@ -42,6 +43,21 @@ def test_optimizer_keeps_set_bonus():
     assert len(sets) >= 4, r["slots"]                                   # exotic must not break the 4-piece bonus
     adv = stash.recal_advice(r, st.owned(), G)
     assert adv and all(a["donor"] != "Coyote's Mask" for a in adv)     # exotics are never recalibration donors
+
+
+def test_build_tool_summary_is_read_only_and_reports_candidates():
+    G = _game()
+    build = {"name": "Summary", "sets_or_brands": [], "talents": {},
+             "attributes": {"weapon_damage": {"weight": 1}}}
+    plan = engine.build_plan(build, G)
+    st = stash.Stash(ROOT / "tests/.stash_test.json"); st.clear()
+    st.add({"name": "Candidate", "slot": "Mask", "kind": "gear", "attrs": {}, "talents": []}, game=G)
+    before = json.dumps(st.data, sort_keys=True)
+    summary = stash.build_tool_summary(build, plan, st.owned(), G)
+    assert summary["candidate_count"] == 1
+    assert summary["total"] >= summary["done"]
+    assert isinstance(summary["missing_slots"], list)
+    assert json.dumps(st.data, sort_keys=True) == before
 
 def test_sanitize():
     G = _game()
