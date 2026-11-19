@@ -236,6 +236,18 @@ class AppStabilityTests(unittest.TestCase):
         self.assertEqual(obj._lt_last_sig, "Complete the objective")
         obj._lt_show.assert_called_once()
 
+    def test_translation_records_overlay_and_end_to_end_timings(self):
+        obj = self.translation_app(Mock(return_value=["Görevi tamamlayın"]))
+        obj.timings = self.app.performance.TimingStats()
+        queued_at = self.app.time.perf_counter() - 0.01
+        with patch.object(self.app.livetranslate, "blocks_from_lines",
+                          return_value=[("Complete the objective", (0, 0, 200, 20))]):
+            obj._lt_run(None, {}, token=7, queued_at=queued_at)
+        obj.poll()
+        timings = obj.timings.snapshot()
+        self.assertEqual(timings["translate_overlay_render"]["count"], 1)
+        self.assertEqual(timings["translate_end_to_end"]["count"], 1)
+
     def test_empty_or_mismatched_translation_is_not_cached(self):
         for output in ([], [""], [None], ["one", "extra"]):
             obj = self.translation_app(Mock(return_value=output))

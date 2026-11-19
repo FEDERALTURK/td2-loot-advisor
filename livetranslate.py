@@ -420,10 +420,11 @@ class Translator:
 
     def translate(self, texts, allow_partial=False):
         self.last_errors = {}
+        self.last_cache_hits = 0
         out, todo, first = [None] * len(texts), [], {}
         for i, t in enumerate(texts):
             c = self.cache.get(self.ck, t)
-            if c is not None: out[i] = c
+            if c is not None: out[i] = c; self.last_cache_hits += 1
             elif t in first: continue                      # aynı metin bir kez çevrilir
             else: first[t] = i; todo.append(i)
         if todo:

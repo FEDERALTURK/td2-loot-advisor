@@ -62,7 +62,7 @@ tr.translate(["Faye Lau warned Aaron Keener. She told him she would stop him."])
 ok(Fake.calls[-1] == ["ZQ0 warned ZQ1. She told him she would stop him."],
    "zamirli çok cümleli satır bağlam kaybolmasın diye birlikte çevrilir")
 n = len(Fake.calls); tr.translate(["Equip Eagle Bearer now.\n• Go fast."])
-ok(len(Fake.calls) == n, "önbellekten geldi (model çağrılmadı)")
+ok(len(Fake.calls) == n and tr.last_cache_hits == 1, "önbellekten geldi (model çağrılmadı, isabet sayıldı)")
 cache.save(); ok(lt.Cache(cache.path).get(tr.ck, "Equip Eagle Bearer now.\n• Go fast.") == out[0], "önbellek diske yazıldı")
 
 ai = lt.AIMT(lambda sys_, user: 'Sure: ["Birinci", "İkinci"]')

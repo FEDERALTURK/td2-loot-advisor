@@ -1,5 +1,12 @@
 ## TD2 Loot Advisor — Windows
 
+**9.1.5.50 — Canlı çeviri gecikme ölçümü ve anında çeviri**
+
+- “Şimdi çevir” artık gereksiz 3 saniye beklemeden kuyruğa girer.
+- Tanılama ekranı kuyruk bekleme, ekran yakalama, OCR motor karşılaştırması, model yükleme, çeviri, overlay çizimi ve toplam yakalama→overlay sürelerini gösterir.
+- Çeviri önbelleği isabetleri ölçülür; aynı çevirinin modeli yeniden çalıştırıp çalıştırmadığı izlenebilir.
+- Yerel çeviri motoru ve kullanıcı ayarları korunur; localhost servisi veya yeni bağımlılık eklenmedi.
+
 **9.1.5.49 — The Division 2 Builds Tool stash/panel özeti**
 
 - Build detayında stash aday ekipmanları, tamamlanma oranı, eksik slotlar ve öncelikli hedef slotlar gösterilir.

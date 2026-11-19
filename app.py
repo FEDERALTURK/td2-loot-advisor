@@ -150,7 +150,7 @@ import decision_center
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.1.5.49"
+APP_VERSION = "9.1.5.50"
 # "Bu oturumda ne kazandın?" özeti için kaba tahmin: bir eşyayı elle inceleyip
 # build'e göre karar vermenin (istatistikleri okuma + karşılaştırma) ortalama
 # süresi, saniye. Gerçek bir ölçüm değil — yalnızca arayüzde "tahmini" etiketiyle
@@ -2049,9 +2049,12 @@ class App:
         """İki OCR'ı aynı görüntüde ölç: Windows OCR, RapidOCR kadar okuyorsa ve daha hızlıysa (ya da ekran kartı oyunda
         meşgulken işlemcide çalıştığı için) onu seç."""
         st = self.cfg["settings"]
-        t0 = time.perf_counter(); r = OCR.segments(img) if hasattr(OCR, "segments") else OCR.lines(img); tr_ = time.perf_counter() - t0
+        timings = getattr(self, "timings", None)
+        with timings.measure("translate_ocr_rapid_bench") if timings is not None else nullcontext():
+            t0 = time.perf_counter(); r = OCR.segments(img) if hasattr(OCR, "segments") else OCR.lines(img); tr_ = time.perf_counter() - t0
         try:
-            t0 = time.perf_counter(); wv = w.segments(img); tw = time.perf_counter() - t0
+            with timings.measure("translate_ocr_windows_bench") if timings is not None else nullcontext():
+                t0 = time.perf_counter(); wv = w.segments(img); tw = time.perf_counter() - t0
         except Exception as e:
             log.info("Windows OCR failed: %s", e); wv, tw = [], 99
         sim = winocr.similar(r, wv)
@@ -2210,20 +2213,22 @@ class App:
         self.lt_stop(quiet=True)
         if not quiet: self.task_ask_share()
         st["tr_on"] = True; save_cfg(self.cfg)
-        self.lt_stop_ev = threading.Event()
-        if st.get("tr_auto", True):
-            threading.Thread(target=self._lt_loop, args=(self.lt_stop_ev,), daemon=True, name="live-translate").start()
-        log.info("Live translation on (engine=%s, mode=%s)", st.get("tr_engine"), st.get("tr_mode"))
         area = self.lt_area()
-        if area:                                            # program penceresi okunan alanı kapatıyorsa küçült
+        startup_wait = 0.0
+        if area:
             try:
                 self.root.update_idletasks()
                 x, y = self.root.winfo_rootx(), self.root.winfo_rooty()
                 if self.rects_overlap((x, y, x + self.root.winfo_width(), y + self.root.winfo_height()),
                                       (area["left"], area["top"], area["left"] + area["width"], area["top"] + area["height"])):
+                    startup_wait = 1.6
                     self.toast(t("scan.minimized")); self.root.after(1200, self.root.iconify)
             except Exception:
                 pass
+        self.lt_stop_ev = threading.Event()
+        if st.get("tr_auto", True):
+            threading.Thread(target=self._lt_loop, args=(self.lt_stop_ev, startup_wait), daemon=True, name="live-translate").start()
+        log.info("Live translation on (engine=%s, mode=%s)", st.get("tr_engine"), st.get("tr_mode"))
         self._lt_pad_start()
         self._lt_status(t("lt.running", key=st.get("tr_hotkey", "<f7>").upper().strip("<>")), "success")
         try:                                                 # özel tam ekranda kaplama görünmez: kullanıcıya söyle
@@ -2270,8 +2275,8 @@ class App:
             if audio: restored = bool(self.speech_start(quiet=True)) or restored
             self.toast(t("ga.translation_resumed" if restored else "ga.translation_unavailable"))
 
-    def _lt_loop(self, stop):
-        if stop.wait(1.6): return                            # program penceresi küçülürken okuma yapma
+    def _lt_loop(self, stop, startup_wait=0.0):
+        if startup_wait and stop.wait(startup_wait): return   # yalnız pencere çakışınca küçülmeyi bekle
         g = capture.Grabber(); g.keep()
         prev = last = None; stable = 0
         revision = getattr(self, "_lt_revision", 0)
@@ -2328,18 +2333,29 @@ class App:
         self._queue_translation(area, force=True)
         return True
 
+    def lt_now(self):
+        """Kullanıcının anında çeviri isteğini gecikmesiz kuyruğa al."""
+        self._lt_status(t("lt.now_hint"))
+        return self.lt_once()
+
     def _queue_translation(self, area, force=False, revision=None):
         if getattr(self, "_closing", False): return
         revision = getattr(self, "_lt_revision", 0) if revision is None else revision
         if revision != getattr(self, "_lt_revision", 0): return
         area = dict(area)
+        queued_at = time.perf_counter()
         def run(token):
             if revision != getattr(self, "_lt_revision", 0) or not self._translation_jobs.is_current(token): return
+            started_at = time.perf_counter()
+            timings = getattr(self, "timings", None)
+            if timings is not None:
+                timings.record("translate_queue_wait", (started_at - queued_at) * 1000.0)
             capture.default().keep()
             try:
-                with self.timings.measure("translate_capture"):
-                    img = grab(area)
-                self._lt_run(img, area, force, token)
+                with timings.measure("translate_pipeline") if timings is not None else nullcontext():
+                    with timings.measure("translate_capture") if timings is not None else nullcontext():
+                        img = grab(area)
+                    self._lt_run(img, area, force, token, queued_at)
             except Exception as e:
                 self._lt_failure(token, e)
             finally:
@@ -2354,9 +2370,9 @@ class App:
         msg = str(error)
         self._post_translation(token, lambda: self._lt_status(t("lt.failed", e=msg), "danger"))
 
-    def _lt_run(self, img, area, force=False, token=None):
+    def _lt_run(self, img, area, force=False, token=None, queued_at=None):
         if token is None:
-            return self._translation_jobs.submit(lambda tok: self._lt_run(img, area, force, tok))
+            return self._translation_jobs.submit(lambda tok: self._lt_run(img, area, force, tok, queued_at))
         try:
             if not self._translation_jobs.is_current(token): return
             # OCR motoru eşya okumasıyla eşzamanlı çalıştırılmaz; model çevirisi F8 kilidini tutmaz.
@@ -2380,8 +2396,16 @@ class App:
             if not self._translation_jobs.is_current(token): return
             t0 = time.perf_counter()
             translator = self.lt_translator()
+            engine = getattr(translator, "engine", None)
+            if isinstance(engine, livetranslate.LocalMT) and engine.tr is None:
+                with engine.lock:
+                    if engine.tr is None:
+                        timings = getattr(self, "timings", None)
+                        with timings.measure("translate_model_load") if timings is not None else nullcontext():
+                            engine.load()
             with self.timings.measure("translate_model"):
                 out = translator.translate([b[0] for b in blocks], allow_partial=True)
+            self._lt_last_cache_hits = getattr(translator, "last_cache_hits", 0)
             if len(out) != len(blocks):
                 raise RuntimeError(t("lt.invalid_result"))
             ms = int((time.perf_counter() - t0) * 1000)
@@ -2401,7 +2425,11 @@ class App:
             def deliver():
                 self._lt_last_sig = sig
                 self._lt_retry_at, self._lt_failures = 0.0, 0
-                self._lt_show(pairs, area, ms)
+                timings = getattr(self, "timings", None)
+                with timings.measure("translate_overlay_render") if timings is not None else nullcontext():
+                    self._lt_show(pairs, area, ms)
+                if timings is not None and queued_at is not None:
+                    timings.record("translate_end_to_end", (time.perf_counter() - queued_at) * 1000.0)
                 if skipped: self._lt_status(t("lt.partial", n=len(pairs), skipped=skipped), "warning")
                 elif low_conf: self._lt_status(t("lt.low_conf", n=len(pairs), ms=ms), "warning")
             self._post_translation(token, deliver)
@@ -2636,7 +2664,7 @@ class App:
                  wraplength=900).pack(fill="x", padx=14, pady=(2, 8))
         row = tk.Frame(hero, bg=PAL["surface"]); row.pack(fill="x", padx=14, pady=(0, 12))
         self.lt_btn = ttk.Button(row, text="", command=self.lt_toggle, style="Accent.TButton"); self.lt_btn.pack(side="left")
-        ttk.Button(row, text="⚡ " + t("lt.now"), command=lambda: (self._lt_status(t("lt.now_hint")), self.root.after(3000, self.lt_once))).pack(side="left", padx=6)
+        ttk.Button(row, text="⚡ " + t("lt.now"), command=self.lt_now).pack(side="left", padx=6)
         self.lt_stat = tk.Label(row, text="", bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 10)); self.lt_stat.pack(side="left", padx=10)
         # motor
         eb = ttk.LabelFrame(f, text="🧠 " + t("lt.engine")); eb.pack(fill="x", padx=10, pady=6)
@@ -8229,7 +8257,15 @@ class App:
             "game_found": game_found,
             "sistem": [f"Python: {sys.version.split()[0]}", f"Platform: {sys.platform}", f"Çözünürlük: {self.root.winfo_screenwidth()}x{self.root.winfo_screenheight()}", f"Pencere: {self.root.winfo_width()}x{self.root.winfo_height()}", f"Mod: {'kompakt' if getattr(self, 'compact', False) else 'normal'}"],
             "ocr": [f"Motor: {getattr(OCR, 'name', 'yok')}", f"Son OCR: {stat('ocr_total')}", f"Son tarama: {stat('scan_total')}", f"OCR geçişi: {getattr(self, 'auto_passes', lambda: '?')()}", f"Durum: {'çalışıyor' if getattr(self, 'running', False) else 'durduruldu'}"],
-            "ceviri": [f"Çeviri kuyruğu: active={trans.get('active', 0)} pending={trans.get('pending', 0)}", f"Çeviri ölçümü: {stat('translate_model')}", f"Canlı çeviri: {'açık' if st.get('tr_on') else 'kapalı'}"],
+            "ceviri": [f"Çeviri kuyruğu: active={trans.get('active', 0)} pending={trans.get('pending', 0)}",
+                       f"Kuyruk bekleme: {stat('translate_queue_wait')}", f"Yakalama: {stat('translate_capture')}",
+                       f"OCR: {stat('translate_ocr')}", f"Model yükleme: {stat('translate_model_load')}",
+                       f"OCR ölçümü Rapid/Windows: {stat('translate_ocr_rapid_bench')} / {stat('translate_ocr_windows_bench')}",
+                       f"Çeviri: {stat('translate_model')}", f"Overlay çizimi: {stat('translate_overlay_render')}",
+                       f"Toplam yakalama→overlay: {stat('translate_end_to_end')}",
+                       f"Önbellek isabeti (son istek): {getattr(self, '_lt_last_cache_hits', 'veri yok')}",
+                       f"Yakalama→sonuç işleme: {stat('translate_pipeline')}",
+                       f"Canlı çeviri: {'açık' if st.get('tr_on') else 'kapalı'}"],
             "asistan": [f"Asistan kuyruğu: active={assistant.get('active', 0)} pending={assistant.get('pending', 0)}", f"AI sağlayıcı: {st.get('ai_provider', 'builtin')}"],
             "oyun_yardimcisi": [f"Çalışma planı: {runtime.state}",
                                  f"Pasif OCR taraması: {'açık' if runtime.passive_capture else 'beklemede'}",
