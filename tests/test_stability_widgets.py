@@ -81,10 +81,13 @@ def main():
             result["widgets_ms"]=round((time.perf_counter()-init)*1000,1)
             result["pages"]=len(obj.tab_keys)
             result["tabs"]=len(obj.nb.tabs())
-            assert result["pages"]==15 and result["tabs"]==6
+            assert result["pages"]==16 and result["tabs"]==7
             assert len(obj.set_nb.tabs())==4 and "shortcuts" in obj.set_pages
             obj.select_page("settings"); obj.select_settings_page("shortcuts"); obj.root.update_idletasks()
             assert obj.current_tab()=="settings"
+            obj.select_page("build_tool"); obj.root.update(); assert hasattr(obj, "bt_panel")
+            assert hasattr(obj.bt_panel, "choice")
+            assert "BUILD TOOL" in obj.group_labels["build_tool"]
             assert obj.shortcut_vars["voice_hotkey"].get()==obj.cfg["settings"]["voice_hotkey"]
             obj.fx_watch_style.current(1)
             obj._fx_from_ui()

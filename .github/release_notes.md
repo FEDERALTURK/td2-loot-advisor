@@ -1,5 +1,14 @@
 ## TD2 Loot Advisor — Windows
 
+**9.1.5.51 — Build Tool, OCR fallback and startup/configuration hardening**
+
+- Added a standalone Build Tool workspace with local build records, equipment and weapon selection, fixed catalog details, brand/gear-set bonuses, SHD values, and estimated weapon damage/DPS/TTK.
+- Build Tool estimates are explicitly labeled estimates; independent `build_tool.json` storage leaves existing loot builds and stash data untouched.
+- Tesseract OCR fallback now returns measured text boxes and confidence instead of zero-sized boxes and a fabricated confidence score, so in-place translation can place valid overlays.
+- Four-part desktop versions are now retained by the task service and recognized by the usage dashboard parser.
+- Structurally invalid settings/build JSON now falls back only to a valid backup or bundled defaults while preserving the broken user file for recovery.
+- Added regressions for OCR coordinates/confidence, config recovery, desktop version reporting, and Build Tool navigation.
+
 **9.1.5.50 — Canlı çeviri gecikme ölçümü ve anında çeviri**
 
 - “Şimdi çevir” artık gereksiz 3 saniye beklemeden kuyruğa girer.

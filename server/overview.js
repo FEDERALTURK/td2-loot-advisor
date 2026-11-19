@@ -9,7 +9,7 @@
 //   Gösterge sekmesinin tek çağrısı: sürüm dağılımı, günlük açılışlar, hesap/lisans sayıları, bekleyen öneriler,
 //   görev durumu, kuyruktaki raporlar, son zamanlanmış çalışma ve "since" sonrası olaylar (bildirimler için).
 
-const VERSION_RE = /^TD2LootAdvisor\/(\d{1,2}\.\d{1,2}\.\d{1,3})(?:\s|$)/;
+const VERSION_RE = /^TD2LootAdvisor\/(\d{1,2}\.\d{1,2}\.\d{1,3}(?:\.\d{1,3})?)(?:\s|$)/;
 let READY = false;
 
 function json(data, status = 200) {

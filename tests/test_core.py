@@ -145,6 +145,26 @@ def test_share_roundtrip():
         try: share.decode(bad); raise AssertionError("accepted " + bad)
         except ValueError: pass
 
+def test_build_tool_state_stats_and_migration_are_bounded():
+    import engine
+    original = {"name": "Tool", "spec": "Gunner", "tool_slots": {"Mask": "Coyote's Mask"}}
+    migrated = engine.migrate_build_tool_build(original)
+    assert "build_tool" not in original
+    assert migrated["build_tool"]["slots"]["Mask"]["name"] == "Coyote's Mask"
+    migrated["build_tool"]["slots"]["Mask"].update({"cores": ["weapon_damage"], "attrs": {"crit_chance": 6}, "brand": "Providence"})
+    stats = engine.build_tool_stats(migrated)
+    assert stats["cores"]["offensive"] == 1 and stats["metrics"]["crit_chance"] == 6
+    assert stats["confidence"] == "estimated"
+    improved = engine.migrate_build_tool_build(original)
+    improved["build_tool"]["slots"]["Mask"] = {"attrs": {"crit_chance": 12}}
+    assert engine.build_tool_delta(migrated, improved)["crit_chance"]["delta"] == 6
+    migrated["build_tool"]["slots"]["Primary"] = {"name": "Test Rifle", "attrs": {"base_damage": 100, "rpm": 600, "magazine_size": 30, "reload_speed": 2}}
+    combat = engine.build_tool_combat_estimate(migrated)
+    assert combat["weapons"] and combat["weapons"][0]["dps"] > 0 and combat["confidence"] == "estimated"
+    code = __import__("share").encode(migrated)
+    decoded = __import__("share").decode(code)
+    assert decoded["build_tool"]["slots"]["Mask"]["name"] == "Coyote's Mask"
+
 def test_vendor_record():
     import vendor
     G = _game()
