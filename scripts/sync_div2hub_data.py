@@ -55,6 +55,17 @@ def fixed_talent(value: str) -> str | None:
     return None
 
 
+def source_metadata(source: Path = SOURCE) -> dict[str, str]:
+    """Read and validate the pinned community-data revision metadata."""
+    value = json.loads((source / "SOURCE_VERSION.json").read_text(encoding="utf-8"))
+    commit = str(value.get("commit") or "")
+    commit_date = str(value.get("commit_date") or "")
+    if not re.fullmatch(r"[0-9a-f]{40}", commit):
+        raise ValueError("Div2Hub source commit must be a full lowercase SHA-1")
+    datetime.strptime(commit_date, "%Y-%m-%d")
+    return {"commit": commit, "commit_date": commit_date}
+
+
 def main() -> None:
     if not (SOURCE / "README.md").is_file() or not (SOURCE / "LICENSE").is_file():
         raise SystemExit("Div2Hub source snapshot or license is missing")
@@ -262,11 +273,11 @@ def main() -> None:
     data["skill_variants"] = skill_details
 
     # Data source metadata is embedded so exported catalogs can be audited later.
+    revision = source_metadata()
     data["community_data_source"] = {
         "name": "Division 2 Community Data Hub",
         "repository": "https://github.com/div2hub/game-data",
-        "commit": "8d5e75b2fb9eb93118e3958a0b49cbf78e71b0a0",
-        "commit_date": "2026-10-17",
+        **revision,
         "license": "CC-BY-4.0",
     }
     # Apply the project's verified corrections after importing upstream data,

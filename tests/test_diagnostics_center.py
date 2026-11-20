@@ -37,6 +37,33 @@ def test_markdown_scrub():
     print("OK markdown")
 
 
+def test_build_tool_health_checks_are_read_only_and_reportable():
+    import tempfile
+    with tempfile.TemporaryDirectory() as directory:
+        path = Path(directory) / "build_tool.json"
+        catalog = {"version": "fixture", "source": "fixture",
+                   "community_data_source": {"commit": "a" * 40, "commit_date": "2026-11-14"},
+                   "items": {"Fixture Item": {}}, "weapon_index": {}, "attributes": {},
+                   "brands": [], "gear_sets": []}
+        context = {"settings": {}, "catalog": catalog, "log_dir": Path(directory),
+                   "config_path": Path(directory) / "missing-config.json",
+                   "build_tool_path": path, "game_window": None}
+        checks = diag.run_checks(context)
+        by_key = {check.key: check for check in checks}
+        assert by_key["game_catalog"].status == "ok"
+        assert by_key["build_tool_store"].status == "info"
+
+        original = b'{"builds": false}'
+        path.write_bytes(original)
+        checks = diag.run_checks(context)
+        assert next(check for check in checks if check.key == "build_tool_store").status == "error"
+        assert path.read_bytes() == original
+        report = diag.markdown_report("test", {"settings": {}, "system": {},
+                                     "check_results": checks}, [])
+        assert "Gerçek Yerel Kontroller" in report
+        print("OK Build Tool diagnostics are read-only")
+
+
 def test_real_check_engine_and_safe_repairs():
     """Motor bir komutu gerçekten denetler, yalnız güvenli ayarları düzeltir."""
     class Completed:
@@ -55,5 +82,5 @@ def test_real_check_engine_and_safe_repairs():
 
 
 if __name__ == "__main__":
-    test_safe_view(); test_events(); test_markdown_scrub(); test_real_check_engine_and_safe_repairs()
+    test_safe_view(); test_events(); test_markdown_scrub(); test_build_tool_health_checks_are_read_only_and_reportable(); test_real_check_engine_and_safe_repairs()
     print("RESULT: PASS")

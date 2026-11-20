@@ -370,7 +370,7 @@ class BuildToolPanel:
             messagebox.showinfo("Build Tool", "Save at least two builds to compare them.", parent=self.root)
             return
         win = tk.Toplevel(self.root); win.title("Build Tool · Compare builds"); win.transient(self.root)
-        win.geometry("760x520")
+        win.geometry("1000x580")
         names = [item["name"] for item in self.builds]
         row = ttk.Frame(win); row.pack(fill="x", padx=10, pady=8)
         ttk.Label(row, text="Build A").pack(side="left")
@@ -383,7 +383,14 @@ class BuildToolPanel:
         table = ttk.Treeview(win, columns=columns, show="headings", height=18)
         for key, label in zip(columns, ("Metric", "Build A", "Build B", "B − A")):
             table.heading(key, text=label)
-        table.column("metric", width=260); table.pack(fill="both", expand=True, padx=10, pady=4)
+        table.column("metric", width=190)
+        table.column("first", width=300)
+        table.column("second", width=300)
+        table.column("delta", width=110)
+        scroll = ttk.Scrollbar(win, orient="horizontal", command=table.xview)
+        table.configure(xscrollcommand=scroll.set)
+        table.pack(fill="both", expand=True, padx=10, pady=4)
+        scroll.pack(fill="x", padx=10)
         note = tk.StringVar()
         ttk.Label(win, textvariable=note, foreground=self.palette["muted"], wraplength=720).pack(anchor="w", padx=10, pady=5)
 
@@ -396,6 +403,17 @@ class BuildToolPanel:
                             f"{values['second']:g}", f"{values['delta']:+g}"))
             table.insert("", "end", values=("Total armor (estimate)", f"{data['armor']['first']:,.0f}",
                         f"{data['armor']['second']:,.0f}", f"{data['armor']['delta']:+,.0f}"))
+            for key, values in data["cores"].items():
+                table.insert("", "end", values=(f"{key.title()} cores", values["first"],
+                            values["second"], f"{values['delta']:+}"))
+            for change in data["slot_changes"]:
+                table.insert("", "end", values=(f"{change['slot']} · equipped item",
+                            change["first"], change["second"], "changed"))
+            for index in range(max(len(data["bonuses"]["first"]), len(data["bonuses"]["second"]))):
+                a = data["bonuses"]["first"][index] if index < len(data["bonuses"]["first"]) else "—"
+                b = data["bonuses"]["second"][index] if index < len(data["bonuses"]["second"]) else "—"
+                if a != b:
+                    table.insert("", "end", values=(f"Active bonus {index + 1}", a, b, "changed"))
             for weapon in data["weapons"]:
                 a, b = weapon["first"], weapon["second"]
                 table.insert("", "end", values=(f"{weapon['slot']} DPS (estimate)",

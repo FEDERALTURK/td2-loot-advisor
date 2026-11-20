@@ -14,6 +14,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'console/console_caption_page.dart';
 import 'services/cloud_link.dart';
 import 'services/companion_release.dart';
+import 'services/build_import.dart';
 import 'services/local_alerts.dart';
 
 const _bg = Color(0xFF090C12);
@@ -366,7 +367,10 @@ class CompanionModel extends ChangeNotifier {
       availableApkUrl = release.apkUrl;
       availableSha256Url = release.sha256Url;
       lastUpdateCheck = DateTime.now();
-      await _prefs?.setInt('last_update_check_ms', lastUpdateCheck!.millisecondsSinceEpoch);
+      await _prefs?.setInt(
+        'last_update_check_ms',
+        lastUpdateCheck!.millisecondsSinceEpoch,
+      );
       if (updateAlertsEnabled && updateAvailable) {
         final notified = _prefs?.getString('notified_companion_version');
         if (notified != release.version) {
@@ -391,7 +395,9 @@ class CompanionModel extends ChangeNotifier {
 
   Future<String?> downloadAndInstallUpdate() async {
     final apkUrl = availableApkUrl;
-    if (apkUrl == null || downloadingUpdate) return 'APK bağlantısı bulunamadı.';
+    if (apkUrl == null || downloadingUpdate) {
+      return 'APK bağlantısı bulunamadı.';
+    }
     downloadingUpdate = true;
     updateProgress = 0;
     notifyListeners();
@@ -415,10 +421,8 @@ class CompanionModel extends ChangeNotifier {
         '${directory.path}/TD2LootAdvisor_Companion_$availableVersion.apk',
       );
       await file.writeAsBytes(response.bodyBytes, flush: true);
-      await const MethodChannel('td2_companion/update').invokeMethod<bool>(
-        'installApk',
-        {'path': file.path},
-      );
+      await const MethodChannel('td2_companion/update')
+          .invokeMethod<bool>('installApk', {'path': file.path});
       return null;
     } catch (error) {
       return 'Güncelleme indirilemedi: $error';
@@ -586,7 +590,9 @@ class CompanionModel extends ChangeNotifier {
       final response = await http
           .get(
             endpoint,
-            headers: {'User-Agent': 'TD2-Loot-Advisor-Companion/$companionVersion'},
+            headers: {
+              'User-Agent': 'TD2-Loot-Advisor-Companion/$companionVersion',
+            },
           )
           .timeout(const Duration(seconds: 4));
       if (response.statusCode != 200) {
@@ -1004,7 +1010,9 @@ class _ContentAlertsCard extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
                 child: FilledButton.icon(
-                  onPressed: model.downloadingUpdate ? null : () => _startUpdate(context),
+                  onPressed: model.downloadingUpdate
+                      ? null
+                      : () => _startUpdate(context),
                   icon: const Icon(Icons.system_update_alt_rounded),
                   label: Text(
                     model.downloadingUpdate
@@ -1154,6 +1162,91 @@ class _BuildsPageState extends State<BuildsPage> {
     );
   }
 
+  Future<void> _importDesktopJson() async {
+    final controller = TextEditingController();
+    try {
+      final raw = await showDialog<String>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('Masaüstü Build Tool içe aktar'),
+          content: SizedBox(
+            width: 520,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'PC programında Build Tool → Dışa aktar ile oluşturduğun JSON dosyasını açıp içeriğini buraya yapıştır. Veriler bu telefonda işlenir.',
+                    style: TextStyle(color: _soft),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: controller,
+                    minLines: 6,
+                    maxLines: 12,
+                    maxLength: 2 * 1024 * 1024,
+                    decoration: const InputDecoration(
+                      labelText: 'Dışa aktarılan JSON',
+                      alignLabelWithHint: true,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('İptal'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(dialogContext, controller.text),
+              child: const Text('İçe aktar'),
+            ),
+          ],
+        ),
+      );
+      if (raw == null || raw.trim().isEmpty || !mounted) return;
+      final imported = parseDesktopBuildExport(raw);
+      if (widget.model.savedBuilds.length + imported.length > 200) {
+        throw const FormatException(
+          'Telefonda en fazla 200 build saklanabilir.',
+        );
+      }
+      final names = widget.model.savedBuilds
+          .map((build) => '${build['name']}'.toLowerCase())
+          .toSet();
+      for (final build in imported) {
+        final baseName = '${build['name']}';
+        var name = baseName;
+        var suffix = 1;
+        while (names.contains(name.toLowerCase())) {
+          suffix++;
+          name = '$baseName (Imported${suffix > 2 ? ' $suffix' : ''})';
+        }
+        names.add(name.toLowerCase());
+        build['name'] = name;
+      }
+      await widget.model.replaceSavedBuilds([
+        ...imported,
+        ...widget.model.savedBuilds,
+      ]);
+      if (!mounted) return;
+      setState(() => tab = 1);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${imported.length} build telefona aktarıldı.')),
+      );
+    } on FormatException catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('İçe aktarılamadı: ${error.message}')),
+      );
+    } finally {
+      controller.dispose();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final meta = widget.model.builds.where((build) {
@@ -1205,6 +1298,12 @@ class _BuildsPageState extends State<BuildsPage> {
                 ),
               ],
             ],
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: _importDesktopJson,
+            icon: const Icon(Icons.file_download_outlined),
+            label: const Text('Masaüstü Build Tool JSON içe aktar'),
           ),
           const SizedBox(height: 12),
           SegmentedButton<int>(
@@ -1516,6 +1615,7 @@ class SavedBuildCard extends StatelessWidget {
   Widget build(BuildContext context) => Card(
     margin: const EdgeInsets.only(bottom: 10),
     child: ListTile(
+      onTap: () => _showSavedBuildDetails(context, data),
       leading: const CircleAvatar(
         backgroundColor: Color(0xFF302015),
         child: Icon(Icons.shield_outlined, color: _orange),
@@ -1531,14 +1631,113 @@ class SavedBuildCard extends StatelessWidget {
         style: const TextStyle(color: _soft, height: 1.4),
       ),
       isThreeLine: true,
-      trailing: IconButton(
-        tooltip: 'Build’i sil',
-        onPressed: onDelete,
-        icon: const Icon(Icons.delete_outline),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            tooltip: 'Build ayrıntılarını gör',
+            onPressed: () => _showSavedBuildDetails(context, data),
+            icon: const Icon(Icons.visibility_outlined, color: _orange),
+          ),
+          IconButton(
+            tooltip: 'Build’i sil',
+            onPressed: onDelete,
+            icon: const Icon(Icons.delete_outline),
+          ),
+        ],
       ),
     ),
   );
 }
+
+Future<void> _showSavedBuildDetails(
+  BuildContext context,
+  Map<String, dynamic> build,
+) => showModalBottomSheet<void>(
+  context: context,
+  isScrollControlled: true,
+  showDragHandle: true,
+  builder: (context) {
+    final slots = build['slots'] is Map ? build['slots'] as Map : const {};
+    final entries = slots.entries.where((entry) => entry.value is Map).toList();
+    const labels = {
+      'core': 'Çekirdek',
+      'brand': 'Marka',
+      'gear_set': 'Ekipman seti',
+      'talent': 'Yetenek',
+    };
+    return SafeArea(
+      child: SizedBox(
+        height: MediaQuery.sizeOf(context).height * .75,
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(18, 4, 18, 24),
+          children: [
+            Text(
+              '${build['name'] ?? 'Kaydedilmiş build'}',
+              style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w800),
+            ),
+            if ('${build['specialization'] ?? ''}'.isNotEmpty ||
+                '${build['playstyle'] ?? ''}'.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 4, bottom: 12),
+                child: Text(
+                  [build['specialization'], build['playstyle']]
+                      .where((value) => value != null && '$value'.isNotEmpty)
+                      .join(' · '),
+                  style: const TextStyle(color: _soft),
+                ),
+              ),
+            if (entries.isEmpty)
+              Text(
+                '${build['gear'] ?? 'Bu kayıtta ayrıntılı ekipman yuvaları bulunmuyor.'}',
+                style: const TextStyle(color: _soft, height: 1.5),
+              )
+            else
+              ...entries.map((entry) {
+                final item = entry.value as Map;
+                final lines = <String>[];
+                for (final key in labels.keys) {
+                  final value = item[key];
+                  if (value != null && '$value'.isNotEmpty) {
+                    lines.add('${labels[key]}: $value');
+                  }
+                }
+                if (item['attrs'] is Map) {
+                  final attrs = item['attrs'] as Map;
+                  lines.addAll(
+                    attrs.entries.map(
+                      (attr) =>
+                          '${'${attr.key}'.replaceAll('_', ' ')}: ${attr.value}',
+                    ),
+                  );
+                }
+                if (item['attachments'] is List) {
+                  for (final attachment in item['attachments'] as List) {
+                    if (attachment is Map) {
+                      lines.add(
+                        '${attachment['slot'] ?? 'Mod'}: '
+                                '${attachment['name'] ?? ''} ${attachment['stats'] ?? ''}'
+                            .trim(),
+                      );
+                    }
+                  }
+                }
+                return Card(
+                  child: ListTile(
+                    title: Text(
+                      '${entry.key} · ${item['name'] ?? 'Seçilmedi'}',
+                    ),
+                    subtitle: lines.isEmpty ? null : Text(lines.join('\n')),
+                    isThreeLine: lines.length > 1,
+                  ),
+                );
+              }),
+          ],
+        ),
+      ),
+    );
+  },
+);
 
 class NewsCard extends StatelessWidget {
   const NewsCard({super.key, required this.item, this.compact = false});

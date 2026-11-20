@@ -6,6 +6,7 @@ import uuid
 import math
 import re
 import hashlib
+from datetime import date
 
 SLOTS = ("Mask", "Backpack", "Chest", "Gloves", "Holster", "Kneepads", "Primary", "Secondary",
          "SideArm", "Specialization", "Skill1", "Skill2")
@@ -257,6 +258,19 @@ def catalog_diagnostics(catalog):
         warnings.append("Library source is not recorded")
     if provenance["community_commit"] == "not recorded":
         warnings.append("Community data commit is not recorded")
+    elif not re.fullmatch(r"[0-9a-f]{40}", provenance["community_commit"]):
+        warnings.append("Community data commit is not a full revision hash")
+    try:
+        age = (date.today() - date.fromisoformat(provenance["community_date"])).days
+        if age < 0:
+            warnings.append("Community data commit date is in the future")
+        elif age > 120:
+            warnings.append(f"Community data snapshot is {age} days old")
+    except ValueError:
+        if provenance["community_date"] != "not recorded":
+            warnings.append("Community data commit date is invalid")
+        else:
+            warnings.append("Community data commit date is not recorded")
     return {"provenance": provenance, "counts": {
         "gear_items": len(items), "weapons": len(weapons), "attributes": len(attrs),
         "brands": len(catalog.get("brands") or []), "gear_sets": len(catalog.get("gear_sets") or []),
@@ -355,8 +369,9 @@ def validate_build(build, catalog=None):
 
 def compare_builds(first, second, catalog=None):
     """Compare two local builds under the same catalog and calculation assumptions."""
-    left = calculate(first, catalog)
-    right = calculate(second, catalog)
+    first_build, second_build = normalize_build(first), normalize_build(second)
+    left = calculate(first_build, catalog)
+    right = calculate(second_build, catalog)
     stats = {key: {"first": left["stats"].get(key, 0), "second": right["stats"].get(key, 0),
                    "delta": right["stats"].get(key, 0) - left["stats"].get(key, 0)}
              for key in sorted(left["stats"].keys() | right["stats"].keys())}
@@ -368,11 +383,28 @@ def compare_builds(first, second, catalog=None):
             weapons.append({"slot": slot, "first": a, "second": b,
                             "dps_delta": (b["dps"] if b else 0) - (a["dps"] if a else 0),
                             "ttk_delta": (b["ttk"] if b else 0) - (a["ttk"] if a else 0)})
+    def item_summary(item):
+        if not item:
+            return "—"
+        parts = [item["name"] or "Unnamed item"]
+        parts.extend(value for value in (item["brand"], item["gear_set"], item["core"], item["talent"]) if value)
+        parts.extend(f"{key.replace('_', ' ')} {value:g}" for key, value in sorted(item["attrs"].items()))
+        return " · ".join(parts)
+
+    slot_changes = [{"slot": slot, "first": item_summary(first_build["slots"][slot]),
+                     "second": item_summary(second_build["slots"][slot])}
+                    for slot in SLOTS if first_build["slots"][slot] != second_build["slots"][slot]]
+    def bonus_summary(result):
+        return [f"{bonus['name']} · {bonus['tier']}-piece: {bonus['text']}"
+                for kind in ("brands", "gear_sets") for bonus in result["bonuses"][kind]]
+
     return {"stats": stats, "armor": {"first": left["armor"], "second": right["armor"],
                                        "delta": right["armor"] - left["armor"]},
             "cores": {key: {"first": left["cores"][key], "second": right["cores"][key],
                              "delta": right["cores"][key] - left["cores"][key]}
                       for key in left["cores"]}, "weapons": weapons,
+            "slot_changes": slot_changes,
+            "bonuses": {"first": bonus_summary(left), "second": bonus_summary(right)},
             "assumptions": "Both estimates use the same local catalog and target HP; they are not in-game measurements."}
 
 

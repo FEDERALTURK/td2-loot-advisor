@@ -202,6 +202,40 @@ def run_checks(context: dict, command_runner=subprocess.run) -> list[CheckResult
         results.append(_result("game_window", "Oyun penceresi", "ok", "Oyun penceresi algılandı.", f"{game.get('width')}x{game.get('height')}"))
     else:
         results.append(_result("game_window", "Oyun penceresi", "info", "Oyun açık değil veya simge durumunda; OCR testi atlandı."))
+
+    catalog = context.get("catalog")
+    if isinstance(catalog, dict):
+        try:
+            import build_tool
+            data = build_tool.catalog_diagnostics(catalog)
+            counts, source = data["counts"], data["provenance"]
+            detail = (f"{counts['gear_items']} ekipman · {counts['weapons']} silah · "
+                      f"{counts['attributes']} attribute · kaynak tarihi {source['community_date']}")
+            if data["warnings"]:
+                results.append(_result("game_catalog", "Oyun veri kütüphanesi", "warning",
+                                       detail + " · " + "; ".join(data["warnings"][:3])))
+            else:
+                results.append(_result("game_catalog", "Oyun veri kütüphanesi", "ok", detail,
+                                       source["community_commit"][:12]))
+        except Exception as exc:
+            results.append(_result("game_catalog", "Oyun veri kütüphanesi", "error",
+                                   "Build Tool oyun veri kütüphanesi denetlenemedi.", type(exc).__name__))
+
+    store_path = context.get("build_tool_path")
+    if store_path:
+        path = Path(store_path)
+        if not path.exists():
+            results.append(_result("build_tool_store", "Build Tool kayıtları", "info",
+                                   "Henüz yerel Build Tool kaydı oluşturulmamış."))
+        else:
+            try:
+                import build_tool
+                store = build_tool.load_store(path)
+                results.append(_result("build_tool_store", "Build Tool kayıtları", "ok",
+                                       f"{len(store['builds'])} build · {len(store['templates'])} şablon; dosya değiştirilmedi."))
+            except Exception as exc:
+                results.append(_result("build_tool_store", "Build Tool kayıtları", "error",
+                                       "Build Tool kayıt dosyası okunamadı; özgün dosyaya dokunulmadı.", type(exc).__name__))
     return results
 
 
@@ -241,6 +275,19 @@ def markdown_report(app_version: str, snapshot: dict, events: list[Event]) -> st
         "## Hızlı Kontrol",
     ]
     lines += [f"- **{reports.scrub(x['name'])}:** {reports.scrub(x['detail'])}" for x in checks]
+    local_checks = snapshot.get("check_results") or []
+    if local_checks:
+        lines += ["", "## Gerçek Yerel Kontroller"]
+        for result in local_checks[:40]:
+            if isinstance(result, dict):
+                title, status = result.get("title", "Kontrol"), result.get("status", "info")
+                detail, evidence = result.get("detail", ""), result.get("evidence", "")
+            else:
+                title, status = getattr(result, "title", "Kontrol"), getattr(result, "status", "info")
+                detail, evidence = getattr(result, "detail", ""), getattr(result, "evidence", "")
+            suffix = f" · kanıt: {evidence}" if evidence else ""
+            lines.append(f"- **{reports.scrub(title)} ({reports.scrub(status)}):** "
+                         f"{reports.scrub(detail + suffix)}")
     lines += ["", "## Sistem Özeti", "```text", system[:3500], "```", "", "## Son Olaylar", "```text"]
     for event in events[-100:]:
         lines.append(reports.scrub(f"{event.timestamp} | {event.level:<7} | {event.category} | {event.message}"))

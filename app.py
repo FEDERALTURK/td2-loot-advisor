@@ -151,7 +151,7 @@ import decision_center
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.1.5.53"
+APP_VERSION = "9.1.5.54"
 # "Bu oturumda ne kazandın?" özeti için kaba tahmin: bir eşyayı elle inceleyip
 # build'e göre karar vermenin (istatistikleri okuma + karşılaştırma) ortalama
 # süresi, saniye. Gerçek bir ölçüm değil — yalnızca arayüzde "tahmini" etiketiyle
@@ -8347,7 +8347,8 @@ class App:
         except Exception: game = None
         return {"settings": data["settings"], "config_path": CFG_PATH, "log_dir": APPLOG_DIR,
                 "translation_ready": data["translation_ready"], "overlay_present": bool(getattr(self, "overlay", None)),
-                "last_error": self.last_err, "game_window": game}
+                "last_error": self.last_err, "game_window": game, "catalog": GAME,
+                "build_tool_path": BASE / "build_tool.json"}
 
     def run_diagnostic_engine(self):
         """Disk, OCR komutu ve model durumunu arka planda gerçekten denetle."""
@@ -8489,7 +8490,8 @@ class App:
     def preview_github_report(self):
         data = self._diagnostic_snapshot()
         text = diagnostics_center.markdown_report(APP_VERSION, {"settings": data["settings"], "system": data["system_dict"],
-                                                                "ocr_ready": data["ocr_ready"], "translation_ready": data["translation_ready"], "game_found": data["game_found"]},
+                                                                "ocr_ready": data["ocr_ready"], "translation_ready": data["translation_ready"], "game_found": data["game_found"],
+                                                                "check_results": getattr(self, "_diagnostic_results", [])},
                                                   self._diag_events.snapshot(100))
         w = tk.Toplevel(self.root); w.title("Maskelenmiş GitHub raporu önizlemesi"); w.geometry("820x620")
         ttk.Label(w, text="Maskelenmiş Markdown raporu", font=(ui_theme.FONT_SEMI, 13), foreground=PAL["accent"]).pack(anchor="w", padx=12, pady=(12, 4))

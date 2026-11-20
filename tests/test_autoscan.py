@@ -90,6 +90,9 @@ if os.name == "nt":
     warm = (time.perf_counter() - t0) / 10
     print(f"     pencere taraması: ilk {cold*1000:.1f} ms, önbellekli {warm*1000:.1f} ms")
     ok(warm <= cold * 1.5 + 0.002, "süreç adı önbelleği taramayı hızlandırıyor")
+# The cache TTL can expire while earlier checks in this script run; exclude the
+# expected refresh from the warm-cache latency measurement.
+app.monitors()
 t0 = time.perf_counter()
 for _ in range(20): app.monitors()
 ok((time.perf_counter() - t0) / 20 < 0.005, "monitör listesi önbellekten")
