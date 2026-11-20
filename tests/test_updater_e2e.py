@@ -5,15 +5,19 @@ Oyun belleğine dokunulmaz, gerçek GitHub API kullanılır.
 """
 import sys
 import os
+import base64
 import hashlib
 import json
 import tempfile
 import io
+from contextlib import redirect_stdout
 import unittest
 import urllib.request
 import zipfile
 from pathlib import Path
 from unittest.mock import patch, MagicMock
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
 # --- updater modülünü import et ---
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -144,6 +148,23 @@ class TestExpectedSha(unittest.TestCase):
         self.assertIsNone(result)
 
 
+class TestReleaseInfo(unittest.TestCase):
+    def test_versioned_source_asset_is_preferred_to_api_zipball(self):
+        result = updater._release_info({
+            "tag_name": "v9.1.5.53",
+            "zipball_url": "https://api.github.com/legacy.zip",
+            "assets": [{"name": "TD2LootAdvisor_9.1.5.53_source.zip",
+                        "browser_download_url": updater.DOWNLOAD_PREFIX +
+                        "v9.1.5.53/TD2LootAdvisor_9.1.5.53_source.zip"}],
+        })
+        self.assertEqual(result["zipball"], updater.DOWNLOAD_PREFIX +
+                         "v9.1.5.53/TD2LootAdvisor_9.1.5.53_source.zip")
+
+    def test_old_release_falls_back_to_api_zipball(self):
+        result = updater._release_info({"tag_name": "v9.1.5.52", "zipball_url": "https://api.github.com/legacy.zip"})
+        self.assertEqual(result["zipball"], "https://api.github.com/legacy.zip")
+
+
 # ---------------------------------------------------------------------------
 # 4. _allowed() — kaynak güncelleme whitelist testi
 # ---------------------------------------------------------------------------
@@ -194,6 +215,36 @@ class TestAllowed(unittest.TestCase):
 # 5. install_frozen() — SHA256 doğrulama testi (mock)
 # ---------------------------------------------------------------------------
 class TestInstallFrozen(unittest.TestCase):
+    def test_release_tag_must_match_installer_and_checksum(self):
+        base = updater.DOWNLOAD_PREFIX + "v9.1.5.40/"
+        info = {
+            "tag": "v9.1.5.39", "version": "9.1.5.39",
+            "setup": base + "TD2LootAdvisor_Setup_9.1.5.40.exe",
+            "sha_url": base + "SHA256SUMS.sha256",
+        }
+        with self.assertRaises(RuntimeError):
+            updater.install_frozen(info)
+
+    def test_release_assets_must_match_exact_tagged_paths(self):
+        base = updater.DOWNLOAD_PREFIX + "v9.1.5.39/"
+        info = {
+            "tag": "v9.1.5.39", "version": "9.1.5.39",
+            "setup": base + "TD2LootAdvisor_Setup_9.1.5.39.exe",
+            "sha_url": updater.DOWNLOAD_PREFIX + "v9.1.5.38/SHA256SUMS.sha256",
+        }
+        with self.assertRaises(RuntimeError):
+            updater.install_frozen(info)
+
+    def test_signed_release_without_manifest_is_rejected(self):
+        base = updater.DOWNLOAD_PREFIX + "v9.1.5.53/"
+        info = {
+            "tag": "v9.1.5.53", "version": "9.1.5.53",
+            "setup": base + "TD2LootAdvisor_Setup_9.1.5.53.exe",
+            "sha_url": base + "SHA256SUMS.sha256",
+        }
+        with self.assertRaisesRegex(RuntimeError, "manifest is missing"):
+            updater.install_frozen(info)
+
     def test_sha_mismatch_raises(self):
         """Yanlış SHA256 ile install_frozen() RuntimeError fırlatmalı."""
         fake_data = b"fake installer content"
@@ -208,8 +259,9 @@ class TestInstallFrozen(unittest.TestCase):
             return fake_data
 
         info = {
-            "setup": "https://example.com/TD2LootAdvisor_Setup_9.1.5.39.exe",
-            "sha_url": "https://example.com/SHA256SUMS.sha256",
+            "tag": "v9.1.5.39", "version": "9.1.5.39",
+            "setup": updater.DOWNLOAD_PREFIX + "v9.1.5.39/TD2LootAdvisor_Setup_9.1.5.39.exe",
+            "sha_url": updater.DOWNLOAD_PREFIX + "v9.1.5.39/SHA256SUMS.sha256",
         }
 
         with patch("updater._get", side_effect=fake_get):
@@ -220,6 +272,141 @@ class TestInstallFrozen(unittest.TestCase):
         """Setup URL'si olmadan install_frozen() RuntimeError fırlatmalı."""
         with self.assertRaises(RuntimeError):
             updater.install_frozen({"setup": None, "sha_url": None})
+
+
+class TestSignedReleaseManifest(unittest.TestCase):
+    def setUp(self):
+        self.private = Ed25519PrivateKey.generate()
+        self.public_b64 = base64.b64encode(
+            self.private.public_key().public_bytes(serialization.Encoding.Raw, serialization.PublicFormat.Raw)
+        ).decode("ascii")
+        self.tag = "v9.1.5.53"
+        self.version = "9.1.5.53"
+        self.manifest_url = updater.DOWNLOAD_PREFIX + self.tag + "/TD2_RELEASE_MANIFEST.json"
+        self.signature_url = updater.DOWNLOAD_PREFIX + self.tag + "/TD2_RELEASE_MANIFEST.sig"
+        self.payload = {
+            "schema": 1, "repository": updater.REPO, "tag": self.tag, "version": self.version,
+            "assets": {"TD2LootAdvisor_Setup_9.1.5.53.exe": "a" * 64},
+            "source_zipball": {"url": updater.DOWNLOAD_PREFIX + self.tag + "/TD2LootAdvisor_9.1.5.53_source.zip",
+                               "sha256": "b" * 64},
+        }
+
+    def _signed(self, payload=None):
+        body = json.dumps(payload or self.payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode()
+        return body, base64.b64encode(self.private.sign(body))
+
+    def _info(self):
+        return {"tag": self.tag, "version": self.version, "manifest_url": self.manifest_url,
+                "signature_url": self.signature_url, "zipball": self.payload["source_zipball"]["url"]}
+
+    def test_valid_signature_and_metadata_are_accepted(self):
+        body, sig = self._signed()
+        data = {self.manifest_url: body, self.signature_url: sig}
+        with patch.object(updater, "RELEASE_SIGNING_PUBLIC_KEY_B64", self.public_b64), \
+                patch("updater._get", side_effect=lambda url, **kwargs: data[url]):
+            self.assertEqual(updater._verified_release_manifest(self._info()), self.payload)
+
+    def test_modified_manifest_is_rejected(self):
+        body, sig = self._signed()
+        changed = body.replace(b"9.1.5.53", b"9.1.5.54", 1)
+        data = {self.manifest_url: changed, self.signature_url: sig}
+        with patch.object(updater, "RELEASE_SIGNING_PUBLIC_KEY_B64", self.public_b64), \
+                patch("updater._get", side_effect=lambda url, **kwargs: data[url]), \
+                self.assertRaisesRegex(RuntimeError, "signature is invalid"):
+            updater._verified_release_manifest(self._info())
+
+    def test_signed_metadata_for_different_release_is_rejected(self):
+        wrong = dict(self.payload, tag="v9.1.5.54")
+        body, sig = self._signed(wrong)
+        data = {self.manifest_url: body, self.signature_url: sig}
+        with patch.object(updater, "RELEASE_SIGNING_PUBLIC_KEY_B64", self.public_b64), \
+                patch("updater._get", side_effect=lambda url, **kwargs: data[url]), \
+                self.assertRaisesRegex(RuntimeError, "metadata does not match"):
+            updater._verified_release_manifest(self._info())
+
+    def test_signature_required_from_next_release(self):
+        self.assertFalse(updater._signature_required({"version": "9.1.5.52"}))
+        self.assertTrue(updater._signature_required({"version": "9.1.5.53"}))
+
+    def test_signed_source_archive_hash_is_enforced_before_writes(self):
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w") as zf:
+            zf.writestr("owner-repo-abc123/app.py", "# modified\n")
+        zipball = buf.getvalue()
+        body, sig = self._signed()
+        zip_url = self.payload["source_zipball"]["url"]
+        data = {self.manifest_url: body, self.signature_url: sig, zip_url: zipball}
+        info = dict(self._info(), zipball=zip_url)
+        with tempfile.TemporaryDirectory() as base:
+            with patch.object(updater, "RELEASE_SIGNING_PUBLIC_KEY_B64", self.public_b64), \
+                    patch("updater._get", side_effect=lambda url, **kwargs: data[url]), \
+                    self.assertRaisesRegex(RuntimeError, "source archive SHA-256 mismatch"):
+                updater.update_source(info, base)
+            self.assertFalse((Path(base) / "app.py").exists())
+
+    def test_release_signer_output_verifies_with_the_embedded_public_key(self):
+        from scripts.sign_release_manifest import signed_manifest
+
+        source_data = b"source archive fixture"
+        source_url = self.payload["source_zipball"]["url"]
+        with tempfile.TemporaryDirectory() as temp:
+            checksum_file = Path(temp) / "SHA256SUMS.sha256"
+            checksum_file.write_text("a" * 64 + "  TD2LootAdvisor_Setup_9.1.5.53.exe\n", encoding="ascii")
+            body, sig = signed_manifest(self.tag, self.version, checksum_file,
+                                        source_url, source_data, self.private)
+        data = {self.manifest_url: body, self.signature_url: sig}
+        with patch.object(updater, "RELEASE_SIGNING_PUBLIC_KEY_B64", self.public_b64), \
+                patch("updater._get", side_effect=lambda url, **kwargs: data[url]):
+            self.assertEqual(updater._verified_release_manifest(self._info())["source_zipball"]["sha256"],
+                             hashlib.sha256(source_data).hexdigest())
+
+    def test_signer_cli_reads_secret_and_writes_signed_release_assets(self):
+        from scripts import sign_release_manifest
+
+        private_pem = self.private.private_bytes(
+            serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8, serialization.NoEncryption())
+        with tempfile.TemporaryDirectory() as temp:
+            out = Path(temp)
+            files = {
+                "TD2LootAdvisor_Setup_9.1.5.53.exe": b"installer fixture",
+                "TD2LootAdvisor_9.1.5.53_portable.zip": b"portable fixture",
+                "TD2LootAdvisor_9.1.5.53_source.zip": b"source fixture",
+            }
+            for name, content in files.items():
+                (out / name).write_bytes(content)
+            (out / "SHA256SUMS.sha256").write_text(
+                "".join(f"{hashlib.sha256(content).hexdigest()}  {name}\n" for name, content in files.items()),
+                encoding="ascii",
+            )
+            argv = ["sign_release_manifest.py", "--tag", self.tag, "--version", self.version,
+                    "--installer-dir", temp]
+            with patch.dict(os.environ, {"TD2_RELEASE_SIGNING_KEY_BASE64": base64.b64encode(private_pem).decode()}), \
+                    patch("sys.argv", argv), redirect_stdout(io.StringIO()):
+                sign_release_manifest.main()
+            body = (out / "TD2_RELEASE_MANIFEST.json").read_bytes()
+            signature = base64.b64decode((out / "TD2_RELEASE_MANIFEST.sig").read_bytes().strip(), validate=True)
+            self.private.public_key().verify(signature, body)
+            self.assertEqual(json.loads(body)["source_zipball"]["sha256"],
+                             hashlib.sha256(files["TD2LootAdvisor_9.1.5.53_source.zip"]).hexdigest())
+
+
+class TestDownloadRedirects(unittest.TestCase):
+    def test_github_asset_redirect_is_allowed(self):
+        handler = updater._GitHubRedirectHandler()
+        redirected = handler.redirect_request(
+            urllib.request.Request("https://github.com/download"), None, 302,
+            "Found", {}, "https://release-assets.githubusercontent.com/file",
+        )
+        self.assertEqual(redirected.full_url, "https://release-assets.githubusercontent.com/file")
+
+    def test_untrusted_or_insecure_redirect_is_rejected(self):
+        handler = updater._GitHubRedirectHandler()
+        for target in ("https://evil.example/file", "http://github.com/file",
+                       "https://user@github.com/file", "https://github.com:444/file"):
+            with self.subTest(target=target), self.assertRaises(urllib.error.HTTPError) as caught:
+                handler.redirect_request(urllib.request.Request("https://github.com/download"), None, 302,
+                                         "Found", {}, target)
+            caught.exception.close()
 
 
 # ---------------------------------------------------------------------------
@@ -239,7 +426,7 @@ class TestUpdateSource(unittest.TestCase):
             "app.py": "# new version\n",
             "lang/tr.json": '{"hello": "merhaba"}',
         })
-        info = {"zipball": "https://example.com/source.zip", "tag": "v9.1.5.40"}
+        info = {"zipball": f"https://api.github.com/repos/{updater.REPO}/zipball/v9.1.5.40", "tag": "v9.1.5.40"}
 
         with tempfile.TemporaryDirectory() as base:
             with patch("updater._get", return_value=zip_data):
@@ -253,7 +440,7 @@ class TestUpdateSource(unittest.TestCase):
             "stash.json": '{}',
             "app.py": "# safe\n",
         })
-        info = {"zipball": "https://example.com/source.zip", "tag": "v9.1.5.40"}
+        info = {"zipball": f"https://api.github.com/repos/{updater.REPO}/zipball/v9.1.5.40", "tag": "v9.1.5.40"}
 
         with tempfile.TemporaryDirectory() as base:
             # pre-create builds.json with original content
@@ -262,24 +449,29 @@ class TestUpdateSource(unittest.TestCase):
 
             with patch("updater._get", return_value=zip_data):
                 changed, _ = updater.update_source(info, base)
-
-        # builds.json değiştirilmemeli
-        self.assertEqual(orig.read_text(), '{"original": true}',
-                         "builds.json must never be overwritten by update_source")
-        # sadece app.py değişmeli
-        self.assertEqual(changed, 1)
+            # builds.json değiştirilmemeli
+            self.assertEqual(orig.read_text(), '{"original": true}',
+                             "builds.json must never be overwritten by update_source")
+            # sadece app.py değişmeli
+            self.assertEqual(changed, 1)
 
     def test_identical_files_not_counted(self):
         content = "# same\n"
         zip_data = self._make_zip({"app.py": content})
-        info = {"zipball": "https://example.com/source.zip", "tag": "v9.1.5.40"}
+        info = {"zipball": f"https://api.github.com/repos/{updater.REPO}/zipball/v9.1.5.40", "tag": "v9.1.5.40"}
 
         with tempfile.TemporaryDirectory() as base:
-            (Path(base) / "app.py").write_text(content)
+            (Path(base) / "app.py").write_bytes(content.encode("utf-8"))
             with patch("updater._get", return_value=zip_data):
                 changed, _ = updater.update_source(info, base)
 
         self.assertEqual(changed, 0, "Identical files should not count as changed")
+
+    def test_untrusted_zipball_host_is_rejected(self):
+        info = {"zipball": "https://example.com/archive.zip", "tag": "v9.1.5.40"}
+        with tempfile.TemporaryDirectory() as base:
+            with self.assertRaises(RuntimeError):
+                updater.update_source(info, base)
 
 
 # ---------------------------------------------------------------------------

@@ -9,6 +9,10 @@ on:
         description: "Releases'te sürüm yayınla (etiket v<sürüm> oluşturulur)"
         type: boolean
         default: false
+      verify_signing:
+        description: "Yayın oluşturmadan release signing secret'ını doğrula"
+        type: boolean
+        default: false
   push:
     branches: ["codex/validate-packaged-translation"]
     tags: ["v*"]
@@ -184,19 +188,15 @@ jobs:
         run: |
           $ver = (python scripts/version.py).Trim()
           Compress-Archive -Path dist\TD2LootAdvisor\* -DestinationPath "installer\TD2LootAdvisor_${ver}_portable.zip" -Force
+          $source = "TD2LootAdvisor_${ver}_source.zip"
+          git archive --format=zip --prefix=td2-loot-advisor/ --output="installer\$source" HEAD
+          if ($LASTEXITCODE -ne 0) { throw "source archive creation failed" }
           # uygulama içi güncelleyici indirdiği dosyayı bununla doğrular
           Get-ChildItem installer -File | Where-Object { $_.Extension -in ".exe", ".zip" } | ForEach-Object {
             "{0}  {1}" -f (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower(), $_.Name
           } | Set-Content -Encoding ascii "installer\SHA256SUMS.sha256"
           Get-Content installer\SHA256SUMS.sha256
           Get-ChildItem installer | Format-Table Name, Length
-
-      - name: Upload installer
-        uses: actions/upload-artifact@v6
-        with:
-          name: TD2LootAdvisor-installer
-          path: installer/*
-          if-no-files-found: error
 
       - name: Release version
         id: ver
@@ -205,6 +205,28 @@ jobs:
           $v = (python scripts/version.py).Trim()
           if ("${{ github.ref_type }}" -eq "tag") { $t = "${{ github.ref_name }}" } else { $t = "v$v" }
           "tag=$t" >> $env:GITHUB_OUTPUT
+
+      - name: Sign release manifest
+        if: startsWith(github.ref, 'refs/tags/') || inputs.release || inputs.verify_signing
+        shell: pwsh
+        env:
+          TD2_RELEASE_SIGNING_KEY_BASE64: ${{ secrets.TD2_RELEASE_SIGNING_KEY_BASE64 }}
+        run: |
+          $v = (python scripts/version.py).Trim()
+          python -B scripts/sign_release_manifest.py --tag "${{ steps.ver.outputs.tag }}" --version "$v"
+          if ($LASTEXITCODE -ne 0) { throw "release manifest signing failed" }
+          python -B -c "import base64; from pathlib import Path; import updater; from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey; p=Path('installer'); Ed25519PublicKey.from_public_bytes(base64.b64decode(updater.RELEASE_SIGNING_PUBLIC_KEY_B64, validate=True)).verify(base64.b64decode((p/'TD2_RELEASE_MANIFEST.sig').read_bytes().strip(), validate=True), (p/'TD2_RELEASE_MANIFEST.json').read_bytes()); print('Release signature verified')"
+          if ($LASTEXITCODE -ne 0) { throw "release manifest verification failed" }
+          if ("${{ inputs.verify_signing }}" -eq "true" -and "${{ inputs.release }}" -ne "true" -and "${{ github.ref_type }}" -ne "tag") {
+            Remove-Item installer\TD2_RELEASE_MANIFEST.json, installer\TD2_RELEASE_MANIFEST.sig
+          }
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v6
+        with:
+          name: TD2LootAdvisor-installer
+          path: installer/*
+          if-no-files-found: error
 
       - name: Publish release
         if: startsWith(github.ref, 'refs/tags/') || inputs.release
