@@ -15,6 +15,10 @@ class MainActivity : FlutterActivity() {
         super.configureFlutterEngine(flutterEngine)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "td2_companion/update")
             .setMethodCallHandler { call, result ->
+                if (call.method == "packageVersion") {
+                    result.success(packageManager.getPackageInfo(packageName, 0).versionName)
+                    return@setMethodCallHandler
+                }
                 if (call.method != "installApk") {
                     result.notImplemented()
                     return@setMethodCallHandler

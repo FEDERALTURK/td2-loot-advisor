@@ -9,6 +9,7 @@ void main() {
   });
 
   test('shared companion user agent follows the installed version', () {
+    expect(companionVersion, '0.1.12');
     expect(companionUserAgent, 'TD2-Loot-Advisor-Companion/$companionVersion');
     expect(companionUserAgent, isNot(contains('0.1.5')));
   });

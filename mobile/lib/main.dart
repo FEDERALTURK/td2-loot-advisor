@@ -158,6 +158,7 @@ class CompanionModel extends ChangeNotifier {
   String? availableSha256Url;
   bool downloadingUpdate = false;
   double updateProgress = 0;
+  String installedVersion = companionVersion;
   DateTime? lastUpdateCheck;
   SharedPreferences? _prefs;
   Timer? _desktopPoll;
@@ -191,9 +192,19 @@ class CompanionModel extends ChangeNotifier {
   int get doneCount => completedTasks.length;
   bool get updateAvailable =>
       availableVersion != null &&
-      isNewerVersion(availableVersion!, companionVersion);
+      isNewerVersion(availableVersion!, installedVersion);
 
   Future<void> load() async {
+    try {
+      installedVersion =
+          await const MethodChannel('td2_companion/update')
+              .invokeMethod<String>('packageVersion') ??
+          companionVersion;
+    } on PlatformException {
+      /* package fallback for unsupported platforms */
+    } on MissingPluginException {
+      /* widget tests / non-Android host */
+    }
     try {
       final loaded = await Future.wait([
         _asset('assets/data/tasks_feed.json'),
@@ -689,7 +700,7 @@ class _MainShellState extends State<MainShell> {
                 ),
               ),
               const SizedBox(width: 10),
-              const Column(
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
@@ -701,7 +712,7 @@ class _MainShellState extends State<MainShell> {
                     ),
                   ),
                   Text(
-                    'COMPANION  ·  BETA $companionVersion',
+                    'COMPANION  ·  BETA ${widget.model.installedVersion}',
                     style: TextStyle(
                       fontSize: 9,
                       color: _soft,
@@ -730,7 +741,7 @@ class _MainShellState extends State<MainShell> {
             ),
             IconButton(
               tooltip: 'Beta hakkında',
-              onPressed: () => _about(context),
+              onPressed: () => _about(context, widget.model.installedVersion),
               icon: const Icon(Icons.info_outline_rounded),
             ),
             const SizedBox(width: 8),
@@ -2510,10 +2521,10 @@ Future<void> _newBuild(
   notes.dispose();
 }
 
-void _about(BuildContext context) => showAboutDialog(
+void _about(BuildContext context, String installedVersion) => showAboutDialog(
   context: context,
   applicationName: 'TD2 Loot Advisor Companion',
-  applicationVersion: '$companionVersion-beta',
+  applicationVersion: '$installedVersion-beta',
   applicationIcon: const Icon(Icons.hexagon_outlined, color: _orange, size: 34),
   children: [
     const Text(
