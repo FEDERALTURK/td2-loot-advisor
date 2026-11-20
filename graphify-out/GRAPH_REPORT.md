@@ -1,7 +1,7 @@
 # Graph Report - TD2LootAdvisor-roadmap-v9.1.5.53  (2026-11-20)
 
 ## Corpus Check
-- 373 files · ~1,183,304 words
+- 373 files · ~1,183,361 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 381 file(s) not represented in the graph (top: .toml 178, .log 79, .csv 51)
 
@@ -11,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `f7b03326`
+- Built from commit: `d4eb269a`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -607,7 +607,7 @@
 7. `BuildToolPanel` - 35 edges
 8. `Banner` - 35 edges
 9. `current_language()` - 33 edges
-10. `slot_name()` - 30 edges
+10. `work()` - 30 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `API Surface & Global Scope` --references--> `Translator`  [INFERRED]
@@ -2499,7 +2499,7 @@ Cohesion: 0.50
 Nodes (4): verify_signing, default, description, type
 
 ## Knowledge Gaps
-- **500 isolated node(s):** `CompanionRelease`, `companionVersion`, `updateCheckInterval`, `companionUserAgent`, `version` (+495 more)
+- **500 isolated node(s):** `a`, `_about`, `activeNews`, `alertChanging`, `_asset` (+495 more)
   These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 4743 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **132 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -2507,15 +2507,15 @@ Nodes (4): verify_signing, default, description, type
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `App` connect `App` to `pathlib`, `save_cfg`, `slot_name`, `.build_translate`, `.build_settings`, `target_planner.py`, `with_icon`, `.scan_image`, `work`, `t`, `current_language`, `SessionLog`, `Grabber`, `current_language`, `TD2_LOOT_ADVISOR_CLAUDE_DEVIR_RAPORU.md`, `GameData`, `game_active`, `._calib_capture`, `match_targets`, `.__init__`, `save_cfg`, `Doğrulanmamış / gerçek Windows'ta teyit gerekli`, `latest`?**
-  _High betweenness centrality (0.046) - this node is a cross-community bridge._
+  _High betweenness centrality (0.060) - this node is a cross-community bridge._
 - **Are the 2 inferred relationships involving `App` (e.g. with `Diğer açık kalemler (BUGS.md/HANDOFF.md'den)` and `10. Test Envanteri`) actually correct?**
   _`App` has 2 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `CompanionRelease`, `companionVersion`, `updateCheckInterval` to the rest of the system?**
+- **What connects `a`, `_about`, `activeNews` to the rest of the system?**
   _500 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `main.dart` be split into smaller, more focused modules?**
   _Cohesion score 0.013978494623655914 - nodes in this community are weakly interconnected._
-- **Why does `Mobil companion bulut altyapısı (Faz 2 — devam ediyor, bkz. `../docs/mobile_companion_roadmap.md`)` connect `mobile.js` to `.login`, `Topluluk istatistik sunucusu / Community stats server`, `worker.js`?**
-  _High betweenness centrality (0.030) - this node is a cross-community bridge._
+- **Why does `t()` connect `t` to `current_language`, `App`, `pathlib`, `._calib_capture`, `save_cfg`, `save_cfg`, `.__init__`, `slot_name`, `.build_settings`, `.build_translate`, `ratio`, `with_icon`, `.scan_image`, `work`, `current_language`, `Doğrulanmamış / gerçek Windows'ta teyit gerekli`?**
+  _High betweenness centrality (0.033) - this node is a cross-community bridge._
 - **Are the 3 inferred relationships involving `t()` (e.g. with `show()` and `Ana tema/menü modernizasyonu + "Hakkında" sekmesi (2026-11-04, v9.1.5.28)`) actually correct?**
   _`t()` has 3 INFERRED edges - model-reasoned connections that need verification._
 - **Should `App` be split into smaller, more focused modules?**

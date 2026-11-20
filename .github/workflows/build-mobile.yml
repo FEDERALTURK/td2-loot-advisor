@@ -58,8 +58,23 @@ jobs:
       - name: Rename APK
         shell: bash
         run: |
-          cp build/app/outputs/flutter-apk/app-release.apk "TD2LootAdvisor_Companion_${GITHUB_REF_NAME#companion-v}.apk"
-          sha256sum "TD2LootAdvisor_Companion_${GITHUB_REF_NAME#companion-v}.apk" > SHA256SUMS.sha256
+          project_version="$(sed -nE 's/^version:[[:space:]]*([0-9]+(\.[0-9]+)*)(\+[0-9]+)?[[:space:]]*$/\1/p' pubspec.yaml)"
+          if [[ ! "$project_version" =~ ^[0-9]+(\.[0-9]+)*$ ]]; then
+            echo "::error::Could not read a valid Companion version from pubspec.yaml"
+            exit 1
+          fi
+          if [[ "$GITHUB_REF" == refs/tags/companion-v* ]]; then
+            version="${GITHUB_REF_NAME#companion-v}"
+            if [[ "$version" != "$project_version" ]]; then
+              echo "::error::Companion tag version ($version) does not match pubspec.yaml ($project_version)"
+              exit 1
+            fi
+          else
+            version="$project_version"
+          fi
+          apk="TD2LootAdvisor_Companion_${version}.apk"
+          cp build/app/outputs/flutter-apk/app-release.apk "$apk"
+          sha256sum "$apk" > SHA256SUMS.sha256
       - uses: actions/upload-artifact@v6
         with:
           name: TD2LootAdvisor-companion-apk

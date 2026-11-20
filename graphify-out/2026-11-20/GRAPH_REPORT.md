@@ -6,8 +6,8 @@
 - Unclassified: 381 file(s) not represented in the graph (top: .toml 178, .log 79, .csv 51)
 
 ## Summary
-- 9103 nodes · 15518 edges · 598 communities (468 shown, 130 thin omitted)
-- Extraction: 95% EXTRACTED · 5% INFERRED · 0% AMBIGUOUS · INFERRED: 728 edges (avg confidence: 0.87)
+- 9103 nodes · 15515 edges · 600 communities (468 shown, 132 thin omitted)
+- Extraction: 95% EXTRACTED · 5% INFERRED · 0% AMBIGUOUS · INFERRED: 725 edges (avg confidence: 0.87)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
@@ -24,13 +24,13 @@
 - slot_name
 - ui/view3d.py
 - .build_translate
-- translate_task_text
+- .build_settings
 - build_mh.py
-- urllib_request
+- tempfile
 - numpy
 - with_icon
 - .scan_image
-- gen_vo.py
+- work
 - cloud_link.dart
 - 3. DEĞİŞEN/OLUŞTURULAN HER DOSYA
 - Renderer
@@ -63,7 +63,7 @@
 - HTML
 - CSV Data Collection
 - companion_release.dart
-- supabase.js
+- diagnostics_center.py
 - Banner
 - Detailed Guidelines
 - xbox_crypto.dart
@@ -81,7 +81,7 @@
 - Stash
 - AppStabilityTests
 - ._calib_capture
-- time
+- test_hardening.py
 - steps
 - steps
 - .__init__
@@ -207,10 +207,10 @@
 - Creating Persistent App Tours
 - Creating Toast Notifications
 - Build a Styled Progress Bar
-- Geliştirme Günlüğü
+- match_targets
 - CODEX DEVİR RAPORU
 - plan
-- scrollable
+- Translator
 - steps
 - neural_audio
 - Görev akışı — `meta/tasks_feed.json`
@@ -223,7 +223,7 @@
 - /brag-slim
 - Translator
 - Style a Form Group When a Field Is Invalid with :has
-- NavMotif
+- ui_feedback_test.py
 - Passkey Reauthentication
 - Component-specific light/dark themes
 - Rearrange Items with Drag and Drop
@@ -241,7 +241,7 @@
 - Sekmeler
 - .session
 - LauncherTests
-- _allowed
+- service.py
 - Audio reference
 - Accessibility Coding Guidelines
 - Implementation
@@ -258,7 +258,7 @@
 - Modern Web Guidance
 - Companion
 - bindings
-- CommandRibbon
+- package:flutter/material.dart
 - Topluluk istatistik sunucusu / Community stats server
 - _Client
 - xbox_token_store.dart
@@ -293,7 +293,7 @@
 - Swarm Orchestration Skill
 - README.md
 - console_translate_service.dart
-- compare
+- IntelligenceTests
 - TranslationControlsTests
 - ._rapid_boxes
 - updater.py
@@ -312,8 +312,8 @@
 - 2. Styles
 - Equal-Width Text Lines
 - Shaped Cutouts
-- latest
-- SessionLog
+- Glossary
+- test_tasks.mjs
 - VoiceSession
 - LatestWorker
 - steps
@@ -350,7 +350,7 @@
 - Implementation steps
 - Implementation
 - Recorder
-- parse_cfg
+- ReliabilityTests
 - panel_shot.py
 - xbox_login_page.dart
 - GameWatcher
@@ -391,7 +391,7 @@
 - Queue
 - TasksTab
 - ._handler
-- ui_click_test.py
+- Submitter
 - Faz 7 — Play Internal Testing Yayın Kapısı
 - LoopbackTests
 - web_deploy/assets/js/api.js
@@ -449,10 +449,10 @@
 - Faz 6 — Android Gerçek Cihaz Kabul Testi
 - Google Play mağaza metni taslağı
 - Google Play hazırlık ve imzalama
-- Yol Haritası
+- Fallback strategies
 - TrailFX
 - Sounds
-- knowledge.py
+- re
 - Lines
 - i18n.js
 - 3. Accessible Names and Descriptions
@@ -491,8 +491,8 @@
 - Python 3.14 OCR beta — 9.1.5-beta.5 / stable 9.1.5 notes
 - Ruflo ajan entegrasyonu
 - TD2 Loot Advisor Companion
-- gameinfo.py
-- dropstats.py
+- Cache
+- time
 - steps
 - Music
 - Accessible generated content
@@ -500,8 +500,8 @@
 - Platform Controls Dismiss Dialog
 - SuggestTab
 - promo/capture.py
+- check_key
 - latest
-- updates.py
 - screenstate.py
 - Panel
 - advanced-full-text-search.md
@@ -560,7 +560,7 @@
 - TestLiveAPI
 - render
 - test_reports.mjs
-- backup_bundle.py
+- _allowed
 - TestFormatStats
 - App
 - with
@@ -582,7 +582,7 @@
 - draw_cursor
 - TermFinder
 - browser
-- ._build_agent_look
+- save_cfg
 - release
 - GH
 - ._req
@@ -591,7 +591,9 @@
 - _Loopback
 - build
 - .cancel
+- AIMT
 - verify_signing
+- _instance_poll
 - ensure_backgrounds
 - Timer
 
@@ -605,7 +607,7 @@
 7. `BuildToolPanel` - 35 edges
 8. `Banner` - 35 edges
 9. `current_language()` - 33 edges
-10. `work()` - 30 edges
+10. `slot_name()` - 30 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `API Surface & Global Scope` --references--> `Translator`  [INFERRED]
@@ -622,7 +624,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (598 total, 130 thin omitted)
+## Communities (600 total, 132 thin omitted)
 
 ### Community 0 - "main.dart"
 Cohesion: 0.01
@@ -630,19 +632,19 @@ Nodes (140): a, _about, activeNews, alertChanging, _asset, availableApkUrl, avai
 
 ### Community 1 - "App"
 Cohesion: 0.03
-Nodes (8): App, work(), go(), diagnose(), save_progress(), webbrowser_open(), assess(), Şu an aktif: Masaüstü özellik/sağlamlaştırma döngüsü + mobil push bildirimi kaydı (Faz 3'ün son parçası)
+Nodes (6): App, diagnose(), answer(), assess(), fmt_left(), Şu an aktif: Masaüstü özellik/sağlamlaştırma döngüsü + mobil push bildirimi kaydı (Faz 3'ün son parçası)
 
 ### Community 2 - "pathlib"
 Cohesion: 0.02
-Nodes (17): daily_period_key(), first_pass_confident(), _history_as_prompt(), _instance_poll(), monitors(), next_daily_reset(), next_weekly_reset(), set_palette() (+9 more)
+Nodes (17): daily_period_key(), first_pass_confident(), _history_as_prompt(), monitors(), next_daily_reset(), next_weekly_reset(), set_palette(), _test_browser() (+9 more)
 
 ### Community 3 - "nrm"
 Cohesion: 0.16
 Nodes (15): nrm(), main(), add_items(), canon_brand(), known_any(), wikitext(), main(), brand_name() (+7 more)
 
 ### Community 4 - "save_cfg"
-Cohesion: 0.04
-Nodes (17): run(), chk(), ch(), save_push(), go(), fetch(), work(), done() (+9 more)
+Cohesion: 0.05
+Nodes (10): run(), work(), done(), draw_bars(), find_tesseract(), provider_label(), setup_logging(), webbrowser_open() (+2 more)
 
 ### Community 5 - "slot_name"
 Cohesion: 0.05
@@ -654,19 +656,19 @@ Nodes (30): elevated(), drop(), lift(), _tint(), AgentView, _animation_budget(),
 
 ### Community 7 - ".build_translate"
 Cohesion: 0.06
-Nodes (12): vp_save(), eng_set(), mode_set(), pad_set(), ts_set(), go(), done(), clear_overlay() (+4 more)
+Nodes (10): pad_set(), go(), done(), clear_overlay(), deliver(), go(), run(), run() (+2 more)
 
-### Community 8 - "translate_task_text"
-Cohesion: 0.10
-Nodes (15): work(), work(), ask_claude(), ask_claude_code(), ask_ollama(), ask_openai(), builtin_task_translate(), claude_tasks_prompt() (+7 more)
+### Community 8 - ".build_settings"
+Cohesion: 0.05
+Nodes (22): work(), work(), ask_claude(), ask_claude_code(), ask_ollama(), ask_openai(), builtin_task_translate(), claude_tasks_prompt() (+14 more)
 
 ### Community 9 - "build_mh.py"
 Cohesion: 0.11
 Nodes (57): backpack(), belt(), body(), boots(), carrier(), cube(), cyl(), hands() (+49 more)
 
-### Community 10 - "urllib_request"
-Cohesion: 0.05
-Nodes (19): ago_s(), parse_meta(), main(), download(), expected_sha(), install(), latest(), _NoRedirect (+11 more)
+### Community 10 - "tempfile"
+Cohesion: 0.06
+Nodes (15): main(), pcm(), rows(), source_metadata(), contrast(), luminance(), on_color(), test_source_metadata_accepts_full_revision_and_iso_date() (+7 more)
 
 ### Community 11 - "numpy"
 Cohesion: 0.07
@@ -678,11 +680,11 @@ Nodes (4): Üst yatay menü, dijital yağmur efekti, 3B radar + rastgele tespit 
 
 ### Community 13 - ".scan_image"
 Cohesion: 0.06
-Nodes (20): work(), run(), go(), save_debug(), timed_read(), up(), go(), color_hints() (+12 more)
+Nodes (21): work(), run(), go(), save_debug(), timed_read(), up(), work(), go() (+13 more)
 
-### Community 14 - "gen_vo.py"
-Cohesion: 0.32
-Nodes (3): benchmark(), _text(), OcrLabTests
+### Community 14 - "work"
+Cohesion: 0.06
+Nodes (13): work(), work(), after(), work(), work(), tl_set(), work(), work() (+5 more)
 
 ### Community 15 - "cloud_link.dart"
 Cohesion: 0.04
@@ -710,31 +712,35 @@ Nodes (14): with, body_path, fetch-depth, files, generate_release_notes, if-no-f
 
 ### Community 21 - "t"
 Cohesion: 0.03
-Nodes (42): work(), work(), after(), work(), work(), work(), go(), prog() (+34 more)
+Nodes (36): save_push(), go(), work(), go(), prog(), work(), work(), go() (+28 more)
+
+### Community 22 - "Transition"
+Cohesion: 0.06
+Nodes (15): 9.1.5.18 — Tanılama motoru, güvenli düzeltmeler, arayüz kararlılığı, 9.1.5.19 düzeltmelerinin gerçek Windows'ta doğrulanması (2026-11-04), 9.1.5.19 — Kod taraması: çökme düzeltmeleri ve lisans şeffaflığı (2026-11), Akış boyut sınırı: sıkıştırma ve ikinci açıklama dosyası (2026-11-03), Ansiklopedi: 30 kesik açıklama düzeltildi (asıl kapsam 13 değil 30) (2026-11-04), Bu depoya dair AI-destekli geliştirme oturumları (genel not), Geliştirme Günlüğü, `server/` için eksik `package.json` eklendi — Workers Builds CI hatası çözüldü (2026-11-04) (+7 more)
 
 ### Community 23 - "mobile.js"
-Cohesion: 0.17
-Nodes (36): Mobil: push-token sunucuya kaydı eksikti, kod yazıldı (2026-11-04), iOS push setup — steps the *user* must do (AI assistant cannot do these), Phase 2 — Cloud foundation (in progress), ALLOWED_COMMANDS, apnsProviderJwt(), b64uEnc(), claimPairing(), cleanup() (+28 more)
+Cohesion: 0.13
+Nodes (41): Mobil: push-token sunucuya kaydı eksikti, kod yazıldı (2026-11-04), hdr_enabled(), iOS push setup — steps the *user* must do (AI assistant cannot do these), Phase 2 — Cloud foundation (in progress), Genel durum (özet), Güncelleme günlüğü, Yol Haritası, Önceki tur: Mobil companion — push bildirimi (Android canlı, iOS kod hazır/deploy bekliyor) (+33 more)
 
 ### Community 24 - "json"
 Cohesion: 0.05
-Nodes (29): work(), load_proper_names(), anchors_of(), main(), main(), _bounded_int(), _clean(), decode() (+21 more)
+Nodes (24): ago_s(), parse_meta(), main(), anchors_of(), main(), main(), sig(), _bounded_int() (+16 more)
 
 ### Community 25 - "Performance"
 Cohesion: 0.05
 Nodes (42): Code Examples, Code Examples, Code Examples, Code Examples, Code Examples, Code Examples, Code Examples, Code Examples (+34 more)
 
 ### Community 26 - "current_language"
-Cohesion: 0.05
-Nodes (20): add_choice_name(), tl_set(), work(), work(), work(), draw_head(), show(), toggle() (+12 more)
+Cohesion: 0.07
+Nodes (15): add_choice_name(), draw_head(), show(), toggle(), work(), cat_name(), fmt_remaining(), save_tasks() (+7 more)
 
 ### Community 27 - "SessionLog"
-Cohesion: 0.09
-Nodes (28): autostart_command(), autostart_get(), autostart_set(), get_priority(), _k32(), set_low_priority(), fake_open(), finish() (+20 more)
+Cohesion: 0.08
+Nodes (23): autostart_command(), autostart_get(), autostart_set(), SessionLog, finish(), guard(), run(), s0() (+15 more)
 
 ### Community 28 - "os"
-Cohesion: 0.03
-Nodes (31): lan_ip(), _GAMEPAD, _accept(), _frame(), new_topic(), check(), decrypt(), _derive() (+23 more)
+Cohesion: 0.04
+Nodes (27): lan_ip(), _accept(), _frame(), new_topic(), check(), decrypt(), _derive(), encrypt() (+19 more)
 
 ### Community 29 - "accounts.js"
 Cohesion: 0.16
@@ -749,8 +755,8 @@ Cohesion: 0.06
 Nodes (9): CaptionDiff, detok(), LiveCaptionsSource, log_mel(), mel_filters(), Segmenter, _Source, Whisper (+1 more)
 
 ### Community 32 - "current_language"
-Cohesion: 0.08
-Nodes (12): deliver(), prepare(), click_through(), exclude_from_capture(), load_assistant_stt(), load_tasks(), parse_claude_tasks(), split_cat() (+4 more)
+Cohesion: 0.06
+Nodes (17): deliver(), prepare(), work(), load_assistant_stt(), load_tasks(), parse_claude_tasks(), split_cat(), transcribe() (+9 more)
 
 ### Community 33 - "build_agents.py"
 Cohesion: 0.13
@@ -773,8 +779,8 @@ Cohesion: 0.06
 Nodes (34): _attribute_key(), _attribute_match(), auto_details(), calculate(), catalog_diagnostics(), catalog_provenance(), _clean_details(), compare_builds() (+26 more)
 
 ### Community 38 - "worker.js"
-Cohesion: 0.12
-Nodes (31): Uç noktalar, ACTIVITIES, b64url(), cleanDrop(), cleanReport(), clip(), enc, fetch() (+23 more)
+Cohesion: 0.09
+Nodes (42): clip(), enabled(), get(), isSupabasePanelEnabled(), mirrorErrorReport(), post(), readErrorReports(), safePlatform() (+34 more)
 
 ### Community 39 - "Companion policies (deploy in parallel)"
 Cohesion: 0.06
@@ -808,9 +814,9 @@ Nodes (29): Corrections, Game Text Errors, How to add an entry, This list is nev
 Cohesion: 0.07
 Nodes (28): a, apkUrl, b, CompanionRelease, companionUserAgent, companionVersion, current, difference (+20 more)
 
-### Community 47 - "supabase.js"
-Cohesion: 0.27
-Nodes (11): clip(), enabled(), get(), isSupabasePanelEnabled(), mirrorErrorReport(), post(), readErrorReports(), safePlatform() (+3 more)
+### Community 47 - "diagnostics_center.py"
+Cohesion: 0.08
+Nodes (21): apply_repairs(), apply_safe_view(), CheckResult, find_tesseract_candidate(), markdown_report(), _result(), run_checks(), safe_view_active() (+13 more)
 
 ### Community 49 - "Detailed Guidelines"
 Cohesion: 0.07
@@ -837,8 +843,8 @@ Cohesion: 0.13
 Nodes (18): _bg(), design_badge(), design_card(), design_hud(), design_scan(), design_shield(), design_watch(), design_watch_real() (+10 more)
 
 ### Community 55 - "time"
-Cohesion: 0.08
-Nodes (23): ok(), s1_check(), s1_open(), s1_send(), s2_check(), s2_panel(), wait(), s3_check() (+15 more)
+Cohesion: 0.06
+Nodes (18): download(), expected_sha(), install(), latest(), _NoRedirect, _open(), vtuple(), main() (+10 more)
 
 ### Community 56 - "steps"
 Cohesion: 0.07
@@ -876,9 +882,9 @@ Nodes (4): AppStabilityTests, run(), card(), cfg()
 Cohesion: 0.23
 Nodes (4): up(), down(), move(), up()
 
-### Community 65 - "time"
-Cohesion: 0.04
-Nodes (41): apply_repairs(), apply_safe_view(), CheckResult, find_tesseract_candidate(), markdown_report(), _result(), run_checks(), safe_view_active() (+33 more)
+### Community 65 - "test_hardening.py"
+Cohesion: 0.07
+Nodes (17): _dpapi(), _dumps(), _lock(), open_settings(), protect(), seal_settings(), unprotect(), write_json() (+9 more)
 
 ### Community 66 - "steps"
 Cohesion: 0.08
@@ -889,12 +895,12 @@ Cohesion: 0.09
 Nodes (25): TD2_NO_WELCOME, jobs, unit, windows, name, on, push, workflow_dispatch (+17 more)
 
 ### Community 68 - ".__init__"
-Cohesion: 0.04
-Nodes (21): active_profile(), ask(), show(), fmt(), work(), apply_ocr_settings(), game_size(), Canlı çeviri: çoklu dil, güven uyarısı, önbellek düzeltmesi (9.1.5.29, 2026-11-04) (+13 more)
+Cohesion: 0.06
+Nodes (15): active_profile(), ask(), do_apply(), show(), fmt(), work(), apply_ocr_settings(), game_size() (+7 more)
 
 ### Community 69 - "console_caption_page.dart"
-Cohesion: 0.03
-Nodes (43): _alignmentGuide, _bg, build, _busy, _cameraArea, _captionBar, _captureInterval, _captureTick (+35 more)
+Cohesion: 0.04
+Nodes (39): _alignmentGuide, _bg, build, _busy, _cameraArea, _captionBar, _captureInterval, _captureTick (+31 more)
 
 ### Community 70 - "protect_verdict"
 Cohesion: 0.09
@@ -913,8 +919,8 @@ Cohesion: 0.08
 Nodes (23): Allow password pasting, Build a sign-up form that follows best practice, Don't double up inputs, Enable the browser to suggest a strong password, Fallback strategies, Give mobile users the right keyboard, Help save users from accidentally missing inputs, Help users avoid re-entering sign-up data (+15 more)
 
 ### Community 74 - "library_excel.py"
-Cohesion: 0.07
-Nodes (18): main(), pcm(), find_key(), main(), add_list(), set_item(), set_weapon(), rows() (+10 more)
+Cohesion: 0.13
+Nodes (12): find_key(), main(), add_list(), set_item(), set_weapon(), rows(), apply_corrections(), build() (+4 more)
 
 ### Community 75 - "steps"
 Cohesion: 0.09
@@ -925,8 +931,8 @@ Cohesion: 0.08
 Nodes (23): runs-on, steps, timeout-minutes, env, PYTHONIOENCODING, TD2_NO_WELCOME, jobs, agent (+15 more)
 
 ### Community 77 - "display.py"
-Cohesion: 0.09
-Nodes (13): clamp_to_screen(), detect_profile(), dynamic_profile(), _exe_of(), _exe_query(), find_game_hwnd(), cb(), _looks_like_game_title() (+5 more)
+Cohesion: 0.08
+Nodes (17): clamp_to_screen(), detect_profile(), dynamic_profile(), _exe_of(), _exe_query(), find_game_hwnd(), cb(), _looks_like_game_title() (+9 more)
 
 ### Community 78 - "prompt-master/README.md"
 Cohesion: 0.09
@@ -973,12 +979,12 @@ Cohesion: 0.10
 Nodes (20): [0.1.3](https://github.com/supabase/agent-skills/compare/v0.1.2...v0.1.3) (2026-06-02), [0.1.4](https://github.com/supabase/agent-skills/compare/v0.1.3...v0.1.4) (2026-06-05), [0.1.5](https://github.com/supabase/agent-skills/compare/v0.1.4...v0.1.5) (2026-07-10), [0.1.6](https://github.com/supabase/agent-skills/compare/v0.1.5...supabase-v0.1.6) (2026-07-30), [0.1.7](https://github.com/supabase/agent-skills/compare/v0.1.6...supabase-v0.1.7) (2026-08-12), [0.1.8](https://github.com/supabase/agent-skills/compare/v0.1.7...supabase-v0.1.8) (2026-09-24), [0.1.9](https://github.com/supabase/agent-skills/compare/v0.1.8...supabase-v0.1.9) (2026-09-28), Bug Fixes (+12 more)
 
 ### Community 92 - "Doğrulanmamış / gerçek Windows'ta teyit gerekli"
-Cohesion: 0.05
-Nodes (24): record(), save_and_send(), save_only(), _cfg_defaults(), draw_bars(), ensure_log(), load_cfg(), load_progress() (+16 more)
+Cohesion: 0.07
+Nodes (21): record(), save_and_send(), save_only(), _cfg_defaults(), ensure_log(), load_cfg(), load_progress(), load_verdict_feedback() (+13 more)
 
 ### Community 93 - "overview.js"
-Cohesion: 0.39
-Nodes (11): countUsage(), dayOf(), ensure(), json(), markCron(), now(), overview(), parseVersion() (+3 more)
+Cohesion: 0.16
+Nodes (16): countUsage(), dayOf(), ensure(), json(), markCron(), now(), overview(), parseVersion() (+8 more)
 
 ### Community 94 - "AppDelegate"
 Cohesion: 0.11
@@ -1061,12 +1067,12 @@ Cohesion: 0.12
 Nodes (14): Ana program (Windows masaüstü, `requirements.txt`), Bağımlılıklar ve Lisanslar, Geliştirici/bakım araçları (`requirements-dev.txt`), Mobil companion (`mobile/`) — Flutter/Dart, Kotlin/Gradle değil, Opsiyonel ses/görüntü paketleri (`requirements-voice.txt`), Programın kendi lisansı, Sunucu (`server/`, Cloudflare Workers + D1, Node.js), Üçüncü taraf oyun verisi (lisans) (+6 more)
 
 ### Community 116 - "features.py"
-Cohesion: 0.17
-Nodes (20): Domain separation with `ContextParams`, _add(), _b64d(), _b64e(), check_entitlement(), check_key(), _dec(), _enc() (+12 more)
+Cohesion: 0.26
+Nodes (14): _add(), _b64e(), _dec(), _enc(), _eq(), _H(), make_key(), _mul() (+6 more)
 
 ### Community 117 - "intelligence.py"
-Cohesion: 0.15
-Nodes (10): cache_age(), command_snapshot(), farm_plan(), library_candidates(), _target_matches(), _text(), universal_search(), hit() (+2 more)
+Cohesion: 0.13
+Nodes (14): cache_age(), command_snapshot(), compare(), farm_plan(), library_candidates(), _quality(), _same_item(), stash_match() (+6 more)
 
 ### Community 118 - "overlay.py"
 Cohesion: 0.15
@@ -1126,11 +1132,11 @@ Nodes (13): apnsTokenOutcomes, b64u(), call(), DB, desktopLogin(), discordUser, 
 
 ### Community 134 - "test_tasks_live_full.py"
 Cohesion: 0.06
-Nodes (15): e2e(), NoModel, ok(), _op(), opener(), _R, Resp, Translator (+7 more)
+Nodes (15): work(), _op(), opener(), _R, Resp, _op(), opener(), _R (+7 more)
 
 ### Community 135 - "target_planner.py"
-Cohesion: 0.12
-Nodes (14): compare_item_to_targets(), farm_summary(), _protected(), _is_stale(), _list(), load_targets(), _match_score(), match_targets() (+6 more)
+Cohesion: 0.20
+Nodes (7): compare_item_to_targets(), farm_summary(), _protected(), load_targets(), normalize_target(), save_targets(), DecisionCenterTests
 
 ### Community 136 - "ui_account_test.py"
 Cohesion: 0.31
@@ -1157,8 +1163,12 @@ Cohesion: 0.13
 Nodes (14): Accordion, Custom accordion, Custom accordion, Customizing the marker, Excluding a `details` element’s contents from find-in-page, Exclusive accordions, Expand all and Collapse all, Fallback strategies (+6 more)
 
 ### Community 142 - "Build a popup menu"
-Cohesion: 0.09
-Nodes (21): Align menu item content, Animate open and close, Build a popup menu, Commands, links, and what makes a menu, Fallback strategies, Fallbacks & browser support for Anchor positioning, Fallbacks & browser support for focusgroup, Fallbacks & browser support for `:has()` (+13 more)
+Cohesion: 0.13
+Nodes (14): Align menu item content, Animate open and close, Build a popup menu, Commands, links, and what makes a menu, Implementing the interaction, Keyboard and focus, Keyboard and focus handling, Not covered here (+6 more)
+
+### Community 144 - "Entitlements"
+Cohesion: 0.18
+Nodes (3): `recal_advisor` ücretsiz yapıldı — mx-division-builds lisans gri alanı çözüldü (2026-11-04), Entitlements, test_license_key()
 
 ### Community 147 - "render.py"
 Cohesion: 0.17
@@ -1205,7 +1215,7 @@ Cohesion: 0.14
 Nodes (13): Delivery phases and exit gates, Existing project pieces, MVP scope, Not in the first release, Official references, Phase 1 — Scope and API contract, Phase 4 — Beta and store readiness, Phase 5 — First public release and follow-up (+5 more)
 
 ### Community 161 - "optimize"
-Cohesion: 0.15
+Cohesion: 0.17
 Nodes (6): _best_for(), optimize(), rank_builds(), slot_fit(), _variants(), match()
 
 ### Community 162 - "xbox_auth_service.dart"
@@ -1225,8 +1235,8 @@ Cohesion: 0.15
 Nodes (16): ConsoleCaptionPage, _ConsoleCaptionPageState, XboxLoginPage, _XboxLoginPageState, BuildsPage, _BuildsPageState, CloudPairPage, _CloudPairPageState (+8 more)
 
 ### Community 166 - "syncer.py"
-Cohesion: 0.19
-Nodes (9): apply_plan(), benchmark(), _cpu_name(), fingerprint(), _gpus(), _monitor_dpi(), needs_sync(), _ram_gb() (+1 more)
+Cohesion: 0.08
+Nodes (19): current(), file_version(), install_dirs(), label(), _reg_get(), _reg_values(), running_exe(), _GAMEPAD (+11 more)
 
 ### Community 167 - "test_core.py"
 Cohesion: 0.09
@@ -1320,9 +1330,9 @@ Nodes (10): Creating Toast Notifications, Fallback strategies, Fallbacks & brows
 Cohesion: 0.15
 Nodes (12): 1. Basic setup, 2. Styling, 3. Indeterminate state styling, Additional Accessibility Considerations, Build a Styled Progress Bar, Fallback strategies, Fallbacks & browser support for accent-color, Fallbacks & browser support for `revert-rule` (+4 more)
 
-### Community 191 - "Geliştirme Günlüğü"
-Cohesion: 0.18
-Nodes (10): 9.1.5.18 — Tanılama motoru, güvenli düzeltmeler, arayüz kararlılığı, 9.1.5.19 düzeltmelerinin gerçek Windows'ta doğrulanması (2026-11-04), 9.1.5.19 — Kod taraması: çökme düzeltmeleri ve lisans şeffaflığı (2026-11), Akış boyut sınırı: sıkıştırma ve ikinci açıklama dosyası (2026-11-03), Ansiklopedi: 30 kesik açıklama düzeltildi (asıl kapsam 13 değil 30) (2026-11-04), Bu depoya dair AI-destekli geliştirme oturumları (genel not), Geliştirme Günlüğü, `server/` için eksik `package.json` eklendi — Workers Builds CI hatası çözüldü (2026-11-04) (+2 more)
+### Community 191 - "match_targets"
+Cohesion: 0.20
+Nodes (7): _is_stale(), _list(), _match_score(), match_targets(), _norm(), normalize_source(), TargetPlannerTests
 
 ### Community 192 - "CODEX DEVİR RAPORU"
 Cohesion: 0.15
@@ -1332,9 +1342,9 @@ Nodes (12): 10. GÜNCEL PROJE DURUMU, 11. CLAUDE İÇİN İLK ADIM ÖNERİSİ, 1
 Cohesion: 0.19
 Nodes (3): plan(), RuntimePlan, RuntimePlanTests
 
-### Community 194 - "scrollable"
-Cohesion: 0.07
-Nodes (9): answer(), work(), fmt_left(), news_sorted(), pick_lang(), Diğer açık kalemler (BUGS.md/HANDOFF.md'den), scrollable(), enter() (+1 more)
+### Community 194 - "Translator"
+Cohesion: 0.16
+Nodes (8): e2e(), NoModel, ok(), clean_for_mt(), Translator, e2e(), NoModel, ok()
 
 ### Community 195 - "steps"
 Cohesion: 0.07
@@ -1379,6 +1389,10 @@ Nodes (11): 1. Checking Availability & Model Management, 2. Executing Translatio
 ### Community 206 - "Style a Form Group When a Field Is Invalid with :has"
 Cohesion: 0.17
 Nodes (11): 1. HTML Structure, 2. CSS, CSS for Fallback, Fallbacking & Browser Support, Implementation Guide, Implementation Strategy, JavaScript Fallback, Other Considerations (+3 more)
+
+### Community 207 - "ui_feedback_test.py"
+Cohesion: 0.32
+Nodes (12): ok(), s1_check(), s1_open(), s1_send(), s2_check(), s2_panel(), wait(), s3_check() (+4 more)
 
 ### Community 208 - "Passkey Reauthentication"
 Cohesion: 0.17
@@ -1439,6 +1453,10 @@ Nodes (25): run, PYTHONIOENCODING, defaults, runs-on, steps, timeout-minutes, jo
 ### Community 222 - "Sekmeler"
 Cohesion: 0.17
 Nodes (12): Asistan, Ayarlar, Bilgi (yeni), Build'ler, Eksik Parça, Görevler, Hesap ve hizmet (yeni), Panel (+4 more)
+
+### Community 225 - "service.py"
+Cohesion: 0.16
+Nodes (4): get_priority(), _k32(), set_low_priority(), Fake
 
 ### Community 226 - "Audio reference"
 Cohesion: 0.18
@@ -1504,9 +1522,13 @@ Nodes (4): Companion, do_GET(), do_POST(), _send()
 Cohesion: 0.27
 Nodes (3): bindings(), Hotkeys, ControlsTests
 
+### Community 242 - "package:flutter/material.dart"
+Cohesion: 0.18
+Nodes (4): main, main, main, main
+
 ### Community 243 - "Topluluk istatistik sunucusu / Community stats server"
-Cohesion: 0.22
-Nodes (9): Hesap sistemi (Discord ile giriş, anahtar / davet / satış, 1 bilgisayar), Kurulum (bir kez, ~10 dakika), Maliyet, Supabase panel runtime aynalama (isteğe bağlı), Sürüm sayacı ve yönetici özeti (6.0.1), Topluluk görevleri (5.1.8), Topluluk istatistik sunucusu / Community stats server, Yayındaki sunucu (+1 more)
+Cohesion: 0.20
+Nodes (10): Hesap sistemi (Discord ile giriş, anahtar / davet / satış, 1 bilgisayar), Kurulum (bir kez, ~10 dakika), Maliyet, Supabase panel runtime aynalama (isteğe bağlı), Sürüm sayacı ve yönetici özeti (6.0.1), Topluluk görevleri (5.1.8), Topluluk istatistik sunucusu / Community stats server, Uç noktalar (+2 more)
 
 ### Community 245 - "xbox_token_store.dart"
 Cohesion: 0.08
@@ -1628,13 +1650,9 @@ Nodes (9): Best Practices, Commands, Initialize Swarm, Monitor Status, Purpose, 
 Cohesion: 0.09
 Nodes (13): ConsoleTranslateService, deleteQuietly, dispose, _disposed, ensureModelReady, modelError, _modelManager, _modelStatus (+5 more)
 
-### Community 277 - "compare"
-Cohesion: 0.23
-Nodes (6): compare(), _quality(), _same_item(), stash_match(), IntelligenceTests, item()
-
 ### Community 280 - "updater.py"
-Cohesion: 0.04
-Nodes (35): Sürüm geçmişi penceresi: herhangi bir sürümü kurma + bilinen sorunlar (2026-11-04), clean_for_mt(), download_model(), is_english(), _is_label(), _joiner(), split_sentences(), api() (+27 more)
+Cohesion: 0.07
+Nodes (17): Sürüm geçmişi penceresi: herhangi bir sürümü kurma + bilinen sorunlar (2026-11-04), TestDownloadRedirects, TestInstallFrozen, TestReleaseInfo, TestSignedReleaseManifest, TestUpdateSource, _expected_sha(), _get() (+9 more)
 
 ### Community 281 - "Memory Management Skill"
 Cohesion: 0.22
@@ -1695,6 +1713,10 @@ Nodes (8): Basic implementation, Equal-Width Text Lines, Fallback strategies, Fo
 ### Community 295 - "Shaped Cutouts"
 Cohesion: 0.22
 Nodes (8): Adjacent Element SVG Masking, Direct Element SVG Masking, Fallback strategies, Implementation, Overview, Shaped Cutouts, Using a Single CSS Gradient for Simple Cutouts, Using an SVG Mask
+
+### Community 297 - "test_tasks.mjs"
+Cohesion: 0.18
+Nodes (8): at, call(), env, now, puts, sql, task, tr
 
 ### Community 298 - "VoiceSession"
 Cohesion: 0.50
@@ -1828,10 +1850,6 @@ Nodes (7): 1. Identify the aspect ratio of your preferred font, 2. Apply font-si
 Cohesion: 0.25
 Nodes (7): Alpha vs Luminance Masking Modes, Fallback strategies, Implementation, Method 1: Using a repeating raster image (Recommended for realistic textures), Method 2: Using CSS Gradients for geometric patterns, Overview, Visually Texture Content
 
-### Community 334 - "parse_cfg"
-Cohesion: 0.50
-Nodes (4): parse_cfg(), table(), val(), _read_cfg()
-
 ### Community 335 - "panel_shot.py"
 Cohesion: 0.19
 Nodes (12): H, meta(), ok(), s_close(), s_end(), s_filter(), s_loaded(), s_reply() (+4 more)
@@ -1905,8 +1923,8 @@ Cohesion: 0.29
 Nodes (6): Best Practices, Browser support and fallback strategies, Example code, `fetchLater()` polyfill, How to implement, Reliably measure full-session analytics and telemetry
 
 ### Community 358 - "Sign and verify data with WebCrypto"
-Cohesion: 0.33
-Nodes (5): 1. Choose an algorithm and generate a key pair, 2. Export and import keys, 3. Sign and verify payloads, Fallback strategies, Sign and verify data with WebCrypto
+Cohesion: 0.29
+Nodes (6): 1. Choose an algorithm and generate a key pair, 2. Export and import keys, 3. Sign and verify payloads, Domain separation with `ContextParams`, Fallback strategies, Sign and verify data with WebCrypto
 
 ### Community 359 - "Implementation Steps"
 Cohesion: 0.29
@@ -1967,10 +1985,6 @@ Nodes (6): fmt_t(), TasksTab, run(), save(), done(), done()
 ### Community 374 - "._handler"
 Cohesion: 0.52
 Nodes (5): _authed(), do_GET(), do_POST(), _send(), _ws()
-
-### Community 375 - "ui_click_test.py"
-Cohesion: 0.29
-Nodes (6): check(), click(), find_gap_in_tab(), step_click(), step_lag(), step_transition()
 
 ### Community 376 - "Faz 7 — Play Internal Testing Yayın Kapısı"
 Cohesion: 0.29
@@ -2161,8 +2175,8 @@ Cohesion: 0.33
 Nodes (5): Canlı etkinleştirme durumu, İlk migration'lar, Oluşturulan proje, Sonraki güvenli adım, Supabase panel entegrasyonu — başlangıç durumu
 
 ### Community 427 - "tasks_live.py"
-Cohesion: 0.09
-Nodes (22): ok(), s1(), s2(), s3(), s4(), s5(), s6(), s7() (+14 more)
+Cohesion: 0.10
+Nodes (24): ok(), s1(), s2(), s3(), shot(), ok(), s1(), s2() (+16 more)
 
 ### Community 428 - "Devir Notu (bir sonraki oturum/geliştirici/AI için)"
 Cohesion: 0.33
@@ -2188,13 +2202,13 @@ Nodes (5): Başlık, Google Play mağaza metni taslağı, Kısa açıklama, Mağ
 Cohesion: 0.33
 Nodes (5): Bu projede açık kalan yayın engelleri, Google Play hazırlık ve imzalama, Mevcut uygulama durumu, Play Console tamamlanacaklar, Yerel upload key oluşturma
 
-### Community 434 - "Yol Haritası"
+### Community 434 - "Fallback strategies"
 Cohesion: 0.29
-Nodes (6): hdr_enabled(), Genel durum (özet), Güncelleme günlüğü, Yol Haritası, Önceki tur: Mobil companion — push bildirimi (Android canlı, iOS kod hazır/deploy bekliyor), Önceki tur: Web sitesi (`web/`) — YAYINDA, HUD görsel kimliği eklendi
+Nodes (7): Fallback strategies, Fallbacks & browser support for Anchor positioning, Fallbacks & browser support for focusgroup, Fallbacks & browser support for `:has()`, Fallbacks & browser support for Invoker commands, Fallbacks & browser support for Popover, Fallbacks & browser support for `sign()`
 
-### Community 437 - "knowledge.py"
-Cohesion: 0.16
-Nodes (9): build_tags(), _iso(), _load(), news_status(), next_resets(), quiz_level(), trend(), _txt() (+1 more)
+### Community 437 - "re"
+Cohesion: 0.04
+Nodes (26): build_tags(), _iso(), _load(), news_status(), next_resets(), quiz_level(), trend(), _txt() (+18 more)
 
 ### Community 439 - "i18n.js"
 Cohesion: 0.60
@@ -2247,10 +2261,6 @@ Nodes (5): Doğrulama, İki ses paketi, Yerinde çeviri, Yerinde çeviri ve doğ
 ### Community 452 - "Üçüncü taraf oyun verisi — lisans notu"
 Cohesion: 0.40
 Nodes (5): Alınan karar (2026-11-04), Bu verinin programda nerede kullanıldığı, Değerlendirme (hukuki görüş değildir), Kaynaklar, Üçüncü taraf oyun verisi — lisans notu
-
-### Community 453 - "LocalMT"
-Cohesion: 0.06
-Nodes (8): AIMT, Cache, Glossary, rep(), LocalMT, 7. Canlı Çeviri Sisteminin Teknik Akışı, Engine, ReliabilityTests
 
 ### Community 454 - "Faz 4 — Kişisel hedef ve farm planı"
 Cohesion: 0.40
@@ -2336,13 +2346,9 @@ Nodes (3): Güvenli sınırlar, Kontrol, Ruflo ajan entegrasyonu
 Cohesion: 0.50
 Nodes (3): Build locally, Companion 0.1.8 (Android package: 0.1.8+10), TD2 Loot Advisor Companion
 
-### Community 476 - "gameinfo.py"
-Cohesion: 0.22
-Nodes (7): current(), file_version(), install_dirs(), label(), _reg_get(), _reg_values(), running_exe()
-
-### Community 477 - "dropstats.py"
-Cohesion: 0.14
-Nodes (11): _get(), item_sig(), new_client_id(), record(), stats(), summary(), add(), load() (+3 more)
+### Community 477 - "time"
+Cohesion: 0.06
+Nodes (24): _get(), item_sig(), new_client_id(), record(), stats(), summary(), benchmark(), _text() (+16 more)
 
 ### Community 478 - "steps"
 Cohesion: 0.12
@@ -2356,13 +2362,13 @@ Nodes (4): AdminAPI, both(), SuggestTab, done()
 Cohesion: 0.18
 Nodes (9): card_image(), grab(), phone(), pop(), pop2(), popup_big(), done(), run() (+1 more)
 
-### Community 485 - "latest"
-Cohesion: 0.17
-Nodes (4): TestFullUpdateFlow, TestVersionParsing, newer(), parse_version()
+### Community 485 - "check_key"
+Cohesion: 0.33
+Nodes (4): _b64d(), check_entitlement(), check_key(), cmd_check()
 
-### Community 486 - "updates.py"
-Cohesion: 0.14
-Nodes (8): work(), changed(), diff_summary(), lib_diff(), lib_newer(), lib_version_key(), release_highlights(), valid_library()
+### Community 486 - "latest"
+Cohesion: 0.06
+Nodes (14): work(), changed(), TestFullUpdateFlow, TestLatestLive, TestVersionParsing, latest(), newer(), parse_version() (+6 more)
 
 ### Community 532 - "Engine"
 Cohesion: 0.15
@@ -2388,10 +2394,6 @@ Nodes (3): _make_mock_response(), TestFetchFromApi, TestGetStats
 Cohesion: 0.33
 Nodes (3): go(), _np(), _rapid()
 
-### Community 550 - "ComboWatcher"
-Cohesion: 0.18
-Nodes (4): ComboWatcher, mask_of(), _STATE, _xinput()
-
 ### Community 551 - "inputs"
 Cohesion: 0.17
 Nodes (12): langs, res, vo_run, default, description, on, workflow_dispatch, default (+4 more)
@@ -2409,12 +2411,12 @@ Cohesion: 0.18
 Nodes (10): jobs, render, name, permissions, actions, contents, if, needs (+2 more)
 
 ### Community 558 - "test_reports.mjs"
-Cohesion: 0.04
-Nodes (29): gumroad, here, priv, pub, publicUrl, rl, toml, tomlPath (+21 more)
+Cohesion: 0.07
+Nodes (16): gumroad, here, priv, pub, publicUrl, rl, toml, tomlPath (+8 more)
 
-### Community 559 - "backup_bundle.py"
-Cohesion: 0.24
-Nodes (6): load(), _number(), restore(), save(), validate(), BackupReleaseTests
+### Community 559 - "_allowed"
+Cohesion: 0.12
+Nodes (8): load(), _number(), restore(), save(), validate(), BackupReleaseTests, TestAllowed, _allowed()
 
 ### Community 562 - "with"
 Cohesion: 0.20
@@ -2476,9 +2478,9 @@ Nodes (3): draw_cursor(), gun(), rect()
 Cohesion: 0.50
 Nodes (4): browser(), open_url(), go(), ok()
 
-### Community 581 - "._build_agent_look"
-Cohesion: 0.83
-Nodes (3): cycle(), pick_outfit(), save()
+### Community 581 - "save_cfg"
+Cohesion: 0.04
+Nodes (16): cycle(), pick_outfit(), save(), vp_save(), chk(), ch(), eng_set(), mode_set() (+8 more)
 
 ### Community 582 - "release"
 Cohesion: 0.20
@@ -2497,24 +2499,24 @@ Cohesion: 0.50
 Nodes (4): verify_signing, default, description, type
 
 ## Knowledge Gaps
-- **500 isolated node(s):** `_bg`, `_panel`, `_panel2`, `_orange`, `_soft` (+495 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 4742 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **130 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **500 isolated node(s):** `CompanionRelease`, `companionVersion`, `updateCheckInterval`, `companionUserAgent`, `version` (+495 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 4743 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **132 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `App` connect `App` to `pathlib`, `save_cfg`, `slot_name`, `.build_translate`, `translate_task_text`, `target_planner.py`, `with_icon`, `.scan_image`, `t`, `current_language`, `SessionLog`, `Grabber`, `current_language`, `TD2_LOOT_ADVISOR_CLAUDE_DEVIR_RAPORU.md`, `GameData`, `game_active`, `._calib_capture`, `scrollable`, `.__init__`, `._build_agent_look`, `Doğrulanmamış / gerçek Windows'ta teyit gerekli`, `updates.py`?**
-  _High betweenness centrality (0.093) - this node is a cross-community bridge._
+- **Why does `App` connect `App` to `pathlib`, `save_cfg`, `slot_name`, `.build_translate`, `.build_settings`, `target_planner.py`, `with_icon`, `.scan_image`, `work`, `t`, `current_language`, `SessionLog`, `Grabber`, `current_language`, `TD2_LOOT_ADVISOR_CLAUDE_DEVIR_RAPORU.md`, `GameData`, `game_active`, `._calib_capture`, `match_targets`, `.__init__`, `save_cfg`, `Doğrulanmamış / gerçek Windows'ta teyit gerekli`, `latest`?**
+  _High betweenness centrality (0.046) - this node is a cross-community bridge._
 - **Are the 2 inferred relationships involving `App` (e.g. with `Diğer açık kalemler (BUGS.md/HANDOFF.md'den)` and `10. Test Envanteri`) actually correct?**
   _`App` has 2 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `_bg`, `_panel`, `_panel2` to the rest of the system?**
+- **What connects `CompanionRelease`, `companionVersion`, `updateCheckInterval` to the rest of the system?**
   _500 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `main.dart` be split into smaller, more focused modules?**
   _Cohesion score 0.013978494623655914 - nodes in this community are weakly interconnected._
-- **Why does `Mobil companion bulut altyapısı (Faz 2 — devam ediyor, bkz. `../docs/mobile_companion_roadmap.md`)` connect `mobile.js` to `.login`, `Topluluk istatistik sunucusu / Community stats server`?**
-  _High betweenness centrality (0.029) - this node is a cross-community bridge._
+- **Why does `Mobil companion bulut altyapısı (Faz 2 — devam ediyor, bkz. `../docs/mobile_companion_roadmap.md`)` connect `mobile.js` to `.login`, `Topluluk istatistik sunucusu / Community stats server`, `worker.js`?**
+  _High betweenness centrality (0.030) - this node is a cross-community bridge._
 - **Are the 3 inferred relationships involving `t()` (e.g. with `show()` and `Ana tema/menü modernizasyonu + "Hakkında" sekmesi (2026-11-04, v9.1.5.28)`) actually correct?**
   _`t()` has 3 INFERRED edges - model-reasoned connections that need verification._
 - **Should `App` be split into smaller, more focused modules?**
-  _Cohesion score 0.027483870967741936 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.033607169529499624 - nodes in this community are weakly interconnected._
