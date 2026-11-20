@@ -151,7 +151,7 @@ import decision_center
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.1.5.51"
+APP_VERSION = "9.1.5.52"
 # "Bu oturumda ne kazandın?" özeti için kaba tahmin: bir eşyayı elle inceleyip
 # build'e göre karar vermenin (istatistikleri okuma + karşılaştırma) ortalama
 # süresi, saniye. Gerçek bir ölçüm değil — yalnızca arayüzde "tahmini" etiketiyle
@@ -4059,8 +4059,8 @@ class App:
 
     def _acc_chip_text(self):
         a = getattr(self, "account", None)
-        if not a or not a.signed_in: return "\U0001F464 " + t("acc.login_short")
-        return "\U0001F464 " + a.username[:16] + (" \u2B50" if self.ent.source == "account" or self.ent.valid else "")
+        if not a or not a.signed_in: return "ACCOUNT / " + t("acc.login_short")
+        return "ACCOUNT / " + a.username[:16] + (" / PREMIUM" if self.ent.source == "account" or self.ent.valid else "")
 
     def _acc_changed(self):
         """Hesap / yetki değişti: başlığı güncelle, premium değiştiyse arayüzü yeniden kur."""
@@ -4426,9 +4426,9 @@ class App:
             "history": "system", "log": "system", "help": "system", "about": "system",
         }
         self.group_keys = ("home", "build_tool", "gear", "intel", "tools", "settings", "system")
-        self.group_labels = {"home": "⌂  " + t("tab.dash"), "build_tool": "BUILD TOOL", "gear": "🎒  " + t("nav.gear"),
-                             "intel": "🛰  " + t("nav.intel"), "tools": "🧰  " + t("nav.tools"),
-                             "settings": "⚙  " + t("nav.settings"), "system": "☰  " + t("nav.system")}
+        self.group_labels = {"home": t("tab.dash"), "build_tool": "BUILD TOOL", "gear": t("nav.gear"),
+                             "intel": t("nav.intel"), "tools": t("nav.tools"),
+                             "settings": t("nav.settings"), "system": t("nav.system")}
         if self.cfg["settings"].get("ui_layout") == "field_command":
             return self._build_field_command_shell()
         if self.cfg["settings"].get("ui_layout") == "shd_terminal":
@@ -4443,6 +4443,7 @@ class App:
         self.nav_panel.pack_propagate(False)
         self.main_area = ttk.Frame(self.workspace)
         self.main_area.pack(side="left", fill="both", expand=True)
+        self._build_page_context(self.main_area)
         self._build_single_nav(self.nav_panel)
         # Pencere elle küçültüldüğünde de kompakt menü davranışını uygula;
         # yalnızca açılış ekran profiline güvenme.
@@ -4493,6 +4494,7 @@ class App:
         self.nav_panel = ttk.Frame(self.workspace, style="Sidebar.TFrame", width=224)
         self.nav_panel.pack(side="left", fill="y", padx=(0, 8)); self.nav_panel.pack_propagate(False)
         self.main_area = ttk.Frame(self.workspace); self.main_area.pack(side="left", fill="both", expand=True)
+        self._build_page_context(self.main_area)
         self._responsive_job = None; self.root.bind("<Configure>", self._responsive_configure, add="+")
         self.fxbar = fx.Transition(self.root, self.root, color=PAL["accent"], bg=PAL["bg"],
                                    duration_ms=int(self.cfg["settings"].get("fx_transition_ms", 220)), style="tactical")
@@ -4523,6 +4525,7 @@ class App:
         self.sidebar = ttk.Frame(self.workspace, style="Sidebar.TFrame", width=230); self.sidebar.pack(side="left", fill="y", padx=(0,8)); self.sidebar.pack_propagate(False)
         ttk.Label(self.sidebar,text="[ NAVIGATION ]",style="Brand.TLabel").pack(anchor="w",padx=12,pady=(14,8))
         self.main_area=ttk.Frame(self.workspace); self.main_area.pack(side="left",fill="both",expand=True)
+        self._build_page_context(self.main_area)
         self._responsive_job=None; self.root.bind("<Configure>",self._responsive_configure,add="+")
         self.fxbar=fx.Transition(self.root,self.root,color=PAL["accent"],bg=PAL["bg"],duration_ms=240,style="tactical")
         self._sidebar_buttons={}; codes=("01","02","03","04","05","06","07")
@@ -4633,15 +4636,15 @@ class App:
             self._responsive_compact = compact_now
             self.compact = compact_now
             if hasattr(self, "sidebar"):          # eski dikey kabuklar (shd_terminal) için korunur
-                sidebar_w = 76 if compact_now else max(164, int(188 * getattr(self, "ui_factor", 1.0)))
+                sidebar_w = max(176, int(190 * getattr(self, "ui_factor", 1.0))) if compact_now else max(190, int(210 * getattr(self, "ui_factor", 1.0)))
                 self.sidebar.configure(width=sidebar_w)
             if hasattr(self, "nav_panel"):
-                self.nav_panel.configure(width=82 if compact_now else max(190, int(224 * getattr(self, "ui_factor", 1.0))))
-            icons = {"home": "⌂", "build_tool": "⬡", "gear": "🎒", "intel": "🛰", "tools": "🧰", "settings": "⚙", "system": "☰"}
+                self.nav_panel.configure(width=max(176, int(190 * getattr(self, "ui_factor", 1.0))) if compact_now
+                                         else max(190, int(224 * getattr(self, "ui_factor", 1.0))))
             for key, button in getattr(self, "_sidebar_buttons", {}).items():
-                button.configure(text=icons.get(key, "•") if compact_now else self.group_labels[key])
+                button.configure(text=self.group_labels[key])
             for key, button in getattr(self, "_nav_page_buttons", {}).items():
-                button.configure(text=ui_theme.TAB_ICONS.get(key, "•") if compact_now else self._nav_page_labels[key])
+                button.configure(text=self._nav_page_labels[key])
             self._layout_topnav_buttons()
             # Küçük modda saydam üst efektleri kapatıp menü yüzeyini güvenilir
             # bırak; büyük modda seçili görsel paketi aynen kullan.
@@ -4693,22 +4696,51 @@ class App:
         self._nav_page_labels = {}
         group_titles = {"home": "ANA SAYFA", "build_tool": "BUILD TOOL", "gear": "EKİPMAN", "intel": "İSTİHBARAT",
                         "tools": "ARAÇLAR", "settings": "AYARLAR", "system": "SİSTEM"}
-        ttk.Label(parent, text="[ NAVIGATION ]", style="Brand.TLabel").pack(anchor="w", padx=12, pady=(14, 8))
+        ttk.Label(parent, text="WORKSPACE", style="Brand.TLabel").pack(anchor="w", padx=14, pady=(14, 8))
         for group_index, group in enumerate(self.group_keys, 1):
-            ttk.Label(parent, text=f"{group_index:02d}  {group_titles[group]}",
-                      style="Section.TLabel").pack(anchor="w", padx=12, pady=(8, 3))
+            ttk.Label(parent, text=f"{group_index:02d}  /  {group_titles[group]}",
+                      style="NavSection.TLabel").pack(anchor="w", padx=12, pady=(8, 3))
             for key in self.tab_keys:
                 if self.tab_groups[key] != group:
                     continue
                 title = "The Division 3" if key == "division3" else ("BUILD TOOL" if key == "build_tool" else t(f"tab.{key}"))
-                label = f"    {title}"
+                label = f"  {title}"
                 self._nav_page_labels[key] = label
                 button = ttk.Button(parent, text=label, style="Nav.TButton",
                                     command=lambda page=key: self.select_page(page))
                 button.pack(fill="x", padx=8, pady=1)
                 self._nav_page_buttons[key] = button
-        ttk.Label(parent, text="LINK: SECURE\nNODE: LOCAL", style="Muted.TLabel",
+        ttk.Label(parent, text="TD2 LOOT ADVISOR\nLOCAL WORKSPACE", style="NavMeta.TLabel",
                   justify="left", font=("Consolas", 8)).pack(side="bottom", anchor="w", padx=12, pady=12)
+
+    def _build_page_context(self, parent):
+        """Persistent workspace heading gives every feature a clear location and state."""
+        bar = self.page_context = ttk.Frame(parent, style="PageContext.TFrame")
+        bar.pack(fill="x", padx=2, pady=(0, 7))
+        ttk.Frame(bar, style="PageRail.TFrame", width=3).pack(side="left", fill="y")
+        labels = ttk.Frame(bar, style="PageContext.TFrame")
+        labels.pack(side="left", fill="both", expand=True, padx=(13, 8), pady=(8, 7))
+        self.page_group_label = ttk.Label(labels, text="TD2 / WORKSPACE", style="PageEyebrow.TLabel")
+        self.page_group_label.pack(anchor="w")
+        self.page_title_label = ttk.Label(labels, text="", style="PageTitle.TLabel")
+        self.page_title_label.pack(anchor="w", pady=(1, 0))
+        self.page_status_label = ttk.Label(bar, text="LOCAL / READY", style="PageStatus.TLabel")
+        self.page_status_label.pack(side="right", padx=14)
+
+    def _update_page_context(self, page=None):
+        if not hasattr(self, "page_title_label"):
+            return
+        page = page or self.current_tab() or "dash"
+        group = self.tab_groups.get(page, "home")
+        group_text = self.group_labels.get(group, group).upper()
+        title = "The Division 3" if page == "division3" else ("BUILD TOOL" if page == "build_tool" else t(f"tab.{page}"))
+        try:
+            self.page_group_label.configure(text=f"TD2  /  {group_text}")
+            self.page_title_label.configure(text=title)
+            state = "SCANNING" if self.running else "READY"
+            self.page_status_label.configure(text=f"LOCAL  /  {state}")
+        except (AttributeError, tk.TclError):
+            return
 
     def _sidebar_activate(self, group, page=None):
         if getattr(self, "_nav_page_buttons", None):
@@ -4793,7 +4825,7 @@ class App:
         st = self.cfg["settings"]
         self.banner = ui_art.Banner(self.root, PAL, ART_DIR / "backgrounds", interval_s=st.get("bg_interval", 15),
                                     title="◆ TD2 LOOT ADVISOR", subtitle=f"v{APP_VERSION}",
-                                    height=max(44, int(118 * getattr(self, "ui_factor", 1.0) * (0.6 if getattr(self, "compact", False) else 1.0))))
+                                    height=max(48, int(82 * getattr(self, "ui_factor", 1.0) * (0.8 if getattr(self, "compact", False) else 1.0))))
         self.refresh_header()
 
     def toast(self, text):
@@ -4824,13 +4856,14 @@ class App:
         st = self.cfg["settings"]
         prov = st.get("ai_provider", "builtin")
         self.banner.set_chips([(self._acc_chip_text(), "btn" if not self.account.signed_in else "on", self.open_account),
-                               ("🐞 " + t("fb.btn_short"), "off", self.open_feedback),
-                               ("🔄 " + t("sync.btn_short"), "btn", self.run_sync),
-                                ("⚖ " + t("perf." + st.get("perf_mode", "balanced")), "btn", self.toggle_performance),
-                               *([( "\U0001F3AE " + t("svc.st_" + self.game_state), "on")] if getattr(self, "game_on", False) else []),
-                               (("● " + t("state.running")) if self.running else ("○ " + t("state.stopped")),
+                               ("FEEDBACK / " + t("fb.btn_short"), "off", self.open_feedback),
+                               ("SYNC / " + t("sync.btn_short"), "btn", self.run_sync),
+                                ("MODE / " + t("perf." + st.get("perf_mode", "balanced")), "btn", self.toggle_performance),
+                               *([("GAME / " + t("svc.st_" + self.game_state), "on")] if getattr(self, "game_on", False) else []),
+                               (("LOCAL / " + t("state.running")) if self.running else ("LOCAL / " + t("state.stopped")),
                                 "on" if self.running else "off"),
-                               ("🤖 " + provider_label(prov if prov in PROVIDER_KEYS else "builtin"), "off")])
+                               ("AI / " + provider_label(prov if prov in PROVIDER_KEYS else "builtin"), "off")])
+        self._update_page_context()
 
     def on_tab(self, event=None):
         if hasattr(self, "sounds"): self.sounds.play("tab")
@@ -4866,6 +4899,7 @@ class App:
             elif k == "log": self.refresh_logtab()
         self.root.after((self.fxbar.duration + 30) if anim else 20, refresh)
         self._sidebar_activate(self.tab_groups.get(k, "home"))
+        self._update_page_context(k)
 
     # ---------- Panel ----------
     def build_dash(self):
@@ -6316,7 +6350,16 @@ class App:
         for child in frame.winfo_children(): child.destroy()
         self.bt_panel = build_tool_ui.BuildToolPanel(
             frame, self.root, GAME.data if getattr(GAME, "ok", False) else {},
-            BASE / "build_tool.json", APP_VERSION, PAL)
+            BASE / "build_tool.json", APP_VERSION, PAL,
+            stash_provider=lambda: self.stash.owned(),
+            target_loot_provider=self._build_tool_target_loot)
+
+    def _build_tool_target_loot(self):
+        """Expose only today's cached, entitled target-loot rows to the planner."""
+        if not self.ent.has("vendor_watch"):
+            return []
+        today = time.strftime("%Y-%m-%d", time.gmtime())
+        return [row for row in vendor.target_loot_today(self.vendor_week) if row[3] == today]
 
     # ---------- Build editörü (v2) ----------
     def build_builds(self):

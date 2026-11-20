@@ -226,6 +226,48 @@ def test_build_tool_calculation_is_slot_scoped_and_uses_real_thresholds():
     faster["slots"]["Primary"]["attrs"]["reload_speed"] = 100
     assert build_tool.calculate(faster, catalog)["weapons"][0]["reload"] == 1
 
+def test_build_tool_advisories_and_storage_are_safe():
+    import build_tool
+    import copy
+    import tempfile
+
+    catalog = {"version": "test-1", "source": "test fixture",
+               "community_data_source": {"commit": "abc"},
+               "items": {"Test Vest": {"slot": "Chest"}},
+               "attributes": {"crit_chance": {"min": 2, "max": 6}},
+               "brands": [], "gear_sets": []}
+    build = build_tool.new_build("Quality check")
+    build["slots"]["Chest"] = {"name": "Test Vest", "attrs": {"crit_chance": 4}}
+    build_tool.stamp_catalog(build, catalog)
+    assert build_tool.catalog_diagnostics(catalog)["provenance"]["community_commit"] == "abc"
+    quality = build_tool.roll_quality(build, catalog)
+    assert quality == [{"slot": "Chest", "item": "Test Vest", "attribute": "crit_chance",
+                        "value": 4.0, "minimum": 2.0, "maximum": 6.0, "percent": 50.0,
+                        "range_verified": True, "basis": "catalog range"}]
+    assert not [issue for issue in build_tool.validate_build(build, catalog)
+                if issue["level"] == "warning"]
+
+    improved = copy.deepcopy(build)
+    improved["slots"]["Chest"]["attrs"]["crit_chance"] = 5
+    assert build_tool.compare_builds(build, improved, catalog)["stats"]["crit_chance"]["delta"] == 1
+
+    stash_items = [{"name": "Test Vest", "slot": "Chest", "status": "owned"}]
+    before = json.dumps(stash_items, sort_keys=True)
+    matches = build_tool.stash_matches(build, stash_items, catalog)
+    assert next(row for row in matches if row["slot"] == "Chest")["owned"]
+    assert json.dumps(stash_items, sort_keys=True) == before
+    target = next(row for row in matches if row["slot"] == "Chest")
+    routes = build_tool.farm_routes([{**target, "owned": False}],
+                                    [("Targeted Loot", ["Test Vest"], ["Mission"], "2026-11-20")])
+    assert routes["Chest"][0]["targets"] == ["Test Vest"]
+
+    with tempfile.TemporaryDirectory() as directory:
+        path = Path(directory) / "share.json"
+        build_tool.export_json(path, [build], [improved])
+        loaded = build_tool.import_json(path)
+        assert loaded["builds"][0]["name"] == "Quality check"
+        assert loaded["templates"][0]["slots"]["Chest"]["attrs"]["crit_chance"] == 5
+
 def test_vendor_record():
     import vendor
     G = _game()

@@ -1,5 +1,14 @@
 ## TD2 Loot Advisor — Windows
 
+**9.1.5.52 — Build Tool insights and desktop UI refinement**
+
+- Build Tool now records the declared game-library source/version and reports catalog coverage and stale catalog snapshots.
+- Added advisory build checks and roll-quality estimates; when the library lacks a minimum roll value, the UI labels the estimate as maximum-relative.
+- Added side-by-side build comparison for stats, armor, estimated DPS and TTK. Estimates remain advisory and are not in-game measurements.
+- Added read-only stash matching and dated target-loot routes from the local feed; routes are shown only when today's data is available and do not guarantee a drop.
+- Added local build templates and bounded JSON import/export. `build_tool.json` remains user runtime data and is excluded from Git.
+- Refined desktop navigation, page context, typography and banner status chips. Retained the third-party attribution notice in the packaged application.
+
 **9.1.5.51 — Build Tool, OCR fallback and startup/configuration hardening**
 
 - Added a standalone Build Tool workspace with local build records, equipment and weapon selection, fixed catalog details, brand/gear-set bonuses, SHD values, and estimated weapon damage/DPS/TTK.

@@ -117,3 +117,39 @@ hazırlığı başlamadan önce bu kurallar dikkate alınır.
 - Her sürüm dalı yayından sonra `main`'e geri birleştirilir.
 - Yayınlanmış bir etiket başka bir commit'e taşınmaz; gerekirse yeni yama
   sürümü açılır.
+
+## graphify
+
+This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.
+
+When the user types `/graphify`, use the installed graphify skill or instructions before doing anything else.
+
+Rules:
+- When graphify-out/graph.json exists, run `graphify query "<question>"` before your first grep, search or source-file read for a codebase question, and put this rule in every subagent prompt that explores code. Read raw files only for lines the graph or an earlier read already located. Use `graphify path "<A>" "<B>"` for relationships and `graphify explain "<concept>"` for focused concepts. When the answer is under a Markdown heading, `graphify section "<heading>"` prints that section's text, so the .md need not be opened. These return a scoped subgraph, usually much smaller than GRAPH_REPORT.md or raw grep output.
+- Dirty graphify-out/ files are expected after hooks or incremental updates; dirty graph files are not a reason to skip graphify. Only skip graphify if the task is about stale or incorrect graph output, or the user explicitly says not to use it.
+- If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
+- Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context.
+- After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).
+- A committed graphify-out/graph.json is rewritten whole on every build, so a large diff to it in a pull request is expected. Do not flag it as churn or suggest skipping the graph rebuild or its hooks.
+
+## UI / UX Pro Max (mandatory for interface work)
+
+For every task that designs, implements, reviews, or fixes the User Interface,
+design system, visual theme, UI components or controls, navigation, typography,
+accessibility, responsive layout, charts, interaction states, or UI animation,
+use the installed `ui-ux-pro-max` skill and the relevant companion skill from
+`.agents/skills/` before changing code. The main skill is
+`.agents/skills/ui-ux-pro-max/SKILL.md`; its local search tool is
+`.agents/skills/ui-ux-pro-max/scripts/search.py`.
+
+- For a new or system-wide design direction, run the skill's `--design-system`
+  search. For a focused component or UX issue, search the matching domain; for
+  stack guidance, use `--stack` as documented by the skill.
+- Use companion skills such as `design-system`, `ui-styling`, `design`, and
+  `brand` when they match the requested work.
+- Treat search results as guidance: preserve the existing Kaivolt theme tokens,
+  project behavior, accessibility, and performance constraints unless the user
+  explicitly asks to change them. Do not apply a whole-app redesign to a
+  component-scoped request.
+- Verify the changed UI states and layout with the relevant local checks, and
+  state which visual/runtime behavior was actually verified.

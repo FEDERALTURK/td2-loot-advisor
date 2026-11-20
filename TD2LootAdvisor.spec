@@ -2,8 +2,7 @@
 from PyInstaller.utils.hooks import collect_all
 from PyInstaller.utils.hooks import copy_metadata
 
-datas = [('build/pkg/builds.json', '.'), ('lang', 'lang'), ('meta', 'meta'), ('icon', 'icon'), ('art', 'art'),
-         ('docs/third_party/mx-division-builds-attribution.md', 'docs/third_party')]
+datas = [('build/pkg/builds.json', '.'), ('lang', 'lang'), ('meta', 'meta'), ('icon', 'icon'), ('art/agents', 'art/agents'), ('art/branding', 'art/branding'), ('art/backgrounds', 'art/backgrounds'), ('docs/third_party/mx-division-builds-attribution.md', 'docs/third_party')]
 binaries = []
 hiddenimports = ['PIL._tkinter_finder', 'PIL.ImageTk', 'pynput.keyboard._win32', 'pynput.mouse._win32', 'pyttsx3.drivers', 'pyttsx3.drivers.sapi5', 'ocr_backend', 'features', 'stash', 'vendor', 'companion', 'share', 'dropstats', 'updater', 'syncer', 'gameinfo', 'updates', 'reports', 'account', 'service', 'screenstate', 'localapi', 'presence', 'notify', 'knowledge', 'voicepack', 'livetranslate', 'single', 'tasks_live', 'overlay', 'terms', 'trscreen', 'speech', 'winocr', 'gamepad', 'safeio', 'winpath', 'pystray._win32', 'fx', 'bgvideo', 'view3d', 'display']
 datas += copy_metadata('edge-tts')

@@ -19,6 +19,7 @@ tempbuild*/
 .venv/
 last_card.png
 game_data_cache.json
+build_tool.json
 
 # kullanıcıya özel / üretilen arka plan videoları
 art/videos/

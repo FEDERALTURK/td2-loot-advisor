@@ -129,7 +129,8 @@ def s2():
     s = a.sessions.stats()
     step("kart okundu ve oturuma sayıldı", s["scanned"] >= 1, session=s, last=(a.comp_state.get("item") or {}).get("name"))
     step("ekran durumu: menü imzası öğrenildi", a.screen.learned() >= 1, learned=a.screen.learned(), state=a.game_state)
-    step("başlıkta oyun rozeti", any(str(c[0]).startswith("🎮") for c in a.banner.chips), chips=[c[0] for c in a.banner.chips][:4])
+    step("başlıkta oyun rozeti", any(str(c[0]).startswith(("GAME /", "🎮")) for c in a.banner.chips),
+         chips=[c[0] for c in a.banner.chips][:6])
     with urllib.request.urlopen(f"http://127.0.0.1:8799/api/state?t={st['api_token']}", timeout=5) as r: js = json.loads(r.read())
     step("API durumu: oyun + son karar", js["game"]["running"] and js["last"] and js["session"]["scanned"] >= 1, game=js["game"])
     kinds = [e.get("type") for e in events]
