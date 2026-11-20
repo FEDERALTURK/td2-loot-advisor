@@ -78,7 +78,8 @@ def s3():
     step("anahtar kullanıldı → premium", a.ent.tier == "premium" and a.ent.source == "account",
          tier=a.ent.tier, src=a.ent.source, why=a.ent.ent_reason)
     step("premium özellik açık", a.ent.has("optimizer_all"))
-    step("rozet kullanıcı adı + yıldız", "Soner" in a._acc_chip_text() and "⭐" in a._acc_chip_text(), chip=a._acc_chip_text())
+    chip = a._acc_chip_text()
+    step("rozet kullanıcı adı + premium etiketi", "Soner" in chip and "PREMIUM" in chip, chip=chip)
     step("hesap penceresi premium sonrası yeniden açık", getattr(a, "_acc_win", None) is not None and a._acc_win.winfo_exists())
     if not (getattr(a, "_acc_win", None) and a._acc_win.winfo_exists()): a.open_account()
     shot("acc_03_premium", a._acc_win)
