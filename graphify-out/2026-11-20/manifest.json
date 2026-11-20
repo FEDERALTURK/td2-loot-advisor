@@ -66,9 +66,9 @@
     "semantic_hash": ""
   },
   ".github/workflows/build-installer.yml": {
-    "mtime": 1795170894.2963343,
-    "seen": 1795171022.8056138,
-    "ast_hash": "133cec3348cfb4f474ace888ec8de34b",
+    "mtime": 1795172251.1179752,
+    "seen": 1795172271.9128695,
+    "ast_hash": "48c81866321a45a67eb86bc7e71626b9",
     "semantic_hash": ""
   },
   ".github/workflows/build-mobile.yml": {

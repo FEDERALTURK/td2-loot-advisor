@@ -1,5 +1,12 @@
 ## TD2 Loot Advisor — Windows
 
+**9.1.5.53 — İmzalı güncelleme güvenliği**
+
+- Windows uygulama güncellemeleri Ed25519 ile imzalanmış release manifestiyle doğrulanır.
+- Manifest sürüm, GitHub deposu, release tag'i, installer SHA-256 özeti ve sürümlü kaynak arşivi özetini bağlar.
+- Manifest imzası veya dosya özeti geçersizse güncelleme reddedilir.
+- GitHub Actions, yayın oluşturmadan signing secret'ını test edebilen bir doğrulama modu içerir.
+
 **9.1.5.52 — Build Tool insights and desktop UI refinement**
 
 - Build Tool now records the declared game-library source/version and reports catalog coverage and stale catalog snapshots.
