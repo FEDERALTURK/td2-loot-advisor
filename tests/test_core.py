@@ -233,11 +233,14 @@ def test_build_tool_advisories_and_storage_are_safe():
 
     catalog = {"version": "test-1", "source": "test fixture",
                "community_data_source": {"commit": "abc"},
-               "items": {"Test Vest": {"slot": "Chest"}},
+               "items": {"Test Vest": {"slot": "Chest"}, "Test Mask": {"slot": "Mask"}},
                "attributes": {"crit_chance": {"min": 2, "max": 6}},
-               "brands": [], "gear_sets": []}
+               "brands": ["Test Brand"], "gear_sets": [],
+               "brand_bonuses": {"Test Brand": ["Two-piece bonus", "Three-piece bonus"]}}
     build = build_tool.new_build("Quality check")
     build["slots"]["Chest"] = {"name": "Test Vest", "attrs": {"crit_chance": 4}}
+    build["slots"]["Chest"]["brand"] = "Test Brand"
+    build["slots"]["Mask"] = {"name": "Test Mask", "brand": "Test Brand"}
     build_tool.stamp_catalog(build, catalog)
     assert build_tool.catalog_diagnostics(catalog)["provenance"]["community_commit"] == "abc"
     quality = build_tool.roll_quality(build, catalog)
@@ -249,7 +252,13 @@ def test_build_tool_advisories_and_storage_are_safe():
 
     improved = copy.deepcopy(build)
     improved["slots"]["Chest"]["attrs"]["crit_chance"] = 5
-    assert build_tool.compare_builds(build, improved, catalog)["stats"]["crit_chance"]["delta"] == 1
+    improved["slots"]["Mask"]["brand"] = ""
+    comparison = build_tool.compare_builds(build, improved, catalog)
+    assert comparison["stats"]["crit_chance"]["delta"] == 1
+    assert {row["slot"] for row in comparison["slot_changes"]} == {"Mask", "Chest"}
+    assert comparison["bonuses"]["first"] == ["Test Brand · 1-piece: Two-piece bonus",
+                                                "Test Brand · 2-piece: Three-piece bonus"]
+    assert comparison["bonuses"]["second"] == ["Test Brand · 1-piece: Two-piece bonus"]
 
     stash_items = [{"name": "Test Vest", "slot": "Chest", "status": "owned"}]
     before = json.dumps(stash_items, sort_keys=True)

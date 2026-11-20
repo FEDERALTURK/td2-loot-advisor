@@ -39,6 +39,7 @@ Urban Lookout Holster,Urban Lookout,N/A,FALSE,FALSE,type:gear-core,N/A,N/A,type:
 Zwiadowka Sp. z o.o. Holster,Zwiadowka Sp. z o.o.,N/A,FALSE,FALSE,type:gear-core,N/A,N/A,type:gear-minor,type:gear-minor,N/A,N/A,N/A,N/A,N/A
 Aces & Eights Holster,N/A,Aces & Eights,FALSE,FALSE,type:gear-core,N/A,N/A,type:gear-minor,N/A,N/A,N/A,N/A,N/A,N/A
 Aegis Holster,N/A,Aegis,FALSE,FALSE,type:gear-core,N/A,N/A,type:gear-minor,N/A,N/A,N/A,N/A,N/A,N/A
+Apex Protocol Holster,N/A,Apex Protocol,FALSE,FALSE,type:gear-core,N/A,N/A,type:gear-minor,N/A,N/A,N/A,N/A,N/A,N/A
 Breaking Point Holster,N/A,Breaking Point,FALSE,FALSE,type:gear-core,N/A,N/A,type:gear-minor,N/A,N/A,N/A,N/A,N/A,N/A
 Cavalier Holster,N/A,Cavalier,FALSE,FALSE,type:gear-core,N/A,N/A,type:gear-minor,N/A,N/A,N/A,N/A,N/A,N/A
 Concentrated Company Holster,N/A,Concentrated Company,FALSE,FALSE,type:gear-core,N/A,N/A,type:gear-minor,N/A,N/A,N/A,N/A,N/A,N/A
@@ -64,7 +65,7 @@ True Patriot Holster,N/A,True Patriot,FALSE,FALSE,type:gear-core,N/A,N/A,type:ge
 Umbra Initiative Holster,N/A,Umbra Initiative,FALSE,FALSE,type:gear-core,N/A,N/A,type:gear-minor,N/A,N/A,N/A,N/A,N/A,N/A
 Virtuoso Holster,N/A,Virtuoso,FALSE,FALSE,type:gear-core,N/A,N/A,type:gear-minor,N/A,N/A,N/A,N/A,N/A,N/A
 Core Strength Holster,N/A,Core Strength,FALSE,FALSE,type:gear-core,N/A,N/A,type:gear-minor,N/A,N/A,N/A,N/A,N/A,N/A
-Ember Engine Holster,N/A,Ember Engine,FALSE,FALSE,type:gear-core,N/A,N/A,type:gear-minor,N/A,N/A,N/A,type:gear-mod,N/A,N/A
+Ember Engine Holster,N/A,Ember Engine,FALSE,FALSE,type:gear-core,N/A,N/A,type:gear-minor,N/A,N/A,N/A,N/A,N/A,N/A
 Forge,Richter & Kaiser GmbH,N/A,TRUE,FALSE,type:gear-core,N/A,N/A,fixed:shield-health-forge,type:gear-minor,N/A,N/A,N/A,N/A,N/A
 Ammo Dump,Badger Tuff,N/A,TRUE,FALSE,type:gear-core,N/A,N/A,fixed:ammo-capacity-ammo-dump,type:gear-minor,type:gear-minor,N/A,N/A,N/A,N/A
 Picaros Holster,Brazos de Arcabuz,N/A,TRUE,FALSE,type:gear-core|!weapon-damage-gear-core,N/A,N/A,fixed:weapon-damage-picaros-holster,type:gear-minor,N/A,N/A,N/A,N/A,N/A
