@@ -5,6 +5,7 @@ import tempfile
 import uuid
 import math
 import re
+import hashlib
 
 SLOTS = ("Mask", "Backpack", "Chest", "Gloves", "Holster", "Kneepads", "Primary", "Secondary",
          "SideArm", "Specialization", "Skill1", "Skill2")
@@ -32,6 +33,12 @@ def normalize_build(build):
             except (TypeError, ValueError): continue
     out["specialization"] = str(build.get("specialization") or "")[:60]
     out["enemy_hp"] = _number(build.get("enemy_hp"), 2_000_000, 1, 100_000_000)
+    snapshot = build.get("catalog_snapshot")
+    if isinstance(snapshot, dict):
+        out["catalog_snapshot"] = {str(key)[:40]: str(value or "")[:500]
+                                    for key, value in snapshot.items()
+                                    if key in {"version", "source", "community_name", "community_commit",
+                                               "community_date", "community_repository", "community_license", "fingerprint"}}
     for slot, item in list(out["slots"].items()):
         if not isinstance(item, dict):
             continue
@@ -217,6 +224,261 @@ def _number(value, default=None, low=-1e12, high=1e12):
         return default
 
 
+def catalog_provenance(catalog):
+    """Return the catalog's declared origin/version; this does not verify accuracy."""
+    catalog = catalog if isinstance(catalog, dict) else {}
+    community = catalog.get("community_data_source")
+    community = community if isinstance(community, dict) else {}
+    identity = "|".join(str(value or "") for value in (
+        catalog.get("version"), catalog.get("source"), community.get("commit"), community.get("commit_date")))
+    return {
+        "version": str(catalog.get("version") or "unknown"),
+        "source": str(catalog.get("source") or "Source not recorded"),
+        "community_name": str(community.get("name") or "not recorded"),
+        "community_commit": str(community.get("commit") or "not recorded"),
+        "community_date": str(community.get("commit_date") or "not recorded"),
+        "community_repository": str(community.get("repository") or "not recorded"),
+        "community_license": str(community.get("license") or "not recorded"),
+        "fingerprint": hashlib.sha256(identity.encode("utf-8")).hexdigest()[:16],
+    }
+
+
+def catalog_diagnostics(catalog):
+    """Summarize catalog coverage and declared provenance without network access."""
+    catalog = catalog if isinstance(catalog, dict) else {}
+    provenance = catalog_provenance(catalog)
+    items = catalog.get("items") if isinstance(catalog.get("items"), dict) else {}
+    weapons = catalog.get("weapon_index") if isinstance(catalog.get("weapon_index"), dict) else {}
+    attrs = catalog.get("attributes") if isinstance(catalog.get("attributes"), dict) else {}
+    warnings = []
+    if provenance["version"] == "unknown":
+        warnings.append("Library version is not recorded")
+    if provenance["source"] == "Source not recorded":
+        warnings.append("Library source is not recorded")
+    if provenance["community_commit"] == "not recorded":
+        warnings.append("Community data commit is not recorded")
+    return {"provenance": provenance, "counts": {
+        "gear_items": len(items), "weapons": len(weapons), "attributes": len(attrs),
+        "brands": len(catalog.get("brands") or []), "gear_sets": len(catalog.get("gear_sets") or []),
+    }, "warnings": warnings}
+
+
+def stamp_catalog(build, catalog):
+    """Store the declared local catalog basis on a build when it is first created."""
+    if isinstance(build, dict) and not build.get("catalog_snapshot"):
+        build["catalog_snapshot"] = catalog_provenance(catalog)
+    return build
+
+
+def roll_quality(build, catalog=None):
+    """Compare entered rolls to catalog maxima; explicitly mark unknown lower bounds."""
+    build = normalize_build(build)
+    catalog = catalog if isinstance(catalog, dict) else {}
+    attributes = catalog.get("attributes", {})
+    attributes = attributes if isinstance(attributes, dict) else {}
+    rows = []
+    for slot, item in build["slots"].items():
+        if not item:
+            continue
+        weapon = slot in ("Primary", "Secondary", "SideArm")
+        fixed = auto_details(item.get("name"), slot, catalog).get("attrs", {})
+        for key, value in item["attrs"].items():
+            meta_key = key if key in attributes else _attribute_key(key, attributes)
+            meta = attributes.get(meta_key, {}) if isinstance(attributes, dict) else {}
+            maximum = _number(meta.get("weapon_max" if weapon else "max"), None) if isinstance(meta, dict) else None
+            minimum = _number(meta.get("min"), None) if isinstance(meta, dict) else None
+            if key in fixed or maximum is None or maximum <= (minimum if minimum is not None else 0):
+                continue
+            denominator = maximum - minimum if minimum is not None else maximum
+            percent = max(0.0, min(100.0, (value - (minimum or 0.0)) / denominator * 100))
+            rows.append({"slot": slot, "item": item["name"], "attribute": key,
+                         "value": value, "minimum": minimum, "maximum": maximum,
+                         "percent": percent, "range_verified": minimum is not None,
+                         "basis": "catalog range" if minimum is not None else "catalog maximum only"})
+    return rows
+
+
+def validate_build(build, catalog=None):
+    """Return structural/catalog warnings; never makes gameplay or dismantle decisions."""
+    build = normalize_build(build)
+    catalog = catalog if isinstance(catalog, dict) else {}
+    attrs = catalog.get("attributes", {})
+    attrs = attrs if isinstance(attrs, dict) else {}
+    issues = []
+    gear_slots = SLOTS[:6]
+    for slot in gear_slots + ("Primary", "Secondary", "SideArm", "Skill1", "Skill2"):
+        item = build["slots"].get(slot)
+        if not item:
+            issues.append({"level": "info", "slot": slot, "message": "Slot is empty"})
+            continue
+        is_weapon = slot in ("Primary", "Secondary", "SideArm")
+        table = catalog.get("weapon_index", {}) if is_weapon else catalog.get("items", {})
+        label, meta = _lookup(table, item.get("name"))
+        if slot in gear_slots and not label:
+            label, _ = _lookup({name: {} for name in catalog.get("brands", [])}, item.get("name"))
+            if not label:
+                label, _ = _lookup({name: {} for name in catalog.get("gear_sets", [])}, item.get("name"))
+        if slot.startswith("Skill"):
+            skills = catalog.get("skills", [])
+            names = list(skills if isinstance(skills, (dict, list, tuple)) else [])
+            names += [entry.get("name", "") for entry in catalog.get("skill_variants", [])
+                      if isinstance(entry, dict)]
+            label = next((name for name in names if str(name).casefold() == item["name"].casefold()), "")
+        if not label:
+            issues.append({"level": "warning", "slot": slot, "message": "Item is not in the current catalog"})
+        elif meta.get("slot") and slot in gear_slots and str(meta["slot"]).casefold() != slot.casefold():
+            issues.append({"level": "warning", "slot": slot,
+                           "message": f"Catalog slot is {meta['slot']}, not {slot}"})
+        fixed = auto_details(item.get("name"), slot, catalog).get("attrs", {})
+        for key, value in item["attrs"].items():
+            data_key = key if key in attrs else _attribute_key(key, attrs)
+            data = attrs.get(data_key, {}) if isinstance(attrs, dict) else {}
+            maximum = _number(data.get("weapon_max" if is_weapon else "max"), None) if isinstance(data, dict) else None
+            minimum = _number(data.get("min"), None) if isinstance(data, dict) else None
+            if key in fixed:
+                continue
+            if maximum is not None and value > maximum:
+                issues.append({"level": "warning", "slot": slot,
+                               "message": f"{key} ({value:g}) exceeds catalog maximum ({maximum:g})"})
+            elif minimum is not None and value < minimum:
+                issues.append({"level": "warning", "slot": slot,
+                               "message": f"{key} ({value:g}) is below catalog minimum ({minimum:g})"})
+    if not build["specialization"]:
+        issues.append({"level": "info", "slot": "Specialization", "message": "No specialization selected"})
+    if build.get("catalog_snapshot"):
+        current = catalog_provenance(catalog)
+        if build["catalog_snapshot"].get("fingerprint") != current["fingerprint"]:
+            issues.append({"level": "warning", "slot": "Catalog",
+                           "message": "Build was last saved against a different catalog version"})
+    return issues
+
+
+def compare_builds(first, second, catalog=None):
+    """Compare two local builds under the same catalog and calculation assumptions."""
+    left = calculate(first, catalog)
+    right = calculate(second, catalog)
+    stats = {key: {"first": left["stats"].get(key, 0), "second": right["stats"].get(key, 0),
+                   "delta": right["stats"].get(key, 0) - left["stats"].get(key, 0)}
+             for key in sorted(left["stats"].keys() | right["stats"].keys())}
+    weapons = []
+    for slot in ("Primary", "Secondary", "SideArm"):
+        a = next((weapon for weapon in left["weapons"] if weapon["slot"] == slot), None)
+        b = next((weapon for weapon in right["weapons"] if weapon["slot"] == slot), None)
+        if a or b:
+            weapons.append({"slot": slot, "first": a, "second": b,
+                            "dps_delta": (b["dps"] if b else 0) - (a["dps"] if a else 0),
+                            "ttk_delta": (b["ttk"] if b else 0) - (a["ttk"] if a else 0)})
+    return {"stats": stats, "armor": {"first": left["armor"], "second": right["armor"],
+                                       "delta": right["armor"] - left["armor"]},
+            "cores": {key: {"first": left["cores"][key], "second": right["cores"][key],
+                             "delta": right["cores"][key] - left["cores"][key]}
+                      for key in left["cores"]}, "weapons": weapons,
+            "assumptions": "Both estimates use the same local catalog and target HP; they are not in-game measurements."}
+
+
+def stash_matches(build, stash_items, catalog=None):
+    """Read-only exact-name/brand/set matching against owned local stash records."""
+    build = normalize_build(build)
+    owned = [item for item in stash_items if isinstance(item, dict) and item.get("status", "owned") == "owned"]
+    matches = []
+    for slot in SLOTS[:6]:
+        target = build["slots"].get(slot)
+        if not target:
+            continue
+        auto = auto_details(target.get("name"), slot, catalog)
+        target_name = str(target.get("name", "")).casefold()
+        target_set = str(target.get("gear_set") or auto.get("gear_set") or "").casefold()
+        target_brand = str(target.get("brand") or auto.get("brand") or "").casefold()
+        candidates = []
+        for item in owned:
+            if str(item.get("slot", "")).casefold() != slot.casefold():
+                continue
+            match = ""
+            if str(item.get("name", "")).casefold() == target_name:
+                match = "exact item"
+            elif target_set and str(item.get("gear_set", "")).casefold() == target_set:
+                match = "same gear set"
+            elif target_brand and str(item.get("brand", "")).casefold() == target_brand:
+                match = "same brand"
+            if match:
+                candidates.append({"name": str(item.get("name") or "Unknown item"),
+                                   "match": match, "locked": bool(item.get("locked")),
+                                   "rarity": list(item.get("rarity") or [])})
+        matches.append({"slot": slot, "target": target.get("name", ""),
+                        "brand": target_brand, "gear_set": target_set,
+                        "owned": bool(candidates), "candidates": candidates})
+    return matches
+
+
+def farm_routes(matches, target_loot_rows):
+    """Match missing gear targets to dated targeted-loot categories; never promise a drop."""
+    def key(value):
+        return re.sub(r"[^a-z0-9]+", "", str(value or "").casefold())
+
+    routes = {}
+    for match in matches:
+        if match["owned"]:
+            continue
+        item = match.get("target", "")
+        wanted = {key(item)}
+        for label in (match.get("brand"), match.get("gear_set")):
+            if label:
+                wanted.add(key(label))
+        found = []
+        for event, targets, missions, day in target_loot_rows or ():
+            hits = [target for target in targets or () if key(target) in wanted]
+            if hits:
+                found.append({"event": str(event), "targets": hits,
+                              "missions": list(missions or ()), "day": str(day or "")})
+        routes[match["slot"]] = found
+    return routes
+
+
+def load_store(path):
+    try:
+        with open(path, encoding="utf-8") as stream:
+            data = json.load(stream)
+    except FileNotFoundError:
+        return {"builds": [], "templates": []}
+    if not isinstance(data, dict) or not isinstance(data.get("builds"), list):
+        raise ValueError("invalid Build Tool store")
+    templates = data.get("templates", [])
+    if not isinstance(templates, list):
+        raise ValueError("invalid Build Tool templates")
+    return {"builds": [normalize_build(value) for value in data["builds"][:200]],
+            "templates": [normalize_build(value) for value in templates[:100]]}
+
+
+def save_store(path, builds, templates=()):
+    directory = os.path.dirname(os.path.abspath(path))
+    os.makedirs(directory, exist_ok=True)
+    fd, temp_path = tempfile.mkstemp(prefix="build-tool-", suffix=".tmp", dir=directory)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as stream:
+            json.dump({"schema": 2, "builds": [normalize_build(b) for b in builds[:200]],
+                       "templates": [normalize_build(b) for b in list(templates)[:100]]},
+                      stream, ensure_ascii=False, indent=2)
+            stream.flush(); os.fsync(stream.fileno())
+        os.replace(temp_path, path)
+    finally:
+        if os.path.exists(temp_path): os.unlink(temp_path)
+
+
+def export_json(path, builds, templates=()):
+    save_store(path, builds, templates)
+
+
+def import_json(path):
+    if os.path.getsize(path) > 2_000_000:
+        raise ValueError("Build Tool JSON is larger than 2 MB")
+    data = load_store(path)
+    if not data["builds"] and not data["templates"]:
+        raise ValueError("No builds or templates were found in this file")
+    for build in data["builds"] + data["templates"]:
+        build["id"] = uuid.uuid4().hex
+    return data
+
+
 def calculate(build, catalog=None):
     """Summarize only explicitly selected local build values; never read the stash/game process."""
     build = normalize_build(build)
@@ -312,23 +574,12 @@ def calculate(build, catalog=None):
 
 
 def load(path):
-    try:
-        with open(path, encoding="utf-8") as stream: data = json.load(stream)
-    except FileNotFoundError:
-        return []
-    if not isinstance(data, dict) or not isinstance(data.get("builds"), list):
-        raise ValueError("invalid Build Tool store")
-    return [normalize_build(build) for build in data["builds"]]
+    return load_store(path)["builds"]
 
 
 def save(path, builds):
-    directory = os.path.dirname(os.path.abspath(path))
-    os.makedirs(directory, exist_ok=True)
-    fd, temp_path = tempfile.mkstemp(prefix="build-tool-", suffix=".tmp", dir=directory)
     try:
-        with os.fdopen(fd, "w", encoding="utf-8") as stream:
-            json.dump({"schema": 1, "builds": [normalize_build(b) for b in builds]}, stream, ensure_ascii=False, indent=2)
-            stream.flush(); os.fsync(stream.fileno())
-        os.replace(temp_path, path)
-    finally:
-        if os.path.exists(temp_path): os.unlink(temp_path)
+        templates = load_store(path)["templates"]
+    except (OSError, ValueError):
+        templates = []
+    save_store(path, builds, templates)

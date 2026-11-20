@@ -118,7 +118,7 @@ def main():
                 obj._responsive_compact = False
                 obj._sync_responsive_layout()
             assert obj._responsive_compact
-            assert obj._sidebar_buttons["build_tool"].cget("text") == "⬡"
+            assert obj._sidebar_buttons["build_tool"].cget("text") == obj.group_labels["build_tool"]
             broken_path = data/"broken_build_tool.json"
             broken_path.write_text("{invalid", encoding="utf-8")
             from build_tool_ui import BuildToolPanel

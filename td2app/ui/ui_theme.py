@@ -147,6 +147,9 @@ def apply_pack(settings, mode):
 
 FONT = "Segoe UI"
 FONT_SEMI = "Segoe UI Semibold"
+FONT_DISPLAY = "Segoe UI"
+FONT_MONO = "Consolas"
+SPACING = {"xs": 4, "sm": 8, "md": 12, "lg": 16}
 
 # Sekme ikonları (sekme kimliğine göre) / tab icons by tab id
 TAB_ICONS = {"dash": "🎯", "builds": "🧩", "progress": "📦", "stash": "🗄", "stats": "📊", "info": "📚", "translate": "🌐", "tasks": "📋",
@@ -189,13 +192,27 @@ def apply(root, mode="default"):
 
     # çerçeveler ve yazılar
     s.configure("TFrame", background=bg)
-    s.configure("Sidebar.TFrame", background=bg)
+    s.configure("Sidebar.TFrame", background=sf, bordercolor=bd, borderwidth=1, relief="solid")
+    s.configure("SidebarHeader.TFrame", background=sf)
+    s.configure("SidebarContent.TFrame", background=sf)
+    s.configure("PageContext.TFrame", background=sf, bordercolor=bd, borderwidth=1, relief="solid")
+    s.configure("PageRail.TFrame", background=ac)
+    s.configure("PageEyebrow.TLabel", background=sf, foreground=mu, font=(FONT_SEMI, 8))
+    s.configure("PageTitle.TLabel", background=sf, foreground=fg, font=(FONT_SEMI, 15))
+    s.configure("PageStatus.TLabel", background=sf, foreground=p["info"], font=(FONT_MONO, 9))
+    s.configure("NavSection.TLabel", background=sf, foreground=mu, font=(FONT_SEMI, 8))
+    s.configure("NavGroup.TLabel", background=sf, foreground=mu, font=(FONT_SEMI, 8))
+    s.configure("NavMeta.TLabel", background=sf, foreground=mu, font=(FONT, 9))
     s.configure("Nav.TButton", background=bg, foreground=mu, borderwidth=0, anchor="w",
-                padding=(12, 10), relief="flat", font=(FONT_SEMI, 10))
-    s.map("Nav.TButton", background=[("active", sf), ("pressed", sf2)], foreground=[("active", fg), ("pressed", ac)])
-    s.configure("NavActive.TButton", background=p["select"], foreground=ac, borderwidth=0, anchor="w",
-                padding=(12, 10), relief="flat", font=(FONT_SEMI, 10))
-    s.map("NavActive.TButton", background=[("active", sf2), ("pressed", bd)], foreground=[("active", ac), ("pressed", fg)])
+                padding=(SPACING["md"], SPACING["sm"]), relief="flat", font=(FONT_SEMI, 9), focuscolor=ac,
+                focusthickness=2)
+    s.map("Nav.TButton", background=[("active", sf2), ("pressed", sf2)],
+          foreground=[("active", fg), ("pressed", ac)], bordercolor=[("focus", ac)])
+    s.configure("NavActive.TButton", background=p["select"], foreground=ac, borderwidth=1,
+                bordercolor=ac, anchor="w", padding=(SPACING["md"], SPACING["sm"]),
+                relief="flat", font=(FONT_SEMI, 9), focuscolor=ac, focusthickness=2)
+    s.map("NavActive.TButton", background=[("active", sf2), ("pressed", bd)],
+          foreground=[("active", ac), ("pressed", fg)], bordercolor=[("focus", ac)])
     # Tam genişlikli Saha Terminali kabuğunun üst operasyon menüsü.
     s.configure("FieldNav.TButton", background=sf, foreground=mu, bordercolor=bd, anchor="center",
                 padding=(12, 9), relief="flat", font=(FONT_SEMI, 10))
@@ -204,31 +221,34 @@ def apply(root, mode="default"):
     s.configure("FieldNavActive.TButton", background=p["select"], foreground=ac, bordercolor=ac, anchor="center",
                 padding=(12, 9), relief="flat", font=(FONT_SEMI, 10))
     s.map("FieldNavActive.TButton", background=[("active", sf2), ("pressed", bd)], foreground=[("active", fg)])
-    s.configure("Card.TFrame", background=sf)
-    s.configure("Header.TFrame", background=sf)
+    s.configure("Card.TFrame", background=sf, bordercolor=bd, borderwidth=1, relief="solid")
+    s.configure("Header.TFrame", background=sf2, bordercolor=bd, borderwidth=1, relief="solid")
     s.configure("TLabel", background=bg, foreground=fg)
     s.configure("Muted.TLabel", background=bg, foreground=mu)
     s.configure("Card.TLabel", background=sf, foreground=fg)
     s.configure("CardMuted.TLabel", background=sf, foreground=mu)
-    s.configure("Brand.TLabel", background=sf, foreground=ac, font=(FONT_SEMI, 15))
+    s.configure("Brand.TLabel", background=sf, foreground=fg, font=(FONT_SEMI, 13))
+    s.configure("Title.TLabel", background=bg, foreground=fg, font=(FONT_SEMI, 16))
     s.configure("Item.TLabel", background=sf, foreground=fg, font=(FONT_SEMI, 13))
     s.configure("Note.TLabel", background=sf, foreground=p["info"], font=(FONT_SEMI, 10))
-    s.configure("Chip.TLabel", background=sf2, foreground=mu, padding=(10, 3), font=(FONT_SEMI, 9))
-    s.configure("ChipOn.TLabel", background=p["success"], foreground="#ffffff", padding=(10, 3), font=(FONT_SEMI, 9))
+    s.configure("Chip.TLabel", background=sf2, foreground=fg, padding=(10, 4), font=(FONT_SEMI, 9))
+    s.configure("ChipOn.TLabel", background=p["success"], foreground="#ffffff", padding=(10, 4), font=(FONT_SEMI, 9))
     s.configure("Warn.TLabel", background=bg, foreground=p["warning"])
     s.configure("Section.TLabel", background=bg, foreground=fg, font=(FONT_SEMI, 11))
     s.configure("TSeparator", background=bd)
 
     # butonlar
     s.configure("TButton", background=sf, foreground=fg, bordercolor=bd, lightcolor=sf,
-                darkcolor=sf, padding=(15, 8), relief="flat", focusthickness=0, font=(FONT_SEMI, 10))
+                darkcolor=sf, padding=(SPACING["md"], SPACING["sm"]), relief="flat",
+                focuscolor=ac, focusthickness=2, font=(FONT_SEMI, 10))
     s.map("TButton", background=[("disabled", bg), ("pressed", bd), ("active", sf2)],
           foreground=[("disabled", mu)], bordercolor=[("active", ac), ("focus", ac)],
           lightcolor=[("pressed", bd), ("active", sf2)], darkcolor=[("pressed", bd), ("active", sf2)])
     for name, col, hov in (("Accent", ac, ach), ("Success", p["success"], p["success"]),
                            ("Danger", p["danger"], p["danger"])):
         s.configure(f"{name}.TButton", background=col, foreground=p["accent_fg"] if name == "Accent" else "#ffffff", bordercolor=col,
-                    lightcolor=col, darkcolor=col, padding=(16, 7), font=(FONT_SEMI, 10))
+                    lightcolor=col, darkcolor=col, padding=(SPACING["lg"], 7), font=(FONT_SEMI, 10),
+                    focuscolor=ac, focusthickness=2)
         s.map(f"{name}.TButton", background=[("pressed", hov), ("active", hov)],
               lightcolor=[("active", hov)], darkcolor=[("active", hov)],
               bordercolor=[("active", "#ffffff"), ("focus", col)])
@@ -248,10 +268,10 @@ def apply(root, mode="default"):
 
     # giriş alanları
     s.configure("TEntry", fieldbackground=ent, foreground=fg, bordercolor=bd, lightcolor=ent,
-                darkcolor=ent, insertcolor=fg, padding=5)
+                darkcolor=ent, insertcolor=fg, padding=(8, 6))
     s.map("TEntry", bordercolor=[("focus", ac)], lightcolor=[("focus", ac)])
     s.configure("TCombobox", fieldbackground=ent, background=sf2, foreground=fg, arrowcolor=fg,
-                bordercolor=bd, lightcolor=ent, darkcolor=ent, padding=4)
+                bordercolor=bd, lightcolor=ent, darkcolor=ent, padding=(8, 5))
     s.map("TCombobox", fieldbackground=[("readonly", ent)], foreground=[("readonly", fg)],
           selectbackground=[("readonly", ent)], selectforeground=[("readonly", fg)],
           bordercolor=[("focus", ac), ("active", ac)], background=[("active", bd)])
@@ -271,7 +291,7 @@ def apply(root, mode="default"):
 
     # tablolar
     s.configure("Treeview", background=sf, fieldbackground=sf, foreground=fg, bordercolor=bd,
-                lightcolor=sf, darkcolor=sf, rowheight=28)
+                lightcolor=sf, darkcolor=sf, rowheight=32)
     s.map("Treeview", background=[("selected", p["select"])], foreground=[("selected", fg)])
     s.configure("Treeview.Heading", background=sf2, foreground=mu, bordercolor=bd, lightcolor=sf2,
                 darkcolor=sf2, relief="flat", padding=(8, 6), font=(FONT_SEMI, 9))

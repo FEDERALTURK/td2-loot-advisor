@@ -574,7 +574,7 @@ class CommandRibbon(tk.Canvas):
                              font=("Segoe UI Semibold", 10))
             self.create_text(16, 30, anchor="w", text=self.detail, fill=self.muted,
                              font=("Segoe UI", 8))
-            self.create_text(w - 16, 21, anchor="e", text="●  LINKED", fill=self.accent,
+            self.create_text(w - 16, 21, anchor="e", text="●  SECTION", fill=self.muted,
                              font=("Segoe UI Semibold", 8))
             if sweep is not None:
                 x = int(max(-70, min(w + 20, sweep)))

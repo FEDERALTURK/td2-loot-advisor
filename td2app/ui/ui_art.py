@@ -546,6 +546,9 @@ class Banner:
     def _compose(self, base):
         w, h = base.size
         img = base.convert("RGBA")
+        # Keep rotating artwork as atmosphere; the application chrome must stay quiet and readable.
+        dim = Image.new("RGBA", (w, h), (8, 11, 15, 255))
+        img = Image.blend(img, dim, 0.32)
         # okunabilirlik için soldan koyu geçiş
         grad = self._grad_cache.get((w, h))
         if grad is None:
@@ -565,8 +568,11 @@ class Banner:
                 ew = int(w * 0.32); eh = int(rgba.height * ew / rgba.width)
             em = rgba.resize((ew, eh), Image.LANCZOS)
             img.alpha_composite(em, (int(w * 0.47) - ew // 2, (h - eh) // 2))
-        # alt kenarda ince turuncu çizgi
-        ImageDraw.Draw(img).rectangle((0, h - 3, w, h), fill=_rgb(self.pal.get("accent", "#ff6d10")) + (255,))
+        # Alt kenarda marka vurgusu, üstte ince yön işareti.
+        draw = ImageDraw.Draw(img)
+        accent = _rgb(self.pal.get("accent", "#ff6d10")) + (255,)
+        draw.rectangle((0, h - 2, w, h), fill=accent)
+        draw.rectangle((0, 0, 4, h), fill=accent)
         return img.convert("RGB")
 
     # --- çizim ---
@@ -614,10 +620,14 @@ class Banner:
             if self.subtitle:
                 cv.create_text(w - 14, h / 2, anchor="e", text=self.subtitle, fill=fs.get("muted", "#8795A6"),
                                font=(ui_theme.FONT_MONO, max(8, int(h / 3.2))))
-        elif h >= 90:
-            cv.create_text(22, 40, anchor="w", text=self.title, fill=fs.get("accent", "#ff6d10"),
-                           font=(ui_theme.FONT_SEMI, 21))
-            cv.create_text(24, 72, anchor="w", text=self.subtitle, fill="#c9ced8", font=(ui_theme.FONT, 10))
+        elif h >= 72:
+            mid = h / 2
+            cv.create_polygon(20, mid - 5, 25, mid, 20, mid + 5, 15, mid,
+                              fill=fs.get("accent", "#ff6d10"), outline="")
+            cv.create_text(36, mid - 9, anchor="w", text=self.title, fill=fs.get("fg", "#e8edf2"),
+                           font=(ui_theme.FONT_DISPLAY, 20, "bold"))
+            cv.create_text(37, mid + 15, anchor="w", text=self.subtitle, fill=fs.get("muted", "#8795a6"),
+                           font=(ui_theme.FONT_MONO, 9))
         else:                                                   # kompakt (küçük ekran): tek satır
             cv.create_text(14, h / 2, anchor="w", text=f"{self.title}  {self.subtitle}", fill=fs.get("accent", "#ff6d10"),
                            font=(ui_theme.FONT_SEMI, max(9, int(h / 3.2))))
@@ -626,21 +636,26 @@ class Banner:
             x = int(w * 0.47) + int(min(h - 18, w * 0.32) * 0.75) + 18
             cv.create_text(x, h / 2 - 12, anchor="w", text=t1, fill="#ffffff", font=(ui_theme.FONT_SEMI, 17))
             cv.create_text(x, h / 2 + 16, anchor="w", text=t2, fill=col, font=(ui_theme.FONT_SEMI, 10))
-        # rozetler (sağ üst); status şeridinde merkezle, eski bantta üst hizayı koru.
-        chip_y = h / 2 if self.status_only else 26
+        # Durum rozetleri aynı yatay eksende hizalanır; başlıkla yarışmaz.
+        chip_y = h / 2
         chip_top = chip_y - 12
         chip_bottom = chip_y + 12
         x = w - 16
         for i, chip in reversed(list(enumerate(self.chips))):
             text, kind = chip[0], chip[1]
             cb = chip[2] if len(chip) > 2 else None             # tıklanabilir rozet (ör. "PC senkron")
-            bg = {"on": fs.get("success", "#22c55e"), "btn": fs.get("accent", "#ff6d10")}.get(kind, "#1d2129")
-            fg = "#ffffff" if kind in ("on", "btn") else "#c9ced8"
+            bg = {"on": fs.get("success", "#22c55e"), "btn": fs.get("surface2", "#1c242f")}.get(
+                kind, fs.get("surface", "#141a22"))
+            fg = "#ffffff" if kind == "on" else fs.get("fg", "#e8edf2") if kind == "btn" else fs.get("muted", "#8795a6")
             tag = f"chip{i}"
             tid = cv.create_text(0, 0, text=text, font=(ui_theme.FONT_SEMI, 9), fill=fg, anchor="e", tags=(tag,))
             bx = cv.bbox(tid); tw = bx[2] - bx[0]
             cv.coords(tid, x - 10, chip_y)
-            cv.create_rectangle(x - tw - 20, chip_top, x, chip_bottom, fill=bg, outline="", tags=(tag,))
+            outline = fs.get("success", "#22c55e") if kind == "on" else fs.get("border", "#2a3542")
+            cv.create_rectangle(x - tw - 20, chip_top, x, chip_bottom, fill=bg, outline=outline, width=1, tags=(tag,))
+            if kind == "btn":
+                cv.create_rectangle(x - tw - 20, chip_top + 2, x - tw - 18, chip_bottom - 2,
+                                    fill=fs.get("accent", "#ff6d10"), outline="", tags=(tag,))
             cv.tag_raise(tid)
             if cb:
                 cv.tag_bind(tag, "<Button-1>", lambda e, cb=cb: cb())

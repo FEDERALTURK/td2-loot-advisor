@@ -26,17 +26,25 @@ class BuildToolPanel:
     SHD = ("Weapon Damage", "Headshot Damage", "Critical Chance", "Critical Damage", "Armor", "Skill Haste")
     COLORS = ("#ff6400", "#55b7e8", "#a78de0")
 
-    def __init__(self, parent, root, catalog, path, version, palette):
+    def __init__(self, parent, root, catalog, path, version, palette, stash_provider=None,
+                 target_loot_provider=None):
         self.root, self.catalog, self.path = root, catalog or {}, path
         self.version, self.palette = version, palette
+        self.stash_provider = stash_provider
+        self.target_loot_provider = target_loot_provider
+        self._stash_matches = None
+        self._farm_routes = {}
         self.enemy_hp = tk.StringVar(value="2000000")
         self.error = None
         try:
-            self.builds = build_tool.load(path)
+            store = build_tool.load_store(path)
+            self.builds, self.templates = store["builds"], store["templates"]
             self._persisted_builds = copy.deepcopy(self.builds)
+            self._persisted_templates = copy.deepcopy(self.templates)
         except (OSError, ValueError) as exc:
-            self.builds, self.error = [], exc
+            self.builds, self.templates, self.error = [], [], exc
             self._persisted_builds = []
+            self._persisted_templates = []
             messagebox.showerror("Build Tool", f"Build data could not be loaded; the file was left unchanged.\n{exc}", parent=root)
         self.frame = ttk.Frame(parent)
         self.frame.pack(fill="both", expand=True)
@@ -49,6 +57,15 @@ class BuildToolPanel:
         f.rowconfigure(2, weight=1); f.rowconfigure(4, weight=1)
         head = ttk.Frame(f); head.grid(row=0, column=0, columnspan=2, sticky="ew", padx=8, pady=5)
         ttk.Label(head, text="THE DIVISION 2 BUILDS TOOL", style="Title.TLabel").pack(side="left")
+        actions = ttk.Menubutton(head, text="Build actions ▾")
+        actions_menu = tk.Menu(actions, tearoff=False)
+        actions_menu.add_command(label="Compare builds", command=self.compare_dialog)
+        actions_menu.add_command(label="Templates", command=self.template_dialog)
+        actions_menu.add_separator()
+        actions_menu.add_command(label="Import builds / templates from JSON", command=self.import_json)
+        actions_menu.add_command(label="Export builds / templates to JSON", command=self.export_json)
+        actions["menu"] = actions_menu
+        actions.pack(side="right", padx=3)
         for text, command in (("Credits", self.credits), ("Patch Notes", self.patch_notes),
                               ("Issues or bug?", self.issues), ("Save & Share", self.share), ("Save Screenshot", self.screenshot),
                               ("Clear", self.clear), ("New Build", self.new)):
@@ -89,12 +106,15 @@ class BuildToolPanel:
             self.status.set("Read-only · build data could not be loaded or saved · original file preserved")
             return False
         try:
-            build_tool.save(self.path, self.builds)
+            build_tool.save_store(self.path, self.builds, self.templates)
             self._persisted_builds = copy.deepcopy(self.builds)
+            self._persisted_templates = copy.deepcopy(self.templates)
+            self._stash_matches = None
             self.status.set(f"Saved locally · {len(self.builds)} build(s) · {self.path.name}")
             return True
         except OSError as exc:
             self.builds = copy.deepcopy(self._persisted_builds)
+            self.templates = copy.deepcopy(self._persisted_templates)
             self.error = exc
             self.status.set("Read-only · build data could not be saved · last saved data restored")
             messagebox.showerror("Build Tool", f"Could not save build.\n{exc}", parent=self.root)
@@ -108,7 +128,9 @@ class BuildToolPanel:
 
     def new(self):
         if not self.can_edit(): return
-        self.builds.append(build_tool.new_build())
+        build = build_tool.new_build()
+        build_tool.stamp_catalog(build, self.catalog)
+        self.builds.append(build)
         self.persist(); self.refresh(len(self.builds) - 1)
 
     def save_current(self):
@@ -117,6 +139,7 @@ class BuildToolPanel:
         if not build: return
         build["name"] = self.name.get().strip()[:80] or "Untitled build"
         build["specialization"] = self.spec.get().strip()
+        build_tool.stamp_catalog(build, self.catalog)
         self.persist(); self.refresh(self.choice.current())
 
     def update_meta(self):
@@ -124,6 +147,7 @@ class BuildToolPanel:
         build = self.current()
         if build:
             build["specialization"] = self.spec.get().strip()
+            build_tool.stamp_catalog(build, self.catalog)
             self.persist(); self.refresh(self.choice.current())
 
     def clear(self):
@@ -232,6 +256,7 @@ class BuildToolPanel:
             build["slots"][slot] = {**auto, "name": name[:120], "core": core.get().strip(),
                                     "brand": brand.get().strip(), "gear_set": gear.get().strip(),
                                     "talent": talent.get().strip(), "attrs": parsed}
+            build_tool.stamp_catalog(build, self.catalog)
             self.persist(); win.destroy(); self.refresh(self.choice.current())
         buttons = ttk.Frame(win); buttons.pack(fill="x", padx=10, pady=8)
         def remove():
@@ -253,6 +278,136 @@ class BuildToolPanel:
                 "shd_levels": build["shd_levels"], "enemy_hp": build["enemy_hp"], "slots": slots}}
             self.root.clipboard_clear(); self.root.clipboard_append(share.encode(payload))
             self.status.set("Share string copied to clipboard; it was not uploaded.")
+
+    def export_json(self):
+        path = filedialog.asksaveasfilename(defaultextension=".json", initialfile="td2-builds.json",
+                                            filetypes=[("Build Tool JSON", "*.json")])
+        if not path:
+            return
+        try:
+            build_tool.export_json(path, self.builds, self.templates)
+            self.status.set(f"Exported {len(self.builds)} build(s) and {len(self.templates)} template(s) locally.")
+        except (OSError, ValueError) as exc:
+            messagebox.showerror("Build Tool", f"Export failed.\n{exc}", parent=self.root)
+
+    def import_json(self):
+        if not self.can_edit(): return
+        path = filedialog.askopenfilename(filetypes=[("Build Tool JSON", "*.json"), ("All files", "*.*")])
+        if not path:
+            return
+        try:
+            imported = build_tool.import_json(path)
+            if len(self.builds) + len(imported["builds"]) > 200 or len(self.templates) + len(imported["templates"]) > 100:
+                raise ValueError("The local limit is 200 builds and 100 templates.")
+            existing_names = {item["name"].casefold() for item in self.builds}
+            for item in imported["builds"]:
+                if item["name"].casefold() in existing_names:
+                    item["name"] = (item["name"][:68] + " (Imported)")[:80]
+                existing_names.add(item["name"].casefold())
+            self.builds.extend(imported["builds"])
+            self.templates.extend(imported["templates"])
+            if not self.persist():
+                self.refresh()
+                return
+            self.refresh(len(self.builds) - len(imported["builds"]) if imported["builds"] else None)
+            self.status.set(f"Imported {len(imported['builds'])} build(s) and {len(imported['templates'])} template(s).")
+        except (OSError, ValueError, TypeError) as exc:
+            messagebox.showerror("Build Tool", f"Import failed; local data was not replaced.\n{exc}", parent=self.root)
+
+    def template_dialog(self):
+        win = tk.Toplevel(self.root); win.title("Build Tool · Templates"); win.transient(self.root)
+        win.geometry("560x420")
+        ttk.Label(win, text="Saved locally · templates never replace your builds").pack(anchor="w", padx=10, pady=(10, 4))
+        listing = tk.Listbox(win, exportselection=False); listing.pack(fill="both", expand=True, padx=10, pady=5)
+
+        def refresh_list():
+            listing.delete(0, "end")
+            for item in self.templates:
+                listing.insert("end", item["name"])
+
+        def save_template():
+            if not self.can_edit(): return
+            current = self.current()
+            if not current:
+                messagebox.showinfo("Build Tool", "Create or select a build first.", parent=win); return
+            template = copy.deepcopy(current)
+            template["id"] = build_tool.new_build()["id"]
+            template["name"] = ("Template · " + current["name"])[:80]
+            self.templates.append(template)
+            if self.persist():
+                refresh_list()
+                self.status.set(f"Saved template · {template['name']}")
+
+        def use_template():
+            if not listing.curselection(): return
+            if not self.can_edit(): return
+            template = copy.deepcopy(self.templates[listing.curselection()[0]])
+            template["id"] = build_tool.new_build()["id"]
+            if template["name"].startswith("Template · "):
+                template["name"] = template["name"][11:]
+            template["name"] = (template["name"] + " (copy)")[:80]
+            self.builds.append(template)
+            if self.persist():
+                self.refresh(len(self.builds) - 1)
+                self.status.set("Template copied to builds; the saved template is unchanged.")
+
+        def delete_template():
+            if not listing.curselection() or not self.can_edit(): return
+            if not messagebox.askyesno("Build Tool", "Remove this saved template? Its source build is unchanged.", parent=win):
+                return
+            del self.templates[listing.curselection()[0]]
+            if self.persist(): refresh_list()
+
+        refresh_list()
+        buttons = ttk.Frame(win); buttons.pack(fill="x", padx=10, pady=8)
+        ttk.Button(buttons, text="Save current as template", command=save_template).pack(side="left")
+        ttk.Button(buttons, text="Use as new build", command=use_template).pack(side="left", padx=5)
+        ttk.Button(buttons, text="Remove template", command=delete_template).pack(side="left")
+        ttk.Button(buttons, text="Close", command=win.destroy).pack(side="right")
+
+    def compare_dialog(self):
+        if len(self.builds) < 2:
+            messagebox.showinfo("Build Tool", "Save at least two builds to compare them.", parent=self.root)
+            return
+        win = tk.Toplevel(self.root); win.title("Build Tool · Compare builds"); win.transient(self.root)
+        win.geometry("760x520")
+        names = [item["name"] for item in self.builds]
+        row = ttk.Frame(win); row.pack(fill="x", padx=10, pady=8)
+        ttk.Label(row, text="Build A").pack(side="left")
+        first = ttk.Combobox(row, state="readonly", values=names, width=28); first.pack(side="left", padx=5)
+        ttk.Label(row, text="Build B").pack(side="left", padx=(12, 0))
+        second = ttk.Combobox(row, state="readonly", values=names, width=28); second.pack(side="left", padx=5)
+        first.current(max(0, self.choice.current()))
+        second.current(1 if self.choice.current() != 1 else 0)
+        columns = ("metric", "first", "second", "delta")
+        table = ttk.Treeview(win, columns=columns, show="headings", height=18)
+        for key, label in zip(columns, ("Metric", "Build A", "Build B", "B − A")):
+            table.heading(key, text=label)
+        table.column("metric", width=260); table.pack(fill="both", expand=True, padx=10, pady=4)
+        note = tk.StringVar()
+        ttk.Label(win, textvariable=note, foreground=self.palette["muted"], wraplength=720).pack(anchor="w", padx=10, pady=5)
+
+        def refresh_comparison():
+            if first.current() < 0 or second.current() < 0: return
+            for iid in table.get_children(): table.delete(iid)
+            data = build_tool.compare_builds(self.builds[first.current()], self.builds[second.current()], self.catalog)
+            for key, values in data["stats"].items():
+                table.insert("", "end", values=(key.replace("_", " ").title(), f"{values['first']:g}",
+                            f"{values['second']:g}", f"{values['delta']:+g}"))
+            table.insert("", "end", values=("Total armor (estimate)", f"{data['armor']['first']:,.0f}",
+                        f"{data['armor']['second']:,.0f}", f"{data['armor']['delta']:+,.0f}"))
+            for weapon in data["weapons"]:
+                a, b = weapon["first"], weapon["second"]
+                table.insert("", "end", values=(f"{weapon['slot']} DPS (estimate)",
+                            f"{a['dps']:,.0f}" if a else "—", f"{b['dps']:,.0f}" if b else "—",
+                            f"{weapon['dps_delta']:+,.0f}"))
+                table.insert("", "end", values=(f"{weapon['slot']} TTK (estimate)",
+                            f"{a['ttk']:.1f}s" if a else "—", f"{b['ttk']:.1f}s" if b else "—",
+                            f"{weapon['ttk_delta']:+.1f}s"))
+            note.set(data["assumptions"] + " A negative TTK difference means the estimate is faster.")
+
+        ttk.Button(row, text="Compare", command=refresh_comparison).pack(side="left", padx=8)
+        refresh_comparison()
 
     def patch_notes(self):
         messagebox.showinfo("Build Tool · Notes",
@@ -377,6 +532,120 @@ class BuildToolPanel:
         if not any_details:
             ttk.Label(fixed_frame, text="No catalogued fixed details for selected items.",
                       foreground=self.palette["muted"]).pack(anchor="w", padx=6, pady=2)
+        self._draw_insights()
+
+    def _draw_insights(self):
+        build = self.current()
+        if not build:
+            return
+        catalog = build_tool.catalog_diagnostics(self.catalog)
+        origin = catalog["provenance"]
+        basis = ttk.LabelFrame(self.detail, text="Library source and version")
+        basis.pack(fill="x", padx=4, pady=3)
+        counts = catalog["counts"]
+        ttk.Label(basis, text=(f"Coverage: {counts['gear_items']} gear items · {counts['weapons']} weapons · "
+                  f"{counts['brands']} brands · {counts['gear_sets']} sets · {counts['attributes']} attributes\n"
+                  f"Library {origin['version']} · {origin['community_name']} · "
+                  f"commit date {origin['community_date']}\n"
+                  f"Community repository: {origin['community_repository']} · license {origin['community_license']}\n"
+                  f"Declared source: {origin['source']}\n"
+                  f"Catalog fingerprint: {origin['fingerprint']} · this records identity, not correctness"),
+                  wraplength=460, justify="left").pack(anchor="w", padx=6, pady=4)
+        snapshot = build.get("catalog_snapshot") or {}
+        if snapshot and snapshot.get("fingerprint") != origin["fingerprint"]:
+            ttk.Label(basis, text=f"This build was saved with catalog {snapshot.get('version', 'unknown')} · basis differs",
+                      foreground=self.palette["accent"], wraplength=460).pack(anchor="w", padx=6, pady=(0, 4))
+        if catalog["warnings"]:
+            ttk.Label(basis, text="Metadata gaps: " + "; ".join(catalog["warnings"]),
+                      foreground=self.palette["muted"], wraplength=460).pack(anchor="w", padx=6, pady=(0, 4))
+
+        issues = build_tool.validate_build(build, self.catalog)
+        warnings = [issue for issue in issues if issue["level"] == "warning"]
+        empty = sum(1 for issue in issues if issue["level"] == "info" and issue["message"] == "Slot is empty")
+        validation = ttk.LabelFrame(self.detail, text="Build check · advisory")
+        validation.pack(fill="x", padx=4, pady=3)
+        headline = f"{len(warnings)} warning(s) · {empty} empty slot(s)"
+        ttk.Label(validation, text=headline,
+                  foreground=self.palette["accent"] if warnings else self.palette["fg"]).pack(anchor="w", padx=6, pady=3)
+        for issue in warnings[:4]:
+            ttk.Label(validation, text=f"{issue['slot']}: {issue['message']}", wraplength=460,
+                      foreground=self.palette["muted"]).pack(anchor="w", padx=6, pady=1)
+        if len(warnings) > 4:
+            ttk.Label(validation, text=f"and {len(warnings) - 4} more warning(s)",
+                      foreground=self.palette["muted"]).pack(anchor="w", padx=6, pady=1)
+        if not warnings:
+            ttk.Label(validation, text="No catalog or roll-limit warnings. This does not certify in-game performance.",
+                      wraplength=460, foreground=self.palette["muted"]).pack(anchor="w", padx=6, pady=1)
+
+        roll_frame = ttk.LabelFrame(self.detail, text="Variable roll quality · catalog based")
+        roll_frame.pack(fill="x", padx=4, pady=3)
+        rows = build_tool.roll_quality(build, self.catalog)
+        for row in rows[:8]:
+            basis_text = "range" if row["range_verified"] else "max-relative; minimum not supplied"
+            ttk.Label(roll_frame, text=(f"{row['slot']} · {row['attribute'].replace('_', ' ').title()}: "
+                      f"{row['value']:g}/{row['maximum']:g} ({row['percent']:.0f}%, {basis_text})"),
+                      wraplength=460).pack(anchor="w", padx=6, pady=1)
+        if not rows:
+            ttk.Label(roll_frame, text="Enter a variable roll; fixed catalog stats are excluded.",
+                      foreground=self.palette["muted"]).pack(anchor="w", padx=6, pady=2)
+        if len(rows) > 8:
+            ttk.Label(roll_frame, text=f"Showing 8 of {len(rows)} roll(s).",
+                      foreground=self.palette["muted"]).pack(anchor="w", padx=6, pady=1)
+
+        farm = ttk.LabelFrame(self.detail, text="Owned gear match · read only")
+        farm.pack(fill="x", padx=4, pady=3)
+        ttk.Button(farm, text="Refresh stash matches", command=self.refresh_stash_matches).pack(anchor="w", padx=6, pady=3)
+        if not callable(self.stash_provider):
+            ttk.Label(farm, text="Stash connection is unavailable in this context.",
+                      foreground=self.palette["muted"]).pack(anchor="w", padx=6, pady=2)
+        else:
+            if self._stash_matches is None:
+                self.refresh_stash_matches(redraw=False)
+            matches = self._stash_matches or []
+            owned_count = sum(bool(row["owned"]) for row in matches)
+            if not matches:
+                ttk.Label(farm, text="Select gear items to compare them with the local stash.",
+                          foreground=self.palette["muted"]).pack(anchor="w", padx=6, pady=1)
+            else:
+                ttk.Label(farm, text=f"{owned_count}/{len(matches)} selected gear target(s) have a matching owned item.",
+                          foreground=self.palette["fg"]).pack(anchor="w", padx=6, pady=1)
+                if callable(self.target_loot_provider):
+                    try:
+                        rows = self.target_loot_provider()
+                        self._farm_routes = build_tool.farm_routes(matches, rows)
+                    except (OSError, ValueError, TypeError) as exc:
+                        self._farm_routes = {}
+                        self.status.set(f"Target-loot data unavailable · {exc}")
+            for row in matches[:6]:
+                if row["owned"]:
+                    label = ", ".join(f"{item['name']} ({item['match']})" for item in row["candidates"][:2])
+                else:
+                    routes = self._farm_routes.get(row["slot"], [])
+                    if routes:
+                        route = routes[0]
+                        locations = ", ".join(route["targets"])
+                        missions = ", ".join(route["missions"][:3])
+                        label = (f"Missing · {row['target']} · {locations} · {route['event']} · "
+                                 f"{missions or 'open-world drop'} · {route['day']} · not guaranteed")
+                    else:
+                        label = f"Missing · {row['target']} · no current verified target-loot route"
+                ttk.Label(farm, text=f"{row['slot']}: {label}", wraplength=460,
+                          foreground=self.palette["muted"] if row["owned"] else self.palette["accent"]).pack(anchor="w", padx=6, pady=1)
+            if matches and not callable(self.target_loot_provider):
+                ttk.Label(farm, text="Current target-loot feed is unavailable in this context.",
+                          foreground=self.palette["muted"]).pack(anchor="w", padx=6, pady=1)
+
+    def refresh_stash_matches(self, redraw=True):
+        if not callable(self.stash_provider):
+            self._stash_matches = []
+            return
+        try:
+            self._stash_matches = build_tool.stash_matches(self.current(), self.stash_provider(), self.catalog)
+        except (OSError, ValueError, TypeError) as exc:
+            self._stash_matches = []
+            self.status.set(f"Stash read failed · {exc}")
+        if redraw and self.current():
+            self.refresh(self.choice.current())
 
     def set_shd(self, name, value):
         if not self.can_edit(): return
@@ -384,6 +653,7 @@ class BuildToolPanel:
         if build:
             try: build.setdefault("shd_levels", {})[name] = max(0, min(10, int(value)))
             except (ValueError, TypeError): return
+            build_tool.stamp_catalog(build, self.catalog)
             if not self.persist(): self.refresh(self.choice.current())
 
     def set_all_shd(self):
@@ -391,6 +661,7 @@ class BuildToolPanel:
         build = self.current()
         if build:
             build["shd_levels"] = {name: 10 for name in self.SHD}
+            build_tool.stamp_catalog(build, self.catalog)
             self.persist(); self.refresh(self.choice.current())
 
     def _draw_weapon_stats(self, build, result):
@@ -431,6 +702,7 @@ class BuildToolPanel:
         except (ValueError, TypeError):
             self.enemy_hp.set(str(int(build["enemy_hp"])))
             return
+        build_tool.stamp_catalog(build, self.catalog)
         self.persist(); self.refresh(self.choice.current())
 
     def refresh_chart(self):
