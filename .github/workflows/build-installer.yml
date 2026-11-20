@@ -9,6 +9,10 @@ on:
         description: "Releases'te sürüm yayınla (etiket v<sürüm> oluşturulur)"
         type: boolean
         default: false
+      verify_signing:
+        description: "Yayın oluşturmadan release signing secret'ını doğrula"
+        type: boolean
+        default: false
   push:
     branches: ["codex/validate-packaged-translation"]
     tags: ["v*"]
@@ -203,7 +207,7 @@ jobs:
           "tag=$t" >> $env:GITHUB_OUTPUT
 
       - name: Sign release manifest
-        if: startsWith(github.ref, 'refs/tags/') || inputs.release
+        if: startsWith(github.ref, 'refs/tags/') || inputs.release || inputs.verify_signing
         shell: pwsh
         env:
           TD2_RELEASE_SIGNING_KEY_BASE64: ${{ secrets.TD2_RELEASE_SIGNING_KEY_BASE64 }}
@@ -211,6 +215,11 @@ jobs:
           $v = (python scripts/version.py).Trim()
           python -B scripts/sign_release_manifest.py --tag "${{ steps.ver.outputs.tag }}" --version "$v"
           if ($LASTEXITCODE -ne 0) { throw "release manifest signing failed" }
+          python -B -c "import base64; from pathlib import Path; import updater; from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey; p=Path('installer'); Ed25519PublicKey.from_public_bytes(base64.b64decode(updater.RELEASE_SIGNING_PUBLIC_KEY_B64, validate=True)).verify(base64.b64decode((p/'TD2_RELEASE_MANIFEST.sig').read_bytes().strip(), validate=True), (p/'TD2_RELEASE_MANIFEST.json').read_bytes()); print('Release signature verified')"
+          if ($LASTEXITCODE -ne 0) { throw "release manifest verification failed" }
+          if ("${{ inputs.verify_signing }}" -eq "true" -and "${{ inputs.release }}" -ne "true" -and "${{ github.ref_type }}" -ne "tag") {
+            Remove-Item installer\TD2_RELEASE_MANIFEST.json, installer\TD2_RELEASE_MANIFEST.sig
+          }
 
       - name: Upload installer
         uses: actions/upload-artifact@v6

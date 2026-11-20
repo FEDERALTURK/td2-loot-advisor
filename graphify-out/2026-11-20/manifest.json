@@ -66,9 +66,9 @@
     "semantic_hash": ""
   },
   ".github/workflows/build-installer.yml": {
-    "mtime": 1795170501.388356,
-    "seen": 1795170719.8481293,
-    "ast_hash": "0c855a125a47a779654571182b0a8543",
+    "mtime": 1795170894.2963343,
+    "seen": 1795171022.8056138,
+    "ast_hash": "133cec3348cfb4f474ace888ec8de34b",
     "semantic_hash": ""
   },
   ".github/workflows/build-mobile.yml": {
@@ -1494,9 +1494,9 @@
     "semantic_hash": "26754a0469d0893da529cb29b9195555"
   },
   "updater.py": {
-    "mtime": 1795170606.8698995,
-    "seen": 1795170719.8484628,
-    "ast_hash": "085b33d02ddd2a99dd0dcf7e2189adbc",
+    "mtime": 1795170877.7078614,
+    "seen": 1795171022.8059843,
+    "ast_hash": "9fbe75399883400d1ef5a9165ad86002",
     "semantic_hash": ""
   },
   "updates.py": {
@@ -8946,9 +8946,9 @@
     "semantic_hash": ""
   },
   "tests/test_updater_e2e.py": {
-    "mtime": 1795170611.693261,
-    "seen": 1795170719.8484457,
-    "ast_hash": "0db6a5bd0fe160f8506ff527f0801b1b",
+    "mtime": 1795170978.5793283,
+    "seen": 1795171022.805967,
+    "ast_hash": "061ba91d0ac39d98f6913ba4697cf9ca",
     "semantic_hash": ""
   },
   "web_deploy/assets/js/api.js": {
@@ -9402,9 +9402,9 @@
     "semantic_hash": ""
   },
   "scripts/sign_release_manifest.py": {
-    "mtime": 1795170536.481929,
-    "seen": 1795170719.8483536,
-    "ast_hash": "d54bd88d608a81769ee086b49ee5146b",
+    "mtime": 1795170884.3595207,
+    "seen": 1795171022.8058712,
+    "ast_hash": "020d3ffe7a3fbcd5df5177d46d2e56b1",
     "semantic_hash": ""
   },
   "docs/RELEASE_SIGNING.md": {
