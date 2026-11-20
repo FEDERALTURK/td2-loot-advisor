@@ -1,7 +1,7 @@
 # Graph Report - Thedivision2program-release-v9.1.5.52  (2026-11-20)
 
 ## Corpus Check
-- 367 files · ~1,179,530 words
+- 367 files · ~1,182,381 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 381 file(s) not represented in the graph (top: .toml 178, .log 79, .csv 51)
 
@@ -11,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `e478758d`
+- Built from commit: `cf613219`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -2504,15 +2504,15 @@ Nodes (3): go(), _np(), _rapid()
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `App` connect `App` to `.toast`, `save_cfg`, `slot_name`, `.build_translate`, `target_planner.py`, `with_icon`, `app.py`, `.scan_image`, `t`, `current_language`, `SessionLog`, `Grabber`, `current_language`, `._calib_capture`, `._task_seen`, `GameData`, `game_active`, `AppStabilityTests`, `scrollable`, `active_profile`, `_attr_key`, `.__init__`, `updates.py`?**
-  _High betweenness centrality (0.069) - this node is a cross-community bridge._
+  _High betweenness centrality (0.044) - this node is a cross-community bridge._
 - **Are the 2 inferred relationships involving `App` (e.g. with `Diğer açık kalemler (BUGS.md/HANDOFF.md'den)` and `10. Test Envanteri`) actually correct?**
   _`App` has 2 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `a`, `_about`, `activeNews` to the rest of the system?**
   _484 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `main.dart` be split into smaller, more focused modules?**
   _Cohesion score 0.014275885792913657 - nodes in this community are weakly interconnected._
-- **Why does `Mobil companion bulut altyapısı (Faz 2 — devam ediyor, bkz. `../docs/mobile_companion_roadmap.md`)` connect `mobile.js` to `Topluluk istatistik sunucusu / Community stats server`, `worker.js`, `.login`?**
-  _High betweenness centrality (0.036) - this node is a cross-community bridge._
+- **Why does `t()` connect `t` to `current_language`, `App`, `scrollable`, `.toast`, `save_cfg`, `active_profile`, `slot_name`, `.build_translate`, `._calib_capture`, `._task_seen`, `with_icon`, `app.py`, `.scan_image`, `current_language`, `.__init__`?**
+  _High betweenness centrality (0.030) - this node is a cross-community bridge._
 - **Are the 3 inferred relationships involving `t()` (e.g. with `show()` and `Ana tema/menü modernizasyonu + "Hakkında" sekmesi (2026-11-04, v9.1.5.28)`) actually correct?**
   _`t()` has 3 INFERRED edges - model-reasoned connections that need verification._
 - **Should `App` be split into smaller, more focused modules?**

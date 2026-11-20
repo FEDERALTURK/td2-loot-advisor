@@ -187,9 +187,9 @@
     "semantic_hash": "cc4d97195218b9276e1803549e85e53f"
   },
   "builds.json": {
-    "mtime": 1795155255.5566304,
-    "seen": 1795155736.71591,
-    "ast_hash": "c6cc4e173343317c27bc181024a5ad96",
+    "mtime": 1795156350.4350045,
+    "seen": 1795156370.7310302,
+    "ast_hash": "e530c128d78fd9baba57cc366d3dfff8",
     "semantic_hash": ""
   },
   "capture.py": {
@@ -1428,9 +1428,9 @@
     "semantic_hash": ""
   },
   "tests/ui_service_test.py": {
-    "mtime": 1795155256.0182443,
-    "seen": 1795155736.7162168,
-    "ast_hash": "9a29a8ac450a3cf3681e1478e3ffdc6e",
+    "mtime": 1795156328.077045,
+    "seen": 1795156370.7313097,
+    "ast_hash": "c2aa1d61e7ccd2dc63f56a04590ea189",
     "semantic_hash": ""
   },
   "tests/ui_sync_shot.py": {
@@ -3588,32 +3588,32 @@
     "semantic_hash": ""
   },
   "art/backgrounds/default_hexgrid.png": {
-    "mtime": 1795155253.4236164,
-    "seen": 1795155736.7166102,
+    "mtime": 1795156336.9624567,
+    "seen": 1795156370.7317114,
     "ast_hash": "f8ed2482b1d2f448faca2ec83448e156",
     "semantic_hash": ""
   },
   "art/backgrounds/default_radar.png": {
-    "mtime": 1795155253.4278522,
-    "seen": 1795155736.7166111,
+    "mtime": 1795156337.2040584,
+    "seen": 1795156370.7317126,
     "ast_hash": "80b90030ced519781ca421de3bdf75a1",
     "semantic_hash": ""
   },
   "art/backgrounds/default_skyline.png": {
-    "mtime": 1795155253.4288566,
-    "seen": 1795155736.716612,
+    "mtime": 1795156336.6172252,
+    "seen": 1795156370.7317135,
     "ast_hash": "611378562676596d76e94be273adf150",
     "semantic_hash": ""
   },
   "art/backgrounds/default_smoke.png": {
-    "mtime": 1795155253.4298816,
-    "seen": 1795155736.7166128,
+    "mtime": 1795156337.8363936,
+    "seen": 1795156370.7317145,
     "ast_hash": "abad2b0e37fd61f3959cc9597866ba56",
     "semantic_hash": ""
   },
   "art/backgrounds/default_topo.png": {
-    "mtime": 1795155253.430911,
-    "seen": 1795155736.7166135,
+    "mtime": 1795156337.4666774,
+    "seen": 1795156370.7317164,
     "ast_hash": "bb2f3683713073765e87893ecfcfdcb4",
     "semantic_hash": ""
   },
