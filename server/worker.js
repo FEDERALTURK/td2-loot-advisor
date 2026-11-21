@@ -349,7 +349,7 @@ export default {
     try {
       if (req.method === "OPTIONS") return json({}, 204, { "access-control-allow-methods": "GET, POST, PUT, DELETE",
                                                            "access-control-allow-headers": "content-type, authorization" });
-      const discord = await discordRoute(req, env, u.pathname);
+      const discord = await discordRoute(req, env, u.pathname, ctx);
       if (discord) return discord;
       if (u.pathname === "/v1/health") return json({ ok: true, login: !!env.DISCORD_CLIENT_ID,
         discord_app: env.DISCORD_CLIENT_ID || null,
