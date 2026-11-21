@@ -20,6 +20,10 @@ tempbuild*/
 last_card.png
 game_data_cache.json
 build_tool.json
+builds.json
+
+# Generated dependency installs and runtime user data
+node_modules/
 
 # kullanıcıya özel / üretilen arka plan videoları
 art/videos/
