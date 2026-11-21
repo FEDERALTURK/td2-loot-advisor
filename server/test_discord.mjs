@@ -25,20 +25,22 @@ const env = { DB, DISCORD_PUBLIC_KEY: publicRaw, DISCORD_CLIENT_ID: "11111111111
 const checks = [];
 const ok = (condition, label) => checks.push([Boolean(condition), label]);
 const user = "222222222222";
+const pendingJobs = [];
 let sequence = 1;
 function payload(name, extra = {}) {
-  return { id: String(100000000000000000n + BigInt(sequence++)), application_id: env.DISCORD_CLIENT_ID, type: 2, data: { name, ...extra }, user: { id: user } };
+  return { id: String(100000000000000000n + BigInt(sequence++)), application_id: env.DISCORD_CLIENT_ID, token: "test-interaction-token", type: 2, data: { name, ...extra }, user: { id: user } };
 }
 async function signedCall(body, { timestamp = String(Math.floor(Date.now() / 1000)), signatureBody = JSON.stringify(body), path = "/v1/discord/interactions" } = {}) {
   const signature = sign(null, Buffer.from(timestamp + signatureBody), pair.privateKey).toString("hex");
   return worker.fetch(new Request(`https://worker.test${path}`, { method: "POST", body: JSON.stringify(body), headers: {
     "content-type": "application/json", "x-signature-timestamp": timestamp, "x-signature-ed25519": signature,
-  } }), env);
+  } }), env, { waitUntil(promise) { pendingJobs.push(promise); } });
 }
 async function result(response) {
   const body = await response.text();
   try { return JSON.parse(body); } catch { return { status: response.status, raw: body }; }
 }
+async function flushJobs() { await Promise.all(pendingJobs.splice(0)); }
 
 (async () => {
   const ping = { application_id: env.DISCORD_CLIENT_ID, type: 1 };
@@ -54,6 +56,26 @@ async function result(response) {
   ok(data.data.content.includes("/haberler") && data.data.embeds[0].footer.text.includes("Kaivolt"), "Turkish help alias returns branded command list");
   r = await signedCall(payload("surum")); data = await result(r);
   ok(data.data.content.includes("9.1.5-test"), "Turkish version alias shares the existing version behavior");
+  env.DISCORD_FETCH = async (url, init) => {
+    ok(String(url) === "https://api.github.com/repos/FEDERALTURK/td2-loot-advisor/releases/latest" && init.headers["user-agent"].includes("TD2"),
+      "GitHub command uses the fixed public project release endpoint");
+    return new Response(JSON.stringify({ tag_name: "v-test", published_at: "2026-11-21T00:00:00Z",
+      html_url: "https://github.com/FEDERALTURK/td2-loot-advisor/releases/tag/v-test" }));
+  };
+  let githubUser = "666666666666";
+  let latestRelease = payload("github"); latestRelease.user.id = githubUser;
+  r = await signedCall(latestRelease); data = await result(r);
+  ok(data.data.content.includes("v-test") && data.data.content.includes("github.com/FEDERALTURK/td2-loot-advisor/releases/tag/v-test"),
+    "GitHub command privately reports the latest release");
+  env.DISCORD_FETCH = async () => new Response(JSON.stringify({ tag_name: "v-bad", html_url: "https://evil.example/releases/tag/v-bad" }));
+  let unsafeRelease = payload("github"); unsafeRelease.user.id = githubUser;
+  r = await signedCall(unsafeRelease); data = await result(r);
+  ok(data.data.content.includes("alınamadı") && !data.data.content.includes("evil.example"), "GitHub command rejects a release link outside the fixed repository");
+  env.DISCORD_FETCH = async () => new Response(JSON.stringify({ items: [] }));
+  let unconfiguredAsk = payload("sor", { options: [{ name: "soru", type: 3, value: "Build nasıl kaydedilir?" }] });
+  unconfiguredAsk.user.id = "777777777777";
+  r = await signedCall(unconfiguredAsk); data = await result(r);
+  ok(data.data.flags === 64 && data.data.content.includes("henüz yapılandırılmamış"), "AI command fails closed when its binding is absent");
   r = await signedCall(payload("haberler")); data = await result(r);
   ok(data.data.content.includes("Son 30 gün") && data.data.flags === 64, "news command gives a private empty state");
   env.DISCORD_FETCH = async url => {
@@ -78,6 +100,38 @@ async function result(response) {
   env.DISCORD_FETCH = async () => new Response("not json", { status: 503 });
   r = await signedCall(payload("haberler")); data = await result(r);
   ok(data.data.content.includes("alınamadı"), "news command handles feed errors safely");
+  env.DISCORD_FETCH = async () => new Response(JSON.stringify({ items: [] }));
+
+  let aiCalls = 0;
+  const question = "Striker build için genel öneri nedir?";
+  let callbackBody;
+  env.AI = { run: async (model, input) => {
+    aiCalls++;
+    ok(model === "@cf/zai-org/glm-4.7-flash" && input.max_tokens === 350 && input.messages[1].content === question,
+      "AI uses a bounded model request with only the explicit user question");
+    return { response: "Genel olarak hasar seti ve kritik istatistik dengesini hedefle." };
+  } };
+  env.DISCORD_FETCH = async (url, init) => {
+    ok(String(url).endsWith("/webhooks/111111111111/test-interaction-token/messages/@original") && init.method === "PATCH",
+      "AI result edits the private deferred Discord response without exposing the token");
+    callbackBody = JSON.parse(init.body);
+    return new Response(null, { status: 204 });
+  };
+  const ask = () => payload("sor", { options: [{ name: "soru", type: 3, value: question }] });
+  let aiUser = "555555555555";
+  const firstAsk = ask(); firstAsk.user.id = aiUser;
+  r = await signedCall(firstAsk); data = await result(r);
+  ok(data.type === 5 && data.data.flags === 64, "AI command acknowledges privately before inference");
+  await flushJobs();
+  ok(callbackBody?.content.includes("kritik istatistik") && callbackBody.allowed_mentions.parse.length === 0,
+    "AI completion is returned privately with mentions disabled");
+  for (let i = 0; i < 5; i++) {
+    const item = ask(); item.user.id = aiUser;
+    r = await signedCall(item); data = await result(r);
+    if (i < 4) await flushJobs();
+  }
+  ok(data.data.content.toLowerCase().includes("saatte en fazla 5") && aiCalls === 5, "AI has a separate five-requests-per-hour user limit");
+  delete env.AI;
   env.DISCORD_FETCH = async () => new Response(JSON.stringify({ items: [] }));
 
   const replay = payload("help");

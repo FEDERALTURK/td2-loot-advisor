@@ -4,6 +4,9 @@ name = "td2-stats"
 main = "worker.js"
 compatibility_date = "2026-09-01"
 
+[ai]
+binding = "AI"
+
 [[d1_databases]]
 binding = "DB"
 database_name = "td2stats"

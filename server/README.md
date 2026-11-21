@@ -135,7 +135,7 @@ görürseniz admin panelinden o lisansın `max_devices`'ını artırabilir ya da
 
 Worker, Discord Gateway bağlantısı veya privileged intents kullanmadan doğrulanmış HTTP interactions kabul eder.
 Guild komutları İngilizce adların yanı sıra Türkçe `/yardim`, `/surum`, `/hesap`, `/buildler`, `/build-paylas`,
-`/bildirimler`, `/gorevler` ve `/haberler` komutlarını sunar. `/gorevler` yalnız topluluk eşiğini geçen kullanıcı
+`/bildirimler`, `/gorevler`, `/haberler`, `/github` ve `/sor` komutlarını sunar. `/gorevler` yalnız topluluk eşiğini geçen kullanıcı
 raporlarını gösterir; resmî haftalık görev rotasyonu değildir. `/haberler` `meta/news_feed.json` akışını kullanır ve
 yalnız onaylı yayın alan adlarına bağlantı verir. `/build-paylas` varsayılan olarak yalnız çağırana görünür; açık
 `public: true` seçilirse yalnız build adı ve ekipman özeti kanala gönderilir. Hesap/build verisi yalnız komutu veren
@@ -154,7 +154,7 @@ node register_discord_commands.mjs
 Komut kaydı aracı varsayılan olarak yalnız JSON önizlemesi verir. Gerçek kaydı yapmak için kendi makinenizde
 `DISCORD_CLIENT_ID`, `DISCORD_GUILD_ID` ve yalnız yerel süreç ortamında `DISCORD_BOT_TOKEN` tanımlayıp
 `node register_discord_commands.mjs --apply` çalıştırın. Bot tokenını repoya, loglara veya sohbete koymayın.
-Araç yalnız kendi 14 komutunu oluşturur/günceller, guild'deki diğer uygulama komutlarını silmez. 429 sınırında
+Araç yalnız kendi 16 komutunu oluşturur/günceller, guild'deki diğer uygulama komutlarını silmez. 429 sınırında
 `Retry-After` süresini bekleyip yalnız bekleyen komutu yeniden dener. Bu işlem Discord'a
 komut yazar; bu yerel görevde çalıştırılmamıştır.
 
@@ -173,6 +173,13 @@ npx wrangler d1 migrations apply td2stats --remote
 
 Migration ve Discord uygulama kaydı bu yerel geliştirme sırasında uzak servislere uygulanmadı. Bot DM bildirimi de
 yapılandırılmadı; `/notifications` yalnız mevcut masaüstü webhook ayarına yönlendirir.
+
+`/github` yalnızca bu herkese açık deponun GitHub Releases API'sinden en son sürümü okur; GitHub yazma izni veya
+token kullanmaz. `/sor` yalnız kullanıcının bu komutta gönderdiği soruyu Cloudflare Workers AI'ya iletir, özel yanıt
+verir ve kullanıcı başına saatte 5 istekle sınırlıdır. Hesap, build, OCR veya oyun ekranı verileri AI'ya gönderilmez.
+AI binding'i `wrangler.toml` içinde `AI` olarak tanımlıdır; Cloudflare hesabında Workers AI erişimi etkin olmalıdır.
+Model kullanımı Cloudflare Workers AI kullanım kotası/fiyatlandırmasına tabidir. Bu özellik için gerçek üretim
+çağrısı veya deploy yerel geliştirme sırasında yapılmadı.
 
 ## Topluluk görevleri (5.1.8)
 
