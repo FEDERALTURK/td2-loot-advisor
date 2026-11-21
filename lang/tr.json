@@ -1691,5 +1691,6 @@
   "ga.translation_resumed": "Canlı çeviri yeniden başlatıldı.",
   "ga.translation_unavailable": "Çeviri başlatılamadı. Canlı Çeviri sekmesindeki model / sağlayıcı durumunu kontrol et.",
   "ga.builtin": "Yerleşik yardımcı sınırlı kurallarla yanıt verir. Genel oyun soruları için Ollama, Claude Code, Claude veya OpenAI sağlayıcısını yapılandır.",
-  "ga.provider_fallback": "AI hizmetine ulaşılamadı. Yerleşik yardımcı yanıtı:"
+  "ga.provider_fallback": "AI hizmetine ulaşılamadı. Yerleşik yardımcı yanıtı:",
+  "build.slot_completion": "Dolu ekipman slotları"
 }

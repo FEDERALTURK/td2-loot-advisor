@@ -48,6 +48,32 @@ def normalize_admin_token(value: str) -> str:
     return token
 
 
+def report_load_status(health: dict, reports: list[dict]) -> str:
+    if reports:
+        return f"{len(reports)} kayıt yüklendi"
+    if health.get("ok") is True and health.get("panel_mirror") == "enabled":
+        return "Worker ve Supabase yanıt verdi; henüz hata raporu yok"
+    return "0 kayıt yüklendi"
+
+
+def overview_metric_values(data: dict) -> dict[str, str]:
+    accounts = data.get("accounts") or {}
+    usage = data.get("usage") or {}
+    tasks = data.get("tasks") or {}
+    accounts = accounts if isinstance(accounts, dict) else {}
+    usage = usage if isinstance(usage, dict) else {}
+    tasks = tasks if isinstance(tasks, dict) else {}
+    values = {
+        "accounts": accounts.get("total"),
+        "licenses": accounts.get("active_licenses"),
+        "starts": usage.get("starts_today"),
+        "suggestions": data.get("suggestions_pending"),
+        "tasks": tasks.get("public"),
+        "queued": data.get("reports_queued"),
+    }
+    return {key: "—" if value is None else str(value) for key, value in values.items()}
+
+
 def api_get(base: str, path: str, token: str) -> dict:
     url = base.rstrip("/") + path
     token = normalize_admin_token(token)
@@ -119,6 +145,22 @@ class Panel(tk.Tk):
         self.health = tk.StringVar(value="Health: bekleniyor")
         ttk.Label(self, textvariable=self.health, padding=(14, 0, 14, 8)).pack(anchor="w")
 
+        summary = ttk.Frame(self, padding=(14, 0, 14, 10))
+        summary.pack(fill="x")
+        self.metric_vars = {}
+        metrics = (("accounts", "Toplam hesap"), ("licenses", "Aktif lisans"), ("starts", "Bugün açılış"),
+                   ("suggestions", "Bekleyen öneri"), ("tasks", "Yayındaki görev"), ("queued", "Kuyruktaki rapor"))
+        for column, (key, title) in enumerate(metrics):
+            card = tk.Frame(summary, bg="#131a22", highlightthickness=1, highlightbackground="#263341", padx=10, pady=7)
+            card.grid(row=0, column=column, sticky="nsew", padx=(0 if column == 0 else 6, 0))
+            summary.columnconfigure(column, weight=1, uniform="metric")
+            tk.Label(card, text=title, bg="#131a22", fg="#a0aab2", font=("Segoe UI", 8), anchor="w").pack(fill="x")
+            value = tk.StringVar(value="—")
+            self.metric_vars[key] = value
+            tk.Label(card, textvariable=value, bg="#131a22", fg="#ff6600", font=("Consolas", 16, "bold"), anchor="w").pack(fill="x")
+        self.summary_note = tk.StringVar(value="Yönetici özeti bekleniyor")
+        ttk.Label(self, textvariable=self.summary_note, padding=(14, 0, 14, 8)).pack(anchor="w")
+
         body = ttk.Frame(self, padding=(14, 0, 14, 14))
         body.pack(fill="both", expand=True)
         ttk.Label(body, text="Supabase aynalanan hata raporları", style="Header.TLabel").pack(anchor="w", pady=(0, 8))
@@ -149,21 +191,49 @@ class Panel(tk.Tk):
         try:
             base, token = self.api_var.get().strip(), self.token_var.get()
             health = api_get(base, "/v1/health", token)
-            reports = api_get(base, "/v1/admin/panel-errors?limit=100", token).get("reports", [])
-            self.after(0, lambda: self._show(base, health, reports))
+            if not isinstance(health, dict):
+                raise RuntimeError("Worker sağlık yanıtı beklenen biçimde değil")
+            overview, overview_error = None, None
+            reports, reports_error = None, None
+            try:
+                overview = api_get(base, "/v1/admin/overview", token)
+                if not isinstance(overview, dict):
+                    raise RuntimeError("Worker özet yanıtı beklenen biçimde değil")
+            except Exception as exc:
+                overview_error = str(exc) or exc.__class__.__name__
+            try:
+                response = api_get(base, "/v1/admin/panel-errors?limit=100", token)
+                reports = response.get("reports") if isinstance(response, dict) else None
+                if not isinstance(reports, list) or any(not isinstance(row, dict) for row in reports):
+                    raise RuntimeError("Worker hata raporu yanıtı beklenen biçimde değil")
+            except Exception as exc:
+                reports_error = str(exc) or exc.__class__.__name__
+            self.after(0, lambda: self._show(base, health, reports, overview, overview_error, reports_error))
         except Exception as exc:  # keep the UI out of a perpetual "connecting" state
             message = str(exc) or exc.__class__.__name__
             self.after(0, lambda: self._failed(message))
 
-    def _show(self, base: str, health: dict, reports: list[dict]) -> None:
+    def _show(self, base: str, health: dict, reports: list[dict] | None,
+              overview: dict | None, overview_error: str | None, reports_error: str | None) -> None:
         self.health.set(f"Health: {'ONLINE' if health.get('ok') else 'OFFLINE'}  |  Supabase mirror: {health.get('panel_mirror', '?')}  |  {base}")
-        for item in self.table.get_children():
-            self.table.delete(item)
-        for row in reports:
-            self.table.insert("", "end", values=(row.get("id", ""), row.get("created_at", ""), row.get("app_version", ""),
-                                                   row.get("platform", ""), row.get("severity", ""), row.get("error_code", ""),
-                                                   row.get("status", ""), str(row.get("message_masked", "")).replace("\n", " ")[:500]))
-        self.status.configure(text=f"{len(reports)} kayıt yüklendi")
+        if overview is not None:
+            for key, value in overview_metric_values(overview).items():
+                self.metric_vars[key].set(value)
+            self.summary_note.set("Açılış sayısı anonim toplamdır; benzersiz kullanıcı sayısı değildir.")
+        else:
+            for value in self.metric_vars.values():
+                value.set("—")
+            self.summary_note.set("Yönetici özeti alınamadı: " + (overview_error or "bilinmeyen hata"))
+        if reports is not None:
+            for item in self.table.get_children():
+                self.table.delete(item)
+            for row in reports:
+                self.table.insert("", "end", values=(row.get("id", ""), row.get("created_at", ""), row.get("app_version", ""),
+                                                       row.get("platform", ""), row.get("severity", ""), row.get("error_code", ""),
+                                                       row.get("status", ""), str(row.get("message_masked", "")).replace("\n", " ")[:500]))
+            self.status.configure(text=report_load_status(health, reports))
+        else:
+            self.status.configure(text="Rapor listesi alınamadı: " + (reports_error or "bilinmeyen hata"))
 
     def _failed(self, message: str) -> None:
         self.health.set("Health: bağlantı başarısız")

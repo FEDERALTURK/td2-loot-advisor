@@ -1482,5 +1482,6 @@
   "ga.translation_resumed": "Live translation restarted.",
   "ga.translation_unavailable": "Translation could not start. Check the model / provider status in Live Translation.",
   "ga.builtin": "The built-in helper uses limited rules. Configure Ollama, Claude Code, Claude or OpenAI for general game questions.",
-  "ga.provider_fallback": "The AI service was unavailable. Built-in helper response:"
+  "ga.provider_fallback": "The AI service was unavailable. Built-in helper response:",
+  "build.slot_completion": "Ranuras de equipo ocupadas"
 }

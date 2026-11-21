@@ -6,7 +6,8 @@ on:
   push:
     paths: ["service.py", "screenstate.py", "localapi.py", "presence.py", "notify.py", "capture.py", "tests/test_service.py",
             "tests/test_localapi.py", "tests/test_screenstate.py", "tests/ui_service_test.py", "single.py", "tests/test_single.py", "display.py", "tests/test_autoscan.py",
-            "app.py", "td2app/ui/ui_art.py", "ui_art.py"]
+            "app.py", "build_tool.py", "build_tool_ui.py", "stash.py", "meta/game_data.json", "tests/test_build_tool_catalog.py",
+            "td2_panel.py", "tests/test_panel_summary.py", "td2app/ui/ui_art.py", "ui_art.py"]
 
 jobs:
   unit:
@@ -44,6 +45,8 @@ jobs:
           python tests/test_service.py || exit /b 1
           python tests/test_single.py || exit /b 1
           python tests/test_autoscan.py || exit /b 1
+          python -B tests/test_panel_summary.py || exit /b 1
+          python -B tests/test_build_tool_catalog.py || exit /b 1
       - name: Single instance end-to-end
         shell: cmd
         run: set PYTHONIOENCODING=utf-8&& python tests/test_single.py --app

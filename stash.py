@@ -59,12 +59,18 @@ class Stash:
     def __init__(self, path):
         self.path = path
         self.data = {"version": 2, "items": []}
+        self.load_error = False
         try:
             with open(path, encoding="utf-8") as f:
                 d = json.load(f)
-            if isinstance(d, dict) and isinstance(d.get("items"), list): self.data = d
-        except (OSError, ValueError):
+            if isinstance(d, dict) and isinstance(d.get("items"), list):
+                self.data = d
+            else:
+                self.load_error = True
+        except FileNotFoundError:
             pass
+        except (OSError, ValueError):
+            self.load_error = True
 
     def save(self):
         import safeio                                  # atomik + kilitli + günlük yedek (tarama ve arayüz aynı anda kaydedebilir)
