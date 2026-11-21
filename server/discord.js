@@ -3,22 +3,38 @@ const ENDPOINT = "/v1/discord/interactions";
 const MAX_BODY = 64 * 1024;
 const MAX_PER_MINUTE = 20;
 const encoder = new TextEncoder();
+const NEWS_URL = "https://raw.githubusercontent.com/FEDERALTURK/td2-loot-advisor/main/meta/news_feed.json";
+const NEWS_MAX_AGE_SECONDS = 30 * 86400;
 
 export const COMMANDS = [
   { name: "help", description: "TD2 Loot Advisor komutlarını göster" },
+  { name: "yardim", description: "TD2 Loot Advisor komutlarını Türkçe göster" },
   { name: "version", description: "Program sürüm bilgisini göster" },
+  { name: "surum", description: "Program sürüm bilgisini göster" },
   { name: "account", description: "Bağlı Discord hesabı ve lisans durumunu göster" },
+  { name: "hesap", description: "Bağlı Discord hesabı ve lisans durumunu göster" },
   { name: "builds", description: "Hesabına bağlı build adlarını listele" },
+  { name: "buildler", description: "Hesabına bağlı build adlarını listele" },
   { name: "build-share", description: "Kendi build'ini güvenli biçimde paylaş" , options: [
     { name: "build_id", description: "Paylaşılacak build kimliği", type: 3, required: true, max_length: 80 },
     { name: "public", description: "Build özetini kanalda herkese açık paylaş", type: 5, required: false },
   ] },
+  { name: "build-paylas", description: "Kendi build'ini güvenli biçimde paylaş", options: [
+    { name: "build_id", description: "Paylaşılacak build kimliği", type: 3, required: true, max_length: 80 },
+    { name: "public", description: "Build özetini kanalda herkese açık paylaş", type: 5, required: false },
+  ] },
   { name: "notifications", description: "Masaüstü Discord bildirimlerini yapılandırma yardımını göster" },
+  { name: "bildirimler", description: "Masaüstü Discord bildirimlerini yapılandırma yardımını göster" },
+  { name: "gorevler", description: "Topluluk tarafından doğrulanmış güncel görevleri göster" },
+  { name: "haberler", description: "Son Division 2 haberlerini göster" },
 ];
 
 function response(content, ephemeral = true) {
+  const description = String(content).slice(0, 2000);
   return new Response(JSON.stringify({ type: 4, data: {
-    content: String(content).slice(0, 2000),
+    content: description,
+    embeds: [{ title: "TD2 LOOT ADVISOR // SHD", description, color: 0xff5500,
+      footer: { text: "Kaivolt • The Division 2 Companion" } }],
     ...(ephemeral ? { flags: 64 } : {}),
     allowed_mentions: { parse: [] },
   } }), { status: 200, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" } });
@@ -58,6 +74,41 @@ function safeText(value, limit = 160) {
     .replace(/\s+/g, " ").trim().slice(0, limit);
 }
 
+async function getJson(env, url) {
+  const fetcher = env.DISCORD_FETCH || fetch;
+  const result = await fetcher(url, { signal: AbortSignal.timeout(4000) });
+  if (!result.ok) throw new Error(`HTTP ${result.status}`);
+  return result.json();
+}
+
+function localized(value) {
+  return value && typeof value === "object" ? value.tr || value.en || "" : value || "";
+}
+
+function safeNewsUrl(value) {
+  try {
+    const url = new URL(value);
+    const host = url.hostname.toLowerCase();
+    return url.protocol === "https:" && ["ubisoft.com", "x.com", "twitter.com", "reddit.com", "youtube.com", "youtu.be"]
+      .some(domain => host === domain || host.endsWith(`.${domain}`))
+      ? url.href : "";
+  } catch {
+    return "";
+  }
+}
+
+async function recentNews(env) {
+  const feed = await getJson(env, NEWS_URL);
+  if (!Array.isArray(feed?.items)) throw new Error("invalid news feed");
+  const now = Date.now();
+  return feed.items.map(item => {
+    const date = Date.parse(item.date || item.start || "");
+    return { item, date };
+  }).filter(({ item, date }) => Number.isFinite(date) && now - date <= NEWS_MAX_AGE_SECONDS * 1000 &&
+      date <= now + NEWS_MAX_AGE_SECONDS * 1000 && safeNewsUrl(item.url))
+    .sort((a, b) => b.date - a.date).slice(0, 5);
+}
+
 async function linkedAccount(env, id) {
   return env.DB.prepare(
     "SELECT id, username, banned FROM accounts WHERE discord_id = ?1 LIMIT 1"
@@ -66,12 +117,46 @@ async function linkedAccount(env, id) {
 
 async function executeCommand(env, interaction, actor) {
   const name = interaction.data?.name;
-  if (name === "help") return response("TD2 Loot Advisor komutları: `/version`, `/account`, `/builds`, `/build-share`, `/notifications`. Hesap ve build komutları yalnız bağlı Discord hesabının verisini gösterir.");
-  if (name === "version") return response(env.TD2_APP_VERSION
+  if (name === "help" || name === "yardim") return response("SHD komutları: `/surum`, `/hesap`, `/buildler`, `/build-paylas`, `/bildirimler`, `/gorevler`, `/haberler`. İngilizce komutlar da kullanılabilir. Hesap ve build verileri yalnız komutu veren Discord hesabına aittir.");
+  if (name === "version" || name === "surum") return response(env.TD2_APP_VERSION
     ? `TD2 Loot Advisor sürümü: ${safeText(env.TD2_APP_VERSION, 40)}`
     : "Program sürümü Worker ortamında yapılandırılmamış.");
-  if (name === "notifications") return response("Masaüstü uygulamasında Ayarlar → Hizmetler bölümünden Discord webhook bildirimlerini isteğe bağlı olarak yapılandır. Bu komut webhook veya gizli anahtar istemez; bot DM bildirimi etkin değildir.");
-  if (name === "account") {
+  if (name === "notifications" || name === "bildirimler") return response("Masaüstü uygulamasında Ayarlar → Hizmetler bölümünden Discord webhook bildirimlerini isteğe bağlı yapılandır. Bot doğrudan DM göndermez ve bu komut gizli anahtar istemez.");
+  if (name === "gorevler") {
+    try {
+      const base = new URL(env.PUBLIC_URL || "https://td2-stats.td2loot.workers.dev");
+      if (base.protocol !== "https:") throw new Error("invalid Worker URL");
+      const data = await getJson(env, new URL("/v1/tasks/live", base));
+      if (!Array.isArray(data?.tasks)) throw new Error("invalid tasks feed");
+      if (!data.tasks.length) return response("Şu anda topluluk eşiğini geçen, doğrulanmış etkin görev bildirimi yok. Bu bilgi haftalık resmî görev rotasyonu değildir.");
+      const tasks = data.tasks.slice(0, 8).map(task => {
+        const title = safeText(task.tr?.title || task.title || "Görev", 100);
+        const objective = safeText(task.tr?.objective || task.objective || "", 160);
+        const expires = Number(task.expires_at) > 0 ? ` · son: ${new Date(task.expires_at * 1000).toISOString().slice(0, 10)}` : "";
+        const reporters = Number.isInteger(task.reporters) ? task.reporters : 0;
+        return `• **${title}**${objective ? ` — ${objective}` : ""}${expires} · ${reporters} bildirim`;
+      });
+      return response(`Topluluk görev raporları · ${safeText(data.version, 32)}\n${tasks.join("\n")}\n\nBu liste yalnızca kullanıcı raporlarından oluşturulur.`);
+    } catch {
+      return response("Topluluk görev verisi şu anda alınamadı. Daha sonra tekrar dene.");
+    }
+  }
+  if (name === "haberler") {
+    try {
+      const items = await recentNews(env);
+      if (!items.length) return response("Son 30 gün için güvenilir kaynaklı haber bulunamadı.");
+      const rows = items.map(({ item, date }) => {
+        const title = safeText(localized(item.title), 130) || "Division 2 haberi";
+        const text = safeText(localized(item.text), 240);
+        const url = safeNewsUrl(item.url);
+        return `• **${title}** · ${new Date(date).toISOString().slice(0, 10)}${text ? `\n  ${text}` : ""}\n  ${url}`;
+      });
+      return response(`Son Division 2 haberleri\n${rows.join("\n\n")}`);
+    } catch {
+      return response("Haber akışı şu anda alınamadı. Daha sonra tekrar dene.");
+    }
+  }
+  if (name === "account" || name === "hesap") {
     const account = await linkedAccount(env, actor);
     if (!account || account.banned) return response("Bu Discord hesabına TD2 Loot Advisor hesabı bağlı değil. Masaüstü uygulamasında Discord ile giriş yapıp tekrar dene.");
     const license = await env.DB.prepare(
@@ -81,10 +166,10 @@ async function executeCommand(env, interaction, actor) {
     const expiry = license?.expires ? ` · bitiş: ${new Date(license.expires * 1000).toISOString().slice(0, 10)}` : "";
     return response(`Hesap: ${safeText(account.username, 40)} · plan: ${tier}${expiry}`);
   }
-  if (name === "builds" || name === "build-share") {
+  if (["builds", "build-share", "buildler", "build-paylas"].includes(name)) {
     const account = await linkedAccount(env, actor);
     if (!account || account.banned) return response("Bu Discord hesabına TD2 Loot Advisor hesabı bağlı değil.");
-    if (name === "builds") {
+    if (name === "builds" || name === "buildler") {
       const rows = (await env.DB.prepare(
         "SELECT client_id, name FROM mobile_builds WHERE account_id = ?1 AND deleted = 0 ORDER BY updated DESC LIMIT 10"
       ).bind(account.id).all()).results || [];
