@@ -131,6 +131,43 @@ bir kullanıcı önce masaüstünde giriş yapıp sonra siteye girerse site "cih
 bilgisi yine görünür, yalnız yetki belgesi verilmez — sitenin zaten ihtiyacı olmayan bir alan). Bunu bir sorun olarak
 görürseniz admin panelinden o lisansın `max_devices`'ını artırabilir ya da "Cihazı sıfırla" diyebilirsiniz.
 
+## Discord uygulama komutları (yerel hazırlık)
+
+Worker, Discord Gateway bağlantısı veya privileged intents kullanmadan doğrulanmış HTTP interactions kabul eder.
+Komutlar guild kapsamındadır; `/build-share` varsayılan olarak yalnız çağırana görünür, `public: true` seçilirse
+yalnız build adı ve ekipman özeti kanala gönderilir. Hesap/build verisi yalnız komutu veren Discord kimliğiyle
+eşleştirilir. Uç nokta her isteğin Ed25519 imzasını, zaman damgasını ve uygulama kimliğini doğrular; tekrar
+istekleri reddeder ve kullanıcı başına dakikada 20 komutla sınırlar.
+
+Yerel hazırlık testleri:
+
+```bat
+node test_discord.mjs
+node register_discord_commands.mjs
+```
+
+Komut kaydı aracı varsayılan olarak yalnız JSON önizlemesi verir. Gerçek kaydı yapmak için kendi makinenizde
+`DISCORD_CLIENT_ID`, `DISCORD_GUILD_ID` ve yalnız yerel süreç ortamında `DISCORD_BOT_TOKEN` tanımlayıp
+`node register_discord_commands.mjs --apply` çalıştırın. Bot tokenını repoya, loglara veya sohbete koymayın.
+Araç yalnız kendi altı komutunu oluşturur/günceller, guild'deki diğer uygulama komutlarını silmez. Bu işlem Discord'a
+komut yazar; bu yerel görevde çalıştırılmamıştır.
+
+Canlı etkinleştirme için Discord Developer Portal'da **Interactions Endpoint URL** alanını
+`https://td2-stats.td2loot.workers.dev/v1/discord/interactions` olarak ayarlayın. Portalın verdiği **Public Key**
+değerini Cloudflare Worker ayarlarında `DISCORD_PUBLIC_KEY` adıyla tanımlayın; `DISCORD_CLIENT_ID` mevcut uygulama
+ID'siyle aynı olmalıdır. Sürüm komutu için isteğe bağlı `TD2_APP_VERSION` değişkenini güncel masaüstü sürümüne
+ayarlayın. Bu değerlerden biri eksikse interaction endpoint güvenli biçimde kapalı kalır.
+
+Yeni D1 tabloları `migrations/0001_discord_interactions.sql` içindedir. Production'a uygulanması uzak veritabanını
+değiştirir; önce staging/local doğrulayın, sonra yetkili operatör olarak `cd server` altında:
+
+```bat
+npx wrangler d1 migrations apply td2stats --remote
+```
+
+Migration ve Discord uygulama kaydı bu yerel geliştirme sırasında uzak servislere uygulanmadı. Bot DM bildirimi de
+yapılandırılmadı; `/notifications` yalnız mevcut masaüstü webhook ayarına yönlendirir.
+
 ## Topluluk görevleri (5.1.8)
 
 Oyuncular canlı çeviriyi açıkken bir görev paneline (harita → Projeler, Ödül avları, Görevlendirmeler) bakınca program

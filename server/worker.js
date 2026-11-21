@@ -20,6 +20,7 @@ import { route as accountRoute, verifyEntitlement, isAdmin } from "./accounts.js
 import { route as tasksRoute, snapshotToRepo, cleanup as tasksCleanup } from "./tasks.js";
 import { route as overviewRoute, countUsage, markCron } from "./overview.js";
 import { route as mobileRoute, cleanup as mobileCleanup } from "./mobile.js";
+import { route as discordRoute, cleanup as discordCleanup } from "./discord.js";
 import { mirrorErrorReport, readErrorReports, isSupabasePanelEnabled } from "./supabase.js";
 
 const ACTIVITIES = new Set(["open_world", "mission", "legendary", "countdown", "summit", "incursion", "raid", "dark_zone",
@@ -348,6 +349,8 @@ export default {
     try {
       if (req.method === "OPTIONS") return json({}, 204, { "access-control-allow-methods": "GET, POST, PUT, DELETE",
                                                            "access-control-allow-headers": "content-type, authorization" });
+      const discord = await discordRoute(req, env, u.pathname);
+      if (discord) return discord;
       if (u.pathname === "/v1/health") return json({ ok: true, login: !!env.DISCORD_CLIENT_ID,
         discord_app: env.DISCORD_CLIENT_ID || null,
         panel_mirror: isSupabasePanelEnabled(env) ? "enabled" : "disabled" });
@@ -385,6 +388,7 @@ export default {
     const t = Math.floor(Date.now() / 1000);
     await env.DB.prepare("DELETE FROM auth_pending WHERE created < ?1").bind(t - 900).run();
     await env.DB.prepare("DELETE FROM sessions WHERE expires < ?1 OR (revoked = 1 AND last_seen < ?2)").bind(t, t - 7 * 86400).run();
+    try { await discordCleanup(env); } catch (e) { /* Discord rate/idempotency cleanup retries next hour */ }
     await flushQueue(env);                             // GitHub'a iletilemeyen raporlar
     try { await tasksCleanup(env); await snapshotToRepo(env, gh); } catch (e) { /* görev dökümü bir sonraki saate */ }
     try { await mobileCleanup(env); } catch (e) { /* mobil temizlik bir sonraki saate */ }
