@@ -20,7 +20,8 @@ function statement(query) {
 const DB = { prepare: statement };
 const pair = generateKeyPairSync("ed25519");
 const publicRaw = pair.publicKey.export({ type: "spki", format: "der" }).subarray(-32).toString("hex");
-const env = { DB, DISCORD_PUBLIC_KEY: publicRaw, DISCORD_CLIENT_ID: "111111111111", TD2_APP_VERSION: "9.1.5-test" };
+const env = { DB, DISCORD_PUBLIC_KEY: publicRaw, DISCORD_CLIENT_ID: "111111111111", TD2_APP_VERSION: "9.1.5-test",
+  PUBLIC_URL: "https://worker.test", DISCORD_FETCH: async () => new Response(JSON.stringify({ items: [] })) };
 const checks = [];
 const ok = (condition, label) => checks.push([Boolean(condition), label]);
 const user = "222222222222";
@@ -46,7 +47,38 @@ async function result(response) {
 
   r = await signedCall(payload("help"));
   let data = await result(r);
-  ok(r.status === 200 && data.type === 4 && data.data.flags === 64 && data.data.content.includes("/builds"), "help command responds privately");
+  ok(r.status === 200 && data.type === 4 && data.data.flags === 64 && data.data.content.includes("/buildler") &&
+    data.data.embeds[0].title === "TD2 LOOT ADVISOR // SHD" && data.data.embeds[0].color === 0xff5500,
+    "help command returns a branded private SHD response");
+  r = await signedCall(payload("yardim")); data = await result(r);
+  ok(data.data.content.includes("/haberler") && data.data.embeds[0].footer.text.includes("Kaivolt"), "Turkish help alias returns branded command list");
+  r = await signedCall(payload("surum")); data = await result(r);
+  ok(data.data.content.includes("9.1.5-test"), "Turkish version alias shares the existing version behavior");
+  r = await signedCall(payload("haberler")); data = await result(r);
+  ok(data.data.content.includes("Son 30 gün") && data.data.flags === 64, "news command gives a private empty state");
+  env.DISCORD_FETCH = async url => {
+    if (String(url) !== "https://worker.test/v1/tasks/live") throw new Error("unexpected tasks URL");
+    return new Response(JSON.stringify({ version: "20261121.1", tasks: [
+      { title: "Weekly Project", objective: "Complete missions", reporters: 3, expires_at: null },
+    ] }));
+  };
+  r = await signedCall(payload("gorevler")); data = await result(r);
+  ok(data.data.content.includes("Weekly Project") && data.data.content.toLowerCase().includes("topluluk") && data.data.flags === 64,
+    "tasks command displays the current community feed privately");
+  env.DISCORD_FETCH = async () => { throw new Error("offline"); };
+  r = await signedCall(payload("gorevler")); data = await result(r);
+  ok(data.data.content.includes("alınamadı"), "tasks command handles Worker failures without throwing");
+  env.DISCORD_FETCH = async () => new Response(JSON.stringify({ items: [
+    { date: new Date().toISOString(), url: "https://x.com/TheDivisionGame/status/123", title: { tr: "Güvenilir haber" }, text: { tr: "Kısa açıklama" } },
+    { date: new Date().toISOString(), url: "https://evil.example/", title: { tr: "Harici adres" } },
+  ] }));
+  r = await signedCall(payload("haberler")); data = await result(r);
+  ok(data.data.content.includes("Güvenilir haber") && !data.data.content.includes("evil.example"),
+    "news command localizes trusted links and rejects untrusted hosts");
+  env.DISCORD_FETCH = async () => new Response("not json", { status: 503 });
+  r = await signedCall(payload("haberler")); data = await result(r);
+  ok(data.data.content.includes("alınamadı"), "news command handles feed errors safely");
+  env.DISCORD_FETCH = async () => new Response(JSON.stringify({ items: [] }));
 
   const replay = payload("help");
   r = await signedCall(replay);
@@ -91,6 +123,12 @@ async function result(response) {
   ok(data.data.content.includes("bulunamadı") && !data.data.content.includes("secret"), "cannot share another Discord account build");
   r = await signedCall(payload("notifications")); data = await result(r);
   ok(data.data.flags === 64 && data.data.content.includes("webhook"), "notification command explains opt-in desktop setup without requesting secrets");
+  r = await signedCall(payload("bildirimler")); data = await result(r);
+  ok(data.data.flags === 64 && data.data.content.includes("DM"), "Turkish notification alias preserves the honest DM limitation");
+  r = await signedCall(payload("hesap")); data = await result(r);
+  ok(data.data.content.includes("Test Agent") && data.data.content.includes("free"), "Turkish account alias remains scoped to the caller");
+  r = await signedCall(payload("buildler")); data = await result(r);
+  ok(data.data.content.includes("Striker DPS") && !data.data.content.includes("Private Other Build"), "Turkish build alias remains account-scoped");
 
   const rateUser = "444444444444";
   for (let i = 0; i < 21; i++) {

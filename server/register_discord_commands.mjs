@@ -20,7 +20,26 @@ if (!token) {
 
 const url = `https://discord.com/api/v10/applications/${clientId}/guilds/${guildId}/commands`;
 const headers = { authorization: `Bot ${token}`, "content-type": "application/json" };
-const existingResponse = await fetch(url, { headers });
+async function discordRequest(target, options) {
+  for (let attempt = 0; attempt <= 5; attempt += 1) {
+    const response = await fetch(target, options);
+    if (response.status !== 429 || attempt === 5) return response;
+
+    const retryHeader = response.headers.get("retry-after");
+    let retryAfter = retryHeader ? Number(retryHeader) : Number.NaN;
+    if (!Number.isFinite(retryAfter) || retryAfter < 0) {
+      const payload = await response.clone().json().catch(() => ({}));
+      retryAfter = Number(payload.retry_after);
+    }
+    if (!Number.isFinite(retryAfter) || retryAfter < 0) return response;
+
+    const waitMs = Math.ceil(retryAfter * 1000) + 250;
+    console.warn(`Discord rate limit: ${Math.ceil(waitMs / 1000)} sn beklenecek; tekrar ${attempt + 1}/5.`);
+    await new Promise(resolve => setTimeout(resolve, waitMs));
+  }
+}
+
+const existingResponse = await discordRequest(url, { headers });
 if (!existingResponse.ok) {
   console.error(`Guild komutları okunamadı: HTTP ${existingResponse.status}. Yanıt gövdesi yazdırılmadı.`);
   process.exit(1);
@@ -30,14 +49,16 @@ if (!Array.isArray(existing)) {
   console.error("Discord komut listesi beklenen biçimde değil; hiçbir komut değiştirilmedi.");
   process.exit(1);
 }
+let completed = 0;
 for (const command of COMMANDS) {
   const previous = existing.find(item => item.name === command.name && (item.type || 1) === 1);
-  const result = await fetch(previous ? `${url}/${previous.id}` : url, {
+  const result = await discordRequest(previous ? `${url}/${previous.id}` : url, {
     method: previous ? "PATCH" : "POST", headers, body: JSON.stringify(command),
   });
   if (!result.ok) {
-    console.error(`/${command.name} komutu kaydedilemedi: HTTP ${result.status}. Önceki guild komutları korunmuştur; yanıt gövdesi yazdırılmadı.`);
+    console.error(`/${command.name} komutu kaydedilemedi: HTTP ${result.status}. Bu çalıştırmada ${completed}/${COMMANDS.length} komut kaydedildi; kısmi başarılar geri alınmadı. Güvenle devam etmek için komutu tekrar çalıştırın. Yanıt gövdesi yazdırılmadı.`);
     process.exit(1);
   }
+  completed += 1;
 }
 console.log(`Guild kapsamındaki ${COMMANDS.length} Discord komutu kaydedildi.`);
