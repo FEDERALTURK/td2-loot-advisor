@@ -17,9 +17,14 @@ def _fixed_value_text(attribute):
     return f"{sign}{value}{attribute.get('unit', '')}"
 
 
+def _slot_grid_positions(width, count, min_card_width=165, max_columns=4):
+    columns = max(1, min(max_columns, int(max(1, width) // min_card_width)))
+    return columns, [(index // columns, index % columns) for index in range(count)]
+
+
 class BuildToolPanel:
     SPECIALIZATIONS = ("", "Survivalist", "Demolitionist", "Sharpshooter", "Gunner", "Technician", "Firewall")
-    ATTRIBUTES = ("crit_chance", "crit_damage", "headshot_damage", "weapon_damage", "armor",
+    ATTRIBUTES = ("crit_chance", "crit_damage", "headshot_damage", "weapon_damage", "weapon_type_damage", "armor",
                   "explosive_resistance", "hazard_protection", "health", "skill_haste", "skill_damage",
                   "skill_duration", "repair_skills", "stability", "accuracy", "ammo_capacity",
                   "base_damage", "rpm", "magazine_size", "reload_time", "reload_speed")
@@ -27,13 +32,16 @@ class BuildToolPanel:
     COLORS = ("#ff6400", "#55b7e8", "#a78de0")
 
     def __init__(self, parent, root, catalog, path, version, palette, stash_provider=None,
-                 target_loot_provider=None):
+                 target_loot_provider=None, summary_callback=None):
         self.root, self.catalog, self.path = root, catalog or {}, path
         self.version, self.palette = version, palette
         self.stash_provider = stash_provider
         self.target_loot_provider = target_loot_provider
+        self.summary_callback = summary_callback
         self._stash_matches = None
         self._farm_routes = {}
+        self._slot_cards = []
+        self._grid_columns = 0
         self.enemy_hp = tk.StringVar(value="2000000")
         self.error = None
         try:
@@ -82,6 +90,7 @@ class BuildToolPanel:
         self.name = tk.StringVar(); ttk.Entry(ctl, textvariable=self.name, width=22).grid(row=0, column=5, padx=4)
         ttk.Button(ctl, text="Save", command=self.save_current).grid(row=0, column=6, padx=4)
         self.grid = ttk.Frame(f); self.grid.grid(row=2, column=0, sticky="nsew", padx=(8, 4), pady=4)
+        self.grid.bind("<Configure>", lambda event: self._layout_slot_cards(event.width))
         self.detail = ttk.Frame(f); self.detail.grid(row=2, column=1, sticky="nsew", padx=(4, 8), pady=4)
         self.weapons_box = ttk.LabelFrame(f, text="Weapon damage / RPM / magazine")
         self.weapons_box.grid(row=3, column=0, columnspan=2, sticky="ew", padx=8, pady=4)
@@ -170,21 +179,42 @@ class BuildToolPanel:
             vals += [item.get("name", "") for item in data.get("skill_variants", []) if isinstance(item, dict)]
         return sorted(set(str(v) for v in vals if str(v).strip()), key=str.casefold)[:1000]
 
+    def _layout_slot_cards(self, width):
+        columns, positions = _slot_grid_positions(width, len(self._slot_cards))
+        if columns == self._grid_columns and all(card.grid_info() for card in self._slot_cards):
+            return
+        self._grid_columns = columns
+        for col in range(4):
+            self.grid.columnconfigure(col, weight=1 if col < columns else 0, minsize=0)
+        for row in range(12):
+            self.grid.rowconfigure(row, weight=0)
+        for card, (row, col) in zip(self._slot_cards, positions):
+            card.grid(row=row, column=col, sticky="nsew", padx=3, pady=3, ipadx=5, ipady=8)
+        for row in range((len(self._slot_cards) + columns - 1) // columns):
+            self.grid.rowconfigure(row, weight=1)
+
     def edit_slot(self, slot):
         if not self.can_edit(): return
         build = self.current()
         if not build: return
         old = build["slots"].get(slot) or {}
         win = tk.Toplevel(self.root); win.title(f"Build Tool · {slot}"); win.transient(self.root); win.grab_set()
-        win.geometry("820x900")
+        win.geometry(f"{min(820, max(520, win.winfo_screenwidth() - 80))}x"
+                     f"{min(900, max(480, win.winfo_screenheight() - 100))}")
         query = tk.StringVar(value=old.get("name", "")); ttk.Entry(win, textvariable=query).pack(fill="x", padx=10, pady=8)
         lb = tk.Listbox(win, exportselection=False); lb.pack(fill="both", expand=True, padx=10, pady=(0, 8))
         options = self.options(slot)
+        pending_filter = {"after": None}
         def fill(*_):
+            pending_filter["after"] = None
             lb.delete(0, "end")
-            for value in options:
-                if query.get().casefold() in value.casefold(): lb.insert("end", value)
-        query.trace_add("write", fill); fill()
+            for value in build_tool.search_catalog_options(options, query.get(), self.catalog, slot):
+                lb.insert("end", value)
+        def schedule_fill(*_):
+            if pending_filter["after"]:
+                win.after_cancel(pending_filter["after"])
+            pending_filter["after"] = win.after(80, fill)
+        query.trace_add("write", schedule_fill); fill()
         editor = ttk.LabelFrame(win, text="Core, brand / gearset, talent and item stats")
         editor.pack(fill="x", padx=10, pady=4)
         editor.columnconfigure(1, weight=1)
@@ -223,6 +253,8 @@ class BuildToolPanel:
                 for key, var in entries.items():
                     var.set(str(auto["attrs"].get(key, "")))
             lines = []
+            if auto["catalog_status"] == "unverified":
+                lines.append("REVIEW REQUIRED · item is not in the current catalog; fixed values were not inferred.")
             if auto["talent"]:
                 lines.append(f"Talent: {auto['talent']}")
             for fixed in auto["fixed_attributes"]:
@@ -233,7 +265,10 @@ class BuildToolPanel:
                     line += " · fixed attribute data unavailable in catalog"
                 lines.append(line)
             lines.extend(f"Available {value} slot" for value in auto["mod_slots"])
-            preview.set("\n".join(lines) if lines else "No fixed catalog details; variable rolls remain editable.")
+            preview.set("\n".join(lines) if lines else
+                        ("Catalogued item · no fixed catalog details; variable rolls remain editable."
+                         if auto["catalog_status"] == "catalogued" else
+                         "REVIEW REQUIRED · item is not in the current catalog; fixed values were not inferred."))
 
         lb.bind("<<ListboxSelect>>", select_item)
         existing = next((i for i, value in enumerate(options) if value.casefold() == old.get("name", "").casefold()), None)
@@ -370,7 +405,7 @@ class BuildToolPanel:
             messagebox.showinfo("Build Tool", "Save at least two builds to compare them.", parent=self.root)
             return
         win = tk.Toplevel(self.root); win.title("Build Tool · Compare builds"); win.transient(self.root)
-        win.geometry("1000x580")
+        win.geometry("760x520")
         names = [item["name"] for item in self.builds]
         row = ttk.Frame(win); row.pack(fill="x", padx=10, pady=8)
         ttk.Label(row, text="Build A").pack(side="left")
@@ -383,14 +418,7 @@ class BuildToolPanel:
         table = ttk.Treeview(win, columns=columns, show="headings", height=18)
         for key, label in zip(columns, ("Metric", "Build A", "Build B", "B − A")):
             table.heading(key, text=label)
-        table.column("metric", width=190)
-        table.column("first", width=300)
-        table.column("second", width=300)
-        table.column("delta", width=110)
-        scroll = ttk.Scrollbar(win, orient="horizontal", command=table.xview)
-        table.configure(xscrollcommand=scroll.set)
-        table.pack(fill="both", expand=True, padx=10, pady=4)
-        scroll.pack(fill="x", padx=10)
+        table.column("metric", width=260); table.pack(fill="both", expand=True, padx=10, pady=4)
         note = tk.StringVar()
         ttk.Label(win, textvariable=note, foreground=self.palette["muted"], wraplength=720).pack(anchor="w", padx=10, pady=5)
 
@@ -403,17 +431,6 @@ class BuildToolPanel:
                             f"{values['second']:g}", f"{values['delta']:+g}"))
             table.insert("", "end", values=("Total armor (estimate)", f"{data['armor']['first']:,.0f}",
                         f"{data['armor']['second']:,.0f}", f"{data['armor']['delta']:+,.0f}"))
-            for key, values in data["cores"].items():
-                table.insert("", "end", values=(f"{key.title()} cores", values["first"],
-                            values["second"], f"{values['delta']:+}"))
-            for change in data["slot_changes"]:
-                table.insert("", "end", values=(f"{change['slot']} · equipped item",
-                            change["first"], change["second"], "changed"))
-            for index in range(max(len(data["bonuses"]["first"]), len(data["bonuses"]["second"]))):
-                a = data["bonuses"]["first"][index] if index < len(data["bonuses"]["first"]) else "—"
-                b = data["bonuses"]["second"][index] if index < len(data["bonuses"]["second"]) else "—"
-                if a != b:
-                    table.insert("", "end", values=(f"Active bonus {index + 1}", a, b, "changed"))
             for weapon in data["weapons"]:
                 a, b = weapon["first"], weapon["second"]
                 table.insert("", "end", values=(f"{weapon['slot']} DPS (estimate)",
@@ -422,6 +439,15 @@ class BuildToolPanel:
                 table.insert("", "end", values=(f"{weapon['slot']} TTK (estimate)",
                             f"{a['ttk']:.1f}s" if a else "—", f"{b['ttk']:.1f}s" if b else "—",
                             f"{weapon['ttk_delta']:+.1f}s"))
+            for change in data["slot_changes"]:
+                table.insert("", "end", values=(f"{change['slot']} · item",
+                            change["first"] or "—", change["second"] or "—", "changed"))
+            for bonus in data["bonus_changes"]["only_first"]:
+                table.insert("", "end", values=(f"{bonus[0]} · {bonus[1]} pc bonus",
+                            bonus[2], "—", "A only"))
+            for bonus in data["bonus_changes"]["only_second"]:
+                table.insert("", "end", values=(f"{bonus[0]} · {bonus[1]} pc bonus",
+                            "—", bonus[2], "B only"))
             note.set(data["assumptions"] + " A negative TTK difference means the estimate is faster.")
 
         ttk.Button(row, text="Compare", command=refresh_comparison).pack(side="left", padx=8)
@@ -462,25 +488,38 @@ class BuildToolPanel:
         if names:
             index = min(max(index, 0), len(names)-1); self.choice.current(index); build = self.builds[index]
         else:
-            self.choice.set(""); self.name.set(""); self._clear_views(); return
+            self.choice.set(""); self.name.set(""); self._clear_views()
+            if callable(self.summary_callback):
+                self.summary_callback()
+            return
         self.name.set(build["name"]); self.spec.set(build.get("specialization", ""))
         result = build_tool.calculate(build, self.catalog)
         for child in self.grid.winfo_children(): child.destroy()
+        self._slot_cards = []
         labels = ("PRIMARY", "SECONDARY", "SIDEARM", "MASK", "BACKPACK", "CHEST", "GLOVES", "HOLSTER", "KNEEPADS", "SKILL 1", "SKILL 2")
         slots = ("Primary", "Secondary", "SideArm") + build_tool.SLOTS[:6] + ("Skill1", "Skill2")
-        for col in range(4): self.grid.columnconfigure(col, weight=1)
         for idx, (slot, title) in enumerate(zip(slots, labels)):
-            row, col = divmod(idx, 4); item = build["slots"].get(slot) or {}
-            card = tk.Frame(self.grid, bg=self.palette["surface"], highlightthickness=1, highlightbackground=self.palette["border"])
-            card.grid(row=row, column=col, sticky="nsew", padx=3, pady=3, ipadx=5, ipady=8)
+            item = build["slots"].get(slot) or {}
+            card = tk.Frame(self.grid, bg=self.palette["surface"], highlightthickness=1,
+                            highlightbackground=self.palette["border"], takefocus=1)
+            self._slot_cards.append(card)
             tk.Label(card, text=title, bg=self.palette["surface"], fg=self.palette["accent"], font=("Consolas", 9, "bold")).pack(anchor="w")
             tk.Label(card, text=item.get("name") or "CHOOSE ITEM", bg=self.palette["surface"], fg=self.palette["fg"],
                      wraplength=140, justify="center", height=3).pack(fill="both", expand=True)
-            for widget in (card, *card.winfo_children()): widget.bind("<Button-1>", lambda _e, s=slot: self.edit_slot(s))
+            for widget in (card, *card.winfo_children()):
+                widget.bind("<Button-1>", lambda _e, s=slot: self.edit_slot(s))
+            card.bind("<Return>", lambda _e, s=slot: self.edit_slot(s))
+            card.bind("<space>", lambda _e, s=slot: self.edit_slot(s))
+            card.bind("<FocusIn>", lambda _e, c=card: c.configure(highlightbackground=self.palette["accent"]))
+            card.bind("<FocusOut>", lambda _e, c=card: c.configure(highlightbackground=self.palette["border"]))
+        self._grid_columns = 0
+        self._layout_slot_cards(self.grid.winfo_width())
         self._draw_stats(result)
         self._draw_weapon_stats(build, result)
         self._draw_ttk(result)
         self.refresh_chart()
+        if callable(self.summary_callback):
+            self.summary_callback()
 
     def _clear_views(self):
         for widget in (self.grid, self.detail, self.weapons_box, self.ttk_box):
@@ -494,8 +533,16 @@ class BuildToolPanel:
                                    ("Utility", "utility", ("skill_haste", "skill_damage", "skill_duration", "repair_skills", "skill_tier"))):
             group = ttk.LabelFrame(self.detail, text=f"{title} Cores · {result['cores'][key]}"); group.pack(fill="x", padx=4, pady=3)
             for field in fields:
-                ttk.Label(group, text=f"{field.replace('_', ' ').title()}: {result['stats'][field]:g}").pack(anchor="w", padx=6, pady=1)
+                source = result["gear_attribute_contributions"].get(field)
+                contribution = f" · gear attributes +{source:g}" if source is not None else ""
+                ttk.Label(group, text=f"{field.replace('_', ' ').title()}: {result['stats'][field]:g}{contribution}").pack(anchor="w", padx=6, pady=1)
         ttk.Label(self.detail, text=f"Total Armor · {result['armor']:,.0f} · estimate", foreground=self.palette["accent"], style="Title.TLabel").pack(anchor="w", padx=6, pady=4)
+        ttk.Label(self.detail, text=(f"Armor inputs · base 660,014 + {result['cores']['defensive']} defensive cores × 170,000 "
+                  f"+ gear armor attributes {result['gear_attribute_contributions'].get('armor', 0):g}"),
+                  wraplength=460, foreground=self.palette["muted"]).pack(anchor="w", padx=6, pady=2)
+        ttk.Label(self.detail, text=("Simulation scope · talents, specialization and SHD effects "
+                  "are not included in the numeric estimate."), wraplength=460,
+                  foreground=self.palette["muted"]).pack(anchor="w", padx=6, pady=2)
         watch = ttk.LabelFrame(self.detail, text="SHD Watch Levels")
         watch.pack(fill="x", padx=4, pady=3)
         levels = self.current().get("shd_levels", {})
@@ -567,6 +614,7 @@ class BuildToolPanel:
                   f"commit date {origin['community_date']}\n"
                   f"Community repository: {origin['community_repository']} · license {origin['community_license']}\n"
                   f"Declared source: {origin['source']}\n"
+                  f"Source verification: {catalog['verification_status']}\n"
                   f"Catalog fingerprint: {origin['fingerprint']} · this records identity, not correctness"),
                   wraplength=460, justify="left").pack(anchor="w", padx=6, pady=4)
         snapshot = build.get("catalog_snapshot") or {}
@@ -594,6 +642,9 @@ class BuildToolPanel:
         if not warnings:
             ttk.Label(validation, text="No catalog or roll-limit warnings. This does not certify in-game performance.",
                       wraplength=460, foreground=self.palette["muted"]).pack(anchor="w", padx=6, pady=1)
+        if catalog["warnings"]:
+            ttk.Label(validation, text="Catalog review: " + "; ".join(catalog["warnings"]),
+                      wraplength=460, foreground=self.palette["accent"]).pack(anchor="w", padx=6, pady=2)
 
         roll_frame = ttk.LabelFrame(self.detail, text="Variable roll quality · catalog based")
         roll_frame.pack(fill="x", padx=4, pady=3)
@@ -710,6 +761,8 @@ class BuildToolPanel:
         if not result["weapons"]:
             ttk.Label(self.ttk_box, text="Select a weapon or enter base damage and RPM in its slot editor.",
                       foreground=self.palette["muted"]).grid(row=2, column=0, columnspan=7, sticky="w", padx=6)
+        ttk.Label(self.ttk_box, text="DPS/TTK estimate uses weapon base damage, RPM, offensive cores, entered damage/critical attributes and parsed attachment stats; talent, specialization and SHD effects are excluded.",
+                  wraplength=900, foreground=self.palette["muted"]).grid(row=3, column=0, columnspan=7, sticky="w", padx=6, pady=2)
 
     def update_enemy_hp(self):
         if not self.can_edit(): return

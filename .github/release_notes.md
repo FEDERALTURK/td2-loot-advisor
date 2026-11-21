@@ -1,5 +1,15 @@
 ## TD2 Loot Advisor — Windows
 
+**9.1.5.55 — Build Tool, panel özeti ve veri güvenliği**
+
+- Build Tool bilinen silahların sabit roll alanlarını ve eklentilerini katalogdan doldurur; değişken roll değerleri kullanıcı kontrolünde kalır.
+- PTS/deneysel katalog girdileri canlı istatistik gibi sunulmaz; eksik kaynak/doğrulama metadatası inceleme uyarısıyla gösterilir.
+- Ekipman seçici daha dar pencerelerde yeniden akar ve katalog seçeneklerini ad, yuva, marka ve talent bilgisine göre filtreler.
+- Build karşılaştırması slot ve aktif bonus farklarını gösterirken önceki `bonuses.first/second` veri alanlarını korur.
+- Kontrol paneli Build Tool'un kendi hesaplamasından doluluk, kasa eşleşmesi, aktif bonus ve inceleme özetini gösterir.
+- Bozuk veya okunamayan stash dosyası boş envanter sayılmaz ve uygulama tarafından üzerine yazılmaz.
+- Yönetici paneli Worker özeti, hata kuyruğu ve boş durum bilgisini daha dayanıklı şekilde işler.
+
 **9.1.5.53 — İmzalı güncelleme güvenliği**
 
 - Windows uygulama güncellemeleri Ed25519 ile imzalanmış release manifestiyle doğrulanır.

@@ -6,7 +6,6 @@ import uuid
 import math
 import re
 import hashlib
-from datetime import date
 
 SLOTS = ("Mask", "Backpack", "Chest", "Gloves", "Holster", "Kneepads", "Primary", "Secondary",
          "SideArm", "Specialization", "Skill1", "Skill2")
@@ -44,7 +43,7 @@ def normalize_build(build):
         if not isinstance(item, dict):
             continue
         clean = {key: str(item.get(key) or "")[:120] for key in
-                 ("name", "core", "brand", "gear_set", "talent", "quality")}
+                 ("name", "core", "brand", "gear_set", "talent", "quality", "catalog_status")}
         attrs = item.get("attrs") if isinstance(item.get("attrs"), dict) else {}
         clean["attrs"] = {str(key)[:40]: _number(value, 0, -1_000_000, 1_000_000)
                            for key, value in attrs.items() if _number(value, None, -1_000_000, 1_000_000) is not None}
@@ -86,6 +85,38 @@ def _lookup(table, name):
     return "", {}
 
 
+def _is_pts_or_experimental(meta):
+    status = str(meta.get("data_status", "")).casefold()
+    modes = {value.strip() for value in str(meta.get("mode", "")).casefold().split("|")}
+    return status in {"pts", "test", "experimental"} or "pts" in modes
+
+
+def search_catalog_options(options, query, catalog, slot):
+    """Filter known options by name and declared slot/brand/talent/type metadata."""
+    query = str(query or "").strip().casefold()
+    if not query:
+        return list(options)
+    weapon = slot in ("Primary", "Secondary", "SideArm")
+    table = (catalog.get("weapon_index", {}) if weapon else catalog.get("items", {}))
+    item_index = {str(name).strip().casefold().replace("’", "'"): value
+                  for name, value in table.items()} if isinstance(table, dict) else {}
+    talent_fields = (catalog.get("weapon_talent_details", []) if weapon else
+                     catalog.get("gear_talent_details", []))
+    details = {str(row.get("name", "")).casefold(): row for row in talent_fields
+               if isinstance(row, dict)}
+    results = []
+    for option in options:
+        label = str(option)
+        item = item_index.get(label.strip().casefold().replace("’", "'"), {})
+        talent = details.get(str(item.get("talent", "")).casefold(), {})
+        fields = (label, item.get("slot", ""), item.get("class", ""), item.get("quality", ""),
+                  item.get("brand", ""), item.get("gear_set", ""), item.get("talent", ""),
+                  talent.get("compatibility", ""))
+        if any(query in str(field).casefold() for field in fields):
+            results.append(option)
+    return results
+
+
 def _attribute_match(slug, attributes):
     normalized = re.sub(r"[^a-z0-9]+", "_", str(slug).casefold()).strip("_")
     candidates = {}
@@ -118,8 +149,17 @@ def auto_details(name, slot, catalog=None):
     """Return only catalogued fixed item facts; variable rolls remain untouched."""
     catalog = catalog if isinstance(catalog, dict) else {}
     is_weapon = slot in ("Primary", "Secondary", "SideArm")
+    is_skill = slot in ("Skill1", "Skill2")
     source = catalog.get("weapon_index", {}) if is_weapon else catalog.get("items", {})
     label, meta = _lookup(source, name)
+    if is_skill and not label:
+        skills = catalog.get("skills", {})
+        skill_names = list(skills) if isinstance(skills, dict) else (
+            list(skills) if isinstance(skills, (list, tuple, set)) else [])
+        skill_names.extend(item.get("name", "") for item in catalog.get("skill_variants", [])
+                           if isinstance(item, dict))
+        label = next((str(value) for value in skill_names
+                      if str(value).strip().casefold() == str(name or "").strip().casefold()), "")
     if not label:
         selected = str(name or "").strip()
         def catalog_names(values):
@@ -132,12 +172,20 @@ def auto_details(name, slot, catalog=None):
                          if str(value).strip().casefold() == selected.casefold()), "")
         return {"name": selected, "quality": "", "core": "", "brand": brand,
                 "gear_set": gear_set, "talent": "", "attrs": {}, "fixed_attributes": [],
-                "attachments": [], "mod_slots": [], "weapon_stats": {}}
+                "attachments": [], "mod_slots": [], "weapon_stats": {},
+                "catalog_status": "catalogued" if brand or gear_set else "unverified"}
+
+    if _is_pts_or_experimental(meta):
+        return {"name": label, "quality": str(meta.get("quality", "")), "core": "",
+                "brand": "", "gear_set": "", "talent": "", "attrs": {},
+                "fixed_attributes": [], "attachments": [], "mod_slots": [],
+                "weapon_stats": {}, "catalog_status": "unverified"}
 
     details = {"name": label, "quality": str(meta.get("quality", "")),
                "core": "", "brand": str(meta.get("brand", "")),
                "gear_set": str(meta.get("gear_set", "")), "talent": str(meta.get("talent", "")),
                "attrs": {}, "fixed_attributes": [], "attachments": [], "mod_slots": [],
+               "catalog_status": "catalogued",
                "weapon_stats": {}}
     attrs = catalog.get("attributes", {})
     if is_weapon:
@@ -175,13 +223,36 @@ def auto_details(name, slot, catalog=None):
                         details["weapon_stats"][stat] = details["weapon_stats"].get(stat, 0) + float(raw_value)
             elif isinstance(raw, str) and raw.startswith("type:"):
                 details["mod_slots"].append(str(mod_slot))
+        raw_rolls = meta.get("roll_slots", {})
+        for roll_slot, raw in raw_rolls.items() if isinstance(raw_rolls, dict) else ():
+            if not isinstance(raw, str) or not raw.startswith("fixed:"):
+                continue
+            slug = raw[6:].strip()
+            key = _UNIQUE_FIXED_ATTRIBUTE_KEYS.get(slug, _attribute_key(slug, attrs))
+            attribute = attrs.get(key, {}) if key else {}
+            value = _number(attribute.get("weapon_max", attribute.get("max")), None)
+            value = _UNIQUE_FIXED_VALUES.get(slug, value)
+            aliases = attribute.get("aliases", []) if isinstance(attribute, dict) else []
+            display = (re.sub(r"-weapon-core$", "", slug).replace("-", " ").title()
+                       if key == "weapon_type_damage" else
+                       aliases[-1].title() if aliases else
+                       key.replace("_", " ").title() if key else slug.replace("-", " ").title())
+            unit = str(attribute.get("unit", "")) if isinstance(attribute, dict) else ""
+            if key in {"weapon_damage", "weapon_type_damage"}:
+                details["core"] = "Weapon Damage"
+            if value is not None:
+                display_value = str(int(value) if float(value).is_integer() else value)
+                details["fixed_attributes"].append({"slot": str(roll_slot), "name": display,
+                                                    "value": display_value, "unit": unit})
+                if key:
+                    details["attrs"][key] = value
     else:
         roll_slots = meta.get("roll_slots", {})
         for roll_slot, raw in roll_slots.items() if isinstance(roll_slots, dict) else ():
             if not isinstance(raw, str) or not raw.startswith("fixed:"):
                 continue
             slug = raw[6:].strip()
-            key = _attribute_key(slug, attrs)
+            key = _UNIQUE_FIXED_ATTRIBUTE_KEYS.get(slug, _attribute_key(slug, attrs))
             attr = attrs.get(key, {}) if key else {}
             if str(roll_slot).startswith("core_"):
                 core_key = key or _attribute_key(re.sub(r"-(?:gear|weapon)-core$", "", slug), attrs)
@@ -214,6 +285,16 @@ _UNIQUE_FIXED_VALUES = {
     "status-effects-firm-handshake": 16,
     "melee-damage-claws-out": 400,
     "weapon-damage-picaros-holster": 15,
+}
+
+_UNIQUE_FIXED_ATTRIBUTE_KEYS = {
+    "damage-to-armor-contractors-gloves": "damage_to_armor",
+    "dtoc-foxs-prayer": "damage_to_armor",
+    "health-damage-the-hollow-man": "damage_to_health",
+    "headshot-damage-punch-drunk": "headshot_damage",
+    "status-effects-firm-handshake": "status_effects",
+    "melee-damage-claws-out": "melee_damage",
+    "weapon-damage-picaros-holster": "weapon_damage",
 }
 
 
@@ -258,23 +339,15 @@ def catalog_diagnostics(catalog):
         warnings.append("Library source is not recorded")
     if provenance["community_commit"] == "not recorded":
         warnings.append("Community data commit is not recorded")
-    elif not re.fullmatch(r"[0-9a-f]{40}", provenance["community_commit"]):
-        warnings.append("Community data commit is not a full revision hash")
-    try:
-        age = (date.today() - date.fromisoformat(provenance["community_date"])).days
-        if age < 0:
-            warnings.append("Community data commit date is in the future")
-        elif age > 120:
-            warnings.append(f"Community data snapshot is {age} days old")
-    except ValueError:
-        if provenance["community_date"] != "not recorded":
-            warnings.append("Community data commit date is invalid")
-        else:
-            warnings.append("Community data commit date is not recorded")
+    item_records = list(items.values()) + list(weapons.values())
+    if item_records and not all(isinstance(record, dict) and record.get("source_url") and
+                                record.get("verified_at") and record.get("data_status") and
+                                record.get("mode") for record in item_records):
+        warnings.append("Per-item source URL, verification date, data status, and game mode are not recorded")
     return {"provenance": provenance, "counts": {
         "gear_items": len(items), "weapons": len(weapons), "attributes": len(attrs),
         "brands": len(catalog.get("brands") or []), "gear_sets": len(catalog.get("gear_sets") or []),
-    }, "warnings": warnings}
+    }, "warnings": warnings, "verification_status": "partial" if warnings else "metadata_recorded"}
 
 
 def stamp_catalog(build, catalog):
@@ -340,16 +413,76 @@ def validate_build(build, catalog=None):
             label = next((name for name in names if str(name).casefold() == item["name"].casefold()), "")
         if not label:
             issues.append({"level": "warning", "slot": slot, "message": "Item is not in the current catalog"})
+        elif _is_pts_or_experimental(meta):
+            issues.append({"level": "warning", "slot": slot,
+                           "message": "PTS/experimental catalog entries are not used for live item details"})
         elif meta.get("slot") and slot in gear_slots and str(meta["slot"]).casefold() != slot.casefold():
             issues.append({"level": "warning", "slot": slot,
                            "message": f"Catalog slot is {meta['slot']}, not {slot}"})
-        fixed = auto_details(item.get("name"), slot, catalog).get("attrs", {})
+        fixed_details = auto_details(item.get("name"), slot, catalog)
+        fixed = fixed_details.get("attrs", {})
+        if fixed_details.get("talent") and item.get("talent") and \
+                item["talent"].casefold() != fixed_details["talent"].casefold():
+            issues.append({"level": "warning", "slot": slot,
+                           "message": f"Talent differs from catalog fixed talent ({fixed_details['talent']})"})
+        if fixed_details.get("core") and item.get("core") and \
+                item["core"].casefold() != fixed_details["core"].casefold():
+            issues.append({"level": "warning", "slot": slot,
+                           "message": f"Core differs from catalog fixed core ({fixed_details['core']})"})
+        if item.get("talent"):
+            if is_weapon:
+                talent_rows = catalog.get("weapon_talent_details", [])
+                talent_row = next((row for row in talent_rows if isinstance(row, dict) and
+                                   str(row.get("name", "")).casefold() == item["talent"].casefold()), {})
+                compatibility = str(talent_row.get("compatibility", ""))
+                weapon_type = str(meta.get("type", "")).casefold().replace(" ", "-")
+                allowed = {value.strip().casefold() for value in compatibility.split("|")}
+                if compatibility and compatibility.casefold() != "n/a" and weapon_type and weapon_type not in allowed:
+                    issues.append({"level": "warning", "slot": slot,
+                                   "message": f"Talent is not listed for weapon type {meta.get('type')}"})
+            else:
+                talent_slots = catalog.get("gear_talent_slots", {})
+                talent_label, talent_meta = _lookup(talent_slots, item["talent"])
+                talent_details = catalog.get("gear_talent_details", [])
+                detail = next((row for row in talent_details if isinstance(row, dict) and
+                               str(row.get("name", "")).casefold() == item["talent"].casefold()), {})
+                required_slot = str(talent_meta.get("slot") or detail.get("compatibility") or "")
+                if talent_label and required_slot and required_slot.casefold() not in ("n/a", slot.casefold()):
+                    issues.append({"level": "warning", "slot": slot,
+                                   "message": f"Talent is listed for {required_slot}, not {slot}"})
+        if is_weapon:
+            raw_mod_slots = meta.get("mod_slots", {})
+            mod_index = {str(row.get("name", "")).casefold(): row
+                         for row in catalog.get("weapon_mod_details", []) if isinstance(row, dict)}
+            for attachment in item.get("attachments", []):
+                if attachment.get("fixed"):
+                    continue
+                mod = mod_index.get(str(attachment.get("name", "")).casefold())
+                raw_slot = raw_mod_slots.get(attachment.get("slot")) if isinstance(raw_mod_slots, dict) else None
+                allowed = str(mod.get("compatibility", "")) if mod else ""
+                slot_types = {value.strip().casefold() for value in allowed.split("|")}
+                weapon_slot_type = str(raw_slot or "").removeprefix("type:").casefold()
+                if not mod or not str(raw_slot or "").startswith("type:") or not allowed or allowed.casefold() == "n/a":
+                    issues.append({"level": "warning", "slot": slot,
+                                   "message": f"Attachment compatibility is unverified: {attachment.get('name', '')}"})
+                elif weapon_slot_type not in slot_types:
+                    issues.append({"level": "warning", "slot": slot,
+                                   "message": f"Attachment {attachment.get('name', '')} is incompatible with {attachment.get('slot', '')}"})
+        seen_attributes = set()
         for key, value in item["attrs"].items():
             data_key = key if key in attrs else _attribute_key(key, attrs)
+            if data_key and data_key in seen_attributes:
+                issues.append({"level": "warning", "slot": slot,
+                               "message": f"Duplicate attribute selection: {data_key}"})
+            if data_key:
+                seen_attributes.add(data_key)
             data = attrs.get(data_key, {}) if isinstance(attrs, dict) else {}
             maximum = _number(data.get("weapon_max" if is_weapon else "max"), None) if isinstance(data, dict) else None
             minimum = _number(data.get("min"), None) if isinstance(data, dict) else None
-            if key in fixed:
+            if data_key in fixed:
+                if abs(value - fixed[data_key]) > 1e-9:
+                    issues.append({"level": "warning", "slot": slot,
+                                   "message": f"{data_key} differs from catalog fixed value ({fixed[data_key]:g})"})
                 continue
             if maximum is not None and value > maximum:
                 issues.append({"level": "warning", "slot": slot,
@@ -369,9 +502,8 @@ def validate_build(build, catalog=None):
 
 def compare_builds(first, second, catalog=None):
     """Compare two local builds under the same catalog and calculation assumptions."""
-    first_build, second_build = normalize_build(first), normalize_build(second)
-    left = calculate(first_build, catalog)
-    right = calculate(second_build, catalog)
+    left = calculate(first, catalog)
+    right = calculate(second, catalog)
     stats = {key: {"first": left["stats"].get(key, 0), "second": right["stats"].get(key, 0),
                    "delta": right["stats"].get(key, 0) - left["stats"].get(key, 0)}
              for key in sorted(left["stats"].keys() | right["stats"].keys())}
@@ -383,6 +515,8 @@ def compare_builds(first, second, catalog=None):
             weapons.append({"slot": slot, "first": a, "second": b,
                             "dps_delta": (b["dps"] if b else 0) - (a["dps"] if a else 0),
                             "ttk_delta": (b["ttk"] if b else 0) - (a["ttk"] if a else 0)})
+    first_build, second_build = normalize_build(first), normalize_build(second)
+
     def item_summary(item):
         if not item:
             return "—"
@@ -394,18 +528,47 @@ def compare_builds(first, second, catalog=None):
     slot_changes = [{"slot": slot, "first": item_summary(first_build["slots"][slot]),
                      "second": item_summary(second_build["slots"][slot])}
                     for slot in SLOTS if first_build["slots"][slot] != second_build["slots"][slot]]
+
     def bonus_summary(result):
         return [f"{bonus['name']} · {bonus['tier']}-piece: {bonus['text']}"
                 for kind in ("brands", "gear_sets") for bonus in result["bonuses"][kind]]
 
+    left_bonuses = {(row["name"], row["tier"], row["text"]) for group in left["bonuses"].values() for row in group}
+    right_bonuses = {(row["name"], row["tier"], row["text"]) for group in right["bonuses"].values() for row in group}
+    bonus_changes = {"only_first": sorted(left_bonuses - right_bonuses),
+                     "only_second": sorted(right_bonuses - left_bonuses)}
     return {"stats": stats, "armor": {"first": left["armor"], "second": right["armor"],
                                        "delta": right["armor"] - left["armor"]},
             "cores": {key: {"first": left["cores"][key], "second": right["cores"][key],
                              "delta": right["cores"][key] - left["cores"][key]}
-                      for key in left["cores"]}, "weapons": weapons,
-            "slot_changes": slot_changes,
+                      for key in left["cores"]}, "weapons": weapons, "slot_changes": slot_changes,
             "bonuses": {"first": bonus_summary(left), "second": bonus_summary(right)},
-            "assumptions": "Both estimates use the same local catalog and target HP; they are not in-game measurements."}
+            "bonus_changes": bonus_changes,
+            "assumptions": (f"Both estimates use the same local catalog; target HP is "
+                            f"{left['enemy_hp']:,} for A and {right['enemy_hp']:,} for B. "
+                            "Talents, specialization and SHD effects are not modeled; "
+                            "these are estimates, not in-game measurements.")}
+
+
+def dashboard_summary(build, catalog=None, stash_items=()):
+    """Summarize the selected Build Tool loadout using the planner's own calculations."""
+    build = normalize_build(build)
+    result = calculate(build, catalog)
+    gear_slots = SLOTS[:6]
+    missing = [slot for slot in gear_slots if not build["slots"].get(slot)]
+    stash_available = stash_items is not None
+    matches = stash_matches(build, stash_items or (), catalog) if stash_available else []
+    diagnostics = catalog_diagnostics(catalog)
+    return {"name": build["name"], "completion": round((len(gear_slots) - len(missing)) / len(gear_slots) * 100),
+            "completion_basis": "gear_slots_filled",
+            "missing_slots": missing, "stash_match_count": sum(bool(row["owned"]) for row in matches),
+            "stash_target_count": len(matches), "stash_status": "available" if stash_available else "unavailable",
+            "review_count": sum(
+                issue["level"] == "warning" for issue in validate_build(build, catalog)),
+            "active_bonus_count": len(result["bonuses"]["brands"]) + len(result["bonuses"]["gear_sets"]),
+            "catalog_version": diagnostics["provenance"]["version"],
+            "catalog_verification_status": diagnostics["verification_status"],
+            "catalog_warnings": diagnostics["warnings"]}
 
 
 def stash_matches(build, stash_items, catalog=None):
@@ -519,6 +682,7 @@ def calculate(build, catalog=None):
                                    "stability", "accuracy", "ammo_capacity", "armor", "explosive_resistance",
                                    "hazard_protection", "health", "skill_haste", "skill_damage", "skill_duration",
                                    "repair_skills", "skill_tier")}
+    gear_attribute_contributions = {}
     cores = {"offensive": 0, "defensive": 0, "utility": 0}
     brands, sets = {}, {}
     for slot, item in build["slots"].items():
@@ -536,6 +700,7 @@ def calculate(build, catalog=None):
             for key, value in item["attrs"].items():
                 if key in stats:
                     stats[key] += value
+                    gear_attribute_contributions[key] = gear_attribute_contributions.get(key, 0.0) + value
             if "skill" in core or "utility" in core:
                 stats["skill_tier"] += 1
         if slot in SLOTS[:6]:
@@ -553,6 +718,8 @@ def calculate(build, catalog=None):
         attrs = item["attrs"]
         weapon_meta = next((meta for name, meta in weapon_index.items()
                             if name.casefold() == item["name"].casefold()), {}) if isinstance(weapon_index, dict) else {}
+        if _is_pts_or_experimental(weapon_meta):
+            weapon_meta = {}
         base_stats = weapon_meta.get("base_stats", {}) if isinstance(weapon_meta, dict) else {}
         damage = _number(attrs.get("base_damage", base_stats.get("base_damage")), 0)
         rpm = _number(attrs.get("rpm", base_stats.get("base_rpm")), 0)
@@ -571,7 +738,9 @@ def calculate(build, catalog=None):
                     if attr_key == "magazine_size" and percent:
                         weapon_mod_magazine_percent += float(value)
         if damage and rpm:
-            weapon_damage = stats["weapon_damage"] + attrs.get("weapon_damage", 0) + weapon_mod_stats.get("weapon_damage", 0)
+            weapon_damage = (stats["weapon_damage"] + attrs.get("weapon_damage", 0) +
+                             attrs.get("weapon_type_damage", 0) + weapon_mod_stats.get("weapon_damage", 0) +
+                             weapon_mod_stats.get("weapon_type_damage", 0))
             crit_chance = min(60, stats["crit_chance"] + attrs.get("crit_chance", 0) + weapon_mod_stats.get("crit_chance", 0))
             crit_damage = stats["crit_damage"] + attrs.get("crit_damage", 0) + weapon_mod_stats.get("crit_damage", 0)
             rate_of_fire = attrs.get("rate_of_fire", 0) + weapon_mod_stats.get("rate_of_fire", 0)
@@ -589,7 +758,13 @@ def calculate(build, catalog=None):
             else:
                 ttk = build["enemy_hp"] / dps if dps else 0
             weapons.append({"slot": slot, "name": item["name"], "dps": dps, "ttk": ttk,
-                            "damage": damage, "rpm": rpm, "magazine": magazine, "reload": reload_time})
+                            "damage": damage, "rpm": rpm, "magazine": magazine, "reload": reload_time,
+                            "contributions": {"base_damage": damage,
+                                              "offensive_core_bonus_percent": cores["offensive"] * 15,
+                                              "weapon_damage_percent": weapon_damage,
+                                              "critical_chance_percent": crit_chance,
+                                              "critical_damage_percent": crit_damage,
+                                              "weapon_mod_stats": weapon_mod_stats.copy()}})
     brand_bonus_data = catalog.get("brand_bonuses", {})
     gear_bonus_data = catalog.get("gear_set_bonuses", {})
     bonuses = {"brands": [], "gear_sets": []}
@@ -602,7 +777,13 @@ def calculate(build, catalog=None):
         for tier, description in enumerate(tiers[:max(0, count - 1)], 2):
             bonuses["gear_sets"].append({"name": name, "tier": tier, "text": str(description)})
     return {"stats": stats, "cores": cores, "armor": armor, "brands": brands, "gear_sets": sets,
-            "bonuses": bonuses, "weapons": weapons, "enemy_hp": build["enemy_hp"]}
+            "bonuses": bonuses, "weapons": weapons, "enemy_hp": build["enemy_hp"],
+            "gear_attribute_contributions": gear_attribute_contributions,
+            "contribution_scope": {"modeled": ["entered gear attributes", "defensive/offensive/utility cores",
+                                                   "weapon base values", "weapon attributes", "weapon mods"],
+                                   "displayed_only": ["listed brand/gear-set bonus descriptions"],
+                                   "excluded": ["talent effects", "specialization effects", "SHD Watch effects",
+                                                "PvE/PvP-specific modifiers not present in the catalog"]}}
 
 
 def load(path):
