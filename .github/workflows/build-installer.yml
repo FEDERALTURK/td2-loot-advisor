@@ -56,7 +56,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "test dependency installation failed" }
           python -B tests/test_translation_controls.py
           if ($LASTEXITCODE -ne 0) { throw "translation control regressions failed" }
-          foreach ($suite in @('test_game_assistant.py', 'test_itempolicy.py', 'test_workqueue.py', 'test_performance.py', 'test_animation_policy.py', 'test_app_stability.py', 'test_translation_reliability.py', 'test_localapi_backpressure.py', 'test_launcher.py', 'test_ocr_serialization.py', 'test_ocr_fallback.py', 'test_inplace_anchors.py', 'test_natural_voice.py', 'test_overlay.py', 'test_scan_latency.py', 'test_region_scan_fastpath.py', 'test_core.py', 'test_livetranslate.py', 'test_autoscan.py', 'test_stability_widgets.py')) {
+          foreach ($suite in @('test_game_assistant.py', 'test_itempolicy.py', 'test_workqueue.py', 'test_performance.py', 'test_animation_policy.py', 'test_app_stability.py', 'test_translation_reliability.py', 'test_localapi_backpressure.py', 'test_launcher.py', 'test_ocr_serialization.py', 'test_ocr_fallback.py', 'test_inplace_anchors.py', 'test_natural_voice.py', 'test_overlay.py', 'test_scan_latency.py', 'test_region_scan_fastpath.py', 'test_core.py', 'test_build_tool_catalog.py', 'test_livetranslate.py', 'test_autoscan.py', 'test_stability_widgets.py')) {
             python -B "tests/$suite"
             if ($LASTEXITCODE -ne 0) { throw "$suite failed" }
           }
@@ -73,6 +73,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "knowledge/news regressions failed" }
           python -B tests/test_project_structure.py
           if ($LASTEXITCODE -ne 0) { throw "project structure regressions failed" }
+          python -B tests/test_panel_summary.py
+          if ($LASTEXITCODE -ne 0) { throw "panel summary regressions failed" }
 
       - name: Package Windows installer
         shell: cmd

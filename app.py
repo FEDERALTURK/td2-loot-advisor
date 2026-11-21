@@ -105,6 +105,7 @@ import meta_sync
 import wiki_sync
 import gamedata
 import engine
+import build_tool
 import build_tool_ui
 import display
 import ocr_backend
@@ -151,7 +152,7 @@ import decision_center
 from i18n import t
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.1.5.54"
+APP_VERSION = "9.1.5.55"
 # "Bu oturumda ne kazandın?" özeti için kaba tahmin: bir eşyayı elle inceleyip
 # build'e göre karar vermenin (istatistikleri okuma + karşılaştırma) ortalama
 # süresi, saniye. Gerçek bir ölçüm değil — yalnızca arayüzde "tahmini" etiketiyle
@@ -5005,6 +5006,30 @@ class App:
         label = getattr(self, "build_tool_lbl", None)
         if label is None:
             return
+        planner = getattr(self, "bt_panel", None)
+        if planner is not None:
+            if planner.error:
+                label.config(text="Build Tool data unavailable · saved planner file was left unchanged.")
+                return
+            build = planner.current()
+            if not build:
+                label.config(text="Build Tool · no saved loadout yet.")
+                return
+            try:
+                stash_items = None if getattr(self.stash, "load_error", False) else self.stash.owned()
+                summary = build_tool.dashboard_summary(build, planner.catalog, stash_items)
+                missing = ", ".join(summary["missing_slots"]) or "none"
+                stash_text = (f"stash matches {summary['stash_match_count']}/{summary['stash_target_count']}"
+                              if summary["stash_status"] == "available" else "stash data unavailable")
+                label.config(text=(f"Build Tool · {summary['name']} · {t('build.slot_completion')} "
+                                   f"{summary['completion']}% · {stash_text} · "
+                                   f"active bonuses {summary['active_bonus_count']} · "
+                                   f"catalog {summary['catalog_version']} ({summary['catalog_verification_status']}) · "
+                                   f"review items {summary['review_count']} · missing: {missing}"))
+            except (OSError, ValueError, TypeError):
+                log.exception("Dashboard Build Tool summary failed")
+                label.config(text="Build Tool summary unavailable · check the saved catalog/build data.")
+            return
         build = active_build(self.cfg)
         if not build:
             label.config(text="Build Tool: aktif build yok")
@@ -6352,7 +6377,9 @@ class App:
             frame, self.root, GAME.data if getattr(GAME, "ok", False) else {},
             BASE / "build_tool.json", APP_VERSION, PAL,
             stash_provider=lambda: self.stash.owned(),
-            target_loot_provider=self._build_tool_target_loot)
+            target_loot_provider=self._build_tool_target_loot,
+            summary_callback=self.refresh_build_tool_panel)
+        self.refresh_build_tool_panel()
 
     def _build_tool_target_loot(self):
         """Expose only today's cached, entitled target-loot rows to the planner."""
