@@ -181,13 +181,24 @@ jobs:
 
       - name: Portable zip
         shell: pwsh
+        env:
+          TD2_RELEASE_SIGNING_KEY_BASE64: ${{ secrets.TD2_RELEASE_SIGNING_KEY_BASE64 }}
         run: |
           $ver = (python scripts/version.py).Trim()
           Compress-Archive -Path dist\TD2LootAdvisor\* -DestinationPath "installer\TD2LootAdvisor_${ver}_portable.zip" -Force
+          $tag = if ("${{ github.ref_type }}" -eq "tag") { "${{ github.ref_name }}" } else { "v$ver" }
+          if ("${{ github.ref_type }}" -eq "tag" -or "${{ inputs.release }}" -eq "true") {
+            # Kaynak güncelleyici, manifestin kapsadığı release asset'ini kullanır.
+            git archive --format=zip --prefix="$tag/" --output="installer\TD2LootAdvisor_${ver}_source.zip" HEAD
+          }
           # uygulama içi güncelleyici indirdiği dosyayı bununla doğrular
           Get-ChildItem installer -File | Where-Object { $_.Extension -in ".exe", ".zip" } | ForEach-Object {
             "{0}  {1}" -f (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower(), $_.Name
           } | Set-Content -Encoding ascii "installer\SHA256SUMS.sha256"
+          if ("${{ github.ref_type }}" -eq "tag" -or "${{ inputs.release }}" -eq "true") {
+            python scripts/sign_release_manifest.py --tag $tag --version $ver --installer-dir installer
+            if ($LASTEXITCODE -ne 0) { throw "signed release manifest generation failed" }
+          }
           Get-Content installer\SHA256SUMS.sha256
           Get-ChildItem installer | Format-Table Name, Length
 

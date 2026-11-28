@@ -218,7 +218,7 @@ build_tool_ui = None
 companion = None
 
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.1.5.56"
+APP_VERSION = "9.1.5.57"
 # "Bu oturumda ne kazandın?" özeti için kaba tahmin: bir eşyayı elle inceleyip
 # build'e göre karar vermenin (istatistikleri okuma + karşılaştırma) ortalama
 # süresi, saniye. Gerçek bir ölçüm değil — yalnızca arayüzde "tahmini" etiketiyle
