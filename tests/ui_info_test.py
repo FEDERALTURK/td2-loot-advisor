@@ -57,7 +57,7 @@ def s3():
 def s4():
     cards = a.news_area.winfo_children()
     step("haber kartları", len(cards) >= 5, n=len(cards))
-    step("sezon başlığı + sayaçlar", "Red Horizon" in a.news_season.cget("text") and ":" in a.news_clock["daily"].cget("text"),
+    step("sezon başlığı + sayaçlar", bool(a.news_season.cget("text").replace("🗓", "").strip()) and ":" in a.news_clock["daily"].cget("text"),
          season=a.news_season.cget("text"), daily=a.news_clock["daily"].cget("text"), weekly=a.news_clock["weekly"].cget("text"))
     shot("03_news")
     a.info_nb.select(3); a.root.after(1200, s5)

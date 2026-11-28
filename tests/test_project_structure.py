@@ -161,6 +161,13 @@ class ProjectStructureTests(unittest.TestCase):
         self.assertIn("pb.start()", source)
         self.assertNotIn("pb.start(12)", source)
 
+    def test_release_workflow_publishes_signed_update_manifest(self):
+        workflow = (ROOT / ".github" / "workflows" / "build-installer.yml").read_text(encoding="utf-8")
+        self.assertIn("git archive --format=zip", workflow)
+        self.assertIn("TD2LootAdvisor_${ver}_source.zip", workflow)
+        self.assertIn("scripts/sign_release_manifest.py", workflow)
+        self.assertIn("TD2_RELEASE_SIGNING_KEY_BASE64", workflow)
+
     def test_game_data_resolves_short_set_aliases_to_canonical_names(self):
         self.assertEqual(packaged_theme.__name__, "td2app.ui.ui_theme")
         import gamedata
