@@ -36,7 +36,13 @@ def fake_restart(tab=None, page=None):        # gerçek yeniden başlatma yerine
     a.rebuild_ui(tab=tab)
     print("restart handoff after rebuild:", {"reopen": a.cfg["settings"].get("_acc_reopen"),
           "window": bool(getattr(a, "_acc_win", None))}, flush=True)
-    a.root.after(1600, a.account_startup)
+    def startup_after_rebuild():
+        print("delayed account startup before:", {"reopen": a.cfg["settings"].get("_acc_reopen"),
+              "signed_in": a.account.signed_in}, flush=True)
+        a.account_startup()
+        print("delayed account startup after:", {"reopen": a.cfg["settings"].get("_acc_reopen"),
+              "window": bool(getattr(a, "_acc_win", None)), "button": hasattr(a, "_acc_btn")}, flush=True)
+    a.root.after(1600, startup_after_rebuild)
 a.restart_app = fake_restart
 res = {"steps": []}
 
