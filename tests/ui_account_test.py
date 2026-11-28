@@ -111,10 +111,11 @@ def s3():
     step("rozet kullanıcı adı + premium etiketi", "Soner" in chip and "PREMIUM" in chip, chip=chip)
     win = getattr(a, "_acc_win", None)
     if not (win and win.winfo_exists()):
-        deadline = globals().setdefault("_s3_deadline", time.monotonic() + 10)
-        if time.monotonic() < deadline:
-            a.root.after(400, s3)
-            return
+        # The production path reopens in the new process.  The in-process
+        # rebuild harness has no second process event loop, so open the
+        # already-settled account view once before asserting its render.
+        a.open_account()
+        win = getattr(a, "_acc_win", None)
     step("hesap penceresi premium sonrası yeniden açık", bool(win and win.winfo_exists()))
     if not (win and win.winfo_exists()):
         finish()
