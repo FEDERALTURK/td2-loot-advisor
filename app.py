@@ -181,24 +181,33 @@ from i18n import t
 # kullanımdan önce hazır olur.
 _DEFERRED_MODULES = ("screenstate", "capture", "meta_sync", "build_tool_ui", "companion")
 _deferred_ready = threading.Event()
+_deferred_lock = threading.Lock()
 
 
 def _load_deferred_modules():
     """Arka plan thread'inde ağır modülleri yükle."""
     import importlib
-    g = globals()
-    for name in _DEFERRED_MODULES:
-        try:
-            g[name] = importlib.import_module(name)
-        except Exception:
-            logging.getLogger("td2").warning("Deferred import failed: %s", name, exc_info=True)
-    _deferred_ready.set()
+    with _deferred_lock:
+        g = globals()
+        for name in _DEFERRED_MODULES:
+            if g.get(name) is not None:
+                continue
+            try:
+                g[name] = importlib.import_module(name)
+            except Exception:
+                logging.getLogger("td2").warning("Deferred import failed: %s", name, exc_info=True)
+        _deferred_ready.set()
 
 
 def _ensure_deferred():
     """Ertelenmiş modüller henüz yüklenmediyse bekle (çok kısa veya anlık)."""
     if not _deferred_ready.is_set():
         _deferred_ready.wait(timeout=5)
+    # CLI probes and small test harnesses do not construct App(), so their
+    # background loader is never started.  Complete only the still-missing
+    # modules synchronously instead of exposing a None placeholder.
+    if any(globals().get(name) is None for name in _DEFERRED_MODULES):
+        _load_deferred_modules()
 
 
 # Placeholder'lar: thread tamamlanınca gerçek modüllerle değiştirilir
