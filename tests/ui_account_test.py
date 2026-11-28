@@ -29,9 +29,13 @@ a.cfg["settings"]["acc_asked"] = False
 restarts = []
 def fake_restart(tab=None, page=None):        # gerçek yeniden başlatma yerine: aynı akış (kaydedilen bayrak + açılış) süreç içinde
     restarts.append(tab)
+    print("restart handoff before rebuild:", {"reopen": a.cfg["settings"].get("_acc_reopen"),
+          "reopen_msg": a.cfg["settings"].get("_acc_reopen_msg"), "asked": a.cfg["settings"].get("acc_asked")}, flush=True)
     # A fresh process runs account_startup after the first UI frame; mirror that
     # lifecycle because rebuild_ui alone does not schedule startup callbacks.
     a.rebuild_ui(tab=tab)
+    print("restart handoff after rebuild:", {"reopen": a.cfg["settings"].get("_acc_reopen"),
+          "window": bool(getattr(a, "_acc_win", None))}, flush=True)
     a.root.after(1600, a.account_startup)
 a.restart_app = fake_restart
 res = {"steps": []}
@@ -71,6 +75,9 @@ def s2():
     step("Discord ile giriş tamamlandı", a.account.signed_in and a.account.username == "Soner", user=a.account.username)
     win = getattr(a, "_acc_win", None)
     reopened = len(restarts) == 1 and bool(win and win.winfo_exists())
+    print("post-restart account state:", {"reopen": a.cfg["settings"].get("_acc_reopen"),
+          "asked": a.cfg["settings"].get("acc_asked"), "window": bool(win),
+          "window_exists": bool(win and win.winfo_exists()), "button": hasattr(a, "_acc_btn")}, flush=True)
     step("girişten sonra program yeniden başlatıldı ve hesap penceresi açıldı", reopened,
          restarts=restarts, msg=getattr(a, "_acc_msg", None))
     if not reopened:
