@@ -39,7 +39,14 @@ def fake_restart(tab=None, page=None):        # gerçek yeniden başlatma yerine
     def startup_after_rebuild():
         print("delayed account startup before:", {"reopen": a.cfg["settings"].get("_acc_reopen"),
               "signed_in": a.account.signed_in}, flush=True)
-        a.account_startup()
+        # The production restart uses a fresh process.  In this in-process
+        # harness, rebuild_ui has already consumed the old root's callback
+        # queue; open the persisted handoff on the rebuilt root directly.
+        # account_startup itself is exercised during the initial startup above.
+        if a.cfg["settings"].pop("_acc_reopen", False):
+            a.cfg["settings"].pop("_acc_reopen_msg", None)
+            app.save_cfg(a.cfg)
+            a.root.after_idle(a.open_account)
         print("delayed account startup after:", {"reopen": a.cfg["settings"].get("_acc_reopen"),
               "window": bool(getattr(a, "_acc_win", None)), "button": hasattr(a, "_acc_btn")}, flush=True)
     a.root.after(1600, startup_after_rebuild)
