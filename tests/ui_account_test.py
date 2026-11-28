@@ -6,6 +6,7 @@ import json
 import os
 import subprocess
 import sys
+import time
 import urllib.request
 from pathlib import Path
 
@@ -108,8 +109,16 @@ def s3():
     step("premium özellik açık", a.ent.has("optimizer_all"))
     chip = a._acc_chip_text()
     step("rozet kullanıcı adı + premium etiketi", "Soner" in chip and "PREMIUM" in chip, chip=chip)
-    step("hesap penceresi premium sonrası yeniden açık", getattr(a, "_acc_win", None) is not None and a._acc_win.winfo_exists())
-    if not (getattr(a, "_acc_win", None) and a._acc_win.winfo_exists()): a.open_account()
+    win = getattr(a, "_acc_win", None)
+    if not (win and win.winfo_exists()):
+        deadline = globals().setdefault("_s3_deadline", time.monotonic() + 10)
+        if time.monotonic() < deadline:
+            a.root.after(400, s3)
+            return
+    step("hesap penceresi premium sonrası yeniden açık", bool(win and win.winfo_exists()))
+    if not (win and win.winfo_exists()):
+        finish()
+        return
     shot("acc_03_premium", a._acc_win)
     a._acc_win.lift(); a.root.after(800, s4)
 
