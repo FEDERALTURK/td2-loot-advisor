@@ -145,7 +145,15 @@ def finish():
     _finish()
 
 
-a.root.after(4500, lambda: (a.account_startup(), a.root.after(200, s1)))
+def start_account_flow():
+    print("account UI state:", {"asked": a.cfg["settings"].get("acc_asked"),
+          "signed_in": a.account.signed_in, "welcome_suppressed": bool(os.environ.get("TD2_NO_WELCOME")),
+          "button_before": hasattr(a, "_acc_btn")}, flush=True)
+    a.account_startup()
+    print("account button after startup:", hasattr(a, "_acc_btn"), flush=True)
+    a.root.after(200, s1)
+
+a.root.after(4500, start_account_flow)
 a.root.after(90000, finish)
 try:
     a.root.mainloop()

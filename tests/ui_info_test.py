@@ -68,7 +68,10 @@ def s5():
     btn = None
     for w in a._quiz_card.winfo_children():
         for b in getattr(w, "winfo_children", lambda: [])():
-            if isinstance(b, app.tk.Button) and b.cget("text") == a._quiz_opt(q, q["right"]): btn = b
+            try:
+                if b.cget("text") == a._quiz_opt(q, q["right"]): btn = b
+            except Exception:
+                pass
     btn.invoke(); a.root.update()
     step("doğru cevap XP verdi", a.cfg["settings"]["quiz_xp"] > xp0, xp=a.cfg["settings"]["quiz_xp"])
     shot("04_quiz")
