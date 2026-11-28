@@ -18,6 +18,28 @@ MIN_PT = 8
 PAD = 4
 
 
+def adaptive_font_size(base_pt, width, height, *, reference=(1920, 1080),
+                       min_pt=10, max_pt=30):
+    """Return a readable overlay size for the current capture work area.
+
+    The geometric screen scale is deliberately softer than a raw pixel ratio:
+    a 4K/ultrawide display should gain legibility without making the overlay
+    enormous, while portrait/virtual monitors should not collapse to tiny text.
+    Tk's own DPI scaling remains separate; this function only controls the
+    translation glyph size.
+    """
+    try:
+        base = float(base_pt)
+        w, h = max(1.0, float(width)), max(1.0, float(height))
+        rw, rh = max(1.0, float(reference[0])), max(1.0, float(reference[1]))
+    except (TypeError, ValueError, IndexError):
+        base, w, h, rw, rh = 15.0, 1920.0, 1080.0, 1920.0, 1080.0
+    # Geometric mean avoids overreacting to one unusually wide or tall monitor.
+    scale = ((w / rw) * (h / rh)) ** 0.5
+    scale = max(0.86, min(1.28, scale))
+    return max(int(min_pt), min(int(max_pt), int(round(base * scale))))
+
+
 def wrap(text, width, measure):
     """Kelimeleri genişliğe göre satırlara böl; mevcut satır sonları korunur. measure(s) → piksel."""
     out = []
@@ -55,7 +77,7 @@ def fit(text, w, h, measure_at, start_pt, min_pt=MIN_PT, line_gap=1.05):
         pt -= 1
 
 
-def layout(blocks, area, measure_at, px_to_pt=0.75, max_pt=28):
+def layout(blocks, area, measure_at, px_to_pt=0.75, max_pt=28, preferred_pt=None):
     """blocks: [(çeviri, (x0,y0,x1,y1) alan içinde px, özgün metin, satır sayısı)] → çizim listesi.
     Çeviri özgünle aynıysa (ör. "Exotic Cache") kutu çizilmez, oyunun yazısı görünür kalır."""
     blocks = list(blocks)
@@ -83,6 +105,14 @@ def layout(blocks, area, measure_at, px_to_pt=0.75, max_pt=28):
         h = min(h, available)
         line_px = (y1 - y0) / max(1, nlines)                       # özgün satır yüksekliği → başlangıç puntosu
         start = min(max_pt, max(MIN_PT, line_px * px_to_pt * 0.75))   # satır aralığı ~1.3 em → kutu yüksekliğine denk
+        if preferred_pt is not None:
+            try:
+                # The OCR box remains the hard constraint; preferred_pt only
+                # prevents a large display from starting with unreadably small
+                # glyphs. fit() will reduce it when the source rectangle is tight.
+                start = max(start, min(max_pt, max(MIN_PT, int(preferred_pt))))
+            except (TypeError, ValueError):
+                pass
         # The renderer uses the same regular font and horizontal padding.
         pt, lines, need_h = fit(tr, w - 4, h, measure_at, start)
         if need_h > available:

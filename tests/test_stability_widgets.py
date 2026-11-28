@@ -44,7 +44,7 @@ def main():
         data=Path(folder)
         shutil.copytree(source/"lang",data/"lang")
         cfg=json.loads((source/"scripts/default_builds.json").read_text(encoding="utf-8"))
-        cfg.setdefault("settings",{}).update(language="tr",ui_layout="shd_terminal",perf_mode="balanced",meta_sync=False,tasks_sync=False,wiki_sync=False,
+        cfg.setdefault("settings",{}).update(language="tr",ui_layout="standard",perf_mode="balanced",meta_sync=False,tasks_sync=False,wiki_sync=False,
             task_live=False,news=False,vendor_auto=False,update_check=False,svc_auto_run=False,svc_tray=False,api_on=False,
             sp_on=False,tr_on=False,sound=False,ui_sounds=False,fx_cursor=False,fx_trail=False,fx_video=False,
             fx_bgwatch=False,fx_transitions=False,bg_interval=0)
@@ -63,12 +63,25 @@ def main():
                "META_CACHE":data/"meta_cache.json","NEWS_CACHE":data/"news_cache.json","DESC_CACHE":data/"descriptions_cache.json"}
         paths["TASK_PATH"]=data/"tasks.json"
         stack.enter_context(patch.multiple(app,**paths))
-        real_tk=app.tk.Tk
-        def hidden_tk(*args,**kw):
-            root=real_tk(*args,**kw);root.withdraw()
+        def _configure_root(root):
+            if os.environ.get("TD2_WIDGET_TEST_VISIBLE") != "1":
+                root.withdraw()
+            else:
+                root.geometry("1500x940+40+30")
             root.report_callback_exception=lambda *exc: errors.append(str(exc[1]))
             return root
-        stack.enter_context(patch.object(app.tk,"Tk",hidden_tk))
+        if getattr(app, "CTK_AVAILABLE", False) and app.ctk is not None:
+            real_ctk=app.ctk.CTk
+            class HiddenCTk(real_ctk):
+                def __init__(self, *args, **kw):
+                    super().__init__(*args, **kw)
+                    _configure_root(self)
+            stack.enter_context(patch.object(app.ctk,"CTk",HiddenCTk))
+        else:
+            real_tk=app.tk.Tk
+            def hidden_tk(*args,**kw):
+                return _configure_root(real_tk(*args,**kw))
+            stack.enter_context(patch.object(app.tk,"Tk",hidden_tk))
         class Speaker:
             def say(self,*a,**k): pass
             def close(self): pass
@@ -84,11 +97,24 @@ def main():
         obj=None
         try:
             init=time.perf_counter();obj=app.App();obj.root.update_idletasks()
+            if os.environ.get("TD2_WIDGET_TEST_VISIBLE") == "1":
+                obj.root.update()
             result["widgets_ms"]=round((time.perf_counter()-init)*1000,1)
             result["pages"]=len(obj.tab_keys)
             result["tabs"]=len(obj.nb.tabs())
             assert result["pages"]==16 and result["tabs"]==7
+            assert obj._dash_scroll_inner.winfo_exists()
+            assert len(obj._dash_card_widgets) == 4
+            deadline = time.monotonic() + 2
+            while not hasattr(obj, "set_nb") and time.monotonic() < deadline:
+                obj.root.update()
+                time.sleep(0.01)
             assert len(obj.set_nb.tabs())==4 and "shortcuts" in obj.set_pages
+            assert set(obj._nav_group_buttons) == set(obj.group_keys)
+            assert set(obj._nav_page_buttons) == {"dash"}
+            obj._select_nav_group("gear")
+            assert set(obj._nav_page_buttons) == {"builds", "progress", "stash", "stats"}
+            assert obj.current_tab() == "builds"
             obj.select_page("settings"); obj.select_settings_page("shortcuts"); obj.root.update_idletasks()
             assert obj.current_tab()=="settings"
             obj.select_page("build_tool")
@@ -99,26 +125,36 @@ def main():
             assert hasattr(obj.bt_panel, "choice")
             assert "BUILD TOOL" in obj.group_labels["build_tool"]
             assert obj.bt_panel.current()["name"] == "Saved Build"
+            obj._refresh_dash_build()
+            dashboard_text = [child.cget("text") for row in obj._build_stats.winfo_children()
+                              for child in getattr(row, "content", row).winfo_children()]
+            assert "660.014" in dashboard_text
+            assert not {"+15,0%", "-8,0%", "+49,0%", "-5,0%", "+106,0%", "+10,0%"}.intersection(dashboard_text)
             obj.bt_panel.edit_slot("Primary"); obj.root.update()
             editor = next(child for child in obj.root.winfo_children()
-                          if isinstance(child, app.tk.Toplevel) and child.title().endswith("Primary"))
+                          if isinstance(child, (app.tk.Toplevel, app.CtkToplevel)) and child.title().endswith("Primary"))
             def descendants(widget):
                 for child in widget.winfo_children():
                     yield child
                     yield from descendants(child)
             next(widget for widget in descendants(editor)
-                 if isinstance(widget, app.ttk.Button) and widget.cget("text") == "Apply").invoke()
+                 if isinstance(widget, (app.ttk.Button, app.CtkButton)) and widget.cget("text") == "Apply").invoke()
             obj.root.update()
             saved_item = obj.bt_panel.current()["slots"]["Primary"]
             assert saved_item["talent"] == "Manual talent"
             assert saved_item["attrs"]["crit_chance"] == 6.2
-            compact_button = app.ttk.Button(obj.root, text="BUILD TOOL")
+            compact_button = app.CtkButton(obj.root, text="BUILD TOOL")
             obj._sidebar_buttons = {"build_tool": compact_button}
             with patch.object(obj.root, "winfo_width", return_value=900):
                 obj._responsive_compact = False
                 obj._sync_responsive_layout()
             assert obj._responsive_compact
-            assert obj._sidebar_buttons["build_tool"].cget("text") == obj.group_labels["build_tool"]
+            assert obj.group_labels["build_tool"].upper() in obj._sidebar_buttons["build_tool"].cget("text")
+            assert obj._dash_card_widgets[2].grid_info()["row"] == 1
+            assert obj._dash_build_panel.grid_info()["row"] == 1
+            obj._sync_dashboard_layout(False)
+            assert obj._dash_card_widgets[2].grid_info()["row"] == 0
+            assert obj._dash_build_panel.grid_info()["column"] == 1
             broken_path = data/"broken_build_tool.json"
             broken_path.write_text("{invalid", encoding="utf-8")
             from build_tool_ui import BuildToolPanel
@@ -143,7 +179,11 @@ def main():
                 assert "Oyun" in obj.perf_btn.cget("text")
                 obj.perf_btn.invoke(); assert obj.cfg["settings"]["perf_mode"]=="balanced"
                 obj.show_performance()
-                obj._performance_tick();assert obj.root._td2_suspend_animations
+                obj._performance_tick()
+                if os.environ.get("TD2_WIDGET_TEST_VISIBLE") == "1":
+                    assert not obj.root._td2_suspend_animations
+                else:
+                    assert obj.root._td2_suspend_animations
                 with patch.object(obj.root,"state",return_value="normal"),patch.object(app,"game_active",return_value=False):
                     obj._performance_tick();assert not obj.root._td2_suspend_animations
             obj.select_page("translate");obj.root.update()
@@ -156,6 +196,9 @@ def main():
             result["working_set_mb"]=memory_mb();result["callback_errors"]=errors
             assert not errors,errors
             result["ok"]=True
+            if os.environ.get("TD2_WIDGET_TEST_VISIBLE") == "1":
+                obj.select_page("dash"); obj.root.update()
+                time.sleep(max(0, min(float(os.environ.get("TD2_WIDGET_TEST_HOLD_SECONDS", "20")), 45)))
         finally:
             if obj is not None:
                 obj.on_close(force=True)

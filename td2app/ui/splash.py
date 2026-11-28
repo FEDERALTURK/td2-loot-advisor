@@ -4,6 +4,7 @@ from __future__ import annotations
 import math
 import time
 import tkinter as tk
+from . import ui_theme
 
 
 class IntroSplash:
@@ -19,10 +20,12 @@ class IntroSplash:
     WHITE = "#e8edf2"
     MUTED = "#8795a6"
 
-    def __init__(self, root: tk.Tk, version: str, on_done):
+    def __init__(self, root: tk.Tk, version: str, on_done, ready=None):
         self.root = root
+        ui_theme.resolve_fonts(root)
         self.version = version
         self.on_done = on_done
+        self.ready = ready
         self.started = None
         self.frames = 0
         self._last_paint = 0.0
@@ -169,12 +172,12 @@ class IntroSplash:
                           cx-panel_w/2+18*scale, panel_cy+panel_h/2,
                           fill=self.ACCENT, width=3*scale)
             c.create_text(cx, panel_cy-5, text="TD2 LOOT ADVISOR", fill=self.WHITE,
-                          font=("Segoe UI", round(20*scale), "bold"))
+                          font=(ui_theme.FONT_DISPLAY, round(20*scale), "bold"))
             c.create_text(cx, panel_cy+19*scale, text=f"TACTICAL COMPANION  ·  v{self.version}",
-                          fill=self.MUTED, font=("Segoe UI", round(8*scale)))
+                          fill=self.MUTED, font=(ui_theme.FONT, round(8*scale)))
 
         c.create_text(cx, 538*scale, text="A G E N T   N E T W O R K   /   SYSTEM INITIALIZING",
-                      fill="#6a7a8a", font=("Segoe UI", round(8*scale)))
+                      fill="#6a7a8a", font=(ui_theme.FONT, round(8*scale)))
         progress_w = 148 * scale * progress
         c.create_line(cx-74*scale, 554*scale, cx-74*scale+progress_w, 554*scale,
                       fill=self.ACCENT, width=2*scale)
@@ -214,7 +217,14 @@ class IntroSplash:
             self._draw_frame(progress)
             self._last_paint = now
             if progress >= 1:
-                self.finish()
+                # Do not reveal a half-built root window.  App startup builds
+                # heavier pages cooperatively after the intro starts; the
+                # readiness gate keeps the splash in place until that layout
+                # is actually complete.
+                if self.ready is None or self.ready():
+                    self.finish()
+                else:
+                    self.win.after(100, self._tick)
             else:
                 # Schedule from the intro clock rather than from the end of
                 # painting.  This prevents a slow frame from producing a

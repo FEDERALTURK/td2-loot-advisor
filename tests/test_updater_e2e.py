@@ -1,7 +1,6 @@
 """
-TD2 Loot Advisor — updater.py uçtan uca testi
-Oyun belleğine dokunulmaz, gerçek GitHub API kullanılır.
-Çalıştırmak için: python test_updater_e2e.py
+TD2 Loot Advisor — updater.py unit and optional live tests.
+Enable GitHub integration cases with TD2_LIVE_UPDATE_TESTS=1.
 """
 import sys
 import os
@@ -22,6 +21,11 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 # --- updater modülünü import et ---
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import updater
+
+
+def require_live_update_tests(test_case):
+    if os.environ.get("TD2_LIVE_UPDATE_TESTS") != "1":
+        test_case.skipTest("Live GitHub checks disabled; set TD2_LIVE_UPDATE_TESTS=1 to enable")
 
 
 # ---------------------------------------------------------------------------
@@ -51,9 +55,10 @@ class TestVersionParsing(unittest.TestCase):
 # 2. latest() — gerçek GitHub API çağrısı
 # ---------------------------------------------------------------------------
 class TestLatestLive(unittest.TestCase):
-    """Gerçek API çağrısı yapar; ağ yoksa atlanır."""
+    """Gerçek API ve release asset çağrıları; opt-in because they consume API quota."""
 
     def setUp(self):
+        require_live_update_tests(self)
         try:
             req = urllib.request.Request(
                 "https://api.github.com/repos/FEDERALTURK/td2-loot-advisor/releases/latest",
@@ -478,9 +483,10 @@ class TestUpdateSource(unittest.TestCase):
 # 7. Entegrasyon testi: latest() + newer() akışı
 # ---------------------------------------------------------------------------
 class TestFullUpdateFlow(unittest.TestCase):
-    """Gerçek GitHub API + versiyon karşılaştırma."""
+    """Gerçek GitHub API + version comparison; opt-in integration tests."""
 
     def setUp(self):
+        require_live_update_tests(self)
         try:
             req = urllib.request.Request(
                 "https://api.github.com/repos/FEDERALTURK/td2-loot-advisor/releases/latest",

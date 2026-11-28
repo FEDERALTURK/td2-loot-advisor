@@ -1,5 +1,15 @@
 ## TD2 Loot Advisor — Windows
 
+**9.1.5.56 — Açılış akışı, görev akışı güvenilirliği ve hesaplama açıklığı**
+
+- Ağır sayfalar uygulama açılırken sıraya alınır; panel önce yüklenir ve diğer sayfalar Tk olay döngüsünü daha az bloke edecek şekilde sonradan kurulur.
+- Klavye odak göstergesi açılır seçim, onay kutusu, kaydırıcı ve metin alanları dahil daha fazla ortak kontrole uygulanır.
+- Çevrimiçi görev yenileme hataları boş sonuç gibi gösterilmez; son başarılı görev verisi hata sırasında korunur ve kaynak kontrol zamanı izlenir.
+- Görev paylaşımında hız sınırı yanıtları yeniden deneme bilgisiyle tutulur; sunucunun reddettiği kayıt grupları yerel karantinaya alınır.
+- Build Tool sonuçları PvE temel tahmini olarak açıkça etiketlenir; PvP normalizasyonu ve dengeleme çarpanlarının dahil olmadığı belirtilir.
+- Düzenlenmiş build/görev kayıtlarında HTTPS kaynak bağlantısı ve kaynak başlığı doğrulaması güçlendirilir.
+- Yerel API günlüklerinde sorgu belirteçleri maskelenir; dış rapor adresleri HTTP(S) doğrulamasından geçirilir.
+
 **9.1.5.55 — Build Tool, panel özeti ve veri güvenliği**
 
 - Build Tool bilinen silahların sabit roll alanlarını ve eklentilerini katalogdan doldurur; değişken roll değerleri kullanıcı kontrolünde kalır.

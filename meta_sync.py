@@ -19,6 +19,7 @@ import re
 import ssl
 import time
 import urllib.request
+from urllib.parse import urlsplit
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -81,6 +82,16 @@ def _text(v, n=120):
     return re.sub(r"[\x00-\x1f]", " ", str(v or "")).strip()[:n]
 
 
+def _https_url(value):
+    """Accept only absolute HTTPS citations with a real host and no userinfo."""
+    url = _text(value, 300)
+    try:
+        parsed = urlsplit(url)
+        return url if parsed.scheme == "https" and parsed.hostname and not parsed.username and not parsed.password else ""
+    except ValueError:
+        return ""
+
+
 def validate(feed, known_attrs):
     """Akışı güvenli, programın anladığı biçime indirger. Hatalıysa ValueError."""
     if not isinstance(feed, dict) or int(feed.get("schema", 0)) != SCHEMA:
@@ -103,6 +114,15 @@ def validate(feed, known_attrs):
         for k, v in list((b.get("talents") or {}).items())[:20]:
             k = _text(k, 60)
             if k: talents[k] = round(_num(v, 0, 10, 1), 2)
+        sources = []
+        for source in (b.get("sources") or [])[:6]:
+            if isinstance(source, dict):
+                title = _text(source.get("title"), 80)
+                url = _https_url(source.get("url"))
+                if title and url:
+                    sources.append({"title": title, "url": url})
+        if not sources:
+            raise ValueError(f"build {mid} has no valid HTTPS source citation")
         build = {
             "meta_id": mid, "name": name,
             "sets_or_brands": [_text(s, 60) for s in (b.get("sets_or_brands") or [])[:6] if _text(s, 60)],
@@ -112,9 +132,7 @@ def validate(feed, known_attrs):
             "meta": {"mode": _text(b.get("mode"), 60), "role": _text(b.get("role"), 20),
                      "popularity": int(_num(b.get("popularity"), 0, 100, 0)),
                      "summary": {str(l)[:5]: _text(s, 300) for l, s in (b.get("summary") or {}).items()},
-                     "sources": [{"title": _text(s.get("title"), 80), "url": _text(s.get("url"), 300)}
-                                 for s in (b.get("sources") or [])[:6]
-                                 if isinstance(s, dict) and str(s.get("url", "")).startswith("https://")]},
+                     "sources": sources},
         }
         slots = [_text(s, 20) for s in (b.get("slots") or [])[:6] if _text(s, 20)]
         if slots: build["slots"] = slots
@@ -220,7 +238,7 @@ def _langs(d, n):
 
 def _https(src):
     u = src.get("url") if isinstance(src, dict) else src
-    return _text(u, 300) if str(u or "").startswith("https://") else ""
+    return _https_url(u)
 
 
 def find_guide(text, guides):
@@ -280,9 +298,12 @@ def validate_tasks(feed):
         seen.add(tid)
         until = _iso_utc(it.get("until"))
         src = it.get("source") if isinstance(it.get("source"), dict) else {}
+        source_url = _https(src)
+        if not source_url:
+            raise ValueError(f"task {tid} has no valid HTTPS source citation")
         out["tasks"].append({"feed_id": tid, "wiki_id": _text(it.get("wiki_id"), 80), "cat": cat, "kind": kind if cat == "projects" else "", "texts": texts, "how": _langs(it.get("how"), 500),
                              "until": until.isoformat(timespec="minutes") if until else "",
-                             "source": _text(src.get("url"), 300) if str(src.get("url", "")).startswith("https://") else ""})
+                             "source": source_url})
     return out
 
 
@@ -429,6 +450,6 @@ def run_news(cfg, cache_path, app_version="", force=False):
         return feed, url
     except Exception as e:
         log.info("News feed unavailable (%s); trying cache", e)
-        if cache_path.exists():
+        if cache_path.exists() and not force:
             return knowledge.validate_news(json.loads(cache_path.read_text(encoding="utf-8"))), "cache"
         raise

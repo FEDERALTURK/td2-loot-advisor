@@ -151,6 +151,24 @@ node test_discord_registration.mjs
 node register_discord_commands.mjs
 ```
 
+Sunucu yapılandırması için `modernize_discord.mjs` mevcut kanalları ve mesajları koruyarak
+eksik kanalları/rolleri oluşturur ve mevcut Community Onboarding yapılandırmasında varsayılan
+kanalları günceller. Varsayılan çalışma yalnızca plan gösterir; gerçek Discord değişikliği için
+`--apply` gerekir. Bot tokenını yalnızca yerel süreç ortam değişkeni olarak verin:
+
+```bat
+cd server
+set DISCORD_GUILD_ID=1572117066071281804
+set DISCORD_BOT_TOKEN=<yerel-token>
+node modernize_discord.mjs
+node modernize_discord.mjs --apply
+```
+
+Botun sunucuda `Manage Channels`, `Manage Roles` ve `Manage Guild` izinleri olmalıdır.
+Araç özel roller için Administrator vermez, mevcut kanalları silmez ve mevcut mesajları değiştirmez.
+Onboarding endpoint'i Community özelliği etkin olmayan sunucularda Discord tarafından reddedilebilir;
+bu durumda araç hata gövdesini kısa biçimde bildirir ve başka değişiklikleri geri almaz.
+
 Komut kaydı aracı varsayılan olarak yalnız JSON önizlemesi verir. Gerçek kaydı yapmak için kendi makinenizde
 `DISCORD_CLIENT_ID`, `DISCORD_GUILD_ID` ve yalnız yerel süreç ortamında `DISCORD_BOT_TOKEN` tanımlayıp
 `node register_discord_commands.mjs --apply` çalıştırın. Bot tokenını repoya, loglara veya sohbete koymayın.

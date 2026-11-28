@@ -22,8 +22,8 @@ const _kNotificationsOptInKey = 'cloud_notifications_opt_in';
 
 class CloudLinkModel extends ChangeNotifier {
   CloudLinkModel({CloudApi? api, FlutterSecureStorage? secureStore})
-      : _api = api ?? CloudApi(),
-        _secureStore = secureStore ?? const FlutterSecureStorage();
+    : _api = api ?? CloudApi(),
+      _secureStore = secureStore ?? const FlutterSecureStorage();
   final CloudApi _api;
   final FlutterSecureStorage _secureStore;
 
@@ -31,6 +31,16 @@ class CloudLinkModel extends ChangeNotifier {
   Timer? _poll;
   StreamSubscription<String>? _pushTokenSub;
   bool _pushListenerStarted = false;
+  bool _disposed = false;
+  final Set<String> _pendingDeletes = {};
+  int get pendingDeleteCount => _pendingDeletes.length;
+  String get _pendingDeletesKey =>
+      'cloud_pending_deletes_${_deviceId ?? "unpaired"}';
+
+  @override
+  void notifyListeners() {
+    if (!_disposed) super.notifyListeners();
+  }
 
   String? _deviceId;
   String? _token;
@@ -74,6 +84,7 @@ class CloudLinkModel extends ChangeNotifier {
       await _prefs?.remove(_kTokenKey);
     }
     notificationsEnabled = _prefs?.getBool(_kNotificationsOptInKey) ?? false;
+    _pendingDeletes.addAll(_prefs?.getStringList(_pendingDeletesKey) ?? []);
     if (_token != null) {
       _startPolling();
       unawaited(refreshDashboard());
@@ -85,6 +96,7 @@ class CloudLinkModel extends ChangeNotifier {
 
   @override
   void dispose() {
+    _disposed = true;
     _poll?.cancel();
     _pushTokenSub?.cancel();
     super.dispose();
@@ -101,20 +113,28 @@ class CloudLinkModel extends ChangeNotifier {
   Future<String?> _registerPushToken() async {
     final token = _token;
     final deviceId = _deviceId;
-    if (token == null || deviceId == null) return 'Telefon buluta eşleştirilmemiş.';
+    if (token == null || deviceId == null) {
+      return 'Telefon buluta eşleştirilmemiş.';
+    }
     try {
       final pushToken = await PushRegistration.requestPermissionAndGetToken();
-      if (pushToken == null) return 'Bildirim izni verilmedi veya bildirim altyapısı hazır değil.';
+      if (pushToken == null) {
+        return 'Bildirim izni verilmedi veya bildirim altyapısı hazır değil.';
+      }
       await _api.putPushToken(token, deviceId, pushToken);
       if (!_pushListenerStarted) {
         _pushListenerStarted = true;
-        _pushTokenSub = PushRegistration.onTokenRefresh.listen((refreshed) async {
+        _pushTokenSub = PushRegistration.onTokenRefresh.listen((
+          refreshed,
+        ) async {
           final t = _token;
           final d = _deviceId;
           if (!notificationsEnabled || t == null || d == null) return;
           try {
             await _api.putPushToken(t, d, refreshed);
-          } catch (_) {/* sessizce yut */}
+          } catch (_) {
+            /* sessizce yut */
+          }
         });
       }
       return null;
@@ -139,7 +159,9 @@ class CloudLinkModel extends ChangeNotifier {
         if (_token != null && _deviceId != null) {
           try {
             await _api.deletePushToken(_token!, _deviceId!);
-          } catch (_) {/* Yerel tercih yine de kapatılır. */}
+          } catch (_) {
+            /* Yerel tercih yine de kapatılır. */
+          }
         }
         _pushTokenSub?.cancel();
         _pushTokenSub = null;
@@ -174,6 +196,9 @@ class CloudLinkModel extends ChangeNotifier {
       final result = await _api.claimPairing(code, isIos: Platform.isIOS);
       _deviceId = result.deviceId;
       _token = result.token;
+      _pendingDeletes
+        ..clear()
+        ..addAll(_prefs?.getStringList(_pendingDeletesKey) ?? []);
       await _secureStore.write(key: _kDeviceIdKey, value: result.deviceId);
       await _secureStore.write(key: _kTokenKey, value: result.token);
       _startPolling();
@@ -194,7 +219,9 @@ class CloudLinkModel extends ChangeNotifier {
     if (_token != null && _deviceId != null) {
       try {
         await _api.deletePushToken(_token!, _deviceId!);
-      } catch (_) {/* sessizce yut — cihaz/hesap zaten kalkıyor */}
+      } catch (_) {
+        /* sessizce yut — cihaz/hesap zaten kalkıyor */
+      }
     }
     _pushTokenSub?.cancel();
     _pushTokenSub = null;
@@ -203,6 +230,7 @@ class CloudLinkModel extends ChangeNotifier {
     _poll = null;
     _deviceId = null;
     _token = null;
+    _pendingDeletes.clear();
     notificationsEnabled = false;
     dashboardState = null;
     pairError = null;
@@ -217,16 +245,21 @@ class CloudLinkModel extends ChangeNotifier {
 
   void _startPolling() {
     _poll?.cancel();
-    _poll = Timer.periodic(const Duration(seconds: 8), (_) => refreshDashboard());
+    _poll = Timer.periodic(
+      const Duration(seconds: 8),
+      (_) => refreshDashboard(),
+    );
   }
 
   Future<void> refreshDashboard() async {
     final token = _token;
-    if (token == null) return;
+    if (token == null || dashboardLoading || _disposed) return;
     dashboardLoading = true;
     notifyListeners();
     try {
-      dashboardState = await _api.dashboard(token);
+      final state = await _api.dashboard(token);
+      if (_token != token || _disposed) return;
+      dashboardState = state;
       pairError = null;
     } on CloudApiException catch (e) {
       if (e.statusCode == 401) await unpair();
@@ -246,7 +279,9 @@ class CloudLinkModel extends ChangeNotifier {
       if (value is Map) {
         return value.map((k, v) => MapEntry('$k', (v as num).toInt()));
       }
-    } catch (_) {/* bozuk veri — sıfırdan başla */}
+    } catch (_) {
+      /* bozuk veri — sıfırdan başla */
+    }
     return {};
   }
 
@@ -261,6 +296,7 @@ class CloudLinkModel extends ChangeNotifier {
     required List<Map<String, dynamic>> local,
     required Future<void> Function(List<Map<String, dynamic>>) persistLocal,
   }) async {
+    if (syncing) return 'Senkronizasyon zaten sürüyor.';
     final token = _token;
     if (token == null) return 'Telefon henüz buluta eşleştirilmedi.';
     syncing = true;
@@ -268,11 +304,19 @@ class CloudLinkModel extends ChangeNotifier {
     notifyListeners();
     try {
       final revisions = await _loadRevisions();
+      final conflicts = <String>{};
+      final deleted = _pendingDeletes.toSet();
+      await _flushPendingDeletes(token, revisions);
       for (final build in local) {
         final id = '${build['id'] ?? ''}';
-        if (id.length < 16 || id.length > 64) continue; // bulutun client_id biçimine uymuyor
+        if (deleted.contains(id) || _pendingDeletes.contains(id)) continue;
+        if (id.length < 16 || id.length > 64) {
+          continue; // bulutun client_id biçimine uymuyor
+        }
         final base = revisions[id] ?? 0;
-        final name = '${build['name'] ?? ''}'.trim().isEmpty ? 'Build' : '${build['name']}';
+        final name = '${build['name'] ?? ''}'.trim().isEmpty
+            ? 'Build'
+            : '${build['name']}';
         try {
           revisions[id] = await _api.putBuild(
             token,
@@ -282,14 +326,22 @@ class CloudLinkModel extends ChangeNotifier {
             baseRevision: base,
           );
         } on RevisionConflict {
-          // Sunucu farklı bir revizyonda: bu turda atla, aşağıdaki çekme adımı
-          // buluttaki hâli uygulayacak — basit "bulut kazanır" çözümü.
+          // Keep the old revision so a retry cannot silently overwrite the cloud.
+          conflicts.add(id);
         }
       }
       final cloudBuilds = await _api.listBuilds(token);
+      if (_token != token || _disposed) {
+        return 'Eşleştirme değişti; senkronizasyon durduruldu.';
+      }
       final merged = [...local];
       for (final cb in cloudBuilds) {
         final id = '${cb['client_id'] ?? ''}';
+        if (conflicts.contains(id) ||
+            deleted.contains(id) ||
+            _pendingDeletes.contains(id)) {
+          continue;
+        }
         final idx = merged.indexWhere((b) => '${b['id']}' == id);
         if (cb['deleted'] == true) {
           if (idx != -1) merged.removeAt(idx);
@@ -304,13 +356,23 @@ class CloudLinkModel extends ChangeNotifier {
           } else {
             merged.add(payload);
           }
-          revisions[id] = (cb['revision'] as num?)?.toInt() ?? revisions[id] ?? 0;
+          revisions[id] =
+              (cb['revision'] as num?)?.toInt() ?? revisions[id] ?? 0;
         }
       }
+      merged.removeWhere(
+        (build) =>
+            deleted.contains('${build['id']}') ||
+            _pendingDeletes.contains('${build['id']}'),
+      );
       await persistLocal(merged);
       await _saveRevisions(revisions);
       lastSync = DateTime.now();
-      return null;
+      if (conflicts.isNotEmpty) {
+        syncError =
+            '${conflicts.length} build çakıştı. Yerel kopyalar korundu; buluttaki kopyalar değiştirilmedi.';
+      }
+      return syncError;
     } on CloudApiException catch (e) {
       syncError = _describe(e);
       return syncError;
@@ -326,31 +388,67 @@ class CloudLinkModel extends ChangeNotifier {
   Future<void> pushBuildQuietly(Map<String, dynamic> build) async {
     final token = _token;
     final id = '${build['id'] ?? ''}';
-    if (token == null || id.length < 16 || id.length > 64) return;
+    if (token == null ||
+        id.length < 16 ||
+        id.length > 64 ||
+        syncing ||
+        _pendingDeletes.contains(id)) {
+      return;
+    }
+    syncing = true;
     try {
       final revisions = await _loadRevisions();
       final rev = await _api.putBuild(
         token,
         clientId: id,
-        name: '${build['name'] ?? ''}'.trim().isEmpty ? 'Build' : '${build['name']}',
+        name: '${build['name'] ?? ''}'.trim().isEmpty
+            ? 'Build'
+            : '${build['name']}',
         payload: build,
         baseRevision: revisions[id] ?? 0,
       );
       revisions[id] = rev;
       await _saveRevisions(revisions);
-    } catch (_) {/* sessizce yut — bir sonraki tam senkron devreye girer */}
+    } catch (_) {
+      /* sonraki tam senkron yerel kopyayı yeniden dener */
+    } finally {
+      syncing = false;
+      notifyListeners();
+    }
   }
 
   /// Bir build silindiğinde buluttaki karşılığını da tombstone'lar.
   Future<void> deleteBuildQuietly(String id) async {
     final token = _token;
     if (token == null || id.length < 16 || id.length > 64) return;
+    _pendingDeletes.add(id);
+    await _prefs?.setStringList(_pendingDeletesKey, _pendingDeletes.toList());
+    if (syncing) return;
+    syncing = true;
     try {
-      await _api.deleteBuild(token, id);
       final revisions = await _loadRevisions();
-      revisions.remove(id);
+      await _flushPendingDeletes(token, revisions);
       await _saveRevisions(revisions);
-    } catch (_) {/* sessizce yut */}
+    } catch (_) {
+      /* Kalıcı kuyruk sonraki senkronda tekrar denenir. */
+    } finally {
+      syncing = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> _flushPendingDeletes(
+    String token,
+    Map<String, int> revisions,
+  ) async {
+    final queueKey = _pendingDeletesKey;
+    for (final id in _pendingDeletes.toList()) {
+      await _api.deleteBuild(token, id);
+      if (_token != token || _disposed) return;
+      _pendingDeletes.remove(id);
+      revisions.remove(id);
+      await _prefs?.setStringList(queueKey, _pendingDeletes.toList());
+    }
   }
 
   // ---------------------------------------------------------------- hesap silme

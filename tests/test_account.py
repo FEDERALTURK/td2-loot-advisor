@@ -148,7 +148,15 @@ try:
     except account.AuthError as e:
         ok(e.code == "offline", "sunucu yoksa anlaşılır hata")
 finally:
-    srv.terminate()
+    if srv.poll() is None:
+        srv.terminate()
+    try:
+        srv.wait(timeout=5)
+    except subprocess.TimeoutExpired:
+        srv.kill()
+        srv.wait(timeout=5)
+    if srv.stdout:
+        srv.stdout.close()
 
 if __name__ == "__main__":
     print("RESULT: " + ("PASS" if not fails else f"FAIL ({fails})"))

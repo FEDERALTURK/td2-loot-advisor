@@ -1,4 +1,4 @@
-﻿"""
+"""
 TD2 Loot Advisor v5 — The Division 2 item / build / project assistant.
 TD2 Loot Advisor v5 — The Division 2 için eşya, build ve görev asistanı.
 
@@ -16,11 +16,42 @@ import csv, ctypes, json, math, logging, logging.handlers, os, queue, re, shutil
 from contextlib import nullcontext
 import urllib.error, urllib.parse, urllib.request
 import tkinter as tk
+import mss
+try:
+    import customtkinter as ctk
+    from td2app.ui.ctk_compat import (CtkFrame, CtkLabel, CtkButton, CtkEntry,
+        CtkCheckBox, CtkComboBox, CtkTextbox, CtkProgressBar, CtkSlider,
+        CtkToplevel, CtkScrollbar, compat_image)
+    CTK_AVAILABLE = True
+except (ImportError, Exception):
+    ctk = None
+    CTK_AVAILABLE = False
+    CtkFrame = tk.Frame
+    CtkLabel = tk.Label
+    CtkButton = tk.Button
+    CtkEntry = tk.Entry
+    CtkCheckBox = tk.Checkbutton
+    CtkComboBox = None  # set after ttk import
+    CtkTextbox = tk.Text
+    CtkProgressBar = None  # set after ttk import
+    CtkSlider = None  # set after ttk import
+    CtkToplevel = tk.Toplevel
+    CtkScrollbar = None  # set after ttk import
+    def compat_image(pil_image, size=None):
+        from PIL import ImageTk as _IT
+        if size and pil_image.size != tuple(size):
+            pil_image = pil_image.resize(tuple(size), Image.LANCZOS)
+        return _IT.PhotoImage(pil_image)
 from collections import Counter
 from datetime import datetime, timedelta, timezone
 from difflib import SequenceMatcher, get_close_matches
 from pathlib import Path
 from tkinter import ttk, filedialog, messagebox, simpledialog
+if not CTK_AVAILABLE:
+    CtkComboBox = ttk.Combobox
+    CtkProgressBar = ttk.Progressbar
+    CtkSlider = ttk.Scale
+    CtkScrollbar = ttk.Scrollbar
 from td2app.ui import splash, ui_theme, ui_hud, ui_art, view3d, fx, bgvideo
 
 if "--dml-probe" in sys.argv:          # ekran kartı (DirectML) denemesi: ayrı süreçte, programın geri kalanı yüklenmeden
@@ -96,17 +127,13 @@ if "--voice-check" in sys.argv:
     Path(sys.argv[_i + 1]).write_text(json.dumps(_res), encoding="utf-8")
     sys.exit(0 if _res["ok"] else 1)
 
-import mss
-import capture
 from PIL import Image, ImageDraw, ImageOps, ImageTk
 
 import i18n
-import meta_sync
 import wiki_sync
 import gamedata
 import engine
 import build_tool
-import build_tool_ui
 import display
 import ocr_backend
 import ocr_lab
@@ -116,7 +143,6 @@ import stash
 import intelligence
 import backup_bundle
 import vendor
-import companion
 import share
 import dropstats
 import updater
@@ -126,7 +152,6 @@ import updates
 import reports
 import account
 import service
-import screenstate
 import localapi
 import presence
 import notify
@@ -151,8 +176,40 @@ import target_planner
 import decision_center
 from i18n import t
 
+# Ağır modüller: arka plan thread'inde yüklenir (açılışta ~390 ms tasarruf).
+# Splash ekranı görünürken paralel olarak import edilir; ilk gerçek
+# kullanımdan önce hazır olur.
+_DEFERRED_MODULES = ("screenstate", "capture", "meta_sync", "build_tool_ui", "companion")
+_deferred_ready = threading.Event()
+
+
+def _load_deferred_modules():
+    """Arka plan thread'inde ağır modülleri yükle."""
+    import importlib
+    g = globals()
+    for name in _DEFERRED_MODULES:
+        try:
+            g[name] = importlib.import_module(name)
+        except Exception:
+            logging.getLogger("td2").warning("Deferred import failed: %s", name, exc_info=True)
+    _deferred_ready.set()
+
+
+def _ensure_deferred():
+    """Ertelenmiş modüller henüz yüklenmediyse bekle (çok kısa veya anlık)."""
+    if not _deferred_ready.is_set():
+        _deferred_ready.wait(timeout=5)
+
+
+# Placeholder'lar: thread tamamlanınca gerçek modüllerle değiştirilir
+screenstate = None
+capture = None
+meta_sync = None
+build_tool_ui = None
+companion = None
+
 APP_NAME = "TD2 Loot Advisor"
-APP_VERSION = "9.1.5.55"
+APP_VERSION = "9.1.5.56"
 # "Bu oturumda ne kazandın?" özeti için kaba tahmin: bir eşyayı elle inceleyip
 # build'e göre karar vermenin (istatistikleri okuma + karşılaştırma) ortalama
 # süresi, saniye. Gerçek bir ölçüm değil — yalnızca arayüzde "tahmini" etiketiyle
@@ -189,12 +246,23 @@ def webbrowser_open(url):
     webbrowser.open(url)
 
 
+def _assert_http_url(url, *, allow_localhost=True):
+    """Reject non-HTTP schemes before any outbound request is made."""
+    parsed = urllib.parse.urlparse(str(url))
+    if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+        raise ValueError("only http/https URLs are allowed")
+    if not allow_localhost and parsed.hostname in {"localhost", "127.0.0.1", "::1"}:
+        raise ValueError("local URLs are not allowed here")
+    return str(url)
+
+
 def _test_browser(url):
     """Yalnız UI testi (TD2_ACCOUNT_TEST_BROWSER): yerel test sunucusunun sahte Discord onayını açar."""
     st = urllib.parse.parse_qs(urllib.parse.urlparse(url).query).get("state", [""])[0]
     base = os.environ.get("TD2_ACCOUNT_URL", "").rstrip("/")
     if not base.startswith("http://127.0.0.1:"): return
-    urllib.request.urlopen(f"{base}/fake/discord?state={st}&user={os.environ['TD2_ACCOUNT_TEST_BROWSER']}", timeout=15).read()
+    target = _assert_http_url(f"{base}/fake/discord?state={st}&user={os.environ['TD2_ACCOUNT_TEST_BROWSER']}")
+    urllib.request.urlopen(urllib.request.Request(target), timeout=15).read()  # nosec B310 - target is localhost HTTP test server.
 REPORTS_DIR = BASE / "reports"
 ISSUES_URL = "https://github.com/FEDERALTURK/td2-loot-advisor/issues/new"
 APPLOG_DIR = BASE / "logs"
@@ -219,7 +287,9 @@ DEFAULTS = {"scan_mode": "hotkey", "auto_interval_ms": 700, "auto_record": True,
             "ui_theme": "default", "ui_sounds": True, "bg_interval": 15,
             "fx_cursor": True, "fx_cursor_style": "crosshair", "fx_cursor_color": "#36e0c4", "fx_cursor_custom": "",
             "fx_trail": True, "fx_trail_color": "#36e0c4", "fx_trail_len": 18, "fx_transitions": True,
-            "fx_video": True, "fx_video_dim": 0.35, "fx_transition_ms": 220, "fx_transition_style": "tactical", "ui_nav_layout": "tactical", "ui_layout": "standard", "fx_bgwatch": False, "fx_bgwatch_dim": 0.0, "event_fx": "standard",
+            # Görsel kimlikte arka plan sakin ve okunaklı kalır; hareketli video
+            # yalnızca kullanıcı ayarlardan açıkça seçerse devreye girer.
+            "fx_video": False, "fx_video_dim": 0.35, "fx_transition_ms": 220, "fx_transition_style": "tactical", "ui_nav_layout": "tactical", "ui_layout": "standard", "fx_bgwatch": False, "fx_bgwatch_dim": 0.0, "event_fx": "standard",
             "res_profile": "auto", "ocr_engine": "auto", "ocr_gpu": "auto", "license_key": "", "update_check": True, "update_last": 0, "update_skip": "", "stash_record": True, "vendor_mode": False, "vendor_auto": True, "drop_share": False, "drop_asked": False, "drop_activity": "none", "drop_server": "", "drop_client": "", "vision_ok": False, "vendor_notified": "", "companion_port": 8765, "svc_tray": True, "svc_close_to_tray": False, "svc_auto_run": True, "svc_session_popup": True, "smart_scan": True, "api_on": False, "api_port": 8766, "api_lan": False, "api_control": True, "api_token": "", "rpc_on": False, "rpc_client_id": "", "push_on": False, "push_topic": "", "push_webhook": "", "push_drop": True, "push_build": True, "push_vendor": True, "push_session": True, "agent_model": "operator", "agent_outfit": "night", "agent_skin": 1, "ocr_threshold": 170, "ocr_scale": "auto", "ocr_psm": 6, "ocr_passes": 3,
             "overlay_mode": "card", "overlay_alpha": 0.94, "overlay_size": 1.0, "ui_depth": True,
             "meta_sync": True, "meta_feed_url": "", "meta_last_try": 0, "meta_last_sync": "", "meta_version": "",
@@ -328,8 +398,16 @@ def _cfg_defaults(cfg):
         b.setdefault("sets_or_brands", []); b.setdefault("attributes", {}); b.setdefault("talents", {})
     return cfg
 
+_ACTIVE_APP = None
+
+
 def save_cfg(cfg):
     """Atomik yazım + kilit (birden çok iş parçacığı kaydedebilir); gizli ayarlar dosyada şifreli."""
+    active = _ACTIVE_APP
+    if active is not None and getattr(active, "cfg", None) is cfg and not getattr(active, "_closing", False) and hasattr(active, "results"):
+        active._cfg_dirty = True
+        active.results.put(("cfg_save_requested",))
+        return
     safeio.write_json(CFG_PATH, safeio.seal_settings(cfg))
 
 def check_hotkey(spec):
@@ -339,6 +417,42 @@ def check_hotkey(spec):
     except Exception:
         return
     keyboard.HotKey.parse(spec)
+
+
+def hotkey_key_name(event):
+    """Return a pynput-compatible single key name, preserving Turkish chars.
+
+    Tk's ``keysym`` names ``ç`` as ``cedilla`` (and similarly names other
+    Latin-extended characters).  ``pynput`` accepts the actual character but
+    rejects ``<cedilla>``; prefer Tk's Unicode ``event.char`` for printable
+    one-character keys and only fall back to keysym for function/special keys.
+    """
+    char = getattr(event, "char", "") or ""
+    if len(char) == 1 and char.isprintable() and not char.isspace():
+        return char.lower()
+    return str(getattr(event, "keysym", "")).lower()
+
+
+def shortcut_keycap_tokens(value):
+    """Convert a pynput shortcut string into visual keycap labels.
+
+    The persisted value remains unchanged (for example
+    ``<ctrl>+<shift>+t``); this helper is display-only and therefore also
+    safely handles Turkish printable keys such as ``ç`` and ``ş``.
+    """
+    raw = str(value or "").strip()
+    if not raw or raw == "Tuşa basın…":
+        return ("…",)
+    tokens = []
+    for part in raw.split("+"):
+        part = part.strip()
+        if part.startswith("<") and part.endswith(">"):
+            part = part[1:-1]
+        aliases = {"control": "CTRL", "ctrl": "CTRL", "alt": "ALT",
+                   "shift": "SHIFT", "space": "SPACE", "return": "ENTER",
+                   "escape": "ESC"}
+        tokens.append(aliases.get(part.casefold(), part.upper()) or "—")
+    return tuple(tokens) or ("…",)
 
 
 def load_progress():
@@ -410,12 +524,12 @@ def attr_name(k):
 
 def elevated(parent, row, column, depth=True):
     """Gölgeli, üzerine gelince kalkan kart (grid ile). Dönüş: iç çerçeve."""
-    outer = tk.Frame(parent, bg=PAL["bg"])
+    outer = CtkFrame(parent, bg=PAL["bg"])
     outer.grid(row=row, column=column, sticky="nsew", padx=6, pady=6)
     if depth:
-        sh = tk.Frame(outer, bg="#b9bdc6" if PAL.get("mode") == "light" else "#06070a")
+        sh = CtkFrame(outer, bg="#b9bdc6" if PAL.get("mode") == "light" else "#06070a")
         sh.place(x=5, y=6, relwidth=1, relheight=1, width=-5, height=-6)
-    box = tk.Frame(outer, bg=PAL["surface"], highlightthickness=2, highlightbackground=PAL["border"], padx=12, pady=10)
+    box = CtkFrame(outer, bg=PAL["surface"], highlightthickness=2, highlightbackground=PAL["border"], padx=12, pady=10)
     box.pack(fill="both", expand=True, padx=(0, 5 if depth else 0), pady=(0, 6 if depth else 0))
     box._base_border = PAL["border"]
     if depth:
@@ -473,6 +587,87 @@ def active_profile(st):
     return display.profile_for(w, h)
 
 
+def screen_work_area(root=None):
+    """Return the usable Windows desktop area, excluding taskbar/docked bars.
+
+    The game/display profile is intentionally not used here: it is an OCR
+    concern, while the advisor window must fit the actual desktop work area.
+    """
+    fallback = (0, 0, 1920, 1080)
+    try:
+        # Tk may expose logical/rotated dimensions under mixed-DPI drivers;
+        # MSS gives us the physical primary-monitor bounds for validation.
+        with mss.MSS() as sct:
+            primary = sct.monitors[1]
+            fallback = (int(primary.get("left", 0)), int(primary.get("top", 0)),
+                        int(primary["width"]), int(primary["height"]))
+    except (AttributeError, OSError, TypeError, KeyError, IndexError):
+        pass
+    if root is not None:
+        try:
+            tk_screen = (0, 0, int(root.winfo_screenwidth()), int(root.winfo_screenheight()))
+            # Prefer Tk only when it agrees with the physical monitor within a
+            # sane range; otherwise keep the MSS dimensions above.
+            if (tk_screen[2] >= fallback[2] * 0.75 and tk_screen[2] <= fallback[2] * 1.25
+                    and tk_screen[3] >= fallback[3] * 0.75 and tk_screen[3] <= fallback[3] * 1.25):
+                fallback = tk_screen
+        except (tk.TclError, AttributeError, TypeError, ValueError):
+            pass
+    if os.name != "nt":
+        return fallback
+    try:
+        class RECT(ctypes.Structure):
+            _fields_ = [("left", ctypes.c_long), ("top", ctypes.c_long),
+                        ("right", ctypes.c_long), ("bottom", ctypes.c_long)]
+        rect = RECT()
+        # SPI_GETWORKAREA = 0x0030.  This is read-only and returns the primary
+        # monitor work area in physical pixels after DPI awareness is enabled.
+        ok = ctypes.windll.user32.SystemParametersInfoW(0x0030, 0, ctypes.byref(rect), 0)
+        if ok and rect.right > rect.left and rect.bottom > rect.top:
+            candidate = (int(rect.left), int(rect.top), int(rect.right - rect.left), int(rect.bottom - rect.top))
+            # Mixed-reality/virtual-display drivers can return logical or
+            # rotated coordinates here. Reject an impossible work area rather
+            # than opening the app in a portrait-sized or off-screen window.
+            sw, sh = fallback[2], fallback[3]
+            if (candidate[2] >= max(320, int(sw * 0.55))
+                    and candidate[3] >= max(200, int(sh * 0.55))
+                    and candidate[2] <= int(sw * 1.10)
+                    and candidate[3] <= int(sh * 1.10)):
+                return candidate
+    except (AttributeError, OSError, TypeError, ValueError):
+        pass
+    return fallback
+
+
+def calculate_window_profile(work_w, work_h, *, dpi_scale=1.0):
+    """Calculate a readable, centered window profile from the desktop area.
+
+    Returns ``(width, height, ui_factor)`` and is deliberately pure so common
+    Windows resolutions can be regression-tested without constructing Tk.
+    """
+    work_w = max(320, int(work_w or 0))
+    work_h = max(200, int(work_h or 0))
+    # Leave a breathing margin around the app while respecting a taskbar or
+    # dock. Ultra-wide screens should not produce a stretched control panel.
+    if work_w >= 2800:
+        width_cap, height_cap = 1540, 960
+    elif work_w >= 1800:
+        width_cap, height_cap = 1360, 900
+    else:
+        width_cap, height_cap = 1240, 860
+    width = min(width_cap, max(320, int(work_w * (0.90 if work_w < 1500 else 0.82))))
+    height = min(height_cap, max(200, int(work_h * (0.88 if work_h < 900 else 0.82))))
+    # Keep enough width for the sidebar and content, but never exceed the
+    # actual work area.
+    width = min(width, work_w - 24)
+    height = min(height, work_h - 24)
+    # Screen height is the primary readability signal; DPI is already included
+    # by Tk, so only a bounded correction is applied for non-standard scaling.
+    dpi = max(0.90, min(1.35, float(dpi_scale or 1.0)))
+    factor = max(0.78, min(1.35, (work_h / 900.0) ** 0.30 * dpi))
+    return width, height, factor
+
+
 def apply_ocr_settings(st):
     """Eşik / ölçek ayarlarını OCR ön işlemine uygular (profil + kullanıcı ince ayarı)."""
     _, prof = active_profile(st)
@@ -515,7 +710,7 @@ def monitors(max_age=3.0):
     """mss monitör listesi; tarama/çeviri döngüleri saniyede birkaç kez sorar — her seferinde mss açmak yerine önbellek."""
     now = time.time()
     if _MON_CACHE["v"] is None or now - _MON_CACHE["t"] > max_age:
-        with mss.mss() as sct:
+        with mss.MSS() as sct:
             _MON_CACHE.update(t=now, v=[dict(m) for m in sct.monitors])
     return _MON_CACHE["v"]
 
@@ -592,6 +787,7 @@ def game_active():
     return "division" in title and "loot advisor" not in title
 
 def grab(region):
+    _ensure_deferred()
     img = capture.default().grab(region)            # kalıcı mss (her yakalamada yeniden açılmaz)
     if CAPTURE_MASK:
         from PIL import ImageDraw
@@ -961,7 +1157,7 @@ DEFAULTS.update({
     "ai_provider": "ollama", "ollama_url": "http://localhost:11434", "ollama_model": "gemma3:12b",
     "claude_model": "claude-haiku-5-5", "claude_api_key": "", "claude_code_model": "haiku", "openai_model": "gpt-4o-mini", "openai_api_key": "",
     "stt_model": "base", "stt_device": "cpu",
-    "tts_rate": 185, "tts_voice": "", "voice_hotkey": "<f9>", "speak_verdict": True, "speak_chat": True, "voice_pack": "auto", "voice_radio": False, "voice_online": False, "quiz_xp": 0, "quiz_best": 0, "quiz_loading": False, "meta_favs": [], "meta_pop_prev": {}, "news_seen": [], "task_share": None, "task_live": True, "task_client": "", "tr_on": False, "tr_engine": "local", "tr_mode": "subtitle", "tr_region": None, "tr_hotkey": "<f7>", "tr_auto": True, "tr_font": 15, "tr_hide": 10, "tr_alpha": 0.9, "tr_screen": False, "tr_screen_port": 8767, "tr_screen_token": "", "tr_speak": "off", "tr_family": "", "tr_outline": False, "sp_on": False, "sp_source": "auto", "sp_hide_captions": True, "tr_ocr": "auto", "tr_ocr_pick": "", "tr_ocr_bench_t": 0, "tr_pad": "back+rb"})
+    "tts_rate": 185, "tts_voice": "", "voice_hotkey": "<f9>", "speak_verdict": True, "speak_chat": True, "voice_pack": "auto", "voice_radio": False, "voice_online": False, "quiz_xp": 0, "quiz_best": 0, "quiz_loading": False, "meta_favs": [], "meta_pop_prev": {}, "news_seen": [], "task_share": None, "task_live": True, "task_client": "", "tr_on": False, "tr_engine": "local", "tr_mode": "subtitle", "tr_region": None, "tr_hotkey": "<f7>", "tr_auto": True, "tr_font": 15, "tr_font_profile": "auto", "tr_hide": 10, "tr_alpha": 0.9, "tr_screen": False, "tr_screen_port": 8767, "tr_screen_token": "", "tr_speak": "off", "tr_family": "", "tr_outline": False, "sp_on": False, "sp_source": "auto", "sp_hide_captions": True, "tr_ocr": "auto", "tr_ocr_pick": "", "tr_ocr_bench_t": 0, "tr_pad": "back+rb"})
 PROVIDER_KEYS = ["ollama", "claude_code", "claude", "openai", "builtin"]
 DEFAULTS.update(tr_toggle_hotkey="<f6>", assistant_cancel_hotkey="<f12>", assistant_hud=True)
 
@@ -1252,10 +1448,11 @@ def voice_diagnostics(cfg):
 
 
 def http_json(url, body, headers=None, timeout=120):
+    _assert_http_url(url)
     req = urllib.request.Request(url, data=json.dumps(body).encode("utf-8"),
                                  headers={"Content-Type": "application/json", **(headers or {})})
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as r:
+        with urllib.request.urlopen(req, timeout=timeout) as r:  # nosec B310 - URL scheme validated above.
             return json.loads(r.read().decode("utf-8"))
     except urllib.error.HTTPError as e:
         raise RuntimeError(f"HTTP {e.code}: {e.read().decode('utf-8', 'ignore')[:200]}")
@@ -1518,7 +1715,7 @@ def load_task_images(task, n=3):
     """Wiki'den görevle ilgili görseller (diskte önbellekli). [(PIL.Image, başlık)]."""
     import hashlib
     title, search = task_image_query(task)
-    key = hashlib.sha1(f"{title}|{search}".encode("utf-8")).hexdigest()[:16]
+    key = hashlib.sha1(f"{title}|{search}".encode("utf-8"), usedforsecurity=False).hexdigest()[:16]
     TASK_IMG_DIR.mkdir(parents=True, exist_ok=True)
     idx = TASK_IMG_DIR / f"{key}.json"
     out = []
@@ -1612,17 +1809,104 @@ class App:
         startup = time.perf_counter()
         # Show the lightweight intro while the rest of the app prepares.
         display.set_dpi_aware()
-        self.root = tk.Tk()
+        if CTK_AVAILABLE:
+            ctk.set_appearance_mode("dark")
+            ctk.set_default_color_theme("dark-blue")
+            self.root = ctk.CTk()
+        else:
+            self.root = tk.Tk()
+        self._thread_queue = queue.Queue()
+        self._main_tid = threading.get_ident()
+        _orig_after = self.root.after
+        _orig_after_idle = self.root.after_idle
+        _orig_after_cancel = self.root.after_cancel
+        _tq = self._thread_queue
+        _mtid = self._main_tid
+        self._after_ids = set()
+        self._thread_drain_id = None
+
+        def _schedule(ms, func, args=(), idle=False):
+            """Schedule a Tk callback that becomes a no-op during shutdown."""
+            if getattr(self, "_closing", False) or func is None:
+                return None
+            token = [None]
+
+            def invoke():
+                ident = token[0]
+                if ident is not None:
+                    self._after_ids.discard(ident)
+                if getattr(self, "_closing", False):
+                    return
+                try:
+                    func(*args)
+                except tk.TclError:
+                    # A widget can disappear during a rebuild.  Only suppress
+                    # this race once shutdown has begun; real callback errors
+                    # must still reach report_callback_exception.
+                    if not getattr(self, "_closing", False):
+                        raise
+
+            try:
+                token[0] = _orig_after_idle(invoke) if idle else _orig_after(ms, invoke)
+                self._after_ids.add(token[0])
+                return token[0]
+            except tk.TclError:
+                return None
+
+        def _safe_after(ms, func=None, *args):
+            if func is None:
+                return _orig_after(ms)
+            if threading.get_ident() == _mtid:
+                return _schedule(ms, func, args)
+            if getattr(self, "_closing", False):
+                return None
+            _tq.put((ms, func, args))
+            return None
+
+        def _safe_after_idle(func, *args):
+            if threading.get_ident() != _mtid:
+                if not getattr(self, "_closing", False):
+                    _tq.put(("idle", func, args))
+                return None
+            return _schedule(0, func, args, idle=True)
+
+        self.root.after = _safe_after
+        self.root.after_idle = _safe_after_idle
+        self._orig_after = _orig_after
+        def _drain_thread_queue():
+            self._thread_drain_id = None
+            if getattr(self, "_closing", False):
+                while True:
+                    try: _tq.get_nowait()
+                    except queue.Empty: break
+                return
+            try:
+                for _ in range(50):
+                    ms, func, args = _tq.get_nowait()
+                    if ms == "idle": _schedule(0, func, args, idle=True)
+                    else: _schedule(ms, func, args)
+            except queue.Empty:
+                pass
+            if not getattr(self, "_closing", False):
+                try: self._thread_drain_id = _orig_after(50, _drain_thread_queue)
+                except tk.TclError: pass
+        self._thread_drain_id = _orig_after(50, _drain_thread_queue)
+        self._orig_after_cancel = _orig_after_cancel
         self.root.report_callback_exception = self._tk_callback_exception
         self._intro = None
         if not os.environ.get("TD2_NO_SPLASH"):
             self.root.withdraw()
             try:
-                self._intro = splash.IntroSplash(self.root, APP_VERSION, lambda: None)
+                self._intro = splash.IntroSplash(
+                    self.root, APP_VERSION, lambda: None,
+                    ready=lambda: bool(getattr(self, "_ui_ready", False)),
+                )
             except Exception:
                 log.debug("Intro animation could not be started", exc_info=True)
                 try: self.root.deiconify()
                 except tk.TclError: pass
+        # Ağır modülleri splash görünürken arka planda yükle
+        threading.Thread(target=_load_deferred_modules, daemon=True).start()
         self.cfg = load_cfg()
         self.timings = performance.TimingStats()
         self._translation_jobs = workqueue.LatestWorker("translation")
@@ -1630,6 +1914,7 @@ class App:
         self._assistant_jobs = workqueue.LatestWorker("assistant-answer")
         self._assistant_setup_jobs = workqueue.LatestWorker("assistant-setup")
         self._closing = False
+        self._diagnostic_started_at = time.time()
         self._lt_retry_at, self._lt_failures = 0.0, 0
         stg = self.cfg["settings"]
         setup_logging(stg.get("log_level", "INFO"), stg.get("log_max_kb", 1024), stg.get("log_backups", 3))
@@ -1642,17 +1927,19 @@ class App:
         active = i18n.set_language(chosen)
         if active != chosen:
             log.warning("Language %r not found, using %r", chosen, active)
+        startup_cfg_changed = False
         if not stg.get("language"):
-            stg["language"] = active; save_cfg(self.cfg)
+            stg["language"] = active; startup_cfg_changed = True
         log.info("Language: %s (%s)", active, i18n.language_name(active))
         self.progress, self.tasks = load_progress(), load_tasks()
-        self.normalize_builds()
+        self._startup_state_ready = False
         self.ent = features.Entitlements(stg.get("license_key", ""))
         self.account = account.Account(ACCOUNT_PATH, self._acc_url())
         self._acc_apply()
         log.info("Tier: %s (key=%s, account=%s)", self.ent.tier, self.ent.reason, self.ent.ent_reason)
         self.sessions = service.SessionLog(SESSIONS_PATH)
         self._last_session = None  # "Bu oturumda ne kazandın?" — son tamamlanan oturum (tepsi menüsünden tekrar açılabilir)
+        _ensure_deferred()
         self.screen = screenstate.Detector(SCREEN_PATH)
         self.game_state, self.game_on, self._auto_started = "unknown", False, False
         self.notifier, self.presence, self.api, self.tray, self.watcher = notify.Notifier(), None, None, None, None
@@ -1662,24 +1949,20 @@ class App:
         self.companion, self.comp_state = None, {}
         self.dropq = dropstats.Queue(DROPQ_PATH)
         if not stg.get("drop_client"):
-            stg["drop_client"] = dropstats.new_client_id(); save_cfg(self.cfg)
+            stg["drop_client"] = dropstats.new_client_id(); startup_cfg_changed = True
         if not stg.get("task_client"):                    # topluluk görevleri için ayrı, rastgele kimlik
-            stg["task_client"] = dropstats.new_client_id(); save_cfg(self.cfg)
+            stg["task_client"] = dropstats.new_client_id(); startup_cfg_changed = True
+        if startup_cfg_changed: save_cfg(self.cfg)
         self.task_mem = tasks_live.Memory(); self.task_feed = None; self.task_sub = None
+        self.task_live_state, self.task_live_snapshot, self.task_live_stale = "pending", False, False
         self.last_text, self.drops_busy = "", False
-        if not self.stash.data.get("imported_progress"):          # eski sürümün kayıtları bir kez aktarılır
-            try:
-                n = self.stash.import_progress(self.progress, GAME) if GAME.ok else 0
-                self.stash.data["imported_progress"] = True; self.stash.save()
-                if n: log.info("Stash: imported %d items from progress.json", n)
-            except Exception:
-                log.exception("Stash import failed")
         apply_ocr_settings(stg)
         self._prof_key = active_profile(stg)[0]
         log.info("Display profile: %s, OCR threshold %s, scale %s", self._prof_key, gamedata.THRESHOLD, gamedata.SCALE or "auto")
         self.tess = find_tesseract(self.cfg)
         self.listener, self.auto_stop, self.running = None, None, False
         self.lock, self.results = threading.Lock(), queue.Queue()
+        self._cfg_save_job = None; self._cfg_dirty = False
         self.counts = {"KEEP": 0, "CONSIDER": 0, "DISMANTLE": 0, "REVIEW": 0}
         self.overlay = self.overlay_job = self.cur = self.last_scan = None
         self.root_after_resets = None
@@ -1707,6 +1990,9 @@ class App:
         self.sounds = ui_theme.Sounds(BASE / "sounds", enabled=bool(stg.get("ui_sounds", True)))
         ui_theme.bind_click_sounds(self.root, self.sounds)
         self.build_ui()
+        global _ACTIVE_APP
+        _ACTIVE_APP = self
+        self.root.after(150, self._deferred_startup_state)
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)
         self.root.bind("<Destroy>", lambda e: e.widget is self.root and self.service_stop(), add="+")
         self.meta_busy = False
@@ -1718,7 +2004,7 @@ class App:
         self.root.after(6000, lambda: self.update_center(reason="startup"))   # her açılışta: program + kütüphane + oyun
         self.root.after(20000, self._drops_tick)
         log.info("UI ready — language=%s, OCR=%s, tesseract=%s", i18n.current_language(), OCR.name, self.tess or "NOT FOUND")
-        if not self.gpu_apply_cached(): OCR.warm_up()
+        if not self.gpu_apply_cached(): self._ocr_ready_event = OCR.warm_up()
         self.root.after(8000, lambda: threading.Thread(target=self.gpu_check, daemon=True).start())
         self.root.after(1500, self.account_startup)
         self.root.after(1000, self.service_start)
@@ -1782,14 +2068,14 @@ class App:
             except tk.TclError: pass
         area = display.game_window()
         if not area: return
-        w = self._assistant_hud = tk.Toplevel(self.root)
+        w = self._assistant_hud = CtkToplevel(self.root)
         w.withdraw(); w.overrideredirect(True); w.attributes("-topmost", True)
         sty = self.lt_style()
         w.configure(bg=sty["bg"])
         width = min(440, max(240, area["width"] - 40))
-        tk.Label(w, text="◆ " + t("ga.title"), bg=sty["bg"], fg=sty["accent"],
+        CtkLabel(w, text="◆ " + t("ga.title"), bg=sty["bg"], fg=sty["accent"],
                  font=(ui_theme.FONT_SEMI, 10), anchor="w").pack(fill="x", padx=12, pady=(8, 2))
-        tk.Label(w, text=text[:1400], bg=sty["bg"], fg=sty["fg"], wraplength=width - 24,
+        CtkLabel(w, text=text[:1400], bg=sty["bg"], fg=sty["fg"], wraplength=width - 24,
                  justify="left", font=(ui_theme.FONT, 11)).pack(padx=12, pady=(0, 8))
         w.update_idletasks()
         x, y = area["left"] + area["width"] - width - 20, area["top"] + 60
@@ -1824,7 +2110,7 @@ class App:
         if getattr(self, "_closing", False): return
         try:
             hidden = self.root.state() != "normal"
-            focused = game_active()
+            focused = False if hidden else game_active()
             self._runtime_plan = game_runtime.plan(self.cfg["settings"], game_focused=focused, app_hidden=hidden)
             foreground = bool(getattr(self, "game_on", False) and focused)
             self._perf_policy = performance.get_policy(self.cfg["settings"], foreground, hidden)
@@ -1832,7 +2118,7 @@ class App:
             self.root._td2_animation_multiplier = self._perf_policy.ui_animation_multiplier
         except tk.TclError:
             return
-        self.root.after(1000, self._performance_tick)
+        self.root.after(4000 if hidden else 1000 if foreground else 3000, self._performance_tick)
 
     def toggle_performance(self):
         st = self.cfg["settings"]
@@ -1849,8 +2135,8 @@ class App:
         for phase, values in sorted(stats.items()):
             rows.append(f"{phase}: n={values['count']}  median={values['median_ms']:.0f} ms  p95={values['p95_ms']:.0f} ms")
         rows.append(t("perf.queue", **self._translation_jobs.stats()))
-        w = tk.Toplevel(self.root); w.title(t("perf.measure"))
-        ttk.Label(w, text="\n".join(rows), justify="left").pack(padx=16, pady=12)
+        w = CtkToplevel(self.root); w.title(t("perf.measure"))
+        CtkLabel(w, text="\n".join(rows), justify="left").pack(padx=16, pady=12)
         chart = tk.Canvas(w, width=620, height=max(100, len(stats)*48), bg=PAL["surface"], highlightthickness=0)
         chart.pack(fill="both", expand=True, padx=16, pady=12)
         maximum = max([v['p95_ms'] for v in stats.values()] + [1])
@@ -1945,8 +2231,16 @@ class App:
             eng = self._lt_local
             lang = "tr"   # yerel model tek dil çifti (EN→TR); arayüz dilinden bağımsız
         tr = livetranslate.Translator(eng, self.lt_glossary(), self.lt_cache, target_lang=lang)
-        if st.get("task_live", True): tr.set_memory(getattr(self, "task_mem", None))
+        personal = self.lt_personal_memory()
+        shared = getattr(self, "task_mem", None) if st.get("task_live", True) else None
+        tr.set_memory(livetranslate.MemoryChain(personal, shared))
         return tr
+
+    def lt_personal_memory(self):
+        """Load the user's private, local-only translation corrections."""
+        if not hasattr(self, "_lt_personal_memory"):
+            self._lt_personal_memory = livetranslate.LocalMemory(BASE / "translation_memory.json")
+        return self._lt_personal_memory
 
     # ---------- Topluluk görevleri (canlı çeviriyle toplanan / dağıtılan görevler)
     def task_server(self):
@@ -1969,9 +2263,20 @@ class App:
         self.root.after(NEWS_POLL_MS, self._task_live_poll)
 
     def _task_live_arrived(self, res):
-        if not res: return
+        if not res:
+            self.task_live_state = "unavailable"
+            self._task_ui()
+            return
         feed, src = res
         self.task_feed = feed
+        self.task_live_state = "ready" if feed["tasks"] else "empty"
+        self.task_live_snapshot = src == self.TASKS_RAW_URL
+        try:
+            generated = feed.get("checked_at") or feed.get("generated")
+            if isinstance(generated, str): generated = datetime.fromisoformat(generated.replace("Z", "+00:00")).timestamp()
+            self.task_live_stale = self.task_live_snapshot and time.time() - float(generated) > 36 * 3600
+        except (TypeError, ValueError, OverflowError):
+            self.task_live_stale = self.task_live_snapshot
         self.task_mem.load(feed)
         summary = meta_sync.merge_tasks(self.tasks, tasks_live.to_feed_tasks(feed), scope="community")
         save_tasks(self.tasks)
@@ -1989,7 +2294,7 @@ class App:
             u = api.url("/tr"); lbl.config(text=u)
             img = companion.qr_image(u, 3)
             if img is not None:
-                self.ts_qr._img = ImageTk.PhotoImage(img); self.ts_qr.config(image=self.ts_qr._img)
+                self.ts_qr._img = compat_image(img); self.ts_qr.config(image=self.ts_qr._img)
         else:
             lbl.config(text=t("ts.off")); self.ts_qr.config(image=""); self.ts_qr._img = None
 
@@ -2038,7 +2343,20 @@ class App:
         if not lbl or not lbl.winfo_exists(): return
         st = self.cfg["settings"]
         n = len((self.task_feed or {}).get("tasks", []))
-        parts = [t("tl.status", n=n, m=len(self.task_mem))] if self.task_feed else [t("tl.status_none")]
+        if not st.get("task_live", True):
+            parts = [t("tl.state.disabled")]
+        elif self.task_live_state == "unavailable":
+            parts = [t("tl.state.unavailable_cached", n=n) if self.task_feed else t("tl.state.unavailable")]
+        elif self.task_live_state == "empty":
+            parts = [t("tl.state.empty_snapshot") if self.task_live_snapshot else t("tl.state.empty")]
+        elif self.task_feed:
+            parts = [t("tl.status", n=n, m=len(self.task_mem))]
+        else:
+            parts = [t("tl.status_pending")]
+        if self.task_live_snapshot and self.task_feed and self.task_live_state != "unavailable":
+            parts.append(t("tl.state.snapshot"))
+        if self.task_live_stale:
+            parts.append(t("tl.state.stale"))
         if shared: parts.append(t("tl.shared", title=shared))
         elif st.get("task_share") is False: parts.append(t("tl.share_off"))
         lbl.config(text="  ·  ".join(parts))
@@ -2420,11 +2738,14 @@ class App:
                             engine.load()
             with self.timings.measure("translate_model"):
                 out = translator.translate([b[0] for b in blocks], allow_partial=True)
+            self._lt_last_engine = getattr(engine, "name", self.cfg["settings"].get("tr_engine", "local"))
             self._lt_last_cache_hits = getattr(translator, "last_cache_hits", 0)
             if len(out) != len(blocks):
                 raise RuntimeError(t("lt.invalid_result"))
             ms = int((time.perf_counter() - t0) * 1000)
             pairs = [(b[0], tr, b[1]) for b, tr in zip(blocks, out) if isinstance(tr, str) and tr.strip()]
+            self._lt_confidence_by_source = {b[0]: float(b[2]) for b, tr in zip(blocks, out)
+                                             if isinstance(tr, str) and tr.strip() and len(b) > 2}
             skipped = len(blocks) - len(pairs)
             if not pairs:
                 raise RuntimeError(t("lt.validation_failed"))
@@ -2476,11 +2797,22 @@ class App:
             if not hist or hist[-1][0] != en: hist.append((en, tr))
         self.lt_hist = hist[-80:]
         self._lt_log(pairs, ms)
+        meta = getattr(self, "lt_hist_meta", {})
+        engine_name = getattr(self, "_lt_last_engine", st.get("tr_engine", "local"))
+        confidence_map = getattr(self, "_lt_confidence_by_source", {})
+        for en, _, _ in pairs:
+            meta[en] = {"confidence": confidence_map.get(en), "engine": engine_name, "ms": int(ms)}
+        self.lt_hist_meta = dict(list(meta.items())[-80:])
         self._lt_status(t("lt.done", n=len(pairs), ms=ms), "success")
         self._lt_hist_fill()
         self._lt_after(pairs, ms)
         self._lt_hide()
-        size = int(st.get("tr_font", 15)); mode = force_mode or st.get("tr_mode", "subtitle")
+        mode = force_mode or st.get("tr_mode", "subtitle")
+        size = overlay.adaptive_font_size(st.get("tr_font", 15), area.get("width", 1920), area.get("height", 1080))
+        confidence_map = getattr(self, "_lt_confidence_by_source", {})
+        confidences = [confidence_map.get(en) for en, _, _ in pairs]
+        valid_conf = [c for c in confidences if c is not None]
+        self._lt_last_confidence = min(valid_conf) if valid_conf else None
         log.info("Translation overlay: mode=%s pairs=%d area=%sx%s", mode, len(pairs), area.get("width"), area.get("height"))
         if mode == "inplace":
             try:
@@ -2489,24 +2821,29 @@ class App:
                 log.exception("In-place translation rendering failed")
                 return self._lt_panel_fallback(pairs)
         sty = self.lt_style()
-        w = self._lt_win = tk.Toplevel(self.root); w.overrideredirect(True)
+        w = self._lt_win = CtkToplevel(self.root); w.overrideredirect(True)
         w.attributes("-topmost", True, "-alpha", float(st.get("tr_alpha", 0.9)))
         w.configure(bg=sty["bg"])
         if mode == "subtitle":
             wrap = max(300, area["width"] - 40)
-            tk.Frame(w, height=3, bg=sty["accent"]).pack(fill="x")
+            CtkFrame(w, height=3, bg=sty["accent"]).pack(fill="x")
+            if valid_conf:
+                confidence = min(valid_conf)
+                conf_color = PAL["success"] if confidence >= LOW_CONF_WARN else PAL["warning"]
+                CtkLabel(w, text=f"OCR GÜVENİ  {confidence:.0%}", bg=sty["bg"], fg=conf_color,
+                         font=(sty["font_semi"], 8), anchor="e").pack(fill="x", padx=12, pady=(4, 0))
             for en, tr, _ in pairs[-3:]:
-                tk.Label(w, text=tr, bg=sty["bg"], fg=sty["fg"], font=(sty["font_semi"], size), wraplength=wrap, justify="center").pack(padx=18, pady=(8, 2))
+                CtkLabel(w, text=tr, bg=sty["bg"], fg=sty["fg"], font=(sty["font_semi"], size), wraplength=wrap, justify="center").pack(padx=18, pady=(8, 2))
             w.update_idletasks()
             x = area["left"] + (area["width"] - w.winfo_reqwidth()) // 2
             y = max(0, area["top"] - w.winfo_reqheight() - 10)
         else:
-            tk.Frame(w, height=3, bg=sty["accent"]).pack(fill="x")
-            tk.Label(w, text="◆ " + t("lt.overlay_title").upper(), bg=sty["bg"], fg=sty["accent"], font=(sty["font_semi"], 9), anchor="w").pack(fill="x", padx=12, pady=(6, 0))
+            CtkFrame(w, height=3, bg=sty["accent"]).pack(fill="x")
+            CtkLabel(w, text="◆ " + t("lt.overlay_title").upper(), bg=sty["bg"], fg=sty["accent"], font=(sty["font_semi"], 9), anchor="w").pack(fill="x", padx=12, pady=(6, 0))
             for en, tr, _ in pairs[:8]:
-                tk.Label(w, text=tr, bg=sty["bg"], fg=sty["fg"], font=(sty["font"], max(9, size - 3)), wraplength=420, justify="left",
+                CtkLabel(w, text=tr, bg=sty["bg"], fg=sty["fg"], font=(sty["font"], max(9, size - 3)), wraplength=420, justify="left",
                          anchor="w").pack(fill="x", padx=12, pady=(4, 0))
-            tk.Frame(w, height=8, bg=sty["bg"]).pack()
+            CtkFrame(w, height=8, bg=sty["bg"]).pack()
             w.update_idletasks()
             x = area["left"] + area["width"] - w.winfo_reqwidth() - 20
             y = area["top"] + 70
@@ -2529,7 +2866,8 @@ class App:
         sty = dict(self.lt_style(), alpha=1.0)              # yerinde: fon tamamen opak, alttaki İngilizce görünmez
         ip = self._lt_inplace = overlay.InPlace(self.root, sty, on_window=self._lt_overlay_window)
         blocks = [(tr, b, en, max(1, en.count("\n") + 1)) for en, tr, b in pairs]
-        items = overlay.layout(blocks, area, ip.measure_at)
+        preferred = overlay.adaptive_font_size(st.get("tr_font", 15), area.get("width", 1920), area.get("height", 1080))
+        items = overlay.layout(blocks, area, ip.measure_at, preferred_pt=preferred)
         log.info("In-place overlay layout: blocks=%d items=%d", len(blocks), len(items))
         if not items:
             # OCR kutuları oyun alanı dışında kaldıysa boş siyah pencere bırakma.
@@ -2639,6 +2977,15 @@ class App:
             st["tr_screen_token"] = _s.token_urlsafe(12); save_cfg(self.cfg)
         try:
             port = max(1024, min(65535, int(st.get("tr_screen_port", 8767))))
+            api_port = getattr(getattr(self, "api", None), "port", None)
+            if api_port == port:
+                replacement = localapi.find_available_port(port, reserved=(api_port,))
+                if replacement is None:
+                    raise OSError(f"Çeviri ekranı için {port} ile çakışmayan boş port bulunamadı")
+                log.warning("Translation screen port %s conflicts with Local API; using %s", port, replacement)
+                port = replacement
+                st["tr_screen_port"] = port
+                save_cfg(self.cfg)
             self.tr_api = localapi.LocalAPI(self.tr_state, None, port=port, token=st["tr_screen_token"], lan=True,
                                             allow_control=False, pages={"/tr": trscreen.PAGE})
             self.tr_api.start()
@@ -2673,14 +3020,14 @@ class App:
     def build_translate(self):
         f = ui_theme.scrollable(self.tabs["translate"], PAL["bg"])
         st = self.cfg["settings"]
-        hero = tk.Frame(f, bg=PAL["surface"]); hero.pack(fill="x", padx=10, pady=(10, 6))
-        tk.Label(hero, text="🌐 " + t("lt.title"), bg=PAL["surface"], fg=PAL["fg"], font=(ui_theme.FONT_SEMI, 15), anchor="w").pack(fill="x", padx=14, pady=(10, 0))
-        tk.Label(hero, text=t("lt.intro"), bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 10), justify="left", anchor="w",
+        hero = CtkFrame(f, bg=PAL["surface"]); hero.pack(fill="x", padx=10, pady=(10, 6))
+        CtkLabel(hero, text="🌐 " + t("lt.title"), bg=PAL["surface"], fg=PAL["fg"], font=(ui_theme.FONT_SEMI, 15), anchor="w").pack(fill="x", padx=14, pady=(10, 0))
+        CtkLabel(hero, text=t("lt.intro"), bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 10), justify="left", anchor="w",
                  wraplength=900).pack(fill="x", padx=14, pady=(2, 8))
-        row = tk.Frame(hero, bg=PAL["surface"]); row.pack(fill="x", padx=14, pady=(0, 12))
-        self.lt_btn = ttk.Button(row, text="", command=self.lt_toggle, style="Accent.TButton"); self.lt_btn.pack(side="left")
-        ttk.Button(row, text="⚡ " + t("lt.now"), command=self.lt_now).pack(side="left", padx=6)
-        self.lt_stat = tk.Label(row, text="", bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 10)); self.lt_stat.pack(side="left", padx=10)
+        row = CtkFrame(hero, bg=PAL["surface"]); row.pack(fill="x", padx=14, pady=(0, 12))
+        self.lt_btn = CtkButton(row, text="", command=self.lt_toggle, style="Accent.TButton"); self.lt_btn.pack(side="left")
+        CtkButton(row, text="⚡ " + t("lt.now"), command=self.lt_now).pack(side="left", padx=6)
+        self.lt_stat = CtkLabel(row, text="", bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 10)); self.lt_stat.pack(side="left", padx=10)
         # motor
         eb = ttk.LabelFrame(f, text="🧠 " + t("lt.engine")); eb.pack(fill="x", padx=10, pady=6)
         self.lt_eng = tk.StringVar(value=st.get("tr_engine", "local"))
@@ -2692,24 +3039,24 @@ class App:
             self._invalidate_translation()
             st["tr_engine"] = choice; save_cfg(self.cfg); self._lt_ui()
             self.lt_privacy_lbl.config(text=self._translation_privacy())
-        r1 = ttk.Frame(eb); r1.pack(fill="x", padx=8, pady=(6, 2))
+        r1 = CtkFrame(eb); r1.pack(fill="x", padx=8, pady=(6, 2))
         ttk.Radiobutton(r1, text=t("lt.e_local"), value="local", variable=self.lt_eng, command=eng_set).pack(side="left")
-        self.lt_model_lbl = ttk.Label(r1, text="", foreground=PAL["muted"]); self.lt_model_lbl.pack(side="left", padx=10)
-        self.lt_dl_btn = ttk.Button(r1, text="⬇ " + t("lt.download"), command=self.lt_download); self.lt_dl_btn.pack(side="left")
-        self.lt_pb = ttk.Progressbar(r1, length=180, mode="determinate"); self.lt_pb.pack(side="left", padx=8)
-        ttk.Label(eb, text=t("lt.e_local_hint"), foreground=PAL["muted"], wraplength=880, justify="left").pack(anchor="w", padx=28)
+        self.lt_model_lbl = CtkLabel(r1, text="", foreground=PAL["muted"]); self.lt_model_lbl.pack(side="left", padx=10)
+        self.lt_dl_btn = CtkButton(r1, text="⬇ " + t("lt.download"), command=self.lt_download); self.lt_dl_btn.pack(side="left")
+        self.lt_pb = CtkProgressBar(r1, length=180, mode="determinate"); self.lt_pb.pack(side="left", padx=8)
+        CtkLabel(eb, text=t("lt.e_local_hint"), foreground=PAL["muted"], wraplength=880, justify="left").pack(anchor="w", padx=28)
         cur_lang = i18n.current_language()
         if cur_lang != "tr":          # yerel model tek dil çifti (EN→TR); başka arayüz dilinde bunu açıkça belirt
-            ttk.Label(eb, text="⚠ " + t("lt.e_local_tr_only"), foreground=PAL["warning"], wraplength=880,
+            CtkLabel(eb, text="⚠ " + t("lt.e_local_tr_only"), foreground=PAL["warning"], wraplength=880,
                       justify="left").pack(anchor="w", padx=28, pady=(0, 4))
-        r2 = ttk.Frame(eb); r2.pack(fill="x", padx=8, pady=(8, 2))
+        r2 = CtkFrame(eb); r2.pack(fill="x", padx=8, pady=(8, 2))
         ttk.Radiobutton(r2, text=t("lt.e_ai"), value="ai", variable=self.lt_eng, command=eng_set).pack(side="left")
         prov = st.get("ai_provider", "builtin")
-        ttk.Label(r2, text=t("lt.ai_now", p=provider_label(prov if prov in PROVIDER_KEYS else "builtin")), foreground=PAL["muted"]).pack(side="left", padx=10)
-        ttk.Label(eb, text=t("lt.e_ai_hint"), foreground=PAL["muted"], wraplength=880, justify="left").pack(anchor="w", padx=28, pady=(0, 2))
-        ttk.Label(eb, text=t("lt.ai_quality_hint"), foreground=PAL["muted"], wraplength=880, justify="left").pack(anchor="w", padx=28, pady=(0, 2))
-        ttk.Label(eb, text="🎯 " + t("lt.target", lang=i18n.language_name(cur_lang)), foreground=PAL["info"]).pack(anchor="w", padx=28, pady=(0, 8))
-        self.lt_privacy_lbl = ttk.Label(eb, text=self._translation_privacy(), foreground=PAL["info"], wraplength=880, justify="left")
+        CtkLabel(r2, text=t("lt.ai_now", p=provider_label(prov if prov in PROVIDER_KEYS else "builtin")), foreground=PAL["muted"]).pack(side="left", padx=10)
+        CtkLabel(eb, text=t("lt.e_ai_hint"), foreground=PAL["muted"], wraplength=880, justify="left").pack(anchor="w", padx=28, pady=(0, 2))
+        CtkLabel(eb, text=t("lt.ai_quality_hint"), foreground=PAL["muted"], wraplength=880, justify="left").pack(anchor="w", padx=28, pady=(0, 2))
+        CtkLabel(eb, text="🎯 " + t("lt.target", lang=i18n.language_name(cur_lang)), foreground=PAL["info"]).pack(anchor="w", padx=28, pady=(0, 8))
+        self.lt_privacy_lbl = CtkLabel(eb, text=self._translation_privacy(), foreground=PAL["info"], wraplength=880, justify="left")
         self.lt_privacy_lbl.pack(anchor="w", padx=12, pady=(0, 8))
         # alan
         mb = ttk.LabelFrame(f, text="🎯 " + t("lt.mode")); mb.pack(fill="x", padx=10, pady=6)
@@ -2719,51 +3066,70 @@ class App:
             st["tr_mode"] = self.lt_mode.get(); save_cfg(self.cfg)
             if st["tr_mode"] == "region" and not st.get("tr_region"): self.lt_pick_region()
         for k in ("subtitle", "region", "screen", "inplace"):
-            rr = ttk.Frame(mb); rr.pack(fill="x", padx=8, pady=1)
+            rr = CtkFrame(mb); rr.pack(fill="x", padx=8, pady=1)
             ttk.Radiobutton(rr, text=t("lt.m_" + k), value=k, variable=self.lt_mode, command=mode_set).pack(side="left")
-            ttk.Label(rr, text=t("lt.m_" + k + "_hint"), foreground=PAL["muted"]).pack(side="left", padx=8)
-            if k == "region": ttk.Button(rr, text="⛶ " + t("lt.pick"), command=self.lt_pick_region).pack(side="right")
+            CtkLabel(rr, text=t("lt.m_" + k + "_hint"), foreground=PAL["muted"]).pack(side="left", padx=8)
+            if k == "region": CtkButton(rr, text="⛶ " + t("lt.pick"), command=self.lt_pick_region).pack(side="right")
         # seçenekler
         ob = ttk.LabelFrame(f, text="⚙ " + t("lt.options")); ob.pack(fill="x", padx=10, pady=6)
         self.lt_auto = tk.BooleanVar(value=bool(st.get("tr_auto", True)))
-        ttk.Checkbutton(ob, text=t("lt.auto"), variable=self.lt_auto,
+        CtkCheckBox(ob, text=t("lt.auto"), variable=self.lt_auto,
                         command=lambda: (st.__setitem__("tr_auto", bool(self.lt_auto.get())), save_cfg(self.cfg))).pack(anchor="w", padx=8, pady=(6, 2))
         self.lt_log_var = tk.BooleanVar(value=bool(st.get("tr_log", False)))
-        ttk.Checkbutton(ob, text=t("lt.log_opt"), variable=self.lt_log_var,
+        CtkCheckBox(ob, text=t("lt.log_opt"), variable=self.lt_log_var,
                         command=lambda: (st.__setitem__("tr_log", bool(self.lt_log_var.get())), save_cfg(self.cfg))).pack(anchor="w", padx=8, pady=2)
-        g = ttk.Frame(ob); g.pack(fill="x", padx=8, pady=(2, 8))
+        g = CtkFrame(ob); g.pack(fill="x", padx=8, pady=(2, 8))
         self.lt_vars = {}
         for i, (k, lab, default, w) in enumerate((("tr_font", t("lt.font"), 15, 5),
                                                   ("tr_hide", t("lt.hide"), 10, 5), ("tr_alpha", t("lt.alpha"), 0.9, 5))):
-            ttk.Label(g, text=lab).grid(row=i // 3, column=(i % 3) * 2, sticky="w", padx=(0, 4))
+            CtkLabel(g, text=lab).grid(row=i // 3, column=(i % 3) * 2, sticky="w", padx=(0, 4))
             v = self.lt_vars[k] = tk.StringVar(value=str(st.get(k, default)))
-            e = ttk.Entry(g, textvariable=v, width=w); e.grid(row=i // 3, column=(i % 3) * 2 + 1, sticky="w", padx=(0, 16))
+            e = CtkEntry(g, textvariable=v, width=w); e.grid(row=i // 3, column=(i % 3) * 2 + 1, sticky="w", padx=(0, 16))
             e.bind("<FocusOut>", lambda ev: self._lt_save_opts())
-        g2 = ttk.Frame(ob); g2.pack(fill="x", padx=8, pady=(0, 8))
-        ttk.Label(g2, text="OCR").pack(side="left")
+        profile_row = CtkFrame(ob); profile_row.pack(fill="x", padx=8, pady=(0, 8))
+        CtkLabel(profile_row, text="Çeviri boyutu profili").pack(side="left")
+        profile_labels = {"auto": "Otomatik", "small": "Küçük", "normal": "Normal", "large": "Büyük", "xlarge": "Çok büyük"}
+        profile_values = list(profile_labels.values())
+        current_profile = st.get("tr_font_profile", "auto")
+        self.lt_profile = tk.StringVar(value=profile_labels.get(current_profile, "Otomatik"))
+        def profile_set(e=None):
+            key = next((k for k, label in profile_labels.items() if label == self.lt_profile.get()), "auto")
+            st["tr_font_profile"] = key
+            if key != "auto":
+                st["tr_font"] = {"small": 12, "normal": 15, "large": 18, "xlarge": 22}[key]
+                if "tr_font" in self.lt_vars:
+                    self.lt_vars["tr_font"].set(str(st["tr_font"]))
+            save_cfg(self.cfg)
+        CtkComboBox(profile_row, textvariable=self.lt_profile, state="readonly", width=18,
+                    values=profile_values).pack(side="left", padx=8)
+        self.lt_profile.trace_add("write", lambda *_: profile_set())
+        CtkLabel(profile_row, text="Ekran boyutu ve OCR kutusuna göre otomatik sığdırılır.",
+                 foreground=PAL["muted"]).pack(side="left", padx=8)
+        g2 = CtkFrame(ob); g2.pack(fill="x", padx=8, pady=(0, 8))
+        CtkLabel(g2, text="OCR").pack(side="left")
         ocr_keys = ("auto", "rapid", "windows")
         self.lt_ocr_var = tk.StringVar(value=t("ocr2." + st.get("tr_ocr", "auto")))
-        cb1 = ttk.Combobox(g2, textvariable=self.lt_ocr_var, state="readonly", width=22, values=[t("ocr2." + k) for k in ocr_keys])
+        cb1 = CtkComboBox(g2, textvariable=self.lt_ocr_var, state="readonly", width=22, values=[t("ocr2." + k) for k in ocr_keys])
         cb1.pack(side="left", padx=(4, 6))
         cb1.bind("<<ComboboxSelected>>", lambda e: (st.__setitem__("tr_ocr", next(k for k in ocr_keys if t("ocr2." + k) == self.lt_ocr_var.get())),
                                                      st.__setitem__("tr_ocr_pick", ""), save_cfg(self.cfg), self._lt_ocr_ui()))
-        self.lt_ocr_lbl = ttk.Label(g2, text="", foreground=PAL["muted"]); self.lt_ocr_lbl.pack(side="left", padx=(0, 16))
-        ttk.Label(g2, text="🎮 " + t("pad.label")).pack(side="left")
+        self.lt_ocr_lbl = CtkLabel(g2, text="", foreground=PAL["muted"]); self.lt_ocr_lbl.pack(side="left", padx=(0, 16))
+        CtkLabel(g2, text="🎮 " + t("pad.label")).pack(side="left")
         self.lt_pad_var = tk.StringVar(value=t("pad." + st.get("tr_pad", "back+rb")))
-        cb2 = ttk.Combobox(g2, textvariable=self.lt_pad_var, state="readonly", width=16, values=[t("pad." + k) for k in gamepad.COMBOS])
+        cb2 = CtkComboBox(g2, textvariable=self.lt_pad_var, state="readonly", width=16, values=[t("pad." + k) for k in gamepad.COMBOS])
         cb2.pack(side="left", padx=4)
         def pad_set(e=None):
             st["tr_pad"] = next(k for k in gamepad.COMBOS if t("pad." + k) == self.lt_pad_var.get()); save_cfg(self.cfg)
             if getattr(self, "lt_stop_ev", None) or getattr(self, "lt_keys", None): self._lt_pad_start()
         cb2.bind("<<ComboboxSelected>>", pad_set)
-        fam = ttk.Frame(ob); fam.pack(fill="x", padx=8, pady=(0, 8))
-        ttk.Label(fam, text=t("lt.family")).pack(side="left")
+        fam = CtkFrame(ob); fam.pack(fill="x", padx=8, pady=(0, 8))
+        CtkLabel(fam, text=t("lt.family")).pack(side="left")
         self.lt_fam = tk.StringVar(value=st.get("tr_family") or ui_theme.FONT)
-        fcb = ttk.Combobox(fam, textvariable=self.lt_fam, width=22, values=[ui_theme.FONT, "Bahnschrift", "Consolas", "Verdana", "Arial", "Tahoma", "OpenDyslexic"])
+        fcb = CtkComboBox(fam, textvariable=self.lt_fam, width=22, values=[ui_theme.FONT, "Bahnschrift", "Consolas", "Verdana", "Arial", "Tahoma", "OpenDyslexic"])
         fcb.pack(side="left", padx=4)
         fcb.bind("<<ComboboxSelected>>", lambda e: (st.__setitem__("tr_family", self.lt_fam.get()), save_cfg(self.cfg)))
         self.lt_outline = tk.BooleanVar(value=bool(st.get("tr_outline", False)))
-        ttk.Checkbutton(fam, text=t("lt.outline"), variable=self.lt_outline,
+        CtkCheckBox(fam, text=t("lt.outline"), variable=self.lt_outline,
                         command=lambda: (st.__setitem__("tr_outline", bool(self.lt_outline.get())), save_cfg(self.cfg))).pack(side="left", padx=12)
         self._lt_ocr_ui()
         # topluluk görevleri
@@ -2774,73 +3140,74 @@ class App:
             st["task_share"] = bool(self.task_share_var.get()); st["task_live"] = bool(self.task_live_var.get()); save_cfg(self.cfg)
             self._task_ui()
             if st["task_live"] and not self.task_feed: self._task_live_poll_once()
-        ttk.Checkbutton(cb, text=t("tl.share"), variable=self.task_share_var, command=tl_set).pack(anchor="w", padx=8, pady=(6, 0))
-        ttk.Label(cb, text=t("tl.share_hint"), foreground=PAL["muted"], wraplength=880, justify="left").pack(anchor="w", padx=28)
-        ttk.Checkbutton(cb, text=t("tl.use"), variable=self.task_live_var, command=tl_set).pack(anchor="w", padx=8, pady=(4, 0))
-        ttk.Label(cb, text=t("tl.use_hint"), foreground=PAL["muted"], wraplength=880, justify="left").pack(anchor="w", padx=28)
-        self.task_stat = ttk.Label(cb, text="", foreground=PAL["muted"]); self.task_stat.pack(anchor="w", padx=8, pady=(4, 8))
+        CtkCheckBox(cb, text=t("tl.share"), variable=self.task_share_var, command=tl_set).pack(anchor="w", padx=8, pady=(6, 0))
+        CtkLabel(cb, text=t("tl.share_hint"), foreground=PAL["muted"], wraplength=880, justify="left").pack(anchor="w", padx=28)
+        CtkCheckBox(cb, text=t("tl.use"), variable=self.task_live_var, command=tl_set).pack(anchor="w", padx=8, pady=(4, 0))
+        CtkLabel(cb, text=t("tl.use_hint"), foreground=PAL["muted"], wraplength=880, justify="left").pack(anchor="w", padx=28)
+        self.task_stat = CtkLabel(cb, text="", foreground=PAL["muted"]); self.task_stat.pack(anchor="w", padx=8, pady=(4, 8))
         self._task_ui()
         # telefon / ikinci ekran + sesli okuma
         pb = ttk.LabelFrame(f, text="📱 " + t("ts.box")); pb.pack(fill="x", padx=10, pady=6)
-        prow = ttk.Frame(pb); prow.pack(fill="x", padx=8, pady=(6, 2))
-        pleft = ttk.Frame(prow); pleft.pack(side="left", fill="x", expand=True)
+        prow = CtkFrame(pb); prow.pack(fill="x", padx=8, pady=(6, 2))
+        pleft = CtkFrame(prow); pleft.pack(side="left", fill="x", expand=True)
         self.ts_var = tk.BooleanVar(value=bool(st.get("tr_screen")))
         def ts_set():
             st["tr_screen"] = bool(self.ts_var.get()); save_cfg(self.cfg)
             self.tr_screen_apply(quiet=False); self._ts_ui()
-        ttk.Checkbutton(pleft, text=t("ts.on"), variable=self.ts_var, command=ts_set).pack(anchor="w")
-        ttk.Label(pleft, text=t("ts.hint"), foreground=PAL["muted"], wraplength=640, justify="left").pack(anchor="w", padx=20)
-        self.ts_url = ttk.Label(pleft, text="", foreground=PAL["info"], cursor="hand2"); self.ts_url.pack(anchor="w", padx=20, pady=(4, 0))
+        CtkCheckBox(pleft, text=t("ts.on"), variable=self.ts_var, command=ts_set).pack(anchor="w")
+        CtkLabel(pleft, text=t("ts.hint"), foreground=PAL["muted"], wraplength=640, justify="left").pack(anchor="w", padx=20)
+        self.ts_url = CtkLabel(pleft, text="", foreground=PAL["info"], cursor="hand2"); self.ts_url.pack(anchor="w", padx=20, pady=(4, 0))
         self.ts_url.bind("<Button-1>", lambda e: self.tr_api and webbrowser_open(self.tr_api.url("/tr")))
-        br = ttk.Frame(pleft); br.pack(anchor="w", padx=20, pady=4)
-        ttk.Button(br, text="🖥 " + t("ts.open"), command=lambda: self.tr_api and webbrowser_open(self.tr_api.url("/tr"))).pack(side="left")
-        ttk.Button(br, text="📋 " + t("ts.copy"), command=lambda: self.tr_api and (self.root.clipboard_clear(), self.root.clipboard_append(self.tr_api.url("/tr")))).pack(side="left", padx=6)
-        self.ts_qr = ttk.Label(prow); self.ts_qr.pack(side="right", padx=8)
-        sr = ttk.Frame(pb); sr.pack(fill="x", padx=8, pady=(4, 8))
-        ttk.Label(sr, text="🔊 " + t("ts.speak")).pack(side="left")
+        br = CtkFrame(pleft); br.pack(anchor="w", padx=20, pady=4)
+        CtkButton(br, text="🖥 " + t("ts.open"), command=lambda: self.tr_api and webbrowser_open(self.tr_api.url("/tr"))).pack(side="left")
+        CtkButton(br, text="📋 " + t("ts.copy"), command=lambda: self.tr_api and (self.root.clipboard_clear(), self.root.clipboard_append(self.tr_api.url("/tr")))).pack(side="left", padx=6)
+        self.ts_qr = CtkLabel(prow); self.ts_qr.pack(side="right", padx=8)
+        sr = CtkFrame(pb); sr.pack(fill="x", padx=8, pady=(4, 8))
+        CtkLabel(sr, text="🔊 " + t("ts.speak")).pack(side="left")
         self.ts_speak = tk.StringVar(value=t("ts.sp_" + st.get("tr_speak", "off")))
-        sp = ttk.Combobox(sr, textvariable=self.ts_speak, state="readonly", width=26, values=[t("ts.sp_" + k) for k in ("off", "subtitle", "all")])
+        sp = CtkComboBox(sr, textvariable=self.ts_speak, state="readonly", width=26, values=[t("ts.sp_" + k) for k in ("off", "subtitle", "all")])
         sp.pack(side="left", padx=8)
         sp.bind("<<ComboboxSelected>>", lambda e: (st.__setitem__("tr_speak", next(k for k in ("off", "subtitle", "all") if t("ts.sp_" + k) == self.ts_speak.get())), save_cfg(self.cfg)))
-        ttk.Label(sr, text=t("ts.speak_hint"), foreground=PAL["muted"]).pack(side="left", padx=6)
+        CtkLabel(sr, text=t("ts.speak_hint"), foreground=PAL["muted"]).pack(side="left", padx=6)
         self.ts_online_voice = tk.BooleanVar(value=bool(st.get("voice_online", False)))
-        ttk.Checkbutton(pb, text=t("vp.online"), variable=self.ts_online_voice,
+        CtkCheckBox(pb, text=t("vp.online"), variable=self.ts_online_voice,
                         command=lambda: self.set_online_voice(self.ts_online_voice.get())).pack(anchor="w", padx=10)
-        ttk.Label(pb, text=t("vp.online_route"), foreground=PAL["muted"], wraplength=880,
+        CtkLabel(pb, text=t("vp.online_route"), foreground=PAL["muted"], wraplength=880,
                   justify="left").pack(anchor="w", padx=28, pady=(0, 8))
         self._ts_ui()
         # konuşma çevirisi
         kb = ttk.LabelFrame(f, text="🎧 " + t("sp.box")); kb.pack(fill="x", padx=10, pady=6)
-        kr = ttk.Frame(kb); kr.pack(fill="x", padx=8, pady=(6, 2))
-        self.sp_btn = ttk.Button(kr, text="", command=lambda: self.speech_stop(quiet=False) if getattr(self, "sp", None) else self.speech_start())
+        kr = CtkFrame(kb); kr.pack(fill="x", padx=8, pady=(6, 2))
+        self.sp_btn = CtkButton(kr, text="", command=lambda: self.speech_stop(quiet=False) if getattr(self, "sp", None) else self.speech_start())
         self.sp_btn.pack(side="left")
-        self.sp_dl = ttk.Button(kr, text="⬇ " + t("sp.download", mb=speech.WHISPER_MB), command=self.sp_download)
-        self.sp_src_lbl = ttk.Label(kr, text="", foreground=PAL["muted"]); self.sp_src_lbl.pack(side="left", padx=10)
-        self.sp_stat = tk.Label(kb, text="", bg=PAL["bg"], fg=PAL["muted"], anchor="w"); self.sp_stat.pack(fill="x", padx=10)
-        ttk.Label(kb, text=t("sp.hint"), foreground=PAL["muted"], wraplength=880, justify="left").pack(anchor="w", padx=10, pady=(2, 8))
+        self.sp_dl = CtkButton(kr, text="⬇ " + t("sp.download", mb=speech.WHISPER_MB), command=self.sp_download)
+        self.sp_src_lbl = CtkLabel(kr, text="", foreground=PAL["muted"]); self.sp_src_lbl.pack(side="left", padx=10)
+        self.sp_stat = CtkLabel(kb, text="", bg=PAL["bg"], fg=PAL["muted"], anchor="w"); self.sp_stat.pack(fill="x", padx=10)
+        CtkLabel(kb, text=t("sp.hint"), foreground=PAL["muted"], wraplength=880, justify="left").pack(anchor="w", padx=10, pady=(2, 8))
         self._sp_ui()
         # dene
         tb = ttk.LabelFrame(f, text="✍ " + t("lt.try")); tb.pack(fill="x", padx=10, pady=6)
-        self.lt_in = tk.Text(tb, height=3, wrap="word", bg=PAL["entry"], fg=PAL["fg"], insertbackground=PAL["fg"], relief="flat",
+        self.lt_in = CtkTextbox(tb, height=3, wrap="word", bg=PAL["entry"], fg=PAL["fg"], insertbackground=PAL["fg"], relief="flat",
                              font=(ui_theme.FONT, 10), padx=8, pady=6)
         self.lt_in.pack(fill="x", padx=8, pady=(6, 4))
         self.lt_in.insert("1.0", "Agent, the Black Tusk have taken control of the Capitol Building. Head to the White House and talk to Manny.")
-        rr = ttk.Frame(tb); rr.pack(fill="x", padx=8)
-        ttk.Button(rr, text="➜ " + t("lt.translate"), command=self.lt_try, style="Accent.TButton").pack(side="left")
-        self.lt_out = tk.Label(tb, text="", bg=PAL["bg"], fg=PAL["fg"], font=(ui_theme.FONT, 11), justify="left", anchor="w", wraplength=880)
+        rr = CtkFrame(tb); rr.pack(fill="x", padx=8)
+        CtkButton(rr, text="➜ " + t("lt.translate"), command=self.lt_try, style="Accent.TButton").pack(side="left")
+        self.lt_out = CtkLabel(tb, text="", bg=PAL["bg"], fg=PAL["fg"], font=(ui_theme.FONT, 11), justify="left", anchor="w", wraplength=880)
         self.lt_out.pack(fill="x", padx=8, pady=(6, 8))
         # geçmiş
         hb = ttk.LabelFrame(f, text="🕘 " + t("lt.history")); hb.pack(fill="both", expand=True, padx=10, pady=6)
-        hbar = ttk.Frame(hb); hbar.pack(fill="x", padx=6, pady=(6, 0))
+        hbar = CtkFrame(hb); hbar.pack(fill="x", padx=6, pady=(6, 0))
         self.lt_q = tk.StringVar()
-        ttk.Label(hbar, text="🔎").pack(side="left")
-        qe = ttk.Entry(hbar, textvariable=self.lt_q, width=30); qe.pack(side="left", padx=4)
+        CtkLabel(hbar, text="🔎").pack(side="left")
+        qe = CtkEntry(hbar, textvariable=self.lt_q, width=30); qe.pack(side="left", padx=4)
         self.lt_q.trace_add("write", lambda *a: self._lt_hist_fill())
-        ttk.Button(hbar, text="⬇ CSV", command=self.lt_export).pack(side="right")
-        self.lt_hist_txt = tk.Text(hb, height=12, wrap="word", bg=PAL["surface"], fg=PAL["fg"], relief="flat", font=(ui_theme.FONT, 10), padx=10, pady=8)
+        CtkButton(hbar, text="⬇ CSV", command=self.lt_export).pack(side="right")
+        CtkButton(hbar, text="⚙ Yerel düzeltmeler", command=self.lt_memory_manager).pack(side="right", padx=6)
+        self.lt_hist_txt = CtkTextbox(hb, height=12, wrap="word", bg=PAL["surface"], fg=PAL["fg"], relief="flat", font=(ui_theme.FONT, 10), padx=10, pady=8)
         self.lt_hist_txt.tag_configure("en", foreground=PAL["muted"]); self.lt_hist_txt.tag_configure("tr", font=(ui_theme.FONT_SEMI, 10))
         self.lt_hist_txt.pack(fill="both", expand=True, padx=6, pady=6)
-        ttk.Label(f, text=t("lt.note"), foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=14, pady=(2, 12))
+        CtkLabel(f, text=t("lt.note"), foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=14, pady=(2, 12))
         self._lt_hist_fill(); self._lt_ui()
 
     def _lt_save_opts(self):
@@ -2873,11 +3240,19 @@ class App:
         T = getattr(self, "lt_hist_txt", None)
         if not T or not T.winfo_exists(): return
         T.config(state="normal"); T.delete("1.0", "end")
+        T.tag_configure("meta", foreground=PAL["info"], font=(ui_theme.FONT_MONO, 8))
         terms_of = getattr(self, "lt_terms", {})
         q = (self.lt_q.get().strip().lower() if getattr(self, "lt_q", None) else "")
         for i, (en, tr) in enumerate(reversed(getattr(self, "lt_hist", [])[-80:])):
             if q and q not in (en + " " + tr).lower(): continue
             T.insert("end", en + "\n", "en"); T.insert("end", tr + "\n", "tr")
+            meta = getattr(self, "lt_hist_meta", {}).get(en, {})
+            confidence = meta.get("confidence")
+            quality = f"OCR {confidence:.0%}" if isinstance(confidence, (int, float)) else "OCR —"
+            engine = meta.get("engine", "?")
+            elapsed = meta.get("ms")
+            timing = f" · {elapsed} ms" if isinstance(elapsed, int) else ""
+            T.insert("end", f"{quality} · {engine}{timing}\n", "meta")
             for k, term in enumerate(terms_of.get(en, [])):
                 tag = f"term{i}_{k}"
                 T.tag_configure(tag, foreground=PAL["accent"], underline=True)
@@ -2903,42 +3278,81 @@ class App:
             for en, tr in hist: w.writerow([en, tr])
         self.toast(t("lt.exported", n=len(hist)))
 
+    def lt_memory_manager(self):
+        """Show, export, and delete the private local translation corrections."""
+        memory = self.lt_personal_memory()
+        w = CtkToplevel(self.root); w.title("Yerel Çeviri Düzeltmeleri"); w.configure(bg=PAL["surface"]); w.transient(self.root)
+        CtkFrame(w, height=3, bg=PAL["accent"]).pack(fill="x")
+        CtkLabel(w, text="Bu kayıtlar yalnızca bu bilgisayarda tutulur.", bg=PAL["surface"], fg=PAL["muted"]).pack(anchor="w", padx=14, pady=10)
+        rows = tk.Listbox(w, height=12, width=72, bg=PAL["entry"], fg=PAL["fg"], selectbackground=PAL["accent"],
+                          relief="flat", borderwidth=0, activestyle="none")
+        rows.pack(fill="both", expand=True, padx=12, pady=(0, 8))
+        keys = []
+        def refresh():
+            rows.delete(0, "end"); keys.clear()
+            for key in sorted(memory.map):
+                keys.append(key)
+                rows.insert("end", f"{key}  →  {memory.map[key]}")
+        def remove_selected():
+            selected = rows.curselection()
+            if not selected: return
+            memory.remove(keys[selected[0]]); refresh()
+        def export_memory():
+            path = filedialog.asksaveasfilename(defaultextension=".json", initialfile="translation_memory.json",
+                                               filetypes=[("JSON", "*.json")])
+            if not path: return
+            try:
+                Path(path).write_text(json.dumps({"version": 1, "items": memory.map}, ensure_ascii=False, indent=2), encoding="utf-8")
+                self.toast("Yerel çeviri hafızası dışa aktarıldı.")
+            except OSError as error:
+                messagebox.showerror(APP_NAME, str(error), parent=w)
+        refresh()
+        bar = CtkFrame(w); bar.pack(fill="x", padx=12, pady=(0, 12))
+        CtkButton(bar, text="Seçileni sil", command=remove_selected).pack(side="left")
+        CtkButton(bar, text="JSON dışa aktar", command=export_memory).pack(side="left", padx=6)
+        CtkButton(bar, text="Kapat", command=w.destroy).pack(side="right")
+
     def lt_suggest(self, en, tr):
         """Topluluk düzeltme önerisi: oyuncu daha iyi bir Türkçe yazar → sunucu → yönetici onayı → herkesin çeviri hafızası."""
         st = self.cfg["settings"]
-        w = tk.Toplevel(self.root); w.title(t("sg.title")); w.configure(bg=PAL["surface"]); w.transient(self.root)
-        tk.Frame(w, height=3, bg=PAL["accent"]).pack(fill="x")
-        tk.Label(w, text=en, bg=PAL["surface"], fg=PAL["muted"], wraplength=560, justify="left", font=(ui_theme.FONT, 9)).pack(anchor="w", padx=16, pady=(12, 2))
-        tk.Label(w, text=t("sg.now") + "  " + tr, bg=PAL["surface"], fg=PAL["fg"], wraplength=560, justify="left").pack(anchor="w", padx=16, pady=(0, 6))
-        tk.Label(w, text=t("sg.better"), bg=PAL["surface"], fg=PAL["accent"], font=(ui_theme.FONT_SEMI, 10)).pack(anchor="w", padx=16)
-        tx = tk.Text(w, height=4, width=70, wrap="word", bg=PAL["entry"], fg=PAL["fg"], insertbackground=PAL["fg"], relief="flat", padx=8, pady=6)
+        w = CtkToplevel(self.root); w.title(t("sg.title")); w.configure(bg=PAL["surface"]); w.transient(self.root)
+        CtkFrame(w, height=3, bg=PAL["accent"]).pack(fill="x")
+        CtkLabel(w, text=en, bg=PAL["surface"], fg=PAL["muted"], wraplength=560, justify="left", font=(ui_theme.FONT, 9)).pack(anchor="w", padx=16, pady=(12, 2))
+        CtkLabel(w, text=t("sg.now") + "  " + tr, bg=PAL["surface"], fg=PAL["fg"], wraplength=560, justify="left").pack(anchor="w", padx=16, pady=(0, 6))
+        CtkLabel(w, text=t("sg.better"), bg=PAL["surface"], fg=PAL["accent"], font=(ui_theme.FONT_SEMI, 10)).pack(anchor="w", padx=16)
+        tx = CtkTextbox(w, height=4, width=70, wrap="word", bg=PAL["entry"], fg=PAL["fg"], insertbackground=PAL["fg"], relief="flat", padx=8, pady=6)
         tx.insert("1.0", tr); tx.pack(fill="x", padx=16, pady=4)
-        msg = tk.Label(w, text=t("sg.hint"), bg=PAL["surface"], fg=PAL["muted"], wraplength=560, justify="left", font=(ui_theme.FONT, 9))
+        msg = CtkLabel(w, text=t("sg.hint"), bg=PAL["surface"], fg=PAL["muted"], wraplength=560, justify="left", font=(ui_theme.FONT, 9))
         msg.pack(anchor="w", padx=16)
         def send():
             new = tx.get("1.0", "end").strip()
             if not new or new == tr: return msg.config(text=t("sg.same"), fg=PAL["warning"])
             msg.config(text=t("acc.working"), fg=PAL["muted"])
             def go():
+                local_ok = self.lt_personal_memory().put(en, new)
                 ok_ = tasks_live.suggest(self.task_server(), st.get("task_client"), en, tr, new, APP_VERSION)
-                self.root.after(0, lambda: (msg.config(text=t("sg.sent") if ok_ else t("sg.fail"), fg=PAL["success"] if ok_ else PAL["danger"]),
-                                            ok_ and w.after(1500, w.destroy)))
+                # Local memory is the primary result; server suggestion is optional.
+                # Never require network access to keep the user's correction.
+                saved = local_ok or ok_
+                self.root.after(0, lambda: (msg.config(text=t("sg.sent") if saved else t("sg.fail"),
+                                                       fg=PAL["success"] if saved else PAL["danger"]),
+                                            saved and w.after(1500, w.destroy)))
             threading.Thread(target=go, daemon=True).start()
-        bar = ttk.Frame(w); bar.pack(fill="x", padx=12, pady=12)
-        ttk.Button(bar, text="✉ " + t("sg.send"), style="Accent.TButton", command=send).pack(side="right")
-        ttk.Button(bar, text=t("btn.cancel") if t("btn.cancel") != "btn.cancel" else "✖", command=w.destroy).pack(side="right", padx=6)
+        bar = CtkFrame(w); bar.pack(fill="x", padx=12, pady=12)
+        CtkButton(bar, text="✉ " + t("sg.send"), style="Accent.TButton", command=send).pack(side="right")
+        CtkButton(bar, text=t("btn.cancel") if t("btn.cancel") != "btn.cancel" else "✖", command=w.destroy).pack(side="right", padx=6)
 
     def _term_popup(self, term):
-        w = tk.Toplevel(self.root); w.title(term["name"]); w.configure(bg=PAL["surface"]); w.transient(self.root)
-        tk.Frame(w, height=3, bg=PAL["accent"]).pack(fill="x")
-        tk.Label(w, text=(term.get("label") + " · " if term.get("label") else "") + term["name"], bg=PAL["surface"], fg=PAL["accent"],
+        w = CtkToplevel(self.root); w.title(term["name"]); w.configure(bg=PAL["surface"]); w.transient(self.root)
+        CtkFrame(w, height=3, bg=PAL["accent"]).pack(fill="x")
+        CtkLabel(w, text=(term.get("label") + " · " if term.get("label") else "") + term["name"], bg=PAL["surface"], fg=PAL["accent"],
                  font=(ui_theme.FONT_SEMI, 12)).pack(anchor="w", padx=16, pady=(12, 4))
-        tk.Label(w, text=term.get("text") or "—", bg=PAL["surface"], fg=PAL["fg"], wraplength=440, justify="left",
+        CtkLabel(w, text=term.get("text") or "—", bg=PAL["surface"], fg=PAL["fg"], wraplength=440, justify="left",
                  font=(ui_theme.FONT, 10)).pack(anchor="w", padx=16, pady=(0, 10))
-        bar = ttk.Frame(w); bar.pack(fill="x", padx=12, pady=(0, 12))
+        bar = CtkFrame(w); bar.pack(fill="x", padx=12, pady=(0, 12))
         if term.get("cat") != "term":
-            ttk.Button(bar, text="📚 " + t("ts.in_enc"), command=lambda: (w.destroy(), self._open_enc(term["name"]))).pack(side="left")
-        ttk.Button(bar, text="✖", command=w.destroy).pack(side="right")
+            CtkButton(bar, text="📚 " + t("ts.in_enc"), command=lambda: (w.destroy(), self._open_enc(term["name"]))).pack(side="left")
+        CtkButton(bar, text="✖", command=w.destroy).pack(side="right")
 
     def _open_enc(self, name):
         try:
@@ -2983,17 +3397,17 @@ class App:
 
     def _lt_region_capture(self):
         mon = self.screen_monitor()
-        with mss.mss() as sct:
+        with mss.MSS() as sct:
             s = sct.grab(mon); img = Image.frombytes("RGB", s.size, s.rgb)
         self.root.deiconify()
-        w = tk.Toplevel(self.root); w.attributes("-fullscreen", True, "-topmost", True)
+        w = CtkToplevel(self.root); w.attributes("-fullscreen", True, "-topmost", True)
         cv = tk.Canvas(w, highlightthickness=0, cursor="crosshair"); cv.pack(fill="both", expand=True)
         w.update_idletasks()
         sw, sh = w.winfo_width(), w.winfo_height()
         scale = min(sw / img.width, sh / img.height)
         w._photo = ImageTk.PhotoImage(img.resize((int(img.width * scale), int(img.height * scale))))
         cv.create_image(0, 0, image=w._photo, anchor="nw")
-        cv.create_text(sw // 2, 30, fill="yellow", font=("Segoe UI", 18, "bold"), text=t("lt.pick_hint"))
+        cv.create_text(sw // 2, 30, fill="yellow", font=ui_theme.font_spec("display", 18), text=t("lt.pick_hint"))
         stt = {}
         def down(e): stt.update(x0=e.x, y0=e.y, r=cv.create_rectangle(e.x, e.y, e.x, e.y, outline="lime", width=3))
         def move(e): cv.coords(stt["r"], stt["x0"], stt["y0"], e.x, e.y)
@@ -3023,7 +3437,7 @@ class App:
         self._info_keys = ["enc", "meta", "news", "quiz"]
         frames = {}
         for k, icon in zip(self._info_keys, ("📖", "🏆", "📰", "❓")):
-            fr = ttk.Frame(nb, padding=8); nb.add(fr, text=f" {icon} {t('info.' + k)} "); frames[k] = fr
+            fr = CtkFrame(nb, padding=8); nb.add(fr, text=f" {icon} {t('info.' + k)} "); frames[k] = fr
         self._build_enc(frames["enc"]); self._build_meta_gallery(frames["meta"])
         self._build_news(frames["news"]); self._build_quiz(frames["quiz"])
         nb.bind("<<NotebookTabChanged>>", lambda e: self._info_tab_changed())
@@ -3044,30 +3458,30 @@ class App:
             except (OSError, ValueError):
                 continue
         wrap = ui_theme.scrollable(page, PAL["bg"])
-        ttk.Label(wrap, text="The Division 3 — doğrulanmış gelişmeler", style="Section.TLabel").pack(anchor="w", padx=12, pady=(12, 4))
-        ttk.Label(wrap, text=(feed.get("status_tr") or "Ubisoft oyunun geliştirme aşamasında olduğunu doğruluyor; çıkış tarihi ve oyun ayrıntıları açıklanmadı."),
+        CtkLabel(wrap, text="The Division 3 — doğrulanmış gelişmeler", style="Section.TLabel").pack(anchor="w", padx=12, pady=(12, 4))
+        CtkLabel(wrap, text=(feed.get("status_tr") or "Ubisoft oyunun geliştirme aşamasında olduğunu doğruluyor; çıkış tarihi ve oyun ayrıntıları açıklanmadı."),
                   foreground=PAL["muted"], wraplength=920, justify="left").pack(anchor="w", padx=12, pady=(0, 10))
         live = ttk.LabelFrame(wrap, text="Son resmî haber akışından")
         live.pack(fill="x", padx=10, pady=5)
-        self.div3_news_area = ttk.Frame(live); self.div3_news_area.pack(fill="x", padx=8, pady=5)
+        self.div3_news_area = CtkFrame(live); self.div3_news_area.pack(fill="x", padx=8, pady=5)
         self.refresh_division3_news()
         for item in feed.get("updates", []):
             card = ttk.LabelFrame(wrap, text=f'{item.get("date", "")}  ·  {item.get("title", "")}')
             card.pack(fill="x", padx=10, pady=5)
-            ttk.Label(card, text=item.get("summary_tr", ""), wraplength=900, justify="left").pack(anchor="w", padx=10, pady=7)
+            CtkLabel(card, text=item.get("summary_tr", ""), wraplength=900, justify="left").pack(anchor="w", padx=10, pady=7)
             url = item.get("url", "")
             if url.startswith("https://"):
-                ttk.Button(card, text="🔗 Kaynağı aç", command=lambda u=url: webbrowser.open(u)).pack(anchor="w", padx=10, pady=(0, 8))
+                CtkButton(card, text="🔗 Kaynağı aç", command=lambda u=url: webbrowser.open(u)).pack(anchor="w", padx=10, pady=(0, 8))
         sources = ttk.LabelFrame(wrap, text="Güvenilir kaynaklar")
         sources.pack(fill="x", padx=10, pady=10)
         for source in feed.get("sources", []):
             url = source.get("url", "")
             if not url.startswith("https://"): continue
-            row = ttk.Frame(sources); row.pack(fill="x", padx=8, pady=4)
-            ttk.Label(row, text=source.get("name", "Ubisoft"), width=34).pack(side="left", anchor="n")
-            ttk.Label(row, text=source.get("note_tr", ""), foreground=PAL["muted"], wraplength=570, justify="left").pack(side="left", fill="x", expand=True, padx=8)
-            ttk.Button(row, text="Aç", command=lambda u=url: webbrowser.open(u)).pack(side="right")
-        ttk.Label(wrap, text=f'Kaynak kontrol tarihi: {feed.get("checked", "—")}. Yeni bilgiler doğrulanana kadar burada söylenti değil, resmî durum gösterilir.',
+            row = CtkFrame(sources); row.pack(fill="x", padx=8, pady=4)
+            CtkLabel(row, text=source.get("name", "Ubisoft"), width=34).pack(side="left", anchor="n")
+            CtkLabel(row, text=source.get("note_tr", ""), foreground=PAL["muted"], wraplength=570, justify="left").pack(side="left", fill="x", expand=True, padx=8)
+            CtkButton(row, text="Aç", command=lambda u=url: webbrowser.open(u)).pack(side="right")
+        CtkLabel(wrap, text=f'Kaynak kontrol tarihi: {feed.get("checked", "—")}. Yeni bilgiler doğrulanana kadar burada söylenti değil, resmî durum gösterilir.',
                   foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=12, pady=(4, 12))
 
     def refresh_division3_news(self):
@@ -3082,18 +3496,18 @@ class App:
             if any(term in text.casefold() for term in ("division 3", "division iii", "division three")):
                 hits.append(item)
         if not hits:
-            ttk.Label(area, text="İndirilen Ubisoft haber akışında henüz doğrudan The Division 3'ü konu alan yeni bir yazı yok.",
+            CtkLabel(area, text="İndirilen Ubisoft haber akışında henüz doğrudan The Division 3'ü konu alan yeni bir yazı yok.",
                       foreground=PAL["muted"], wraplength=850, justify="left").pack(anchor="w", padx=4, pady=4)
             return
         for item in hits[:8]:
             title = next(iter((item.get("title") or {}).values()), "The Division 3")
             date = item.get("date")
-            row = ttk.Frame(area); row.pack(fill="x", pady=3)
-            ttk.Label(row, text=f'{date.date().isoformat() if date else ""}  {title}',
+            row = CtkFrame(area); row.pack(fill="x", pady=3)
+            CtkLabel(row, text=f'{date.date().isoformat() if date else ""}  {title}',
                       wraplength=750, justify="left").pack(side="left", fill="x", expand=True)
             url = item.get("url", "")
             if url.startswith("https://"):
-                ttk.Button(row, text="Aç", command=lambda u=url: webbrowser.open(u)).pack(side="right")
+                CtkButton(row, text="Aç", command=lambda u=url: webbrowser.open(u)).pack(side="right")
 
     # --- canlı haber akışı
     def _news_poll(self):
@@ -3208,34 +3622,34 @@ class App:
     # --- ansiklopedi
     def _build_enc(self, f):
         enc = self.encyclopedia()
-        top = ttk.Frame(f); top.pack(fill="x")
+        top = CtkFrame(f); top.pack(fill="x")
         self.enc_q = tk.StringVar()
-        e = ttk.Entry(top, textvariable=self.enc_q, width=34); e.pack(side="left")
+        e = CtkEntry(top, textvariable=self.enc_q, width=34); e.pack(side="left")
         self.enc_q.trace_add("write", lambda *a: self._enc_fill())
         self._enc_cat_labels = [t("enc.all")] + [t("enc.c_" + c) for c in knowledge.CATEGORIES]
         self.enc_cat = tk.StringVar(value=self._enc_cat_labels[0])
-        cb = ttk.Combobox(top, textvariable=self.enc_cat, values=self._enc_cat_labels, state="readonly", width=16); cb.pack(side="left", padx=6)
+        cb = CtkComboBox(top, textvariable=self.enc_cat, values=self._enc_cat_labels, state="readonly", width=16); cb.pack(side="left", padx=6)
         cb.bind("<<ComboboxSelected>>", lambda e: self._enc_fill())
         self._enc_slots = [None] + list(knowledge.SLOT_ORDER)
         self.enc_slot = tk.StringVar(value=t("enc.any_slot"))
-        sb = ttk.Combobox(top, textvariable=self.enc_slot, values=[t("enc.any_slot")] + [slot_name(x) for x in knowledge.SLOT_ORDER],
+        sb = CtkComboBox(top, textvariable=self.enc_slot, values=[t("enc.any_slot")] + [slot_name(x) for x in knowledge.SLOT_ORDER],
                           state="readonly", width=14); sb.pack(side="left")
         sb.bind("<<ComboboxSelected>>", lambda e: self._enc_fill())
         c = enc.counts()
-        self.enc_count = ttk.Label(top, text="", foreground=PAL["muted"]); self.enc_count.pack(side="left", padx=10)
-        ttk.Label(top, text=t("enc.totals", ex=c["exotic"], na=c["named"], gs=c["gear_set"], br=c["brand"], ta=c["talent"]),
+        self.enc_count = CtkLabel(top, text="", foreground=PAL["muted"]); self.enc_count.pack(side="left", padx=10)
+        CtkLabel(top, text=t("enc.totals", ex=c["exotic"], na=c["named"], gs=c["gear_set"], br=c["brand"], ta=c["talent"]),
                   foreground=PAL["muted"]).pack(side="right")
-        body = ttk.Frame(f); body.pack(fill="both", expand=True, pady=(8, 0))
-        left = ttk.Frame(body); left.pack(side="left", fill="y")
+        body = CtkFrame(f); body.pack(fill="both", expand=True, pady=(8, 0))
+        left = CtkFrame(body); left.pack(side="left", fill="y")
         self.enc_tv = ttk.Treeview(left, columns=("name", "kind"), show="headings", height=22, selectmode="browse")
         self.enc_tv.heading("name", text=t("enc.h_name")); self.enc_tv.heading("kind", text=t("enc.h_kind"))
         self.enc_tv.column("name", width=250); self.enc_tv.column("kind", width=120)
         for k, col in self.CAT_COLORS.items(): self.enc_tv.tag_configure(k, foreground=col)
-        ys = ttk.Scrollbar(left, orient="vertical", command=self.enc_tv.yview); self.enc_tv.configure(yscrollcommand=ys.set)
+        ys = CtkScrollbar(left, orient="vertical", command=self.enc_tv.yview); self.enc_tv.configure(yscrollcommand=ys.set)
         self.enc_tv.pack(side="left", fill="y"); ys.pack(side="left", fill="y")
         self.enc_tv.bind("<<TreeviewSelect>>", lambda e: self._enc_show())
-        right = ttk.Frame(body); right.pack(side="left", fill="both", expand=True, padx=(10, 0))
-        self.enc_txt = tk.Text(right, wrap="word", bg=PAL["surface"], fg=PAL["fg"], relief="flat", padx=14, pady=10,
+        right = CtkFrame(body); right.pack(side="left", fill="both", expand=True, padx=(10, 0))
+        self.enc_txt = CtkTextbox(right, wrap="word", bg=PAL["surface"], fg=PAL["fg"], relief="flat", padx=14, pady=10,
                                font=(ui_theme.FONT, 10), cursor="arrow")
         self.enc_txt.pack(fill="both", expand=True)
         for tag, kw in (("h1", {"font": (ui_theme.FONT_SEMI, 16)}), ("sub", {"foreground": PAL["muted"]}),
@@ -3244,12 +3658,12 @@ class App:
             self.enc_txt.tag_configure(tag, **kw)
         for k, col in self.CAT_COLORS.items(): self.enc_txt.tag_configure("c_" + k, foreground=col, font=(ui_theme.FONT_SEMI, 10))
         self.enc_txt.config(state="disabled")
-        bar = ttk.Frame(right); bar.pack(fill="x", pady=(6, 0))
-        self.enc_add_btn = ttk.Button(bar, text="➕ " + t("enc.add"), command=self.enc_add_to_build, style="Accent.TButton")
+        bar = CtkFrame(right); bar.pack(fill="x", pady=(6, 0))
+        self.enc_add_btn = CtkButton(bar, text="➕ " + t("enc.add"), command=self.enc_add_to_build, style="Accent.TButton")
         self.enc_add_btn.pack(side="left")
-        ttk.Button(bar, text="📍 " + t("enc.where") + ("" if self.ent.has("drop_stats_view") else " ⭐"), command=self.enc_where).pack(side="left", padx=6)
-        ttk.Button(bar, text="🌐 " + t("enc.wiki"), command=self.enc_wiki).pack(side="left")
-        self.enc_status = ttk.Label(right, text="", foreground=PAL["muted"]); self.enc_status.pack(anchor="w", pady=(4, 0))
+        CtkButton(bar, text="📍 " + t("enc.where") + ("" if self.ent.has("drop_stats_view") else " ⭐"), command=self.enc_where).pack(side="left", padx=6)
+        CtkButton(bar, text="🌐 " + t("enc.wiki"), command=self.enc_wiki).pack(side="left")
+        self.enc_status = CtkLabel(right, text="", foreground=PAL["muted"]); self.enc_status.pack(anchor="w", pady=(4, 0))
         self._enc_fill()
 
     def _enc_fill(self):
@@ -3382,19 +3796,19 @@ class App:
         return (h.get("prev") or {}).get("pop")
 
     def _build_meta_gallery(self, f):
-        top = ttk.Frame(f); top.pack(fill="x")
+        top = CtkFrame(f); top.pack(fill="x")
         self._mg_tags = ["all", "pve", "pvp", "solo", "group", "endgame", "dps", "close", "precision", "skill", "tank", "pulse"]
         self.mg_tag = tk.StringVar(value=t("mg.t_all"))
-        cb = ttk.Combobox(top, textvariable=self.mg_tag, values=[t("mg.t_" + x) for x in self._mg_tags], state="readonly", width=16)
+        cb = CtkComboBox(top, textvariable=self.mg_tag, values=[t("mg.t_" + x) for x in self._mg_tags], state="readonly", width=16)
         cb.pack(side="left"); cb.bind("<<ComboboxSelected>>", lambda e: self.refresh_meta_gallery())
         self._mg_sorts = ["pop", "trend", "name"]
         self.mg_sort = tk.StringVar(value=t("mg.s_pop"))
-        sb = ttk.Combobox(top, textvariable=self.mg_sort, values=[t("mg.s_" + x) for x in self._mg_sorts], state="readonly", width=16)
+        sb = CtkComboBox(top, textvariable=self.mg_sort, values=[t("mg.s_" + x) for x in self._mg_sorts], state="readonly", width=16)
         sb.pack(side="left", padx=6); sb.bind("<<ComboboxSelected>>", lambda e: self.refresh_meta_gallery())
         self.mg_favs = tk.BooleanVar(value=False)
-        ttk.Checkbutton(top, text="★ " + t("mg.only_favs"), variable=self.mg_favs, command=self.refresh_meta_gallery).pack(side="left", padx=6)
-        self.mg_info = ttk.Label(top, text="", foreground=PAL["muted"]); self.mg_info.pack(side="right")
-        holder = ttk.Frame(f); holder.pack(fill="both", expand=True, pady=(8, 0))
+        CtkCheckBox(top, text="★ " + t("mg.only_favs"), variable=self.mg_favs, command=self.refresh_meta_gallery).pack(side="left", padx=6)
+        self.mg_info = CtkLabel(top, text="", foreground=PAL["muted"]); self.mg_info.pack(side="right")
+        holder = CtkFrame(f); holder.pack(fill="both", expand=True, pady=(8, 0))
         self.mg_area = ui_theme.scrollable(holder, PAL["bg"])
         self.refresh_meta_gallery()
 
@@ -3420,9 +3834,9 @@ class App:
         else: rows.sort(key=lambda r: r[0]["name"].lower())
         self.mg_info.config(text=t("mg.info", n=len(rows), season=feed.get("season") or "?", v=feed.get("version") or "?"))
         if not rows:
-            ttk.Label(self.mg_area, text=t("mg.empty"), foreground=PAL["muted"]).pack(anchor="w", padx=10, pady=10); return
+            CtkLabel(self.mg_area, text=t("mg.empty"), foreground=PAL["muted"]).pack(anchor="w", padx=10, pady=10); return
         cols = 2
-        grid = tk.Frame(self.mg_area, bg=PAL["bg"]); grid.pack(fill="both", expand=True)
+        grid = CtkFrame(self.mg_area, bg=PAL["bg"]); grid.pack(fill="both", expand=True)
         for c in range(cols): grid.columnconfigure(c, weight=1, uniform="mg")
         for i, (b, tags, pop, tr, _) in enumerate(rows):
             self._meta_card(grid, b, tags, pop, tr, b["meta_id"] in favs, b["meta_id"] in hidden).grid(
@@ -3430,34 +3844,34 @@ class App:
 
     def _meta_card(self, parent, b, tags, pop, tr, fav, hidden):
         m = b["meta"]
-        card = tk.Frame(parent, bg=PAL["surface"], highlightthickness=1, highlightbackground=PAL["accent"] if fav else PAL["surface"])
-        head = tk.Frame(card, bg=PAL["surface"]); head.pack(fill="x", padx=12, pady=(10, 2))
-        tk.Label(head, text=b["name"], bg=PAL["surface"], fg=PAL["fg"], font=(ui_theme.FONT_SEMI, 12), anchor="w").pack(side="left")
+        card = CtkFrame(parent, bg=PAL["surface"], highlightthickness=1, highlightbackground=PAL["accent"] if fav else PAL["surface"])
+        head = CtkFrame(card, bg=PAL["surface"]); head.pack(fill="x", padx=12, pady=(10, 2))
+        CtkLabel(head, text=b["name"], bg=PAL["surface"], fg=PAL["fg"], font=(ui_theme.FONT_SEMI, 12), anchor="w").pack(side="left")
         trc = {"up": ("▲ " + t("mg.up"), PAL["success"]), "down": ("▼ " + t("mg.down"), PAL["danger"]), "new": ("✦ " + t("mg.new"), PAL["accent"])}.get(tr)
-        if trc: tk.Label(head, text=trc[0], bg=PAL["surface"], fg=trc[1], font=(ui_theme.FONT_SEMI, 9)).pack(side="right")
-        tk.Label(card, text=" · ".join(x for x in (m.get("mode"), t("mg.t_" + m["role"]) if m.get("role") in self._mg_tags else m.get("role")) if x),
+        if trc: CtkLabel(head, text=trc[0], bg=PAL["surface"], fg=trc[1], font=(ui_theme.FONT_SEMI, 9)).pack(side="right")
+        CtkLabel(card, text=" · ".join(x for x in (m.get("mode"), t("mg.t_" + m["role"]) if m.get("role") in self._mg_tags else m.get("role")) if x),
                  bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 9), anchor="w").pack(fill="x", padx=12)
-        chips = tk.Frame(card, bg=PAL["surface"]); chips.pack(fill="x", padx=12, pady=(4, 0))
+        chips = CtkFrame(card, bg=PAL["surface"]); chips.pack(fill="x", padx=12, pady=(4, 0))
         for tg in tags[:5]:
-            tk.Label(chips, text=t("mg.t_" + tg) if tg in self._mg_tags else tg, bg=PAL["bg"], fg=PAL["fg"], font=(ui_theme.FONT, 8),
+            CtkLabel(chips, text=t("mg.t_" + tg) if tg in self._mg_tags else tg, bg=PAL["bg"], fg=PAL["fg"], font=(ui_theme.FONT, 8),
                      padx=6, pady=1).pack(side="left", padx=(0, 4))
-        bar = tk.Frame(card, bg=PAL["surface"]); bar.pack(fill="x", padx=12, pady=(6, 0))
-        tk.Label(bar, text=t("mg.pop"), bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 9)).pack(side="left")
+        bar = CtkFrame(card, bg=PAL["surface"]); bar.pack(fill="x", padx=12, pady=(6, 0))
+        CtkLabel(bar, text=t("mg.pop"), bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 9)).pack(side="left")
         cv = tk.Canvas(bar, height=8, bg=PAL["bg"], highlightthickness=0); cv.pack(side="left", fill="x", expand=True, padx=6)
         cv.bind("<Configure>", lambda ev, cv=cv, pop=pop: (cv.delete("all"), cv.create_rectangle(0, 0, ev.width * pop / 100, 8, fill=PAL["accent"], width=0)))
-        tk.Label(bar, text=f"{pop}", bg=PAL["surface"], fg=PAL["fg"], font=(ui_theme.FONT_SEMI, 9)).pack(side="left")
+        CtkLabel(bar, text=f"{pop}", bg=PAL["surface"], fg=PAL["fg"], font=(ui_theme.FONT_SEMI, 9)).pack(side="left")
         sets = ", ".join(b.get("sets_or_brands") or [])
         tal = ", ".join(sorted(b.get("talents") or {}, key=lambda k: -(b["talents"][k]))[:3])
-        tk.Label(card, text=(sets + ("\n" + tal if tal else "")), bg=PAL["surface"], fg=PAL["fg"], font=(ui_theme.FONT, 9),
+        CtkLabel(card, text=(sets + ("\n" + tal if tal else "")), bg=PAL["surface"], fg=PAL["fg"], font=(ui_theme.FONT, 9),
                  justify="left", anchor="w", wraplength=380).pack(fill="x", padx=12, pady=(6, 0))
         src = m.get("sources") or []
         if src:
-            lk = tk.Label(card, text=f"🔗 {src[0]['title']}" + (f"  (+{len(src) - 1})" if len(src) > 1 else ""), bg=PAL["surface"], fg="#7cb7ff",
+            lk = CtkLabel(card, text=f"🔗 {src[0]['title']}" + (f"  (+{len(src) - 1})" if len(src) > 1 else ""), bg=PAL["surface"], fg="#7cb7ff",
                           cursor="hand2", font=(ui_theme.FONT, 8), anchor="w")
             lk.pack(fill="x", padx=12, pady=(4, 0)); lk.bind("<Button-1>", lambda e, u=src[0]["url"]: webbrowser_open(u))
-        btns = tk.Frame(card, bg=PAL["surface"]); btns.pack(fill="x", padx=12, pady=(8, 10))
-        ttk.Button(btns, text=("★ " if fav else "☆ ") + t("mg.fav"), command=lambda: self.meta_toggle_fav(b["meta_id"])).pack(side="left")
-        ttk.Button(btns, text=(t("mg.show") if hidden else t("mg.hide")), command=lambda: self.meta_toggle_hidden(b)).pack(side="left", padx=6)
+        btns = CtkFrame(card, bg=PAL["surface"]); btns.pack(fill="x", padx=12, pady=(8, 10))
+        CtkButton(btns, text=("★ " if fav else "☆ ") + t("mg.fav"), command=lambda: self.meta_toggle_fav(b["meta_id"])).pack(side="left")
+        CtkButton(btns, text=(t("mg.show") if hidden else t("mg.hide")), command=lambda: self.meta_toggle_hidden(b)).pack(side="left", padx=6)
         return card
 
     def meta_toggle_fav(self, mid):
@@ -3484,17 +3898,17 @@ class App:
 
     # --- haberler ve sezon
     def _build_news(self, f):
-        top = tk.Frame(f, bg=PAL["surface"]); top.pack(fill="x")
-        self.news_season = tk.Label(top, text="", bg=PAL["surface"], fg=PAL["fg"], font=(ui_theme.FONT_SEMI, 13), anchor="w")
+        top = CtkFrame(f, bg=PAL["surface"]); top.pack(fill="x")
+        self.news_season = CtkLabel(top, text="", bg=PAL["surface"], fg=PAL["fg"], font=(ui_theme.FONT_SEMI, 13), anchor="w")
         self.news_season.pack(fill="x", padx=14, pady=(10, 2))
-        row = tk.Frame(top, bg=PAL["surface"]); row.pack(fill="x", padx=14, pady=(2, 10))
+        row = CtkFrame(top, bg=PAL["surface"]); row.pack(fill="x", padx=14, pady=(2, 10))
         self.news_clock = {}
         for k in ("daily", "weekly", "tasks"):
-            box = tk.Frame(row, bg=PAL["bg"]); box.pack(side="left", padx=(0, 10), ipadx=10, ipady=4)
-            self.news_clock[k] = tk.Label(box, text="–", bg=PAL["bg"], fg=PAL["accent"], font=(ui_theme.FONT_SEMI, 16))
+            box = CtkFrame(row, bg=PAL["bg"]); box.pack(side="left", padx=(0, 10), ipadx=10, ipady=4)
+            self.news_clock[k] = CtkLabel(box, text="–", bg=PAL["bg"], fg=PAL["accent"], font=(ui_theme.FONT_SEMI, 16))
             self.news_clock[k].pack(anchor="w", padx=8)
-            tk.Label(box, text=t("news.c_" + k), bg=PAL["bg"], fg=PAL["muted"], font=(ui_theme.FONT, 9)).pack(anchor="w", padx=8)
-        holder = ttk.Frame(f); holder.pack(fill="both", expand=True, pady=(8, 0))
+            CtkLabel(box, text=t("news.c_" + k), bg=PAL["bg"], fg=PAL["muted"], font=(ui_theme.FONT, 9)).pack(anchor="w", padx=8)
+        holder = CtkFrame(f); holder.pack(fill="both", expand=True, pady=(8, 0))
         self.news_area = ui_theme.scrollable(holder, PAL["bg"])
         self.refresh_info_news(); self._news_tick()
 
@@ -3527,36 +3941,36 @@ class App:
         seen = set(self.cfg["settings"].get("news_seen", []))
         rows = knowledge.news_sorted(feed["items"])
         if not rows:
-            ttk.Label(self.news_area, text=t("news.empty"), foreground=PAL["muted"]).pack(anchor="w", padx=10, pady=10); return
+            CtkLabel(self.news_area, text=t("news.empty"), foreground=PAL["muted"]).pack(anchor="w", padx=10, pady=10); return
         now = datetime.now(timezone.utc)
         icons = {"patch": "🛠", "event": "🎉", "season": "🗺", "maintenance": "🔧", "dlc": "🆕", "community": "💬"}
         colors = {"live": PAL["success"], "upcoming": PAL["accent"], "news": PAL["muted"], "ended": PAL["muted"]}
         for it, stt in rows:
-            card = tk.Frame(self.news_area, bg=PAL["surface"]); card.pack(fill="x", padx=6, pady=5)
-            head = tk.Frame(card, bg=PAL["surface"]); head.pack(fill="x", padx=12, pady=(8, 0))
-            tk.Label(head, text=t("news.s_" + stt), bg=colors[stt], fg=PAL["bg"], font=(ui_theme.FONT_SEMI, 8), padx=6).pack(side="left")
+            card = CtkFrame(self.news_area, bg=PAL["surface"]); card.pack(fill="x", padx=6, pady=5)
+            head = CtkFrame(card, bg=PAL["surface"]); head.pack(fill="x", padx=12, pady=(8, 0))
+            CtkLabel(head, text=t("news.s_" + stt), bg=colors[stt], fg=PAL["bg"], font=(ui_theme.FONT_SEMI, 8), padx=6).pack(side="left")
             if it["id"] not in seen and stt != "ended":
-                tk.Label(head, text=t("news.new"), bg=PAL["accent"], fg=PAL["bg"], font=(ui_theme.FONT_SEMI, 8), padx=6).pack(side="left", padx=4)
+                CtkLabel(head, text=t("news.new"), bg=PAL["accent"], fg=PAL["bg"], font=(ui_theme.FONT_SEMI, 8), padx=6).pack(side="left", padx=4)
             title = it["title"].get(lang) or self.ai_localize(knowledge.pick_lang(it["title"], "en"), lang, lambda _t: self.refresh_info_news()) \
                 or knowledge.pick_lang(it["title"], lang)
-            tk.Label(head, text=f" {icons.get(it['kind'], '•')} " + title, bg=PAL["surface"], fg=PAL["fg"],
+            CtkLabel(head, text=f" {icons.get(it['kind'], '•')} " + title, bg=PAL["surface"], fg=PAL["fg"],
                      font=(ui_theme.FONT_SEMI, 11), anchor="w").pack(side="left")
             when = ""
             if stt == "live" and it.get("end"): when = t("news.ends_in", t=knowledge.fmt_left(it["end"] - now, t("news.d"))[0])
             elif stt == "upcoming" and it.get("start"): when = t("news.starts_in", t=knowledge.fmt_left(it["start"] - now, t("news.d"))[0])
             elif it.get("date"): when = it["date"].astimezone().strftime("%Y-%m-%d")
-            tk.Label(head, text=when, bg=PAL["surface"], fg=colors[stt], font=(ui_theme.FONT, 9)).pack(side="right")
+            CtkLabel(head, text=when, bg=PAL["surface"], fg=colors[stt], font=(ui_theme.FONT, 9)).pack(side="right")
             txt = (it.get("text") or {}).get(lang) or (self.ai_localize(knowledge.pick_lang(it.get("text"), "en"), lang, lambda _t: self.refresh_info_news())
                                                        if it.get("text") else None) or knowledge.pick_lang(it.get("text"), lang)
             if txt:
-                tk.Label(card, text=txt, bg=PAL["surface"], fg=PAL["fg"] if stt != "ended" else PAL["muted"], font=(ui_theme.FONT, 10),
+                CtkLabel(card, text=txt, bg=PAL["surface"], fg=PAL["fg"] if stt != "ended" else PAL["muted"], font=(ui_theme.FONT, 10),
                          justify="left", anchor="w", wraplength=900).pack(fill="x", padx=12, pady=(4, 0))
             if it.get("url"):
-                lk = tk.Label(card, text="🔗 " + (it.get("source") or t("news.source")), bg=PAL["surface"], fg="#7cb7ff", cursor="hand2",
+                lk = CtkLabel(card, text="🔗 " + (it.get("source") or t("news.source")), bg=PAL["surface"], fg="#7cb7ff", cursor="hand2",
                               font=(ui_theme.FONT, 9), anchor="w")
                 lk.pack(fill="x", padx=12, pady=(2, 8)); lk.bind("<Button-1>", lambda e, u=it["url"]: webbrowser_open(u))
             else:
-                tk.Frame(card, height=6, bg=PAL["surface"]).pack()
+                CtkFrame(card, height=6, bg=PAL["surface"]).pack()
 
     def _news_mark_seen(self):
         if not self.news: return
@@ -3569,16 +3983,16 @@ class App:
     # --- bilgi yarışması
     def _build_quiz(self, f):
         st = self.cfg["settings"]
-        top = tk.Frame(f, bg=PAL["surface"]); top.pack(fill="x")
-        self.quiz_lvl = tk.Label(top, text="", bg=PAL["surface"], fg=PAL["accent"], font=(ui_theme.FONT_SEMI, 13)); self.quiz_lvl.pack(side="left", padx=14, pady=10)
+        top = CtkFrame(f, bg=PAL["surface"]); top.pack(fill="x")
+        self.quiz_lvl = CtkLabel(top, text="", bg=PAL["surface"], fg=PAL["accent"], font=(ui_theme.FONT_SEMI, 13)); self.quiz_lvl.pack(side="left", padx=14, pady=10)
         self.quiz_bar = tk.Canvas(top, height=10, width=260, bg=PAL["bg"], highlightthickness=0); self.quiz_bar.pack(side="left", padx=6)
-        self.quiz_stat = tk.Label(top, text="", bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 10)); self.quiz_stat.pack(side="left", padx=10)
-        self.quiz_box = tk.Frame(f, bg=PAL["bg"]); self.quiz_box.pack(fill="both", expand=True, pady=10)
-        opt = ttk.Frame(f); opt.pack(fill="x")
+        self.quiz_stat = CtkLabel(top, text="", bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 10)); self.quiz_stat.pack(side="left", padx=10)
+        self.quiz_box = CtkFrame(f, bg=PAL["bg"]); self.quiz_box.pack(fill="both", expand=True, pady=10)
+        opt = CtkFrame(f); opt.pack(fill="x")
         self.quiz_load_v = tk.BooleanVar(value=bool(st.get("quiz_loading")))
-        ttk.Checkbutton(opt, text=t("quiz.on_loading"), variable=self.quiz_load_v,
+        CtkCheckBox(opt, text=t("quiz.on_loading"), variable=self.quiz_load_v,
                         command=lambda: (st.__setitem__("quiz_loading", bool(self.quiz_load_v.get())), save_cfg(self.cfg))).pack(anchor="w")
-        ttk.Label(opt, text=t("quiz.hint"), foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w")
+        CtkLabel(opt, text=t("quiz.hint"), foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w")
         self._quiz_streak = 0
         self._quiz_render_level()
 
@@ -3603,11 +4017,11 @@ class App:
         q = self._quiz_q = knowledge.Quiz(self.encyclopedia()).make()
         for c in box.winfo_children(): c.destroy()
         if not q:
-            ttk.Label(box, text=t("quiz.none"), foreground=PAL["muted"]).pack(anchor="w"); return
-        card = tk.Frame(box, bg=PAL["surface"]); card.pack(fill="x", padx=6, pady=6)
-        tk.Label(card, text=self._quiz_text(q), bg=PAL["surface"], fg=PAL["fg"], font=(ui_theme.FONT_SEMI, 11 if compact else 13),
+            CtkLabel(box, text=t("quiz.none"), foreground=PAL["muted"]).pack(anchor="w"); return
+        card = CtkFrame(box, bg=PAL["surface"]); card.pack(fill="x", padx=6, pady=6)
+        CtkLabel(card, text=self._quiz_text(q), bg=PAL["surface"], fg=PAL["fg"], font=(ui_theme.FONT_SEMI, 11 if compact else 13),
                  justify="left", anchor="w", wraplength=420 if compact else 900).pack(fill="x", padx=14, pady=(12, 8))
-        btns, fb = [], tk.Label(card, text="", bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 10), anchor="w", justify="left")
+        btns, fb = [], CtkLabel(card, text="", bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 10), anchor="w", justify="left")
         def answer(o, b):
             if getattr(card, "_done", False): return
             card._done = True
@@ -3627,33 +4041,33 @@ class App:
                       fg=PAL["success"] if ok else PAL["danger"])
             if hasattr(self, "quiz_lvl") and self.quiz_lvl.winfo_exists(): self._quiz_render_level()
             if hasattr(self, "sounds"): self.sounds.play("KEEP" if ok else "DISMANTLE", force=False)
-        grid = tk.Frame(card, bg=PAL["surface"]); grid.pack(fill="x", padx=14)
+        grid = CtkFrame(card, bg=PAL["surface"]); grid.pack(fill="x", padx=14)
         for i, o in enumerate(q["options"]):
-            b = tk.Button(grid, text=self._quiz_opt(q, o), bg=PAL["bg"], fg=PAL["fg"], activebackground=PAL["accent"], relief="flat",
+            b = CtkButton(grid, text=self._quiz_opt(q, o), bg=PAL["bg"], fg=PAL["fg"], activebackground=PAL["accent"], relief="flat",
                           font=(ui_theme.FONT, 10), wraplength=200 if compact else 400, justify="left", anchor="w", padx=10, pady=6, cursor="hand2")
             b.config(command=lambda o=o, b=b: answer(o, b))
             b.grid(row=i // 2, column=i % 2, sticky="ew", padx=4, pady=4); grid.columnconfigure(i % 2, weight=1)
             btns.append((b, o))
         fb.pack(fill="x", padx=14, pady=(6, 0))
-        nav = tk.Frame(card, bg=PAL["surface"]); nav.pack(fill="x", padx=14, pady=(6, 12))
-        ttk.Button(nav, text="➜ " + t("quiz.next"), command=lambda: self.quiz_next(box, compact), style="Accent.TButton").pack(side="left")
+        nav = CtkFrame(card, bg=PAL["surface"]); nav.pack(fill="x", padx=14, pady=(6, 12))
+        CtkButton(nav, text="➜ " + t("quiz.next"), command=lambda: self.quiz_next(box, compact), style="Accent.TButton").pack(side="left")
         subj = q["args"].get("name") or (q["right"] if q["kind"] == "talent_desc" else None)
         if subj and not compact:
-            ttk.Button(nav, text="📖 " + t("quiz.open_enc"), command=lambda: self.enc_open(subj)).pack(side="left", padx=6)
+            CtkButton(nav, text="📖 " + t("quiz.open_enc"), command=lambda: self.enc_open(subj)).pack(side="left", padx=6)
         self._quiz_card = card
 
     def quiz_popup(self):
         """Yükleme ekranında küçük yarışma penceresi (isteğe bağlı). Yükleme bitince kendiliğinden kapanır."""
         w = getattr(self, "_quiz_pop", None)
         if w and w.winfo_exists(): return
-        w = self._quiz_pop = tk.Toplevel(self.root); w.overrideredirect(True); w.attributes("-topmost", True)
+        w = self._quiz_pop = CtkToplevel(self.root); w.overrideredirect(True); w.attributes("-topmost", True)
         w.configure(bg=PAL["surface"], highlightthickness=1, highlightbackground=PAL["accent"])
         try: w.attributes("-alpha", 0.95)
         except tk.TclError: pass
-        head = tk.Frame(w, bg=PAL["surface"]); head.pack(fill="x")
-        tk.Label(head, text="❓ " + t("quiz.pop_title"), bg=PAL["surface"], fg=PAL["accent"], font=(ui_theme.FONT_SEMI, 10)).pack(side="left", padx=10, pady=6)
-        tk.Button(head, text="✕", command=w.destroy, bg=PAL["surface"], fg=PAL["muted"], relief="flat", cursor="hand2").pack(side="right", padx=4)
-        box = tk.Frame(w, bg=PAL["bg"]); box.pack(fill="both", expand=True)
+        head = CtkFrame(w, bg=PAL["surface"]); head.pack(fill="x")
+        CtkLabel(head, text="❓ " + t("quiz.pop_title"), bg=PAL["surface"], fg=PAL["accent"], font=(ui_theme.FONT_SEMI, 10)).pack(side="left", padx=10, pady=6)
+        CtkButton(head, text="✕", command=w.destroy, bg=PAL["surface"], fg=PAL["muted"], relief="flat", cursor="hand2").pack(side="right", padx=4)
+        box = CtkFrame(w, bg=PAL["bg"]); box.pack(fill="both", expand=True)
         self.quiz_next(box, compact=True)
         w.update_idletasks()
         sw = w.winfo_screenwidth(); w.geometry(f"+{sw - w.winfo_reqwidth() - 30}+{80}")
@@ -3730,19 +4144,19 @@ class App:
         SessionLog.end()'in döndürdüğü veriyi kullanır, yeni bir ölçüm yapmaz."""
         if not c:
             return self.toast(t("session.none_yet"))
-        w = tk.Toplevel(self.root); w.title(t("session.summary_title")); w.geometry("480x540")
+        w = CtkToplevel(self.root); w.title(t("session.summary_title")); w.geometry("480x540")
         w.minsize(440, 460); w.transient(self.root); w.configure(bg=PAL["bg"])
         mins = max(1, (c["end"] - c["start"]) // 60) if c.get("end") and c.get("start") else 0
         saved = self._session_time_saved_min(c)
-        ttk.Label(w, text="🎮 " + t("session.summary_title"), style="Title.TLabel").pack(anchor="w", padx=16, pady=(14, 2))
-        ttk.Label(w, text=t("session.duration", mins=mins), foreground=PAL["muted"]).pack(anchor="w", padx=16)
-        saved_box = ttk.Frame(w); saved_box.pack(fill="x", padx=16, pady=(10, 6))
-        ttk.Label(saved_box, text=t("session.time_saved", mins=saved), style="Title.TLabel",
+        CtkLabel(w, text="🎮 " + t("session.summary_title"), style="Title.TLabel").pack(anchor="w", padx=16, pady=(14, 2))
+        CtkLabel(w, text=t("session.duration", mins=mins), foreground=PAL["muted"]).pack(anchor="w", padx=16)
+        saved_box = CtkFrame(w); saved_box.pack(fill="x", padx=16, pady=(10, 6))
+        CtkLabel(saved_box, text=t("session.time_saved", mins=saved), style="Title.TLabel",
                   foreground=PAL["success"]).pack(anchor="w")
-        ttk.Label(saved_box, text=t("session.time_saved_note"), foreground=PAL["muted"],
+        CtkLabel(saved_box, text=t("session.time_saved_note"), foreground=PAL["muted"],
                   wraplength=440, justify="left").pack(anchor="w", pady=(2, 0))
         ttk.Separator(w).pack(fill="x", padx=16, pady=8)
-        ttk.Label(w, text=t("session.scanned", n=c.get("scanned", 0))).pack(anchor="w", padx=16)
+        CtkLabel(w, text=t("session.scanned", n=c.get("scanned", 0))).pack(anchor="w", padx=16)
         cv = tk.Canvas(w, bg=PAL["bg"], highlightthickness=0, height=110)
         cv.pack(fill="x", padx=16, pady=(4, 6))
         data = [(verdict_label(v), c.get(v.lower(), 0), COLORS[v]) for v in ("KEEP", "CONSIDER", "DISMANTLE")]
@@ -3752,15 +4166,15 @@ class App:
         if c.get("named"): bits.append(t("session.named_n", n=c["named"]))
         if c.get("upgrades"): bits.append(t("session.upgrades_n", n=c["upgrades"]))
         if bits:
-            ttk.Label(w, text=" · ".join(bits), foreground=PAL["accent"]).pack(anchor="w", padx=16, pady=(2, 6))
+            CtkLabel(w, text=" · ".join(bits), foreground=PAL["accent"]).pack(anchor="w", padx=16, pady=(2, 6))
         if c.get("highlights"):
             hl = ttk.LabelFrame(w, text=t("session.highlights_label")); hl.pack(fill="both", expand=True, padx=16, pady=(4, 8))
-            txt = tk.Text(hl, bg=PAL["surface"], fg=PAL["fg"], wrap="word", height=5,
+            txt = CtkTextbox(hl, bg=PAL["surface"], fg=PAL["fg"], wrap="word", height=5,
                           relief="flat", padx=8, pady=6)
             txt.insert("1.0", "\n".join(c["highlights"][-10:]))
             txt.config(state="disabled")
             txt.pack(fill="both", expand=True)
-        ttk.Button(w, text=t("upd.close"), command=w.destroy, style="Accent.TButton").pack(anchor="e", padx=16, pady=(0, 14))
+        CtkButton(w, text=t("upd.close"), command=w.destroy, style="Accent.TButton").pack(anchor="e", padx=16, pady=(0, 14))
 
     def _screen_observe(self, small):
         """Tarama döngüsünden (arka plan) — ekran durumu; değişince arayüze bildirir."""
@@ -3877,7 +4291,8 @@ class App:
         if not cid.isdigit():
             def fetch():                                     # Discord uygulama kimliği sunucudan (herkese açık bilgi)
                 try:
-                    with urllib.request.urlopen(self._acc_url().rstrip("/") + "/v1/health", timeout=8) as r:
+                    health_url = _assert_http_url(self._acc_url().rstrip("/") + "/v1/health")
+                    with urllib.request.urlopen(urllib.request.Request(health_url), timeout=8) as r:  # nosec B310 - URL scheme validated above.
                         got = str(json.loads(r.read()).get("discord_app") or "")
                 except Exception:
                     got = ""
@@ -3950,13 +4365,13 @@ class App:
 
     # --- ayarlar sayfası
     def build_service_page(self, f, st):
-        P = lambda parent, txt: ttk.Label(parent, text=txt, foreground=PAL["muted"], wraplength=900, justify="left")
+        P = lambda parent, txt: CtkLabel(parent, text=txt, foreground=PAL["muted"], wraplength=900, justify="left")
         def chk(parent, key, label, cmd=None, feature=None):
             v = tk.BooleanVar(value=bool(st.get(key)))
             def ch():
                 st[key] = bool(v.get()); save_cfg(self.cfg)
                 if cmd: cmd()
-            cb = ttk.Checkbutton(parent, text=label + ("" if not feature or self.ent.has(feature) else "  ⭐"), variable=v, command=ch)
+            cb = CtkCheckBox(parent, text=label + ("" if not feature or self.ent.has(feature) else "  ⭐"), variable=v, command=ch)
             if feature and not self.ent.has(feature): cb.state(["disabled"])
             cb.pack(anchor="w", padx=10, pady=1); return v
         # 1) arka plan
@@ -3966,7 +4381,7 @@ class App:
         chk(g, "svc_tray", t("svc.tray"), cmd=lambda: (self.tray_start() if st.get("svc_tray") else (self.tray and self.tray.stop(), setattr(self, "tray", None))))
         chk(g, "svc_close_to_tray", t("svc.close_to_tray"))
         av = tk.BooleanVar(value=service.autostart_get())
-        cb = ttk.Checkbutton(g, text=t("svc.autostart"), variable=av, command=lambda: self.autostart_toggle(av))
+        cb = CtkCheckBox(g, text=t("svc.autostart"), variable=av, command=lambda: self.autostart_toggle(av))
         cb.pack(anchor="w", padx=10, pady=1)
         if os.name != "nt": cb.state(["disabled"])
         tot = self.sessions.totals(7)
@@ -3977,8 +4392,8 @@ class App:
         chk(sm, "smart_scan", t("svc.smart"))
         n = self.screen.learned()
         P(sm, t("svc.smart_hint") + "  " + (t("svc.smart_learned", n=n) if n else t("svc.smart_none"))).pack(anchor="w", padx=12)
-        rr = ttk.Frame(sm); rr.pack(anchor="w", padx=10, pady=(4, 8))
-        ttk.Button(rr, text=t("svc.smart_reset"), command=lambda: (self.screen.reset(), self.toast(t("svc.smart_reset_done")))).pack(side="left")
+        rr = CtkFrame(sm); rr.pack(anchor="w", padx=10, pady=(4, 8))
+        CtkButton(rr, text=t("svc.smart_reset"), command=lambda: (self.screen.reset(), self.toast(t("svc.smart_reset_done")))).pack(side="left")
         # 3) yerel API
         ap = ttk.LabelFrame(f, text="🔌 " + t("svc.box_api") + ("" if self.ent.has("local_api") else "  ⭐")); ap.pack(fill="x", padx=10, pady=6)
         chk(ap, "api_on", t("svc.api_on"), cmd=lambda: (self.api_apply(), self.rebuild_ui(tab="settings")), feature="local_api")
@@ -3987,10 +4402,10 @@ class App:
         if self.api and self.api.running:
             for label, val in ((t("svc.api_obs"), self.api.url("/overlay")), ("WebSocket", self.api.ws_url),
                                (t("svc.api_deck"), self.api.url("/deck/toggle"))):
-                r = ttk.Frame(ap); r.pack(fill="x", padx=10, pady=1)
-                ttk.Label(r, text=label, width=16).pack(side="left")
-                e = ttk.Entry(r); e.insert(0, val); e.config(state="readonly"); e.pack(side="left", fill="x", expand=True)
-                ttk.Button(r, text="📋", width=3, command=lambda v=val: (self.root.clipboard_clear(), self.root.clipboard_append(v),
+                r = CtkFrame(ap); r.pack(fill="x", padx=10, pady=1)
+                CtkLabel(r, text=label, width=16).pack(side="left")
+                e = CtkEntry(r); e.insert(0, val); e.config(state="readonly"); e.pack(side="left", fill="x", expand=True)
+                CtkButton(r, text="📋", width=3, command=lambda v=val: (self.root.clipboard_clear(), self.root.clipboard_append(v),
                                                                        self.toast(t("svc.copied")))).pack(side="left", padx=4)
             P(ap, t("svc.api_hint")).pack(anchor="w", padx=12, pady=(2, 8))
         else:
@@ -4001,21 +4416,21 @@ class App:
         P(dc, t("svc.rpc_hint")).pack(anchor="w", padx=12, pady=(0, 8))
         pn = ttk.LabelFrame(f, text="📱 " + t("svc.box_push") + ("" if self.ent.has("push_notify") else "  ⭐")); pn.pack(fill="x", padx=10, pady=6)
         chk(pn, "push_on", t("svc.push_on"), cmd=self._push_configure, feature="push_notify")
-        r1 = ttk.Frame(pn); r1.pack(fill="x", padx=10, pady=2)
-        ttk.Label(r1, text=t("svc.push_topic"), width=16).pack(side="left")
+        r1 = CtkFrame(pn); r1.pack(fill="x", padx=10, pady=2)
+        CtkLabel(r1, text=t("svc.push_topic"), width=16).pack(side="left")
         tv = tk.StringVar(value=st.get("push_topic", ""))
-        ttk.Entry(r1, textvariable=tv).pack(side="left", fill="x", expand=True)
-        ttk.Button(r1, text=t("svc.push_new"), command=lambda: tv.set(notify.new_topic())).pack(side="left", padx=4)
-        r2 = ttk.Frame(pn); r2.pack(fill="x", padx=10, pady=2)
-        ttk.Label(r2, text=t("svc.push_webhook"), width=16).pack(side="left")
+        CtkEntry(r1, textvariable=tv).pack(side="left", fill="x", expand=True)
+        CtkButton(r1, text=t("svc.push_new"), command=lambda: tv.set(notify.new_topic())).pack(side="left", padx=4)
+        r2 = CtkFrame(pn); r2.pack(fill="x", padx=10, pady=2)
+        CtkLabel(r2, text=t("svc.push_webhook"), width=16).pack(side="left")
         wv = tk.StringVar(value=st.get("push_webhook", ""))
-        ttk.Entry(r2, textvariable=wv, show="•").pack(side="left", fill="x", expand=True)
-        ev_row = ttk.Frame(pn); ev_row.pack(anchor="w", padx=6, pady=2)
+        CtkEntry(r2, textvariable=wv, show="•").pack(side="left", fill="x", expand=True)
+        ev_row = CtkFrame(pn); ev_row.pack(anchor="w", padx=6, pady=2)
         for k in ("drop", "build", "vendor", "session", "news"):
             v = tk.BooleanVar(value=st.get("push_" + k, True))
-            ttk.Checkbutton(ev_row, text=t("svc.push_" + k), variable=v,
+            CtkCheckBox(ev_row, text=t("svc.push_" + k), variable=v,
                             command=lambda k=k, v=v: (st.__setitem__("push_" + k, bool(v.get())), save_cfg(self.cfg))).pack(side="left", padx=4)
-        qr_lbl = tk.Label(pn, bg=PAL["bg"]); res_lbl = ttk.Label(pn, text="", foreground=PAL["muted"])
+        qr_lbl = CtkLabel(pn, bg=PAL["bg"]); res_lbl = CtkLabel(pn, text="", foreground=PAL["muted"])
 
         def save_push(test=False):
             tp, wh = tv.get().strip(), wv.get().strip()
@@ -4024,7 +4439,7 @@ class App:
             st["push_topic"], st["push_webhook"] = tp, wh; save_cfg(self.cfg); self._push_configure()
             img = companion.qr_image(self.notifier.subscribe_url, 4) if self.notifier.topic else None
             if img is not None:
-                qr_lbl._img = ImageTk.PhotoImage(img); qr_lbl.config(image=qr_lbl._img); qr_lbl.pack(anchor="w", padx=12, pady=4)
+                qr_lbl._img = compat_image(img); qr_lbl.config(image=qr_lbl._img); qr_lbl.pack(anchor="w", padx=12, pady=4)
             if not test: return res_lbl.config(text=t("svc.saved"), foreground=PAL["success"])
             if not self.notifier.enabled: return res_lbl.config(text=t("svc.push_need"), foreground=PAL["warning"])
             res_lbl.config(text=t("acc.working"), foreground=PAL["muted"])
@@ -4034,9 +4449,9 @@ class App:
                 self.root.after(0, lambda: res_lbl.config(text=txt + (f"  ({self.notifier.last_error})" if self.notifier.last_error else ""),
                                                          foreground=PAL["success"] if all(v is not False for v in r) else PAL["danger"]))
             threading.Thread(target=go, daemon=True).start()
-        br = ttk.Frame(pn); br.pack(anchor="w", padx=10, pady=4)
-        ttk.Button(br, text="💾 " + t("svc.save"), command=save_push).pack(side="left")
-        ttk.Button(br, text="🔔 " + t("svc.push_test"), command=lambda: save_push(True), style="Accent.TButton").pack(side="left", padx=6)
+        br = CtkFrame(pn); br.pack(anchor="w", padx=10, pady=4)
+        CtkButton(br, text="💾 " + t("svc.save"), command=save_push).pack(side="left")
+        CtkButton(br, text="🔔 " + t("svc.push_test"), command=lambda: save_push(True), style="Accent.TButton").pack(side="left", padx=6)
         res_lbl.pack(anchor="w", padx=12)
         P(pn, t("svc.push_hint")).pack(anchor="w", padx=12, pady=(2, 8))
         if self.notifier.topic: save_push()
@@ -4116,12 +4531,12 @@ class App:
     def open_account(self, welcome=False):
         if getattr(self, "_acc_win", None) and self._acc_win.winfo_exists():
             self._acc_win.lift(); return
-        w = self._acc_win = tk.Toplevel(self.root); w.title("👤 " + t("acc.title")); w.configure(bg=PAL["bg"])
+        w = self._acc_win = CtkToplevel(self.root); w.title("👤 " + t("acc.title")); w.configure(bg=PAL["bg"])
         w.transient(self.root)
         k = getattr(self, "ui_factor", 1.0)
         w.geometry(f"{int(560 * k)}x{int(600 * k)}"); w.minsize(int(480 * k), int(460 * k))
         self._acc_welcome, self._acc_msg = welcome, None
-        self._acc_body = tk.Frame(w, bg=PAL["bg"]); self._acc_body.pack(fill="both", expand=True, padx=18, pady=16)
+        self._acc_body = CtkFrame(w, bg=PAL["bg"]); self._acc_body.pack(fill="both", expand=True, padx=18, pady=16)
         w.bind("<Escape>", lambda e: w.destroy())
         self._acc_fill()
 
@@ -4129,35 +4544,35 @@ class App:
         b = self._acc_body
         for c in b.winfo_children(): c.destroy()
         a, e = self.account, self.ent
-        H = lambda txt, size=15, fg=None: tk.Label(b, text=txt, bg=PAL["bg"], fg=fg or PAL["fg"], font=(ui_theme.FONT_SEMI, size),
+        H = lambda txt, size=15, fg=None: CtkLabel(b, text=txt, bg=PAL["bg"], fg=fg or PAL["fg"], font=(ui_theme.FONT_SEMI, size),
                                                    anchor="w", justify="left")
-        P = lambda txt, fg=None: tk.Label(b, text=txt, bg=PAL["bg"], fg=fg or PAL["muted"], font=(ui_theme.FONT, 10),
+        P = lambda txt, fg=None: CtkLabel(b, text=txt, bg=PAL["bg"], fg=fg or PAL["muted"], font=(ui_theme.FONT, 10),
                                           anchor="w", justify="left", wraplength=int(500 * getattr(self, "ui_factor", 1.0)))
         if not a.signed_in:
             H("👤 " + t("acc.welcome_title" if self._acc_welcome else "acc.title")).pack(fill="x")
             P(t("acc.intro")).pack(fill="x", pady=(6, 12))
-            card = tk.Frame(b, bg=PAL["surface"], highlightthickness=1, highlightbackground=PAL["accent"])
+            card = CtkFrame(b, bg=PAL["surface"], highlightthickness=1, highlightbackground=PAL["accent"])
             card.pack(fill="x", pady=4)
             for line in ("acc.why_1", "acc.why_2", "acc.why_3"):
-                tk.Label(card, text="⭐  " + t(line), bg=PAL["surface"], fg=PAL["fg"], font=(ui_theme.FONT, 10), anchor="w",
+                CtkLabel(card, text="⭐  " + t(line), bg=PAL["surface"], fg=PAL["fg"], font=(ui_theme.FONT, 10), anchor="w",
                          justify="left").pack(fill="x", padx=12, pady=(6, 0))
-            tk.Frame(card, height=8, bg=PAL["surface"]).pack()
-            self._acc_btn = ttk.Button(b, text="🎮  " + t("acc.discord"), style="Accent.TButton", command=self._acc_login)
+            CtkFrame(card, height=8, bg=PAL["surface"]).pack()
+            self._acc_btn = CtkButton(b, text="🎮  " + t("acc.discord"), style="Accent.TButton", command=self._acc_login)
             self._acc_btn.pack(fill="x", pady=(16, 4), ipady=6)
             P(t("acc.register_note")).pack(fill="x")
-            self._acc_status = tk.Label(b, text="", bg=PAL["bg"], fg=PAL["muted"], font=(ui_theme.FONT, 10), anchor="w",
+            self._acc_status = CtkLabel(b, text="", bg=PAL["bg"], fg=PAL["muted"], font=(ui_theme.FONT, 10), anchor="w",
                                         justify="left", wraplength=int(500 * getattr(self, "ui_factor", 1.0)))
             self._acc_status.pack(fill="x", pady=(8, 0))
-            sec = tk.Frame(b, bg=PAL["bg"]); sec.pack(fill="x", side="bottom")
+            sec = CtkFrame(b, bg=PAL["bg"]); sec.pack(fill="x", side="bottom")
             for line in ("acc.sec_1", "acc.sec_2", "acc.sec_3"):
-                tk.Label(sec, text="🔒 " + t(line), bg=PAL["bg"], fg=PAL["muted"], font=(ui_theme.FONT, 9), anchor="w").pack(fill="x")
+                CtkLabel(sec, text="🔒 " + t(line), bg=PAL["bg"], fg=PAL["muted"], font=(ui_theme.FONT, 9), anchor="w").pack(fill="x")
             if self._acc_welcome:
-                ttk.Button(b, text=t("acc.skip"), command=self._acc_win.destroy).pack(anchor="e", pady=(10, 6), side="bottom")
+                CtkButton(b, text=t("acc.skip"), command=self._acc_win.destroy).pack(anchor="e", pady=(10, 6), side="bottom")
         else:
             prem = e.source == "account"
             H("👤 " + a.username).pack(fill="x")
             badge = ("⭐ " + t("prem.premium")) if prem else (("⭐ " + t("acc.via_key")) if e.valid else t("prem.free"))
-            tk.Label(b, text=badge, bg=PAL["accent"] if (prem or e.valid) else PAL["surface"],
+            CtkLabel(b, text=badge, bg=PAL["accent"] if (prem or e.valid) else PAL["surface"],
                      fg=PAL["bg"] if (prem or e.valid) else PAL["muted"], font=(ui_theme.FONT_SEMI, 10), padx=10, pady=2).pack(anchor="w", pady=(4, 8))
             lic = a.data.get("license") or {}
             if lic:
@@ -4173,22 +4588,22 @@ class App:
                 P(t("acc.nokey"), fg=PAL["warning"]).pack(fill="x", pady=(6, 0))
             H(t("acc.redeem_title"), 11).pack(fill="x", pady=(18, 2))
             P(t("acc.redeem_hint")).pack(fill="x")
-            rr = tk.Frame(b, bg=PAL["bg"]); rr.pack(fill="x", pady=6)
-            self._acc_code = ttk.Entry(rr); self._acc_code.pack(side="left", fill="x", expand=True)
+            rr = CtkFrame(b, bg=PAL["bg"]); rr.pack(fill="x", pady=6)
+            self._acc_code = CtkEntry(rr); self._acc_code.pack(side="left", fill="x", expand=True)
             self._acc_code.bind("<Return>", lambda ev: self._acc_redeem())
-            self._acc_btn = ttk.Button(rr, text="✔ " + t("acc.redeem"), style="Accent.TButton", command=self._acc_redeem)
+            self._acc_btn = CtkButton(rr, text="✔ " + t("acc.redeem"), style="Accent.TButton", command=self._acc_redeem)
             self._acc_btn.pack(side="left", padx=(6, 0))
-            self._acc_status = tk.Label(b, text="", bg=PAL["bg"], fg=PAL["muted"], font=(ui_theme.FONT, 10), anchor="w",
+            self._acc_status = CtkLabel(b, text="", bg=PAL["bg"], fg=PAL["muted"], font=(ui_theme.FONT, 10), anchor="w",
                                         justify="left", wraplength=int(500 * getattr(self, "ui_factor", 1.0)))
             self._acc_status.pack(fill="x")
             P(t("acc.one_device")).pack(fill="x", pady=(14, 0))
             P(t("acc.mobile_hint")).pack(fill="x", pady=(16, 2))
-            ttk.Button(b, text="📱 " + t("acc.mobile_pair"), command=self._acc_pair_phone).pack(fill="x", pady=(2, 0))
-            bar = tk.Frame(b, bg=PAL["bg"]); bar.pack(fill="x", side="bottom", pady=(10, 0))
-            ttk.Button(bar, text="🔄 " + t("acc.refresh"), command=lambda: (self._acc_set_status(t("acc.working")), self.account_refresh())).pack(side="left")
-            ttk.Button(bar, text="🐞 " + t("acc.support"), command=lambda: self.open_feedback(
+            CtkButton(b, text="📱 " + t("acc.mobile_pair"), command=self._acc_pair_phone).pack(fill="x", pady=(2, 0))
+            bar = CtkFrame(b, bg=PAL["bg"]); bar.pack(fill="x", side="bottom", pady=(10, 0))
+            CtkButton(bar, text="🔄 " + t("acc.refresh"), command=lambda: (self._acc_set_status(t("acc.working")), self.account_refresh())).pack(side="left")
+            CtkButton(bar, text="🐞 " + t("acc.support"), command=lambda: self.open_feedback(
                 prefill={"type": "question", "title": t("acc.support_title")})).pack(side="left", padx=6)
-            ttk.Button(bar, text="⎋ " + t("acc.logout"), command=self._acc_logout).pack(side="right")
+            CtkButton(bar, text="⎋ " + t("acc.logout"), command=self._acc_logout).pack(side="right")
         if getattr(self, "_acc_msg", None):
             self._acc_set_status(*self._acc_msg)
 
@@ -4255,7 +4670,7 @@ class App:
         pr = st.get("ocr_gpu_probe") or {}
         if mode == "off" or OCR is None or OCR.name != "rapidocr" or sys.platform != "win32": return False
         if pr.get("key") == self._gpu_key() and (pr.get("ok") or mode == "on"):
-            ocr_backend.USE_DML = True; ocr_backend.reset_rapid(); OCR.warm_up()
+            ocr_backend.USE_DML = True; ocr_backend.reset_rapid(); self._ocr_ready_event = OCR.warm_up()
             log.info("OCR: DirectML (GPU) on — cached probe cpu %s ms -> gpu %s ms", pr.get("cpu_ms"), pr.get("dml_ms"))
             return True
         return False
@@ -4294,7 +4709,7 @@ class App:
         if res.get("ok") or (mode == "on" and "DmlExecutionProvider" in (res.get("providers") or [])):
             with self.lock:
                 ocr_backend.USE_DML = True; ocr_backend.reset_rapid()
-            OCR.warm_up()
+            self._ocr_ready_event = OCR.warm_up()
             log.info("OCR: DirectML (GPU) on — cpu %s ms -> gpu %s ms", res.get("cpu_ms"), res.get("dml_ms"))
 
     def set_app_icon(self):
@@ -4332,26 +4747,29 @@ class App:
         self.on_close(force=True)
 
     def apply_window_profile(self, initial=False):
-        """Pencereyi seçilen çözünürlük profiline göre boyutlandırır: 240p'den 4K'ya kadar her ekranda sığar.
-        Küçük ekranlarda yazılar/boşluklar küçülür (tk scaling), başlık bandı incelir (kompakt mod)."""
+        """Size the UI from the real Windows work area, not game resolution."""
         st = self.cfg["settings"]
         key, prof = active_profile(st)
-        try: pw, ph = map(int, key.split("x"))
-        except ValueError: pw, ph = self.root.winfo_screenwidth(), self.root.winfo_screenheight()
-        sw, sh = self.root.winfo_screenwidth(), self.root.winfo_screenheight()
-        tw, th = min(pw, sw), min(ph, sh)                 # profil ekrandan büyükse ekran sınırı
-        # yazı ölçeği: 1080p = 1.0 → 720p ≈ 0.8, 480p ≈ 0.62, 240p ≈ 0.5, 1440p ≈ 1.1, 4K ≈ 1.3
-        f = max(0.5, min(1.35, (th / 1080) ** 0.55))
+        wx, wy, work_w, work_h = screen_work_area(self.root)
+        base_scaling = max(0.9, float(getattr(self, "_base_scaling", 1.0)))
+        # Tk scaling is pixels-per-point-ish; normalize it around the common
+        # 1.0 value so DPI correction remains bounded and predictable.
+        dpi_scale = max(0.9, min(1.35, base_scaling))
+        ww, wh, f = calculate_window_profile(work_w, work_h, dpi_scale=dpi_scale)
         self.ui_factor = f
-        self.compact = th < 800
+        self._profile_ui_factor = f
+        self._screen_work_area = (wx, wy, work_w, work_h)
+        self.compact = work_w < 1200 or work_h < 760
         try: self.root.tk.call("tk", "scaling", self._base_scaling * f)
         except tk.TclError: pass
-        ww, wh = (int(tw * 0.98), int(th * 0.92)) if self.compact else \
-                 ((1700, 1080) if tw >= 3000 and th >= 1300 else (1360, 900) if tw >= 1900 else (min(1240, tw - 40), min(860, th - 60)))
-        self.root.minsize(min(880, max(320, ww - 20)), min(640, max(200, wh - 20)))
-        x = max(0, (sw - ww) // 2); y = max(0, (sh - wh) // 3)
+        self.root.minsize(min(960, max(320, ww - 20)), min(680, max(200, wh - 20)))
+        self._window_profile_size = (ww, wh)
+        self._responsive_scale = 1.0
+        x = wx + max(12, (work_w - ww) // 2)
+        y = wy + max(12, (work_h - wh) // 2)
         self.root.geometry(f"{ww}x{wh}+{x}+{y}")
-        log.info("Window profile %s: %dx%d, ui scale %.2f, compact=%s", key, ww, wh, f, self.compact)
+        log.info("Window profile %s: workarea=%dx%d+%d+%d, window=%dx%d, dpi=%.2f, ui scale %.2f, compact=%s",
+                 key, work_w, work_h, wx, wy, ww, wh, dpi_scale, f, self.compact)
 
     def apply_fx(self):
         """İmleç, fare izi ve arka plan videosunu ayarlara göre aç/kapat."""
@@ -4361,11 +4779,47 @@ class App:
                                   st.get("fx_cursor_color", "#ff6d10"), st.get("fx_cursor_custom", ""), getattr(self, "ui_factor", 1.0))
         if not ok: log.warning("Custom cursor could not be applied")
         tr = getattr(self, "trail_fx", None)
-        # Fare izi devre dışı: tam pencere Canvas denemesi Windows şeffaf
-        # arka planıyla çakışarak arayüz katmanını görünmez yapabildi.
-        if tr:
+        trail_on = bool(st.get("fx_trail", True))
+        trail_color = st.get("fx_trail_color", "#ff6d10")
+        trail_length = int(st.get("fx_trail_len", 18) or 18)
+        if tr and (not trail_on or not isinstance(tr, fx.TrailFX)
+                   or tr.color != trail_color or tr.length != max(6, min(32, trail_length))):
             tr.stop()
             self.trail_fx = None
+        # Güvenli iz, ana widget ağacında ve diğer kontrollerin altında
+        # çalışır. Riskli üst pencere overlay'i ise yalnız geliştirici
+        # tanılamasında açıkça istenirse kullanılır.
+        trail_requested = trail_on
+        if trail_requested and getattr(self, "trail_fx", None) is None:
+            # A separate transparent top-level can make Tk/CustomTkinter text
+            # glyphs disappear while Windows repaints the surface, even when
+            # its hit-test hook is correct.  Keep the production path inside
+            # the app's own widget tree so labels and controls cannot be
+            # clipped.  The old overlay remains available for diagnosis only
+            # with an explicit developer opt-in.
+            # Saydam katman varsayılan yol: gerçek tıklama-geçirgen Toplevel.
+            # Eski SafeTrail, sayfa gövdeleri opak olduğu için panelin
+            # arkasında kalıyordu (fare izi görünmüyordu). Katman başlatılamazsa
+            # güvenli yedek olarak SafeTrail kullanılır.
+            overlay_requested = os.environ.get("TD2_TRAIL_OVERLAY", "1").strip() != "0"
+
+            def _trail_window_hook(win):
+                # Tıklama-geçirgen + ekran yakalamadan hariç: fare izi ne menü
+                # tıklamasını yakalar ne de OCR karesine çizgi olarak düşer.
+                click_through(win)
+                exclude_from_capture(win, "trail")
+
+            candidate = (fx.TrailFX(self.root, color=trail_color, length=trail_length,
+                                    click_through=_trail_window_hook)
+                         if overlay_requested else None)
+            if candidate and candidate.start():
+                self.trail_fx = candidate
+            else:
+                if overlay_requested:
+                    log.warning("Cursor trail overlay unavailable; using background-safe trail")
+                self.trail_fx = fx.SafeTrail(self.root, color=trail_color, length=trail_length)
+        if not trail_requested and getattr(self, "trail_fx", None):
+            self.trail_fx.stop(); self.trail_fx = None
         if float(st.get("fx_video_dim", 0.35)) > 0.7: st["fx_video_dim"] = 0.35     # eski sürümden kalan çok koyu ayar
         # tüm pencere arka planı: ajan saati (Windows, koyu temalar)
         wb = getattr(self, "watch_bg", None)
@@ -4373,7 +4827,8 @@ class App:
         # yanlış alt çerçeveye yönlendirebildiği için dekoratif saati kapat.
         # Büyük görünümde efekt aynen korunur; küçük görünümde tıklama yüzeyi
         # doğrudan ana pencereye ait olur.
-        want = (bool(st.get("fx_bgwatch", True)) and os.name == "nt"
+        want = (bool(st.get("fx_bgwatch", True)) and os.environ.get("TD2_BGWATCH_EFFECT", "").strip() == "1"
+                and os.name == "nt"
                 and PAL.get("mode") != "light" and not getattr(self, "compact", False))
         variant = st.get("event_fx", "standard")
         if wb and (not want or wb.bgc != PAL["bg"] or wb.color != PAL["accent"] or wb.dim != float(st.get("fx_bgwatch_dim", 0.0)) or wb.variant != variant):
@@ -4403,6 +4858,7 @@ class App:
                         self.make_videos()                         # ilk açılış: özgün arka plan videolarını üret
                     self.video = None
 
+
     def normalize_builds(self):
         """Build'lerdeki talent/eşya karışıklığını oyun kütüphanesine göre düzeltir (Equalizer → items)."""
         changed = False
@@ -4412,6 +4868,22 @@ class App:
             if unk: log.warning("Build %r: unknown talents %s (not in game library)", b["name"], unk)
         if changed:
             save_cfg(self.cfg); log.info("Builds normalized against game library")
+
+    def _deferred_startup_state(self):
+        """Run nonessential build/stash migration after the first UI frame."""
+        if getattr(self, "_closing", False): return
+        try:
+            self.normalize_builds()
+            if not self.stash.data.get("imported_progress"):
+                n = self.stash.import_progress(self.progress, GAME) if GAME.ok else 0
+                self.stash.data["imported_progress"] = True; self.stash.save()
+                if n: log.info("Stash: imported %d items from progress.json", n)
+            self._startup_state_ready = True
+            if getattr(self, "_ui_ready", False) and self.current_tab() in ("builds", "stash"):
+                if self.current_tab() == "builds": self.refresh_builds()
+                else: self.refresh_stash()
+        except Exception:
+            log.exception("Deferred startup state initialization failed")
 
     def build_ui(self):
         """ISAC kabuk + sabit ana gezinme + özellik gruplarının alt sekmeleri."""
@@ -4437,12 +4909,14 @@ class App:
 
         # ISAC ana kabuğu: tek bir sol navigasyon paneli kullanır; grup ve sayfa
         # sekmeleri ayrı satırlara yayılmaz.
-        self.workspace = ttk.Frame(self.root)
-        self.workspace.pack(fill="both", expand=True, padx=10, pady=(4, 10))
-        self.nav_panel = ttk.Frame(self.workspace, style="Sidebar.TFrame", width=224)
-        self.nav_panel.pack(side="left", fill="y", padx=(0, 8))
+        shell = ui_theme.DESIGN_TOKENS["shell"]
+        self.workspace = CtkFrame(self.root)
+        self.workspace.pack(fill="both", expand=True, padx=shell["workspace_gap"], pady=(4, shell["workspace_gap"]))
+        self.nav_panel = CtkFrame(self.workspace, style="Sidebar.TFrame", bg=PAL["surface"],
+                                  width=shell["nav_width"])
+        self.nav_panel.pack(side="left", fill="y", padx=(0, shell["workspace_gap"] - 2))
         self.nav_panel.pack_propagate(False)
-        self.main_area = ttk.Frame(self.workspace)
+        self.main_area = CtkFrame(self.workspace, bg=PAL["bg"])
         self.main_area.pack(side="left", fill="both", expand=True)
         self._build_page_context(self.main_area)
         self._build_single_nav(self.nav_panel)
@@ -4460,7 +4934,7 @@ class App:
 
         self.group_nbs = {}
         for group in self.group_keys:
-            holder = ttk.Frame(nb)
+            holder = CtkFrame(nb)
             nb.add(holder, text=self.group_labels[group])
             self.group_nbs[group] = ttk.Notebook(holder, style="NoTabs.TNotebook")
             self.group_nbs[group].pack(fill="both", expand=True, padx=3, pady=3)
@@ -4468,7 +4942,7 @@ class App:
         for k in self.tab_keys:
             group = self.tab_groups[k]
             parent = self.group_nbs[group]
-            self.tabs[k] = ttk.Frame(parent)
+            self.tabs[k] = CtkFrame(parent)
             title = "The Division 3" if k == "division3" else ("BUILD TOOL" if k == "build_tool" else t(f"tab.{k}"))
             parent.add(self.tabs[k], text=ui_theme.with_icon(title, ui_theme.TAB_ICONS.get(k, "")))
 
@@ -4488,13 +4962,12 @@ class App:
         for inner in self.group_nbs.values(): inner.bind("<<NotebookTabChanged>>", self.on_tab)
         self._sidebar_activate("home")
         self.root.after_idle(self._build_next_ui_page)
-
     def _build_field_command_shell(self):
         """Saha terminali: yatay menü yerine tek dikey gezinme paneli kullanır."""
-        self.workspace = ttk.Frame(self.root); self.workspace.pack(fill="both", expand=True, padx=12, pady=(4, 12))
-        self.nav_panel = ttk.Frame(self.workspace, style="Sidebar.TFrame", width=224)
+        self.workspace = CtkFrame(self.root, bg=PAL["bg"]); self.workspace.pack(fill="both", expand=True, padx=12, pady=(4, 12))
+        self.nav_panel = CtkFrame(self.workspace, style="Sidebar.TFrame", bg=PAL["surface"], width=224)
         self.nav_panel.pack(side="left", fill="y", padx=(0, 8)); self.nav_panel.pack_propagate(False)
-        self.main_area = ttk.Frame(self.workspace); self.main_area.pack(side="left", fill="both", expand=True)
+        self.main_area = CtkFrame(self.workspace, bg=PAL["bg"]); self.main_area.pack(side="left", fill="both", expand=True)
         self._build_page_context(self.main_area)
         self._responsive_job = None; self.root.bind("<Configure>", self._responsive_configure, add="+")
         self.fxbar = fx.Transition(self.root, self.root, color=PAL["accent"], bg=PAL["bg"],
@@ -4503,11 +4976,11 @@ class App:
         nb = self.nb = ttk.Notebook(self.main_area, style="NoTabs.TNotebook"); nb.pack(fill="both", expand=True, padx=2, pady=2)
         self.group_nbs = {}
         for group in self.group_keys:
-            holder = ttk.Frame(nb); nb.add(holder, text=self.group_labels[group])
+            holder = CtkFrame(nb); nb.add(holder, text=self.group_labels[group])
             self.group_nbs[group] = ttk.Notebook(holder, style="NoTabs.TNotebook"); self.group_nbs[group].pack(fill="both", expand=True, padx=4, pady=4)
         self.tabs = {}
         for key in self.tab_keys:
-            parent = self.group_nbs[self.tab_groups[key]]; self.tabs[key] = ttk.Frame(parent)
+            parent = self.group_nbs[self.tab_groups[key]]; self.tabs[key] = CtkFrame(parent)
             title = "The Division 3" if key == "division3" else ("BUILD TOOL" if key == "build_tool" else t(f"tab.{key}"))
             parent.add(self.tabs[key], text=ui_theme.with_icon(title, ui_theme.TAB_ICONS.get(key, "")))
         self._ui_builders = [self.build_dash, self.build_build_tool, self.build_builds, self.build_prog, self.build_stash, self.build_stats,
@@ -4518,53 +4991,62 @@ class App:
         nb.bind("<<NotebookTabChanged>>", self.on_tab)
         for inner in self.group_nbs.values(): inner.bind("<<NotebookTabChanged>>", self.on_tab)
         self._sidebar_activate("home"); self.root.after_idle(self._build_next_ui_page)
-
     def _build_shd_terminal_shell(self):
         """Turuncu SHD terminal kabuğu: header, kodlu dikey nav, workspace, canlı footer."""
         self.shd_header = fx.SHDStatusBar(self.root, accent=PAL["accent"], bg=PAL["bg"], fg=PAL["fg"], muted=PAL["muted"]); self.shd_header.pack(fill="x")
-        self.workspace = ttk.Frame(self.root); self.workspace.pack(fill="both", expand=True, padx=10, pady=8)
-        self.sidebar = ttk.Frame(self.workspace, style="Sidebar.TFrame", width=230); self.sidebar.pack(side="left", fill="y", padx=(0,8)); self.sidebar.pack_propagate(False)
-        ttk.Label(self.sidebar,text="[ NAVIGATION ]",style="Brand.TLabel").pack(anchor="w",padx=12,pady=(14,8))
-        self.main_area=ttk.Frame(self.workspace); self.main_area.pack(side="left",fill="both",expand=True)
+        self.workspace = CtkFrame(self.root, bg=PAL["bg"]); self.workspace.pack(fill="both", expand=True, padx=10, pady=8)
+        self.sidebar = CtkFrame(self.workspace, style="Sidebar.TFrame", bg=PAL["surface"], width=230); self.sidebar.pack(side="left", fill="y", padx=(0,8)); self.sidebar.pack_propagate(False)
+        CtkLabel(self.sidebar,text="ISAC  //  FIELD MENU",style="Brand.TLabel", bg=PAL["surface"], fg=PAL["accent"], font=(ui_theme.FONT_MONO, 9)).pack(anchor="w",padx=12,pady=(14,8))
+        self.main_area=CtkFrame(self.workspace, bg=PAL["bg"]); self.main_area.pack(side="left",fill="both",expand=True)
         self._build_page_context(self.main_area)
         self._responsive_job=None; self.root.bind("<Configure>",self._responsive_configure,add="+")
         self.fxbar=fx.Transition(self.root,self.root,color=PAL["accent"],bg=PAL["bg"],duration_ms=240,style="tactical")
-        self._sidebar_buttons={}; codes=("01","02","03","04","05","06","07")
-        for index,group in enumerate(self.group_keys):
-            label="> "+codes[index]+". "+self.group_labels[group].replace("⌂  ","").upper()
-            button=ttk.Button(self.sidebar,text=label,style="Nav.TButton",command=lambda g=group:self._sidebar_select_group(g)); button.pack(fill="x",padx=(10,8),pady=3); self._sidebar_buttons[group]=button
-        ttk.Label(self.sidebar,text="[ STATUS ]\nLINK: SECURE\nNODE: LOCAL\nMODE: ADVISOR",style="Muted.TLabel",justify="left",font=("Consolas",8)).pack(side="bottom",anchor="w",padx=12,pady=12)
+        self._sidebar_buttons={}
+        _nav_icons={"home":"●","build_tool":"◆","gear":"■","intel":"◎","tools":"▲","settings":"◈","system":"□"}
+        for group in self.group_keys:
+            icon=_nav_icons.get(group,"▸")
+            label=f"{icon}  {self.group_labels[group].replace('⌂  ','').upper()}"
+            button=CtkButton(self.sidebar,text=f"{self.group_keys.index(group) + 1:02d}   {label}",style="Nav.TButton",
+                             bg=PAL["surface"],fg=PAL["muted"],command=lambda g=group:self._sidebar_select_group(g))
+            self._style_nav_button(button, group == "home", category=True)
+            button.pack(fill="x",padx=(10,8),pady=3); self._sidebar_buttons[group]=button
+        CtkLabel(self.sidebar,text="NODE  /  LOCAL\nMODE  /  ADVISOR",style="Muted.TLabel",
+                 bg=PAL["surface"],fg=PAL["muted"],justify="left",font=ui_theme.font_spec("mono", 8)).pack(side="bottom",anchor="w",padx=12,pady=12)
         nb=self.nb=ttk.Notebook(self.main_area,style="NoTabs.TNotebook"); nb.pack(fill="both",expand=True)
         self.group_nbs={}
         for group in self.group_keys:
-            holder=ttk.Frame(nb); nb.add(holder,text=self.group_labels[group]); self.group_nbs[group]=ttk.Notebook(holder,style="NoTabs.TNotebook"); self.group_nbs[group].pack(fill="both",expand=True,padx=3,pady=3)
+            holder=CtkFrame(nb); nb.add(holder,text=self.group_labels[group]); self.group_nbs[group]=ttk.Notebook(holder,style="NoTabs.TNotebook"); self.group_nbs[group].pack(fill="both",expand=True,padx=3,pady=3)
         self.tabs={}
         for key in self.tab_keys:
-            parent=self.group_nbs[self.tab_groups[key]]; self.tabs[key]=ttk.Frame(parent); parent.add(self.tabs[key],text=ui_theme.with_icon("The Division 3" if key=="division3" else ("BUILD TOOL" if key=="build_tool" else t(f"tab.{key}")),ui_theme.TAB_ICONS.get(key,"")))
+            parent=self.group_nbs[self.tab_groups[key]]; self.tabs[key]=CtkFrame(parent); parent.add(self.tabs[key],text=ui_theme.with_icon("The Division 3" if key=="division3" else ("BUILD TOOL" if key=="build_tool" else t(f"tab.{key}")),ui_theme.TAB_ICONS.get(key,"")))
         self._ui_builders=[self.build_dash,self.build_build_tool,self.build_builds,self.build_prog,self.build_stash,self.build_stats,self.build_info,self.build_division3,self.build_translate,self.build_gorevler,self.build_asistan,self.build_settings,self.build_hist,self.build_logtab,self.build_help,self.build_about]; self._ui_build_index=0; self._ui_ready=False; self._build_critical_ui_pages()
         nb.bind("<<NotebookTabChanged>>",self.on_tab)
         for inner in self.group_nbs.values(): inner.bind("<<NotebookTabChanged>>",self.on_tab)
         self._sidebar_activate("home"); self.shd_footer=fx.SHDStatusBar(self.root,accent=PAL["accent"],bg=PAL["bg"],fg=PAL["fg"],muted=PAL["muted"],footer=True); self.shd_footer.pack(fill="x",side="bottom"); self.root.after_idle(self._build_next_ui_page)
-
     def _build_critical_ui_pages(self):
-        """Ayarlar, Sandık, Çeviri ve Asistan ilk tıklamada hazır olmalı.
+        """Keep expensive pages out of the synchronous startup path.
 
-        Ağır ve nadiren açılan sayfalar sonraki karelerde kurulur. Bu denge
-        açılışın akıcılığını korurken kullanıcının ilk menü tıklamasında boş
-        bir sayfa görmesini engeller.
+        Each page is then built by _build_next_ui_page, which yields between
+        builders instead of constructing all four inside application startup.
         """
-        critical = {"build_stash", "build_translate", "build_asistan", "build_settings"}
-        remaining = []
-        for builder in self._ui_builders:
-            if getattr(builder, "__name__", "") not in critical:
-                remaining.append(builder); continue
-            try:
-                builder()
-            except Exception:
-                name = getattr(builder, "__name__", "unknown")
-                self._ui_build_errors.append(name)
-                log.exception("Critical UI page build failed: %s", name)
-        self._ui_builders = remaining
+        deferred = {"build_stash", "build_translate", "build_asistan", "build_settings"}
+        dashboard = [builder for builder in self._ui_builders
+                     if getattr(builder, "__name__", "") == "build_dash"]
+        critical = [builder for builder in self._ui_builders
+                    if getattr(builder, "__name__", "") in deferred]
+        remaining = [builder for builder in self._ui_builders
+                     if getattr(builder, "__name__", "") != "build_dash"
+                     and getattr(builder, "__name__", "") not in deferred]
+        self._ui_builders = dashboard + critical + remaining
+
+    _BUILDER_PAGE_MAP = {
+        "build_dash": "dash", "build_build_tool": "build_tool", "build_builds": "builds",
+        "build_prog": "progress", "build_stash": "stash", "build_stats": "stats",
+        "build_info": "info", "build_division3": "division3", "build_translate": "translate",
+        "build_gorevler": "tasks", "build_asistan": "assistant", "build_settings": "settings",
+        "build_hist": "history", "build_logtab": "log", "build_help": "help",
+        "build_about": "about",
+    }
 
     def _build_next_ui_page(self):
         """Build one tab, then yield so the opening scene stays responsive."""
@@ -4575,6 +5057,9 @@ class App:
             self._ui_build_index += 1
             try:
                 builder()
+                ui_theme.normalize_surface(self.root)
+                if getattr(self, "cursor_fx", None):
+                    self.cursor_fx.refresh()
             except Exception:
                 name = getattr(builder, "__name__", "unknown")
                 self._ui_build_errors.append(name)
@@ -4586,6 +5071,11 @@ class App:
             self.root.after(34, self._build_next_ui_page)
             return
         self._ui_ready = True
+        intro = getattr(self, "_intro", None)
+        if intro and not getattr(intro, "closed", True):
+            # Reveal exactly after the final page builder, even when the
+            # decorative intro's nominal duration has already elapsed.
+            intro.finish()
         if self._ui_build_errors:
             self.root.after(120, self._show_startup_recovery)
         self.root.after(300, self.apply_fx)
@@ -4598,6 +5088,7 @@ class App:
             st["_start_tab"] = st["_start_page"] = ""
             save_cfg(self.cfg)
 
+
     def _show_startup_recovery(self):
         """Bir sayfa oluşturulamadıysa kullanıcıyı boş ekranla bırakma."""
         if getattr(self, "_recovery_window", None):
@@ -4606,19 +5097,19 @@ class App:
             except tk.TclError:
                 pass
         failed = ", ".join(getattr(self, "_ui_build_errors", [])[:5])
-        w = self._recovery_window = tk.Toplevel(self.root)
+        w = self._recovery_window = CtkToplevel(self.root)
         w.title("TD2 Loot Advisor — Başlangıç kurtarma")
         w.transient(self.root); w.geometry("640x300"); w.resizable(False, False)
-        ttk.Label(w, text="Arayüz güvenli kipte açılabilir", font=(ui_theme.FONT_SEMI, 14), foreground=PAL["warning"]).pack(anchor="w", padx=18, pady=(18, 8))
-        ttk.Label(w, text=f"Bazı arayüz bölümleri oluşturulamadı: {failed}\nBu, oyun verilerinizi silmez. Güvenli görünüm animasyon, video, özel imleç ve fare izi katmanlarını kapatır.",
+        CtkLabel(w, text="Arayüz güvenli kipte açılabilir", font=(ui_theme.FONT_SEMI, 14), foreground=PAL["warning"]).pack(anchor="w", padx=18, pady=(18, 8))
+        CtkLabel(w, text=f"Bazı arayüz bölümleri oluşturulamadı: {failed}\nBu, oyun verilerinizi silmez. Güvenli görünüm animasyon, video, özel imleç ve fare izi katmanlarını kapatır.",
                   foreground=PAL["fg"], wraplength=600, justify="left").pack(anchor="w", padx=18)
-        ttk.Label(w, text="Rapor önizlemesi kişisel yol, e-posta, anahtar ve token bilgilerini maskeler; GitHub'a otomatik bir şey gönderilmez.",
+        CtkLabel(w, text="Rapor önizlemesi kişisel yol, e-posta, anahtar ve token bilgilerini maskeler; GitHub'a otomatik bir şey gönderilmez.",
                   foreground=PAL["muted"], wraplength=600, justify="left").pack(anchor="w", padx=18, pady=(8, 14))
-        bar = ttk.Frame(w); bar.pack(fill="x", padx=18, pady=8)
-        ttk.Button(bar, text="Güvenli görünümle yeniden kur", style="Accent.TButton",
+        bar = CtkFrame(w); bar.pack(fill="x", padx=18, pady=8)
+        CtkButton(bar, text="Güvenli görünümle yeniden kur", style="Accent.TButton",
                    command=lambda: (w.destroy(), self.activate_safe_view())).pack(side="left")
-        ttk.Button(bar, text="Rapor önizle", command=lambda: self.preview_github_report()).pack(side="left", padx=7)
-        ttk.Button(bar, text="Kapat", command=w.destroy).pack(side="right")
+        CtkButton(bar, text="Rapor önizle", command=lambda: self.preview_github_report()).pack(side="left", padx=7)
+        CtkButton(bar, text="Kapat", command=w.destroy).pack(side="right")
 
     def _responsive_configure(self, _event=None):
         """Boyut değişikliklerini gecikmeli uygula; her piksel hareketinde UI kurma."""
@@ -4631,19 +5122,34 @@ class App:
         self._responsive_job = None
         try:
             width = self.root.winfo_width()
-            compact_now = width < 1100
-            if compact_now == getattr(self, "_responsive_compact", None):
-                return
+            height = self.root.winfo_height()
+            base_w, base_h = getattr(self, "_window_profile_size", (1360, 900))
+            # Do not let a temporarily smaller window make every label tiny.
+            # Responsive layout changes columns/sidebar width instead.
+            resize_scale = max(0.90, min(1.0, width / max(1, base_w), height / max(1, base_h)))
+            previous_scale = getattr(self, "_responsive_scale", 1.0)
+            if abs(resize_scale - previous_scale) >= 0.025:
+                self._responsive_scale = resize_scale
+                self.ui_factor = getattr(self, "_profile_ui_factor", 1.0) * resize_scale
+                self.root.tk.call("tk", "scaling", self._base_scaling * self.ui_factor)
+            compact_now = width < 1100 or height < 760
+            compact_changed = compact_now != getattr(self, "_responsive_compact", None)
             self._responsive_compact = compact_now
             self.compact = compact_now
+            if not compact_changed:
+                return
+            self._sync_dashboard_layout(compact_now)
             if hasattr(self, "sidebar"):          # eski dikey kabuklar (shd_terminal) için korunur
                 sidebar_w = max(176, int(190 * getattr(self, "ui_factor", 1.0))) if compact_now else max(190, int(210 * getattr(self, "ui_factor", 1.0)))
                 self.sidebar.configure(width=sidebar_w)
             if hasattr(self, "nav_panel"):
-                self.nav_panel.configure(width=max(176, int(190 * getattr(self, "ui_factor", 1.0))) if compact_now
-                                         else max(190, int(224 * getattr(self, "ui_factor", 1.0))))
+                shell = ui_theme.DESIGN_TOKENS["shell"]
+                base_width = shell["nav_compact_width"] if compact_now else shell["nav_width"]
+                self.nav_panel.configure(width=max(176, int(base_width * getattr(self, "ui_factor", 1.0))))
+            _nav_icons={"home":"●","build_tool":"◆","gear":"■","intel":"◎","tools":"▲","settings":"◈","system":"□"}
             for key, button in getattr(self, "_sidebar_buttons", {}).items():
-                button.configure(text=self.group_labels[key])
+                icon=_nav_icons.get(key,"▸")
+                button.configure(text=f"{icon}  {self.group_labels[key].replace('⌂  ','').upper()}")
             for key, button in getattr(self, "_nav_page_buttons", {}).items():
                 button.configure(text=self._nav_page_labels[key])
             self._layout_topnav_buttons()
@@ -4652,6 +5158,53 @@ class App:
             self.apply_fx()
         except (tk.TclError, AttributeError):
             return
+
+    def _sync_dashboard_layout(self, compact):
+        """Reflow the dashboard and reduce type scale as the window shrinks."""
+        cards = getattr(self, "_dash_card_widgets", None)
+        cards_frame = getattr(self, "_dash_cards_frame", None)
+        if not cards or cards_frame is None:
+            return
+        columns = 2 if compact else 4
+        for index, card in enumerate(cards):
+            card.grid_configure(row=index // columns, column=index % columns,
+                                sticky="nsew", padx=3, pady=3)
+        for column in range(4):
+            cards_frame.columnconfigure(column, weight=1 if column < columns else 0,
+                                        uniform="dash-cards" if column < columns else "")
+
+        main = getattr(self, "_dash_main_frame", None)
+        goals = getattr(self, "_dash_goals_panel", None)
+        build = getattr(self, "_dash_build_panel", None)
+        if main is not None and goals is not None and build is not None:
+            goals.grid_configure(row=0, column=0, sticky="nsew", padx=(0, 0 if compact else 5), pady=(0, 5 if compact else 0))
+            build.grid_configure(row=1 if compact else 0, column=0 if compact else 1,
+                                 sticky="nsew", padx=(0 if compact else 5, 0), pady=(0, 0))
+            main.columnconfigure(0, weight=1 if compact else 3, uniform="dash-main")
+            main.columnconfigure(1, weight=0 if compact else 2, uniform="dash-main")
+
+        val_size = 14 if compact else 16
+        for lbl in getattr(self, "_dash_cards", {}).values():
+            try:
+                lbl.configure(font=(ui_theme.FONT_SEMI, val_size))
+            except (tk.TclError, ValueError):
+                pass
+        scene = getattr(self, "dash_scene", None)
+        if scene is not None:
+            try:
+                scene.configure(height=300 if compact else 350)
+            except tk.TclError:
+                pass
+
+        bottom = getattr(self, "_dash_bottom_frame", None)
+        quick = getattr(self, "_dash_quick_panel", None)
+        themes = getattr(self, "_dash_theme_panel", None)
+        if bottom is not None and quick is not None and themes is not None:
+            quick.grid_configure(row=0, column=0, sticky="nsew", padx=(0, 0 if compact else 5), pady=(0, 5 if compact else 0))
+            themes.grid_configure(row=1 if compact else 0, column=0 if compact else 1,
+                                  sticky="nsew", padx=(0 if compact else 5, 0), pady=(0, 0))
+            bottom.columnconfigure(0, weight=1 if compact else 3, uniform="dash-bottom")
+            bottom.columnconfigure(1, weight=0 if compact else 2, uniform="dash-bottom")
 
     def _layout_topnav_buttons(self, _event=None):
         """Üst yatay menüdeki düğmeleri (DigitalRain canvas'ına gömülü) soldan sağa diz.
@@ -4692,42 +5245,104 @@ class App:
             return
 
     def _build_single_nav(self, parent):
-        """Tek menü yüzeyi: grup başlıkları ve tüm sayfa düğmeleri aynı panelde."""
+        """ISAC görev menüsü: ana kategoriler ve seçili grubun alt rotaları."""
         self._nav_page_buttons = {}
         self._nav_page_labels = {}
-        group_titles = {"home": "ANA SAYFA", "build_tool": "BUILD TOOL", "gear": "EKİPMAN", "intel": "İSTİHBARAT",
-                        "tools": "ARAÇLAR", "settings": "AYARLAR", "system": "SİSTEM"}
-        ttk.Label(parent, text="WORKSPACE", style="Brand.TLabel").pack(anchor="w", padx=14, pady=(14, 8))
-        for group_index, group in enumerate(self.group_keys, 1):
-            ttk.Label(parent, text=f"{group_index:02d}  /  {group_titles[group]}",
-                      style="NavSection.TLabel").pack(anchor="w", padx=12, pady=(8, 3))
-            for key in self.tab_keys:
-                if self.tab_groups[key] != group:
-                    continue
-                title = "The Division 3" if key == "division3" else ("BUILD TOOL" if key == "build_tool" else t(f"tab.{key}"))
-                label = f"  {title}"
-                self._nav_page_labels[key] = label
-                button = ttk.Button(parent, text=label, style="Nav.TButton",
-                                    command=lambda page=key: self.select_page(page))
-                button.pack(fill="x", padx=8, pady=1)
-                self._nav_page_buttons[key] = button
-        ttk.Label(parent, text="TD2 LOOT ADVISOR\nLOCAL WORKSPACE", style="NavMeta.TLabel",
-                  justify="left", font=("Consolas", 8)).pack(side="bottom", anchor="w", padx=12, pady=12)
+        CtkLabel(parent, text="ISAC  //  FIELD MENU", style="NavMasthead.TLabel",
+                 bg=PAL["surface"], fg=PAL["accent"], font=(ui_theme.FONT_MONO, 9)).pack(
+            anchor="w", padx=14, pady=(16, 3))
+        CtkLabel(parent, text="TD2  /  OPERASYON AĞI", style="NavSection.TLabel",
+                 bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT_MONO, 8)).pack(
+            anchor="w", padx=14, pady=(0, 12))
+        self._nav_group_buttons = {}
+        for index, group in enumerate(self.group_keys, start=1):
+            title = self.group_labels.get(group, group).replace("⌂  ", "").upper()
+            button = CtkButton(parent, text=f"{index:02d}   {title}", style="NavCategory.TButton",
+                                bg=PAL["surface"], fg=PAL["muted"],
+                                command=lambda value=group: self._select_nav_group(value))
+            self._style_nav_button(button, group == "home", category=True)
+            button.pack(fill="x", padx=8, pady=3)
+            self._nav_group_buttons[group] = button
+        ttk.Separator(parent).pack(fill="x", padx=10, pady=(12, 10))
+        self._nav_routes_title = CtkLabel(parent, text="SEÇİLİ OPERASYON", style="NavSection.TLabel",
+                                          bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT_MONO, 8))
+        self._nav_routes_title.pack(anchor="w", padx=14, pady=(0, 6))
+        self._nav_routes = CtkFrame(parent, style="SidebarContent.TFrame", bg=PAL["surface"])
+        self._nav_routes.pack(fill="x", padx=2)
+        CtkLabel(parent, text="NODE  /  LOCAL\nMODE  /  ADVISOR", style="NavMeta.TLabel",
+                  bg=PAL["surface"], fg=PAL["muted"],
+                  justify="left", font=ui_theme.font_spec("mono", 8)).pack(side="bottom", anchor="w", padx=12, pady=12)
+        self._render_nav_routes("home", "dash")
 
+    def _style_nav_button(self, button, active, *, category=False):
+        """Apply selected/unselected menu colors for both CTk and ttk backends."""
+        if CTK_AVAILABLE:
+            if active:
+                button.configure(fg_color=PAL["select"] if category else PAL["surface2"],
+                                 text_color=PAL["accent"] if category else PAL["fg"],
+                                 hover_color=PAL["surface2"], border_width=1,
+                                 border_color=PAL["accent"], corner_radius=3)
+            else:
+                button.configure(fg_color=PAL["surface"], text_color=PAL["muted"],
+                                 hover_color=PAL["surface2"], border_width=1 if category else 0,
+                                 border_color=PAL["border"], corner_radius=3)
+        else:
+            style = ("NavCategoryActive.TButton" if active else "NavCategory.TButton") if category else (
+                "NavActive.TButton" if active else "Nav.TButton")
+            button.configure(style=style)
+
+    def _render_nav_routes(self, group, active_page=None):
+        """Show only the selected category's routes, keeping every page reachable."""
+        routes = getattr(self, "_nav_routes", None)
+        if routes is None:
+            return
+        for child in routes.winfo_children():
+            child.destroy()
+        self._nav_page_buttons = {}
+        self._nav_page_labels = {}
+        pages = [key for key in self.tab_keys if self.tab_groups.get(key) == group]
+        for key in pages:
+            title = "The Division 3" if key == "division3" else ("BUILD TOOL" if key == "build_tool" else t(f"tab.{key}"))
+            label = f">  {title}"
+            self._nav_page_labels[key] = label
+            button = CtkButton(routes, text=label,
+                                style="NavActive.TButton" if key == active_page else "Nav.TButton",
+                                bg=PAL["surface2"] if key == active_page else PAL["surface"],
+                                fg=PAL["fg"] if key == active_page else PAL["muted"],
+                                command=lambda page=key: self.select_page(page))
+            self._style_nav_button(button, key == active_page)
+            button.pack(fill="x", padx=8, pady=1)
+            self._nav_page_buttons[key] = button
+        for key, button in getattr(self, "_nav_group_buttons", {}).items():
+            try:
+                self._style_nav_button(button, key == group, category=True)
+            except tk.TclError:
+                pass
+
+    def _select_nav_group(self, group):
+        """Open a category's first page; route buttons remain visible for its other pages."""
+        page = next((key for key in self.tab_keys if self.tab_groups.get(key) == group), None)
+        if page:
+            self.select_page(page)
     def _build_page_context(self, parent):
         """Persistent workspace heading gives every feature a clear location and state."""
-        bar = self.page_context = ttk.Frame(parent, style="PageContext.TFrame")
+        bar = self.page_context = CtkFrame(parent, style="PageContext.TFrame", bg=PAL["surface2"],
+                                           border_color=PAL["border"], border_width=1, corner_radius=4,
+                                           height=72)
         bar.pack(fill="x", padx=2, pady=(0, 7))
-        ttk.Frame(bar, style="PageRail.TFrame", width=3).pack(side="left", fill="y")
-        labels = ttk.Frame(bar, style="PageContext.TFrame")
+        bar.pack_propagate(False)
+        CtkFrame(bar, style="PageRail.TFrame", bg=PAL["accent"], width=3).pack(side="left", fill="y")
+        labels = CtkFrame(bar, style="PageContext.TFrame", bg=PAL["surface2"])
         labels.pack(side="left", fill="both", expand=True, padx=(13, 8), pady=(8, 7))
-        self.page_group_label = ttk.Label(labels, text="TD2 / WORKSPACE", style="PageEyebrow.TLabel")
+        self.page_group_label = CtkLabel(labels, text="TD2 / WORKSPACE", style="PageEyebrow.TLabel",
+                                         bg=PAL["surface2"], fg=PAL["accent"], font=(ui_theme.FONT_MONO, 8))
         self.page_group_label.pack(anchor="w")
-        self.page_title_label = ttk.Label(labels, text="", style="PageTitle.TLabel")
+        self.page_title_label = CtkLabel(labels, text="", style="PageTitle.TLabel", bg=PAL["surface2"],
+                                         fg=PAL["fg"], font=(ui_theme.FONT_SEMI, 18))
         self.page_title_label.pack(anchor="w", pady=(1, 0))
-        self.page_status_label = ttk.Label(bar, text="LOCAL / READY", style="PageStatus.TLabel")
+        self.page_status_label = CtkLabel(bar, text="LOCAL / READY", style="PageStatus.TLabel",
+                                          bg=PAL["surface2"], fg=PAL["info"], font=(ui_theme.FONT_MONO, 9))
         self.page_status_label.pack(side="right", padx=14)
-
     def _update_page_context(self, page=None):
         if not hasattr(self, "page_title_label"):
             return
@@ -4744,6 +5359,10 @@ class App:
             return
 
     def _sidebar_activate(self, group, page=None):
+        if hasattr(self, "_nav_group_buttons"):
+            active_page = page or next((key for key in self.tab_keys if self.tab_groups.get(key) == group), None)
+            self._render_nav_routes(group, active_page)
+            return
         if getattr(self, "_nav_page_buttons", None):
             active_page = page or next((key for key in self.tab_keys if self.tab_groups.get(key) == group), None)
             for key, button in self._nav_page_buttons.items():
@@ -4755,13 +5374,14 @@ class App:
         field_style = not hasattr(self, "sidebar")      # yatay üst menü (ana kabuk + eski field_command) FieldNav stili kullanır
         for key, button in getattr(self, "_sidebar_buttons", {}).items():
             try:
-                if field_style:
+                if hasattr(self, "sidebar"):
+                    self._style_nav_button(button, key == group, category=True)
+                elif field_style:
                     button.configure(style="FieldNavActive.TButton" if key == group else "FieldNav.TButton")
                 else:
                     button.configure(style="NavActive.TButton" if key == group else "Nav.TButton")
             except tk.TclError:
                 pass
-
     def _sidebar_select_group(self, group):
         page = next((key for key in self.tab_keys if self.tab_groups.get(key) == group), None)
         if page:
@@ -4781,6 +5401,7 @@ class App:
             try: self.overlay.destroy()
             except Exception: pass
             self.overlay = None
+        self._destroy_transient_windows()
         if getattr(self, "video", None): self.video.stop(); self.video = None
         try: self.banner.destroy()
         except Exception: pass
@@ -4798,6 +5419,39 @@ class App:
         if was_running: self.start(quiet=True)
         log.info("UI rebuilt (theme=%s, language=%s)", self.cfg["settings"].get("ui_theme"), i18n.current_language())
 
+    def _destroy_transient_windows(self):
+        """Remove stale child overlays before the shell is rebuilt.
+
+        Translation, assistant, quiz and startup-recovery windows are visual
+        children of the old shell.  Keeping one alive across a theme/language
+        rebuild makes it appear as if pages are out of sync because the old
+        translucent surface remains above the newly created notebook.
+        """
+        for name in ("_lt_win", "_assistant_hud", "_quiz_pop", "_recovery_window"):
+            window = getattr(self, name, None)
+            if window is None:
+                continue
+            try:
+                if window.winfo_exists():
+                    window.destroy()
+            except (AttributeError, tk.TclError):
+                pass
+            setattr(self, name, None)
+
+    # ── Yerinde tema değişimi (rebuild gerektirmez) ──────────────
+
+    def _swap_theme(self):
+        """Rebuild the themed shell while keeping the currently selected page.
+
+        Dashboard theme cards use this compatibility entry point.  The former
+        in-place theme path was removed when the shell became rebuild-based;
+        keeping the small bridge avoids a callback-time AttributeError and
+        preserves the same page after the new palette is applied.
+        """
+        self.rebuild_ui(tab=self.current_tab() or "dashboard")
+
+
+
     def current_tab(self):
         """Seçili sekmenin kimliği (görünen adı değil)."""
         try:
@@ -4814,7 +5468,6 @@ class App:
         group = self.tab_groups[key]; self.nb.select(self.group_keys.index(group))
         inner = self.group_nbs[group]; inner.select(self.tabs[key])
         self._sidebar_activate(group, key)
-
     def select_settings_page(self, key):
         if key not in getattr(self, "set_pages", {}): return
         group, page = self.set_pages[key]
@@ -4825,10 +5478,9 @@ class App:
         """Üst bant: dönen arka planlar, marka ve durum rozetleri (ui_art.Banner)."""
         st = self.cfg["settings"]
         self.banner = ui_art.Banner(self.root, PAL, ART_DIR / "backgrounds", interval_s=st.get("bg_interval", 15),
-                                    title="◆ TD2 LOOT ADVISOR", subtitle=f"v{APP_VERSION}",
+                                    title="TD2 // LOOT ADVISOR", subtitle=f"v{APP_VERSION}",
                                     height=max(48, int(82 * getattr(self, "ui_factor", 1.0) * (0.8 if getattr(self, "compact", False) else 1.0))))
         self.refresh_header()
-
     def toast(self, text):
         """Kısa onay mesajı (başlık bandında, pencere açmadan)."""
         try: self.banner.toast("✔ " + text)
@@ -4865,7 +5517,6 @@ class App:
                                 "on" if self.running else "off"),
                                ("AI / " + provider_label(prov if prov in PROVIDER_KEYS else "builtin"), "off")])
         self._update_page_context()
-
     def on_tab(self, event=None):
         if hasattr(self, "sounds"): self.sounds.play("tab")
         cur = (self.nb.index(self.nb.select()), self.current_tab()) if hasattr(self, "nb") else None
@@ -4901,111 +5552,373 @@ class App:
         self.root.after((self.fxbar.duration + 30) if anim else 20, refresh)
         self._sidebar_activate(self.tab_groups.get(k, "home"))
         self._update_page_context(k)
-
     # ---------- Panel ----------
     def build_dash(self):
-        """Panel v2 — geniş ekran (21:9) için iki sütun: solda kontrol + karar, sağda eşya kartı ve build eşleşmeleri."""
-        f = self.tabs["dash"]
+        """Operasyon Merkezi — durum kartları, hedefler, build özeti, hızlı başlangıç ve tema önizleme."""
+        page = self.tabs["dash"]
+        f = ui_theme.scrollable(page, PAL["bg"])
+        self._dash_scroll_inner = f
         st = self.cfg["settings"]
-        # Ana ekranın üstündeki sahne mevcut OCR/çeviri verisinin görsel özeti; kartlar aşağıda ayrıntılı kalır.
+        gap = ui_theme.SPACING
+
+        def panel(parent, *, selected=False, **options):
+            return ui_theme.RoundedPanel(parent, PAL, selected=selected, **options)
+
         self.dash_scene = ui_hud.DashboardScene(
-            # HUD sahnesi, kullanıcı eklediği dönen arka planlardan ayrı olarak
-            # paketle gelen seçili ISAC/Rogue kompozisyonunu kullanır. Böylece
-            # eski bir kullanici art/ klasörü yeni tasarım katmanını gölgeleyemez.
             f, PAL, (BUNDLE / "art") if (BUNDLE / "art").exists() else ART_DIR,
             mode="rogue" if st.get("event_fx") == "rogue" else "isac",
             on_scan=self.trigger, on_translate=lambda: self.select_page("translate"))
-        self.dash_scene.pack(fill="x", padx=10, pady=(10, 2))
-        paned = ttk.Panedwindow(f, orient="horizontal"); paned.pack(fill="both", expand=True, padx=10, pady=10)
-        left, right = ttk.Frame(paned), ttk.Frame(paned)
-        paned.add(left, weight=2); paned.add(right, weight=3)
+        # HUD scene contains four operational cards on each side; keep enough
+        # vertical room for their labels instead of clipping the lower rows.
+        self.dash_scene.configure(height=350)
+        self.dash_scene.pack(fill="x")
 
-        top = ttk.Frame(left); top.pack(fill="x")
-        self.btn_run = ttk.Button(top, text=t("btn.start"), command=self.toggle, style="Success.TButton"); self.btn_run.pack(side="left")
-        ttk.Button(top, text="🔍 " + t("btn.scan_now"), command=self.trigger, style="Accent.TButton").pack(side="left", padx=6)
-        ttk.Button(top, text=ui_theme.with_icon(t("btn.pick_region"), "⛶"), command=self.calibrate).pack(side="left")
-        ttk.Button(top, text=ui_theme.with_icon(t("btn.test_image"), "🖼"), command=self.test_image).pack(side="left", padx=6)
-        perf_row = ttk.Frame(left); perf_row.pack(fill="x", pady=(6, 0))
-        self.perf_btn = ttk.Button(perf_row, text="⚖ " + t("perf." + st.get("perf_mode", "balanced")), command=self.toggle_performance)
-        self.perf_btn.pack(side="left")
-        ttk.Button(perf_row, text=t("perf.measure"), command=self.show_performance).pack(side="left", padx=6)
+        title_f = CtkFrame(f, bg=PAL["bg"])
+        title_f.pack(fill="x", padx=gap["xl"], pady=(gap["xs"], 0))
+        CtkLabel(title_f, text=t("dash.ops_center"), bg=PAL["bg"], fg=PAL["fg"],
+                 font=(ui_theme.FONT_SEMI, ui_theme.DESIGN_TOKENS["type"]["display"]), anchor="w").pack(fill="x")
+        CtkLabel(title_f, text=t("dash.ops_subtitle"), bg=PAL["bg"], fg=PAL["muted"],
+                 font=(ui_theme.FONT, ui_theme.DESIGN_TOKENS["type"]["body"]), anchor="w").pack(fill="x")
 
-        src = ttk.Frame(left); src.pack(fill="x", pady=(8, 0))
-        ttk.Label(src, text=t("panel.source"), foreground=PAL["muted"]).pack(side="left")
+        cards_f = CtkFrame(f, bg=PAL["bg"])
+        cards_f.pack(fill="x", padx=gap["xl"], pady=(gap["md"], 0))
+        self._dash_cards_frame = cards_f
+        self._dash_cards = {}
+        self._dash_card_widgets = []
+        for i, (key, icon, title, val, color) in enumerate([
+            ("ocr", "◉", t("dash.ocr_status"), t("dash.ocr_ready"), PAL["success"]),
+            ("library", "▤", t("dash.library"), t("dash.lib_current"), PAL["success"]),
+            ("build", "◇", t("dash.active_build"), "—", PAL["accent"]),
+            ("sync", "↻", t("dash.last_sync"), t("dash.sync_never"), PAL["fg"]),
+        ]):
+            card = panel(cards_f, bg=PAL["surface"], padx=gap["lg"], pady=gap["md"])
+            card.grid(row=0, column=i, sticky="nsew", padx=3, pady=3)
+            self._dash_card_widgets.append(card)
+            CtkLabel(card.content, text=f"{icon}  {title}", bg=PAL["surface"], fg=PAL["muted"],
+                     font=(ui_theme.FONT, ui_theme.DESIGN_TOKENS["type"]["small"]), anchor="w").pack(fill="x")
+            lbl = CtkLabel(card.content, text=val, bg=PAL["surface"], fg=color,
+                           font=ui_theme.font_spec("display", 15, weight="bold", numeric=True), anchor="w")
+            lbl.pack(fill="x", pady=(4, 0))
+            self._dash_cards[key] = lbl
+
+        main_f = CtkFrame(f, bg=PAL["bg"])
+        main_f.pack(fill="both", expand=True, padx=gap["xl"], pady=(gap["md"], 0))
+        self._dash_main_frame = main_f
+        main_f.columnconfigure(0, weight=3, uniform="dash")
+        main_f.columnconfigure(1, weight=2, uniform="dash")
+
+        goals = panel(main_f, bg=PAL["surface"], padx=gap["lg"], pady=gap["md"])
+        self._dash_goals_panel = goals
+        goals.grid(row=0, column=0, sticky="nsew", padx=(0, 5))
+        CtkLabel(goals.content, text=f"01  /  {t('dash.daily_goals')}", bg=PAL["surface"], fg=PAL["fg"],
+                 font=(ui_theme.FONT_SEMI, ui_theme.DESIGN_TOKENS["type"]["section"]), anchor="w").pack(fill="x", pady=(0, 8))
+        self._goals_inner = CtkFrame(goals.content, bg=PAL["surface"])
+        self._goals_inner.pack(fill="both", expand=True)
+
+        bcard = panel(main_f, bg=PAL["surface"], padx=gap["lg"], pady=gap["md"])
+        self._dash_build_panel = bcard
+        bcard.grid(row=0, column=1, sticky="nsew", padx=(5, 0))
+        bh = CtkFrame(bcard.content, bg=PAL["surface"])
+        bh.pack(fill="x")
+        CtkLabel(bh, text=f"02  /  {t('dash.build_status')}", bg=PAL["surface"], fg=PAL["fg"],
+                 font=(ui_theme.FONT_SEMI, ui_theme.DESIGN_TOKENS["type"]["section"])).pack(side="left")
+        self._build_badge = CtkLabel(bh, text="", bg=PAL["accent"], fg=PAL["accent_fg"],
+                                      font=(ui_theme.FONT_SEMI, 9), padx=8, pady=2)
+        self._build_badge.pack(side="right")
+        self._build_slots = CtkFrame(bcard.content, bg=PAL["surface"])
+        self._build_slots.pack(fill="x", pady=(10, 6))
+        CtkLabel(bcard.content, text=t("dash.build_result"), bg=PAL["surface"], fg=PAL["fg"],
+                 font=(ui_theme.FONT_SEMI, 11), anchor="w").pack(fill="x", pady=(4, 2))
+        self._build_stats = CtkFrame(bcard.content, bg=PAL["surface"])
+        self._build_stats.pack(fill="x")
+
+        bot_f = CtkFrame(f, bg=PAL["bg"])
+        bot_f.pack(fill="x", padx=gap["xl"], pady=(gap["md"], gap["lg"]))
+        self._dash_bottom_frame = bot_f
+        bot_f.columnconfigure(0, weight=3, uniform="dashbot")
+        bot_f.columnconfigure(1, weight=2, uniform="dashbot")
+
+        qs = panel(bot_f, bg=PAL["surface"], padx=gap["lg"], pady=gap["md"])
+        self._dash_quick_panel = qs
+        qs.grid(row=0, column=0, sticky="nsew", padx=(0, 5))
+        CtkLabel(qs.content, text=f"03  /  {t('dash.quick_start')}", bg=PAL["surface"], fg=PAL["fg"],
+                 font=(ui_theme.FONT_SEMI, ui_theme.DESIGN_TOKENS["type"]["section"]), anchor="w").pack(fill="x", pady=(0, 8))
+        qr = CtkFrame(qs.content, bg=PAL["surface"])
+        qr.pack(fill="x")
+        def _qbtn(parent, txt, icon, bg_c, fg_c, cmd):
+            button = panel(parent, bg=bg_c, padx=gap["md"], pady=gap["sm"],
+                           radius=ui_theme.DESIGN_TOKENS["border"]["control_radius"],
+                           selected=bg_c == PAL["accent"])
+            button.configure(cursor="hand2")
+            button.pack(side="left", padx=(0, gap["sm"]))
+            lb = CtkLabel(button.content, text=f"{icon}  {txt}", bg=bg_c, fg=fg_c,
+                          font=(ui_theme.FONT_SEMI, ui_theme.DESIGN_TOKENS["type"]["control"]), cursor="hand2")
+            lb.pack()
+            for w in (button, button.content, lb):
+                w.bind("<Button-1>", lambda e, c=cmd: c())
+        _qbtn(qr, t("dash.create_build"), "◇", PAL["accent"], PAL["accent_fg"],
+              lambda: self.select_page("build_tool"))
+        _qbtn(qr, t("dash.inspect_gear"), "▤", PAL["surface2"], PAL["fg"],
+              lambda: self.select_page("stash"))
+        _qbtn(qr, t("dash.start_translate"), "↻", PAL["surface2"], PAL["fg"],
+              lambda: self.select_page("translate"))
+
+        tp = panel(bot_f, bg=PAL["surface"], padx=gap["lg"], pady=gap["md"])
+        self._dash_theme_panel = tp
+        tp.grid(row=0, column=1, sticky="nsew", padx=(5, 0))
+        tph = CtkFrame(tp.content, bg=PAL["surface"])
+        tph.pack(fill="x")
+        CtkLabel(tph, text=f"04  /  {t('dash.theme_preview')}", bg=PAL["surface"], fg=PAL["fg"],
+                 font=(ui_theme.FONT_SEMI, ui_theme.DESIGN_TOKENS["type"]["section"])).pack(side="left")
+        CtkLabel(tph, text="✕", bg=PAL["surface"], fg=PAL["muted"], cursor="hand2",
+                 font=(ui_theme.FONT, 12)).pack(side="right")
+        tpr = CtkFrame(tp.content, bg=PAL["surface"])
+        tpr.pack(fill="x", pady=(8, 0))
+        current = st.get("ui_theme", "shd_tactical")
+        for tk_key, name in [("kaivolt", "Kaivolt"), ("shd_tactical", "SHD Tactical"), ("clean_console", "Field Clean")]:
+            p = ui_theme.PALETTES[tk_key]
+            sel = tk_key == current
+            tile = panel(tpr, bg=p["bg"], padx=gap["xs"], pady=gap["xs"], radius=10, selected=sel)
+            tile.pack(side="left", fill="x", expand=True, padx=(0, 6) if tk_key != "clean_console" else 0)
+            cv = tk.Canvas(tile.content, width=100, height=65, bg=p["bg"], highlightthickness=0)
+            cv.pack()
+            cv.create_rectangle(2, 2, 25, 63, fill=p["surface"], outline="")
+            cv.create_rectangle(28, 2, 98, 16, fill=p["surface"], outline="")
+            cv.create_rectangle(28, 18, 60, 42, fill=p["surface2"], outline="")
+            cv.create_rectangle(63, 18, 98, 42, fill=p["surface2"], outline="")
+            cv.create_rectangle(28, 44, 98, 63, fill=p["surface"], outline="")
+            cv.create_rectangle(4, 8, 23, 11, fill=p["accent"], outline="")
+            if sel:
+                cv.create_text(85, 52, text="✓", fill=p["accent"], font=(ui_theme.FONT_SEMI, 11))
+            CtkLabel(tile.content, text=name, bg=p["bg"], fg=p["fg"],
+                     font=(ui_theme.FONT_SEMI if sel else ui_theme.FONT, 9)).pack(pady=(2, 3))
+            for w in (tile, tile.content, cv):
+                w.bind("<Button-1>", lambda e, k=tk_key: self._dash_switch_theme(k))
+
+        ocr = CtkFrame(f)
+        self.btn_run = CtkButton(ocr, text=t("btn.start"), command=self.toggle, style="Success.TButton")
+        self.perf_btn = CtkButton(ocr, text="⚖ " + t("perf." + st.get("perf_mode", "balanced")), command=self.toggle_performance)
         self.src_var = tk.StringVar(value=st.get("scan_source", "screen"))
-        for txt, val in ((t("panel.src_screen"), "screen"), (t("panel.src_region"), "region")):
-            ttk.Radiobutton(src, text=txt, value=val, variable=self.src_var, command=self.change_source).pack(side="left", padx=6)
-        mode = ttk.Frame(left); mode.pack(fill="x", pady=(2, 0))
-        ttk.Label(mode, text=t("panel.scan_mode"), foreground=PAL["muted"]).pack(side="left")
         self.mode_var = tk.StringVar(value=st["scan_mode"])
-        for txt, val in ((t("mode.hotkey"), "hotkey"), (t("mode.auto"), "auto")):
-            ttk.Radiobutton(mode, text=txt, value=val, variable=self.mode_var, command=self.change_mode).pack(side="left", padx=6)
-        ab = ttk.Frame(left); ab.pack(fill="x", pady=(4, 0))
-        ttk.Label(ab, text="⭐ " + t("plan.active"), foreground=PAL["accent"]).pack(side="left")
-        self.act_cb = ttk.Combobox(ab, state="readonly", width=44, values=[b["name"] for b in self.cfg["builds"]])
+        self._acts = {k: t("act." + k) for k in dropstats.ACTIVITIES}
+        self.act_cb = CtkComboBox(ocr, state="readonly", width=44, values=[b["name"] for b in self.cfg["builds"]])
         a0 = active_build(self.cfg)
         if a0: self.act_cb.set(a0["name"])
-        self.act_cb.pack(side="left", padx=6)
         self.act_cb.bind("<<ComboboxSelected>>", lambda e: self.set_active_build(self.act_cb.get()))
-        self.act_prog = ttk.Label(ab, text="", foreground=PAL["muted"]); self.act_prog.pack(side="left", padx=6)
-        self.build_tool_lbl = ttk.Label(left, text="", foreground=PAL["muted"], wraplength=560, justify="left")
-        self.build_tool_lbl.pack(anchor="w", pady=(0, 4))
-        ac = ttk.Frame(left); ac.pack(fill="x", pady=(4, 0))
-        ttk.Label(ac, text="🎮 " + t("drops.activity")).pack(side="left")
-        self._acts = {k: t("act." + k) for k in dropstats.ACTIVITIES}
-        self.drop_act = ttk.Combobox(ac, state="readonly", width=22, values=list(self._acts.values()))
+        self.act_prog = CtkLabel(ocr, text="", foreground=PAL["muted"])
+        self.build_tool_lbl = CtkLabel(ocr, text="", foreground=PAL["muted"], wraplength=560, justify="left")
+        self.drop_act = CtkComboBox(ocr, state="readonly", width=22, values=list(self._acts.values()))
         self.drop_act.set(self._acts.get(st.get("drop_activity", "none"), self._acts["none"]))
-        self.drop_act.pack(side="left", padx=6)
         self.drop_act.bind("<<ComboboxSelected>>", lambda e=None: self._set_activity())
-        ttk.Label(ac, text=t("drops.activity_hint"), foreground=PAL["muted"]).pack(side="left", padx=4)
-        tb = ttk.Frame(left); tb.pack(fill="x", pady=(4, 0))
-        ttk.Button(tb, text="🤖 " + t("ai.ask_item"), command=self.ask_about_item).pack(side="left")
-        ttk.Button(tb, text="👁 " + t("ai.vision_read"), command=self.vision_read).pack(side="left", padx=6)
-        ttk.Button(tb, text="⚑ " + t("report.wrong"), command=self.report_wrong).pack(side="left")
-        ttk.Button(tb, text="⚠ " + t("vf.btn"), command=self.report_wrong_verdict).pack(side="left", padx=6)
-        self.status = ttk.Label(left, foreground=PAL["muted"], wraplength=560, justify="left"); self.status.pack(anchor="w", pady=(4, 2))
-
-        card = ttk.Frame(left, style="Card.TFrame", padding=(0, 0, 0, 12)); card.pack(fill="x", pady=(6, 8))
-        self.verdict_lbl = tk.Label(card, text=verdict_label("IDLE"), bg=COLORS["IDLE"], fg="white",
+        self.status = CtkLabel(ocr, foreground=PAL["muted"], wraplength=560, justify="left")
+        self.verdict_lbl = CtkLabel(ocr, text=verdict_label("IDLE"), bg=COLORS["IDLE"], fg="white",
                                     font=(ui_theme.FONT_SEMI, 34), pady=20)
-        self.verdict_lbl.pack(fill="x")
-        self.item_lbl = ttk.Label(card, text="—", style="Item.TLabel", wraplength=560); self.item_lbl.pack(anchor="w", padx=16, pady=(10, 0))
-        self.note_lbl = ttk.Label(card, text="", style="Note.TLabel", wraplength=560, justify="left"); self.note_lbl.pack(anchor="w", padx=16)
-        self.fit_lbl = tk.Label(card, text="", wraplength=560, justify="left", bg=PAL["surface"], fg=PAL["muted"],
-                                font=(ui_theme.FONT, 10)); self.fit_lbl.pack(anchor="w", padx=16, pady=(4, 0))
-        chips = ttk.Frame(left); chips.pack(fill="x", pady=(0, 6))
+        self.item_lbl = CtkLabel(ocr, text="—", style="Item.TLabel", wraplength=560)
+        self.note_lbl = CtkLabel(ocr, text="", style="Note.TLabel", wraplength=560, justify="left")
+        self.fit_lbl = CtkLabel(ocr, text="", wraplength=560, justify="left", bg=PAL["surface"], fg=PAL["muted"],
+                                font=(ui_theme.FONT, 10))
         self.count_chips = {}
         for v in ("KEEP", "CONSIDER", "DISMANTLE", "REVIEW"):
-            lb = tk.Label(chips, bg=PAL["surface"], fg=VFG[v], font=(ui_theme.FONT_SEMI, 10), padx=12, pady=5)
-            lb.pack(side="left", padx=(0, 8)); self.count_chips[v] = lb
-        ttk.Label(left, text=t("panel.card_preview"), style="Section.TLabel").pack(anchor="w", pady=(6, 2))
-        self.card_img_lbl = tk.Label(left, bg=PAL["surface"], text=t("panel.no_card"), fg=PAL["muted"], height=12)
-        self.card_img_lbl.pack(fill="both", expand=True)
-
-        ttk.Label(right, text=t("panel.item_box"), style="Section.TLabel").pack(anchor="w")
-        self.item_tv = ttk.Treeview(right, columns=("a", "v", "m", "q"), show="headings", height=8)
+            self.count_chips[v] = CtkLabel(ocr, bg=PAL["surface"], fg=VFG[v], font=(ui_theme.FONT_SEMI, 10), padx=12, pady=5)
+        self.card_img_lbl = CtkLabel(ocr, bg=PAL["surface"], text=t("panel.no_card"), fg=PAL["muted"], height=12)
+        self.item_tv = ttk.Treeview(ocr, columns=("a", "v", "m", "q"), show="headings", height=8)
         for c, hd, w in (("a", t("panel.col_attr"), 220), ("v", t("panel.col_value"), 110), ("m", t("panel.col_max"), 110), ("q", t("panel.col_quality"), 220)):
             self.item_tv.heading(c, text=hd); self.item_tv.column(c, width=w, anchor="w" if c in ("a", "q") else "center")
-        self.item_tv.pack(fill="x", pady=(2, 4))
-        self.tal_lbl = ttk.Label(right, text="", wraplength=900, justify="left"); self.tal_lbl.pack(anchor="w", pady=(0, 8))
-        ttk.Label(right, text=t("panel.matches"), style="Section.TLabel").pack(anchor="w")
-        self.match_tv = ttk.Treeview(right, columns=("p", "b", "w"), show="headings", height=8)
+        self.tal_lbl = CtkLabel(ocr, text="", wraplength=900, justify="left")
+        self.match_tv = ttk.Treeview(ocr, columns=("p", "b", "w"), show="headings", height=8)
         for c, hd, w in (("p", "%", 60), ("b", t("panel.col_build"), 280), ("w", t("panel.col_why"), 560)):
             self.match_tv.heading(c, text=hd); self.match_tv.column(c, width=w, anchor="center" if c == "p" else "w")
-        self.match_tv.pack(fill="x", pady=(2, 6))
-        dbg = ttk.Frame(right); dbg.pack(fill="x")
         self.dbg_var = tk.BooleanVar(value=False)
-        ttk.Checkbutton(dbg, text=t("panel.show_ocr"), variable=self.dbg_var, command=lambda: self.last_shown and self.show_result(*self.last_shown)).pack(side="left")
-        self.out = tk.Text(right, height=8, state="disabled", font=("Consolas", 10), wrap="word"); self.out.pack(fill="both", expand=True, pady=(4, 0))
-        self.stats = ttk.Label(f)
+        self.out = CtkTextbox(ocr, height=8, state="disabled", font=ui_theme.font_spec("mono", 10), wrap="word")
+        self.stats = CtkLabel(f)
         self.last_shown = None
+
+        self._refresh_dash_cards()
+        self._refresh_dash_goals()
+        self._refresh_dash_build()
+        self._sync_dashboard_layout(bool(getattr(self, "compact", False)))
         self.refresh_counts(); self.refresh_status(); self.refresh_build_tool_panel()
+
+    def _refresh_dash_cards(self):
+        cards = getattr(self, "_dash_cards", None)
+        if not cards:
+            return
+        ocr_ok = getattr(self, "_ocr_engine", None) is not None or hasattr(self, "ocr")
+        cards["ocr"].config(text=t("dash.ocr_ready") if ocr_ok else t("dash.ocr_waiting"),
+                            fg=PAL["success"] if ocr_ok else PAL["warning"])
+        lib_ok = GAME.ok if hasattr(GAME, "ok") else False
+        cards["library"].config(text=t("dash.lib_current") if lib_ok else t("dash.lib_outdated"),
+                                fg=PAL["success"] if lib_ok else PAL["warning"])
+        b = active_build(self.cfg)
+        cards["build"].config(text=b["name"] if b else "—", fg=PAL["accent"])
+        last = self.cfg["settings"].get("_last_sync")
+        if last:
+            try:
+                ago = max(1, int((time.time() - float(last)) / 60))
+                cards["sync"].config(text=t("dash.sync_ago", n=ago))
+            except (ValueError, TypeError):
+                cards["sync"].config(text=t("dash.sync_never"))
+        else:
+            cards["sync"].config(text=t("dash.sync_never"))
+
+    def _refresh_dash_goals(self):
+        inner = getattr(self, "_goals_inner", None)
+        if not inner:
+            return
+        for w in inner.winfo_children():
+            w.destroy()
+        tasks_data = getattr(self, "tasks", None) or {}
+        goals = []
+        if isinstance(tasks_data, dict):
+            for tid, task in list(tasks_data.items())[:5]:
+                if isinstance(task, dict):
+                    name = task.get("title") or task.get("name", str(tid))
+                    total = task.get("total", 1)
+                    have = task.get("current", task.get("progress", 0))
+                    reward = task.get("reward", "")
+                    goals.append((name, have, total, reward))
+        if not goals:
+            goals = [
+                (t("dash.ocr_status") + " — " + t("dash.ocr_ready"), 1, 1, ""),
+            ]
+        for name, have, total, reward in goals:
+            row = CtkFrame(inner, bg=PAL["surface"], pady=ui_theme.SPACING["xs"])
+            row.pack(fill="x")
+            sep = CtkFrame(row, bg=PAL["border"], height=1)
+            sep.pack(fill="x", pady=(0, ui_theme.SPACING["xs"]))
+            top_r = CtkFrame(row, bg=PAL["surface"])
+            top_r.pack(fill="x")
+            done = have >= total
+            check = "✅" if done else "☐"
+            CtkLabel(top_r, text=check, bg=PAL["surface"], fg=PAL["success"] if done else PAL["muted"],
+                     font=(ui_theme.FONT, 11)).pack(side="left")
+            CtkLabel(top_r, text=f"  {name}", bg=PAL["surface"], fg=PAL["fg"],
+                     font=(ui_theme.FONT_SEMI, 11)).pack(side="left")
+            if reward:
+                CtkLabel(top_r, text=f"{t('dash.reward')}\n{reward}", bg=PAL["surface"], fg=PAL["muted"],
+                         font=(ui_theme.FONT, 8), justify="right").pack(side="right")
+            CtkLabel(top_r, text=t("dash.completed_count", have=have, total=total), bg=PAL["surface"],
+                     fg=PAL["muted"], font=(ui_theme.FONT, 9)).pack(side="right", padx=8)
+            bar_bg = CtkFrame(row, bg=PAL["border"], height=4)
+            bar_bg.pack(fill="x", pady=(4, 0))
+            try:
+                pct = min(100, max(0, int(float(have) / max(float(total), 1) * 100)))
+            except (TypeError, ValueError, ZeroDivisionError):
+                pct = 0
+            bar_fg = CtkFrame(bar_bg, bg=PAL["accent"], height=4)
+            bar_fg.place(relwidth=pct / 100.0, relheight=1.0)
+            CtkLabel(row, text=f"%{pct}", bg=PAL["surface"], fg=PAL["accent"],
+                     font=(ui_theme.FONT_SEMI, 9), anchor="e").pack(anchor="e")
+
+    def _refresh_dash_build(self):
+        badge = getattr(self, "_build_badge", None)
+        slots_f = getattr(self, "_build_slots", None)
+        stats_f = getattr(self, "_build_stats", None)
+        if not badge or not slots_f or not stats_f:
+            return
+        planner = getattr(self, "bt_panel", None)
+        if planner is not None:
+            if getattr(planner, "error", None):
+                badge.config(text="DATA UNAVAILABLE")
+                for w in slots_f.winfo_children() + stats_f.winfo_children():
+                    w.destroy()
+                return
+            b = planner.current()
+            catalog = getattr(planner, "catalog", None)
+        else:
+            b = active_build(self.cfg)
+            catalog = GAME.data if getattr(GAME, "ok", False) else None
+        if not b:
+            badge.config(text="—")
+            for w in slots_f.winfo_children() + stats_f.winfo_children():
+                w.destroy()
+            return
+        badge.config(text=b["name"].upper())
+        for w in slots_f.winfo_children():
+            w.destroy()
+        for w in stats_f.winfo_children():
+            w.destroy()
+        plan = plan_of(b)
+        slot_names_map = {"Mask": "Maske", "Chest": "Göğüs", "Backpack": "Sırt Çantası",
+                          "Gloves": "Eldiven", "Kneepads": "Dizlik", "Holster": "Kılıf"}
+        slot_icons = {"Mask": "🎭", "Chest": "🛡", "Backpack": "🎒",
+                      "Gloves": "🧤", "Kneepads": "🦿", "Holster": "📦"}
+        slots_f.columnconfigure((0, 1, 2), weight=1, uniform="slot")
+        row_i = 0
+        for col_i, slot_key in enumerate(["Mask", "Chest", "Backpack", "Gloves", "Kneepads", "Holster"]):
+            r, c = divmod(col_i, 3)
+            sf = ui_theme.RoundedPanel(slots_f, PAL, radius=8, bg=PAL["surface2"], padx=8, pady=6)
+            sf.grid(row=r, column=c, sticky="nsew", padx=2, pady=2)
+            req = plan.get(slot_key, {})
+            core = req.get("core", "")
+            icon = slot_icons.get(slot_key, "📦")
+            display = slot_names_map.get(slot_key, slot_key)
+            CtkLabel(sf.content, text=f"{icon}  {display}", bg=PAL["surface2"], fg=PAL["fg"],
+                     font=(ui_theme.FONT_SEMI, 9)).pack(anchor="w")
+            CtkLabel(sf.content, text=core if core else "—", bg=PAL["surface2"], fg=PAL["muted"],
+                     font=(ui_theme.FONT, 8)).pack(anchor="w")
+        stats_f.columnconfigure((0, 1), weight=1, uniform="bstat")
+        try:
+            calculated = build_tool.calculate(b, catalog)
+            attrs = calculated["stats"]
+            weapon = calculated["weapons"][0] if calculated["weapons"] else None
+            weapon_values = weapon.get("contributions", {}) if weapon else {}
+
+            def dash_number(value, suffix=""):
+                number = float(value)
+                rendered = f"{number:,.1f}".replace(",", "\0").replace(".", ",").replace("\0", ".")
+                if rendered.endswith(",0"):
+                    rendered = rendered[:-2]
+                return rendered + suffix
+
+            weapon_damage = (weapon_values.get("offensive_core_bonus_percent", 0) +
+                             weapon_values.get("weapon_damage_percent", attrs.get("weapon_damage", 0)))
+            crit_chance = weapon_values.get("critical_chance_percent", attrs.get("crit_chance", 0))
+            crit_damage = weapon_values.get("critical_damage_percent", attrs.get("crit_damage", 0))
+            stat_items = [
+                (t("dash.weapon_dmg"), dash_number(weapon_damage, "%") if weapon or weapon_damage else "—",
+                 PAL["accent"] if weapon or weapon_damage else PAL["muted"]),
+                (t("dash.armor"), dash_number(calculated["armor"]), PAL["fg"]),
+                (t("dash.chc"), dash_number(crit_chance, "%") if crit_chance else "—",
+                 PAL["fg"] if crit_chance else PAL["muted"]),
+                (t("dash.health"), dash_number(attrs.get("health", 0)) if attrs.get("health", 0) else "—",
+                 PAL["fg"] if attrs.get("health", 0) else PAL["muted"]),
+                (t("dash.chd"), dash_number(crit_damage, "%") if crit_damage else "—",
+                 PAL["fg"] if crit_damage else PAL["muted"]),
+                # The local calculator does not model a Skill Power total.
+                (t("dash.skill_power"), "—", PAL["muted"]),
+            ]
+        except (KeyError, TypeError, ValueError, ZeroDivisionError):
+            log.exception("Dashboard build metrics could not be calculated")
+            stat_items = [(label, "—", PAL["muted"]) for label in
+                          (t("dash.weapon_dmg"), t("dash.armor"), t("dash.chc"),
+                           t("dash.health"), t("dash.chd"), t("dash.skill_power"))]
+        for i, (label, value, color) in enumerate(stat_items):
+            r, c = divmod(i, 2)
+            sf = ui_theme.RoundedPanel(stats_f, PAL, radius=8, bg=PAL["surface2"], padx=8, pady=5)
+            sf.grid(row=r, column=c, sticky="ew", padx=3, pady=3)
+            CtkLabel(sf.content, text=label, bg=PAL["surface2"], fg=PAL["muted"],
+                     font=(ui_theme.FONT, 9)).pack(side="left")
+            CtkLabel(sf.content, text=value, bg=PAL["surface2"], fg=color,
+                     font=ui_theme.font_spec("display", 9, weight="bold", numeric=True)).pack(side="right")
+
+    def _dash_switch_theme(self, theme_key):
+        if self.cfg["settings"].get("ui_theme") == theme_key:
+            return
+        self.cfg["settings"]["ui_theme"] = theme_key
+        save_cfg(self.cfg)
+        # Dashboard callbacks must use the active rebuild path directly. Keep
+        # _swap_theme as a compatibility entry point for older integrations,
+        # but do not make the primary UI action depend on that alias.
+        self.rebuild_ui(tab=self.current_tab() or "dashboard")
 
     def refresh_build_tool_panel(self):
         """Refresh the dashboard's read-only Build Tool summary."""
         label = getattr(self, "build_tool_lbl", None)
         if label is None:
             return
+        if hasattr(self, "_build_slots"):
+            self._refresh_dash_build()
         planner = getattr(self, "bt_panel", None)
         if planner is not None:
             if planner.error:
@@ -5042,7 +5955,6 @@ class App:
         except Exception:
             log.exception("Dashboard Build Tool summary failed")
             label.config(text="Build Tool: özet alınamadı")
-
     def show_fit(self, item):
         """Panel: bu eşya aktif build'in ilgili yuvasının şartlarını karşılıyor mu?"""
         if not hasattr(self, "fit_lbl"): return
@@ -5104,7 +6016,7 @@ class App:
         if img is not None:
             try:
                 th = img.copy(); th.thumbnail((520, 640))
-                self._card_photo = ImageTk.PhotoImage(th)
+                self._card_photo = compat_image(th)
                 self.card_img_lbl.config(image=self._card_photo, text="", height=0)
             except Exception:
                 pass
@@ -5120,6 +6032,7 @@ class App:
                                           else (f"{r['width']}x{r['height']}" if r else t("state.not_set")))))
         if hasattr(self, "dash_scene"):
             self.dash_scene.set_snapshot(status=(t("state.running") if self.running else t("state.stopped")))
+        self._refresh_dash_cards()
         self.refresh_header()
 
     def refresh_counts(self):
@@ -5146,7 +6059,9 @@ class App:
         if self.cfg["settings"]["scan_mode"] == "auto":
             self.auto_stop = threading.Event()
             threading.Thread(target=self.auto_loop, args=(self.auto_stop,), daemon=True).start()
-        self.running = True; self.btn_run.config(text=t("btn.stop"), style="Danger.TButton"); self.refresh_status()
+        self.running = True
+        if getattr(self, "btn_run", None): self.btn_run.config(text=t("btn.stop"), style="Danger.TButton")
+        self.refresh_status()
         if not quiet: self.sounds.play("start")
         self.card_x = None; self.card_box = None
         if self.window_overlaps_region():
@@ -5158,7 +6073,9 @@ class App:
     def stop(self, quiet=False):
         if self.listener: self.listener.stop(); self.listener = None
         if self.auto_stop: self.auto_stop.set(); self.auto_stop = None
-        self.running = False; self.btn_run.config(text=t("btn.start"), style="Success.TButton"); self.refresh_status()
+        self.running = False
+        if getattr(self, "btn_run", None): self.btn_run.config(text=t("btn.start"), style="Success.TButton")
+        self.refresh_status()
         if hasattr(self, "sounds") and not quiet: self.sounds.play("stop")
         log.info("Scanning stopped")
 
@@ -5182,8 +6099,66 @@ class App:
         region = self.scan_area()
         if region and self.cfg["settings"].get("only_game_active", True) and not game_active():
             return log.info("Hotkey ignored: game window is not in front")
-        if region and self.lock.acquire(blocking=False):
-            threading.Thread(target=self.manual_scan, args=(region, True), daemon=True).start()
+        if region:
+            ready = getattr(self, "_ocr_ready_event", None)
+            if ready is not None and not ready.is_set():
+                self._queue_scan_feedback(t("ocr.warming_up")); return
+            if self.lock.acquire(blocking=False):
+                threading.Thread(target=self.manual_scan, args=(region, True), daemon=True).start()
+            else:
+                self._queue_scan_feedback(t("ocr.scan_busy"))
+
+    def _queue_scan_feedback(self, message):
+        """Throttle hotkey-thread feedback and let Tk's queue poll display it."""
+        now = time.monotonic()
+        if now - getattr(self, "_scan_feedback_at", 0.0) < 2.0: return
+        self._scan_feedback_at = now
+        self.results.put(("scan_feedback", message))
+
+    def _schedule_cfg_save(self):
+        """Coalesce config mutations from UI and worker callbacks for 500 ms."""
+        pending = getattr(self, "_cfg_save_job", None)
+        if pending:
+            try: self.root.after_cancel(pending)
+            except tk.TclError: pass
+        self._cfg_save_job = self.root.after(500, self._flush_cfg_save)
+
+    def _flush_cfg_save(self):
+        pending = getattr(self, "_cfg_save_job", None)
+        self._cfg_save_job = None
+        if pending:
+            try: self.root.after_cancel(pending)
+            except tk.TclError: pass
+        if not getattr(self, "_cfg_dirty", False): return
+        self._cfg_dirty = False
+        try:
+            safeio.write_json(CFG_PATH, safeio.seal_settings(self.cfg))
+        except Exception:
+            self._cfg_dirty = True
+            raise
+
+    def _defer_scan_popup(self, verdict, item, res, note):
+        """Create the result overlay after pending input and paint events run."""
+        if not isinstance(self.root, tk.Misc):
+            self.popup(verdict, item, res, note)
+            return
+        self.root.after_idle(lambda: not getattr(self, "_closing", False) and self.popup(verdict, item, res, note))
+
+    def _schedule_stash_save(self):
+        """Coalesce scan-driven stash writes while keeping user edits immediate."""
+        pending = getattr(self, "_stash_save_job", None)
+        if pending:
+            try: self.root.after_cancel(pending)
+            except tk.TclError: pass
+        self._stash_save_job = self.root.after(500, self._flush_stash_save)
+
+    def _flush_stash_save(self):
+        pending = getattr(self, "_stash_save_job", None)
+        self._stash_save_job = None
+        if pending:
+            try: self.root.after_cancel(pending)
+            except tk.TclError: pass
+        if getattr(self, "stash", None): self.stash.save()
 
     def manual_scan(self, region, acquired=False):
         if not acquired and not self.lock.acquire(blocking=False): return
@@ -5368,39 +6343,39 @@ class App:
         st = self.cfg["settings"]
         store = self.fb_store = getattr(self, "fb_store", None) or reports.Store(BASE)
         pre = prefill or {}
-        w = self._fb_win = tk.Toplevel(self.root); w.title(t("fb.title")); w.configure(bg=PAL["bg"]); w.transient(self.root)
+        w = self._fb_win = CtkToplevel(self.root); w.title(t("fb.title")); w.configure(bg=PAL["bg"]); w.transient(self.root)
         k = getattr(self, "ui_factor", 1.0)
         w.geometry(f"{int(760 * k)}x{int(620 * k)}")
         nb = ttk.Notebook(w); nb.pack(fill="both", expand=True, padx=10, pady=10)
-        f = ttk.Frame(nb, padding=10); nb.add(f, text="📝 " + t("fb.tab_new"))
-        g = ttk.Frame(nb, padding=10); nb.add(g, text="📬 " + t("fb.tab_mine"))
+        f = CtkFrame(nb, padding=10); nb.add(f, text="📝 " + t("fb.tab_new"))
+        g = CtkFrame(nb, padding=10); nb.add(g, text="📬 " + t("fb.tab_mine"))
         # --- yeni rapor
-        r0 = ttk.Frame(f); r0.pack(fill="x")
-        ttk.Label(r0, text=t("fb.type")).pack(side="left")
+        r0 = CtkFrame(f); r0.pack(fill="x")
+        CtkLabel(r0, text=t("fb.type")).pack(side="left")
         tv = tk.StringVar(value=pre.get("type", "bug"))
         for key in reports.TYPES:
             ttk.Radiobutton(r0, text=t("fb.type_" + key), value=key, variable=tv).pack(side="left", padx=8)
-        ttk.Label(f, text=t("fb.f_title")).pack(anchor="w", pady=(10, 2))
-        title = ttk.Entry(f); title.pack(fill="x"); title.insert(0, pre.get("title", ""))
-        ttk.Label(f, text=t("fb.f_body")).pack(anchor="w", pady=(10, 2))
-        body = tk.Text(f, height=9, wrap="word", bg=PAL["entry"], fg=PAL["fg"], insertbackground=PAL["fg"], relief="flat",
+        CtkLabel(f, text=t("fb.f_title")).pack(anchor="w", pady=(10, 2))
+        title = CtkEntry(f); title.pack(fill="x"); title.insert(0, pre.get("title", ""))
+        CtkLabel(f, text=t("fb.f_body")).pack(anchor="w", pady=(10, 2))
+        body = CtkTextbox(f, height=9, wrap="word", bg=PAL["entry"], fg=PAL["fg"], insertbackground=PAL["fg"], relief="flat",
                        font=(ui_theme.FONT, 10), padx=8, pady=6)
         body.pack(fill="both", expand=True); body.insert("1.0", pre.get("body", ""))
-        rc = ttk.Frame(f); rc.pack(fill="x", pady=(8, 0))
-        ttk.Label(rc, text=t("fb.f_contact")).pack(side="left")
-        contact = ttk.Entry(rc, width=34); contact.pack(side="left", padx=8); contact.insert(0, st.get("fb_contact", ""))
-        ttk.Label(rc, text=t("fb.contact_hint"), foreground=PAL["muted"]).pack(side="left")
+        rc = CtkFrame(f); rc.pack(fill="x", pady=(8, 0))
+        CtkLabel(rc, text=t("fb.f_contact")).pack(side="left")
+        contact = CtkEntry(rc, width=34); contact.pack(side="left", padx=8); contact.insert(0, st.get("fb_contact", ""))
+        CtkLabel(rc, text=t("fb.contact_hint"), foreground=PAL["muted"]).pack(side="left")
         v_sys = tk.BooleanVar(value=True); v_log = tk.BooleanVar(value=pre.get("type", "bug") == "bug")
         has_card = bool(getattr(self, "last_text", ""))
         v_card = tk.BooleanVar(value=bool(pre.get("card")) and has_card)
-        ck = ttk.Frame(f); ck.pack(fill="x", pady=(8, 0))
-        ttk.Checkbutton(ck, text=t("fb.inc_sys"), variable=v_sys).pack(anchor="w")
-        ttk.Checkbutton(ck, text=t("fb.inc_log"), variable=v_log).pack(anchor="w")
-        cb = ttk.Checkbutton(ck, text=t("fb.inc_card"), variable=v_card); cb.pack(anchor="w")
+        ck = CtkFrame(f); ck.pack(fill="x", pady=(8, 0))
+        CtkCheckBox(ck, text=t("fb.inc_sys"), variable=v_sys).pack(anchor="w")
+        CtkCheckBox(ck, text=t("fb.inc_log"), variable=v_log).pack(anchor="w")
+        cb = CtkCheckBox(ck, text=t("fb.inc_card"), variable=v_card); cb.pack(anchor="w")
         if not has_card: cb.state(["disabled"])
-        ttk.Label(f, text=t("fb.privacy"), foreground=PAL["muted"], wraplength=int(700 * k), justify="left").pack(anchor="w", pady=(6, 0))
-        status = ttk.Label(f, text="", foreground=PAL["muted"]); status.pack(anchor="w", pady=(6, 0))
-        bar = ttk.Frame(f); bar.pack(fill="x", pady=(8, 0))
+        CtkLabel(f, text=t("fb.privacy"), foreground=PAL["muted"], wraplength=int(700 * k), justify="left").pack(anchor="w", pady=(6, 0))
+        status = CtkLabel(f, text="", foreground=PAL["muted"]); status.pack(anchor="w", pady=(6, 0))
+        bar = CtkFrame(f); bar.pack(fill="x", pady=(8, 0))
 
         def payload():
             gs = display.read_game_settings() or getattr(display, "_last_game_settings", None) or {}
@@ -5416,8 +6391,8 @@ class App:
         def preview():
             try: p = payload()
             except ValueError as e: return status.config(text=t("fb.err_" + str(e)), foreground=PAL["danger"])
-            pv = tk.Toplevel(w); pv.title(t("fb.preview")); pv.configure(bg=PAL["bg"])
-            tx = tk.Text(pv, wrap="word", bg=PAL["surface"], fg=PAL["fg"], font=("Consolas", 9), width=100, height=34)
+            pv = CtkToplevel(w); pv.title(t("fb.preview")); pv.configure(bg=PAL["bg"])
+            tx = CtkTextbox(pv, wrap="word", bg=PAL["surface"], fg=PAL["fg"], font=ui_theme.font_spec("mono", 9), width=100, height=34)
             tx.pack(fill="both", expand=True, padx=8, pady=8)
             tx.insert("1.0", json.dumps({k: v for k, v in p.items() if k != "client"}, ensure_ascii=False, indent=1)); tx.config(state="disabled")
 
@@ -5447,8 +6422,8 @@ class App:
         def p_type_title():
             return f"[{tv.get()}] {title.get()[:60]!r}"
 
-        ttk.Button(bar, text="👁 " + t("fb.preview"), command=preview).pack(side="left")
-        send_btn = ttk.Button(bar, text="📨 " + t("fb.send"), command=send, style="Accent.TButton"); send_btn.pack(side="right")
+        CtkButton(bar, text="👁 " + t("fb.preview"), command=preview).pack(side="left")
+        send_btn = CtkButton(bar, text="📨 " + t("fb.send"), command=send, style="Accent.TButton"); send_btn.pack(side="right")
         self._fb_send = send; self._fb_fields = (tv, title, body, contact)
         # --- raporlarım
         cols = ("no", "type", "title", "time", "status")
@@ -5456,10 +6431,10 @@ class App:
         for c, wd in zip(cols, (60, 70, 330, 120, 110)):
             tree.heading(c, text=t("fb.col_" + c)); tree.column(c, width=int(wd * k), anchor="w")
         tree.pack(fill="both", expand=True)
-        reply = tk.Text(g, height=6, wrap="word", bg=PAL["surface"], fg=PAL["fg"], relief="flat", font=(ui_theme.FONT, 10), padx=8, pady=6)
-        ttk.Label(g, text=t("fb.reply")).pack(anchor="w", pady=(8, 2)); reply.pack(fill="x")
-        gb = ttk.Frame(g); gb.pack(fill="x", pady=(8, 0))
-        info = ttk.Label(gb, text="", foreground=PAL["muted"]); info.pack(side="left")
+        reply = CtkTextbox(g, height=6, wrap="word", bg=PAL["surface"], fg=PAL["fg"], relief="flat", font=(ui_theme.FONT, 10), padx=8, pady=6)
+        CtkLabel(g, text=t("fb.reply")).pack(anchor="w", pady=(8, 2)); reply.pack(fill="x")
+        gb = CtkFrame(g); gb.pack(fill="x", pady=(8, 0))
+        info = CtkLabel(gb, text="", foreground=PAL["muted"]); info.pack(side="left")
 
         def fill_mine():
             tree.delete(*tree.get_children())
@@ -5490,7 +6465,7 @@ class App:
                     msg = t("fb.failed", e=e)
                 self.root.after(0, lambda: (w.winfo_exists() and (fill_mine(), info.config(text=msg))))
             threading.Thread(target=work, daemon=True).start()
-        ttk.Button(gb, text="🔄 " + t("fb.refresh"), command=refresh).pack(side="right")
+        CtkButton(gb, text="🔄 " + t("fb.refresh"), command=refresh).pack(side="right")
         self._fb_refresh = refresh
         fill_mine()
         if store.sent or store.queue: w.after(300, refresh)
@@ -5565,10 +6540,10 @@ class App:
         if res.get("prog"):
             self.upd_info = res["prog"]; self._upd_show(res["prog"])
         self._uc_open = True
-        w = tk.Toplevel(self.root); w.title(t("uc.title")); w.configure(bg=PAL["bg"]); w.transient(self.root)
+        w = CtkToplevel(self.root); w.title(t("uc.title")); w.configure(bg=PAL["bg"]); w.transient(self.root)
         w.protocol("WM_DELETE_WINDOW", lambda: close())
-        ttk.Label(w, text="⬆ " + t("uc.title"), font=(ui_theme.FONT_SEMI, 15)).pack(anchor="w", padx=16, pady=(14, 6))
-        body = ttk.Frame(w); body.pack(fill="both", expand=True, padx=16)
+        CtkLabel(w, text="⬆ " + t("uc.title"), font=(ui_theme.FONT_SEMI, 15)).pack(anchor="w", padx=16, pady=(14, 6))
+        body = CtkFrame(w); body.pack(fill="both", expand=True, padx=16)
         wrap = int(640 * getattr(self, "ui_factor", 1.0))
         v_prog = tk.BooleanVar(value=True); v_lib = tk.BooleanVar(value=True)
         if res.get("game"):
@@ -5576,30 +6551,30 @@ class App:
             box = ttk.LabelFrame(body, text="🎮 " + t("uc.game_box")); box.pack(fill="x", pady=4)
             msg = t("uc.game_updated", old=gameinfo.label(old), new=gameinfo.label(new)) + "\n" + \
                   (t("uc.game_lib_new") if res.get("lib") else t("uc.game_lib_ok"))
-            ttk.Label(box, text=msg, wraplength=wrap, justify="left").pack(anchor="w", padx=8, pady=6)
+            CtkLabel(box, text=msg, wraplength=wrap, justify="left").pack(anchor="w", padx=8, pady=6)
         if res.get("lib"):
             gd, diff, cur = res["lib"]
             box = ttk.LabelFrame(body, text="📚 " + t("uc.lib_box")); box.pack(fill="x", pady=4)
-            ttk.Checkbutton(box, variable=v_lib, text=t("uc.lib", old=cur or "—", new=gd.get("version"), n=diff["total"])).pack(anchor="w", padx=8, pady=(6, 2))
+            CtkCheckBox(box, variable=v_lib, text=t("uc.lib", old=cur or "—", new=gd.get("version"), n=diff["total"])).pack(anchor="w", padx=8, pady=(6, 2))
             names, more = updates.diff_summary(diff)
             if names:
-                ttk.Label(box, text=t("uc.lib_new", names=", ".join(names)) + (" " + t("uc.lib_more", n=more) if more else ""),
+                CtkLabel(box, text=t("uc.lib_new", names=", ".join(names)) + (" " + t("uc.lib_more", n=more) if more else ""),
                           foreground=PAL["muted"], wraplength=wrap, justify="left").pack(anchor="w", padx=28, pady=(0, 6))
         if res.get("prog"):
             info = res["prog"]
             box = ttk.LabelFrame(body, text="⬆ " + t("uc.prog_box")); box.pack(fill="x", pady=4)
-            ttk.Checkbutton(box, variable=v_prog, text=t("uc.prog", old=APP_VERSION, new=info["version"])).pack(anchor="w", padx=8, pady=(6, 2))
+            CtkCheckBox(box, variable=v_prog, text=t("uc.prog", old=APP_VERSION, new=info["version"])).pack(anchor="w", padx=8, pady=(6, 2))
             notes = updates.release_highlights(info.get("notes", ""), info.get("version"))
             if notes:
-                ttk.Label(box, text=notes, foreground=PAL["muted"], wraplength=wrap, justify="left").pack(anchor="w", padx=28, pady=(0, 6))
+                CtkLabel(box, text=notes, foreground=PAL["muted"], wraplength=wrap, justify="left").pack(anchor="w", padx=28, pady=(0, 6))
             if FROZEN and not info.get("setup"): v_prog.set(False)
-        bar = ttk.Frame(w); bar.pack(fill="x", padx=16, pady=12)
+        bar = CtkFrame(w); bar.pack(fill="x", padx=16, pady=12)
         can_install = bool(res.get("lib") or res.get("prog"))
         if can_install:
-            ttk.Button(bar, text="✔ " + t("uc.install"), style="Accent.TButton", command=lambda: install()).pack(side="left")
-            ttk.Button(bar, text=t("uc.later"), command=lambda: close()).pack(side="left", padx=8)
+            CtkButton(bar, text="✔ " + t("uc.install"), style="Accent.TButton", command=lambda: install()).pack(side="left")
+            CtkButton(bar, text=t("uc.later"), command=lambda: close()).pack(side="left", padx=8)
         else:
-            ttk.Button(bar, text="OK", style="Accent.TButton", command=lambda: close()).pack(side="left")
+            CtkButton(bar, text="OK", style="Accent.TButton", command=lambda: close()).pack(side="left")
         self._uc_win = w
 
         def close(ack_game=True):
@@ -5653,26 +6628,28 @@ class App:
         """PC'yi ve oyun ayarlarını tara, kart okuma hızını ölç, programın ayarlarını bu PC'ye göre öner ve uygula."""
         if getattr(self, "_sync_win", None) and self._sync_win.winfo_exists():
             self._sync_win.lift(); return
-        w = self._sync_win = tk.Toplevel(self.root)
+        w = self._sync_win = CtkToplevel(self.root)
         w.title(t("sync.title")); w.configure(bg=PAL["bg"])
         try: w.geometry(f"{int(860 * self.ui_factor)}x{int(640 * self.ui_factor)}")
         except Exception: w.geometry("860x640")
         w.transient(self.root)
-        ttk.Label(w, text="🔄 " + t("sync.title"), font=(ui_theme.FONT_SEMI, 15)).pack(anchor="w", padx=14, pady=(12, 2))
-        status = ttk.Label(w, text=t("sync.scanning"), foreground=PAL["muted"]); status.pack(anchor="w", padx=14)
-        pb = ttk.Progressbar(w, mode="indeterminate"); pb.pack(fill="x", padx=14, pady=6); pb.start(12)
-        txt = tk.Text(w, bg=PAL["surface"], fg=PAL["fg"], relief="flat", wrap="word", font=(ui_theme.FONT, 10),
+        CtkLabel(w, text="🔄 " + t("sync.title"), font=(ui_theme.FONT_SEMI, 15)).pack(anchor="w", padx=14, pady=(12, 2))
+        status = CtkLabel(w, text=t("sync.scanning"), foreground=PAL["muted"]); status.pack(anchor="w", padx=14)
+        # CustomTkinter's CTkProgressBar.start() accepts no interval argument;
+        # the ttk fallback also uses its default interval when called this way.
+        pb = CtkProgressBar(w, mode="indeterminate"); pb.pack(fill="x", padx=14, pady=6); pb.start()
+        txt = CtkTextbox(w, bg=PAL["surface"], fg=PAL["fg"], relief="flat", wrap="word", font=(ui_theme.FONT, 10),
                       padx=10, pady=8, height=20)
         txt.pack(fill="both", expand=True, padx=14, pady=6)
         for tag, col in (("ok", PAL["success"]), ("info", PAL["muted"]), ("warn", PAL["warning"]),
                          ("bad", PAL["danger"]), ("h", PAL["accent"])):
             txt.tag_configure(tag, foreground=col)
         txt.tag_configure("h", font=(ui_theme.FONT_SEMI, 12))
-        bar = ttk.Frame(w); bar.pack(fill="x", padx=14, pady=(0, 12))
-        apply_btn = ttk.Button(bar, text="✔ " + t("sync.apply"), style="Accent.TButton", state="disabled")
+        bar = CtkFrame(w); bar.pack(fill="x", padx=14, pady=(0, 12))
+        apply_btn = CtkButton(bar, text="✔ " + t("sync.apply"), style="Accent.TButton", state="disabled")
         apply_btn.pack(side="left"); self._sync_apply_btn = apply_btn
-        copy_btn = ttk.Button(bar, text="📋 " + t("sync.copy"), state="disabled"); copy_btn.pack(side="left", padx=8)
-        ttk.Button(bar, text=t("sync.close"), command=w.destroy).pack(side="right")
+        copy_btn = CtkButton(bar, text="📋 " + t("sync.copy"), state="disabled"); copy_btn.pack(side="left", padx=8)
+        CtkButton(bar, text=t("sync.close"), command=w.destroy).pack(side="right")
         st = self.cfg["settings"]
 
         def work():
@@ -5815,7 +6792,7 @@ class App:
 
     def screen_monitor(self):
         """Tam ekran seçimleri (kalibrasyon, görev bölgesi) için oyunun bulunduğu monitör."""
-        with mss.mss() as sct:
+        with mss.MSS() as sct:
             g = display.game_window()
             return dict(display.monitor_of(g, sct.monitors) if g else sct.monitors[1])
 
@@ -5873,7 +6850,8 @@ class App:
         # Arka plan işlerinden çok sayıda sonuç aynı anda gelirse Tk ana
         # döngüsünü sınırsız süre işgal etme. Kalan sonuçlar bir sonraki turda
         # işlenir; böylece menü tıklamaları ve pencere boyama önceliğini korur.
-        poll_deadline = time.perf_counter() + 0.012
+        poll_started = time.perf_counter()
+        poll_deadline = poll_started + 0.012
         poll_count = 0
         try:
             while poll_count < 32 and time.perf_counter() < poll_deadline:
@@ -5881,6 +6859,15 @@ class App:
                 poll_count += 1
                 if r[0] == "hotkey":
                     self._hotkey_action(r[1]); continue
+                if r[0] == "scan_feedback":
+                    if not getattr(self, "_closing", False): self.toast(r[1])
+                    continue
+                if r[0] == "cfg_save_requested":
+                    if not getattr(self, "_closing", False): self._schedule_cfg_save()
+                    continue
+                if r[0] == "meta_sync_done":
+                    if not getattr(self, "_closing", False): self._defer_meta_sync_done(r[1], r[2])
+                    continue
                 if r[0] == "translate_pad":
                     if r[1] == getattr(self, "_lt_revision", 0): self.lt_once()
                     continue
@@ -5932,6 +6919,10 @@ class App:
                 self.handle_result(*r[1:])
         except queue.Empty:
             pass
+        poll_ms = (time.perf_counter() - poll_started) * 1000.0
+        record_timing = getattr(getattr(self, "timings", None), "record", None)
+        if callable(record_timing): record_timing("poll", poll_ms)
+        if poll_ms > 20: log.warning("UI result poll exceeded 20 ms: %.1f ms", poll_ms)
         self.root.after(100, self.poll)
 
     def handle_result(self, text, item, verdict, res, sig):
@@ -5947,7 +6938,7 @@ class App:
         self.counts[verdict] += 1; self.refresh_counts()
         self.last_text = text
         self.show_result(text, item, verdict, res, note, diff=diff)
-        self.popup(verdict, item, res, note)
+        self._defer_scan_popup(verdict, item, res, note)
         if s.get("speak_verdict"): self.speak_verdict(verdict, item, res, note)
         elif s.get("sound"): self.sounds.play(verdict, force=True)
         if s.get("log_csv"): self.log(item, verdict, res)
@@ -5962,7 +6953,7 @@ class App:
                 rec, new = self.stash.add(item, verdict, res[0][1] if res else None, res[0][0] if res else None, GAME)
                 if new: self._drop_report(item)
                 if rec:
-                    self.stash.save()
+                    self._schedule_stash_save()
                     if self.current_tab() == "stash": self.refresh_stash()
             except Exception:
                 log.exception("Stash add failed")
@@ -6042,23 +7033,23 @@ class App:
         if not self.last_shown: return messagebox.showinfo(APP_NAME, t("ocr.need_card"))
         text, item, verdict, res, note, debug, diff = self.last_shown
         if not valid_item(item): return messagebox.showinfo(APP_NAME, t("ocr.need_card"))
-        w = tk.Toplevel(self.root); w.title(t("vf.title")); w.configure(bg=PAL["bg"]); w.transient(self.root)
+        w = CtkToplevel(self.root); w.title(t("vf.title")); w.configure(bg=PAL["bg"]); w.transient(self.root)
         w.geometry("460x400"); w.minsize(420, 360)
-        ttk.Label(w, text=t("vf.title"), style="Title.TLabel").pack(anchor="w", padx=16, pady=(14, 2))
+        CtkLabel(w, text=t("vf.title"), style="Title.TLabel").pack(anchor="w", padx=16, pady=(14, 2))
         sub = (item.get("name") or "?") + ("  ·  " + verdict_label(verdict) if verdict else "")
-        ttk.Label(w, text=sub, wraplength=420, justify="left", foreground=PAL["muted"]).pack(anchor="w", padx=16)
-        ttk.Label(w, text=t("vf.ask"), wraplength=420, justify="left").pack(anchor="w", padx=16, pady=(10, 4))
+        CtkLabel(w, text=sub, wraplength=420, justify="left", foreground=PAL["muted"]).pack(anchor="w", padx=16)
+        CtkLabel(w, text=t("vf.ask"), wraplength=420, justify="left").pack(anchor="w", padx=16, pady=(10, 4))
         vv = tk.StringVar(value="")
-        opts = ttk.Frame(w); opts.pack(anchor="w", padx=16)
+        opts = CtkFrame(w); opts.pack(anchor="w", padx=16)
         for v in ("KEEP", "CONSIDER", "DISMANTLE", "REVIEW"):
             if v == verdict: continue
             ttk.Radiobutton(opts, text=verdict_label(v), value=v, variable=vv).pack(anchor="w")
-        ttk.Label(w, text=t("vf.note_label")).pack(anchor="w", padx=16, pady=(10, 2))
-        note_box = tk.Text(w, height=4, wrap="word", bg=PAL["entry"], fg=PAL["fg"], insertbackground=PAL["fg"],
+        CtkLabel(w, text=t("vf.note_label")).pack(anchor="w", padx=16, pady=(10, 2))
+        note_box = CtkTextbox(w, height=4, wrap="word", bg=PAL["entry"], fg=PAL["fg"], insertbackground=PAL["fg"],
                            relief="flat", font=(ui_theme.FONT, 10), padx=8, pady=6)
         note_box.pack(fill="x", padx=16)
-        status = ttk.Label(w, text="", foreground=PAL["muted"]); status.pack(anchor="w", padx=16, pady=(8, 0))
-        bar = ttk.Frame(w); bar.pack(fill="x", padx=16, pady=(10, 14))
+        status = CtkLabel(w, text="", foreground=PAL["muted"]); status.pack(anchor="w", padx=16, pady=(8, 0))
+        bar = CtkFrame(w); bar.pack(fill="x", padx=16, pady=(10, 14))
 
         def record():
             return {"time": time.strftime("%Y-%m-%d %H:%M:%S"),
@@ -6085,18 +7076,18 @@ class App:
                            correct=verdict_label(rec["correct_verdict"])),
                 "body": t("vf.fb_body") + "\n\n" + json.dumps(rec, ensure_ascii=False, indent=1)})
 
-        ttk.Button(bar, text=t("vf.save_local"), command=save_only).pack(side="left")
-        ttk.Button(bar, text="📨 " + t("vf.save_send"), command=save_and_send, style="Accent.TButton").pack(side="right")
-        ttk.Button(bar, text=t("upd.close"), command=w.destroy).pack(side="right", padx=(0, 8))
+        CtkButton(bar, text=t("vf.save_local"), command=save_only).pack(side="left")
+        CtkButton(bar, text="📨 " + t("vf.save_send"), command=save_and_send, style="Accent.TButton").pack(side="right")
+        CtkButton(bar, text=t("upd.close"), command=w.destroy).pack(side="right", padx=(0, 8))
 
     def show_verdict_feedback_log(self):
         """'Bu karar yanlıştı' ile yerel olarak kaydedilen bildirimleri listeler (bkz. report_wrong_verdict)."""
         items = load_verdict_feedback()
-        w = tk.Toplevel(self.root); w.title(t("vf.log_title")); w.geometry("860x480"); w.minsize(640, 360)
+        w = CtkToplevel(self.root); w.title(t("vf.log_title")); w.geometry("860x480"); w.minsize(640, 360)
         w.transient(self.root); w.configure(bg=PAL["bg"])
-        top = ttk.Frame(w); top.pack(fill="x", padx=12, pady=(10, 4))
-        ttk.Label(top, text=t("vf.log_title") + f"  ({len(items)})", style="Title.TLabel").pack(side="left")
-        ttk.Button(top, text=t("upd.close"), command=w.destroy).pack(side="right")
+        top = CtkFrame(w); top.pack(fill="x", padx=12, pady=(10, 4))
+        CtkLabel(top, text=t("vf.log_title") + f"  ({len(items)})", style="Title.TLabel").pack(side="left")
+        CtkButton(top, text=t("upd.close"), command=w.destroy).pack(side="right")
         cols = ("time", "item", "given", "correct", "build", "note")
         tree = ttk.Treeview(w, columns=cols, show="headings", height=16)
         heads = {"time": t("vf.col_time"), "item": t("vf.col_item"), "given": t("vf.col_given"),
@@ -6112,7 +7103,7 @@ class App:
                 verdict_label(rec["correct_verdict"]) if rec.get("correct_verdict") else "—",
                 rec.get("build") or "—", (rec.get("note") or "")[:80]))
         if not items:
-            ttk.Label(w, text=t("vf.log_empty"), foreground=PAL["muted"]).pack(anchor="w", padx=12, pady=(0, 10))
+            CtkLabel(w, text=t("vf.log_empty"), foreground=PAL["muted"]).pack(anchor="w", padx=12, pady=(0, 10))
 
     def report_wrong_github(self):
         """(eski yol) Yanlış okunan kartı kaydet ve GitHub'da hata bildirimi aç."""
@@ -6251,7 +7242,7 @@ class App:
             return
         if self.overlay: self.overlay.destroy()
         st = self.cfg["settings"]
-        w = self.overlay = tk.Toplevel(self.root)
+        w = self.overlay = CtkToplevel(self.root)
         try: alpha = max(0.4, min(1.0, float(st.get("overlay_alpha", 0.94))))
         except (TypeError, ValueError): alpha = 0.94
         w.overrideredirect(True); w.attributes("-topmost", True, "-alpha", alpha)
@@ -6264,15 +7255,15 @@ class App:
         # Toplevel dış çerçevesi de kartla aynı renkte olsun; bazı Windows
         # bileşimlerinde siyah bir dikdörtgen olarak kalmasını önler.
         w.configure(bg=dark)
-        shell = tk.Frame(w, bg=dark, highlightthickness=1, highlightbackground="#2c313d"); shell.pack(fill="both", expand=True)
-        tk.Frame(shell, bg=col, width=max(5, int(7 * k))).pack(side="left", fill="y")      # renkli şerit
-        body = tk.Frame(shell, bg=dark, padx=int(16 * k), pady=int(12 * k)); body.pack(side="left", fill="both")
-        tk.Label(body, text=verdict_label(verdict), fg=PAL["verdict_fg"].get(verdict, fg),
+        shell = CtkFrame(w, bg=dark, highlightthickness=1, highlightbackground="#2c313d"); shell.pack(fill="both", expand=True)
+        CtkFrame(shell, bg=col, width=max(5, int(7 * k))).pack(side="left", fill="y")      # renkli şerit
+        body = CtkFrame(shell, bg=dark, padx=int(16 * k), pady=int(12 * k)); body.pack(side="left", fill="both")
+        CtkLabel(body, text=verdict_label(verdict), fg=PAL["verdict_fg"].get(verdict, fg),
                  bg=dark, font=(ui_theme.FONT_SEMI, fz(18))).pack(anchor="w")
         sub = item["name"][:42] + ("  ·  " + ", ".join(item["rarity"]) if item.get("rarity") else "")
-        tk.Label(body, text=sub, fg=fg, bg=dark, font=(ui_theme.FONT_SEMI, fz(11))).pack(anchor="w")
+        CtkLabel(body, text=sub, fg=fg, bg=dark, font=(ui_theme.FONT_SEMI, fz(11))).pack(anchor="w")
         tag = " / ".join(x for x in (item.get("gear_set"), item.get("brand")) if x)
-        if tag: tk.Label(body, text="🏷 " + tag, fg=mu, bg=dark, font=(ui_theme.FONT, fz(10))).pack(anchor="w")
+        if tag: CtkLabel(body, text="🏷 " + tag, fg=mu, bg=dark, font=(ui_theme.FONT, fz(10))).pack(anchor="w")
         # rulo kalitesi çubukları (oyundaki en yüksek değere göre)
         q = item.get("quality", {})
         if q:
@@ -6294,7 +7285,7 @@ class App:
         if res and res[0][2]: L.append("  " + ", ".join(res[0][2][:4]))
         if verdict == "DISMANTLE": L.append(t("panel.no_build_match"))
         if L:
-            tk.Label(body, text="\n".join(L), justify="left", fg=mu, bg=dark, font=(ui_theme.FONT, fz(10)),
+            CtkLabel(body, text="\n".join(L), justify="left", fg=mu, bg=dark, font=(ui_theme.FONT, fz(10)),
                      wraplength=int(420 * k)).pack(anchor="w", pady=(6, 0))
         w.update_idletasks()
         sw, sh = self.root.winfo_screenwidth(), self.root.winfo_screenheight()
@@ -6330,17 +7321,17 @@ class App:
 
     def _calib_capture(self):
         mon = self.screen_monitor()
-        with mss.mss() as sct:
+        with mss.MSS() as sct:
             s = sct.grab(mon); img = Image.frombytes("RGB", s.size, s.rgb)
         self.root.deiconify()
-        w = tk.Toplevel(self.root); w.attributes("-fullscreen", True, "-topmost", True)
+        w = CtkToplevel(self.root); w.attributes("-fullscreen", True, "-topmost", True)
         cv = tk.Canvas(w, highlightthickness=0, cursor="crosshair"); cv.pack(fill="both", expand=True)
         w.update_idletasks()
         sw, sh = w.winfo_width(), w.winfo_height()
         scale = min(sw / img.width, sh / img.height)
         w._photo = ImageTk.PhotoImage(img.resize((int(img.width * scale), int(img.height * scale))))
         cv.create_image(0, 0, image=w._photo, anchor="nw")
-        cv.create_text(sw // 2, 30, fill="yellow", font=("Segoe UI", 18, "bold"), text=t("calib.item_hint"))
+        cv.create_text(sw // 2, 30, fill="yellow", font=ui_theme.font_spec("display", 18), text=t("calib.item_hint"))
         st = {}
         def down(e): st.update(x0=e.x, y0=e.y, r=cv.create_rectangle(e.x, e.y, e.x, e.y, outline="lime", width=3))
         def move(e): cv.coords(st["r"], st["x0"], st["y0"], e.x, e.y)
@@ -6371,6 +7362,7 @@ class App:
     # ---------- The Division 2 Builds Tool ----------
     def build_build_tool(self):
         """Create the standalone planner backed by build_tool.json."""
+        _ensure_deferred()
         frame = self.tabs["build_tool"]
         for child in frame.winfo_children(): child.destroy()
         self.bt_panel = build_tool_ui.BuildToolPanel(
@@ -6393,113 +7385,113 @@ class App:
         """Build'ler v2: oyun verisinden seçmeli set/marka, attribute (oyun max'ı ile), talent ve silah türü."""
         f = self.tabs["builds"]
         paned = ttk.Panedwindow(f, orient="horizontal"); paned.pack(fill="both", expand=True, padx=8, pady=8)
-        left = ttk.Frame(paned); paned.add(left, weight=1)
+        left = CtkFrame(paned); paned.add(left, weight=1)
         self.b_search = tk.StringVar()
-        se = ttk.Entry(left, textvariable=self.b_search); se.pack(fill="x", pady=(0, 4))
+        se = CtkEntry(left, textvariable=self.b_search); se.pack(fill="x", pady=(0, 4))
         se.bind("<KeyRelease>", lambda e: self.refresh_builds(keep=True))
         self.lb = tk.Listbox(left, exportselection=False, font=(ui_theme.FONT, 11))
         self.lb.pack(fill="both", expand=True); self.lb.bind("<<ListboxSelect>>", self.on_pick)
-        bb = ttk.Frame(left); bb.pack(fill="x", pady=4)
-        ttk.Button(bb, text=ui_theme.with_icon(t("build.new"), "➕"), command=self.new_build).pack(side="left", fill="x", expand=True)
-        ttk.Button(bb, text=ui_theme.with_icon(t("build.duplicate"), "⧉"), command=self.dup_build).pack(side="left", fill="x", expand=True, padx=4)
-        ttk.Button(bb, text=ui_theme.with_icon(t("build.delete"), "🗑"), command=self.del_build).pack(side="left", fill="x", expand=True)
-        bb2 = ttk.Frame(left); bb2.pack(fill="x")
-        ttk.Button(bb2, text=t("build.export"), command=self.export_builds).pack(side="left", fill="x", expand=True)
-        ttk.Button(bb2, text=t("build.import"), command=self.import_builds).pack(side="left", fill="x", expand=True, padx=(4, 0))
-        bb3 = ttk.Frame(left); bb3.pack(fill="x", pady=(4, 0))
-        ttk.Button(bb3, text="🔗 " + t("share.share"), command=self.share_build).pack(side="left", fill="x", expand=True)
-        ttk.Button(bb3, text="📥 " + t("share.paste"), command=self.import_build_code).pack(side="left", fill="x", expand=True, padx=(4, 0))
-        ttk.Button(left, text="🆚 " + t("cmp.compare_btn"), command=self.show_build_compare).pack(fill="x", pady=(6, 0))
-        ttk.Button(left, text=ui_theme.with_icon(t("meta.sync_now"), "⭐"), command=lambda: self.meta_sync_start(force=True, what=("builds",)),
+        bb = CtkFrame(left); bb.pack(fill="x", pady=4)
+        CtkButton(bb, text=ui_theme.with_icon(t("build.new"), "➕"), command=self.new_build).pack(side="left", fill="x", expand=True)
+        CtkButton(bb, text=ui_theme.with_icon(t("build.duplicate"), "⧉"), command=self.dup_build).pack(side="left", fill="x", expand=True, padx=4)
+        CtkButton(bb, text=ui_theme.with_icon(t("build.delete"), "🗑"), command=self.del_build).pack(side="left", fill="x", expand=True)
+        bb2 = CtkFrame(left); bb2.pack(fill="x")
+        CtkButton(bb2, text=t("build.export"), command=self.export_builds).pack(side="left", fill="x", expand=True)
+        CtkButton(bb2, text=t("build.import"), command=self.import_builds).pack(side="left", fill="x", expand=True, padx=(4, 0))
+        bb3 = CtkFrame(left); bb3.pack(fill="x", pady=(4, 0))
+        CtkButton(bb3, text="🔗 " + t("share.share"), command=self.share_build).pack(side="left", fill="x", expand=True)
+        CtkButton(bb3, text="📥 " + t("share.paste"), command=self.import_build_code).pack(side="left", fill="x", expand=True, padx=(4, 0))
+        CtkButton(left, text="🆚 " + t("cmp.compare_btn"), command=self.show_build_compare).pack(fill="x", pady=(6, 0))
+        CtkButton(left, text=ui_theme.with_icon(t("meta.sync_now"), "⭐"), command=lambda: self.meta_sync_start(force=True, what=("builds",)),
                    style="Accent.TButton").pack(fill="x", pady=(6, 0))
-        self.meta_info = ttk.Label(left, text=self.meta_status_text(), foreground=PAL["muted"], wraplength=300, justify="left")
+        self.meta_info = CtkLabel(left, text=self.meta_status_text(), foreground=PAL["muted"], wraplength=300, justify="left")
         self.meta_info.pack(fill="x", pady=(4, 0))
 
-        right = ttk.Frame(paned); paned.add(right, weight=3)
+        right = CtkFrame(paned); paned.add(right, weight=3)
         self.b_nb = ttk.Notebook(right); self.b_nb.pack(fill="both", expand=True)
-        sh = ttk.Frame(self.b_nb); self.b_nb.add(sh, text=" 📋 " + t("plan.tab_sheet") + " ")
-        holder = ttk.Frame(self.b_nb); self.b_nb.add(holder, text=" ✏ " + t("plan.tab_edit") + " ")
+        sh = CtkFrame(self.b_nb); self.b_nb.add(sh, text=" 📋 " + t("plan.tab_sheet") + " ")
+        holder = CtkFrame(self.b_nb); self.b_nb.add(holder, text=" ✏ " + t("plan.tab_edit") + " ")
         self.sheet_box = ui_theme.scrollable(sh, PAL["bg"])
         r = ui_theme.scrollable(holder, PAL["bg"])
         names = (GAME.data.get("gear_sets", []) + GAME.data.get("brands", [])) if GAME.ok else []
 
         g = ttk.LabelFrame(r, text=t("build.sec_general")); g.pack(fill="x", padx=6, pady=(0, 8))
         self.v_name, self.v_bonus = tk.StringVar(), tk.StringVar()
-        ttk.Label(g, text=t("build.name")).grid(row=0, column=0, sticky="w", padx=8, pady=4)
-        ttk.Entry(g, textvariable=self.v_name, width=48).grid(row=0, column=1, columnspan=3, sticky="w", pady=4)
-        ttk.Label(g, text=t("build.sets")).grid(row=1, column=0, sticky="nw", padx=8, pady=4)
+        CtkLabel(g, text=t("build.name")).grid(row=0, column=0, sticky="w", padx=8, pady=4)
+        CtkEntry(g, textvariable=self.v_name, width=48).grid(row=0, column=1, columnspan=3, sticky="w", pady=4)
+        CtkLabel(g, text=t("build.sets")).grid(row=1, column=0, sticky="nw", padx=8, pady=4)
         self.sets_lb = tk.Listbox(g, height=4, width=34, exportselection=False); self.sets_lb.grid(row=1, column=1, rowspan=2, sticky="w", pady=4)
         self.v_setpick = tk.StringVar()
-        ttk.Combobox(g, textvariable=self.v_setpick, values=names, width=30).grid(row=1, column=2, sticky="w", padx=6)
-        sb = ttk.Frame(g); sb.grid(row=2, column=2, sticky="w", padx=6)
-        ttk.Button(sb, text="✚", width=3, command=self.add_set).pack(side="left")
-        ttk.Button(sb, text="🗑", width=3, command=self.del_set).pack(side="left", padx=4)
-        ttk.Label(g, text=t("build.set_bonus")).grid(row=3, column=0, sticky="w", padx=8, pady=4)
+        CtkComboBox(g, textvariable=self.v_setpick, values=names, width=30).grid(row=1, column=2, sticky="w", padx=6)
+        sb = CtkFrame(g); sb.grid(row=2, column=2, sticky="w", padx=6)
+        CtkButton(sb, text="✚", width=3, command=self.add_set).pack(side="left")
+        CtkButton(sb, text="🗑", width=3, command=self.del_set).pack(side="left", padx=4)
+        CtkLabel(g, text=t("build.set_bonus")).grid(row=3, column=0, sticky="w", padx=8, pady=4)
         ttk.Spinbox(g, textvariable=self.v_bonus, from_=0, to=50, width=6).grid(row=3, column=1, sticky="w")
-        ttk.Label(g, text=t("plan.items")).grid(row=5, column=0, sticky="nw", padx=8, pady=4)
+        CtkLabel(g, text=t("plan.items")).grid(row=5, column=0, sticky="nw", padx=8, pady=4)
         self.items_lb = tk.Listbox(g, height=3, width=34, exportselection=False); self.items_lb.grid(row=5, column=1, sticky="w", pady=4)
         self.v_itempick = tk.StringVar()
-        ip = ttk.Frame(g); ip.grid(row=5, column=2, sticky="w", padx=6)
-        ttk.Combobox(ip, textvariable=self.v_itempick, width=30,
+        ip = CtkFrame(g); ip.grid(row=5, column=2, sticky="w", padx=6)
+        CtkComboBox(ip, textvariable=self.v_itempick, width=30,
                      values=sorted(set(GAME.data.get("exotics", []) + GAME.data.get("named", []))) if GAME.ok else []).pack(side="left")
-        ttk.Button(ip, text="✚", width=3, command=lambda: self.v_itempick.get().strip() and self.v_itempick.get().strip() not in self.items_lb.get(0, "end")
+        CtkButton(ip, text="✚", width=3, command=lambda: self.v_itempick.get().strip() and self.v_itempick.get().strip() not in self.items_lb.get(0, "end")
                    and self.items_lb.insert("end", self.v_itempick.get().strip())).pack(side="left", padx=4)
-        ttk.Button(ip, text="🗑", width=3, command=lambda: [self.items_lb.delete(x) for x in reversed(self.items_lb.curselection())]).pack(side="left")
-        ttk.Label(g, text=t("build.slots")).grid(row=4, column=0, sticky="nw", padx=8, pady=4)
-        slf = ttk.Frame(g); slf.grid(row=4, column=1, columnspan=3, sticky="w")
+        CtkButton(ip, text="🗑", width=3, command=lambda: [self.items_lb.delete(x) for x in reversed(self.items_lb.curselection())]).pack(side="left")
+        CtkLabel(g, text=t("build.slots")).grid(row=4, column=0, sticky="nw", padx=8, pady=4)
+        slf = CtkFrame(g); slf.grid(row=4, column=1, columnspan=3, sticky="w")
         self.v_slots = {}
         for i, s in enumerate(engine.ALL_SLOTS):
             self.v_slots[s] = tk.BooleanVar(value=True)
-            ttk.Checkbutton(slf, text=slot_name(s), variable=self.v_slots[s]).grid(row=i // 4, column=i % 4, sticky="w", padx=(0, 14))
+            CtkCheckBox(slf, text=slot_name(s), variable=self.v_slots[s]).grid(row=i // 4, column=i % 4, sticky="w", padx=(0, 14))
 
         a = ttk.LabelFrame(r, text=t("build.attr_rules")); a.pack(fill="x", padx=6, pady=8)
         self.ta = ttk.Treeview(a, columns=("k", "w", "g", "m"), show="headings", height=7)
         for c, hd, w in (("k", t("build.attr"), 240), ("w", t("build.weight"), 90), ("g", t("build.goodval"), 110), ("m", t("panel.col_max"), 110)):
             self.ta.heading(c, text=hd); self.ta.column(c, width=w, anchor="w" if c == "k" else "center")
         self.ta.pack(fill="x", padx=8, pady=(6, 2)); self.ta.bind("<<TreeviewSelect>>", self.pick_attr)
-        af = ttk.Frame(a); af.pack(fill="x", padx=8, pady=(2, 8))
+        af = CtkFrame(a); af.pack(fill="x", padx=8, pady=(2, 8))
         self.attr_keys = list(GAME.data.get("attributes", {}).keys()) if GAME.ok else list(self.cfg["attributes"])
         self.v_ak, self.v_aw, self.v_ag = tk.StringVar(), tk.StringVar(value="2"), tk.StringVar()
-        ak = ttk.Combobox(af, textvariable=self.v_ak, width=32, state="readonly", values=[attr_name(k) for k in self.attr_keys])
+        ak = CtkComboBox(af, textvariable=self.v_ak, width=32, state="readonly", values=[attr_name(k) for k in self.attr_keys])
         ak.pack(side="left"); ak.bind("<<ComboboxSelected>>", self.attr_default_good)
-        ttk.Label(af, text=t("build.weight")).pack(side="left", padx=(10, 2))
+        CtkLabel(af, text=t("build.weight")).pack(side="left", padx=(10, 2))
         ttk.Spinbox(af, textvariable=self.v_aw, from_=0, to=5, increment=0.5, width=5).pack(side="left")
-        ttk.Label(af, text=t("build.goodval")).pack(side="left", padx=(10, 2))
-        ttk.Entry(af, textvariable=self.v_ag, width=9).pack(side="left")
-        ttk.Button(af, text=ui_theme.with_icon(t("btn.add_update"), "✚"), command=self.set_attr).pack(side="left", padx=6)
-        ttk.Button(af, text=ui_theme.with_icon(t("btn.delete"), "🗑"), command=self.del_attr).pack(side="left")
+        CtkLabel(af, text=t("build.goodval")).pack(side="left", padx=(10, 2))
+        CtkEntry(af, textvariable=self.v_ag, width=9).pack(side="left")
+        CtkButton(af, text=ui_theme.with_icon(t("btn.add_update"), "✚"), command=self.set_attr).pack(side="left", padx=6)
+        CtkButton(af, text=ui_theme.with_icon(t("btn.delete"), "🗑"), command=self.del_attr).pack(side="left")
 
         tl = ttk.LabelFrame(r, text=t("build.talents")); tl.pack(fill="x", padx=6, pady=8)
         self.tt = ttk.Treeview(tl, columns=("n", "k", "w"), show="headings", height=6)
         for c, hd, w in (("n", t("build.talent"), 260), ("k", t("build.talent_kind"), 120), ("w", t("build.weight"), 90)):
             self.tt.heading(c, text=hd); self.tt.column(c, width=w, anchor="w" if c == "n" else "center")
         self.tt.pack(fill="x", padx=8, pady=(6, 2)); self.tt.bind("<<TreeviewSelect>>", self.pick_tal)
-        tf = ttk.Frame(tl); tf.pack(fill="x", padx=8, pady=(2, 8))
+        tf = CtkFrame(tl); tf.pack(fill="x", padx=8, pady=(2, 8))
         tal_names = []
         if GAME.ok:
             for n in GAME.data.get("gear_talents", []) + GAME.data.get("weapon_talents", []):
                 tal_names += [n, "Perfect " + n]
         if GAME.ok: tal_names += list(GAME.data.get("prototype_augments", []))
         self.v_tn, self.v_tw = tk.StringVar(), tk.StringVar(value="2")
-        ttk.Combobox(tf, textvariable=self.v_tn, width=32, values=sorted(set(tal_names))).pack(side="left")
-        ttk.Label(tf, text=t("build.weight")).pack(side="left", padx=(10, 2))
+        CtkComboBox(tf, textvariable=self.v_tn, width=32, values=sorted(set(tal_names))).pack(side="left")
+        CtkLabel(tf, text=t("build.weight")).pack(side="left", padx=(10, 2))
         ttk.Spinbox(tf, textvariable=self.v_tw, from_=0, to=10, increment=0.5, width=5).pack(side="left")
-        ttk.Button(tf, text=ui_theme.with_icon(t("btn.add_update"), "✚"), command=self.set_tal).pack(side="left", padx=6)
-        ttk.Button(tf, text=ui_theme.with_icon(t("btn.delete"), "🗑"), command=self.del_tal).pack(side="left")
+        CtkButton(tf, text=ui_theme.with_icon(t("btn.add_update"), "✚"), command=self.set_tal).pack(side="left", padx=6)
+        CtkButton(tf, text=ui_theme.with_icon(t("btn.delete"), "🗑"), command=self.del_tal).pack(side="left")
 
         wp = ttk.LabelFrame(r, text=t("build.weapons")); wp.pack(fill="x", padx=6, pady=8)
-        wf = ttk.Frame(wp); wf.pack(fill="x", padx=8, pady=6)
+        wf = CtkFrame(wp); wf.pack(fill="x", padx=8, pady=6)
         self.v_wtypes = {}
         for i, (key, label) in enumerate(engine.TYPE_LABEL.items()):
             self.v_wtypes[key] = tk.BooleanVar(value=False)
-            ttk.Checkbutton(wf, text=label, variable=self.v_wtypes[key]).grid(row=i // 4, column=i % 4, sticky="w", padx=(0, 16))
-        self.wtype_hint = ttk.Label(wp, text="", foreground=PAL["muted"]); self.wtype_hint.pack(anchor="w", padx=8, pady=(0, 6))
+            CtkCheckBox(wf, text=label, variable=self.v_wtypes[key]).grid(row=i // 4, column=i % 4, sticky="w", padx=(0, 16))
+        self.wtype_hint = CtkLabel(wp, text="", foreground=PAL["muted"]); self.wtype_hint.pack(anchor="w", padx=8, pady=(0, 6))
 
-        act = ttk.Frame(r); act.pack(fill="x", padx=6, pady=(4, 6))
-        ttk.Button(act, text=t("btn.save"), command=self.save_build, style="Accent.TButton").pack(side="left")
-        ttk.Button(act, text=ui_theme.with_icon(t("build.test_last"), "🧪"), command=self.test_build_last).pack(side="left", padx=8)
-        self.test_lbl = ttk.Label(r, text="", wraplength=900, justify="left"); self.test_lbl.pack(anchor="w", padx=8)
-        self.meta_detail = ttk.Label(r, text="", foreground=PAL["muted"], wraplength=900, justify="left")
+        act = CtkFrame(r); act.pack(fill="x", padx=6, pady=(4, 6))
+        CtkButton(act, text=t("btn.save"), command=self.save_build, style="Accent.TButton").pack(side="left")
+        CtkButton(act, text=ui_theme.with_icon(t("build.test_last"), "🧪"), command=self.test_build_last).pack(side="left", padx=8)
+        self.test_lbl = CtkLabel(r, text="", wraplength=900, justify="left"); self.test_lbl.pack(anchor="w", padx=8)
+        self.meta_detail = CtkLabel(r, text="", foreground=PAL["muted"], wraplength=900, justify="left")
         self.meta_detail.pack(anchor="w", padx=8, pady=(6, 0))
         self._lb_index = []
         self.refresh_builds()
@@ -6583,20 +7575,20 @@ class App:
         if box is None or not b: return
         for w in box.winfo_children(): w.destroy()
         is_act = active_build(self.cfg) is b
-        head = ttk.Frame(box); head.pack(fill="x", padx=8, pady=(8, 4))
-        ttk.Label(head, text=b["name"], font=(ui_theme.FONT_SEMI, 16)).pack(side="left")
+        head = CtkFrame(box); head.pack(fill="x", padx=8, pady=(8, 4))
+        CtkLabel(head, text=b["name"], font=(ui_theme.FONT_SEMI, 16)).pack(side="left")
         if is_act:
-            tk.Label(head, text="⭐ " + t("plan.is_active"), bg=PAL["accent"], fg="white", font=(ui_theme.FONT_SEMI, 9), padx=8, pady=2).pack(side="left", padx=10)
+            CtkLabel(head, text="⭐ " + t("plan.is_active"), bg=PAL["accent"], fg="white", font=(ui_theme.FONT_SEMI, 9), padx=8, pady=2).pack(side="left", padx=10)
         else:
-            ttk.Button(head, text="⭐ " + t("plan.make_active"), style="Accent.TButton",
+            CtkButton(head, text="⭐ " + t("plan.make_active"), style="Accent.TButton",
                        command=lambda: (self.set_active_build(b["name"]), self.refresh_builds(keep=True))).pack(side="left", padx=10)
-        ttk.Button(head, text="🧍 " + t("plan.open_progress"), command=lambda: (self.pb.set(b["name"]), self.refresh_prog(),
+        CtkButton(head, text="🧍 " + t("plan.open_progress"), command=lambda: (self.pb.set(b["name"]), self.refresh_prog(),
                                                                               self.select_page("progress"))).pack(side="right")
         stt = self.build_status(b)
         have = sum(1 for v in stt.values() if v[0] in ("done", "partial")); full = sum(1 for v in stt.values() if v[0] == "done")
         tot = sum(1 for v in stt.values() if v[0] != "off")
-        pb = ttk.Progressbar(box, maximum=max(tot, 1), value=have); pb.pack(fill="x", padx=10, pady=(2, 0))
-        ttk.Label(box, text=t("plan.progress", have=have, full=full, total=tot), foreground=PAL["muted"]).pack(anchor="w", padx=10)
+        pb = CtkProgressBar(box, maximum=max(tot, 1), value=have); pb.pack(fill="x", padx=10, pady=(2, 0))
+        CtkLabel(box, text=t("plan.progress", have=have, full=full, total=tot), foreground=PAL["muted"]).pack(anchor="w", padx=10)
         # Build Tool summary: read-only bridge from the build definition to the
         # local stash. It intentionally does not alter stash or loot decisions.
         try:
@@ -6604,7 +7596,7 @@ class App:
             missing_text = ", ".join(slot_name(s) for s in tool["missing_slots"]) or "—"
             tool_box = ttk.LabelFrame(box, text="The Division 2 Builds Tool")
             tool_box.pack(fill="x", padx=10, pady=(6, 2))
-            ttk.Label(
+            CtkLabel(
                 tool_box,
                 text=(f"Stash adayları: {tool['candidate_count']}  ·  "
                       f"Tamamlanma: {tool['completion']}%  ·  "
@@ -6615,7 +7607,7 @@ class App:
             ).pack(anchor="w", padx=8, pady=4)
             if tool["next_drop"]:
                 next_text = ", ".join(slot_name(slot) for slot, _gain, _req in tool["next_drop"])
-                ttk.Label(
+                CtkLabel(
                     tool_box,
                     text=f"Öncelikli hedef slotlar: {next_text}",
                     foreground=PAL["accent"],
@@ -6633,9 +7625,11 @@ class App:
         sets = b.get("sets_or_brands", [])
         if sets: info.append(t("plan.sets_line", s=", ".join(sets)))
         for br in sets:
-            is_set = GAME.ok and br in GAME.data.get("gear_sets", [])
+            set_name = gamedata.resolve_name(br, GAME.data.get("gear_sets", [])) if GAME.ok else None
+            is_set = bool(set_name)
             bonus_table = GAME.data.get("gear_set_bonuses", {}) if is_set else GAME.data.get("brand_bonuses", {})
-            bon = bonus_table.get(br) if GAME.ok else None
+            bonus_name = gamedata.resolve_name(br, bonus_table) if GAME.ok else None
+            bon = bonus_table.get(bonus_name) if bonus_name else None
             if bon:
                 start = 2 if is_set else 1
                 info.append(f"   {br}: " + " · ".join(f"{i + start}pc {x}" for i, x in enumerate(bon)))
@@ -6645,11 +7639,11 @@ class App:
             info.append(t("plan.attrs_line", s=", ".join(f"{attr_name(k)} ≥{r.get('good_at') or '—'}" for k, r in
                                                            sorted(b["attributes"].items(), key=lambda kv: -float(kv[1].get("weight", 1))))))
         if info:
-            ttk.Label(box, text="\n".join(info), wraplength=1100, justify="left").pack(anchor="w", padx=10, pady=(6, 4))
+            CtkLabel(box, text="\n".join(info), wraplength=1100, justify="left").pack(anchor="w", padx=10, pady=(6, 4))
         for src in m.get("sources", [])[:4]:
-            lk = ttk.Label(box, text="🔗 " + (src.get("title") or src.get("url")), foreground=PAL["accent"], cursor="hand2")
+            lk = CtkLabel(box, text="🔗 " + (src.get("title") or src.get("url")), foreground=PAL["accent"], cursor="hand2")
             lk.pack(anchor="w", padx=14); lk.bind("<Button-1>", lambda e, u=src.get("url"): __import__("webbrowser").open(u))
-        grid = ttk.Frame(box); grid.pack(fill="x", padx=4, pady=8)
+        grid = CtkFrame(box); grid.pack(fill="x", padx=4, pady=8)
         for c in range(4): grid.columnconfigure(c, weight=1, uniform="sheet")
         plan = plan_of(b)
         colors = {"done": PAL["success"], "partial": PAL["warning"], "missing": PAL["danger"], "off": PAL["border"]}
@@ -6657,17 +7651,17 @@ class App:
             state, rec, checks = stt[slot]
             card = elevated(grid, row=i // 4, column=i % 4, depth=self.cfg["settings"].get("ui_depth", True))
             card.config(highlightbackground=colors[state])
-            tk.Label(card, text=f"{SLOT_ICONS.get(slot, '•')}  {slot_name(slot)}   " + t("plan.st_" + state), bg=PAL["surface"],
+            CtkLabel(card, text=f"{SLOT_ICONS.get(slot, '•')}  {slot_name(slot)}   " + t("plan.st_" + state), bg=PAL["surface"],
                      fg=colors[state] if state != "off" else PAL["muted"], font=(ui_theme.FONT_SEMI, 11), anchor="w").pack(fill="x")
-            tk.Label(card, text="\n".join(req_lines(plan.get(slot))), bg=PAL["surface"], fg=PAL["fg"], justify="left", anchor="w",
+            CtkLabel(card, text="\n".join(req_lines(plan.get(slot))), bg=PAL["surface"], fg=PAL["fg"], justify="left", anchor="w",
                      font=(ui_theme.FONT, 9), wraplength=300).pack(fill="x", pady=(4, 2))
             if rec:
-                tk.Label(card, text="🎒 " + t("plan.have", item=rec.get("item"), score=rec.get("score")), bg=PAL["surface"], fg=PAL["accent"],
+                CtkLabel(card, text="🎒 " + t("plan.have", item=rec.get("item"), score=rec.get("score")), bg=PAL["surface"], fg=PAL["accent"],
                          justify="left", anchor="w", font=(ui_theme.FONT_SEMI, 9), wraplength=300).pack(fill="x")
-                tk.Label(card, text="\n".join(check_lines(checks)), bg=PAL["surface"], fg=PAL["muted"], justify="left", anchor="w",
+                CtkLabel(card, text="\n".join(check_lines(checks)), bg=PAL["surface"], fg=PAL["muted"], justify="left", anchor="w",
                          font=(ui_theme.FONT, 9), wraplength=300).pack(fill="x")
             elif state == "missing":
-                tk.Label(card, text=t("plan.missing_hint"), bg=PAL["surface"], fg=PAL["muted"], justify="left", anchor="w",
+                CtkLabel(card, text=t("plan.missing_hint"), bg=PAL["surface"], fg=PAL["muted"], justify="left", anchor="w",
                          font=(ui_theme.FONT, 9), wraplength=300).pack(fill="x")
             card.bind("<Configure>", lambda e, c=card: [w.config(wraplength=max(120, e.width - 26))
                                                        for w in c.winfo_children() if isinstance(w, tk.Label)])
@@ -6694,20 +7688,20 @@ class App:
         names = [b["name"] for b in self.cfg["builds"]]
         if len(names) < 2:
             return self.toast(t("cmp.need_two"))
-        w = tk.Toplevel(self.root); w.title(t("cmp.title")); w.geometry("940x680"); w.minsize(760, 520)
+        w = CtkToplevel(self.root); w.title(t("cmp.title")); w.geometry("940x680"); w.minsize(760, 520)
         w.transient(self.root); w.configure(bg=PAL["bg"])
-        top = ttk.Frame(w); top.pack(fill="x", padx=14, pady=(12, 4))
-        ttk.Label(top, text=t("cmp.title"), style="Title.TLabel").pack(side="left")
+        top = CtkFrame(w); top.pack(fill="x", padx=14, pady=(12, 4))
+        CtkLabel(top, text=t("cmp.title"), style="Title.TLabel").pack(side="left")
         cur = getattr(self, "cur", None)
         default_a = cur["name"] if cur else (active_build(self.cfg) or {}).get("name", names[0])
         default_b = next((n for n in names if n != default_a), names[0])
         va, vb = tk.StringVar(value=default_a), tk.StringVar(value=default_b)
-        pick = ttk.Frame(w); pick.pack(fill="x", padx=14, pady=(2, 8))
-        ttk.Label(pick, text=t("cmp.pick_a")).grid(row=0, column=0, sticky="w", padx=(0, 6))
-        cba = ttk.Combobox(pick, textvariable=va, state="readonly", values=names, width=34)
+        pick = CtkFrame(w); pick.pack(fill="x", padx=14, pady=(2, 8))
+        CtkLabel(pick, text=t("cmp.pick_a")).grid(row=0, column=0, sticky="w", padx=(0, 6))
+        cba = CtkComboBox(pick, textvariable=va, state="readonly", values=names, width=34)
         cba.grid(row=0, column=1, padx=(0, 20))
-        ttk.Label(pick, text=t("cmp.pick_b")).grid(row=0, column=2, sticky="w", padx=(0, 6))
-        cbb = ttk.Combobox(pick, textvariable=vb, state="readonly", values=names, width=34)
+        CtkLabel(pick, text=t("cmp.pick_b")).grid(row=0, column=2, sticky="w", padx=(0, 6))
+        cbb = CtkComboBox(pick, textvariable=vb, state="readonly", values=names, width=34)
         cbb.grid(row=0, column=3)
         body = ui_theme.scrollable(w, PAL["bg"]); body.pack(fill="both", expand=True, padx=14, pady=(0, 10))
 
@@ -6718,53 +7712,53 @@ class App:
             plan1, plan2 = plan_of(b1), plan_of(b2)
             stt1, stt2 = self.build_status(b1), self.build_status(b2)
             colors = {"done": PAL["success"], "partial": PAL["warning"], "missing": PAL["danger"], "off": PAL["border"]}
-            head = ttk.Frame(body); head.pack(fill="x", pady=(0, 8))
+            head = CtkFrame(body); head.pack(fill="x", pady=(0, 8))
             for col, (b, stt) in enumerate(((b1, stt1), (b2, stt2))):
                 have = sum(1 for v in stt.values() if v[0] in ("done", "partial")); full = sum(1 for v in stt.values() if v[0] == "done")
                 tot = sum(1 for v in stt.values() if v[0] != "off")
-                c = ttk.Frame(head); c.grid(row=0, column=col, sticky="ew", padx=(0, 14) if col == 0 else 0)
+                c = CtkFrame(head); c.grid(row=0, column=col, sticky="ew", padx=(0, 14) if col == 0 else 0)
                 head.columnconfigure(col, weight=1)
-                ttk.Label(c, text=b["name"], font=(ui_theme.FONT_SEMI, 13)).pack(anchor="w")
-                ttk.Progressbar(c, maximum=max(tot, 1), value=have).pack(fill="x", pady=(4, 2))
-                ttk.Label(c, text=t("plan.progress", have=have, full=full, total=tot), foreground=PAL["muted"]).pack(anchor="w")
-            grid = ttk.Frame(body); grid.pack(fill="x", pady=(4, 10))
+                CtkLabel(c, text=b["name"], font=(ui_theme.FONT_SEMI, 13)).pack(anchor="w")
+                CtkProgressBar(c, maximum=max(tot, 1), value=have).pack(fill="x", pady=(4, 2))
+                CtkLabel(c, text=t("plan.progress", have=have, full=full, total=tot), foreground=PAL["muted"]).pack(anchor="w")
+            grid = CtkFrame(body); grid.pack(fill="x", pady=(4, 10))
             grid.columnconfigure(1, weight=1); grid.columnconfigure(2, weight=1)
             mismatched = 0
             for i, slot in enumerate(engine.ALL_SLOTS):
                 r1, r2 = plan1.get(slot, {"kind": "off"}), plan2.get(slot, {"kind": "off"})
                 s1, s2 = stt1[slot][0], stt2[slot][0]
                 if s1 != "off" and s2 != "off" and not self._slots_shareable(r1, r2): mismatched += 1
-                ttk.Label(grid, text=f"{SLOT_ICONS.get(slot, '•')} {slot_name(slot)}").grid(row=i, column=0, sticky="w", padx=(0, 10), pady=3)
+                CtkLabel(grid, text=f"{SLOT_ICONS.get(slot, '•')} {slot_name(slot)}").grid(row=i, column=0, sticky="w", padx=(0, 10), pady=3)
                 for col, (req, state) in enumerate(((r1, s1), (r2, s2))):
-                    cell = tk.Frame(grid, bg=PAL["surface"], highlightthickness=1, highlightbackground=colors[state])
+                    cell = CtkFrame(grid, bg=PAL["surface"], highlightthickness=1, highlightbackground=colors[state])
                     cell.grid(row=i, column=1 + col, sticky="ew", padx=(0, 10) if col == 0 else 0, pady=3)
                     txt = t("plan.st_" + state) + ("  —  " + req_lines_short(req) if state != "off" else "")
-                    tk.Label(cell, text=txt, bg=PAL["surface"], fg=colors[state] if state != "off" else PAL["muted"],
+                    CtkLabel(cell, text=txt, bg=PAL["surface"], fg=colors[state] if state != "off" else PAL["muted"],
                              font=(ui_theme.FONT, 9), anchor="w", justify="left", wraplength=320).pack(fill="x", padx=8, pady=4)
                 if s1 != "off" and s2 != "off" and self._slots_shareable(r1, r2):
-                    ttk.Label(grid, text="🔁 " + t("cmp.shareable"), foreground=PAL["accent"], font=(ui_theme.FONT, 8)).grid(
+                    CtkLabel(grid, text="🔁 " + t("cmp.shareable"), foreground=PAL["accent"], font=(ui_theme.FONT, 8)).grid(
                         row=i, column=3, sticky="w", padx=(6, 0))
             shared_sets = sorted(set(b1.get("sets_or_brands", [])) & set(b2.get("sets_or_brands", [])))
             shared_items = sorted(set(b1.get("items", [])) & set(b2.get("items", [])))
             shared_tal = sorted(set(b1.get("talents", {})) & set(b2.get("talents", {})))
             info = ttk.LabelFrame(body, text=t("cmp.overlap")); info.pack(fill="x", pady=(2, 10))
             for key, vals in (("cmp.shared_sets", shared_sets), ("cmp.shared_items", shared_items), ("cmp.shared_talents", shared_tal)):
-                ttk.Label(info, text=t(key, s=", ".join(vals) if vals else t("cmp.none")), wraplength=880, justify="left").pack(anchor="w", padx=10, pady=2)
+                CtkLabel(info, text=t(key, s=", ".join(vals) if vals else t("cmp.none")), wraplength=880, justify="left").pack(anchor="w", padx=10, pady=2)
             have1 = sum(1 for v in stt1.values() if v[0] in ("done", "partial")); tot1 = sum(1 for v in stt1.values() if v[0] != "off")
             have2 = sum(1 for v in stt2.values() if v[0] in ("done", "partial")); tot2 = sum(1 for v in stt2.values() if v[0] != "off")
             pct1 = round(100 * have1 / tot1) if tot1 else 0
             pct2 = round(100 * have2 / tot2) if tot2 else 0
-            verdict = ttk.Frame(body); verdict.pack(fill="x")
+            verdict = CtkFrame(body); verdict.pack(fill="x")
             if pct1 == pct2:
                 vtxt = t("cmp.verdict_equal")
             else:
                 closer, pct = (b1["name"], pct1) if pct1 > pct2 else (b2["name"], pct2)
                 vtxt = t("cmp.verdict_closer", name=closer, pct=pct)
-            ttk.Label(verdict, text="⚖ " + vtxt, font=(ui_theme.FONT_SEMI, 10), foreground=PAL["accent"]).pack(anchor="w", pady=(0, 2))
-            ttk.Label(verdict, text=t("cmp.switch_cost", n=mismatched), foreground=PAL["muted"], wraplength=880, justify="left").pack(anchor="w")
+            CtkLabel(verdict, text="⚖ " + vtxt, font=(ui_theme.FONT_SEMI, 10), foreground=PAL["accent"]).pack(anchor="w", pady=(0, 2))
+            CtkLabel(verdict, text=t("cmp.switch_cost", n=mismatched), foreground=PAL["muted"], wraplength=880, justify="left").pack(anchor="w")
 
         cba.bind("<<ComboboxSelected>>", redraw); cbb.bind("<<ComboboxSelected>>", redraw)
-        ttk.Button(top, text=t("upd.close"), command=w.destroy).pack(side="right")
+        CtkButton(top, text=t("upd.close"), command=w.destroy).pack(side="right")
         redraw()
 
     def meta_detail_text(self, b):
@@ -6901,8 +7895,8 @@ class App:
         names = {m: t("v3d.m_" + m) for m in (view3d.SPRITE_MODELS if sprite else view3d.MODELS)}
         outfits = {o: t("v3d.o_" + o) for o in view3d.THEMES}
         btn = dict(bg=PAL["surface2"] if "surface2" in PAL else PAL["bg"], fg=PAL["fg"], bd=0, relief="flat", cursor="hand2",
-                   activebackground=PAL["accent"], activeforeground="#111", font=(ui_theme.FONT_SEMI, 11), width=2)
-        lbl = tk.Label(bar, text=names[av.model], bg=PAL["surface"], fg=PAL["accent"], font=(ui_theme.FONT_SEMI, 11), width=12)
+                   activebackground=PAL["accent"], activeforeground=PAL["bg"], font=ui_theme.font_spec("display", 11), width=2)
+        lbl = CtkLabel(bar, text=names[av.model], bg=PAL["surface"], fg=PAL["accent"], font=(ui_theme.FONT_SEMI, 11), width=12)
 
         def save():
             st["agent_model"] = av.model
@@ -6911,21 +7905,21 @@ class App:
 
         def cycle(step):
             av.cycle(step); lbl.config(text=names[av.model]); save()
-        tk.Button(bar, text="◀", command=lambda: cycle(-1), **btn).pack(side="left")
+        CtkButton(bar, text="◀", command=lambda: cycle(-1), **btn).pack(side="left")
         lbl.pack(side="left", padx=2)
-        tk.Button(bar, text="▶", command=lambda: cycle(1), **btn).pack(side="left")
+        CtkButton(bar, text="▶", command=lambda: cycle(1), **btn).pack(side="left")
         if sprite:                                       # gerçekçi ajanlarda renk/ten seçimi yok (kıyafet = model)
             self._agent_look = {"cycle": cycle, "outfit": None, "pick_outfit": lambda *_: None, "label": lbl}
             return
-        skins = tk.Frame(bar, bg=PAL["surface"]); skins.pack(side="right")
+        skins = CtkFrame(bar, bg=PAL["surface"]); skins.pack(side="right")
         for i, col in enumerate(view3d.SKINS):
-            b = tk.Label(skins, bg=col, width=2, cursor="hand2", relief="flat", bd=0,
+            b = CtkLabel(skins, bg=col, width=2, cursor="hand2", relief="flat", bd=0,
                          highlightthickness=2, highlightbackground=PAL["accent"] if i == av.skin else PAL["surface"])
             b.pack(side="left", padx=1)
             b.bind("<Button-1>", lambda e, i=i: (av.set_look(skin=i), save(),
                                                  [w.config(highlightbackground=PAL["accent"] if j == i else PAL["surface"])
                                                   for j, w in enumerate(skins.winfo_children())]))
-        cb = ttk.Combobox(bar, state="readonly", width=10, values=list(outfits.values()))
+        cb = CtkComboBox(bar, state="readonly", width=10, values=list(outfits.values()))
         cb.set(outfits[av.outfit]); cb.pack(side="right", padx=6)
 
         def pick_outfit(_=None):
@@ -6938,21 +7932,21 @@ class App:
     def build_prog(self):
         """Eksik Parça v2: seçili build'in 8 yuvası kart olarak; her kartta parça, set/marka, puan ve rulolar."""
         f = self.tabs["progress"]
-        bar = ttk.Frame(f); bar.pack(fill="x", padx=10, pady=10)
-        ttk.Label(bar, text=t("label.build")).pack(side="left")
-        self.pb = ttk.Combobox(bar, state="readonly", width=48, values=[b["name"] for b in self.cfg["builds"]])
+        bar = CtkFrame(f); bar.pack(fill="x", padx=10, pady=10)
+        CtkLabel(bar, text=t("label.build")).pack(side="left")
+        self.pb = CtkComboBox(bar, state="readonly", width=48, values=[b["name"] for b in self.cfg["builds"]])
         self.pb.pack(side="left", padx=6); self.pb.bind("<<ComboboxSelected>>", lambda e: (self.set_active_build(self.pb.get()), self.refresh_prog()))
         a0 = active_build(self.cfg)
         if a0: self.pb.set(a0["name"])
-        ttk.Button(bar, text=ui_theme.with_icon(t("prog.reset_build"), "↺"), command=self.reset_build_prog).pack(side="right")
-        self.pg_lbl = ttk.Label(f, style="Section.TLabel"); self.pg_lbl.pack(anchor="w", padx=12)
-        self.pbar = ttk.Progressbar(f, maximum=100); self.pbar.pack(fill="x", padx=12, pady=6)
-        mid = ttk.Frame(f); mid.pack(fill="x", padx=8, pady=4)
-        av_box = tk.Frame(mid, bg=PAL["surface"], highlightthickness=1, highlightbackground=PAL["border"])
+        CtkButton(bar, text=ui_theme.with_icon(t("prog.reset_build"), "↺"), command=self.reset_build_prog).pack(side="right")
+        self.pg_lbl = CtkLabel(f, style="Section.TLabel"); self.pg_lbl.pack(anchor="w", padx=12)
+        self.pbar = CtkProgressBar(f, maximum=100); self.pbar.pack(fill="x", padx=12, pady=6)
+        mid = CtkFrame(f); mid.pack(fill="x", padx=8, pady=4)
+        av_box = CtkFrame(mid, bg=PAL["surface"], highlightthickness=1, highlightbackground=PAL["border"])
         av_box.pack(side="left", fill="y", padx=(4, 8), pady=6)
-        tk.Label(av_box, text="🧍 " + t("v3d.agent"), bg=PAL["surface"], fg=PAL["fg"], font=(ui_theme.FONT_SEMI, 11)).pack(anchor="w", padx=10, pady=(8, 0))
+        CtkLabel(av_box, text="🧍 " + t("v3d.agent"), bg=PAL["surface"], fg=PAL["fg"], font=(ui_theme.FONT_SEMI, 11)).pack(anchor="w", padx=10, pady=(8, 0))
         stg_ = self.cfg["settings"]
-        look = tk.Frame(av_box, bg=PAL["surface"]); look.pack(fill="x", padx=8, pady=(6, 0))
+        look = CtkFrame(av_box, bg=PAL["surface"]); look.pack(fill="x", padx=8, pady=(6, 0))
         agents_dir = next((d for d in (BUNDLE / "meta" / "agents", BASE / "meta" / "agents") if view3d.sprite_models(d)), None)
         if agents_dir:                                   # gerçekçi ajanlar (önceden render edilmiş kareler)
             self.agent3d = view3d.SpriteAgentView(av_box, agents_dir, model=stg_.get("agent_model", "operator"),
@@ -6964,39 +7958,39 @@ class App:
         self._build_agent_look(look)
         self.agent3d.on_pick = self._pick_slot3d
         self.agent3d.set_labels({x: slot_name(x) for x in engine.ALL_SLOTS})
-        tk.Label(av_box, text=t("v3d.agent_hint_sprite" if getattr(self.agent3d, "sprite", False) else "v3d.agent_hint"), bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 9),
+        CtkLabel(av_box, text=t("v3d.agent_hint_sprite" if getattr(self.agent3d, "sprite", False) else "v3d.agent_hint"), bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 9),
                  wraplength=350, justify="left").pack(anchor="w", padx=10, pady=(0, 8))
         self.agent3d.spin()
         self.sel_slot = None
-        self.slot_grid = ttk.Frame(mid); self.slot_grid.pack(side="left", fill="both", expand=True)
+        self.slot_grid = CtkFrame(mid); self.slot_grid.pack(side="left", fill="both", expand=True)
         cols = 4
         for c in range(cols): self.slot_grid.columnconfigure(c, weight=1, uniform="slot")
         self.slot_cards = {}
         for i, s in enumerate(engine.ALL_SLOTS):
             box = elevated(self.slot_grid, row=i // cols, column=i % cols, depth=self.cfg["settings"].get("ui_depth", True))
-            head = tk.Label(box, text=SLOT_ICONS.get(s, "•") + "  " + slot_name(s), bg=PAL["surface"], fg=PAL["fg"],
+            head = CtkLabel(box, text=SLOT_ICONS.get(s, "•") + "  " + slot_name(s), bg=PAL["surface"], fg=PAL["fg"],
                             font=(ui_theme.FONT_SEMI, 12), anchor="w")
             head.pack(fill="x")
-            body = tk.Label(box, text="", bg=PAL["surface"], fg=PAL["muted"], justify="left", anchor="w",
+            body = CtkLabel(box, text="", bg=PAL["surface"], fg=PAL["muted"], justify="left", anchor="w",
                             font=(ui_theme.FONT, 10), wraplength=360)
             body.pack(fill="x", pady=(4, 6))
             box.bind("<Configure>", lambda e, b=body: b.config(wraplength=max(120, e.width - 30)))
-            btns = tk.Frame(box, bg=PAL["surface"]); btns.pack(fill="x")
-            ttk.Button(btns, text="📥 " + t("prog.put_last"), command=lambda s=s: self.save_last_scan(s)).pack(side="left")
-            ttk.Button(btns, text="✖", width=3, command=lambda s=s: self.clear_slot(s)).pack(side="left", padx=6)
+            btns = CtkFrame(box, bg=PAL["surface"]); btns.pack(fill="x")
+            CtkButton(btns, text="📥 " + t("prog.put_last"), command=lambda s=s: self.save_last_scan(s)).pack(side="left")
+            CtkButton(btns, text="✖", width=3, command=lambda s=s: self.clear_slot(s)).pack(side="left", padx=6)
             self.slot_cards[s] = (box, head, body)
-        ttk.Label(f, text=t("prog.all_builds"), style="Section.TLabel").pack(anchor="w", padx=12, pady=(10, 2))
-        low = ttk.Frame(f); low.pack(fill="both", expand=True, padx=12, pady=(0, 10))
+        CtkLabel(f, text=t("prog.all_builds"), style="Section.TLabel").pack(anchor="w", padx=12, pady=(10, 2))
+        low = CtkFrame(f); low.pack(fill="both", expand=True, padx=12, pady=(0, 10))
         self.allp = ttk.Treeview(low, columns=("b", "n", "m"), show="headings", height=7)
         for c, hd, w in (("b", t("panel.col_build"), 300), ("n", t("prog.col_have"), 80), ("m", t("prog.col_missing"), 420)):
             self.allp.heading(c, text=hd); self.allp.column(c, width=w, anchor="center" if c == "n" else "w")
         self.allp.pack(side="left", fill="both", expand=True)
-        bx = tk.Frame(low, bg=PAL["surface"], highlightthickness=1, highlightbackground=PAL["border"]); bx.pack(side="left", fill="both", padx=(10, 0))
-        tk.Label(bx, text="📊 " + t("v3d.bars"), bg=PAL["surface"], fg=PAL["fg"], font=(ui_theme.FONT_SEMI, 11)).pack(anchor="w", padx=10, pady=(8, 0))
+        bx = CtkFrame(low, bg=PAL["surface"], highlightthickness=1, highlightbackground=PAL["border"]); bx.pack(side="left", fill="both", padx=(10, 0))
+        CtkLabel(bx, text="📊 " + t("v3d.bars"), bg=PAL["surface"], fg=PAL["fg"], font=(ui_theme.FONT_SEMI, 11)).pack(anchor="w", padx=10, pady=(8, 0))
         self.bars3d = view3d.Bars3D(bx, bg=PAL["surface"], width=520, height=260)
         self.bars3d.pack(padx=6, pady=4)
         self.bars3d.on_pick = lambda tag: self.bars_info.config(text=tag)
-        self.bars_info = tk.Label(bx, text=t("v3d.bars_hint"), bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 9))
+        self.bars_info = CtkLabel(bx, text=t("v3d.bars_hint"), bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 9))
         self.bars_info.pack(anchor="w", padx=10, pady=(0, 8))
         self.allp.bind("<<TreeviewSelect>>", self._pick_allp)
         self.refresh_prog()
@@ -7074,14 +8068,14 @@ class App:
     # ---------- İstatistik ----------
     def build_stats(self):
         f = self.tabs["stats"]
-        bar = ttk.Frame(f); bar.pack(fill="x", padx=10, pady=10)
-        ttk.Label(bar, text=t("label.period")).pack(side="left")
-        self.stats_period = ttk.Combobox(bar, state="readonly", width=14, values=[t("period.today"), t("period.7d"), t("period.30d"), t("period.all")]); self.stats_period.current(1)
+        bar = CtkFrame(f); bar.pack(fill="x", padx=10, pady=10)
+        CtkLabel(bar, text=t("label.period")).pack(side="left")
+        self.stats_period = CtkComboBox(bar, state="readonly", width=14, values=[t("period.today"), t("period.7d"), t("period.30d"), t("period.all")]); self.stats_period.current(1)
         self.stats_period.pack(side="left", padx=6); self.stats_period.bind("<<ComboboxSelected>>", lambda e: self.refresh_stats_tab())
-        ttk.Button(bar, text=ui_theme.with_icon(t("btn.refresh"), "⟳"), command=self.refresh_stats_tab).pack(side="left")
-        self.sum_lbl = ttk.Label(f, style="Section.TLabel"); self.sum_lbl.pack(anchor="w", padx=12)
+        CtkButton(bar, text=ui_theme.with_icon(t("btn.refresh"), "⟳"), command=self.refresh_stats_tab).pack(side="left")
+        self.sum_lbl = CtkLabel(f, style="Section.TLabel"); self.sum_lbl.pack(anchor="w", padx=12)
         self._build_community(f)
-        grid = ttk.Frame(f); grid.pack(fill="both", expand=True, padx=8, pady=6)
+        grid = CtkFrame(f); grid.pack(fill="both", expand=True, padx=8, pady=6)
         self.cvs = []
         for i in range(4):
             cv = tk.Canvas(grid, height=230, bg=PAL["surface"], highlightthickness=1, highlightbackground=PAL["border"])
@@ -7092,29 +8086,29 @@ class App:
     def _build_community(self, f):
         st = self.cfg["settings"]
         cb = ttk.LabelFrame(f, text="🌐 " + t("drops.box")); cb.pack(fill="x", padx=10, pady=(6, 2))
-        r = ttk.Frame(cb); r.pack(fill="x", padx=8, pady=4)
+        r = CtkFrame(cb); r.pack(fill="x", padx=8, pady=4)
         self.drop_var = tk.BooleanVar(value=bool(st.get("drop_share")))
-        ttk.Checkbutton(r, text=t("drops.share"), variable=self.drop_var, command=self._drop_toggle).pack(side="left")
-        ttk.Label(r, text=t("drops.server")).pack(side="left", padx=(16, 2))
+        CtkCheckBox(r, text=t("drops.share"), variable=self.drop_var, command=self._drop_toggle).pack(side="left")
+        CtkLabel(r, text=t("drops.server")).pack(side="left", padx=(16, 2))
         self.drop_srv = tk.StringVar(value=st.get("drop_server") or dropstats.DEFAULT_URL)
-        ttk.Entry(r, textvariable=self.drop_srv, width=40).pack(side="left")
-        ttk.Button(r, text="💾", width=3, command=self._drop_server_save).pack(side="left", padx=4)
-        ttk.Button(r, text="⇪ " + t("drops.send_now"), command=self.drops_flush).pack(side="left", padx=4)
-        ttk.Button(r, text="Î£ " + t("drops.summary_btn"), command=self.drops_summary).pack(side="left")
-        self.drop_lbl = ttk.Label(cb, text="", foreground=PAL["muted"]); self.drop_lbl.pack(anchor="w", padx=12)
+        CtkEntry(r, textvariable=self.drop_srv, width=40).pack(side="left")
+        CtkButton(r, text="💾", width=3, command=self._drop_server_save).pack(side="left", padx=4)
+        CtkButton(r, text="⇪ " + t("drops.send_now"), command=self.drops_flush).pack(side="left", padx=4)
+        CtkButton(r, text="Î£ " + t("drops.summary_btn"), command=self.drops_summary).pack(side="left")
+        self.drop_lbl = CtkLabel(cb, text="", foreground=PAL["muted"]); self.drop_lbl.pack(anchor="w", padx=12)
         self._drops_label()
-        hold = ttk.Frame(cb); hold.pack(fill="x", padx=8, pady=(2, 6))
+        hold = CtkFrame(cb); hold.pack(fill="x", padx=8, pady=(2, 6))
         self.cs_out = None
         if self.premium_gate(hold, "drop_stats_view"):
-            r2 = ttk.Frame(hold); r2.pack(fill="x")
-            self.cs_act = ttk.Combobox(r2, state="readonly", width=22, values=[v for k, v in self._acts.items() if k != "none"])
+            r2 = CtkFrame(hold); r2.pack(fill="x")
+            self.cs_act = CtkComboBox(r2, state="readonly", width=22, values=[v for k, v in self._acts.items() if k != "none"])
             self.cs_act.pack(side="left")
-            ttk.Label(r2, text=t("drops.search")).pack(side="left", padx=(12, 2))
-            self.cs_q = tk.StringVar(); ttk.Entry(r2, textvariable=self.cs_q, width=28).pack(side="left")
-            ttk.Button(r2, text="🔍 " + t("drops.show"), command=self.community_stats).pack(side="left", padx=6)
-            self.cs_out = tk.Text(hold, height=7, bg=PAL["surface"], fg=PAL["fg"], relief="flat", wrap="word", font=(ui_theme.FONT, 10))
+            CtkLabel(r2, text=t("drops.search")).pack(side="left", padx=(12, 2))
+            self.cs_q = tk.StringVar(); CtkEntry(r2, textvariable=self.cs_q, width=28).pack(side="left")
+            CtkButton(r2, text="🔍 " + t("drops.show"), command=self.community_stats).pack(side="left", padx=6)
+            self.cs_out = CtkTextbox(hold, height=7, bg=PAL["surface"], fg=PAL["fg"], relief="flat", wrap="word", font=(ui_theme.FONT, 10))
             self.cs_out.pack(fill="x", pady=(4, 0))
-        ttk.Label(cb, text=t("drops.privacy"), foreground=PAL["muted"], wraplength=1000, justify="left").pack(anchor="w", padx=12, pady=(0, 6))
+        CtkLabel(cb, text=t("drops.privacy"), foreground=PAL["muted"], wraplength=1000, justify="left").pack(anchor="w", padx=12, pady=(0, 6))
 
     def _drop_toggle(self):
         self.cfg["settings"]["drop_share"] = bool(self.drop_var.get()); self.cfg["settings"]["drop_asked"] = True
@@ -7188,32 +8182,32 @@ class App:
     def build_asistan(self):
         f, st = ui_theme.scrollable(self.tabs["assistant"], PAL["bg"]), self.cfg["settings"]
         quick = ttk.LabelFrame(f, text="🎮 " + t("ga.title")); quick.pack(fill="x", padx=10, pady=(8, 0))
-        self.ga_help = ttk.Label(quick, text=t("ga.help", voice=st.get("voice_hotkey", "<f9>"),
+        self.ga_help = CtkLabel(quick, text=t("ga.help", voice=st.get("voice_hotkey", "<f9>"),
                                 pause=st.get("tr_toggle_hotkey", "<f6>"), cancel=st.get("assistant_cancel_hotkey", "<f12>")),
                                 wraplength=880, justify="left")
         self.ga_help.pack(anchor="w", padx=10, pady=6)
-        self.ga_privacy = ttk.Label(quick, text=t("ga.privacy", provider=provider_label(st.get("ai_provider", "builtin"))),
+        self.ga_privacy = CtkLabel(quick, text=t("ga.privacy", provider=provider_label(st.get("ai_provider", "builtin"))),
                                    wraplength=880, justify="left", foreground=PAL["muted"])
         self.ga_privacy.pack(anchor="w", padx=10)
-        controls = ttk.Frame(quick); controls.pack(fill="x", padx=10, pady=8)
-        ttk.Button(controls, text=t("ga.prepare"), command=self.prepare_assistant).pack(side="left")
-        ttk.Button(controls, text=t("ga.cancel"), command=self.cancel_assistant).pack(side="left", padx=8)
-        self.ga_builtin = ttk.Label(quick, text=t("ga.builtin") if st.get("ai_provider") == "builtin" else "",
+        controls = CtkFrame(quick); controls.pack(fill="x", padx=10, pady=8)
+        CtkButton(controls, text=t("ga.prepare"), command=self.prepare_assistant).pack(side="left")
+        CtkButton(controls, text=t("ga.cancel"), command=self.cancel_assistant).pack(side="left", padx=8)
+        self.ga_builtin = CtkLabel(quick, text=t("ga.builtin") if st.get("ai_provider") == "builtin" else "",
                                     foreground=PAL["warning"], wraplength=880)
         self.ga_builtin.pack(anchor="w", padx=10, pady=4)
-        self.chat = tk.Text(f, height=13, state="disabled", wrap="word", font=("Segoe UI", 10))
+        self.chat = CtkTextbox(f, height=13, state="disabled", wrap="word", font=ui_theme.font_spec("body", 10))
         self.chat.tag_configure("user", foreground=PAL["accent"], font=(ui_theme.FONT_SEMI, 10))
         self.chat.tag_configure("asistan", foreground=PAL["fg"], spacing3=4)
         self.chat.tag_configure("sys", foreground=PAL["muted"])
         self.chat.pack(fill="both", expand=True, padx=10, pady=(10, 4))
-        row = ttk.Frame(f); row.pack(fill="x", padx=10)
-        self.chat_in = ttk.Entry(row); self.chat_in.pack(side="left", fill="x", expand=True)
+        row = CtkFrame(f); row.pack(fill="x", padx=10)
+        self.chat_in = CtkEntry(row); self.chat_in.pack(side="left", fill="x", expand=True)
         self.chat_in.bind("<Return>", lambda e: self.send_chat())
-        ttk.Button(row, text=ui_theme.with_icon(t("btn.send"), "➤"), command=self.send_chat, style="Accent.TButton").pack(side="left", padx=4)
-        ttk.Button(row, text=t("ai.talk"), command=self.toggle_voice).pack(side="left")
-        ttk.Button(row, text=ui_theme.with_icon(t("ai.diag"), "🩺"), command=self.run_voice_diag).pack(side="left", padx=(4, 0))
-        ttk.Button(row, text=ui_theme.with_icon(t("btn.clear"), "🧹"), command=self.clear_chat).pack(side="left", padx=4)
-        self.vstatus = ttk.Label(f, text="", foreground=PAL["warning"]); self.vstatus.pack(anchor="w", padx=12)
+        CtkButton(row, text=ui_theme.with_icon(t("btn.send"), "➤"), command=self.send_chat, style="Accent.TButton").pack(side="left", padx=4)
+        CtkButton(row, text=t("ai.talk"), command=self.toggle_voice).pack(side="left")
+        CtkButton(row, text=ui_theme.with_icon(t("ai.diag"), "🩺"), command=self.run_voice_diag).pack(side="left", padx=(4, 0))
+        CtkButton(row, text=ui_theme.with_icon(t("btn.clear"), "🧹"), command=self.clear_chat).pack(side="left", padx=4)
+        self.vstatus = CtkLabel(f, text="", foreground=PAL["warning"]); self.vstatus.pack(anchor="w", padx=12)
 
         box = ttk.LabelFrame(f, text=t("ai.settings")); box.pack(fill="x", padx=10, pady=8)
         self.av = {k: tk.StringVar(value=str(st.get(k, ""))) for k in
@@ -7221,26 +8215,26 @@ class App:
                     "stt_model", "stt_device", "tts_rate", "tts_voice")}
         self.av["ai_provider"] = tk.StringVar(value=provider_label(st["ai_provider"] if st["ai_provider"] in PROVIDER_KEYS else "ollama"))
         self.abv = {k: tk.BooleanVar(value=bool(st.get(k, True))) for k in ("speak_verdict", "speak_chat")}
-        ttk.Label(box, text=t("ai.provider")).grid(row=0, column=0, sticky="w", padx=8, pady=3)
-        ttk.Combobox(box, textvariable=self.av["ai_provider"], values=[provider_label(k) for k in PROVIDER_KEYS], state="readonly", width=30).grid(row=0, column=1, sticky="w")
+        CtkLabel(box, text=t("ai.provider")).grid(row=0, column=0, sticky="w", padx=8, pady=3)
+        CtkComboBox(box, textvariable=self.av["ai_provider"], values=[provider_label(k) for k in PROVIDER_KEYS], state="readonly", width=30).grid(row=0, column=1, sticky="w")
         fields = [(t("ai.ollama_url"), "ollama_url", 30), (t("ai.ollama_model"), "ollama_model", 30),
                   (t("ai.cc_model"), "claude_code_model", 30), (t("ai.claude_model"), "claude_model", 30),
                   (t("ai.claude_key"), "claude_api_key", 30), (t("ai.openai_model"), "openai_model", 30), (t("ai.openai_key"), "openai_api_key", 30),
                   (t("ai.stt_model"), "stt_model", 12), (t("ai.stt_device"), "stt_device", 12),
                   (t("ai.tts_rate"), "tts_rate", 12), (t("ai.tts_voice"), "tts_voice", 12)]
         for i, (lab, k, w) in enumerate(fields, start=1):
-            ttk.Label(box, text=lab).grid(row=i, column=0, sticky="w", padx=8, pady=2)
-            ttk.Entry(box, textvariable=self.av[k], width=w, show="*" if k in ("claude_api_key", "openai_api_key") else "").grid(row=i, column=1, sticky="w")
-        ttk.Checkbutton(box, text=t("ai.speak_verdict"), variable=self.abv["speak_verdict"]).grid(row=1, column=2, sticky="w", padx=16)
-        ttk.Checkbutton(box, text=t("ai.speak_chat"), variable=self.abv["speak_chat"]).grid(row=2, column=2, sticky="w", padx=16)
-        ttk.Button(box, text=t("ai.test_voice"), command=lambda: self.speak(t("ai.voice_test"))).grid(row=3, column=2, sticky="w", padx=16)
-        ttk.Button(box, text=t("btn.save"), command=self.save_ai_settings, style="Accent.TButton").grid(row=4, column=2, sticky="w", padx=16)
-        vp = ttk.Frame(box); vp.grid(row=5, column=2, rowspan=4, sticky="nw", padx=16, pady=(6, 0))
-        ttk.Label(vp, text="🎙 " + t("vp.pack")).pack(anchor="w")
+            CtkLabel(box, text=lab).grid(row=i, column=0, sticky="w", padx=8, pady=2)
+            CtkEntry(box, textvariable=self.av[k], width=w, show="*" if k in ("claude_api_key", "openai_api_key") else "").grid(row=i, column=1, sticky="w")
+        CtkCheckBox(box, text=t("ai.speak_verdict"), variable=self.abv["speak_verdict"]).grid(row=1, column=2, sticky="w", padx=16)
+        CtkCheckBox(box, text=t("ai.speak_chat"), variable=self.abv["speak_chat"]).grid(row=2, column=2, sticky="w", padx=16)
+        CtkButton(box, text=t("ai.test_voice"), command=lambda: self.speak(t("ai.voice_test"))).grid(row=3, column=2, sticky="w", padx=16)
+        CtkButton(box, text=t("btn.save"), command=self.save_ai_settings, style="Accent.TButton").grid(row=4, column=2, sticky="w", padx=16)
+        vp = CtkFrame(box); vp.grid(row=5, column=2, rowspan=4, sticky="nw", padx=16, pady=(6, 0))
+        CtkLabel(vp, text="🎙 " + t("vp.pack")).pack(anchor="w")
         packs = list(voicepack.NATURAL_PACKS)
         selected = voicepack.natural_pack(st.get("voice_pack"), i18n.current_language())
         self.vp_var = tk.StringVar(value=t("vp.p_" + selected))
-        cb = ttk.Combobox(vp, textvariable=self.vp_var, values=[t("vp.p_" + p) for p in packs], state="readonly", width=24); cb.pack(anchor="w", pady=2)
+        cb = CtkComboBox(vp, textvariable=self.vp_var, values=[t("vp.p_" + p) for p in packs], state="readonly", width=24); cb.pack(anchor="w", pady=2)
         self.vp_radio = tk.BooleanVar(value=False)
         self.vp_online = tk.BooleanVar(value=bool(st.get("voice_online", False)))
         def vp_save(*_):
@@ -7248,10 +8242,10 @@ class App:
             st["voice_radio"] = False
             self.set_online_voice(self.vp_online.get())
         cb.bind("<<ComboboxSelected>>", vp_save)
-        ttk.Checkbutton(vp, text=t("vp.online"), variable=self.vp_online, command=vp_save).pack(anchor="w")
-        ttk.Button(vp, text="▶ " + t("vp.test"), command=self.voice_demo).pack(anchor="w", pady=(4, 0))
-        ttk.Label(vp, text=t("vp.natural_hint"), foreground=PAL["muted"], wraplength=300, justify="left").pack(anchor="w", pady=(4, 0))
-        ttk.Label(box, text=t("ai.key_warning"),
+        CtkCheckBox(vp, text=t("vp.online"), variable=self.vp_online, command=vp_save).pack(anchor="w")
+        CtkButton(vp, text="▶ " + t("vp.test"), command=self.voice_demo).pack(anchor="w", pady=(4, 0))
+        CtkLabel(vp, text=t("vp.natural_hint"), foreground=PAL["muted"], wraplength=300, justify="left").pack(anchor="w", pady=(4, 0))
+        CtkLabel(box, text=t("ai.key_warning"),
                  foreground=PAL["muted"]).grid(row=len(fields) + 1, column=0, columnspan=2, sticky="w", padx=8, pady=(6, 0))
         self.chat_add("sys", t("ai.examples"))
         for m in getattr(self, "chat_hist", []):           # arayüz yeniden kurulduysa sohbeti geri yaz
@@ -7469,12 +8463,12 @@ class App:
         self.task_nb = ttk.Notebook(self.tabs["tasks"]); self.task_nb.pack(fill="both", expand=True, padx=8, pady=8)
         pg = {}
         for key, icon in (("list", "🗂"), ("add", "➕"), ("claude", "🤖"), ("sync", "⏱")):
-            fr = ttk.Frame(self.task_nb); self.task_nb.add(fr, text=f" {icon} {t('tpage.' + key)} ")
+            fr = CtkFrame(self.task_nb); self.task_nb.add(fr, text=f" {icon} {t('tpage.' + key)} ")
             pg[key] = fr
 
         # ---- liste
         L = pg["list"]
-        head = ttk.Frame(L); head.pack(fill="x", padx=6, pady=(8, 4))
+        head = CtkFrame(L); head.pack(fill="x", padx=6, pady=(8, 4))
         self.task_cat = tk.StringVar(value=TASK_CATS[0])
         self.cat_btns = {}
         icons = {"projects": "📋", "journey": "🧭", "manhunt": "🎯"}
@@ -7483,16 +8477,16 @@ class App:
                                 command=self.refresh_tasks)
             b.pack(side="left", padx=(0, 6)); self.cat_btns[c] = (b, icons.get(c, "•"))
         self.task_q = tk.StringVar()
-        ttk.Label(head, text="🔎").pack(side="left", padx=(14, 2))
-        qe = ttk.Entry(head, textvariable=self.task_q, width=24); qe.pack(side="left")
+        CtkLabel(head, text="🔎").pack(side="left", padx=(14, 2))
+        qe = CtkEntry(head, textvariable=self.task_q, width=24); qe.pack(side="left")
         qe.bind("<KeyRelease>", lambda e=None: self.refresh_tasks())
         self.hide_done = tk.BooleanVar(value=bool(st.get("tasks_hide_done", False)))
-        ttk.Checkbutton(head, text=t("tasks.hide_done"), variable=self.hide_done,
+        CtkCheckBox(head, text=t("tasks.hide_done"), variable=self.hide_done,
                         command=lambda: (st.__setitem__("tasks_hide_done", self.hide_done.get()), save_cfg(self.cfg), self.refresh_tasks())).pack(side="left", padx=12)
-        self.reset_lbl = ttk.Label(head, foreground=PAL["muted"]); self.reset_lbl.pack(side="right")
+        self.reset_lbl = CtkLabel(head, foreground=PAL["muted"]); self.reset_lbl.pack(side="right")
 
         body = ttk.Panedwindow(L, orient="horizontal"); body.pack(fill="both", expand=True, padx=6, pady=4)
-        lf, rf = ttk.Frame(body), ttk.Frame(body)
+        lf, rf = CtkFrame(body), CtkFrame(body)
         body.add(lf, weight=3); body.add(rf, weight=2)
         self.task_tv = ttk.Treeview(lf, columns=("st", "src"), show="tree headings", selectmode="browse")
         self.task_tv.heading("#0", text=t("tasks.col_task")); self.task_tv.column("#0", width=560, anchor="w")
@@ -7500,102 +8494,102 @@ class App:
         self.task_tv.heading("src", text=t("col.source")); self.task_tv.column("src", width=90, anchor="center", stretch=False)
         self.task_tv.tag_configure("group", font=(ui_theme.FONT_SEMI, 10), foreground=PAL["accent"])
         self.task_tv.tag_configure("done", foreground=PAL["muted"])
-        sb = ttk.Scrollbar(lf, orient="vertical", command=self.task_tv.yview); self.task_tv.configure(yscrollcommand=sb.set)
+        sb = CtkScrollbar(lf, orient="vertical", command=self.task_tv.yview); self.task_tv.configure(yscrollcommand=sb.set)
         self.task_tv.pack(side="left", fill="both", expand=True); sb.pack(side="left", fill="y")
         self.task_tv.bind("<Double-1>", self.on_task_double)
         self.task_tv.bind("<Return>", self.on_task_double)
         self.task_tv.bind("<<TreeviewSelect>>", self.show_task_how)
         self.task_tv.bind("<space>", lambda e=None: e is not None and self.toggle_task_done())
         # sağ: önizleme kartı
-        card = tk.Frame(rf, bg=PAL["surface"], highlightthickness=1, highlightbackground=PAL["border"])
+        card = CtkFrame(rf, bg=PAL["surface"], highlightthickness=1, highlightbackground=PAL["border"])
         card.pack(fill="both", expand=True, padx=(8, 0))
-        self.prev_title = tk.Label(card, text=t("tasks.how_pick"), bg=PAL["surface"], fg=PAL["fg"], font=(ui_theme.FONT_SEMI, 13),
+        self.prev_title = CtkLabel(card, text=t("tasks.how_pick"), bg=PAL["surface"], fg=PAL["fg"], font=(ui_theme.FONT_SEMI, 13),
                                    wraplength=420, justify="left", anchor="w")
         self.prev_title.pack(fill="x", padx=14, pady=(14, 4))
-        self.prev_meta = tk.Label(card, text="", bg=PAL["surface"], fg=PAL["accent"], font=(ui_theme.FONT, 9), anchor="w")
+        self.prev_meta = CtkLabel(card, text="", bg=PAL["surface"], fg=PAL["accent"], font=(ui_theme.FONT, 9), anchor="w")
         self.prev_meta.pack(fill="x", padx=14)
-        self.how_lbl = tk.Label(card, text="", bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 10), wraplength=420,
+        self.how_lbl = CtkLabel(card, text="", bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 10), wraplength=420,
                                 justify="left", anchor="nw")
         self.how_lbl.pack(fill="both", expand=True, padx=14, pady=8)
         card.bind("<Configure>", lambda e=None: e is not None and [w.config(wraplength=max(160, e.width - 30)) for w in (self.prev_title, self.how_lbl)])
-        pb = tk.Frame(card, bg=PAL["surface"]); pb.pack(fill="x", padx=12, pady=(0, 12))
-        ttk.Button(pb, text=ui_theme.with_icon(t("tasks.details"), "🔍"), style="Accent.TButton", command=self.on_task_double).pack(side="left")
-        self.how_btn = ttk.Button(pb, text=ui_theme.with_icon(t("tasks.open_source"), "🔗"), command=self.open_how_source, state="disabled")
+        pb = CtkFrame(card, bg=PAL["surface"]); pb.pack(fill="x", padx=12, pady=(0, 12))
+        CtkButton(pb, text=ui_theme.with_icon(t("tasks.details"), "🔍"), style="Accent.TButton", command=self.on_task_double).pack(side="left")
+        self.how_btn = CtkButton(pb, text=ui_theme.with_icon(t("tasks.open_source"), "🔗"), command=self.open_how_source, state="disabled")
         self.how_btn.pack(side="left", padx=6)
-        tb = ttk.Frame(L); tb.pack(fill="x", padx=6, pady=(2, 8))
-        ttk.Button(tb, text=ui_theme.with_icon(t("task.toggle_done"), "✔"), command=self.toggle_task_done).pack(side="left")
-        ttk.Button(tb, text=ui_theme.with_icon(t("btn.delete"), "🗑"), command=self.delete_task).pack(side="left", padx=6)
-        ttk.Button(tb, text=ui_theme.with_icon(t("task.clear_done"), "🧹"), command=self.clear_done_tasks).pack(side="left")
-        ttk.Button(tb, text=ui_theme.with_icon(t("task.clear_cat"), "🗑"), command=self.clear_all_tasks).pack(side="left", padx=6)
-        ttk.Label(tb, text=t("tasks.dbl_hint"), foreground=PAL["muted"]).pack(side="right")
+        tb = CtkFrame(L); tb.pack(fill="x", padx=6, pady=(2, 8))
+        CtkButton(tb, text=ui_theme.with_icon(t("task.toggle_done"), "✔"), command=self.toggle_task_done).pack(side="left")
+        CtkButton(tb, text=ui_theme.with_icon(t("btn.delete"), "🗑"), command=self.delete_task).pack(side="left", padx=6)
+        CtkButton(tb, text=ui_theme.with_icon(t("task.clear_done"), "🧹"), command=self.clear_done_tasks).pack(side="left")
+        CtkButton(tb, text=ui_theme.with_icon(t("task.clear_cat"), "🗑"), command=self.clear_all_tasks).pack(side="left", padx=6)
+        CtkLabel(tb, text=t("tasks.dbl_hint"), foreground=PAL["muted"]).pack(side="right")
 
         # ---- ekle / ekrandan oku
         A = ui_theme.scrollable(pg["add"], PAL["bg"])
         add = ttk.LabelFrame(A, text=t("task.add_box")); add.pack(fill="x", padx=10, pady=10)
-        row = ttk.Frame(add); row.pack(fill="x", padx=8, pady=6)
-        ttk.Label(row, text=t("label.category")).pack(side="left")
+        row = CtkFrame(add); row.pack(fill="x", padx=8, pady=6)
+        CtkLabel(row, text=t("label.category")).pack(side="left")
         self.cat_var = tk.StringVar(value=add_choice_name(*ADD_CHOICES[0]))
-        ttk.Combobox(row, textvariable=self.cat_var, values=[add_choice_name(*c) for c in ADD_CHOICES],
+        CtkComboBox(row, textvariable=self.cat_var, values=[add_choice_name(*c) for c in ADD_CHOICES],
                      width=24, state="readonly").pack(side="left", padx=4)
-        ttk.Button(row, text=t("task.read_screen"), command=self.capture_task_region).pack(side="left", padx=8)
-        ttk.Button(row, text=ui_theme.with_icon(t("tasks.read_projects"), "📋"), style="Accent.TButton",
+        CtkButton(row, text=t("task.read_screen"), command=self.capture_task_region).pack(side="left", padx=8)
+        CtkButton(row, text=ui_theme.with_icon(t("tasks.read_projects"), "📋"), style="Accent.TButton",
                    command=self.read_projects_screen).pack(side="left")
-        ttk.Button(row, text=t("tasks.reset_region"), command=lambda: self.read_projects_screen(reselect=True)).pack(side="left", padx=6)
-        ttk.Label(add, text=t("tasks.projects_note"), foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=8)
-        self.task_in = tk.Text(add, height=6, wrap="word"); self.task_in.pack(fill="x", padx=8, pady=(4, 4))
-        row2 = ttk.Frame(add); row2.pack(fill="x", padx=8, pady=(0, 8))
-        ttk.Button(row2, text=t("task.translate_add"), command=self.translate_and_add, style="Accent.TButton").pack(side="left")
-        self.tr_status = ttk.Label(row2, text=""); self.tr_status.pack(side="left", padx=10)
+        CtkButton(row, text=t("tasks.reset_region"), command=lambda: self.read_projects_screen(reselect=True)).pack(side="left", padx=6)
+        CtkLabel(add, text=t("tasks.projects_note"), foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=8)
+        self.task_in = CtkTextbox(add, height=6, wrap="word"); self.task_in.pack(fill="x", padx=8, pady=(4, 4))
+        row2 = CtkFrame(add); row2.pack(fill="x", padx=8, pady=(0, 8))
+        CtkButton(row2, text=t("task.translate_add"), command=self.translate_and_add, style="Accent.TButton").pack(side="left")
+        self.tr_status = CtkLabel(row2, text=""); self.tr_status.pack(side="left", padx=10)
 
         # ---- Claude ile getir (eski ChatGPT ekran makrosu yerine)
         C = ui_theme.scrollable(pg["claude"], PAL["bg"])
         cb = ttk.LabelFrame(C, text="🤖 " + t("cl.box")); cb.pack(fill="x", padx=10, pady=10)
-        ttk.Label(cb, text=t("cl.note"), wraplength=900, justify="left").pack(anchor="w", padx=8, pady=(6, 4))
-        cr = ttk.Frame(cb); cr.pack(fill="x", padx=8, pady=6)
-        ttk.Button(cr, text=ui_theme.with_icon(t("cl.run"), "🌐"), style="Accent.TButton", command=self.run_claude_fetch).pack(side="left")
+        CtkLabel(cb, text=t("cl.note"), wraplength=900, justify="left").pack(anchor="w", padx=8, pady=(6, 4))
+        cr = CtkFrame(cb); cr.pack(fill="x", padx=8, pady=6)
+        CtkButton(cr, text=ui_theme.with_icon(t("cl.run"), "🌐"), style="Accent.TButton", command=self.run_claude_fetch).pack(side="left")
         self.cl_replace = tk.BooleanVar(value=bool(st.get("claude_tasks_replace", True)))
-        ttk.Checkbutton(cr, text=t("cl.replace"), variable=self.cl_replace,
+        CtkCheckBox(cr, text=t("cl.replace"), variable=self.cl_replace,
                         command=lambda: (st.__setitem__("claude_tasks_replace", bool(self.cl_replace.get())), save_cfg(self.cfg))).pack(side="left", padx=12)
         self.gv = {}
-        self.cl_status = ttk.Label(cb, text=self.claude_cli_state(), foreground=PAL["muted"], wraplength=900, justify="left")
+        self.cl_status = CtkLabel(cb, text=self.claude_cli_state(), foreground=PAL["muted"], wraplength=900, justify="left")
         self.cl_status.pack(anchor="w", padx=8)
-        ttk.Label(cb, text=t("cl.raw"), foreground=PAL["muted"]).pack(anchor="w", padx=8, pady=(8, 0))
-        self.cl_raw = tk.Text(cb, height=10, state="disabled", wrap="word", font=("Consolas", 9)); self.cl_raw.pack(fill="x", padx=8, pady=(0, 8))
+        CtkLabel(cb, text=t("cl.raw"), foreground=PAL["muted"]).pack(anchor="w", padx=8, pady=(8, 0))
+        self.cl_raw = CtkTextbox(cb, height=10, state="disabled", wrap="word", font=ui_theme.font_spec("mono", 9)); self.cl_raw.pack(fill="x", padx=8, pady=(0, 8))
 
         # ---- sıfırlama ve senkron
         S = ui_theme.scrollable(pg["sync"], PAL["bg"])
         top = ttk.LabelFrame(S, text=t("task.reset_box")); top.pack(fill="x", padx=10, pady=10)
-        self.reset_lbl2 = ttk.Label(top, style="Section.TLabel"); self.reset_lbl2.pack(anchor="w", padx=8, pady=4)
-        rr = ttk.Frame(top); rr.pack(fill="x", padx=8, pady=(0, 6))
+        self.reset_lbl2 = CtkLabel(top, style="Section.TLabel"); self.reset_lbl2.pack(anchor="w", padx=8, pady=4)
+        rr = CtkFrame(top); rr.pack(fill="x", padx=8, pady=(0, 6))
         self.rv = {"daily_reset_hour": tk.StringVar(value=str(st["daily_reset_hour"])),
                    "weekly_reset_day": tk.StringVar(value=weekday_names()[st["weekly_reset_day"]]),
                    "weekly_reset_hour": tk.StringVar(value=str(st["weekly_reset_hour"]))}
-        ttk.Label(rr, text=t("task.daily_hour")).pack(side="left")
-        ttk.Entry(rr, textvariable=self.rv["daily_reset_hour"], width=4).pack(side="left", padx=(2, 12))
-        ttk.Label(rr, text=t("task.weekly_day")).pack(side="left")
-        ttk.Combobox(rr, textvariable=self.rv["weekly_reset_day"], values=weekday_names(), width=10, state="readonly").pack(side="left", padx=2)
-        ttk.Label(rr, text=t("task.hour")).pack(side="left")
-        ttk.Entry(rr, textvariable=self.rv["weekly_reset_hour"], width=4).pack(side="left", padx=2)
-        ttk.Button(rr, text=ui_theme.with_icon(t("btn.save_short"), "💾"), command=self.save_reset_settings, style="Accent.TButton").pack(side="left", padx=8)
-        ttk.Label(top, text=t("task.reset_note"), foreground=PAL["muted"]).pack(anchor="w", padx=8, pady=(0, 4))
+        CtkLabel(rr, text=t("task.daily_hour")).pack(side="left")
+        CtkEntry(rr, textvariable=self.rv["daily_reset_hour"], width=4).pack(side="left", padx=(2, 12))
+        CtkLabel(rr, text=t("task.weekly_day")).pack(side="left")
+        CtkComboBox(rr, textvariable=self.rv["weekly_reset_day"], values=weekday_names(), width=10, state="readonly").pack(side="left", padx=2)
+        CtkLabel(rr, text=t("task.hour")).pack(side="left")
+        CtkEntry(rr, textvariable=self.rv["weekly_reset_hour"], width=4).pack(side="left", padx=2)
+        CtkButton(rr, text=ui_theme.with_icon(t("btn.save_short"), "💾"), command=self.save_reset_settings, style="Accent.TButton").pack(side="left", padx=8)
+        CtkLabel(top, text=t("task.reset_note"), foreground=PAL["muted"]).pack(anchor="w", padx=8, pady=(0, 4))
         fb = ttk.LabelFrame(S, text=t("tasks.feed_box")); fb.pack(fill="x", padx=10, pady=(0, 8))
-        fr = ttk.Frame(fb); fr.pack(fill="x", padx=8, pady=6)
-        ttk.Button(fr, text=ui_theme.with_icon(t("tasks.sync_now"), "🌐"), style="Accent.TButton",
+        fr = CtkFrame(fb); fr.pack(fill="x", padx=8, pady=6)
+        CtkButton(fr, text=ui_theme.with_icon(t("tasks.sync_now"), "🌐"), style="Accent.TButton",
                    command=lambda: self.meta_sync_start(force=True, what=("tasks",))).pack(side="left")
         self.bv_tasks = {k: tk.BooleanVar(value=bool(st.get(k, True))) for k in ("tasks_sync", "auto_reset_times")}
-        ttk.Checkbutton(fr, text=t("tasks.enable"), variable=self.bv_tasks["tasks_sync"], command=self.save_task_feed_flags).pack(side="left", padx=(14, 0))
-        ttk.Checkbutton(fr, text=t("tasks.auto_resets"), variable=self.bv_tasks["auto_reset_times"], command=self.save_task_feed_flags).pack(side="left", padx=(14, 0))
-        self.tasks_info = ttk.Label(fb, text=self.tasks_status_text(), foreground=PAL["muted"], wraplength=900, justify="left")
+        CtkCheckBox(fr, text=t("tasks.enable"), variable=self.bv_tasks["tasks_sync"], command=self.save_task_feed_flags).pack(side="left", padx=(14, 0))
+        CtkCheckBox(fr, text=t("tasks.auto_resets"), variable=self.bv_tasks["auto_reset_times"], command=self.save_task_feed_flags).pack(side="left", padx=(14, 0))
+        self.tasks_info = CtkLabel(fb, text=self.tasks_status_text(), foreground=PAL["muted"], wraplength=900, justify="left")
         self.tasks_info.pack(anchor="w", padx=8)
-        wr = ttk.Frame(fb); wr.pack(fill="x", padx=8, pady=(6, 2))
-        ttk.Button(wr, text=ui_theme.with_icon(t("wiki.sync_now"), "📚"), style="Accent.TButton",
+        wr = CtkFrame(fb); wr.pack(fill="x", padx=8, pady=(6, 2))
+        CtkButton(wr, text=ui_theme.with_icon(t("wiki.sync_now"), "📚"), style="Accent.TButton",
                    command=lambda: self.meta_sync_start(force=True, what=("wiki",))).pack(side="left")
         self.bv_tasks["wiki_sync"] = tk.BooleanVar(value=bool(st.get("wiki_sync", True)))
-        ttk.Checkbutton(wr, text=t("wiki.enable"), variable=self.bv_tasks["wiki_sync"], command=self.save_task_feed_flags).pack(side="left", padx=(14, 0))
-        ttk.Button(wr, text=ui_theme.with_icon(t("wiki.open"), "🔗"), command=self.open_wiki_page).pack(side="left", padx=(14, 0))
-        self.wiki_lbl = ttk.Label(fb, text=self.wiki_status_text(), foreground=PAL["muted"], wraplength=900, justify="left")
+        CtkCheckBox(wr, text=t("wiki.enable"), variable=self.bv_tasks["wiki_sync"], command=self.save_task_feed_flags).pack(side="left", padx=(14, 0))
+        CtkButton(wr, text=ui_theme.with_icon(t("wiki.open"), "🔗"), command=self.open_wiki_page).pack(side="left", padx=(14, 0))
+        self.wiki_lbl = CtkLabel(fb, text=self.wiki_status_text(), foreground=PAL["muted"], wraplength=900, justify="left")
         self.wiki_lbl.pack(anchor="w", padx=8)
-        ttk.Label(fb, text=t("wiki.note") + "\n" + t("tasks.feed_note"), foreground=PAL["muted"], wraplength=900,
+        CtkLabel(fb, text=t("wiki.note") + "\n" + t("tasks.feed_note"), foreground=PAL["muted"], wraplength=900,
                   justify="left").pack(anchor="w", padx=8, pady=(4, 8))
         sr = ttk.LabelFrame(S, text="Görev ve sezon verileri için güvenilir kaynaklar")
         sr.pack(fill="x", padx=10, pady=(0, 10))
@@ -7605,8 +8599,8 @@ class App:
             ("The Division Wiki — görev ve proje rehberleri", "https://thedivision.fandom.com/wiki/Projects_in_The_Division_2"),
         )
         for title, url in task_sources:
-            ttk.Button(sr, text="🔗 " + title, command=lambda u=url: webbrowser.open(u)).pack(anchor="w", padx=8, pady=3)
-        ttk.Label(sr, text="Uygulamadaki görev listesi resmî akış, wiki eşlemesi ve (en az iki ayrı oyuncu bildirimiyle doğrulanan) topluluk akışını birleştirir. Süresi geçen sezon görevleri otomatik düşer; güncelleme için üstteki eşitleme düğmesini kullan.",
+            CtkButton(sr, text="🔗 " + title, command=lambda u=url: webbrowser.open(u)).pack(anchor="w", padx=8, pady=3)
+        CtkLabel(sr, text="Uygulamadaki görev listesi resmî akış, wiki eşlemesi ve (en az iki ayrı oyuncu bildirimiyle doğrulanan) topluluk akışını birleştirir. Süresi geçen sezon görevleri otomatik düşer; güncelleme için üstteki eşitleme düğmesini kullan.",
                   foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=8, pady=(4, 8))
         self.refresh_tasks(); self.update_reset_label()
         self.root.after(1500, self.translate_wiki_tasks)
@@ -7692,6 +8686,7 @@ class App:
     # ---------- Meta build senkronu ----------
     def meta_sync_start(self, force=False, quiet=False, what=("builds", "tasks", "wiki")):
         """Arka planda meta build + görev listelerini indirir (günde bir; force=True ise hemen)."""
+        _ensure_deferred()
         st = self.cfg["settings"]
         if self.meta_busy: return
         if not meta_sync.configured_urls(st.get("meta_feed_url", "")):
@@ -7734,8 +8729,14 @@ class App:
                 start = start or self.tasks.get("wiki_season") or wiki_sync.DEFAULT_SEASON
                 try: out["wiki"] = (wiki_sync.run(start, APP_VERSION), None)
                 except Exception as e: out["wiki"] = (None, e)
-            self.root.after(0, lambda: self.sync_done(out, verbose))
+            self.results.put(("meta_sync_done", out, verbose))
         threading.Thread(target=work, daemon=True).start()
+
+    def _defer_meta_sync_done(self, out, verbose):
+        """Apply downloaded feed state after the current Tk event batch."""
+        if getattr(self, "_closing", False): return
+        try: self.root.after_idle(lambda: self.sync_done(out, verbose))
+        except tk.TclError: log.debug("Meta sync UI update skipped after window teardown")
 
     def sync_done(self, out, verbose):
         self.meta_busy = False
@@ -8021,7 +9022,7 @@ class App:
         group, short = split_title(text)
         tip, url = self.task_how(task)
         f = getattr(self, "ui_factor", 1.0)
-        w = tk.Toplevel(self.root); w.title(f"{cat_name(cat)} — {short[:60]}"); w.configure(bg=PAL["bg"])
+        w = CtkToplevel(self.root); w.title(f"{cat_name(cat)} — {short[:60]}"); w.configure(bg=PAL["bg"])
         ww, wh = int(980 * max(0.6, f)), int(700 * max(0.6, f))
         w.geometry(f"{ww}x{wh}+{self.root.winfo_rootx() + 60}+{self.root.winfo_rooty() + 60}")
         w.transient(self.root)
@@ -8050,46 +9051,46 @@ class App:
                            font=(ui_theme.FONT_SEMI, 11))
         hb.bind("<Configure>", draw_head)
         body = ttk.Panedwindow(w, orient="horizontal"); body.pack(fill="both", expand=True, padx=12, pady=10)
-        left, right = ttk.Frame(body), ttk.Frame(body)
+        left, right = CtkFrame(body), CtkFrame(body)
         body.add(left, weight=3); body.add(right, weight=2)
-        tk.Label(left, text=short, bg=PAL["bg"], fg=PAL["fg"], font=(ui_theme.FONT_SEMI, 14), wraplength=520,
+        CtkLabel(left, text=short, bg=PAL["bg"], fg=PAL["fg"], font=(ui_theme.FONT_SEMI, 14), wraplength=520,
                  justify="left", anchor="w").pack(fill="x", pady=(0, 6))
         if not ok:
-            tk.Label(left, text="🌐 " + t("tasks.not_translated"), bg=PAL["bg"], fg=PAL["warning"], font=(ui_theme.FONT, 9),
+            CtkLabel(left, text="🌐 " + t("tasks.not_translated"), bg=PAL["bg"], fg=PAL["warning"], font=(ui_theme.FONT, 9),
                      anchor="w").pack(fill="x")
-        ttk.Label(left, text=t("tasks.how_title"), style="Section.TLabel").pack(anchor="w", pady=(10, 2))
+        CtkLabel(left, text=t("tasks.how_title"), style="Section.TLabel").pack(anchor="w", pady=(10, 2))
         steps = [x.strip() for x in re.split(r"(?<=[.!?])\s+", tip or "") if x.strip()]
-        sf = tk.Frame(left, bg=PAL["bg"]); sf.pack(fill="x")
+        sf = CtkFrame(left, bg=PAL["bg"]); sf.pack(fill="x")
         if steps:
             for n, stp in enumerate(steps, 1):
-                r_ = tk.Frame(sf, bg=PAL["bg"]); r_.pack(fill="x", pady=3)
-                tk.Label(r_, text=str(n), bg=accent, fg="white", font=(ui_theme.FONT_SEMI, 9), width=3).pack(side="left", anchor="n")
-                tk.Label(r_, text=stp, bg=PAL["bg"], fg=PAL["fg"], font=(ui_theme.FONT, 10), wraplength=480, justify="left",
+                r_ = CtkFrame(sf, bg=PAL["bg"]); r_.pack(fill="x", pady=3)
+                CtkLabel(r_, text=str(n), bg=accent, fg="white", font=(ui_theme.FONT_SEMI, 9), width=3).pack(side="left", anchor="n")
+                CtkLabel(r_, text=stp, bg=PAL["bg"], fg=PAL["fg"], font=(ui_theme.FONT, 10), wraplength=480, justify="left",
                          anchor="w").pack(side="left", fill="x", padx=8)
         else:
-            tk.Label(sf, text=t("tasks.how_none"), bg=PAL["bg"], fg=PAL["muted"], font=(ui_theme.FONT, 10), anchor="w").pack(fill="x")
+            CtkLabel(sf, text=t("tasks.how_none"), bg=PAL["bg"], fg=PAL["muted"], font=(ui_theme.FONT, 10), anchor="w").pack(fill="x")
         meta = []
         if task.get("src"): meta.append(t("tasks.src_line", src=task["src"]))
         if task.get("expires"): meta.append(t("tasks.expires", d=str(task["expires"])[:16]))
         if task.get("time"): meta.append(t("tasks.added_at", d=str(task["time"])[:16].replace("T", " ")))
         if meta:
-            tk.Label(left, text="   ·   ".join(meta), bg=PAL["bg"], fg=PAL["muted"], font=(ui_theme.FONT, 9), anchor="w").pack(fill="x", pady=(12, 0))
-        bb = ttk.Frame(left); bb.pack(fill="x", pady=12)
+            CtkLabel(left, text="   ·   ".join(meta), bg=PAL["bg"], fg=PAL["muted"], font=(ui_theme.FONT, 9), anchor="w").pack(fill="x", pady=(12, 0))
+        bb = CtkFrame(left); bb.pack(fill="x", pady=12)
 
         def toggle():
             task["done"] = not task.get("done"); save_tasks(self.tasks); self.refresh_tasks(); draw_head()
             done_btn.config(text=ui_theme.with_icon(t("tasks.mark_open") if task.get("done") else t("tasks.mark_done"), "✔"))
-        done_btn = ttk.Button(bb, text=ui_theme.with_icon(t("tasks.mark_open") if task.get("done") else t("tasks.mark_done"), "✔"),
+        done_btn = CtkButton(bb, text=ui_theme.with_icon(t("tasks.mark_open") if task.get("done") else t("tasks.mark_done"), "✔"),
                               style="Accent.TButton", command=toggle)
         done_btn.pack(side="left")
         if url:
-            ttk.Button(bb, text=ui_theme.with_icon(t("tasks.open_source"), "🔗"), command=lambda: __import__("webbrowser").open(url)).pack(side="left", padx=6)
-        ttk.Button(bb, text=t("btn.close"), command=w.destroy).pack(side="right")
+            CtkButton(bb, text=ui_theme.with_icon(t("tasks.open_source"), "🔗"), command=lambda: __import__("webbrowser").open(url)).pack(side="left", padx=6)
+        CtkButton(bb, text=t("btn.close"), command=w.destroy).pack(side="right")
         # görseller (wiki) — arka planda yüklenir
-        ttk.Label(right, text="🖼 " + t("tasks.images"), style="Section.TLabel").pack(anchor="w")
-        galh = ttk.Frame(right); galh.pack(fill="both", expand=True, pady=(4, 0))
+        CtkLabel(right, text="🖼 " + t("tasks.images"), style="Section.TLabel").pack(anchor="w")
+        galh = CtkFrame(right); galh.pack(fill="both", expand=True, pady=(4, 0))
         gal = ui_theme.scrollable(galh, PAL["surface"])
-        loading = tk.Label(gal, text=t("tasks.images_loading"), bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 10))
+        loading = CtkLabel(gal, text=t("tasks.images_loading"), bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 10))
         loading.pack(pady=30)
         w._photos = []
 
@@ -8102,16 +9103,16 @@ class App:
                 for k in range(0, 420, 28): d.line((k, 0, k - 120, 240), fill=(26, 30, 38), width=2)
                 d.rectangle((0, 232, 420, 240), fill=tuple(int(accent[j:j + 2], 16) for j in (1, 3, 5)))
                 imgs = [(art, "")]
-                tk.Label(gal, text=t("tasks.no_images"), bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 9)).pack(anchor="w", padx=8)
+                CtkLabel(gal, text=t("tasks.no_images"), bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 9)).pack(anchor="w", padx=8)
             maxw = max(240, right.winfo_width() - 20)
             for img, page in imgs:
                 k = min(1.0, maxw / img.width, 260 / img.height)
-                ph = ImageTk.PhotoImage(img.resize((max(1, int(img.width * k)), max(1, int(img.height * k))), Image.LANCZOS))
+                ph = compat_image(img, (max(1, int(img.width * k)), max(1, int(img.height * k))))
                 w._photos.append(ph)
-                lb = tk.Label(gal, image=ph, bg=PAL["surface"], cursor="hand2" if page else "")
+                lb = CtkLabel(gal, image=ph, bg=PAL["surface"], cursor="hand2" if page else "")
                 lb.pack(padx=8, pady=(8, 0), anchor="w")
                 if page:
-                    tk.Label(gal, text="📚 " + page + " — The Division Wiki", bg=PAL["surface"], fg=PAL["muted"],
+                    CtkLabel(gal, text="📚 " + page + " — The Division Wiki", bg=PAL["surface"], fg=PAL["muted"],
                              font=(ui_theme.FONT, 8)).pack(anchor="w", padx=8)
                     lb.bind("<Button-1>", lambda e, pg_=page: __import__("webbrowser").open(wiki_sync.page_url(pg_)))
         threading.Thread(target=lambda: (lambda imgs: self.root.after(0, lambda: show(imgs)))(load_task_images(task)), daemon=True).start()
@@ -8156,17 +9157,17 @@ class App:
 
     def _task_region_capture(self):
         mon = self.screen_monitor()
-        with mss.mss() as sct:
+        with mss.MSS() as sct:
             s = sct.grab(mon); img = Image.frombytes("RGB", s.size, s.rgb)
         self.root.deiconify()
-        w = tk.Toplevel(self.root); w.attributes("-fullscreen", True, "-topmost", True)
+        w = CtkToplevel(self.root); w.attributes("-fullscreen", True, "-topmost", True)
         cv = tk.Canvas(w, highlightthickness=0, cursor="crosshair"); cv.pack(fill="both", expand=True)
         w.update_idletasks()
         sw, sh = w.winfo_width(), w.winfo_height()
         scale = min(sw / img.width, sh / img.height)
         w._photo = ImageTk.PhotoImage(img.resize((int(img.width * scale), int(img.height * scale))))
         cv.create_image(0, 0, image=w._photo, anchor="nw")
-        cv.create_text(sw // 2, 30, fill="yellow", font=("Segoe UI", 18, "bold"), text=t("task.calib_hint"))
+        cv.create_text(sw // 2, 30, fill="yellow", font=ui_theme.font_spec("display", 18), text=t("task.calib_hint"))
         st = {}
         def down(e): st.update(x0=e.x, y0=e.y, r=cv.create_rectangle(e.x, e.y, e.x, e.y, outline="lime", width=3))
         def move(e): cv.coords(st["r"], st["x0"], st["y0"], e.x, e.y)
@@ -8236,7 +9237,7 @@ class App:
         st = self.cfg["settings"]
         box = ttk.LabelFrame(parent, text="⌨ Kısayol tuşları")
         box.pack(fill="x", padx=10, pady=10)
-        ttk.Label(box, text="Kısayollar uygulama açıkken genel olarak çalışır. Aynı tuş iki işlemde kullanılamaz.",
+        CtkLabel(box, text="Kısayollar uygulama açıkken genel olarak çalışır. Aynı tuş iki işlemde kullanılamaz.",
                   foreground=PAL["muted"], wraplength=850, justify="left").grid(row=0, column=0, columnspan=3, sticky="w", padx=10, pady=8)
         self.shortcut_vars = {
             k: tk.StringVar(value=str(st.get(k, default)))
@@ -8249,14 +9250,56 @@ class App:
                   ("tasks_hotkey", "Görev verilerini güncelle"),
                   ("voice_hotkey", "Oyun içi AI asistana sesli soru"),
                   ("assistant_cancel_hotkey", "Ses kaydını / yanıtı iptal et"))
+        self.shortcut_keycap_hosts = {}
         for i, (key, label) in enumerate(labels, start=1):
-            ttk.Label(box, text=label).grid(row=i, column=0, sticky="w", padx=10, pady=4)
-            ttk.Entry(box, textvariable=self.shortcut_vars[key], width=18).grid(row=i, column=1, sticky="w", padx=8, pady=4)
-            ttk.Button(box, text="⌨", command=lambda k=key: self.capture_shortcut(k)).grid(row=i, column=2, padx=4)
-        ttk.Button(box, text=ui_theme.with_icon(t("set.save"), "💾"), command=self.save_shortcuts,
+            CtkLabel(box, text=label).grid(row=i, column=0, sticky="w", padx=10, pady=4)
+            # The persisted StringVar remains the source of truth. The
+            # adjacent keycap host renders the same value as individual
+            # keyboard keys (W or CTRL + SHIFT + T), like a tactical HUD.
+            keycap_host = CtkFrame(box, width=210, height=44, bg=PAL["surface"])
+            keycap_host.grid(row=i, column=1, sticky="w", padx=8, pady=4)
+            keycap_host.grid_propagate(False)
+            self.shortcut_keycap_hosts[key] = keycap_host
+            self._render_shortcut_keycaps(key)
+            self.shortcut_vars[key].trace_add(
+                "write", lambda *_args, shortcut_key=key: self._render_shortcut_keycaps(shortcut_key))
+            CtkButton(box, text="⌨", command=lambda k=key: self.capture_shortcut(k)).grid(row=i, column=2, padx=4)
+        CtkButton(box, text=ui_theme.with_icon(t("set.save"), "💾"), command=self.save_shortcuts,
                    style="Accent.TButton").grid(row=7, column=0, sticky="w", padx=10, pady=10)
-        ttk.Label(parent, text="Örnek: <ctrl>+<shift>+t. Bir değişiklik kaydedildiğinde global kısayol dinleyicisi yenilenir.",
+        CtkLabel(parent, text="Örnek: <ctrl>+<shift>+t. Bir değişiklik kaydedildiğinde global kısayol dinleyicisi yenilenir.",
                   foreground=PAL["muted"], wraplength=850, justify="left").pack(anchor="w", padx=12, pady=(0, 10))
+
+    def _render_shortcut_keycaps(self, key):
+        """Render one or more visible keycaps without changing the saved value."""
+        host = getattr(self, "shortcut_keycap_hosts", {}).get(key)
+        var = getattr(self, "shortcut_vars", {}).get(key)
+        if host is None or var is None:
+            return
+        try:
+            for child in host.winfo_children():
+                child.destroy()
+            tokens = shortcut_keycap_tokens(var.get())
+            for token in tokens:
+                width = max(42, min(88, 24 + len(token) * 10))
+                # Two nested surfaces create real depth in Tk: the dark lower
+                # layer is visible as a drop/shadow edge, while the upper face
+                # is lifted by two pixels like a physical keyboard cap.
+                shadow = CtkFrame(host, width=width, height=42, bg="#090b10",
+                                  corner_radius=7)
+                shadow.pack(side="left", padx=(0, 5), pady=1)
+                shadow.pack_propagate(False)
+                face = CtkFrame(shadow, width=width, height=38, bg="#55575d",
+                                corner_radius=6, border_width=1,
+                                border_color="#70737a")
+                face.place(relx=0, rely=0, relwidth=1, relheight=0.88)
+                CtkLabel(face, text=token, bg="#55575d", fg="#f5f1f2",
+                         width=width - 4, height=34,
+                         font=ui_theme.font_spec("display", 13)).pack(
+                             expand=True, fill="both", padx=2, pady=1)
+        except tk.TclError:
+            # A settings page can be rebuilt while a StringVar trace is being
+            # delivered; stale keycap hosts must not leak a callback error.
+            return
 
     def save_shortcuts(self):
         st = self.cfg["settings"]
@@ -8284,45 +9327,45 @@ class App:
         def on_key(event):
             if event.keysym in ("Shift_L", "Shift_R", "Control_L", "Control_R", "Alt_L", "Alt_R"): return
             mods = (["<ctrl>"] if event.state & 0x4 else []) + (["<shift>"] if event.state & 0x1 else []) + (["<alt>"] if event.state & 0x20000 else [])
-            name = event.keysym.lower()
+            name = hotkey_key_name(event)
             self.shortcut_vars[key].set("+".join(mods + [name if len(name) == 1 else f"<{name}>"]))
             self.root.unbind("<Key>")
         self.root.bind("<Key>", on_key)
 
     def build_diagnostics(self, parent):
         """Yerel, kullanıcı kontrollü tanılama / iyileştirme merkezi."""
-        top = ttk.Frame(parent); top.pack(fill="x", padx=10, pady=(10, 6))
-        ttk.Label(top, text="Sistem Tanılama Merkezi", font=(ui_theme.FONT_SEMI, 14), foreground=PAL["accent"]).pack(side="left")
+        top = CtkFrame(parent); top.pack(fill="x", padx=10, pady=(10, 6))
+        CtkLabel(top, text="Sistem Tanılama Merkezi", font=(ui_theme.FONT_SEMI, 14), foreground=PAL["accent"]).pack(side="left")
         self.diag_advanced = tk.BooleanVar(value=False)
-        ttk.Checkbutton(top, text="Gelişmiş görünüm", variable=self.diag_advanced,
+        CtkCheckBox(top, text="Gelişmiş görünüm", variable=self.diag_advanced,
                         command=self.refresh_diagnostics).pack(side="right", padx=6)
-        ttk.Button(top, text="⟳ Yenile", command=self.refresh_diagnostics).pack(side="right")
-        ttk.Button(top, text="Raporu dışa aktar", command=self.export_diagnostics).pack(side="right", padx=6)
+        CtkButton(top, text="⟳ Yenile", command=self.refresh_diagnostics).pack(side="right")
+        CtkButton(top, text="Raporu dışa aktar", command=self.export_diagnostics).pack(side="right", padx=6)
         actions = ttk.LabelFrame(parent, text="Hızlı müdahale"); actions.pack(fill="x", padx=10, pady=(0, 8))
-        ttk.Button(actions, text="◈ Güvenli Görünüm", command=self.activate_safe_view,
+        CtkButton(actions, text="◈ Güvenli Görünüm", command=self.activate_safe_view,
                    style="Accent.TButton").pack(side="left", padx=8, pady=7)
-        ttk.Button(actions, text="🔎 Sorunları tara", command=self.run_diagnostic_engine,
+        CtkButton(actions, text="🔎 Sorunları tara", command=self.run_diagnostic_engine,
                    style="Accent.TButton").pack(side="left", padx=4)
-        ttk.Button(actions, text="🛠 Bulunan güvenli hataları düzelt", command=self.apply_detected_repairs).pack(side="left", padx=4)
-        ttk.Button(actions, text="⚕ Sorun giderme sihirbazı", command=self.open_troubleshooter).pack(side="left", padx=4)
-        ttk.Button(actions, text="🧾 GitHub raporu önizle", command=self.preview_github_report).pack(side="left", padx=4)
-        ttk.Button(actions, text="⚠ " + t("vf.log_btn"), command=self.show_verdict_feedback_log).pack(side="left", padx=4)
-        ttk.Label(actions, text="Bu işlemler oyun dosyalarına, build/sandık verilerine veya GitHub'a otomatik olarak dokunmaz.",
+        CtkButton(actions, text="🛠 Bulunan güvenli hataları düzelt", command=self.apply_detected_repairs).pack(side="left", padx=4)
+        CtkButton(actions, text="⚕ Sorun giderme sihirbazı", command=self.open_troubleshooter).pack(side="left", padx=4)
+        CtkButton(actions, text="🧾 GitHub raporu önizle", command=self.preview_github_report).pack(side="left", padx=4)
+        CtkButton(actions, text="⚠ " + t("vf.log_btn"), command=self.show_verdict_feedback_log).pack(side="left", padx=4)
+        CtkLabel(actions, text="Bu işlemler oyun dosyalarına, build/sandık verilerine veya GitHub'a otomatik olarak dokunmaz.",
                   foreground=PAL["muted"]).pack(side="left", padx=10)
-        ttk.Label(parent, text="Tanılama verileri varsayılan olarak yalnızca bu bilgisayarda tutulur. GitHub raporu önce maskelenmiş Markdown taslağı olarak gösterilir.",
+        CtkLabel(parent, text="Tanılama verileri varsayılan olarak yalnızca bu bilgisayarda tutulur. GitHub raporu önce maskelenmiş Markdown taslağı olarak gösterilir.",
                   foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=10, pady=(0, 8))
         split = ttk.Panedwindow(parent, orient="vertical"); split.pack(fill="both", expand=True, padx=10, pady=(0, 10))
-        summary = ttk.Frame(split); events = ttk.Frame(split); split.add(summary, weight=3); split.add(events, weight=2)
-        self.diag_text = tk.Text(summary, height=15, bg=PAL["surface"], fg=PAL["fg"], insertbackground=PAL["fg"],
+        summary = CtkFrame(split); events = CtkFrame(split); split.add(summary, weight=3); split.add(events, weight=2)
+        self.diag_text = CtkTextbox(summary, height=15, bg=PAL["surface"], fg=PAL["fg"], insertbackground=PAL["fg"],
                                  relief="flat", wrap="word", state="disabled")
         self.diag_text.pack(fill="both", expand=True)
-        event_bar = ttk.Frame(events); event_bar.pack(fill="x", pady=(6, 3))
-        ttk.Label(event_bar, text="Canlı olay kaydı", foreground=PAL["accent"], font=(ui_theme.FONT_SEMI, 10)).pack(side="left")
+        event_bar = CtkFrame(events); event_bar.pack(fill="x", pady=(6, 3))
+        CtkLabel(event_bar, text="Canlı olay kaydı", foreground=PAL["accent"], font=(ui_theme.FONT_SEMI, 10)).pack(side="left")
         self.diag_event_filter = tk.StringVar(value="ALL")
-        ttk.Combobox(event_bar, textvariable=self.diag_event_filter, state="readonly", width=10,
+        CtkComboBox(event_bar, textvariable=self.diag_event_filter, state="readonly", width=10,
                      values=["ALL", "INFO", "WARNING", "ERROR"]).pack(side="right")
-        ttk.Button(event_bar, text="⟳", width=3, command=self.refresh_diagnostics).pack(side="right", padx=4)
-        self.diag_event_text = tk.Text(events, height=9, bg=PAL["text_bg"], fg=PAL["fg"], relief="flat", wrap="none", state="disabled")
+        CtkButton(event_bar, text="⟳", width=3, command=self.refresh_diagnostics).pack(side="right", padx=4)
+        self.diag_event_text = CtkTextbox(events, height=9, bg=PAL["text_bg"], fg=PAL["fg"], relief="flat", wrap="none", state="disabled")
         self.diag_event_text.pack(fill="both", expand=True)
         self.refresh_diagnostics()
 
@@ -8373,6 +9416,8 @@ class App:
         try: game = display.game_window()
         except Exception: game = None
         return {"settings": data["settings"], "config_path": CFG_PATH, "log_dir": APPLOG_DIR,
+                "project_root": BASE, "log_path": APPLOG_PATH,
+                "runtime_since": getattr(self, "_diagnostic_started_at", None),
                 "translation_ready": data["translation_ready"], "overlay_present": bool(getattr(self, "overlay", None)),
                 "last_error": self.last_err, "game_window": game, "catalog": GAME,
                 "build_tool_path": BASE / "build_tool.json"}
@@ -8440,7 +9485,12 @@ class App:
                 icon = {"ok": "✔", "warning": "⚠", "error": "✖", "info": "•"}.get(result.status, "•")
                 suffix = f" — {result.evidence}" if result.evidence else ""
                 fix = " [düzeltilebilir]" if result.repair else ""
-                lines.append(f"  {icon} {result.title}: {result.detail}{fix}{suffix}")
+                location = ""
+                if getattr(result, "source", ""):
+                    location = f" · {result.source}{':' + str(result.line) if result.line else ''}"
+                    if getattr(result, "symbol", ""):
+                        location += f" ({result.symbol})"
+                lines.append(f"  {icon} {result.title}: {result.detail}{location}{fix}{suffix}")
             lines.append("")
         lines += ["[HIZLI DURUM]"]
         for check in diagnostics_center.assess(data):
@@ -8489,13 +9539,13 @@ class App:
         self.toast("Güvenli düzeltmeler uygulandı" if fixed else "Uygulanacak güvenli düzeltme yok")
 
     def open_troubleshooter(self):
-        w = tk.Toplevel(self.root); w.title("Sorun giderme sihirbazı"); w.geometry("720x460")
-        ttk.Label(w, text="Sorun giderme sihirbazı", font=(ui_theme.FONT_SEMI, 14), foreground=PAL["accent"]).pack(anchor="w", padx=14, pady=(14, 6))
-        ttk.Label(w, text="Bir sorun seçin. Sihirbaz yalnız tanılama çalıştırır; düzeltme düğmesi açıkça seçilmeden ayar değiştirmez.", foreground=PAL["muted"], wraplength=680).pack(anchor="w", padx=14)
+        w = CtkToplevel(self.root); w.title("Sorun giderme sihirbazı"); w.geometry("720x460")
+        CtkLabel(w, text="Sorun giderme sihirbazı", font=(ui_theme.FONT_SEMI, 14), foreground=PAL["accent"]).pack(anchor="w", padx=14, pady=(14, 6))
+        CtkLabel(w, text="Bir sorun seçin. Sihirbaz yalnız tanılama çalıştırır; düzeltme düğmesi açıkça seçilmeden ayar değiştirmez.", foreground=PAL["muted"], wraplength=680).pack(anchor="w", padx=14)
         issue = tk.StringVar(value="Canlı çeviri / boş siyah kutu")
         options = ["Canlı çeviri / boş siyah kutu", "Eşya OCR okuması", "Menü tıklanmıyor veya donuyor", "Kısayollar", "Oyun klasörü / senkron", "Sesli asistan", "Güncelleme"]
-        ttk.Combobox(w, textvariable=issue, values=options, state="readonly", width=42).pack(anchor="w", padx=14, pady=10)
-        result = tk.Text(w, height=14, bg=PAL["text_bg"], fg=PAL["fg"], relief="flat", wrap="word", state="disabled"); result.pack(fill="both", expand=True, padx=14, pady=6)
+        CtkComboBox(w, textvariable=issue, values=options, state="readonly", width=42).pack(anchor="w", padx=14, pady=10)
+        result = CtkTextbox(w, height=14, bg=PAL["text_bg"], fg=PAL["fg"], relief="flat", wrap="word", state="disabled"); result.pack(fill="both", expand=True, padx=14, pady=6)
         def diagnose():
             data = self._diagnostic_snapshot(); text = []
             selected = issue.get()
@@ -8508,10 +9558,10 @@ class App:
             else:
                 text = [x["name"] + ": " + x["detail"] for x in diagnostics_center.assess(data)]
             result.configure(state="normal"); result.delete("1.0", "end"); result.insert("end", "\n\n".join(text)); result.configure(state="disabled")
-        row = ttk.Frame(w); row.pack(fill="x", padx=14, pady=(0, 12))
-        ttk.Button(row, text="Tanıla", command=diagnose, style="Accent.TButton").pack(side="left")
-        ttk.Button(row, text="Güvenli düzeltmeyi uygula", command=lambda: (self.run_safe_autofix(), w.destroy())).pack(side="left", padx=6)
-        ttk.Button(row, text="Kapat", command=w.destroy).pack(side="right")
+        row = CtkFrame(w); row.pack(fill="x", padx=14, pady=(0, 12))
+        CtkButton(row, text="Tanıla", command=diagnose, style="Accent.TButton").pack(side="left")
+        CtkButton(row, text="Güvenli düzeltmeyi uygula", command=lambda: (self.run_safe_autofix(), w.destroy())).pack(side="left", padx=6)
+        CtkButton(row, text="Kapat", command=w.destroy).pack(side="right")
         diagnose()
 
     def preview_github_report(self):
@@ -8520,14 +9570,14 @@ class App:
                                                                 "ocr_ready": data["ocr_ready"], "translation_ready": data["translation_ready"], "game_found": data["game_found"],
                                                                 "check_results": getattr(self, "_diagnostic_results", [])},
                                                   self._diag_events.snapshot(100))
-        w = tk.Toplevel(self.root); w.title("Maskelenmiş GitHub raporu önizlemesi"); w.geometry("820x620")
-        ttk.Label(w, text="Maskelenmiş Markdown raporu", font=(ui_theme.FONT_SEMI, 13), foreground=PAL["accent"]).pack(anchor="w", padx=12, pady=(12, 4))
-        ttk.Label(w, text="Bu pencere raporu göndermez. Yalnızca kontrol edip isterseniz GitHub yeni kayıt sayfasını açabilirsiniz.", foreground=PAL["muted"]).pack(anchor="w", padx=12)
-        box = tk.Text(w, wrap="word", bg=PAL["text_bg"], fg=PAL["fg"], relief="flat"); box.pack(fill="both", expand=True, padx=12, pady=10); box.insert("1.0", text)
-        bar = ttk.Frame(w); bar.pack(fill="x", padx=12, pady=(0, 12))
-        ttk.Button(bar, text="Panoya kopyala", command=lambda: (self.root.clipboard_clear(), self.root.clipboard_append(text), self.toast("Rapor panoya kopyalandı"))).pack(side="left")
-        ttk.Button(bar, text="GitHub kayıt sayfasını aç", command=lambda: webbrowser_open(ISSUES_URL)).pack(side="left", padx=6)
-        ttk.Button(bar, text="Kapat", command=w.destroy).pack(side="right")
+        w = CtkToplevel(self.root); w.title("Maskelenmiş GitHub raporu önizlemesi"); w.geometry("820x620")
+        CtkLabel(w, text="Maskelenmiş Markdown raporu", font=(ui_theme.FONT_SEMI, 13), foreground=PAL["accent"]).pack(anchor="w", padx=12, pady=(12, 4))
+        CtkLabel(w, text="Bu pencere raporu göndermez. Yalnızca kontrol edip isterseniz GitHub yeni kayıt sayfasını açabilirsiniz.", foreground=PAL["muted"]).pack(anchor="w", padx=12)
+        box = CtkTextbox(w, wrap="word", bg=PAL["text_bg"], fg=PAL["fg"], relief="flat"); box.pack(fill="both", expand=True, padx=12, pady=10); box.insert("1.0", text)
+        bar = CtkFrame(w); bar.pack(fill="x", padx=12, pady=(0, 12))
+        CtkButton(bar, text="Panoya kopyala", command=lambda: (self.root.clipboard_clear(), self.root.clipboard_append(text), self.toast("Rapor panoya kopyalandı"))).pack(side="left")
+        CtkButton(bar, text="GitHub kayıt sayfasını aç", command=lambda: webbrowser_open(ISSUES_URL)).pack(side="left", padx=6)
+        CtkButton(bar, text="Kapat", command=w.destroy).pack(side="right")
 
     def export_diagnostics(self):
         path = filedialog.asksaveasfilename(defaultextension=".json", initialfile="td2_diagnostics.json", filetypes=[("JSON", "*.json")])
@@ -8543,9 +9593,9 @@ class App:
         st = self.cfg["settings"]
         # Ayarlar alt sekmelere ayrıldı: Genel · Tarama · Ekran ve oyun · OCR · Bindirme · Senkron · Kayıt
         outer = self.tabs["settings"]
-        bar = ttk.Frame(outer); bar.pack(side="bottom", fill="x", padx=10, pady=8)
-        ttk.Button(bar, text=ui_theme.with_icon(t("set.save"), "💾"), command=self.save_settings, style="Accent.TButton").pack(side="left")
-        ttk.Label(bar, text=t("set.save_hint"), foreground=PAL["muted"]).pack(side="left", padx=12)
+        bar = CtkFrame(outer); bar.pack(side="bottom", fill="x", padx=10, pady=8)
+        CtkButton(bar, text=ui_theme.with_icon(t("set.save"), "💾"), command=self.save_settings, style="Accent.TButton").pack(side="left")
+        CtkLabel(bar, text=t("set.save_hint"), foreground=PAL["muted"]).pack(side="left", padx=12)
         self.set_nb = ttk.Notebook(outer); self.set_nb.pack(fill="both", expand=True, padx=8, pady=(8, 0))
         tr_ui = i18n.current_language() == "tr"
         self.set_groups = ["basic", "capture", "display", "service"]
@@ -8553,7 +9603,7 @@ class App:
                             "display": "Görünüm" if tr_ui else "Display", "service": "Hizmetler" if tr_ui else "Services"}
         self.set_group_nbs = {}
         for group in self.set_groups:
-            holder = ttk.Frame(self.set_nb); self.set_nb.add(holder, text=set_group_labels[group])
+            holder = CtkFrame(self.set_nb); self.set_nb.add(holder, text=set_group_labels[group])
             self.set_group_nbs[group] = ttk.Notebook(holder); self.set_group_nbs[group].pack(fill="both", expand=True)
         set_group_for = {"general": "basic", "shortcuts": "basic", "scan": "capture", "display": "capture", "ocr": "capture",
                          "fx": "display", "overlay": "display", "sync": "service", "service": "service",
@@ -8562,7 +9612,7 @@ class App:
         for key, icon in (("general", "⚙"), ("shortcuts", "⌨"), ("fx", "✨"), ("scan", "🎯"), ("display", "🖥"), ("ocr", "🔍"), ("overlay", "🪟"),
                           ("sync", "🔄"), ("service", "🛰"), ("premium", "⭐"), ("logs", "📝"), ("diagnostics", "🩺")):
             group = set_group_for[key]
-            holder = ttk.Frame(self.set_group_nbs[group])
+            holder = CtkFrame(self.set_group_nbs[group])
             label = ("Kısayollar" if i18n.current_language() == "tr" else "Shortcuts") if key == "shortcuts" else t("setpage." + key)
             self.set_group_nbs[group].add(holder, text=f" {icon} {label} ")
             P[key] = ui_theme.scrollable(holder, PAL["bg"])
@@ -8588,28 +9638,28 @@ class App:
         cur = i18n.current_language()
         self.lang_var = tk.StringVar(value=i18n.language_name(cur))
         lb = ttk.LabelFrame(f, text=t("set.language_box")); lb.pack(fill="x", padx=10, pady=(10, 6))
-        r0 = ttk.Frame(lb); r0.pack(fill="x", padx=8, pady=6)
-        ttk.Label(r0, text=t("set.language")).pack(side="left")
-        lcb = ttk.Combobox(r0, textvariable=self.lang_var, values=[n for _, n in langs], width=24, state="readonly")
+        r0 = CtkFrame(lb); r0.pack(fill="x", padx=8, pady=6)
+        CtkLabel(r0, text=t("set.language")).pack(side="left")
+        lcb = CtkComboBox(r0, textvariable=self.lang_var, values=[n for _, n in langs], width=24, state="readonly")
         lcb.pack(side="left", padx=6)
         lcb.bind("<<ComboboxSelected>>", lambda e: self.flash_language(self._selected_lang_code()))
-        ttk.Button(r0, text=ui_theme.with_icon(t("set.apply_language"), "✔"), command=self.apply_language).pack(side="left")
-        ttk.Label(lb, text=t("set.language_note"), foreground=PAL["muted"], wraplength=820,
+        CtkButton(r0, text=ui_theme.with_icon(t("set.apply_language"), "✔"), command=self.apply_language).pack(side="left")
+        CtkLabel(lb, text=t("set.language_note"), foreground=PAL["muted"], wraplength=820,
                   justify="left").pack(anchor="w", padx=8, pady=(0, 6))
 
         # ---- Güncellemeler ----
         ub = ttk.LabelFrame(f, text="⬆ " + t("upd.box")); ub.pack(fill="x", padx=10, pady=6)
-        ur = ttk.Frame(ub); ur.pack(fill="x", padx=8, pady=6)
-        ttk.Label(ur, text=t("upd.current", v=APP_VERSION, mode=t("upd.mode_exe") if FROZEN else t("upd.mode_src"))).pack(side="left")
-        ttk.Button(ur, text="🔎 " + t("upd.check"), command=lambda: (self.upd_lbl.config(text=t("upd.checking")),
+        ur = CtkFrame(ub); ur.pack(fill="x", padx=8, pady=6)
+        CtkLabel(ur, text=t("upd.current", v=APP_VERSION, mode=t("upd.mode_exe") if FROZEN else t("upd.mode_src"))).pack(side="left")
+        CtkButton(ur, text="🔎 " + t("upd.check"), command=lambda: (self.upd_lbl.config(text=t("upd.checking")),
                                                                      self.update_center(reason="manual"))).pack(side="left", padx=10)
-        ttk.Button(ur, text="🕘 " + t("upd.history"), command=self.show_version_history).pack(side="left", padx=4)
-        ttk.Button(ur, text="⚙ " + t("set.factory"), command=self.factory_reset).pack(side="left", padx=4)
-        self.upd_now_btn = ttk.Button(ur, text="⬆ " + t("upd.now"), command=self.do_update, style="Accent.TButton")
+        CtkButton(ur, text="🕘 " + t("upd.history"), command=self.show_version_history).pack(side="left", padx=4)
+        CtkButton(ur, text="⚙ " + t("set.factory"), command=self.factory_reset).pack(side="left", padx=4)
+        self.upd_now_btn = CtkButton(ur, text="⬆ " + t("upd.now"), command=self.do_update, style="Accent.TButton")
         self.upd_auto = tk.BooleanVar(value=bool(st.get("update_check", True)))
-        ttk.Checkbutton(ur, text=t("upd.auto"), variable=self.upd_auto,
+        CtkCheckBox(ur, text=t("upd.auto"), variable=self.upd_auto,
                         command=lambda: (st.__setitem__("update_check", bool(self.upd_auto.get())), save_cfg(self.cfg))).pack(side="right")
-        self.upd_lbl = ttk.Label(ub, text="", foreground=PAL["muted"], wraplength=900, justify="left")
+        self.upd_lbl = CtkLabel(ub, text="", foreground=PAL["muted"], wraplength=900, justify="left")
         self.upd_lbl.pack(anchor="w", padx=12, pady=(0, 6))
         if getattr(self, "upd_info", None) and updater.newer(self.upd_info["version"], APP_VERSION):
             self._upd_show(self.upd_info)
@@ -8617,29 +9667,29 @@ class App:
         # ---- Telefon arkadaşı ----
         cb_ = ttk.LabelFrame(P["sync"], text="📱 " + t("comp.box")); cb_.pack(fill="x", padx=10, pady=(10, 6))
         if self.premium_gate(cb_, "companion"):
-            r = ttk.Frame(cb_); r.pack(fill="x", padx=8, pady=6)
-            self.comp_btn = ttk.Button(r, text="", command=self.toggle_companion, style="Accent.TButton"); self.comp_btn.pack(side="left")
-            ttk.Label(r, text=t("comp.port")).pack(side="left", padx=(12, 2))
+            r = CtkFrame(cb_); r.pack(fill="x", padx=8, pady=6)
+            self.comp_btn = CtkButton(r, text="", command=self.toggle_companion, style="Accent.TButton"); self.comp_btn.pack(side="left")
+            CtkLabel(r, text=t("comp.port")).pack(side="left", padx=(12, 2))
             self.comp_port = tk.StringVar(value=str(st.get("companion_port", 8765)))
-            ttk.Entry(r, textvariable=self.comp_port, width=7).pack(side="left")
-            self.comp_url = ttk.Label(r, text="", foreground=PAL["accent"]); self.comp_url.pack(side="left", padx=12)
-            self.comp_qr = tk.Label(cb_, bg=PAL["bg"]); self.comp_qr.pack(anchor="w", padx=12, pady=4)
-            ttk.Label(cb_, text=t("comp.note"), foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=12, pady=(0, 8))
+            CtkEntry(r, textvariable=self.comp_port, width=7).pack(side="left")
+            self.comp_url = CtkLabel(r, text="", foreground=PAL["accent"]); self.comp_url.pack(side="left", padx=12)
+            self.comp_qr = CtkLabel(cb_, bg=PAL["bg"]); self.comp_qr.pack(anchor="w", padx=12, pady=4)
+            CtkLabel(cb_, text=t("comp.note"), foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=12, pady=(0, 8))
             self._companion_ui()
 
         # ---- Meta build senkronu ----
         mb = ttk.LabelFrame(P["sync"], text=t("meta.box")); mb.pack(fill="x", padx=10, pady=6)
-        rm = ttk.Frame(mb); rm.pack(fill="x", padx=8, pady=6)
+        rm = CtkFrame(mb); rm.pack(fill="x", padx=8, pady=6)
         self.bv["meta_sync"] = tk.BooleanVar(value=bool(st.get("meta_sync", True)))
-        ttk.Checkbutton(rm, text=t("meta.enable"), variable=self.bv["meta_sync"]).pack(side="left")
-        ttk.Button(rm, text=ui_theme.with_icon(t("meta.sync_now"), "⭐"), command=lambda: self.meta_sync_start(force=True, what=("builds",))).pack(side="left", padx=12)
+        CtkCheckBox(rm, text=t("meta.enable"), variable=self.bv["meta_sync"]).pack(side="left")
+        CtkButton(rm, text=ui_theme.with_icon(t("meta.sync_now"), "⭐"), command=lambda: self.meta_sync_start(force=True, what=("builds",))).pack(side="left", padx=12)
         if st.get("meta_hidden"):
-            ttk.Button(rm, text=t("meta.restore_hidden"), command=self.meta_restore_hidden).pack(side="left")
-        rm2 = ttk.Frame(mb); rm2.pack(fill="x", padx=8, pady=(0, 4))
-        ttk.Label(rm2, text=t("meta.url")).pack(side="left")
+            CtkButton(rm, text=t("meta.restore_hidden"), command=self.meta_restore_hidden).pack(side="left")
+        rm2 = CtkFrame(mb); rm2.pack(fill="x", padx=8, pady=(0, 4))
+        CtkLabel(rm2, text=t("meta.url")).pack(side="left")
         self.sv["meta_feed_url"] = tk.StringVar(value=st.get("meta_feed_url", ""))
-        ttk.Entry(rm2, textvariable=self.sv["meta_feed_url"], width=60).pack(side="left", padx=6)
-        ttk.Label(mb, text=t("meta.note"), foreground=PAL["muted"], wraplength=820,
+        CtkEntry(rm2, textvariable=self.sv["meta_feed_url"], width=60).pack(side="left", padx=6)
+        CtkLabel(mb, text=t("meta.note"), foreground=PAL["muted"], wraplength=820,
                   justify="left").pack(anchor="w", padx=8, pady=(0, 6))
 
         # ---- Ekran ve oyun / display & game ----
@@ -8647,34 +9697,34 @@ class App:
 
         # ---- Görünüm / appearance ----
         ap = ttk.LabelFrame(f, text=t("set.appearance_box")); ap.pack(fill="x", padx=10, pady=6)
-        theme_row = ttk.Frame(ap); theme_row.pack(fill="x", padx=8, pady=(8, 4))
-        ttk.Label(theme_row, text="Tema / Theme").pack(side="left")
+        theme_row = CtkFrame(ap); theme_row.pack(fill="x", padx=8, pady=(8, 4))
+        CtkLabel(theme_row, text="Tema / Theme").pack(side="left")
         current_theme = ui_theme.canonical_mode(st.get("ui_theme", "default"))
         self.theme_var = tk.StringVar(value=ui_theme.THEME_LABELS[current_theme])
         self.theme_modes_by_label = {label: mode for mode, label in ui_theme.THEME_LABELS.items()}
-        theme_cb = ttk.Combobox(theme_row, textvariable=self.theme_var,
+        theme_cb = CtkComboBox(theme_row, textvariable=self.theme_var,
                                 values=list(ui_theme.THEME_LABELS.values()), width=30,
                                 state="readonly")
         theme_cb.pack(side="left", padx=8)
         theme_cb.bind("<<ComboboxSelected>>", self._theme_preview_selected)
-        ttk.Label(ap, text="Önizlemeyi görerek tema seçin; kaydettiğinizde uygulama yeni temayla yeniden kurulur.",
+        CtkLabel(ap, text="Önizlemeyi görerek tema seçin; kaydettiğinizde uygulama yeni temayla yeniden kurulur.",
                   foreground=PAL["muted"]).pack(anchor="w", padx=8, pady=(0, 6))
         self.theme_preview = tk.Canvas(ap, height=128, highlightthickness=1,
                                        highlightbackground=PAL["border"],
                                        bg=PAL["bg"])
         self.theme_preview.pack(fill="x", padx=8, pady=(0, 8))
         self._draw_theme_preview(current_theme)
-        ra = ttk.Frame(ap); ra.pack(fill="x", padx=8, pady=6)
+        ra = CtkFrame(ap); ra.pack(fill="x", padx=8, pady=6)
         self.bv["ui_sounds"] = tk.BooleanVar(value=bool(st.get("ui_sounds", True)))
-        ttk.Checkbutton(ra, text=t("set.ui_sounds"), variable=self.bv["ui_sounds"]).pack(side="left")
-        rb = ttk.Frame(ap); rb.pack(fill="x", padx=8, pady=(0, 6))
-        ttk.Label(rb, text=t("set.bg_interval")).pack(side="left")
+        CtkCheckBox(ra, text=t("set.ui_sounds"), variable=self.bv["ui_sounds"]).pack(side="left")
+        rb = CtkFrame(ap); rb.pack(fill="x", padx=8, pady=(0, 6))
+        CtkLabel(rb, text=t("set.bg_interval")).pack(side="left")
         self.sv["bg_interval"] = tk.StringVar(value=str(st.get("bg_interval", 15)))
-        ttk.Entry(rb, textvariable=self.sv["bg_interval"], width=6).pack(side="left", padx=6)
-        ttk.Button(rb, text=ui_theme.with_icon(t("set.open_art"), "📂"), command=self.open_art_folder).pack(side="left", padx=(12, 0))
+        CtkEntry(rb, textvariable=self.sv["bg_interval"], width=6).pack(side="left", padx=6)
+        CtkButton(rb, text=ui_theme.with_icon(t("set.open_art"), "📂"), command=self.open_art_folder).pack(side="left", padx=(12, 0))
         self.bv["ui_depth"] = tk.BooleanVar(value=bool(st.get("ui_depth", True)))
-        ttk.Checkbutton(rb, text=t("v3d.depth"), variable=self.bv["ui_depth"]).pack(side="left", padx=(18, 0))
-        ttk.Label(ap, text=t("set.art_note"), foreground=PAL["muted"], wraplength=820,
+        CtkCheckBox(rb, text=t("v3d.depth"), variable=self.bv["ui_depth"]).pack(side="left", padx=(18, 0))
+        CtkLabel(ap, text=t("set.art_note"), foreground=PAL["muted"], wraplength=820,
                   justify="left").pack(anchor="w", padx=8, pady=(0, 6))
 
         # ---- Tarama / scanning ----
@@ -8684,30 +9734,30 @@ class App:
                 (t("set.auto_interval"), "auto_interval_ms"), (t("set.ocr_lang"), "ocr_lang"),
                 (t("set.tesseract_path"), "tesseract_cmd")]
         for i, (lab, k) in enumerate(rows):
-            ttk.Label(gb, text=lab).grid(row=i, column=0, sticky="w", padx=10, pady=4)
-            ttk.Entry(gb, textvariable=self.sv[k], width=46).grid(row=i, column=1, sticky="w")
-        ttk.Button(gb, text=t("btn.browse"),
+            CtkLabel(gb, text=lab).grid(row=i, column=0, sticky="w", padx=10, pady=4)
+            CtkEntry(gb, textvariable=self.sv[k], width=46).grid(row=i, column=1, sticky="w")
+        CtkButton(gb, text=t("btn.browse"),
                    command=lambda: self.sv["tesseract_cmd"].set(filedialog.askopenfilename() or self.sv["tesseract_cmd"].get())
                    ).grid(row=5, column=2, padx=6)
-        ttk.Label(gb, text=t("set.overlay_corner")).grid(row=6, column=0, sticky="w", padx=10, pady=4)
-        ttk.Combobox(gb, textvariable=self.sv["overlay_corner"],
+        CtkLabel(gb, text=t("set.overlay_corner")).grid(row=6, column=0, sticky="w", padx=10, pady=4)
+        CtkComboBox(gb, textvariable=self.sv["overlay_corner"],
                      values=["top_right", "top_left", "bottom_right", "bottom_left"],
                      width=20, state="readonly").grid(row=6, column=1, sticky="w")
         for i, (lab, k) in enumerate(((t("set.sound"), "sound"), (t("set.track_progress"), "track_progress"),
                                       (t("set.auto_record"), "auto_record"),
                                       (t("set.save_crop"), "save_debug_crop"), (t("set.log_csv"), "log_csv"))):
-            ttk.Checkbutton(gb, text=lab, variable=self.bv[k]).grid(row=7 + i, column=0, columnspan=2, sticky="w", padx=10)
+            CtkCheckBox(gb, text=lab, variable=self.bv[k]).grid(row=7 + i, column=0, columnspan=2, sticky="w", padx=10)
 
         # ---- Günlük kayıt / logging ----
         lg = ttk.LabelFrame(P["logs"], text=t("set.log_box")); lg.pack(fill="x", padx=10, pady=6)
-        r1 = ttk.Frame(lg); r1.pack(fill="x", padx=8, pady=6)
-        ttk.Label(r1, text=t("set.log_level")).pack(side="left")
-        ttk.Combobox(r1, textvariable=self.sv["log_level"], values=["DEBUG", "INFO", "WARNING", "ERROR"],
+        r1 = CtkFrame(lg); r1.pack(fill="x", padx=8, pady=6)
+        CtkLabel(r1, text=t("set.log_level")).pack(side="left")
+        CtkComboBox(r1, textvariable=self.sv["log_level"], values=["DEBUG", "INFO", "WARNING", "ERROR"],
                      width=10, state="readonly").pack(side="left", padx=6)
-        ttk.Label(r1, text=t("set.log_size")).pack(side="left", padx=(12, 2))
-        ttk.Entry(r1, textvariable=self.sv["log_max_kb"], width=7).pack(side="left")
-        ttk.Label(r1, text=t("set.log_backups")).pack(side="left", padx=(12, 2))
-        ttk.Entry(r1, textvariable=self.sv["log_backups"], width=5).pack(side="left")
+        CtkLabel(r1, text=t("set.log_size")).pack(side="left", padx=(12, 2))
+        CtkEntry(r1, textvariable=self.sv["log_max_kb"], width=7).pack(side="left")
+        CtkLabel(r1, text=t("set.log_backups")).pack(side="left", padx=(12, 2))
+        CtkEntry(r1, textvariable=self.sv["log_backups"], width=5).pack(side="left")
 
 
     # ---------- Efektler ----------
@@ -8728,91 +9778,94 @@ class App:
         colors = ["#ff6d10", "#ffffff", "#22c55e", "#38bdf8", "#ef4444", "#eab308", "#a855f7"]
 
         c = ttk.LabelFrame(f, text="🖱 " + t("fx.cursor_box")); c.pack(fill="x", padx=10, pady=(10, 6))
-        r1 = ttk.Frame(c); r1.pack(fill="x", padx=8, pady=6)
-        ttk.Checkbutton(r1, text=t("fx.enable"), variable=self.fxv["fx_cursor"]).pack(side="left")
-        ttk.Label(r1, text=t("fx.style")).pack(side="left", padx=(16, 4))
-        ttk.Combobox(r1, textvariable=self.fx_style, values=styles, state="readonly", width=20).pack(side="left")
-        ttk.Label(r1, text=t("fx.color")).pack(side="left", padx=(16, 4))
-        ttk.Combobox(r1, textvariable=self.fx_ccol, values=colors, width=10).pack(side="left")
-        r2 = ttk.Frame(c); r2.pack(fill="x", padx=8, pady=(0, 6))
-        ttk.Label(r2, text=t("fx.custom")).pack(side="left")
-        ttk.Entry(r2, textvariable=self.fx_custom, width=50).pack(side="left", padx=6)
-        ttk.Button(r2, text=t("btn.browse"), command=lambda: self.fx_custom.set(filedialog.askopenfilename(
+        r1 = CtkFrame(c); r1.pack(fill="x", padx=8, pady=6)
+        CtkCheckBox(r1, text=t("fx.enable"), variable=self.fxv["fx_cursor"]).pack(side="left")
+        CtkLabel(r1, text=t("fx.style")).pack(side="left", padx=(16, 4))
+        CtkComboBox(r1, textvariable=self.fx_style, values=styles, state="readonly", width=20).pack(side="left")
+        CtkLabel(r1, text=t("fx.color")).pack(side="left", padx=(16, 4))
+        CtkComboBox(r1, textvariable=self.fx_ccol, values=colors, width=10).pack(side="left")
+        r2 = CtkFrame(c); r2.pack(fill="x", padx=8, pady=(0, 6))
+        CtkLabel(r2, text=t("fx.custom")).pack(side="left")
+        CtkEntry(r2, textvariable=self.fx_custom, width=50).pack(side="left", padx=6)
+        CtkButton(r2, text=t("btn.browse"), command=lambda: self.fx_custom.set(filedialog.askopenfilename(
             filetypes=[(t("fx.images"), "*.png *.cur *.ani *.ico *.webp")]) or self.fx_custom.get())).pack(side="left")
-        prev = ttk.Frame(c); prev.pack(fill="x", padx=8, pady=(0, 8))
+        prev = CtkFrame(c); prev.pack(fill="x", padx=8, pady=(0, 8))
         self._cur_prev = []
         for stl in fx.CURSOR_STYLES[1:-1]:
             img, _ = fx.draw_cursor(stl, self.fx_ccol.get(), 40)
             bg = Image.new("RGBA", img.size, (23, 26, 33, 255)); bg.alpha_composite(img)
-            ph = ImageTk.PhotoImage(bg); self._cur_prev.append(ph)
-            b = tk.Label(prev, image=ph, bg=PAL["surface"], cursor="hand2", padx=6, pady=6)
+            ph = compat_image(bg); self._cur_prev.append(ph)
+            # CTkLabel's default text is literally "CTkLabel" when no text is
+            # supplied. Set it explicitly empty so preview cards show only the
+            # cursor artwork and never leak the widget class name.
+            b = CtkLabel(prev, text="", image=ph, bg=PAL["surface"], cursor="hand2", padx=6, pady=6)
             b.pack(side="left", padx=4)
             b.bind("<Button-1>", lambda e, x=stl: self.fx_style.set(t("fx.cur_" + x)))
-        ttk.Label(c, text=t("fx.cursor_note"), foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=12, pady=(0, 8))
+        CtkLabel(c, text=t("fx.cursor_note"), foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=12, pady=(0, 8))
 
         tr = ttk.LabelFrame(f, text="☄ " + t("fx.trail_box")); tr.pack(fill="x", padx=10, pady=6)
-        r3 = ttk.Frame(tr); r3.pack(fill="x", padx=8, pady=8)
-        ttk.Checkbutton(r3, text=t("fx.enable"), variable=self.fxv["fx_trail"]).pack(side="left")
-        ttk.Label(r3, text=t("fx.color")).pack(side="left", padx=(16, 4))
-        ttk.Combobox(r3, textvariable=self.fx_tcol, values=colors, width=10).pack(side="left")
-        ttk.Label(r3, text=t("fx.length")).pack(side="left", padx=(16, 4))
-        ttk.Scale(r3, from_=6, to=40, variable=self.fx_tlen, length=160).pack(side="left")
+        r3 = CtkFrame(tr); r3.pack(fill="x", padx=8, pady=8)
+        CtkCheckBox(r3, text=t("fx.enable"), variable=self.fxv["fx_trail"]).pack(side="left")
+        CtkLabel(r3, text=t("fx.color")).pack(side="left", padx=(16, 4))
+        CtkComboBox(r3, textvariable=self.fx_tcol, values=colors, width=10).pack(side="left")
+        CtkLabel(r3, text=t("fx.length")).pack(side="left", padx=(16, 4))
+        CtkSlider(r3, from_=6, to=40, variable=self.fx_tlen, length=160).pack(side="left")
 
         an = ttk.LabelFrame(f, text="🎞 " + t("fx.anim_box")); an.pack(fill="x", padx=10, pady=6)
-        ar = ttk.Frame(an); ar.pack(fill="x", padx=8, pady=8)
-        ttk.Checkbutton(ar, text=t("fx.transitions"), variable=self.fxv["fx_transitions"]).pack(side="left")
-        ttk.Label(ar, text=t("fx.speed")).pack(side="left", padx=(18, 4))
+        ar = CtkFrame(an); ar.pack(fill="x", padx=8, pady=8)
+        CtkCheckBox(ar, text=t("fx.transitions"), variable=self.fxv["fx_transitions"]).pack(side="left")
+        CtkLabel(ar, text=t("fx.speed")).pack(side="left", padx=(18, 4))
         self.fx_tms = tk.IntVar(value=max(120, min(450, int(st.get("fx_transition_ms", 260)))))
-        tl = ttk.Label(ar, text=f"{self.fx_tms.get()} ms", width=8)
-        ttk.Scale(ar, from_=120, to=450, variable=self.fx_tms, length=200,
+        tl = CtkLabel(ar, text=f"{self.fx_tms.get()} ms", width=8)
+        CtkSlider(ar, from_=120, to=450, variable=self.fx_tms, length=200,
                   command=lambda v: (self.fx_tms.set(int(float(v))), tl.config(text=f"{int(float(v))} ms"))).pack(side="left")
         tl.pack(side="left", padx=4)
-        ttk.Button(ar, text=ui_theme.with_icon(t("fx.preview"), "▶"),
+        CtkButton(ar, text=ui_theme.with_icon(t("fx.preview"), "▶"),
                    command=lambda: (setattr(self.fxbar, "duration", max(120, min(450, int(self.fx_tms.get())))),
                                     self.fxbar.play(self.nb, 0, self.nb.index(self.nb.select())))).pack(side="left", padx=8)
-        layout = ttk.Frame(an); layout.pack(fill="x", padx=8, pady=(0, 8))
-        ttk.Label(layout, text="Menü düzeni" if i18n.current_language() == "tr" else "Menu layout").pack(side="left")
+        layout = CtkFrame(an); layout.pack(fill="x", padx=8, pady=(0, 8))
+        CtkLabel(layout, text="Menü düzeni" if i18n.current_language() == "tr" else "Menu layout").pack(side="left")
         self.fx_nav_layout = tk.StringVar(value=st.get("ui_nav_layout", "tactical"))
         labels = {
             "tactical": "Tactical HUD — hafif kademeli / çapraz" if i18n.current_language() == "tr" else "Tactical HUD — staggered / angled",
             "flat": "Düz — klasik hizalama" if i18n.current_language() == "tr" else "Flat — classic alignment",
         }
         self._fx_nav_labels = labels
-        self.fx_nav_pick = ttk.Combobox(layout, state="readonly", width=34,
+        self.fx_nav_pick = CtkComboBox(layout, state="readonly", width=34,
                                         values=list(labels.values()))
         self.fx_nav_pick.set(labels.get(self.fx_nav_layout.get(), labels["tactical"]))
         self.fx_nav_pick.pack(side="left", padx=6)
-        ttk.Label(layout, text="Deneme düzeni; tıklama alanları dikdörtgen kalır." if i18n.current_language() == "tr" else "Trial layout; button hit areas remain rectangular.", foreground=PAL["muted"]).pack(side="left", padx=6)
+        CtkLabel(layout, text="Deneme düzeni; tıklama alanları dikdörtgen kalır." if i18n.current_language() == "tr" else "Trial layout; button hit areas remain rectangular.", foreground=PAL["muted"]).pack(side="left", padx=6)
 
         self.fxv["fx_bgwatch"] = tk.BooleanVar(value=bool(st.get("fx_bgwatch", True)))
         self.fx_wdim = tk.DoubleVar(value=float(st.get("fx_bgwatch_dim", 0.0)))
         wbx = ttk.LabelFrame(f, text="⌚ " + t("fx.watch_box")); wbx.pack(fill="x", padx=10, pady=6)
-        wr_ = ttk.Frame(wbx); wr_.pack(fill="x", padx=8, pady=6)
-        ttk.Checkbutton(wr_, text=t("fx.enable"), variable=self.fxv["fx_bgwatch"]).pack(side="left")
-        ttk.Label(wr_, text=t("fx.dim")).pack(side="left", padx=(16, 4))
-        ttk.Scale(wr_, from_=0.0, to=0.7, variable=self.fx_wdim, length=160).pack(side="left")
+        wr_ = CtkFrame(wbx); wr_.pack(fill="x", padx=8, pady=6)
+        CtkCheckBox(wr_, text=t("fx.enable"), variable=self.fxv["fx_bgwatch"]).pack(side="left")
+        CtkLabel(wr_, text=t("fx.dim")).pack(side="left", padx=(16, 4))
+        CtkSlider(wr_, from_=0.0, to=0.7, variable=self.fx_wdim, length=160).pack(side="left")
         modes = ("standard", "isac", "rogue", "field")
-        ttk.Label(wr_, text=t("fx.watch_style")).pack(side="left", padx=(12, 4))
-        self.fx_watch_style = ttk.Combobox(wr_, state="readonly", width=18, values=[t("fx.watch_" + m) for m in modes])
+        CtkLabel(wr_, text=t("fx.watch_style")).pack(side="left", padx=(12, 4))
+        self.fx_watch_style = CtkComboBox(wr_, state="readonly", width=18, values=[t("fx.watch_" + m) for m in modes])
         self.fx_watch_style.current(modes.index(st.get("event_fx")) if st.get("event_fx") in modes else 0)
         self.fx_watch_style.pack(side="left")
-        ttk.Label(wbx, text=t("fx.watch_note"), foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=12, pady=(0, 8))
+        CtkLabel(wbx, text=t("fx.watch_note"), foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=12, pady=(0, 8))
         vd = ttk.LabelFrame(f, text="🎬 " + t("fx.video_box")); vd.pack(fill="x", padx=10, pady=6)
-        r4 = ttk.Frame(vd); r4.pack(fill="x", padx=8, pady=6)
-        ttk.Checkbutton(r4, text=t("fx.enable"), variable=self.fxv["fx_video"]).pack(side="left")
-        ttk.Label(r4, text=t("fx.dim")).pack(side="left", padx=(16, 4))
-        ttk.Scale(r4, from_=0.0, to=0.7, variable=self.fx_dim, length=160).pack(side="left")
-        ttk.Button(r4, text=ui_theme.with_icon(t("fx.add_video"), "➕"), command=self.add_video).pack(side="left", padx=(16, 4))
-        ttk.Button(r4, text=ui_theme.with_icon(t("fx.open_videos"), "📂"), command=lambda: self.open_folder(ART_DIR / "videos")).pack(side="left")
-        ttk.Button(r4, text=ui_theme.with_icon(t("fx.multiply"), "🎬"), command=lambda: self.make_videos(count=6)).pack(side="left", padx=(8, 0))
+        r4 = CtkFrame(vd); r4.pack(fill="x", padx=8, pady=6)
+        CtkCheckBox(r4, text=t("fx.enable"), variable=self.fxv["fx_video"]).pack(side="left")
+        CtkLabel(r4, text=t("fx.dim")).pack(side="left", padx=(16, 4))
+        CtkSlider(r4, from_=0.0, to=0.7, variable=self.fx_dim, length=160).pack(side="left")
+        CtkButton(r4, text=ui_theme.with_icon(t("fx.add_video"), "➕"), command=self.add_video).pack(side="left", padx=(16, 4))
+        CtkButton(r4, text=ui_theme.with_icon(t("fx.open_videos"), "📂"), command=lambda: self.open_folder(ART_DIR / "videos")).pack(side="left")
+        CtkButton(r4, text=ui_theme.with_icon(t("fx.multiply"), "🎬"), command=lambda: self.make_videos(count=6)).pack(side="left", padx=(8, 0))
         n = len(fx.list_videos(ART_DIR / "videos"))
         be = fx.video_backend()
         mp4s = [x for x in (ART_DIR / "videos").glob("*") if x.suffix.lower() in fx.VIDEO_EXT] if (ART_DIR / "videos").exists() else []
         state = t("fx.video_state", n=n, be=be) + ("  ·  " + t("fx.webp_note", n=len(mp4s)) if be == "pil" and mp4s else "")
-        self.fx_vstate = ttk.Label(vd, text=state, foreground=PAL["warning"] if not n else PAL["muted"])
+        self.fx_vstate = CtkLabel(vd, text=state, foreground=PAL["warning"] if not n else PAL["muted"])
         self.fx_vstate.pack(anchor="w", padx=12)
-        ttk.Label(vd, text=t("fx.video_note"), foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=12, pady=(2, 8))
-        ttk.Button(f, text=ui_theme.with_icon(t("fx.apply"), "✨"), command=self.save_fx, style="Accent.TButton").pack(anchor="w", padx=12, pady=8)
+        CtkLabel(vd, text=t("fx.video_note"), foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=12, pady=(2, 8))
+        CtkButton(f, text=ui_theme.with_icon(t("fx.apply"), "✨"), command=self.save_fx, style="Accent.TButton").pack(anchor="w", padx=12, pady=8)
 
     def _fx_from_ui(self):
         st = self.cfg["settings"]
@@ -8862,7 +9915,7 @@ class App:
 
     def _vid_poll(self):
         if getattr(self, "_vid_busy", False):
-            try: self.banner.toast_text = t("fx.generating", pct=int(self._vid_prog * 100)); self.banner._redraw_overlay_only()
+            try: self.banner.toast_text = t("fx.generating", pct=int(self._vid_prog * 100))
             except Exception: pass
             self.root.after(700, self._vid_poll); return
         try: self.banner.toast_text = ""
@@ -8872,7 +9925,9 @@ class App:
             self.toast(t("fx.generated", n=n))
             if hasattr(self, "fx_vstate"):
                 self.fx_vstate.config(text=t("fx.video_state", n=len(fx.list_videos(ART_DIR / "videos")), be=fx.video_backend() or "—"))
-            if not getattr(self, "video", None): self.apply_fx()
+            if not getattr(self, "video", None):
+                self._fx_applied_signature = None
+                self.apply_fx()
 
     def add_video(self):
         paths = filedialog.askopenfilenames(initialdir=str(Path.home() / "Videos"),
@@ -8892,95 +9947,95 @@ class App:
     # ---------- Ekran ve oyun ----------
     def build_display_box(self, P, st):
         sb = ttk.LabelFrame(P["display"], text="🔄 " + t("sync.box")); sb.pack(fill="x", padx=10, pady=6)
-        ttk.Label(sb, text=t("sync.box_hint"), foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=8, pady=(6, 4))
-        sr = ttk.Frame(sb); sr.pack(fill="x", padx=8, pady=(0, 8))
-        ttk.Button(sr, text="🔄 " + t("sync.btn"), command=self.run_sync, style="Accent.TButton").pack(side="left")
-        ttk.Label(sr, text=t("sync.last", t=st["sync_time"]) if st.get("sync_time") else t("sync.never"),
+        CtkLabel(sb, text=t("sync.box_hint"), foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=8, pady=(6, 4))
+        sr = CtkFrame(sb); sr.pack(fill="x", padx=8, pady=(0, 8))
+        CtkButton(sr, text="🔄 " + t("sync.btn"), command=self.run_sync, style="Accent.TButton").pack(side="left")
+        CtkLabel(sr, text=t("sync.last", t=st["sync_time"]) if st.get("sync_time") else t("sync.never"),
                   foreground=PAL["muted"]).pack(side="left", padx=12)
         db = ttk.LabelFrame(P["display"], text=t("disp.box")); db.pack(fill="x", padx=10, pady=6)
         mw, mh, src = game_size(st)
         det_label = display.profile_for(mw, mh)[1]["label"]
-        r1 = ttk.Frame(db); r1.pack(fill="x", padx=8, pady=(6, 2))
-        ttk.Label(r1, text=t("disp.monitor", res=f"{mw}×{mh}", prof=det_label) +
+        r1 = CtkFrame(db); r1.pack(fill="x", padx=8, pady=(6, 2))
+        CtkLabel(r1, text=t("disp.monitor", res=f"{mw}×{mh}", prof=det_label) +
                   {"window": "  ·  🎮 oyun penceresi / game window", "state.cfg": "  ·  oyun ayarı / game settings"}.get(src, "")).pack(side="left")
-        r2 = ttk.Frame(db); r2.pack(fill="x", padx=8, pady=4)
-        ttk.Label(r2, text=t("disp.profile")).pack(side="left")
+        r2 = CtkFrame(db); r2.pack(fill="x", padx=8, pady=4)
+        CtkLabel(r2, text=t("disp.profile")).pack(side="left")
         self._prof_keys = ["auto"] + list(display.PROFILES)
         labels = [t("disp.auto", prof=det_label)] + [display.PROFILES[k]["label"] for k in display.PROFILES]
         cur = st.get("res_profile", "auto")
         self.prof_var = tk.StringVar(value=labels[self._prof_keys.index(cur)] if cur in self._prof_keys else labels[0])
-        pcb = ttk.Combobox(r2, textvariable=self.prof_var, values=labels, width=34, state="readonly"); pcb.pack(side="left", padx=6)
+        pcb = CtkComboBox(r2, textvariable=self.prof_var, values=labels, width=34, state="readonly"); pcb.pack(side="left", padx=6)
         self._prof_labels = labels
         pcb.bind("<<ComboboxSelected>>", lambda e: (self._apply_profile_defaults(), self._profile_warn()))
-        self.prof_warn = ttk.Label(db, text="", foreground=PAL["warning"], wraplength=900, justify="left")
+        self.prof_warn = CtkLabel(db, text="", foreground=PAL["warning"], wraplength=900, justify="left")
         self.prof_warn.pack(anchor="w", padx=12)
         self._profile_warn()
 
         # oyun ayar dosyası (yalnız okuma)
-        gx = ttk.Frame(db); gx.pack(fill="x", padx=8, pady=(8, 2))
-        ttk.Label(gx, text="🎮 " + t("disp.game_settings"), style="Section.TLabel").pack(side="left")
-        ttk.Button(gx, text=ui_theme.with_icon(t("disp.reread"), "↻"), command=self.refresh_game_settings).pack(side="left", padx=10)
-        self.gfx_lbl = ttk.Label(db, text="", justify="left", wraplength=900); self.gfx_lbl.pack(anchor="w", padx=12)
-        self.gfx_tips = ttk.Label(db, text="", justify="left", wraplength=900, foreground=PAL["muted"]); self.gfx_tips.pack(anchor="w", padx=12, pady=(2, 6))
+        gx = CtkFrame(db); gx.pack(fill="x", padx=8, pady=(8, 2))
+        CtkLabel(gx, text="🎮 " + t("disp.game_settings"), style="Section.TLabel").pack(side="left")
+        CtkButton(gx, text=ui_theme.with_icon(t("disp.reread"), "↻"), command=self.refresh_game_settings).pack(side="left", padx=10)
+        self.gfx_lbl = CtkLabel(db, text="", justify="left", wraplength=900); self.gfx_lbl.pack(anchor="w", padx=12)
+        self.gfx_tips = CtkLabel(db, text="", justify="left", wraplength=900, foreground=PAL["muted"]); self.gfx_tips.pack(anchor="w", padx=12, pady=(2, 6))
         self.refresh_game_settings()
 
         # OCR ince ayar
         ob = ttk.LabelFrame(P["ocr"], text=t("ocr.box")); ob.pack(fill="x", padx=10, pady=(10, 6))
-        o1 = ttk.Frame(ob); o1.pack(fill="x", padx=8, pady=(8, 4))
-        ttk.Label(o1, text=t("ocr.engine")).pack(side="left")
+        o1 = CtkFrame(ob); o1.pack(fill="x", padx=8, pady=(8, 4))
+        CtkLabel(o1, text=t("ocr.engine")).pack(side="left")
         self._ocr_engines = {"auto": t("ocr.engine_auto"), "rapidocr": "RapidOCR (PP-OCR)", "tesseract": "Tesseract"}
         self.ocr_engine_var = tk.StringVar(value=self._ocr_engines.get(st.get("ocr_engine", "auto"), self._ocr_engines["auto"]))
-        ttk.Combobox(o1, textvariable=self.ocr_engine_var, values=list(self._ocr_engines.values()), width=26,
+        CtkComboBox(o1, textvariable=self.ocr_engine_var, values=list(self._ocr_engines.values()), width=26,
                      state="readonly").pack(side="left", padx=6)
         eng_txt = t("ocr.active", name="RapidOCR" if OCR.name == "rapidocr" else "Tesseract")
         if not ocr_backend.rapid_available(): eng_txt += "  —  " + t("ocr.rapid_missing")
-        ttk.Label(o1, text=eng_txt, foreground=PAL["muted"], wraplength=640, justify="left").pack(side="left", padx=10)
-        og = ttk.Frame(ob); og.pack(fill="x", padx=8, pady=(2, 4))
-        ttk.Label(og, text=t("ocr.gpu")).pack(side="left")
+        CtkLabel(o1, text=eng_txt, foreground=PAL["muted"], wraplength=640, justify="left").pack(side="left", padx=10)
+        og = CtkFrame(ob); og.pack(fill="x", padx=8, pady=(2, 4))
+        CtkLabel(og, text=t("ocr.gpu")).pack(side="left")
         self._gpu_modes = {"auto": t("ocr.gpu_auto"), "on": t("ocr.gpu_on"), "off": t("ocr.gpu_off")}
         self.ocr_gpu_var = tk.StringVar(value=self._gpu_modes.get(st.get("ocr_gpu", "auto"), self._gpu_modes["auto"]))
-        ttk.Combobox(og, textvariable=self.ocr_gpu_var, values=list(self._gpu_modes.values()), width=14, state="readonly").pack(side="left", padx=6)
-        ttk.Label(og, text=self.gpu_status_text(), foreground=PAL["muted"], wraplength=640, justify="left").pack(side="left", padx=10)
-        o2 = ttk.Frame(ob); o2.pack(fill="x", padx=8, pady=4)
-        ttk.Label(o2, text=t("ocr.threshold")).pack(side="left")
+        CtkComboBox(og, textvariable=self.ocr_gpu_var, values=list(self._gpu_modes.values()), width=14, state="readonly").pack(side="left", padx=6)
+        CtkLabel(og, text=self.gpu_status_text(), foreground=PAL["muted"], wraplength=640, justify="left").pack(side="left", padx=10)
+        o2 = CtkFrame(ob); o2.pack(fill="x", padx=8, pady=4)
+        CtkLabel(o2, text=t("ocr.threshold")).pack(side="left")
         self.ocr_thr = tk.IntVar(value=int(st.get("ocr_threshold", 170)))
-        thr_lbl = ttk.Label(o2, text=str(self.ocr_thr.get()), width=4)
-        ttk.Scale(o2, from_=100, to=230, variable=self.ocr_thr, length=220,
+        thr_lbl = CtkLabel(o2, text=str(self.ocr_thr.get()), width=4)
+        CtkSlider(o2, from_=100, to=230, variable=self.ocr_thr, length=220,
                   command=lambda v: (self.ocr_thr.set(int(float(v))), thr_lbl.config(text=str(int(float(v)))))).pack(side="left", padx=6)
         thr_lbl.pack(side="left")
-        ttk.Label(o2, text=t("ocr.scale")).pack(side="left", padx=(16, 2))
+        CtkLabel(o2, text=t("ocr.scale")).pack(side="left", padx=(16, 2))
         self.ocr_scale_var = tk.StringVar(value=t("ocr.auto") if st.get("ocr_scale", "auto") == "auto" else str(st.get("ocr_scale")))
-        ttk.Combobox(o2, textvariable=self.ocr_scale_var, values=[t("ocr.auto"), "1.0", "1.25", "1.5", "1.75", "2.0", "2.5", "3.0", "4.0", "6.0"],
+        CtkComboBox(o2, textvariable=self.ocr_scale_var, values=[t("ocr.auto"), "1.0", "1.25", "1.5", "1.75", "2.0", "2.5", "3.0", "4.0", "6.0"],
                      width=8).pack(side="left")
-        ttk.Label(o2, text="PSM").pack(side="left", padx=(16, 2))
+        CtkLabel(o2, text="PSM").pack(side="left", padx=(16, 2))
         self.ocr_psm_var = tk.StringVar(value=str(st.get("ocr_psm", 6)))
-        ttk.Combobox(o2, textvariable=self.ocr_psm_var, values=["6", "4", "3", "11"], width=4, state="readonly").pack(side="left")
-        ttk.Label(o2, text=t("ocr.passes")).pack(side="left", padx=(16, 2))
+        CtkComboBox(o2, textvariable=self.ocr_psm_var, values=["6", "4", "3", "11"], width=4, state="readonly").pack(side="left")
+        CtkLabel(o2, text=t("ocr.passes")).pack(side="left", padx=(16, 2))
         self.ocr_pass_var = tk.StringVar(value=t("ocr.auto") if st.get("ocr_passes_auto", True) else str(st.get("ocr_passes", 3)))
-        ttk.Combobox(o2, textvariable=self.ocr_pass_var, values=[t("ocr.auto"), "1", "2", "3"], width=9, state="readonly").pack(side="left")
-        o3 = ttk.Frame(ob); o3.pack(fill="x", padx=8, pady=4)
-        ttk.Button(o3, text=ui_theme.with_icon(t("ocr.calibrate"), "🎯"), command=self.auto_calibrate_ocr).pack(side="left")
-        ttk.Button(o3, text=ui_theme.with_icon(t("ocr.preview"), "👁"), command=self.ocr_preview).pack(side="left", padx=8)
-        ttk.Button(o3, text="⚖ Motorları karşılaştır", command=self.ocr_lab_report).pack(side="left", padx=8)
-        self.ocr_msg = ttk.Label(o3, text="", foreground=PAL["muted"]); self.ocr_msg.pack(side="left", padx=8)
-        ttk.Label(ob, text=t("ocr.note_rapid") if OCR.name == "rapidocr" else t("ocr.note"), foreground=PAL["muted"],
+        CtkComboBox(o2, textvariable=self.ocr_pass_var, values=[t("ocr.auto"), "1", "2", "3"], width=9, state="readonly").pack(side="left")
+        o3 = CtkFrame(ob); o3.pack(fill="x", padx=8, pady=4)
+        CtkButton(o3, text=ui_theme.with_icon(t("ocr.calibrate"), "🎯"), command=self.auto_calibrate_ocr).pack(side="left")
+        CtkButton(o3, text=ui_theme.with_icon(t("ocr.preview"), "👁"), command=self.ocr_preview).pack(side="left", padx=8)
+        CtkButton(o3, text="⚖ Motorları karşılaştır", command=self.ocr_lab_report).pack(side="left", padx=8)
+        self.ocr_msg = CtkLabel(o3, text="", foreground=PAL["muted"]); self.ocr_msg.pack(side="left", padx=8)
+        CtkLabel(ob, text=t("ocr.note_rapid") if OCR.name == "rapidocr" else t("ocr.note"), foreground=PAL["muted"],
                   wraplength=900, justify="left").pack(anchor="w", padx=12, pady=(0, 4))
 
         # bindirme
         ovb = ttk.LabelFrame(P["overlay"], text=t("overlay.box")); ovb.pack(fill="x", padx=10, pady=(10, 6))
-        o4 = ttk.Frame(ovb); o4.pack(fill="x", padx=8, pady=(8, 8))
-        ttk.Label(o4, text=t("overlay.mode")).pack(side="left")
+        o4 = CtkFrame(ovb); o4.pack(fill="x", padx=8, pady=(8, 8))
+        CtkLabel(o4, text=t("overlay.mode")).pack(side="left")
         self.ov_mode = tk.StringVar(value=t("overlay.mode_card") if st.get("overlay_mode", "card") == "card" else t("overlay.mode_corner"))
-        ttk.Combobox(o4, textvariable=self.ov_mode, values=[t("overlay.mode_card"), t("overlay.mode_corner")], width=24,
+        CtkComboBox(o4, textvariable=self.ov_mode, values=[t("overlay.mode_card"), t("overlay.mode_corner")], width=24,
                      state="readonly").pack(side="left", padx=6)
-        ttk.Label(o4, text=t("overlay.alpha")).pack(side="left", padx=(16, 2))
+        CtkLabel(o4, text=t("overlay.alpha")).pack(side="left", padx=(16, 2))
         self.ov_alpha = tk.DoubleVar(value=float(st.get("overlay_alpha", 0.94)))
-        ttk.Scale(o4, from_=0.4, to=1.0, variable=self.ov_alpha, length=120).pack(side="left")
-        ttk.Label(o4, text=t("overlay.size")).pack(side="left", padx=(16, 2))
+        CtkSlider(o4, from_=0.4, to=1.0, variable=self.ov_alpha, length=120).pack(side="left")
+        CtkLabel(o4, text=t("overlay.size")).pack(side="left", padx=(16, 2))
         self.ov_size = tk.DoubleVar(value=float(st.get("overlay_size", 1.0)))
-        ttk.Scale(o4, from_=0.7, to=1.6, variable=self.ov_size, length=120).pack(side="left")
-        ttk.Button(o4, text=ui_theme.with_icon(t("overlay.test"), "▶"), command=self.overlay_test).pack(side="left", padx=12)
-        ttk.Label(ovb, text=t("overlay.note"), foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=12, pady=(0, 8))
+        CtkSlider(o4, from_=0.7, to=1.6, variable=self.ov_size, length=120).pack(side="left")
+        CtkButton(o4, text=ui_theme.with_icon(t("overlay.test"), "▶"), command=self.overlay_test).pack(side="left", padx=12)
+        CtkLabel(ovb, text=t("overlay.note"), foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=12, pady=(0, 8))
 
     def _profile_warn(self):
         key = self._profile_key()
@@ -9103,19 +10158,19 @@ class App:
         """Orijinal kart ↔ işlenmiş (siyah-beyaz) görüntü + OCR metni + tanınanlar; eşik kaydırıcısıyla canlı."""
         img = self._calib_image()
         if img is None: return messagebox.showinfo(APP_NAME, t("ocr.need_card"))
-        w = tk.Toplevel(self.root); w.title(t("ocr.preview")); w.configure(bg=PAL["bg"])
-        top = ttk.Frame(w); top.pack(fill="both", expand=True, padx=10, pady=10)
+        w = CtkToplevel(self.root); w.title(t("ocr.preview")); w.configure(bg=PAL["bg"])
+        top = CtkFrame(w); top.pack(fill="both", expand=True, padx=10, pady=10)
         h = min(640, int(self.root.winfo_screenheight() * 0.55))
         k = h / img.height
-        orig = ImageTk.PhotoImage(img.resize((max(1, int(img.width * k)), h)))
-        l1 = tk.Label(top, image=orig, bg=PAL["bg"]); l1.image = orig; l1.pack(side="left", padx=4)
-        l2 = tk.Label(top, bg=PAL["bg"]); l2.pack(side="left", padx=4)
-        txt = tk.Text(top, width=48, height=30, bg=PAL["surface"], fg=PAL["fg"], font=("Consolas", 10), relief="flat")
+        orig = compat_image(img, (max(1, int(img.width * k)), h))
+        l1 = CtkLabel(top, image=orig, bg=PAL["bg"]); l1.image = orig; l1.pack(side="left", padx=4)
+        l2 = CtkLabel(top, bg=PAL["bg"]); l2.pack(side="left", padx=4)
+        txt = CtkTextbox(top, width=48, height=30, bg=PAL["surface"], fg=PAL["fg"], font=ui_theme.font_spec("mono", 10), relief="flat")
         txt.pack(side="left", fill="both", expand=True, padx=4)
-        bar = ttk.Frame(w); bar.pack(fill="x", padx=10, pady=(0, 10))
+        bar = CtkFrame(w); bar.pack(fill="x", padx=10, pady=(0, 10))
         thr = tk.IntVar(value=self.ocr_thr.get())
-        ttk.Label(bar, text=t("ocr.threshold")).pack(side="left")
-        vl = ttk.Label(bar, text=str(thr.get()), width=4)
+        CtkLabel(bar, text=t("ocr.threshold")).pack(side="left")
+        vl = CtkLabel(bar, text=str(thr.get()), width=4)
 
         def run(_=None):
             th = int(thr.get()); vl.config(text=str(th))
@@ -9134,7 +10189,7 @@ class App:
                     pre = gamedata.text_image(img)
                     out = read_card(img)[0] if self.tess else ""
                 kk = h / pre.height
-                ph = ImageTk.PhotoImage(pre.resize((max(1, int(pre.width * kk)), h)))
+                ph = compat_image(pre, (max(1, int(pre.width * kk)), h))
                 l2.config(image=ph); l2.image = ph
             finally:
                 gamedata.THRESHOLD, gamedata.SCALE = old_t, old_s
@@ -9146,10 +10201,10 @@ class App:
                     txt.insert("end", f"  {attr_name(a)}: {v:g}  ({r.get('quality', {}).get(a, '?')}%)\n")
                 if r.get("talents"): txt.insert("end", "  ★ " + ", ".join(r["talents"]) + "\n")
                 txt.insert("end", t("ocr.score", q=round(ocr_quality(out), 1)))
-        ttk.Scale(bar, from_=100, to=230, variable=thr, length=300, command=lambda v: thr.set(int(float(v)))).pack(side="left", padx=6)
+        CtkSlider(bar, from_=100, to=230, variable=thr, length=300, command=lambda v: thr.set(int(float(v)))).pack(side="left", padx=6)
         vl.pack(side="left")
-        ttk.Button(bar, text=ui_theme.with_icon(t("ocr.rerun"), "↻"), command=run).pack(side="left", padx=8)
-        ttk.Button(bar, text=ui_theme.with_icon(t("ocr.use_this"), "✔"),
+        CtkButton(bar, text=ui_theme.with_icon(t("ocr.rerun"), "↻"), command=run).pack(side="left", padx=8)
+        CtkButton(bar, text=ui_theme.with_icon(t("ocr.use_this"), "✔"),
                    command=lambda: (self.ocr_thr.set(int(thr.get())), w.destroy())).pack(side="left")
         run()
 
@@ -9286,7 +10341,6 @@ class App:
             self.rebuild_ui(tab="settings")
             return
         self.toast(t("msg.settings_saved"))
-
     def meta_restore_hidden(self):
         self.cfg["settings"]["meta_hidden"] = []; save_cfg(self.cfg)
         self.meta_sync_start(force=True, what=("builds",))
@@ -9302,10 +10356,10 @@ class App:
     # ---------- Geçmiş ----------
     def build_hist(self):
         f = self.tabs["history"]
-        bar = ttk.Frame(f); bar.pack(fill="x", padx=8, pady=8)
-        ttk.Button(bar, text=ui_theme.with_icon(t("btn.refresh"), "⟳"), command=self.load_history).pack(side="left")
-        ttk.Button(bar, text=ui_theme.with_icon(t("btn.open_folder"), "📂"), command=lambda: os.startfile(BASE) if os.name == "nt" else None).pack(side="left", padx=6)
-        ttk.Button(bar, text=ui_theme.with_icon(t("hist.clear"), "🗑"), command=self.clear_history).pack(side="left")
+        bar = CtkFrame(f); bar.pack(fill="x", padx=8, pady=8)
+        CtkButton(bar, text=ui_theme.with_icon(t("btn.refresh"), "⟳"), command=self.load_history).pack(side="left")
+        CtkButton(bar, text=ui_theme.with_icon(t("btn.open_folder"), "📂"), command=lambda: os.startfile(BASE) if os.name == "nt" else None).pack(side="left", padx=6)
+        CtkButton(bar, text=ui_theme.with_icon(t("hist.clear"), "🗑"), command=self.clear_history).pack(side="left")
         cols = (("time", t("col.time"), 140), ("item", t("col.item"), 230), ("verdict", t("col.verdict"), 90),
                 ("best_build", t("col.best_build"), 190), ("score", t("col.score"), 50), ("slot", t("col.slot"), 80))
         self.th = ttk.Treeview(f, columns=[c[0] for c in cols], show="headings")
@@ -9325,25 +10379,25 @@ class App:
     # ---------- Log sekmesi / application log ----------
     def build_logtab(self):
         f = self.tabs["log"]
-        bar = ttk.Frame(f); bar.pack(fill="x", padx=10, pady=8)
-        ttk.Button(bar, text=ui_theme.with_icon(t("btn.refresh"), "⟳"), command=self.refresh_logtab).pack(side="left")
-        ttk.Button(bar, text=t("btn.open_folder"),
+        bar = CtkFrame(f); bar.pack(fill="x", padx=10, pady=8)
+        CtkButton(bar, text=ui_theme.with_icon(t("btn.refresh"), "⟳"), command=self.refresh_logtab).pack(side="left")
+        CtkButton(bar, text=t("btn.open_folder"),
                    command=lambda: os.startfile(APPLOG_DIR) if os.name == "nt" else None).pack(side="left", padx=6)
-        ttk.Button(bar, text=ui_theme.with_icon(t("log.save_as"), "💾"), command=self.export_log).pack(side="left")
-        ttk.Button(bar, text=ui_theme.with_icon(t("log.clear"), "🧹"), command=self.clear_applog).pack(side="left", padx=6)
-        ttk.Button(bar, text="☁ " + t("log.send_github"), command=self.send_log_github, style="Accent.TButton").pack(side="left", padx=6)
+        CtkButton(bar, text=ui_theme.with_icon(t("log.save_as"), "💾"), command=self.export_log).pack(side="left")
+        CtkButton(bar, text=ui_theme.with_icon(t("log.clear"), "🧹"), command=self.clear_applog).pack(side="left", padx=6)
+        CtkButton(bar, text="☁ " + t("log.send_github"), command=self.send_log_github, style="Accent.TButton").pack(side="left", padx=6)
         self.log_filter = tk.StringVar(value="ALL")
-        ttk.Label(bar, text=t("log.level_filter")).pack(side="left", padx=(12, 2))
-        cb = ttk.Combobox(bar, textvariable=self.log_filter, width=9, state="readonly",
+        CtkLabel(bar, text=t("log.level_filter")).pack(side="left", padx=(12, 2))
+        cb = CtkComboBox(bar, textvariable=self.log_filter, width=9, state="readonly",
                           values=["ALL", "DEBUG", "INFO", "WARNING", "ERROR"])
         cb.pack(side="left"); cb.bind("<<ComboboxSelected>>", lambda e: self.refresh_logtab())
         self.log_auto = tk.BooleanVar(value=True)
-        ttk.Checkbutton(bar, text=t("log.autoscroll"), variable=self.log_auto).pack(side="left", padx=10)
-        self.log_info = ttk.Label(f, foreground=PAL["muted"]); self.log_info.pack(anchor="w", padx=12)
-        wrap = ttk.Frame(f); wrap.pack(fill="both", expand=True, padx=10, pady=(4, 10))
-        self.log_box = tk.Text(wrap, wrap="none", font=("Consolas", 9), state="disabled")
-        ysb = ttk.Scrollbar(wrap, orient="vertical", command=self.log_box.yview)
-        xsb = ttk.Scrollbar(f, orient="horizontal", command=self.log_box.xview)
+        CtkCheckBox(bar, text=t("log.autoscroll"), variable=self.log_auto).pack(side="left", padx=10)
+        self.log_info = CtkLabel(f, foreground=PAL["muted"]); self.log_info.pack(anchor="w", padx=12)
+        wrap = CtkFrame(f); wrap.pack(fill="both", expand=True, padx=10, pady=(4, 10))
+        self.log_box = CtkTextbox(wrap, wrap="none", font=ui_theme.font_spec("mono", 9), state="disabled")
+        ysb = CtkScrollbar(wrap, orient="vertical", command=self.log_box.yview)
+        xsb = CtkScrollbar(f, orient="horizontal", command=self.log_box.xview)
         self.log_box.configure(yscrollcommand=ysb.set, xscrollcommand=xsb.set)
         ysb.pack(side="right", fill="y"); self.log_box.pack(side="left", fill="both", expand=True)
         xsb.pack(fill="x", padx=10, pady=(0, 8))
@@ -9507,21 +10561,21 @@ class App:
 
     def show_version_history(self):
         """Kullanıcının açık onayıyla istediği herhangi bir GitHub sürümünü (eski ya da yeni) kurmasını sağlar."""
-        w = tk.Toplevel(self.root); w.title(t("upd.history_title")); w.geometry("640x560"); w.minsize(560, 460); w.transient(self.root)
+        w = CtkToplevel(self.root); w.title(t("upd.history_title")); w.geometry("640x560"); w.minsize(560, 460); w.transient(self.root)
         w.configure(bg=PAL["bg"])
-        ttk.Label(w, text=t("upd.history_title"), style="Title.TLabel").pack(anchor="w", padx=14, pady=(12, 2))
-        ttk.Label(w, text=t("upd.history_note", v=APP_VERSION), wraplength=600, justify="left").pack(anchor="w", padx=14, pady=(0, 8))
-        body = ttk.Frame(w); body.pack(fill="both", expand=True, padx=14, pady=4)
+        CtkLabel(w, text=t("upd.history_title"), style="Title.TLabel").pack(anchor="w", padx=14, pady=(12, 2))
+        CtkLabel(w, text=t("upd.history_note", v=APP_VERSION), wraplength=600, justify="left").pack(anchor="w", padx=14, pady=(0, 8))
+        body = CtkFrame(w); body.pack(fill="both", expand=True, padx=14, pady=4)
         lb = tk.Listbox(body, bg=PAL["surface"], fg=PAL["fg"], selectbackground=PAL["accent"], height=8, exportselection=False)
-        sb = ttk.Scrollbar(body, orient="vertical", command=lb.yview); lb.configure(yscrollcommand=sb.set)
+        sb = CtkScrollbar(body, orient="vertical", command=lb.yview); lb.configure(yscrollcommand=sb.set)
         lb.pack(side="left", fill="both", expand=True); sb.pack(side="right", fill="y")
-        status = ttk.Label(w, text=t("upd.history_loading"), foreground=PAL["muted"]); status.pack(anchor="w", padx=14, pady=4)
+        status = CtkLabel(w, text=t("upd.history_loading"), foreground=PAL["muted"]); status.pack(anchor="w", padx=14, pady=4)
 
         # ---- seçili sürümün notları / bilinen sorunları (GitHub release metni) ----
         nb = ttk.LabelFrame(w, text=t("upd.notes_label")); nb.pack(fill="both", expand=True, padx=14, pady=(2, 6))
-        notes_txt = tk.Text(nb, bg=PAL["surface"], fg=PAL["fg"], wrap="word", height=10, state="disabled",
+        notes_txt = CtkTextbox(nb, bg=PAL["surface"], fg=PAL["fg"], wrap="word", height=10, state="disabled",
                              relief="flat", padx=8, pady=6)
-        notes_sb = ttk.Scrollbar(nb, orient="vertical", command=notes_txt.yview); notes_txt.configure(yscrollcommand=notes_sb.set)
+        notes_sb = CtkScrollbar(nb, orient="vertical", command=notes_txt.yview); notes_txt.configure(yscrollcommand=notes_sb.set)
         notes_txt.pack(side="left", fill="both", expand=True); notes_sb.pack(side="right", fill="y")
 
         def set_notes(text):
@@ -9554,7 +10608,7 @@ class App:
             except Exception as e:
                 err_msg = str(e)
                 self.root.after(0, lambda: status.config(text=t("upd.history_failed", e=err_msg)))
-        bf = ttk.Frame(w); bf.pack(fill="x", padx=14, pady=10)
+        bf = CtkFrame(w); bf.pack(fill="x", padx=14, pady=10)
         def install_selected():
             ix = lb.curselection()
             if not ix or not releases: return
@@ -9569,13 +10623,13 @@ class App:
             w.destroy()
             self._upd_show(info)
             self.do_update()
-        install_btn = ttk.Button(bf, text=t("upd.rollback"), command=install_selected, style="Accent.TButton", state="disabled")
+        install_btn = CtkButton(bf, text=t("upd.rollback"), command=install_selected, style="Accent.TButton", state="disabled")
         install_btn.pack(side="left")
-        ttk.Button(bf, text="🐞 " + t("upd.known_issues"),
+        CtkButton(bf, text="🐞 " + t("upd.known_issues"),
                    command=lambda: webbrowser.open(f"https://github.com/{updater.REPO}/blob/main/BUGS.md")).pack(side="left", padx=8)
         lb.bind("<<ListboxSelect>>", on_select)
         lb.bind("<Double-Button-1>", lambda e: install_selected())
-        ttk.Button(bf, text=t("upd.close"), command=w.destroy).pack(side="right")
+        CtkButton(bf, text=t("upd.close"), command=w.destroy).pack(side="right")
         threading.Thread(target=load, daemon=True).start()
 
     def do_update(self):
@@ -9625,13 +10679,13 @@ class App:
     def premium_gate(self, parent, feature):
         """Özellik açıksa True. Değilse yerine kilit kartı koyar ve False döner."""
         if self.ent.has(feature): return True
-        box = tk.Frame(parent, bg=PAL["surface"], highlightthickness=1, highlightbackground=PAL["accent"])
+        box = CtkFrame(parent, bg=PAL["surface"], highlightthickness=1, highlightbackground=PAL["accent"])
         box.pack(fill="x", padx=4, pady=6)
-        tk.Label(box, text="⭐ " + t("prem.locked") + " — " + t("feat." + feature), bg=PAL["surface"], fg=PAL["accent"],
+        CtkLabel(box, text="⭐ " + t("prem.locked") + " — " + t("feat." + feature), bg=PAL["surface"], fg=PAL["accent"],
                  font=(ui_theme.FONT_SEMI, 11), anchor="w").pack(fill="x", padx=10, pady=(8, 2))
-        tk.Label(box, text=t("prem.locked_hint"), bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 10),
+        CtkLabel(box, text=t("prem.locked_hint"), bg=PAL["surface"], fg=PAL["muted"], font=(ui_theme.FONT, 10),
                  anchor="w", justify="left", wraplength=700).pack(fill="x", padx=10)
-        ttk.Button(box, text=t("prem.open"), command=self.open_premium_page).pack(anchor="w", padx=10, pady=8)
+        CtkButton(box, text=t("prem.open"), command=self.open_premium_page).pack(anchor="w", padx=10, pady=8)
         return False
 
     def open_premium_page(self):
@@ -9640,33 +10694,33 @@ class App:
 
     def build_premium_box(self, f, st):
         ab = ttk.LabelFrame(f, text="👤 " + t("acc.title")); ab.pack(fill="x", padx=10, pady=(10, 6))
-        ar = ttk.Frame(ab); ar.pack(fill="x", padx=8, pady=8)
+        ar = CtkFrame(ab); ar.pack(fill="x", padx=8, pady=8)
         a = self.account
         txt = (t("acc.signed_as", name=a.username) + ("  ⭐ " + t("prem.premium") if self.ent.source == "account" else "")) if a.signed_in \
             else t("acc.not_signed")
-        ttk.Label(ar, text=txt).pack(side="left")
-        ttk.Button(ar, text=t("acc.open") if a.signed_in else "🎮 " + t("acc.discord"), command=self.open_account,
+        CtkLabel(ar, text=txt).pack(side="left")
+        CtkButton(ar, text=t("acc.open") if a.signed_in else "🎮 " + t("acc.discord"), command=self.open_account,
                    style="Accent.TButton").pack(side="right")
         pb = ttk.LabelFrame(f, text=t("prem.box")); pb.pack(fill="x", padx=10, pady=(4, 6))
-        r = ttk.Frame(pb); r.pack(fill="x", padx=8, pady=8)
-        ttk.Label(r, text=t("prem.key")).pack(side="left")
+        r = CtkFrame(pb); r.pack(fill="x", padx=8, pady=8)
+        CtkLabel(r, text=t("prem.key")).pack(side="left")
         self.lic_var = tk.StringVar(value=st.get("license_key", ""))
-        ttk.Entry(r, textvariable=self.lic_var, width=70).pack(side="left", padx=6, fill="x", expand=True)
-        ttk.Button(r, text=ui_theme.with_icon(t("prem.activate"), "✔"), command=self.activate_license,
+        CtkEntry(r, textvariable=self.lic_var, width=70).pack(side="left", padx=6, fill="x", expand=True)
+        CtkButton(r, text=ui_theme.with_icon(t("prem.activate"), "✔"), command=self.activate_license,
                    style="Accent.TButton").pack(side="left")
-        self.lic_status = ttk.Label(pb, text="", foreground=PAL["muted"]); self.lic_status.pack(anchor="w", padx=12, pady=(0, 8))
+        self.lic_status = CtkLabel(pb, text="", foreground=PAL["muted"]); self.lic_status.pack(anchor="w", padx=12, pady=(0, 8))
         self._lic_status_text()
         fb = ttk.LabelFrame(f, text=t("prem.features")); fb.pack(fill="x", padx=10, pady=6)
         for name, tier in features.FEATURES.items():
-            row = tk.Frame(fb, bg=PAL["bg"]); row.pack(fill="x", padx=10, pady=1)
+            row = CtkFrame(fb, bg=PAL["bg"]); row.pack(fill="x", padx=10, pady=1)
             ok = self.ent.has(name)
             soon = name in features.COMING
-            tk.Label(row, text=("⏳ " if soon else "✔ " if ok else "🔒 ") + t("feat." + name) + (f"  ({t('prem.soon')})" if soon else ""),
+            CtkLabel(row, text=("⏳ " if soon else "✔ " if ok else "🔒 ") + t("feat." + name) + (f"  ({t('prem.soon')})" if soon else ""),
                      bg=PAL["bg"], fg=PAL["fg"] if ok and not soon else PAL["muted"],
                      font=(ui_theme.FONT, 10), anchor="w").pack(side="left")
-            tk.Label(row, text=t("prem." + tier), bg=PAL["bg"], fg=PAL["accent"] if tier == "premium" else PAL["muted"],
+            CtkLabel(row, text=t("prem." + tier), bg=PAL["bg"], fg=PAL["accent"] if tier == "premium" else PAL["muted"],
                      font=(ui_theme.FONT_SEMI, 9)).pack(side="right")
-        ttk.Label(f, text=t("prem.note"), foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=14, pady=8)
+        CtkLabel(f, text=t("prem.note"), foreground=PAL["muted"], wraplength=900, justify="left").pack(anchor="w", padx=14, pady=8)
 
     def _lic_status_text(self):
         e = self.ent
@@ -9696,26 +10750,26 @@ class App:
 
     # ---------- Satıcılar ----------
     def _build_vendor_page(self, p):
-        top = ttk.Frame(p); top.pack(fill="x", padx=8, pady=8)
+        top = CtkFrame(p); top.pack(fill="x", padx=8, pady=8)
         self.vend_mode = tk.BooleanVar(value=bool(self.cfg["settings"].get("vendor_mode")))
-        ttk.Checkbutton(top, text=t("vend.mode"), variable=self.vend_mode, command=self._vendor_mode_toggle).pack(side="left")
-        ttk.Button(top, text="🧹 " + t("vend.clear_scans"), command=self._vendor_clear_scans).pack(side="left", padx=8)
-        self.vend_btn = ttk.Button(top, text="↻ " + t("vend.refresh"), command=lambda: self.vendor_refresh(force=True))
+        CtkCheckBox(top, text=t("vend.mode"), variable=self.vend_mode, command=self._vendor_mode_toggle).pack(side="left")
+        CtkButton(top, text="🧹 " + t("vend.clear_scans"), command=self._vendor_clear_scans).pack(side="left", padx=8)
+        self.vend_btn = CtkButton(top, text="↻ " + t("vend.refresh"), command=lambda: self.vendor_refresh(force=True))
         self.vend_btn.pack(side="right")
-        self.vend_info = ttk.Label(p, text="", foreground=PAL["muted"], wraplength=1000, justify="left"); self.vend_info.pack(anchor="w", padx=12)
-        self.vend_tl = ttk.Label(p, text="", foreground=PAL["accent"], wraplength=1000, justify="left"); self.vend_tl.pack(anchor="w", padx=12, pady=(4, 0))
+        self.vend_info = CtkLabel(p, text="", foreground=PAL["muted"], wraplength=1000, justify="left"); self.vend_info.pack(anchor="w", padx=12)
+        self.vend_tl = CtkLabel(p, text="", foreground=PAL["accent"], wraplength=1000, justify="left"); self.vend_tl.pack(anchor="w", padx=12, pady=(4, 0))
         self.vend_tv = None
-        holder = ttk.Frame(p); holder.pack(fill="both", expand=True, padx=8, pady=6)
+        holder = CtkFrame(p); holder.pack(fill="both", expand=True, padx=8, pady=6)
         if self.premium_gate(holder, "vendor_watch"):
             cols = ("build", "slot", "item", "vendor", "fit", "attrs")
             tv = self.vend_tv = ttk.Treeview(holder, columns=cols, show="headings")
             for c, w in zip(cols, (230, 90, 220, 110, 110, 420)):
                 tv.heading(c, text=t("vend.col_" + c)); tv.column(c, width=w, anchor="w", stretch=c in ("attrs", "build"))
             tv.pack(fill="both", expand=True)
-        src = ttk.Frame(p); src.pack(fill="x", padx=12, pady=(0, 8))
-        ttk.Label(src, text=t("vend.source", src=vendor.SOURCE_NAME), foreground=PAL["muted"]).pack(side="left")
+        src = CtkFrame(p); src.pack(fill="x", padx=12, pady=(0, 8))
+        CtkLabel(src, text=t("vend.source", src=vendor.SOURCE_NAME), foreground=PAL["muted"]).pack(side="left")
         import webbrowser
-        ttk.Button(src, text="🌐", width=3, command=lambda: webbrowser.open(vendor.SOURCE_URL)).pack(side="left", padx=6)
+        CtkButton(src, text="🌐", width=3, command=lambda: webbrowser.open(vendor.SOURCE_URL)).pack(side="left", padx=6)
 
     def _vendor_mode_toggle(self):
         self.cfg["settings"]["vendor_mode"] = bool(self.vend_mode.get()); save_cfg(self.cfg)
@@ -9854,7 +10908,7 @@ class App:
         self.comp_url.config(text=self.companion.url if on else "")
         img = companion.qr_image(self.companion.url, 5) if on else None
         if img is not None:
-            ph = ImageTk.PhotoImage(img); self.comp_qr.config(image=ph); self.comp_qr.image = ph
+            ph = compat_image(img); self.comp_qr.config(image=ph); self.comp_qr.image = ph
         else:
             self.comp_qr.config(image="", text=(t("comp.no_qr") if on else "")); self.comp_qr.image = None
 
@@ -9864,21 +10918,21 @@ class App:
         if not b: return
         code = share.encode(b)
         self.root.clipboard_clear(); self.root.clipboard_append(code)
-        w = tk.Toplevel(self.root); w.title(t("share.title")); w.configure(bg=PAL["bg"])
-        ttk.Label(w, text=t("share.copied", name=b["name"]), style="Section.TLabel").pack(anchor="w", padx=14, pady=(12, 4))
-        txt = tk.Text(w, height=4, width=70, bg=PAL["surface"], fg=PAL["fg"], relief="flat", wrap="char", font=("Consolas", 9))
+        w = CtkToplevel(self.root); w.title(t("share.title")); w.configure(bg=PAL["bg"])
+        CtkLabel(w, text=t("share.copied", name=b["name"]), style="Section.TLabel").pack(anchor="w", padx=14, pady=(12, 4))
+        txt = CtkTextbox(w, height=4, width=70, bg=PAL["surface"], fg=PAL["fg"], relief="flat", wrap="char", font=ui_theme.font_spec("mono", 9))
         txt.insert("end", code); txt.config(state="disabled"); txt.pack(fill="x", padx=14)
         img = companion.qr_image(code, 4)
         if img is not None:
-            ph = ImageTk.PhotoImage(img); lb = tk.Label(w, image=ph, bg=PAL["bg"]); lb.image = ph; lb.pack(pady=8)
-        ttk.Label(w, text=t("share.note"), foreground=PAL["muted"], wraplength=520, justify="left").pack(anchor="w", padx=14, pady=(0, 12))
+            ph = compat_image(img); lb = CtkLabel(w, image=ph, bg=PAL["bg"]); lb.image = ph; lb.pack(pady=8)
+        CtkLabel(w, text=t("share.note"), foreground=PAL["muted"], wraplength=520, justify="left").pack(anchor="w", padx=14, pady=(0, 12))
 
     def import_build_code(self):
         try: clip = self.root.clipboard_get()
         except Exception: clip = ""
-        w = tk.Toplevel(self.root); w.title(t("share.paste")); w.configure(bg=PAL["bg"])
-        ttk.Label(w, text=t("share.paste_hint")).pack(anchor="w", padx=14, pady=(12, 4))
-        txt = tk.Text(w, height=5, width=70, bg=PAL["surface"], fg=PAL["fg"], relief="flat", wrap="char", font=("Consolas", 9))
+        w = CtkToplevel(self.root); w.title(t("share.paste")); w.configure(bg=PAL["bg"])
+        CtkLabel(w, text=t("share.paste_hint")).pack(anchor="w", padx=14, pady=(12, 4))
+        txt = CtkTextbox(w, height=5, width=70, bg=PAL["surface"], fg=PAL["fg"], relief="flat", wrap="char", font=ui_theme.font_spec("mono", 9))
         txt.pack(fill="x", padx=14)
         if share.PREFIX in clip: txt.insert("end", clip.strip())
 
@@ -9893,7 +10947,7 @@ class App:
             b.setdefault("sets_or_brands", []); b.setdefault("attributes", {}); b.setdefault("talents", {}); b.setdefault("set_bonus", 0)
             self.cfg["builds"].append(b); self.normalize_builds(); save_cfg(self.cfg)
             w.destroy(); self.refresh_builds(len(self.cfg["builds"]) - 1); self.toast(t("share.added", name=b["name"]))
-        ttk.Button(w, text="✔ " + t("share.add"), command=go, style="Accent.TButton").pack(anchor="w", padx=14, pady=10)
+        CtkButton(w, text="✔ " + t("share.add"), command=go, style="Accent.TButton").pack(anchor="w", padx=14, pady=10)
 
     # ---------- Sandık (envanter) ----------
     def build_stash(self):
@@ -9901,29 +10955,29 @@ class App:
         self.st_nb = ttk.Notebook(f); self.st_nb.pack(fill="both", expand=True, padx=8, pady=8)
         pages = {}
         for key, icon in (("inv", "🗄"), ("opt", "🧮"), ("audit", "🧾"), ("vendor", "🏪"), ("command", "⌘")):
-            holder = ttk.Frame(self.st_nb); self.st_nb.add(holder, text=f" {icon} {t('stash.page_' + key)} ")
+            holder = CtkFrame(self.st_nb); self.st_nb.add(holder, text=f" {icon} {t('stash.page_' + key)} ")
             pages[key] = holder
         self.st_nb.bind("<<NotebookTabChanged>>", lambda e=None: self.refresh_stash())
         # envanter
         p = pages["inv"]
-        bar = ttk.Frame(p); bar.pack(fill="x", padx=8, pady=8)
+        bar = CtkFrame(p); bar.pack(fill="x", padx=8, pady=8)
         self.st_rec = tk.BooleanVar(value=bool(self.cfg["settings"].get("stash_record", True)))
-        ttk.Checkbutton(bar, text=t("stash.record"), variable=self.st_rec, command=self._stash_rec_toggle).pack(side="left")
-        ttk.Label(bar, text=t("col.slot") + ":").pack(side="left", padx=(16, 2))
+        CtkCheckBox(bar, text=t("stash.record"), variable=self.st_rec, command=self._stash_rec_toggle).pack(side="left")
+        CtkLabel(bar, text=t("col.slot") + ":").pack(side="left", padx=(16, 2))
         self.st_slot = tk.StringVar(value=t("stash.all_slots"))
-        cb = ttk.Combobox(bar, textvariable=self.st_slot, state="readonly", width=14,
+        cb = CtkComboBox(bar, textvariable=self.st_slot, state="readonly", width=14,
                           values=[t("stash.all_slots")] + [slot_name(x) for x in engine.ALL_SLOTS])
         cb.pack(side="left"); cb.bind("<<ComboboxSelected>>", lambda e=None: self.refresh_stash())
-        self.st_count = ttk.Label(bar, text="", foreground=PAL["muted"]); self.st_count.pack(side="left", padx=12)
-        bar2 = ttk.Frame(p); bar2.pack(fill="x", padx=8)
-        ttk.Button(bar2, text="🔨 " + t("stash.dismantled"), command=lambda: self._stash_mark("dismantled")).pack(side="left")
-        ttk.Button(bar2, text="✖ " + t("stash.delete"), command=self._stash_delete).pack(side="left", padx=6)
-        ttk.Button(bar2, text="⇩ " + t("stash.import"), command=self._stash_import).pack(side="left")
-        ttk.Button(bar2, text="💾 Yedekle", command=self._stash_backup).pack(side="left", padx=6)
-        ttk.Button(bar2, text="↩ Geri yükle", command=self._stash_restore).pack(side="left")
-        ttk.Button(bar2, text="📤 " + t("stash.export") + ("" if self.ent.has("stash_export") else " ⭐"),
+        self.st_count = CtkLabel(bar, text="", foreground=PAL["muted"]); self.st_count.pack(side="left", padx=12)
+        bar2 = CtkFrame(p); bar2.pack(fill="x", padx=8)
+        CtkButton(bar2, text="🔨 " + t("stash.dismantled"), command=lambda: self._stash_mark("dismantled")).pack(side="left")
+        CtkButton(bar2, text="✖ " + t("stash.delete"), command=self._stash_delete).pack(side="left", padx=6)
+        CtkButton(bar2, text="⇩ " + t("stash.import"), command=self._stash_import).pack(side="left")
+        CtkButton(bar2, text="💾 Yedekle", command=self._stash_backup).pack(side="left", padx=6)
+        CtkButton(bar2, text="↩ Geri yükle", command=self._stash_restore).pack(side="left")
+        CtkButton(bar2, text="📤 " + t("stash.export") + ("" if self.ent.has("stash_export") else " ⭐"),
                    command=self._stash_export).pack(side="left", padx=6)
-        ttk.Button(bar2, text="🧹 " + t("stash.clear"), command=self._stash_clear).pack(side="right")
+        CtkButton(bar2, text="🧹 " + t("stash.clear"), command=self._stash_clear).pack(side="right")
         cols = ("slot", "item", "src", "attrs", "verdict", "best", "time")
         tv = self.st_tv = ttk.Treeview(p, columns=cols, show="headings", selectmode="extended")
         widths = {"slot": 90, "item": 200, "src": 170, "attrs": 330, "verdict": 120, "best": 220, "time": 130}
@@ -9931,19 +10985,19 @@ class App:
             tv.heading(c, text=t("stash.col_" + c)); tv.column(c, width=widths[c], anchor="w", stretch=c in ("attrs", "best"))
         for v, col in VFG.items(): tv.tag_configure(v, foreground=col)
         tv.pack(fill="both", expand=True, padx=8, pady=8)
-        ttk.Label(p, text=t("stash.hint"), foreground=PAL["muted"], wraplength=1000, justify="left").pack(anchor="w", padx=12, pady=(0, 8))
+        CtkLabel(p, text=t("stash.hint"), foreground=PAL["muted"], wraplength=1000, justify="left").pack(anchor="w", padx=12, pady=(0, 8))
         # optimize
         p = pages["opt"]
-        ob = ttk.Frame(p); ob.pack(fill="x", padx=8, pady=8)
-        ttk.Label(ob, text=t("label.build")).pack(side="left")
-        self.opt_b = ttk.Combobox(ob, state="readonly", width=48, values=[b["name"] for b in self.cfg["builds"]])
+        ob = CtkFrame(p); ob.pack(fill="x", padx=8, pady=8)
+        CtkLabel(ob, text=t("label.build")).pack(side="left")
+        self.opt_b = CtkComboBox(ob, state="readonly", width=48, values=[b["name"] for b in self.cfg["builds"]])
         self.opt_b.pack(side="left", padx=6)
         a0 = active_build(self.cfg)
         if a0: self.opt_b.set(a0["name"])
         self.opt_b.bind("<<ComboboxSelected>>", lambda e=None: (self.set_active_build(self.opt_b.get()), self.refresh_stash()))
-        self.opt_sum = ttk.Label(p, text="", style="Section.TLabel"); self.opt_sum.pack(anchor="w", padx=12)
-        self.opt_bar = ttk.Progressbar(p, maximum=100); self.opt_bar.pack(fill="x", padx=12, pady=4)
-        self.opt_next = ttk.Label(p, text="", foreground=PAL["accent"], wraplength=1000, justify="left"); self.opt_next.pack(anchor="w", padx=12)
+        self.opt_sum = CtkLabel(p, text="", style="Section.TLabel"); self.opt_sum.pack(anchor="w", padx=12)
+        self.opt_bar = CtkProgressBar(p, maximum=100); self.opt_bar.pack(fill="x", padx=12, pady=4)
+        self.opt_next = CtkLabel(p, text="", foreground=PAL["accent"], wraplength=1000, justify="left"); self.opt_next.pack(anchor="w", padx=12)
         cols = ("slot", "item", "fit", "checks")
         self.opt_tv = ttk.Treeview(p, columns=cols, show="headings", height=8)
         for c, w in zip(cols, (100, 240, 70, 560)):
@@ -9951,23 +11005,23 @@ class App:
         self.opt_tv.tag_configure("done", foreground=VFG.get("KEEP", PAL["fg"]))
         self.opt_tv.tag_configure("miss", foreground=VFG.get("DISMANTLE", PAL["fg"]))
         self.opt_tv.pack(fill="x", padx=8, pady=6)
-        low = ttk.Frame(p); low.pack(fill="both", expand=True, padx=8, pady=4)
+        low = CtkFrame(p); low.pack(fill="both", expand=True, padx=8, pady=4)
         lf = ttk.LabelFrame(low, text=t("opt.recal_title")); lf.pack(side="left", fill="both", expand=True, padx=(0, 4))
         rf = ttk.LabelFrame(low, text=t("opt.rank_title")); rf.pack(side="left", fill="both", expand=True, padx=(4, 0))
         self.opt_recal_box, self.opt_rank_box = lf, rf
         self.opt_recal = self.opt_rank = None
         if self.premium_gate(lf, "recal_advisor"):
-            self.opt_recal = tk.Text(lf, height=8, bg=PAL["surface"], fg=PAL["fg"], relief="flat", wrap="word", font=(ui_theme.FONT, 10))
+            self.opt_recal = CtkTextbox(lf, height=8, bg=PAL["surface"], fg=PAL["fg"], relief="flat", wrap="word", font=(ui_theme.FONT, 10))
             self.opt_recal.pack(fill="both", expand=True, padx=6, pady=6)
         if self.premium_gate(rf, "optimizer_all"):
-            self.opt_rank = tk.Text(rf, height=8, bg=PAL["surface"], fg=PAL["fg"], relief="flat", wrap="word", font=(ui_theme.FONT, 10))
+            self.opt_rank = CtkTextbox(rf, height=8, bg=PAL["surface"], fg=PAL["fg"], relief="flat", wrap="word", font=(ui_theme.FONT, 10))
             self.opt_rank.pack(fill="both", expand=True, padx=6, pady=6)
         # denetim
         p = pages["audit"]
-        ab = ttk.Frame(p); ab.pack(fill="x", padx=8, pady=8)
-        ttk.Button(ab, text="↻ " + t("audit.refresh"), command=self.refresh_stash).pack(side="left")
-        ttk.Button(ab, text="🔨 " + t("audit.mark_all"), command=self._audit_mark_all).pack(side="left", padx=6)
-        self.audit_txt = tk.Text(p, bg=PAL["surface"], fg=PAL["fg"], relief="flat", wrap="word", font=(ui_theme.FONT, 10))
+        ab = CtkFrame(p); ab.pack(fill="x", padx=8, pady=8)
+        CtkButton(ab, text="↻ " + t("audit.refresh"), command=self.refresh_stash).pack(side="left")
+        CtkButton(ab, text="🔨 " + t("audit.mark_all"), command=self._audit_mark_all).pack(side="left", padx=6)
+        self.audit_txt = CtkTextbox(p, bg=PAL["surface"], fg=PAL["fg"], relief="flat", wrap="word", font=(ui_theme.FONT, 10))
         self.audit_txt.tag_configure("h", font=(ui_theme.FONT_SEMI, 12), foreground=PAL["accent"])
         self.audit_txt.pack(fill="both", expand=True, padx=8, pady=(0, 8))
         self._audit = None
@@ -9976,23 +11030,23 @@ class App:
         self.refresh_stash()
 
     def _build_command_page(self, parent):
-        tools = ttk.Frame(parent); tools.pack(fill="x", padx=10, pady=6)
-        ttk.Button(tools, text=t("command.search"), command=self._universal_search_window).pack(side="left")
-        ttk.Button(tools, text=t("command.audit"), command=self._library_report_window).pack(side="left", padx=6)
-        ttk.Button(tools, text="🧭 Karar merkezi", command=self._decision_center_window).pack(side="left", padx=6)
+        tools = CtkFrame(parent); tools.pack(fill="x", padx=10, pady=6)
+        CtkButton(tools, text=t("command.search"), command=self._universal_search_window).pack(side="left")
+        CtkButton(tools, text=t("command.audit"), command=self._library_report_window).pack(side="left", padx=6)
+        CtkButton(tools, text="🧭 Karar merkezi", command=self._decision_center_window).pack(side="left", padx=6)
         target_box = ttk.LabelFrame(parent, text="🎯 Kişisel hedef ve farm planı")
         target_box.pack(fill="x", padx=10, pady=(0, 6))
-        target_tools = ttk.Frame(target_box); target_tools.pack(fill="x", padx=6, pady=4)
-        ttk.Button(target_tools, text="ï¼‹ Hedef ekle", command=self._target_add).pack(side="left")
-        ttk.Button(target_tools, text="↻ Farm planını yenile", command=self.refresh_stash).pack(side="left", padx=6)
-        ttk.Label(target_tools, text="Yerel hedefler; eski/verisi belirsiz kaynaklar REVIEW olur.", foreground=PAL["muted"]).pack(side="left", padx=8)
+        target_tools = CtkFrame(target_box); target_tools.pack(fill="x", padx=6, pady=4)
+        CtkButton(target_tools, text="ï¼‹ Hedef ekle", command=self._target_add).pack(side="left")
+        CtkButton(target_tools, text="↻ Farm planını yenile", command=self.refresh_stash).pack(side="left", padx=6)
+        CtkLabel(target_tools, text="Yerel hedefler; eski/verisi belirsiz kaynaklar REVIEW olur.", foreground=PAL["muted"]).pack(side="left", padx=8)
         self.target_tv = ttk.Treeview(target_box, columns=("name", "slot", "priority", "state"), show="headings", height=4)
         for col, title, width in (("name", "Eşya", 230), ("slot", "Yuva", 120), ("priority", "Öncelik", 90), ("state", "Durum", 120)):
             self.target_tv.heading(col, text=title); self.target_tv.column(col, width=width, anchor="w")
         self.target_tv.pack(fill="x", padx=6, pady=(0, 5))
-        self.command_txt = tk.Text(parent, bg=PAL["surface"], fg=PAL["fg"], relief="flat", wrap="word", font=(ui_theme.FONT, 11))
+        self.command_txt = CtkTextbox(parent, bg=PAL["surface"], fg=PAL["fg"], relief="flat", wrap="word", font=(ui_theme.FONT, 11))
         self.command_txt.pack(fill="both", expand=True, padx=10, pady=10)
-        ttk.Button(parent, text=t("command.refresh"), command=self.refresh_stash).pack(anchor="e", padx=10, pady=(0, 8))
+        CtkButton(parent, text=t("command.refresh"), command=self.refresh_stash).pack(anchor="e", padx=10, pady=(0, 8))
 
     def _target_add(self):
         name = simpledialog.askstring(APP_NAME, "Eşya adı:", parent=self.root)
@@ -10050,9 +11104,9 @@ class App:
                 self.command_txt.insert("end", f"• {name}: {row['status']} · {detail}\n")
 
     def _universal_search_window(self):
-        w = tk.Toplevel(self.root); w.title(t("command.search")); w.geometry("760x500")
-        q = tk.StringVar(); ttk.Entry(w, textvariable=q).pack(fill="x", padx=10, pady=10)
-        output = tk.Text(w, wrap="word"); output.pack(fill="both", expand=True, padx=10, pady=10)
+        w = CtkToplevel(self.root); w.title(t("command.search")); w.geometry("760x500")
+        q = tk.StringVar(); CtkEntry(w, textvariable=q).pack(fill="x", padx=10, pady=10)
+        output = CtkTextbox(w, wrap="word"); output.pack(fill="both", expand=True, padx=10, pady=10)
         def search(*_):
             result = intelligence.universal_search(q.get(), self.stash.owned(), self.cfg['builds'])
             output.config(state='normal'); output.delete('1.0','end')
@@ -10265,11 +11319,11 @@ class App:
     def build_help(self):
         """Yardım metni dil dosyasındaki help.body anahtarından gelir."""
         f = self.tabs["help"]
-        hb = ttk.Frame(f); hb.pack(side="top", fill="x", padx=10, pady=(10, 0))
-        ttk.Button(hb, text="🐞 " + t("fb.btn"), command=self.open_feedback, style="Accent.TButton").pack(side="left")
-        ttk.Label(hb, text=t("fb.help_hint"), foreground=PAL["muted"]).pack(side="left", padx=10)
-        box = tk.Text(f, wrap="word", font=("Segoe UI", 10))
-        sb = ttk.Scrollbar(f, orient="vertical", command=box.yview); box.configure(yscrollcommand=sb.set)
+        hb = CtkFrame(f); hb.pack(side="top", fill="x", padx=10, pady=(10, 0))
+        CtkButton(hb, text="🐞 " + t("fb.btn"), command=self.open_feedback, style="Accent.TButton").pack(side="left")
+        CtkLabel(hb, text=t("fb.help_hint"), foreground=PAL["muted"]).pack(side="left", padx=10)
+        box = CtkTextbox(f, wrap="word", font=ui_theme.font_spec("body", 10))
+        sb = CtkScrollbar(f, orient="vertical", command=box.yview); box.configure(yscrollcommand=sb.set)
         sb.pack(side="right", fill="y", pady=10); box.pack(side="left", fill="both", expand=True, padx=10, pady=10)
         body = t("help.body")
         if body == "help.body":          # dil dosyasında yoksa İngilizceye düşülmüş olmalı
@@ -10284,14 +11338,14 @@ class App:
     def build_about(self):
         """Program hakkında ve kurucu stüdyo (Kaivolt) bilgileri — about.body dil dosyasından gelir."""
         f = self.tabs["about"]
-        hb = ttk.Frame(f); hb.pack(side="top", fill="x", padx=10, pady=(10, 0))
-        ttk.Label(hb, text=f"{APP_NAME} — {APP_VERSION}", style="Item.TLabel").pack(side="left")
-        ttk.Button(hb, text=ui_theme.with_icon("GitHub", "🔗"), style="Accent.TButton",
+        hb = CtkFrame(f); hb.pack(side="top", fill="x", padx=10, pady=(10, 0))
+        CtkLabel(hb, text=f"{APP_NAME} — {APP_VERSION}", style="Item.TLabel").pack(side="left")
+        CtkButton(hb, text=ui_theme.with_icon("GitHub", "🔗"), style="Accent.TButton",
                    command=lambda: webbrowser.open("https://github.com/FEDERALTURK/td2-loot-advisor")).pack(side="right")
-        ttk.Button(hb, text=ui_theme.with_icon(t("fb.btn"), "🐞"),
+        CtkButton(hb, text=ui_theme.with_icon(t("fb.btn"), "🐞"),
                    command=self.open_feedback).pack(side="right", padx=(0, 8))
-        box = tk.Text(f, wrap="word", font=("Segoe UI", 10))
-        sb = ttk.Scrollbar(f, orient="vertical", command=box.yview); box.configure(yscrollcommand=sb.set)
+        box = CtkTextbox(f, wrap="word", font=ui_theme.font_spec("body", 10))
+        sb = CtkScrollbar(f, orient="vertical", command=box.yview); box.configure(yscrollcommand=sb.set)
         sb.pack(side="right", fill="y", pady=10); box.pack(side="left", fill="both", expand=True, padx=10, pady=10)
         body = t("about.body")
         if body == "about.body":          # dil dosyasında yoksa İngilizceye düşülmüş olmalı
@@ -10307,6 +11361,13 @@ class App:
         """Tkinter varsayılanı (--noconsole build'de hiçbir yere görünmeyen stderr basımı) yerine:
         her callback (buton komutu, after(), bind) hatasını app.log'a yazar. Böylece örn.
         PAL[...] KeyError gibi sessiz GUI hataları bir daha hiç iz bırakmadan kaybolmaz."""
+        if (getattr(self, "_closing", False)
+                and isinstance(val, tk.TclError)
+                and "application has been destroyed" in str(val)):
+            # Tk/CustomTkinter may still deliver one internal after/bind
+            # callback while the root is being torn down.  This is an expected
+            # shutdown race, not an application failure.
+            return
         try:
             log.error("Tk callback hatası: %s", val, exc_info=(exc, val, tb))
         except Exception:
@@ -10317,6 +11378,14 @@ class App:
         if not force and st0.get("svc_close_to_tray") and self.tray and self.tray.available:
             self.root.withdraw(); self.tray.notify(t("svc.in_tray")); return
         self._closing = True
+        self._cancel_pending_ui_callbacks()
+        self._destroy_child_windows()
+        try: self._flush_stash_save()
+        except Exception: log.exception("Stash save during shutdown failed")
+        try: self._flush_cfg_save()
+        except Exception: log.exception("Config save during shutdown failed")
+        global _ACTIVE_APP
+        if _ACTIVE_APP is self: _ACTIVE_APP = None
         self._global_hotkeys.stop()
         self._voice_session.close()
         for name in ("_translation_jobs", "_debug_jobs", "_assistant_jobs", "_assistant_setup_jobs"):
@@ -10341,6 +11410,43 @@ class App:
             except Exception: pass
         self.root.destroy()
 
+    def _cancel_pending_ui_callbacks(self):
+        """Cancel timers queued for the Tk root before destroying it."""
+        cancel = getattr(self, "_orig_after_cancel", None)
+        if cancel:
+            for ident in list(getattr(self, "_after_ids", ())):
+                try: cancel(ident)
+                except tk.TclError: pass
+        self._after_ids = set()
+        drain = getattr(self, "_thread_drain_id", None)
+        if drain and cancel:
+            try: cancel(drain)
+            except tk.TclError: pass
+        self._thread_drain_id = None
+        pending = getattr(self, "_thread_queue", None)
+        if pending:
+            while True:
+                try: pending.get_nowait()
+                except queue.Empty: break
+
+    def _destroy_child_windows(self):
+        """Close Toplevel children before destroying the Tk root."""
+        intro = getattr(self, "_intro", None)
+        if intro is not None:
+            intro.closed = True
+            try:
+                if intro.win.winfo_exists(): intro.win.destroy()
+            except (AttributeError, tk.TclError):
+                pass
+        try:
+            children = tuple(self.root.winfo_children())
+        except tk.TclError:
+            return
+        for child in children:
+            if isinstance(child, tk.Toplevel):
+                try: child.destroy()
+                except tk.TclError: pass
+
 
 def _instance_poll(app, inst):
     """Başka bir açılma denemesi geldiyse pencereyi öne getir (tarama sırasında küçültülmüş olsa bile)."""
@@ -10350,7 +11456,8 @@ def _instance_poll(app, inst):
             app.tray_show()
     except Exception:
         log.debug("instance poll", exc_info=True)
-    app.root.after(400, lambda: _instance_poll(app, inst))
+    if not getattr(app, "_closing", False):
+        app.root.after(400, lambda: _instance_poll(app, inst))
 
 
 if __name__ == "__main__":

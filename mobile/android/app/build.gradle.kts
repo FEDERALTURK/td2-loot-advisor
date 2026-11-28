@@ -4,10 +4,12 @@ plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
-    // Push bildirimi (Faz 4): google-services.json eklenince bu satırın başındaki "//" kaldırılmalı.
-    // Dosya yokken açılırsa Gradle "File google-services.json is missing" ile patlar — bkz.
-    // docs/push_notifications_setup.md (depo köküne göre).
-    // id("com.google.gms.google-services")
+}
+
+// Firebase yapılandırması kişiye özel ve Git dışında tutulur. Dosya varsa FCM
+// kaynaklarını üret; yoksa yerel olmayan CI derlemelerinde Firebase'i atla.
+if (file("google-services.json").isFile) {
+    pluginManager.apply("com.google.gms.google-services")
 }
 
 val playSigningFile = rootProject.file("key.properties")

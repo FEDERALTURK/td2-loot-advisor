@@ -11,6 +11,7 @@ import subprocess
 import sys
 import time
 from pathlib import Path
+
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -47,7 +48,7 @@ def main():
     import display
     display.set_dpi_aware()
     import mss
-    with mss.mss() as s:
+    with mss.MSS() as s:
         mons = s.monitors
     print("monitors:", mons)
     scr = mons[1]
@@ -58,7 +59,9 @@ def main():
     display._GW_CACHE["t"] = 0
     g0 = display.game_window(max_age=0)
     print("no game:", g0)
-    ok &= g0 is None
+    if g0 is not None:
+        print("RESULT: SKIP (a real game window is already open; synthetic window test would compete with it)")
+        return
 
     # 2) sahte oyun penceresi (ekranın sağ altına, ana monitörün tamamı değil)
     W = min(1000, scr["width"] - 80); H = min(700, scr["height"] - 90)
@@ -81,6 +84,7 @@ def main():
         # Match the real application startup path: discover a configured or
         # standard Windows Tesseract installation before the first OCR call.
         tess = app.find_tesseract(app.load_cfg())
+        app._load_deferred_modules()
         if app.OCR is not None and app.OCR.name == "tesseract" and not tess:
             print("RESULT: SKIP (Tesseract executable unavailable; RapidOCR was not installed)")
             sys.exit(0)

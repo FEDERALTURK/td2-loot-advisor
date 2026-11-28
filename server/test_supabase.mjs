@@ -10,6 +10,7 @@ globalThis.fetch = async (url, opts = {}) => {
 };
 
 const base = {
+  HASH_SALT: "test-only-hash-salt-with-at-least-32-characters",
   SUPABASE_URL: "https://example.supabase.co/",
   SUPABASE_SECRET_KEY: "sb_secret_test-only",
   SUPABASE_PANEL_ENABLED: "true",

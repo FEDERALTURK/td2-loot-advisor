@@ -5,9 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Premium — TD2 Loot Advisor</title>
 <meta name="description" content="TD2 Loot Advisor Premium: kalibrasyon danışmanı, tüm build'ler için optimizasyon, satıcı takibi, telefon companion ve daha fazlası.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><circle cx=%2216%22 cy=%2216%22 r=%2214%22 fill=%22%230f1116%22 stroke=%22%23ff6d10%22 stroke-width=%222%22/><circle cx=%2216%22 cy=%2216%22 r=%225%22 fill=%22%23ff6d10%22/></svg>">
 <link rel="stylesheet" href="../assets/css/style.css">
 </head>
 <body>
+<a class="skip-link" href="#main-content" data-i18n="skip_content">Ana içeriğe geç</a>
 <div class="td2-bg" aria-hidden="true">
   <div class="td2-bg-base"></div>
   <div class="td2-glow td2-glow-a"></div>
@@ -51,16 +53,17 @@
     <nav class="td2-nav-links">
       <a href="../" data-i18n="nav_home">Ana Sayfa</a>
       <a href="../news/" data-i18n="nav_news">Haberler</a>
-      <a href="./" class="active" data-i18n="nav_premium">Premium</a>
+      <a href="./" class="active" aria-current="page" data-i18n="nav_premium">Premium</a>
       <a href="../account/" data-i18n="nav_account">Hesabım</a>
     </nav>
     <div class="td2-nav-right">
-      <div class="td2-lang"><button class="td2-lang-btn" data-lang="tr">TR</button><button class="td2-lang-btn" data-lang="en">EN</button></div>
+      <div class="td2-lang" role="group" aria-label="Language"><button class="td2-lang-btn" data-lang="tr" aria-pressed="true">TR</button><button class="td2-lang-btn" data-lang="en" aria-pressed="false">EN</button></div>
       <a class="btn btn-primary btn-sm" href="../#indir" data-i18n="nav_download">İndir</a>
     </div>
   </div>
 </header>
 
+<main id="main-content" tabindex="-1">
 <section class="section td2-wrap" style="border-top:none;padding-top:48px">
   <h2 data-i18n="prem_title">Premium</h2>
   <p class="section-lede" data-i18n="prem_sub">Ücretsiz sürüm tam ve sınırsız kalır. Premium, ekstra zaman kazandıran özellikler ekler.</p>
@@ -87,6 +90,7 @@
   </div>
   <p style="margin-top:24px;color:var(--muted);font-size:13.5px" data-i18n="prem_license_note">Bir lisans tek bilgisayara bağlanır; hesabından istediğin zaman cihazı sıfırlayabilirsin.</p>
 </section>
+</main>
 
 <footer class="td2-footer td2-wrap">
   <div class="links">

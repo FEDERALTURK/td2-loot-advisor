@@ -23,6 +23,8 @@
 // çekemez (açık yönlendirme riski kapalı). Teslimat yine tarayıcı-navigasyonu ile olur: grant yalnız Discord
 // onayını tamamlayan O tarayıcıda görünür, tıpkı loopback'in yalnız o bilgisayarda görünmesi gibi.
 
+import { requireHashSalt } from "./security.js";
+
 const enc = new TextEncoder();
 const DAY = 86400;
 const ENT_DAYS = 7;
@@ -60,7 +62,7 @@ function safeEqual(a, b) {                           // sabit süreli karşıla�
   let r = 0; for (let i = 0; i < a.length; i++) r |= a.charCodeAt(i) ^ b.charCodeAt(i);
   return r === 0;
 }
-const salt = env => env.HASH_SALT || "dev-salt";
+const salt = requireHashSalt;
 const ipOf = req => req.headers.get("cf-connecting-ip") || "local";
 
 // Anahtar biçimi: TD2K-XXXX-XXXX-XXXX-XXXX (Crockford base32: karışan harfler yok), davet: TD2I-XXXX-XXXX-XXXX

@@ -24,6 +24,7 @@ import hmac
 import json
 import logging
 import queue
+import re
 import secrets
 import socket
 import struct
@@ -41,6 +42,32 @@ MAX_CLIENTS = 8
 MAX_OUTGOING = 64
 MAX_QUEUED_BYTES = 1024 * 1024
 SOCKET_TIMEOUT = 2.0
+
+
+def find_available_port(preferred, reserved=(), host="127.0.0.1", span=32):
+    """Return a locally bindable port without starting a server.
+
+    Used when the optional translation screen and the main Local API are
+    configured with the same port.  Only a local bind probe is performed; no
+    network request or remote service is contacted.
+    """
+    try: preferred = max(1024, min(65535, int(preferred)))
+    except (TypeError, ValueError): preferred = 8767
+    reserved = {int(item) for item in reserved if str(item).isdigit()}
+    for offset in range(max(1, int(span))):
+        candidate = 1024 + ((preferred - 1024 + offset) % (65535 - 1024 + 1))
+        if candidate in reserved:
+            continue
+        probe = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            probe.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            probe.bind((host, candidate))
+            return candidate
+        except OSError:
+            continue
+        finally:
+            probe.close()
+    return None
 
 OVERLAY = r"""<!doctype html><html><head><meta charset="utf-8"><title>TD2 overlay</title>
 <style>
@@ -77,7 +104,7 @@ class _Server(ThreadingHTTPServer):
 
 
 def _accept(key):
-    return base64.b64encode(hashlib.sha1((key + GUID).encode()).digest()).decode()
+    return base64.b64encode(hashlib.sha1((key + GUID).encode(), usedforsecurity=False).digest()).decode()
 
 
 def _frame(payload, opcode=0x1):
@@ -193,12 +220,7 @@ class LocalAPI:
     # ---- adresler
     @property
     def host(self):
-        if not self.lan: return "127.0.0.1"
-        try:
-            import companion
-            return companion.lan_ip()
-        except Exception:
-            return "127.0.0.1"
+        return "127.0.0.1"
 
     def url(self, path="/overlay"):
         return f"http://{self.host}:{self.port}{path}?t={self.token}"
@@ -240,7 +262,10 @@ class LocalAPI:
             protocol_version = "HTTP/1.1"
             timeout = 15                       # yarım bırakılan bağlantılar iş parçacığı tüketmesin (WebSocket'te kaldırılır)
 
-            def log_message(self, fmt, *a): log.debug("api %s - %s", self.address_string(), fmt % a)
+            def log_message(self, fmt, *a):
+                message = re.sub(r"([?&](?:t|token|access_token|api_token)=)[^&\s\"']+",
+                                 r"\1<redacted>", fmt % a, flags=re.IGNORECASE)
+                log.debug("api %s - %s", self.address_string(), message)
 
             def _send(self, code, body, ctype="application/json; charset=utf-8"):
                 data = body.encode() if isinstance(body, str) else body
@@ -336,13 +361,15 @@ class LocalAPI:
     def start(self):
         if self.httpd: return self.url()
         with self._lock: self._stopping = False
+        if self.lan:
+            raise OSError("LAN sharing is disabled until HTTPS is available; local HTTP exposes tokens and translated text")
         try:
-            self.httpd = _Server(("0.0.0.0" if self.lan else "127.0.0.1", self.port), self._handler())
+            self.httpd = _Server(("127.0.0.1", self.port), self._handler())
         except OSError as e:
             log.warning("Local API could not open port %s: %s", self.port, e); self.httpd = None
             raise
         threading.Thread(target=self.httpd.serve_forever, daemon=True).start()
-        log.info("Local API on %s:%s (lan=%s)", "0.0.0.0" if self.lan else "127.0.0.1", self.port, self.lan)
+        log.info("Local API on %s:%s (lan=%s)", "LAN" if self.lan else "loopback", self.port, self.lan)
         return self.url()
 
     def stop(self):

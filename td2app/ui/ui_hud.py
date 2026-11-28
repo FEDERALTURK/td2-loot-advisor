@@ -1,7 +1,9 @@
 """Hafif çalışan canlı ana-panel sahnesi.
 
-Yalnızca Canvas ve Pillow kullanır. Görsel katman 12 FPS ile sınırlıdır;
-oyun ön plandayken bile OCR ve çeviri kuyruğunu etkilememesi amaçlanır.
+Fotoğraf arka planı yerine prosedürel bir Kaivolt zemini çizer: dikey gradyan,
+ince eğik ızgara, kenar vinyeti ve yavaş akan tarama bandı. Yalnızca Canvas ve
+Pillow kullanır; görsel katman 12 FPS ile sınırlıdır, böylece oyun ön plandayken
+OCR ve çeviri kuyruğunu etkilemez.
 """
 from __future__ import annotations
 
@@ -12,7 +14,7 @@ from pathlib import Path
 import tkinter as tk
 from . import ui_theme
 
-from PIL import Image, ImageOps, ImageTk
+from PIL import Image, ImageDraw, ImageFilter, ImageTk
 
 
 def _rgb(hex_color: str) -> tuple[int, int, int]:
@@ -60,40 +62,84 @@ class DashboardScene(tk.Canvas):
                 self.snapshot[key] = str(value)
         self._draw()
 
-    def _scene_path(self):
-        name = "darkzone_rogue_scene.png" if self.mode == "rogue" else "isac_operations_scene.png"
-        path = self.art_dir / "backgrounds" / name
-        return path if path.exists() else None
-
     def _resize(self, _event=None):
         self._size = (0, 0)
         self.delete("scene-bg")
         self._bg_item = None
         self._draw()
 
+    def _backdrop(self, width, height):
+        """Prosedürel zemin: dikey gradyan + ince eğik ızgara + kenar vinyeti.
+
+        Önceden `art/backgrounds/isac_operations_scene.png` fotoğrafı
+        kullanılıyordu; fotoğraf kaldırıldı. Zemin tamamen palet renklerinden
+        üretildiği için tema değişiminde de tutarlı kalır ve diskten büyük
+        görsel okumaz.
+        """
+        bg, surface = _rgb(self.pal["bg"]), _rgb(self.pal["surface"])
+        target = tuple(int(bg[i] + (surface[i] - bg[i]) * 0.62) for i in range(3))
+        grad = Image.new("RGB", (1, height))
+        for y in range(height):
+            t = y / max(1, height - 1)
+            grad.putpixel((0, y), tuple(int(bg[i] + (target[i] - bg[i]) * t) for i in range(3)))
+        base = grad.resize((width, height))
+
+        accent = _rgb(self.pal["accent"])
+        overlay = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(overlay)
+        step = 44
+        for x in range(-height, width + height, step):
+            draw.line([(x, 0), (x - height, height)], fill=(*accent, 16), width=1)
+        for y in range(0, height, step):
+            draw.line([(0, y), (width, y)], fill=(*accent, 10), width=1)
+        # İnce yatay tarama dokusu (fotoğrafın yerini alan HUD hissi).
+        for y in range(0, height, 3):
+            draw.line([(0, y), (width, y)], fill=(0, 0, 0, 8), width=1)
+        # Radar merkezinin arkasında yumuşak vurgu ışıması.
+        glow = Image.new("L", (width, height), 0)
+        gcx, gcy = width * 0.56, height * 0.50
+        gr = max(80, min(width, height) * 0.52)
+        ImageDraw.Draw(glow).ellipse([gcx - gr, gcy - gr * 0.55, gcx + gr, gcy + gr * 0.55], fill=44)
+        glow = glow.filter(ImageFilter.GaussianBlur(max(18, min(width, height) * 0.16)))
+        glow_layer = Image.new("RGBA", (width, height), (*accent, 0))
+        glow_layer.putalpha(glow)
+        overlay = Image.alpha_composite(overlay, glow_layer)
+        draw = ImageDraw.Draw(overlay)
+        edge = int(min(width, height) * 0.22)
+        for i in range(edge):
+            alpha = int(70 * (1 - i / max(1, edge)))
+            draw.line([(i, 0), (i, height)], fill=(0, 0, 0, alpha), width=1)
+            draw.line([(width - 1 - i, 0), (width - 1 - i, height)], fill=(0, 0, 0, alpha), width=1)
+        return Image.alpha_composite(base.convert("RGBA"), overlay).convert("RGB")
+
     def _background(self, width, height):
         key = (width, height, self.mode)
         if self._size == key and self._photo is not None:
             return
         self._size = key
-        path = self._scene_path()
         try:
-            base = Image.open(path).convert("RGB") if path else Image.new("RGB", (width, height), _rgb(self.pal["bg"]))
-            base = ImageOps.fit(base, (width, height), Image.Resampling.LANCZOS, centering=(0.52, 0.45))
-            veil = Image.new("RGB", base.size, _rgb(self.pal["bg"]))
-            # Sahne artık dekor değil: şehir, harita, görev ve risk öğeleri
-            # okunur kalırken üstteki veri kartları yeterli kontrastı korur.
-            base = Image.blend(base, veil, 0.25)
-            self._photo = ImageTk.PhotoImage(base)
+            self._photo = ImageTk.PhotoImage(self._backdrop(width, height))
         except Exception:
             self._photo = None
 
     def _box(self, x1, y1, x2, y2, title, value, accent=None):
         accent = accent or self.pal["accent"]
-        self.create_rectangle(x1, y1, x2, y2, fill=_blend(self.pal["bg"], self.pal["surface"], 0.78), outline=_blend(accent, self.pal["border"], 0.45), width=1, tags="hud")
+        text = str(value)
+        # Uzun değerler karttan taşmasın: HUD yazısı kademeli küçülür ve
+        # gerekiyorsa üç nokta ile kırpılır.
+        size = 12 if len(text) <= 20 else (11 if len(text) <= 26 else (10 if len(text) <= 40 else 9))
+        avail = max(40, x2 - x1 - 24)
+        max_chars = max(8, int(avail / (size * 0.66)))
+        if len(text) > max_chars:
+            text = text[:max_chars - 1].rstrip() + "…"
+        self.create_rectangle(x1, y1, x2, y2, fill=_blend(self.pal["bg"], self.pal["surface"], 0.78),
+                              outline=_blend(self.pal.get("line", self.pal["border"]), accent, 0.35),
+                              width=1, tags="hud")
         self.create_rectangle(x1, y1, x1 + 3, y2, fill=accent, outline="", tags="hud")
-        self.create_text(x1 + 12, y1 + 13, anchor="w", text=title, fill=self.pal["muted"], font=(ui_theme.FONT_SEMI, 8), tags="hud")
-        self.create_text(x1 + 12, y1 + 33, anchor="w", text=value[:48], fill=self.pal["fg"], font=(ui_theme.FONT_SEMI, 11), tags="hud")
+        self.create_text(x1 + 12, y1 + 14, anchor="w", text=title, fill=self.pal["muted"],
+                         font=ui_theme.font_spec("mono", 9), tags="hud")
+        self.create_text(x1 + 12, y1 + 36, anchor="w", text=text, fill=self.pal["fg"],
+                         font=ui_theme.font_spec("display", size, weight="bold"), tags="hud")
 
     def _draw_blips(self, cx, cy, radius, ry, accent, sweep_deg):
         """Rastgele 'tespit' noktaları: açı/yarıçap her defasında yeniden seçilir,
@@ -141,6 +187,7 @@ class DashboardScene(tk.Canvas):
         # Dinamik öğeleri yenile; ağır sinematik bitmapi her karede silip
         # yeniden yaratmak yerine tek Canvas öğesi olarak tut.
         self.delete("hud")
+        self.delete("fx")
         if self._photo:
             if self._bg_item is None:
                 self._bg_item = self.create_image(0, 0, image=self._photo, anchor="nw", tags="scene-bg")
@@ -155,6 +202,29 @@ class DashboardScene(tk.Canvas):
         now = time.perf_counter() - self._started
         cx, cy, radius = width * 0.56, height * 0.50, min(width, height) * 0.39
         accent = self.pal["accent"]
+
+        # Fotoğrafın yerini alan hareketli katman: yavaş akan tarama bandı ve
+        # kenar veri izleri. Hepsi birkaç çizgi; 12 FPS'te maliyeti düşük.
+        band_y = (now * 46) % (height + 160) - 80
+        for offset, alpha in ((0, 0.50), (7, 0.18), (-7, 0.18)):
+            y = band_y + offset
+            if -2 <= y <= height + 2:
+                self.create_line(0, y, width, y, fill=_blend(self.pal["bg"], accent, alpha),
+                                 width=1, tags="fx")
+        for i in range(6):
+            x = ((now * 34) + i * (width / 6)) % width
+            self.create_line(x, 0, x + 16, 0, fill=_blend(self.pal["bg"], accent, 0.30),
+                             width=2, tags="fx")
+            self.create_line(x, height - 1, x + 16, height - 1,
+                             fill=_blend(self.pal["bg"], accent, 0.22), width=2, tags="fx")
+        # Köşe braketleri: sahneyi çerçeveleyen ince HUD işaretleri.
+        m, arm = 10, 26
+        for x0, y0, dx, dy in ((m, m, 1, 1), (width - m, m, -1, 1),
+                               (m, height - m, 1, -1), (width - m, height - m, -1, -1)):
+            self.create_line(x0, y0, x0 + dx * arm, y0,
+                             fill=_blend(self.pal["bg"], accent, 0.40), width=2, tags="fx")
+            self.create_line(x0, y0, x0, y0 + dy * arm,
+                             fill=_blend(self.pal["bg"], accent, 0.40), width=2, tags="fx")
         # 3B eğimli radar tabanı: daire yerine basık elips ("squash") çizmek,
         # sahte bir zemin perspektifi verir — halkalar bir masa üstünde değil,
         # eğik bir tarama diski gibi görünür. ry: dikey basıklık oranı.
@@ -185,6 +255,13 @@ class DashboardScene(tk.Canvas):
             angle = math.radians(sweep_deg)
             self.create_line(cx, cy, cx + math.cos(angle) * radius, cy + math.sin(angle) * radius * ry,
                              fill=_blend(self.pal["bg"], accent, 0.74), width=2, tags="hud")
+            # Dış halkada yavaş dönen kesik yaylar: tarama diskinin "çalışıyor" hissi.
+            rot = (now * 12) % 360
+            for start in (rot, rot + 120, rot + 240):
+                self.create_arc(cx - radius * 1.03, cy - radius * 1.03 * ry,
+                                cx + radius * 1.03, cy + radius * 1.03 * ry,
+                                start=start, extent=24, style="arc",
+                                outline=_blend(self.pal["bg"], accent, 0.35), width=2, tags="hud")
             event_text = "ISAC // CANLI TARAMA"
         pulse = (math.sin(now * 2.0) + 1) / 2
         self.create_oval(cx - radius * (.28 + pulse * .08), cy - radius * (.28 + pulse * .08) * ry,
@@ -192,17 +269,19 @@ class DashboardScene(tk.Canvas):
                          outline=_blend(self.pal["bg"], accent, 0.16 + pulse * .22), width=2, tags="hud")
         self._draw_blips(cx, cy, radius, ry, accent, sweep_deg)
         self.create_text(cx, cy + radius * ry + 18, text=event_text, fill=_blend(self.pal["bg"], accent, .78),
-                         font=(ui_theme.FONT_SEMI, 9), tags="hud")
+                         font=ui_theme.font_spec("mono", 10, weight="bold"), tags="hud")
 
         pad, card_w = 16, min(325, int(width * .27))
         theme_name = "DARK ZONE // ROGUE EVENT" if self.mode == "rogue" else "ISAC // OPERATIONS"
-        self.create_text(pad, 18, anchor="w", text=theme_name, fill=accent, font=(ui_theme.FONT_SEMI, 14), tags="hud")
-        self.create_text(pad, 39, anchor="w", text=self.snapshot["status"][:72], fill=self.pal["muted"], font=(ui_theme.FONT, 9), tags="hud")
+        self.create_text(pad, 18, anchor="w", text=theme_name, fill=accent,
+                         font=ui_theme.font_spec("display", 16, weight="bold"), tags="hud")
+        self.create_text(pad, 41, anchor="w", text=self.snapshot["status"][:72], fill=self.pal["muted"],
+                         font=ui_theme.font_spec("body", 10), tags="hud")
         self._box(pad, 58, pad + card_w, 118, "SON TARAMA", self.snapshot["name"], accent)
         self._box(pad, 126, pad + card_w, 186, "KARAR / BUILD UYUMU", f"{self.snapshot['verdict']}  ·  {self.snapshot['score']}", accent)
         self._box(pad, 194, pad + card_w, 260, "HIZLI İŞLEM", "TARAMAK İÇİN TIKLA", accent)
         self._box(pad, 268, pad + card_w, 342, "LOOT ÖNCELİĞİ", "YÜKSEK DEĞERLİ ÖĞELERİ İZLE", accent)
-        right = width - pad
+        right = width - 26
         r_w = min(310, int(width * .25))
         self._box(right - r_w, 58, right, 131, "CANLI ÇEVİRİ", self.snapshot["translation"], accent)
         self._box(right - r_w, 139, right, 205, "GÖREV İSTİHBARATI", "Günlük · Haftalık · Sezon", accent)

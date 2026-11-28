@@ -240,7 +240,7 @@ class Cache:
 
     @staticmethod
     def key(engine, text):
-        return engine + ":" + hashlib.sha1(text.strip().lower().encode()).hexdigest()[:20]
+        return engine + ":" + hashlib.sha1(text.strip().lower().encode(), usedforsecurity=False).hexdigest()[:20]
 
     def get(self, engine, text):
         k = self.key(engine, text)
@@ -266,6 +266,81 @@ class Cache:
             safeio.write_json(self.path, data, indent=None, backup=False)
         except OSError:
             pass
+
+
+class LocalMemory:
+    """User-approved local translation corrections.
+
+    This is separate from shared/community memory. It never uploads data and
+    is consulted before community memory. Keys are normalized so OCR spacing
+    noise does not create duplicate corrections.
+    """
+    def __init__(self, path=None):
+        self.path = str(path) if path else None
+        self.map = {}
+        self.version = "local-1"
+        if self.path:
+            try:
+                data = json.loads(Path(self.path).read_text(encoding="utf-8"))
+                raw = data.get("items", {}) if isinstance(data, dict) else {}
+                if isinstance(raw, dict):
+                    self.map = {self.norm(k): str(v).strip() for k, v in raw.items()
+                                if isinstance(k, str) and isinstance(v, str) and v.strip()}
+            except (OSError, ValueError, TypeError):
+                pass
+
+    @staticmethod
+    def norm(text):
+        return re.sub(r"\s+", " ", str(text).strip()).casefold()
+
+    def __len__(self):
+        return len(self.map)
+
+    def get(self, text):
+        return self.map.get(self.norm(text))
+
+    def put(self, source, target):
+        source, target = self.norm(source), str(target).strip()
+        if not source or not target:
+            return False
+        self.map[source] = target
+        if self.path:
+            try:
+                import safeio
+                safeio.write_json(self.path, {"version": 1, "items": self.map}, indent=2, backup=True)
+            except OSError:
+                return False
+        return True
+
+    def remove(self, source):
+        key = self.norm(source)
+        if key not in self.map:
+            return False
+        del self.map[key]
+        if self.path:
+            try:
+                import safeio
+                safeio.write_json(self.path, {"version": 1, "items": self.map}, indent=2, backup=True)
+            except OSError:
+                return False
+        return True
+
+
+class MemoryChain:
+    """Read-only composition of local and shared memories, in priority order."""
+    def __init__(self, *memories):
+        self.memories = tuple(m for m in memories if m is not None and len(m))
+        self.version = ":".join(getattr(m, "version", "") for m in self.memories) or "none"
+
+    def __len__(self):
+        return sum(len(m) for m in self.memories)
+
+    def get(self, text):
+        for memory in self.memories:
+            value = memory.get(text)
+            if value:
+                return value
+        return None
 
 
 # ---------------------------------------------------------------- motorlar

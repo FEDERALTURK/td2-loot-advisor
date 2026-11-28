@@ -35,6 +35,22 @@ def nrm(s):
     return re.sub(r"\s+", " ", re.sub(r"[^a-z0-9&' ]+", " ", s)).strip()
 
 
+def resolve_name(name, candidates):
+    """Return the canonical candidate for an exact or safe short-name match."""
+    wanted = nrm(name)
+    if not wanted:
+        return None
+    values = list(candidates or ())
+    normalized = {nrm(candidate): candidate for candidate in values}
+    if wanted in normalized:
+        return normalized[wanted]
+    for candidate in values:
+        current = nrm(candidate)
+        if len(wanted) >= 5 and (wanted in current or current in wanted):
+            return candidate
+    return None
+
+
 _TLS = threading.local()
 
 

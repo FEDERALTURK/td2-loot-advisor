@@ -10,6 +10,7 @@ from unittest.mock import Mock, patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import game_runtime
 import app
+app._load_deferred_modules()
 
 
 class RuntimePlanTests(unittest.TestCase):

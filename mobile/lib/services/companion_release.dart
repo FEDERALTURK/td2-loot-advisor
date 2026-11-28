@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 
 /// GitHub beta etiketi dört bileşene izin verir (ör. 0.1.4.1). Android'in
 /// package sürümü ise pubspec içinde üç bileşen + artan build numarasıdır.
-const companionVersion = '0.1.10';
+const companionVersion = '0.1.12';
 const updateCheckInterval = Duration(hours: 6);
 const companionUserAgent = 'TD2-Loot-Advisor-Companion/$companionVersion';
 
@@ -64,17 +64,20 @@ CompanionRelease? parseLatestCompanionRelease(dynamic decoded) {
   CompanionRelease? latest;
   for (final item in decoded) {
     if (item is! Map) continue;
+    if (item['draft'] == true) continue;
     final tag = '${item['tag_name'] ?? ''}';
     if (!tag.startsWith('companion-v')) continue;
     final version = tag.substring('companion-v'.length).split('-').first;
     if (!_validVersion(version)) continue;
     final url = '${item['html_url'] ?? ''}';
-    if (!_isSafeHttpsUrl(url)) continue;
+    if (!isTrustedReleaseUrl(url) || Uri.parse(url).pathSegments.last != tag) {
+      continue;
+    }
     final candidate = CompanionRelease(
       version: version,
       url: url,
-      apkUrl: _findApkUrl(item['assets']),
-      sha256Url: _findSha256Url(item['assets']),
+      apkUrl: _findApkUrl(item['assets'], tag),
+      sha256Url: _findSha256Url(item['assets'], tag),
     );
     if (latest == null || isNewerVersion(candidate.version, latest.version)) {
       latest = candidate;
@@ -83,7 +86,7 @@ CompanionRelease? parseLatestCompanionRelease(dynamic decoded) {
   return latest;
 }
 
-String? _findApkUrl(dynamic assets) {
+String? _findApkUrl(dynamic assets, String tag) {
   if (assets is! List) return null;
   for (final asset in assets) {
     if (asset is! Map) continue;
@@ -91,7 +94,8 @@ String? _findApkUrl(dynamic assets) {
     final url = '${asset['browser_download_url'] ?? ''}';
     if (!name.startsWith('TD2LootAdvisor_Companion_') ||
         !name.toLowerCase().endsWith('.apk') ||
-        !_isSafeHttpsUrl(url)) {
+        !isTrustedReleaseUrl(url, asset: true, tag: tag) ||
+        Uri.parse(url).pathSegments.last != name) {
       continue;
     }
     return url;
@@ -99,20 +103,40 @@ String? _findApkUrl(dynamic assets) {
   return null;
 }
 
-String? _findSha256Url(dynamic assets) {
+String? _findSha256Url(dynamic assets, String tag) {
   if (assets is! List) return null;
   for (final asset in assets) {
     if (asset is! Map) continue;
     final name = '${asset['name'] ?? ''}'.toLowerCase();
     final url = '${asset['browser_download_url'] ?? ''}';
-    if (name == 'sha256sums.sha256' && _isSafeHttpsUrl(url)) return url;
+    if (name == 'sha256sums.sha256' &&
+        isTrustedReleaseUrl(url, asset: true, tag: tag) &&
+        Uri.parse(url).pathSegments.last.toLowerCase() == name) {
+      return url;
+    }
   }
   return null;
 }
 
-bool _isSafeHttpsUrl(String value) {
+bool isTrustedReleaseUrl(String value, {bool asset = false, String? tag}) {
   final uri = Uri.tryParse(value);
-  return uri != null && uri.scheme == 'https' && uri.host.isNotEmpty;
+  if (uri == null ||
+      uri.scheme != 'https' ||
+      uri.host != 'github.com' ||
+      uri.userInfo.isNotEmpty ||
+      uri.port != 443 ||
+      uri.hasQuery ||
+      uri.hasFragment) {
+    return false;
+  }
+  final parts = uri.pathSegments;
+  return parts.length == (asset ? 6 : 5) &&
+      parts[0] == 'FEDERALTURK' &&
+      parts[1] == 'td2-loot-advisor' &&
+      parts[2] == 'releases' &&
+      parts[3] == (asset ? 'download' : 'tag') &&
+      parts[4].startsWith('companion-v') &&
+      (tag == null || parts[4] == tag);
 }
 
 bool isNewerVersion(String candidate, String installed) {

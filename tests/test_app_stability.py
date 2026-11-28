@@ -46,6 +46,23 @@ class AppStabilityTests(unittest.TestCase):
         cls.app = importlib.util.module_from_spec(spec)
         sys.modules[name] = cls.app
         spec.loader.exec_module(cls.app)
+        # builds.json kullanıcı verisidir: sınıf genelinde CFG_PATH geçici
+        # dizine yönlendirilir, böylece bir test yanlışlıkla load_cfg çağırsa
+        # bile proje kökündeki dosyaya yazılamaz (OPEN-003).
+        cls._cfg_dir = tempfile.TemporaryDirectory()
+        cls._cfg_path_patch = patch.object(
+            cls.app, "CFG_PATH", Path(cls._cfg_dir.name) / "builds.json")
+        cls._cfg_path_patch.start()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls._cfg_path_patch.stop()
+        cls._cfg_dir.cleanup()
+
+    def test_cfg_path_is_isolated_from_project_root(self):
+        cfg_path = Path(self.app.CFG_PATH).resolve()
+        self.assertNotEqual(cfg_path, (ROOT / "builds.json").resolve())
+        self.assertTrue(str(cfg_path).startswith(str(Path(self._cfg_dir.name).resolve())))
 
     def bare_app(self):
         obj = self.app.App.__new__(self.app.App)
@@ -53,6 +70,32 @@ class AppStabilityTests(unittest.TestCase):
         obj.root = Mock()
         obj.results = queue.Queue()
         return obj
+
+    def test_theme_swap_rebuilds_the_current_page(self):
+        obj = self.bare_app()
+        obj.current_tab = Mock(return_value="dashboard")
+        obj.rebuild_ui = Mock()
+
+        obj._swap_theme()
+
+        obj.rebuild_ui.assert_called_once_with(tab="dashboard")
+
+    def test_screen_capture_module_is_available_to_app_level_capture_paths(self):
+        self.assertIsNotNone(self.app.mss)
+        self.assertTrue(callable(self.app.mss.MSS))
+
+    def test_dashboard_theme_switch_uses_rebuild_path_directly(self):
+        obj = self.bare_app()
+        obj.cfg["settings"]["ui_theme"] = "shd_tactical"
+        obj.current_tab = Mock(return_value="dashboard")
+        obj.rebuild_ui = Mock()
+
+        with patch.object(self.app, "save_cfg") as save:
+            obj._dash_switch_theme("kaivolt")
+
+        self.assertEqual(obj.cfg["settings"]["ui_theme"], "kaivolt")
+        save.assert_called_once_with(obj.cfg)
+        obj.rebuild_ui.assert_called_once_with(tab="dashboard")
 
     def test_real_modern_and_legacy_invalid_ocr_is_reviewed(self):
         modern = self.app.gamedata.GameData(ROOT / "meta" / "game_data.json")

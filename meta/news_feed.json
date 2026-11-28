@@ -1,9 +1,40 @@
 {
  "schema": 1,
- "version": "2026-11-17.1",
- "updated": "2026-11-17T07:34:02Z",
- "season": "Year 8 Season 3 – Red Horizon",
+ "version": "2026-11-27.1",
+ "updated": "2026-11-27T05:04:49Z",
+ "season": "Spearfall",
  "items": [
+  {
+   "id": "spearfall-season-launch-2026-11-26",
+   "kind": "season",
+   "date": "2026-11-26T00:00:00Z",
+   "url": "https://news.ubisoft.com/en-us/article/7A3TP0iVVCjafKPmuTTLoS/the-division-2-spearfall-white-tusk-invades-washington-dc-crossplay-available-now-and-more",
+   "source": "Ubisoft",
+   "title": {
+    "en": "Spearfall season is live",
+    "tr": "Spearfall sezonu başladı",
+    "de": "Die Spearfall-Saison ist gestartet",
+    "fr": "La saison Spearfall est lancée",
+    "es": "La temporada Spearfall ya está disponible",
+    "it": "La stagione Spearfall è disponibile",
+    "pt": "A temporada Spearfall já começou",
+    "ru": "Сезон Spearfall уже начался",
+    "pl": "Sezon Spearfall już wystartował",
+    "nl": "Het Spearfall-seizoen is begonnen"
+   },
+   "text": {
+    "en": "Spearfall brings White Tusk to Washington, D.C., with new Legendary missions, Crossplay, Prototype Gear customization, Escalation changes, and new rewards.",
+    "tr": "Spearfall; yeni Efsanevi görevlerle White Tusk'ı Washington'a getiriyor. Sezonda Crossplay, Prototype ekipmanı özelleştirmeleri, Escalation değişiklikleri ve yeni ödüller de var.",
+    "de": "Spearfall bringt White Tusk mit neuen legendären Missionen nach Washington, D.C. Dazu kommen Crossplay, Anpassungen der Prototype-Ausrüstung, Änderungen an Escalation und neue Belohnungen.",
+    "fr": "Spearfall amène les White Tusk à Washington avec de nouvelles missions en difficulté Légendaire. La saison ajoute aussi le crossplay, la personnalisation de l'équipement Prototype, des changements à Escalation et de nouvelles récompenses.",
+    "es": "Spearfall lleva a los White Tusk a Washington con nuevas misiones en dificultad Legendaria. La temporada también incorpora juego cruzado, personalización del equipo Prototype, cambios en Escalation y nuevas recompensas.",
+    "it": "Spearfall porta i White Tusk a Washington con nuove missioni a difficoltà Leggendaria. La stagione aggiunge anche il crossplay, la personalizzazione dell'equipaggiamento Prototype, modifiche a Escalation e nuove ricompense.",
+    "pt": "Spearfall leva os White Tusk a Washington com novas missões na dificuldade Lendária. A temporada também traz crossplay, personalização do equipamento Prototype, mudanças em Escalation e novas recompensas.",
+    "ru": "В Spearfall отряд White Tusk приходит в Вашингтон, а игроков ждут новые миссии на легендарной сложности. Сезон также добавляет кроссплей, настройку Prototype-снаряжения, изменения Escalation и новые награды.",
+    "pl": "Spearfall sprowadza White Tusk do Waszyngtonu i dodaje nowe misje na poziomie legendarnym. Sezon wprowadza też rozgrywkę międzyplatformową, personalizację wyposażenia Prototype, zmiany w Escalation i nowe nagrody.",
+    "nl": "Spearfall brengt White Tusk naar Washington met nieuwe missies op Legendary-niveau. Het seizoen voegt ook crossplay, aanpassingen voor Prototype-uitrusting, wijzigingen aan Escalation en nieuwe beloningen toe."
+   }
+  },
   {
    "id": "console-crossplay-servers-maintenance-2026-11-17",
    "kind": "maintenance",

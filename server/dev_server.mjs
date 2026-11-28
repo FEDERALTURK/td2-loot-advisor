@@ -18,7 +18,7 @@ const stmt = q => { let a = []; const s = {
 
 const { publicKey, privateKey } = generateKeyPairSync("ed25519");
 const port = parseInt(process.argv[2] || "8799", 10);
-const env = { DB: { prepare: stmt }, HASH_SALT: "dev", DISCORD_CLIENT_ID: "dev-client", DISCORD_CLIENT_SECRET: "dev-secret",
+const env = { DB: { prepare: stmt }, HASH_SALT: "local-development-hash-salt-do-not-use-in-production", DISCORD_CLIENT_ID: "dev-client", DISCORD_CLIENT_SECRET: "dev-secret",
   ENT_SIGNING_KEY: privateKey.export({ format: "der", type: "pkcs8" }).toString("base64"),
   ENT_PUBLIC_KEY: publicKey.export({ format: "der", type: "spki" }).subarray(-32).toString("hex"),
   ADMIN_TOKEN: process.env.DEV_ADMIN_TOKEN || "dev-admin-token-0123456789abcdef", GUMROAD_PRODUCT_ID: "dev-product",

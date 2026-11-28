@@ -8,11 +8,15 @@ eylemiyle başlatılır.
 from __future__ import annotations
 
 import collections
+import ast
+import importlib.util
 import logging
+import re
 import shutil
 import subprocess
 import threading
 import time
+import datetime
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -64,6 +68,10 @@ class CheckResult:
     detail: str
     evidence: str = ""
     repair: str = ""
+    source: str = ""
+    line: int = 0
+    symbol: str = ""
+    category: str = ""
 
 
 class EventBuffer(logging.Handler):
@@ -126,8 +134,143 @@ def assess(snapshot: dict) -> list[dict]:
     return checks
 
 
-def _result(key, title, status, detail, evidence="", repair=""):
-    return CheckResult(key, title, status, detail, evidence, repair)
+def _result(key, title, status, detail, evidence="", repair="", source="", line=0, symbol="", category=""):
+    return CheckResult(key, title, status, detail, evidence, repair, source, int(line or 0), symbol, category)
+
+
+SOURCE_EXCLUDES = {
+    ".git", ".venv", ".venv-ocr", "__pycache__", "backup", "build", "dist",
+    "graphify-out", "project_review", ".agents", ".claude", ".playwright-mcp",
+    "mobile", "server",
+}
+
+
+def _relative_source(path: Path, root: Path) -> str:
+    try:
+        return str(path.resolve().relative_to(root.resolve())).replace("\\", "/")
+    except ValueError:
+        return path.name
+
+
+def scan_source_tree(root, exclude_dirs=None) -> list[CheckResult]:
+    """Compile every in-scope Python file and return file/line diagnostics.
+
+    This is deliberately read-only.  It does not import application modules,
+    execute project code, or create cache files, so a broken optional package
+    cannot hide a syntax error elsewhere in the checkout.
+    """
+    root = Path(root).resolve()
+    excluded = set(exclude_dirs or SOURCE_EXCLUDES)
+    results = []
+    scanned = 0
+    for path in sorted(root.rglob("*.py")):
+        if any(part in excluded for part in path.relative_to(root).parts[:-1]):
+            continue
+        scanned += 1
+        source = _relative_source(path, root)
+        try:
+            # utf-8-sig accepts ordinary UTF-8 and legacy BOM-prefixed files;
+            # the BOM is an encoding marker, not a Python syntax error.
+            text = path.read_text(encoding="utf-8-sig")
+            ast.parse(text, filename=str(path))
+            compile(text, str(path), "exec")
+        except SyntaxError as exc:
+            results.append(_result(
+                "source_syntax", "Python kaynak sözdizimi", "error",
+                f"Kaynak dosyası derlenemiyor: {exc.msg}",
+                f"{source}:{exc.lineno or 0}", source=source,
+                line=exc.lineno or 0, category="Kod / Derleme"))
+        except (UnicodeDecodeError, OSError) as exc:
+            results.append(_result(
+                "source_read", "Python kaynak dosyası", "error",
+                f"Kaynak dosyası okunamadı: {type(exc).__name__}", source,
+                source=source, category="Kod / Dosya"))
+    if not results:
+        results.append(_result(
+            "source_syntax", "Python kaynak sözdizimi", "ok",
+            f"{scanned} Python dosyası sözdizimi açısından derlendi.",
+            str(root), category="Kod / Derleme"))
+    return results
+
+
+_TRACE_FRAME = re.compile(r'^\s*File "(?P<path>.+?)", line (?P<line>\d+), in (?P<symbol>.+)$')
+_TRACE_ERROR = re.compile(r"^(?P<kind>[A-Za-z_][\w.]*(?:Error|Exception|Warning)):\s*(?P<message>.*)$")
+_LOG_TIME = re.compile(r"^(?P<stamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\s+\|")
+
+
+def scan_runtime_log(log_path, root=None, limit=20, since=None) -> list[CheckResult]:
+    """Resolve recent Python tracebacks to a source file, line and function."""
+    path = Path(log_path)
+    if not path.is_file():
+        return []
+    try:
+        lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+    except OSError:
+        return []
+    root = Path(root).resolve() if root else None
+    results = []
+    frames = []
+    in_traceback = False
+    traceback_time = None
+    record_time = None
+    for raw in lines[-4000:]:
+        stamp = _LOG_TIME.match(raw)
+        if stamp:
+            try:
+                record_time = datetime.datetime.strptime(stamp.group("stamp"), "%Y-%m-%d %H:%M:%S").timestamp()
+            except ValueError:
+                record_time = None
+        if raw.startswith("Traceback (most recent call last):"):
+            in_traceback = True; frames = []; traceback_time = record_time; continue
+        if in_traceback:
+            match = _TRACE_FRAME.match(raw)
+            if match:
+                frames.append(match.groupdict()); continue
+            error = _TRACE_ERROR.match(raw.strip())
+            if error:
+                if since is not None and (traceback_time is None or traceback_time < float(since)):
+                    in_traceback = False; frames = []; traceback_time = None
+                    continue
+                data = error.groupdict()
+                frame = None
+                if frames:
+                    if root:
+                        frame = next((item for item in frames
+                                      if Path(item["path"]).resolve().is_relative_to(root)), frames[-1])
+                    else:
+                        frame = frames[-1]
+                source_path = Path(frame["path"]) if frame else Path("")
+                source = _relative_source(source_path, root) if frame and root else (str(source_path) if frame else "")
+                location = f"{source}:{frame['line']}" if frame else str(path)
+                kind = data["kind"]
+                status = "warning" if kind.endswith("Warning") else "error"
+                results.append(_result(
+                    "runtime_traceback", "Son çalışma zamanı traceback'i", status,
+                    f"{kind}: {data['message'] or 'mesaj yok'}", location,
+                    source=source, line=int(frame["line"]) if frame else 0,
+                    symbol=frame["symbol"] if frame else "", category="Çalışma Zamanı"))
+                in_traceback = False; frames = []; traceback_time = None
+                if len(results) >= limit:
+                    break
+    return results
+
+
+def dependency_checks() -> list[CheckResult]:
+    """Check core runtime modules without importing heavy OCR models."""
+    modules = (("mss", "mss ekran yakalama"), ("PIL", "Pillow görüntü işleme"),
+               ("pytesseract", "Tesseract köprüsü"), ("pynput", "global kısayol"),
+               ("rapidocr", "RapidOCR"), ("onnxruntime", "ONNX Runtime"))
+    results = []
+    for module, label in modules:
+        try:
+            present = importlib.util.find_spec(module) is not None
+        except (ImportError, ValueError):
+            present = False
+        results.append(_result(
+            "dependency", label, "ok" if present else "warning",
+            f"{label} hazır." if present else f"{label} bulunamadı; ilgili özellik devre dışı kalabilir.",
+            module, category="Ortam / Bağımlılık"))
+    return results
 
 
 def find_tesseract_candidate(settings: dict) -> str:
@@ -147,6 +290,14 @@ def run_checks(context: dict, command_runner=subprocess.run) -> list[CheckResult
     """
     settings = dict(context.get("settings") or {})
     results: list[CheckResult] = []
+
+    project_root = context.get("project_root")
+    if project_root:
+        results.extend(scan_source_tree(project_root))
+    log_path = context.get("log_path")
+    if log_path:
+        results.extend(scan_runtime_log(log_path, project_root, since=context.get("runtime_since")))
+    results.extend(dependency_checks())
 
     config_path = Path(context.get("config_path") or "")
     try:
@@ -285,9 +436,16 @@ def markdown_report(app_version: str, snapshot: dict, events: list[Event]) -> st
             else:
                 title, status = getattr(result, "title", "Kontrol"), getattr(result, "status", "info")
                 detail, evidence = getattr(result, "detail", ""), getattr(result, "evidence", "")
+            location = ""
+            if isinstance(result, dict):
+                source, line, symbol = result.get("source", ""), result.get("line", 0), result.get("symbol", "")
+            else:
+                source, line, symbol = getattr(result, "source", ""), getattr(result, "line", 0), getattr(result, "symbol", "")
+            if source:
+                location = f" · konum: {source}{':' + str(line) if line else ''}{' (' + symbol + ')' if symbol else ''}"
             suffix = f" · kanıt: {evidence}" if evidence else ""
             lines.append(f"- **{reports.scrub(title)} ({reports.scrub(status)}):** "
-                         f"{reports.scrub(detail + suffix)}")
+                         f"{reports.scrub(detail + location + suffix)}")
     lines += ["", "## Sistem Özeti", "```text", system[:3500], "```", "", "## Son Olaylar", "```text"]
     for event in events[-100:]:
         lines.append(reports.scrub(f"{event.timestamp} | {event.level:<7} | {event.category} | {event.message}"))

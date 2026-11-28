@@ -27,7 +27,7 @@ jobs:
         id: fetch
         run: |
           python - <<'EOF'
-          import json, os, sys, urllib.request
+          import datetime, json, os, sys, urllib.request
           sys.path.insert(0, ".")
           import tasks_live
           url = os.environ.get("TASKS_URL", "https://td2-stats.td2loot.workers.dev") + "/v1/tasks/live"
@@ -35,16 +35,34 @@ jobs:
               with urllib.request.urlopen(urllib.request.Request(url, headers={"user-agent": "td2-tasks-feed"}), timeout=20) as r:
                   raw = json.loads(r.read().decode("utf-8"))
           except Exception as e:
-              print("::warning::community tasks endpoint unavailable:", e); sys.exit(0)
+              print("::error::community tasks endpoint unavailable:", e); sys.exit(1)
           feed = tasks_live.validate_feed(raw)
+          generated = feed.get("generated")
+          try:
+              stamp = (datetime.datetime.fromtimestamp(generated, datetime.timezone.utc) if isinstance(generated, (int, float))
+                       else datetime.datetime.fromisoformat(str(generated).replace("Z", "+00:00")))
+              if stamp.tzinfo is None: stamp = stamp.replace(tzinfo=datetime.timezone.utc)
+              age = (datetime.datetime.now(datetime.timezone.utc) - stamp.astimezone(datetime.timezone.utc)).total_seconds()
+              if age < -300 or age > 900: raise ValueError(f"feed generated {age:.0f}s ago")
+          except (TypeError, ValueError, OverflowError, OSError) as e:
+              print("::error::community tasks response is stale or has no valid generated time:", e); sys.exit(1)
           out = {"schema": 1, "version": feed["version"], "generated": feed["generated"], "tasks": feed["tasks"], "lines": feed["lines"]}
+          out["checked_at"] = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
           path = "meta/tasks_live.json"
           old = None
           try: old = json.load(open(path, encoding="utf-8"))
           except Exception: pass
           strip = lambda d: ([{k: v for k, v in t.items() if k != "last_seen"} for t in (d or {}).get("tasks", [])], (d or {}).get("lines", []))
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as summary:
+              summary.write(f"Live API check succeeded: generated {age:.0f}s ago; {len(out['tasks'])} tasks, {len(out['lines'])} translation lines.\n")
           if old is not None and strip(old) == strip(out):
-              print("no change"); sys.exit(0)
+              old_check = old.get("checked_at")
+              if isinstance(old_check, str) and old_check[:10] == out["checked_at"][:10]:
+                  print("feed checked; content and daily check stamp unchanged")
+                  sys.exit(0)
+              print("content unchanged; refreshing the successful check timestamp")
+              with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as summary:
+                  summary.write("Content unchanged; refreshing the daily source-check timestamp.\n")
           json.dump(out, open(path, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
           open(os.environ["GITHUB_OUTPUT"], "a").write(f"changed=1\ncount={len(out['tasks'])}\n")
           print("tasks:", len(out["tasks"]))
@@ -56,4 +74,9 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add meta/tasks_live.json
           git commit -m "Topluluk görevleri: ${{ steps.fetch.outputs.count }} görev"
-          for i in 1 2 3; do git pull --rebase -q && git push -q && break; sleep 5; done
+          for i in 1 2 3; do
+            if git pull --rebase -q && git push -q; then exit 0; fi
+            sleep 5
+          done
+          echo "::error::could not publish community feed snapshot after 3 attempts"
+          exit 1

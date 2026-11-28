@@ -73,7 +73,7 @@ def monitor_size():
     if g: return g["width"], g["height"]
     try:
         import mss
-        with mss.mss() as s:
+        with mss.MSS() as s:
             m = s.monitors[1]
             return m["width"], m["height"]
     except Exception:
@@ -253,7 +253,11 @@ def settings_dir():
 def parse_cfg(text):
     """Snowdrop (The Division 2) .cfg dosyaları Lua tablosu biçimindedir: { key = value, ["a b"] = 1, t = { … } }.
     Küçük, güvenli bir ayrıştırıcı (kod çalıştırmaz)."""
+    if not isinstance(text, str) or len(text.encode("utf-8", errors="ignore")) > 2 * 1024 * 1024:
+        return {}
     tok = re.findall(r'"(?:[^"\\]|\\.)*"|\[|\]|\{|\}|=|,|[^\s\[\]{}=,]+', text)
+    if len(tok) > 250_000:
+        return {}
     pos = [0]
 
     def val():
@@ -289,7 +293,11 @@ def parse_cfg(text):
 
 
 def _read_cfg(path):
-    try: return parse_cfg(Path(path).read_text(encoding="utf-8", errors="ignore"))
+    try:
+        raw = Path(path).read_bytes()
+        if len(raw) > 2 * 1024 * 1024:
+            return {}
+        return parse_cfg(raw.decode("utf-8", errors="ignore"))
     except OSError: return {}
 
 
@@ -345,7 +353,10 @@ def read_game_settings(folder=None):
     if not files: return None
     f = files[0]
     try:
-        root = ET.fromstring(f.read_text(encoding="utf-8", errors="ignore"))
+        xml = f.read_text(encoding="utf-8", errors="ignore")
+        if "<!DOCTYPE" in xml.upper() or "<!ENTITY" in xml.upper():
+            return {"file": str(f), "error": "unsafe_xml"}
+        root = ET.fromstring(xml)  # nosec B314 - DTD/entity declarations are rejected above; file is local game config.
     except Exception:
         return {"file": str(f), "error": "unreadable"}
     out = {"file": str(f), "options": {}}
