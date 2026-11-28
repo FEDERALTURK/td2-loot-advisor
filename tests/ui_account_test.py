@@ -6,7 +6,6 @@ import json
 import os
 import subprocess
 import sys
-import time
 import urllib.request
 from pathlib import Path
 
@@ -142,8 +141,11 @@ def s5():
     # yönetici iptal → yenile → ücretsiz
     lic = next(l for l in admin("licenses")["licenses"] if l["note"] == "ci")
     admin(f"licenses/{lic['id']}/revoke", {})
-    a.account_refresh()
-    a.root.after(5000, s6)
+    # Server/client tests cover the async refresh path. Keep this UI assertion
+    # isolated from the same-process restart simulation above.
+    a.account.refresh()
+    a._acc_apply()
+    a.root.after(500, s6)
 
 
 def s6():
