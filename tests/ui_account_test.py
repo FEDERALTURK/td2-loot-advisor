@@ -148,8 +148,10 @@ def finish():
 def start_account_flow():
     print("account UI state:", {"asked": a.cfg["settings"].get("acc_asked"),
           "signed_in": a.account.signed_in, "welcome_suppressed": bool(os.environ.get("TD2_NO_WELCOME")),
-          "button_before": hasattr(a, "_acc_btn")}, flush=True)
+          "button_before": hasattr(a, "_acc_btn"),
+          "window_exists": bool(getattr(a, "_acc_win", None) and a._acc_win.winfo_exists())}, flush=True)
     a.account_startup()
+    a.open_account(welcome=True)
     print("account button after startup:", hasattr(a, "_acc_btn"), flush=True)
     a.root.after(200, s1)
 

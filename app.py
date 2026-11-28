@@ -4529,8 +4529,12 @@ class App:
         self._acc_changed()
 
     def open_account(self, welcome=False):
-        if getattr(self, "_acc_win", None) and self._acc_win.winfo_exists():
-            self._acc_win.lift(); return
+        existing = getattr(self, "_acc_win", None)
+        if existing and existing.winfo_exists():
+            button = getattr(self, "_acc_btn", None)
+            if button and button.winfo_exists():
+                existing.lift(); return
+            existing.destroy()
         w = self._acc_win = CtkToplevel(self.root); w.title("👤 " + t("acc.title")); w.configure(bg=PAL["bg"])
         w.transient(self.root)
         k = getattr(self, "ui_factor", 1.0)
