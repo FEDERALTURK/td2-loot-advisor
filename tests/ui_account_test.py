@@ -145,7 +145,7 @@ def finish():
     _finish()
 
 
-a.root.after(4500, s1)
+a.root.after(4500, lambda: (a.account_startup(), a.root.after(200, s1)))
 a.root.after(90000, finish)
 try:
     a.root.mainloop()
