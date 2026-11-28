@@ -74,7 +74,7 @@ def s1():
     step("başlıkta 'Giriş yap' rozeti", any(getattr(c[2], "__name__", "") == "open_account" for c in a.banner.chips if len(c) > 2))
     shot("acc_01_welcome", w)
     a._acc_btn.invoke()
-    a.root.after(6000, s2)
+    a.root.after(12000, s2)
 
 
 def s2():
