@@ -9,6 +9,7 @@
 - Build Tool sonuçları PvE temel tahmini olarak açıkça etiketlenir; PvP normalizasyonu ve dengeleme çarpanlarının dahil olmadığı belirtilir.
 - Düzenlenmiş build/görev kayıtlarında HTTPS kaynak bağlantısı ve kaynak başlığı doğrulaması güçlendirilir.
 - Yerel API günlüklerinde sorgu belirteçleri maskelenir; dış rapor adresleri HTTP(S) doğrulamasından geçirilir.
+- Telefon/ikinci ekranın yerel ağ üzerinden HTTP yayını, belirteç ve çeviri metnini ağda açık taşıyacağı için HTTPS taşıması hazır olana kadar engellenir; bu paylaşım bu sürümde kullanılamaz.
 
 **9.1.5.55 — Build Tool, panel özeti ve veri güvenliği**
 

@@ -40,6 +40,15 @@ a.cfg["settings"].update(only_game_active=False, tr_engine="local", tr_mode="sub
 res = {"steps": []}
 def step(name, ok, **kw):
     res["steps"].append({"name": name, "ok": bool(ok), **kw}); print(("OK   " if ok else "FAIL ") + name, kw, flush=True)
+
+def wait_for(predicate, callback, timeout=30000):
+    deadline = time.monotonic() + timeout / 1000
+    def poll():
+        if predicate() or time.monotonic() >= deadline:
+            callback()
+        else:
+            a.root.after(250, poll)
+    poll()
 def shot(name, full=False, w=None):
     try:
         if full: ImageGrab.grab(all_screens=True).save(SHOTS / f"tr_{name}.png"); return
@@ -58,7 +67,7 @@ def s2():
     shot("01_tab")
     ok = a.lt_start(quiet=True)
     step("canlı çeviri başladı", ok and bool(a.lt_stop_ev))
-    a.root.after(12000, s3)
+    wait_for(lambda: any("Black Tusk" in en for en, _ in getattr(a, "lt_hist", [])), s3)
 def s3():
     w = getattr(a, "_lt_win", None)
     hist = getattr(a, "lt_hist", [])
@@ -68,7 +77,8 @@ def s3():
     a.lt_stop()
     step("durduruldu", not getattr(a, "lt_stop_ev", None) and getattr(a, "_lt_win", None) is None)
     a.cfg["settings"].update(tr_mode="region", tr_region={"left": 30 + 30, "top": 30 + 30 + 80, "width": 880, "height": 90})
-    a.lt_hist = []; a.lt_once(); a.root.after(8000, s4)
+    a.lt_hist = []; a.lt_once()
+    wait_for(lambda: any("quartermaster" in en for en, _ in getattr(a, "lt_hist", [])), s4)
 def s4():
     hist = getattr(a, "lt_hist", [])
     step("seçili alan (istihbarat metni) çevrildi", any("quartermaster" in en for en, _ in hist), hist=hist[-1:])
@@ -84,7 +94,15 @@ def s4():
     step("ansiklopedi açıklaması Türkçe", "Kritik" in txt, txt=txt)
     # yerinde çeviri
     a.cfg["settings"].update(tr_mode="inplace", tr_hide=40); a._lt_last_sig = None
-    a.lt_hist = []; a.lt_once(); a.root.after(9000, s5)
+    a.lt_hist = []; a.lt_once()
+    def inplace_ready():
+        ip = getattr(a, "_lt_inplace", None)
+        if not ip: return False
+        canvases = [ip.cv] if ip.cv else []
+        for win in getattr(ip, "_wins", []):
+            canvases.extend(c for c in win.winfo_children() if isinstance(c, app.tk.Canvas))
+        return any(c.find_all() and any(c.type(i) == "text" for i in c.find_all()) for c in canvases)
+    wait_for(inplace_ready, s5)
 def s5():
     ip = getattr(a, "_lt_inplace", None)
     # Windows production renderer deliberately uses one opaque canvas per
@@ -107,22 +125,10 @@ def s5():
     step("yerinde çeviri: kutular oyun yazılarının yerinde", bool(ip and backend_visible and n >= 4 and text_n >= 1),
          canvas_items=n, text_items=text_n, native_windows=visible)
     shot("04_inplace", full=True); a._lt_hide()
-    # telefon / ikinci ekran
+    # HTTP LAN sharing intentionally remains disabled until it can use HTTPS.
     a.cfg["settings"].update(tr_screen=True, tr_screen_port=8797); url = a.tr_screen_apply()
-    import urllib.request
-    try:
-        page = urllib.request.urlopen(url, timeout=5).read().decode("utf-8")
-        st_ = json.loads(urllib.request.urlopen(url.replace("/tr?", "/api/state?"), timeout=5).read())
-        step("telefon sayfası açıldı ve son çeviriler hazır", "CANLI" in page and len(st_["translate"]["recent"]) >= 1,
-             recent=[x["tr"][:40] for x in st_["translate"]["recent"][-2:]])
-        terms_ = [t_ for x in st_["translate"]["recent"] for t_ in x.get("terms", [])]
-        step("terimler bulundu (Black Tusk vb.)", any(t_["name"] == "Black Tusk" for t_ in terms_), terms=[t_["name"] for t_ in terms_][:6])
-        edge = next((p_ for p_ in (r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe", r"C:\Program Files\Microsoft\Edge\Application\msedge.exe") if os.path.exists(p_)), None)
-        if edge:
-            subprocess.run([edge, "--headless=new", "--disable-gpu", "--window-size=420,820", "--virtual-time-budget=6000",
-                            f"--screenshot={SHOTS / 'tr_05_phone.png'}", url], timeout=40)
-    except Exception as e:
-        step("telefon sayfası", False, e=repr(e))
+    step("güvensiz HTTP LAN telefon paylaşımı engellendi", url is None and a.tr_api is None,
+         url_created=bool(url), api_created=bool(a.tr_api))
     a._ts_ui()
     a.select_page("translate"); shot("06_tab_new")
     a.lt_suggest("Agent, the Black Tusk have taken control of the Capitol Building.", "Ajan, Black Tusk Capitol Binası'nın kontrolünü ele geçirdi.")

@@ -29,7 +29,9 @@ a.cfg["settings"]["acc_asked"] = False
 restarts = []
 def fake_restart(tab=None, page=None):        # gerçek yeniden başlatma yerine: aynı akış (kaydedilen bayrak + açılış) süreç içinde
     restarts.append(tab)
-    a.rebuild_ui(tab=tab); a.account_startup()
+    # rebuild_ui schedules the normal delayed startup; let that callback consume
+    # the reopen flag just as a fresh process would.
+    a.rebuild_ui(tab=tab)
 a.restart_app = fake_restart
 res = {"steps": []}
 
@@ -66,9 +68,14 @@ def s1():
 
 def s2():
     step("Discord ile giriş tamamlandı", a.account.signed_in and a.account.username == "Soner", user=a.account.username)
-    step("girişten sonra program yeniden başlatıldı ve hesap penceresi açıldı", len(restarts) == 1 and a._acc_win.winfo_exists(),
+    win = getattr(a, "_acc_win", None)
+    reopened = len(restarts) == 1 and bool(win and win.winfo_exists())
+    step("girişten sonra program yeniden başlatıldı ve hesap penceresi açıldı", reopened,
          restarts=restarts, msg=getattr(a, "_acc_msg", None))
-    shot("acc_02_signed_in", a._acc_win)
+    if not reopened:
+        finish()
+        return
+    shot("acc_02_signed_in", win)
     key = admin("licenses", {"count": 1, "days": 30, "note": "ci"})["keys"][0]
     a._acc_code.insert(0, key); a._acc_btn.invoke()
     a.root.after(6000, s3)
