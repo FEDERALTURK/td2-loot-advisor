@@ -29,9 +29,10 @@ a.cfg["settings"]["acc_asked"] = False
 restarts = []
 def fake_restart(tab=None, page=None):        # gerçek yeniden başlatma yerine: aynı akış (kaydedilen bayrak + açılış) süreç içinde
     restarts.append(tab)
-    # rebuild_ui schedules the normal delayed startup; let that callback consume
-    # the reopen flag just as a fresh process would.
+    # A fresh process runs account_startup after the first UI frame; mirror that
+    # lifecycle because rebuild_ui alone does not schedule startup callbacks.
     a.rebuild_ui(tab=tab)
+    a.root.after(1600, a.account_startup)
 a.restart_app = fake_restart
 res = {"steps": []}
 
