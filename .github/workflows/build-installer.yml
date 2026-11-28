@@ -48,7 +48,7 @@ jobs:
       - name: Stability regressions before packaging
         shell: pwsh
         run: |
-          python -m pip install mss pillow pytesseract pynput numpy -r requirements-dev.txt
+          python -m pip install mss pillow pytesseract pynput numpy customtkinter -r requirements-dev.txt
           if ($LASTEXITCODE -ne 0) { throw "test dependency installation failed" }
           python -B tests/test_translation_controls.py
           if ($LASTEXITCODE -ne 0) { throw "translation control regressions failed" }
