@@ -6,14 +6,37 @@ klasörü yolları, lisans anahtarı, e-postalar, token'lar); sistem bilgisi ve 
 Ağ yoksa rapor reports_queue.json'da bekler; gönderilenler reports_sent.json'da durumlarıyla tutulur.
 """
 import json
+from email.utils import parsedate_to_datetime
 import platform
 import re
 import time
+import urllib.parse
 import urllib.request
 from pathlib import Path
 
 TYPES = ("bug", "feature", "question")
 TIMEOUT = 10
+
+
+def _retry_at(error):
+    value = error.headers.get("Retry-After", "")
+    try:
+        return time.time() + max(0, min(int(value), 86400))
+    except (TypeError, ValueError):
+        try:
+            return min(max(parsedate_to_datetime(value).timestamp(), time.time()), time.time() + 86400)
+        except (TypeError, ValueError, OverflowError):
+            return time.time() + 60
+
+
+def _http_base(url):
+    value = str(url or "").rstrip("/")
+    parsed = urllib.parse.urlsplit(value)
+    if parsed.scheme not in {"http", "https"} or not parsed.hostname or parsed.username or parsed.password or parsed.query or parsed.fragment:
+        raise ValueError("only plain HTTP(S) server URLs are allowed")
+    try: parsed.port
+    except ValueError as exc: raise ValueError("invalid server port") from exc
+    return value
 
 
 def scrub(text):
@@ -71,9 +94,9 @@ def build(rtype, title, body, contact="", app_version="", lang="", client="", sy
 
 
 def _post(url, payload, timeout=TIMEOUT):
-    req = urllib.request.Request(url.rstrip("/") + "/v1/reports", data=json.dumps(payload).encode("utf-8"), method="POST",
+    req = urllib.request.Request(_http_base(url) + "/v1/reports", data=json.dumps(payload).encode("utf-8"), method="POST",
                                  headers={"content-type": "application/json", "user-agent": "TD2-Loot-Advisor"})
-    with urllib.request.urlopen(req, timeout=timeout) as r:
+    with urllib.request.urlopen(req, timeout=timeout) as r:  # nosec B310 - base is _http_base validated.
         return json.loads(r.read().decode("utf-8"))
 
 
@@ -104,7 +127,12 @@ class Store:
         try:
             res = _post(url, payload)
         except urllib.error.HTTPError as e:
-            if e.code in (400, 413, 429): return "error", f"HTTP {e.code}"
+            if e.code in (400, 413): return "error", f"HTTP {e.code}"
+            if e.code == 429:
+                q = self.queue
+                q.append({"t": time.time(), "retry_at": _retry_at(e), "payload": payload})
+                self._save(self.queue_p, q)
+                return "queued", None
             res = None
         except Exception:
             res = None
@@ -120,6 +148,9 @@ class Store:
         """Kuyruktakileri göndermeyi dene. Dönüş: gönderilen sayısı."""
         q, left, n = self.queue, [], 0
         for item in q:
+            if item.get("retry_at", 0) > time.time():
+                left.append(item)
+                continue
             try:
                 res = _post(url, item["payload"])
                 if res.get("ok"):
@@ -128,6 +159,9 @@ class Store:
                            "status": "queued" if res.get("queued") else "new", "reply": ""}
                     s = self.sent; s.insert(0, rec); self._save(self.sent_p, s[:200]); n += 1
                     continue
+            except urllib.error.HTTPError as e:
+                if e.code == 429:
+                    item["retry_at"] = _retry_at(e)
             except Exception:
                 pass
             left.append(item)
@@ -140,8 +174,8 @@ class Store:
         ids = [str(r["id"]) for r in s if r.get("id")][:20]
         if not ids: return 0
         q = urllib.parse.urlencode({"client": client, "ids": ",".join(ids)})
-        req = urllib.request.Request(url.rstrip("/") + "/v1/reports/status?" + q, headers={"user-agent": "TD2-Loot-Advisor"})
-        with urllib.request.urlopen(req, timeout=timeout) as r:
+        req = urllib.request.Request(_http_base(url) + "/v1/reports/status?" + q, headers={"user-agent": "TD2-Loot-Advisor"})
+        with urllib.request.urlopen(req, timeout=timeout) as r:  # nosec B310 - base is _http_base validated.
             data = json.loads(r.read().decode("utf-8"))
         by = {x["id"]: x for x in data.get("reports", [])}
         changed = 0
@@ -155,5 +189,4 @@ class Store:
         return changed
 
 
-import urllib.parse  # noqa: E402  (refresh için)
 import urllib.error  # noqa: E402

@@ -9,6 +9,7 @@ or:
 """
 
 import json
+import os
 import sys
 import time
 import unittest
@@ -18,8 +19,7 @@ from unittest.mock import MagicMock, patch
 # Make sure the module under test is importable from the repo root.
 sys.path.insert(0, str(Path(__file__).parent.parent / "Thedivision2program"))
 
-import nexus_tracker  # noqa: E402
-
+import nexus_tracker
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -198,7 +198,8 @@ class TestGetStats(unittest.TestCase):
             with patch("nexus_tracker._load_cache", return_value=None), \
                  patch("nexus_tracker._fetch_from_api", return_value=None), \
                  patch("nexus_tracker._cache_path") as mock_path:
-                import tempfile, os
+                import os
+                import tempfile
                 tmp = tempfile.NamedTemporaryFile(
                     mode="w", suffix=".json", delete=False, encoding="utf-8")
                 json.dump(stale, tmp)
@@ -232,7 +233,10 @@ class TestFormatStats(unittest.TestCase):
 # Integration test (skipped if no network / NEXUS_MOD_ID not set)
 # ---------------------------------------------------------------------------
 
-@unittest.skipUnless(nexus_tracker.NEXUS_MOD_ID is not None, "NEXUS_MOD_ID not configured")
+@unittest.skipUnless(
+    nexus_tracker.NEXUS_MOD_ID is not None and os.environ.get("TD2_RUN_NETWORK_TESTS") == "1",
+    "live network tests disabled; set TD2_RUN_NETWORK_TESTS=1",
+)
 class TestLiveAPI(unittest.TestCase):
     """Live smoke test against the real Nexus Mods API."""
 

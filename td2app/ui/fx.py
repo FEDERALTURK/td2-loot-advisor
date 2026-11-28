@@ -248,17 +248,11 @@ class CursorFX:
             self._apply_tree(child, spec)
 
     def _on_enter(self, event):
-        # Some screens set hand2/arrow on hover. Apply the selected app cursor
-        # after those widget-level bindings have run.
-        if not self.enabled or not self.spec:
-            return
-        widget = getattr(event, "widget", None)
-        if widget is not None:
-            try:
-                widget.configure(cursor=self.spec)
-            except Exception:
-                pass
-            self._install_native_cursor(widget)
+        # Kept for compatibility with older callers.  Reconfiguring a
+        # CustomTkinter widget on every <Enter> causes its internal canvas to
+        # repaint and can make text flicker while the pointer crosses labels.
+        # Cursor assignment is now done once per tree refresh instead.
+        return None
 
     def refresh(self):
         """Reapply the app cursor after tabs or dynamic screen content change."""
@@ -276,9 +270,6 @@ class CursorFX:
                 self.enabled = True
                 self.spec = "crosshair" if style in ("crosshair", "ring") else "tcross"
                 self._apply_tree(self.root, self.spec)
-                if not self._enter_bound:
-                    self.root.bind_all("<Enter>", self._on_enter, add="+")
-                    self._enter_bound = True
                 return True
             self.folder.mkdir(parents=True, exist_ok=True)
             size = 48 if scale >= 1.2 else 32
@@ -298,9 +289,6 @@ class CursorFX:
             self.current = path
             self.enabled = True
             self._apply_tree(self.root, self.spec)
-            if not self._enter_bound:
-                self.root.bind_all("<Enter>", self._on_enter, add="+")
-                self._enter_bound = True
             return True
         except Exception:
             self.enabled = False; self.spec = ""
@@ -356,7 +344,10 @@ class TrailFX:
         if not self.alive: return
         try:
             r = self.root
-            if r.state() == "iconic" or not r.winfo_viewable():
+            # Uygulama önde değilken overlay'i gizle: aksi halde fare izi
+            # başka pencerelerin üzerinde asılı kalabilir.
+            focus_displayof = getattr(r, "focus_displayof", lambda: True)
+            if r.state() == "iconic" or not r.winfo_viewable() or focus_displayof() is None:
                 self.win.withdraw(); self.root.after(200, self._tick); return
             paused, _ = _animation_budget(r, 33)
             if paused:
@@ -366,7 +357,14 @@ class TrailFX:
             geo = f"{w}x{h}+{x}+{y}"
             if self.win.geometry() != geo: self.win.geometry(geo)
             self._n = getattr(self, "_n", 0) + 1
-            if self._n % 15 == 0: self.win.lift(r)               # her karede değil (pencere sırası savaşı = kasma)
+            if self._n % 15 == 0:
+                self.win.lift(r)                                  # pencere sırası savaşı = kasma
+                # Windows can recreate/reset the hit-test surface after a
+                # theme rebuild, deiconify or lift. Reapply the click-through
+                # hook periodically so the visible trail never captures a
+                # menu click.
+                if self.click_through:
+                    self.click_through(self.win)
             px, py = r.winfo_pointerxy()
             inside = x <= px < x + w and y <= py < y + h
             if inside and (not self.pts or (px - x, py - y) != self.pts[-1][:2]):
@@ -479,7 +477,7 @@ class DigitalRain(tk.Canvas):
         self._size = (n_cols, n_rows)
         self.delete("rain")
         self._grid = [[self.create_text((c + 0.5) * self.cell_w, r * self.cell_h, text="",
-                                        fill=self.dim_color, font=("Consolas", 10), anchor="n", tags=("rain",))
+                                        fill=self.dim_color, font=(ui_theme.FONT_MONO, 10), anchor="n", tags=("rain",))
                        for r in range(n_rows)] for c in range(n_cols)]
         self._cols = [self._new_column(n_rows) for _ in range(n_cols)]
         self.tag_lower("rain")
@@ -571,11 +569,11 @@ class CommandRibbon(tk.Canvas):
             for x in range(14, min(w, 180), 28):
                 self.create_line(x, h - 4, x + 13, 4, fill=self.muted, width=1)
             self.create_text(16, 14, anchor="w", text=self.title, fill="#e8edf2",
-                             font=("Segoe UI Semibold", 10))
+                             font=(ui_theme.FONT_DISPLAY, 10))
             self.create_text(16, 30, anchor="w", text=self.detail, fill=self.muted,
-                             font=("Segoe UI", 8))
+                             font=(ui_theme.FONT, 8))
             self.create_text(w - 16, 21, anchor="e", text="●  SECTION", fill=self.muted,
-                             font=("Segoe UI Semibold", 8))
+                             font=(ui_theme.FONT_DISPLAY, 8))
             if sweep is not None:
                 x = int(max(-70, min(w + 20, sweep)))
                 self.create_polygon(x - 38, 3, x, 3, x - 18, h - 3, x - 56, h - 3,
@@ -618,10 +616,10 @@ class FieldConsole(CommandRibbon):
             self.create_polygon(0, 3, w - cut, 3, w, h - 3, 0, h - 3, fill=self.surface, outline=self.muted)
             self.create_rectangle(0, 3, 7, h - 3, fill=self.accent, outline="")
             for x in range(18, w, 46): self.create_line(x, h - 5, x + 28, 5, fill=self.muted, width=1)
-            self.create_text(22, 25, anchor="w", text=self.title, fill="#e8edf2", font=("Segoe UI Semibold", 18))
-            self.create_text(22, 51, anchor="w", text=self.detail + "  //  SECURE UPLINK", fill=self.muted, font=("Segoe UI Semibold", 9))
-            self.create_text(w - 22, 25, anchor="e", text="SHD-02  •  ONLINE", fill=self.accent, font=("Segoe UI Semibold", 10))
-            self.create_text(w - 22, 50, anchor="e", text="FIELD NETWORK / ENCRYPTED", fill=self.muted, font=("Segoe UI", 8))
+            self.create_text(22, 25, anchor="w", text=self.title, fill="#e8edf2", font=(ui_theme.FONT_DISPLAY, 18))
+            self.create_text(22, 51, anchor="w", text=self.detail + "  //  SECURE UPLINK", fill=self.muted, font=(ui_theme.FONT_DISPLAY, 9))
+            self.create_text(w - 22, 25, anchor="e", text="SHD-02  •  ONLINE", fill=self.accent, font=(ui_theme.FONT_DISPLAY, 10))
+            self.create_text(w - 22, 50, anchor="e", text="FIELD NETWORK / ENCRYPTED", fill=self.muted, font=(ui_theme.FONT, 8))
             if sweep is not None:
                 x = int(max(-90, min(w + 25, sweep)))
                 self.create_polygon(x - 55, 4, x, 4, x - 28, h - 4, x - 83, h - 4, fill=self.accent, outline="")
@@ -640,14 +638,14 @@ class SHDStatusBar(tk.Canvas):
             w, h = max(1,self.winfo_width()), max(1,self.winfo_height()); self.delete("all")
             scan = int((time.perf_counter()-self.t0)*150)%max(1,w)
             if self.footer:
-                self.create_text(10,h//2,anchor="w",text="[ LOG ]  SYSTEM READY  //  OCR LINK STANDBY  //  MEMORY NOMINAL",fill=self.muted,font=("Consolas",8))
-                self.create_text(w-10,h//2,anchor="e",text="[ SHD // LOCAL ]",fill=self.accent,font=("Consolas",8))
+                self.create_text(10,h//2,anchor="w",text="[ LOG ]  SYSTEM READY  //  OCR LINK STANDBY  //  MEMORY NOMINAL",fill=self.muted,font=(ui_theme.FONT_MONO,8))
+                self.create_text(w-10,h//2,anchor="e",text="[ SHD // LOCAL ]",fill=self.accent,font=(ui_theme.FONT_MONO,8))
             else:
-                self.create_text(12,16,anchor="w",text="[ SHD_NET // SECURE_CONNECTION ]",fill=self.fg,font=("Consolas",10,"bold"))
-                self.create_text(w-12,16,anchor="e",text=time.strftime("%H:%M:%S")+"  //  ONLINE - 14ms",fill=self.muted,font=("Consolas",9))
+                self.create_text(12,16,anchor="w",text="[ SHD_NET // SECURE_CONNECTION ]",fill=self.fg,font=(ui_theme.FONT_MONO,10,"bold"))
+                self.create_text(w-12,16,anchor="e",text=time.strftime("%H:%M:%S")+"  //  ONLINE - 14ms",fill=self.muted,font=(ui_theme.FONT_MONO,9))
                 self.create_line(0,39,w,39,fill=self.muted,width=1)
                 self.create_line(max(0,scan-80),39,min(w,scan),39,fill=self.accent,width=2)
-                self.create_text(12,49,anchor="w",text="[ STRATEGIC HOMELAND DIVISION // TERMINAL ]",fill=self.accent,font=("Consolas",7))
+                self.create_text(12,49,anchor="w",text="[ STRATEGIC HOMELAND DIVISION // TERMINAL ]",fill=self.accent,font=(ui_theme.FONT_MONO,7))
         except tk.TclError: return
     def _tick(self):
         self._draw(); self.after(33,self._tick)
@@ -666,12 +664,20 @@ class SafeTrail:
         self.length = max(6, min(32, int(length)))
         self.cv = tk.Canvas(root, bg=root.cget("bg"), highlightthickness=0, bd=0)
         self.cv.place(x=0, y=0, relwidth=1, relheight=1)
-        # NOT: self.cv.lower() ÇAĞIRMA — Canvas kendi .lower() metodunu canvas-öge (tag_lower)
-        # sözdizimiyle gölgeliyor; argümansız çağrılırsa Tcl "wrong # args" TclError fırlatır.
-        # Pencere yığın sırasında bu widget'ı geriye almak için Misc'in orijinal metodunu kullan.
-        tk.Misc.lower(self.cv)
+        # NOT: self.cv.lower() ÇAĞIRMA — Canvas kendi .lower() metodunu
+        # canvas-öge (tag_lower) sözdizimiyle gölgeliyor. Yeni sayfalar
+        # sonradan oluşturulduğu için canvas'ı periyodik olarak tekrar alta
+        # almak gerekir; aksi halde fare izi alanı ayar kontrollerini örter.
+        self._lower()
+        self.root.after_idle(self._lower)
         self.points, self.alive, self._job = [], True, None
         self._bind = root.bind("<Motion>", self._motion, add="+")
+
+    def _lower(self):
+        try:
+            tk.Misc.lower(self.cv)
+        except tk.TclError:
+            pass
 
     def _motion(self, event):
         if not self.alive: return
@@ -686,6 +692,7 @@ class SafeTrail:
     def _tick(self):
         if not self.alive: return
         try:
+            self._lower()
             now=time.perf_counter(); self.points=[p for p in self.points if now-p[2] < .48]
             self.cv.delete("trail")
             for i,(x,y,stamp) in enumerate(self.points):
@@ -1137,7 +1144,7 @@ class AgentWatch:
                 P.put("line", nx, ny, cx + (nx - cx) * 0.78, cy + (ny - cy) * 0.78,
                            fill=self._col(0.18), width=1, dash=(3, 4), tags="dyn")
             P.put("text", cx, cy + R * 0.34, text="ISAC // LIVE SCAN", fill=self._col(0.44),
-                       font=("Segoe UI Semibold", max(8, int(R * 0.22) // 5)), tags="dyn")
+                       font=(ui_theme.FONT_DISPLAY, max(8, int(R * 0.22) // 5)), tags="dyn")
         elif self.variant == "rogue":
             # Rogue: kırmızı risk dilimleri, bozulan sinyal parçaları ve uyarı nabzı.
             for j in range(7):
@@ -1150,7 +1157,7 @@ class AgentWatch:
                 P.put("line", xx, yy, xx + R * 0.16, yy, fill=self._col(0.26 + 0.12 * (j % 2)), width=2, tags="dyn")
             warn = 0.45 + 0.35 * (0.5 + 0.5 * math.sin(tt * 3.0))
             P.put("text", cx, cy + R * 0.34, text="ROGUE SIGNAL // UNSTABLE", fill=self._col(warn),
-                       font=("Segoe UI Semibold", max(8, int(R * 0.22) // 5)), tags="dyn")
+                       font=(ui_theme.FONT_DISPLAY, max(8, int(R * 0.22) // 5)), tags="dyn")
         # fareyi takip eden turuncu ışık + kuyruk + parıltı katmanları
         A = self.angle
         for k in range(6, 0, -1):                                   # kuyruk (ters yönde, solarak)
@@ -1166,23 +1173,23 @@ class AgentWatch:
         # merkez: saat
         fs = max(14, int(R * 0.22))
         P.put("text", cx, cy - R * 0.06, text=time.strftime("%H:%M", lt), fill=self._col(1.0),
-                       font=("Segoe UI Semibold", fs), tags="dyn")
+                       font=(ui_theme.FONT_DISPLAY, fs), tags="dyn")
         P.put("text", cx + R * 0.34, cy - R * 0.02, text=time.strftime("%S", lt), fill=self._col(0.7),
-                       font=("Segoe UI Semibold", max(9, fs // 3)), tags="dyn", anchor="w")
+                       font=(ui_theme.FONT_DISPLAY, max(9, fs // 3)), tags="dyn", anchor="w")
         P.put("text", cx, cy + R * 0.16, text=time.strftime("%d.%m.%Y", lt), fill=self._grey(0.8),
-                       font=("Segoe UI", max(8, fs // 4)), tags="dyn")
-        P.put("text", cx, cy - R * 0.33, text="◆ AGENT", fill=self._col(0.6), font=("Segoe UI Semibold", max(8, fs // 4)), tags="dyn")
+                       font=(ui_theme.FONT, max(8, fs // 4)), tags="dyn")
+        P.put("text", cx, cy - R * 0.33, text="◆ AGENT", fill=self._col(0.6), font=(ui_theme.FONT_DISPLAY, max(8, fs // 4)), tags="dyn")
         P.end()
 
     def _render_field(self, P, w, h, cx, cy, R, tt, target):
         """Saat/agent halkası olmadan saha haritası taraması — 12 FPS arka plan katmanı."""
         # Koordinat köşeleri ve tarama bandı, gerçek oyun haritasını kopyalamaz.
         P.put("text", 22, 18, text="SHD FIELD TERMINAL", fill=self._col(0.88),
-              font=("Segoe UI Semibold", 11), anchor="w", tags="dyn")
+              font=(ui_theme.FONT_DISPLAY, 11), anchor="w", tags="dyn")
         P.put("text", 22, 35, text="SECTOR MAP // DATA LINK STABLE", fill=self._grey(0.7),
-              font=("Segoe UI", 8), anchor="w", tags="dyn")
+              font=(ui_theme.FONT, 8), anchor="w", tags="dyn")
         P.put("text", w - 22, 18, text="GRID 04-A", fill=self._col(0.62),
-              font=("Segoe UI Semibold", 9), anchor="e", tags="dyn")
+              font=(ui_theme.FONT_DISPLAY, 9), anchor="e", tags="dyn")
         # Harita merkezi + merkezden fare yönüne kısa doğrultu; ajan saati yok.
         mx, my = cx, cy
         P.put("rectangle", mx - R * 0.58, my - R * 0.34, mx + R * 0.58, my + R * 0.34,
@@ -1203,13 +1210,21 @@ class AgentWatch:
         for step, label in enumerate(("SAFEHOUSE", "SUPPLY", "INTEL")):
             x = 22 + step * 115
             P.put("text", x, h - 22, text="■ " + label, fill=self._grey(.70),
-                  font=("Segoe UI Semibold", 8), anchor="w", tags="dyn")
+                  font=(ui_theme.FONT_DISPLAY, 8), anchor="w", tags="dyn")
 
 
 class WatchBackground:
-    """Windows: ana pencerenin ARKASINDA duran ikinci bir pencere ajan saatini çizer; ana pencerenin
-    zemin rengi (-transparentcolor) şeffaf yapılır → kartlar ve listeler okunur kalır, boşluklarda saat görünür.
-    Diğer sistemlerde (şeffaflık yok) kapalı kalır."""
+    """Windows'ta ana pencerenin arkasında ajan saatini çizer.
+
+    Windows renk anahtarı olarak uygulamanın gerçek tema zeminini kullanmak
+    güvenli değildir: kartlar, sekmeler ve boşluklar aynı rengi paylaşabildiği
+    için bütün bu pikseller şeffaflaşır.  Bu sınıf yalnızca kök pencerenin boş
+    yüzeyine ayrılmış, UI paletinde kullanılmayan ``KEY`` rengini anahtarlar.
+    Çocuk widget'lar kendi yüzey renklerini çizdiğinden menüler opak kalır.
+    Diğer sistemlerde (şeffaflık yok) kapalı kalır.
+    """
+
+    KEY = "#010203"
 
     def __init__(self, root, bg="#0b0e13", color="#ff6d10", dim=0.0, fps=12, variant="standard"):
         self.root, self.bgc, self.color, self.dim, self.fps = root, bg, color, dim, fps
@@ -1217,6 +1232,8 @@ class WatchBackground:
         self.win = self.cv = self.watch = None
         self.alive = False
         self._geo = None
+        self._root_bindings = []
+        self._root_surface = None
 
     def start(self):
         if self.alive or os.name != "nt": return False
@@ -1238,8 +1255,9 @@ class WatchBackground:
             self._style(w)
             self.alive = True
             self._n, self._keyed = 0, False                # zemin, saat yerine oturunca şeffaflaşır
-            for ev in ("<Map>", "<Configure>"):            # açılış, büyütme/küçültme, taşıma: konumu yeniden eşitle
-                self.root.bind(ev, self._resync, add="+")
+            for ev in ("<Map>", "<Configure>", "<Unmap>"):  # taşıma/boyutlandırma: timer beklemeden eşitle
+                funcid = self.root.bind(ev, self._resync, add="+")
+                self._root_bindings.append((ev, funcid))
             self._tick()
             return True
         except Exception:
@@ -1325,16 +1343,77 @@ class WatchBackground:
     def stop(self):
         self.alive = False
         self._keyed = False
+        for sequence, funcid in self._root_bindings:
+            try:
+                self.root.unbind(sequence, funcid)
+            except (tk.TclError, AttributeError):
+                pass
+        self._root_bindings = []
         try: self.root.attributes("-transparentcolor", "")
         except Exception: pass
+        self._restore_root_surface()
         try:
             if self.win: self.win.destroy()
         except Exception:
             pass
         self.win = self.cv = self.watch = None
 
+    def _set_root_surface(self):
+        """Kök pencerenin yalnızca boş yüzeyini renk anahtarına ayır.
+
+        CTk ve Tk farklı option adları kullandığından iki kontrollü yol
+        denenir.  Başarısız olursa renk anahtarı da etkinleştirilmez; bu,
+        opak ve tıklanabilir bir arayüzü şeffaf bir arayüze tercih eder.
+        """
+        if self._root_surface is not None:
+            return True
+        try:
+            try:
+                previous = self.root.cget("fg_color")
+                self._root_surface = ("fg_color", previous)
+                self.root.configure(fg_color=self.KEY)
+            except (tk.TclError, AttributeError, TypeError):
+                previous = self.root.cget("bg")
+                self._root_surface = ("bg", previous)
+                self.root.configure(bg=self.KEY)
+            return True
+        except (tk.TclError, AttributeError, TypeError, ValueError):
+            self._root_surface = None
+            return False
+
+    def _restore_root_surface(self):
+        previous = self._root_surface
+        self._root_surface = None
+        if not previous:
+            return
+        option, value = previous
+        try:
+            self.root.configure(**{option: value})
+        except (tk.TclError, AttributeError, TypeError, ValueError):
+            pass
+
     def _resync(self, _e=None):
-        self._geo = None
+        """Move the background immediately when Windows reports a move/resize.
+
+        The render timer intentionally runs slowly to protect CPU usage.  A
+        timer-only position update leaves the old agent-clock window behind
+        while the user drags the main window, so geometry is synchronized from
+        Tk's Configure/Map events as a separate fast path.
+        """
+        if not self.alive:
+            return
+        try:
+            if self.root.state() in ("iconic", "withdrawn") or not self.root.winfo_viewable():
+                self._geo = None
+                return
+            geo = self._client_rect()
+            if self.win.state() == "withdrawn":
+                self.win.deiconify()
+            if geo != self._geo:
+                self._place(geo)
+                self._geo = geo
+        except (tk.TclError, AttributeError):
+            self._geo = None
 
     def _client_rect(self):
         """Ana pencerenin iç alanının GERÇEK ekran koordinatları (Windows'tan; Tk'nın açılıştaki eski değerleri değil)."""
@@ -1383,8 +1462,11 @@ class WatchBackground:
             if geo != self._geo:
                 self._geo = geo
                 self._place(geo)
-                if not self._keyed:                        # artık saat arkada: boşluklarda masaüstü değil saat görünür
-                    self.root.attributes("-transparentcolor", self.bgc); self._keyed = True
+                if not self._keyed and self._set_root_surface():
+                    # Yalnızca ayrılmış KEY rengi transparan olsun. Tema bg'si
+                    # burada kullanılamaz; kartların zemini de aynı renktir.
+                    self.root.attributes("-transparentcolor", self.KEY)
+                    self._keyed = True
             elif time.time() - self._last_z > 1.0:          # pencere sırası her karede değil, saniyede bir
                 self._below_root(); self._last_z = time.time()
             self.watch.render()

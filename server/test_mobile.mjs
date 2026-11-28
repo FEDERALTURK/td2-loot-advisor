@@ -22,7 +22,7 @@ function stmt(q) {
 const DB = { prepare: stmt, async batch(list) { return Promise.all(list.map(s => s.run())); } };
 
 const { publicKey, privateKey } = generateKeyPairSync("ed25519");
-const env = { DB, HASH_SALT: "t", DISCORD_CLIENT_ID: "123", DISCORD_CLIENT_SECRET: "sec",
+const env = { DB, HASH_SALT: "test-only-hash-salt-not-for-production-0002", DISCORD_CLIENT_ID: "123", DISCORD_CLIENT_SECRET: "sec",
   ENT_SIGNING_KEY: privateKey.export({ format: "der", type: "pkcs8" }).toString("base64"),
   ENT_PUBLIC_KEY: publicKey.export({ format: "der", type: "spki" }).subarray(-32).toString("hex"),
   ADMIN_TOKEN: "admin-token-very-long-random-xyz-123", GUMROAD_PRODUCT_ID: "prod",

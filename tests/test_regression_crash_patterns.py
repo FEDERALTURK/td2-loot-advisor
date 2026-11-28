@@ -23,6 +23,7 @@ olarak ayrıştırıp iki bilinen hata desenini arar:
 """
 import ast
 import pathlib
+import tokenize
 import unittest
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -32,7 +33,9 @@ DEFERRED_CALL_ATTRS = {"after", "after_idle", "call_soon", "call_later", "call_s
 
 
 def _parse(path: pathlib.Path) -> ast.Module:
-    return ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+    # Match Python's source decoding behavior, including UTF-8 BOM and coding cookies.
+    with tokenize.open(path) as source:
+        return ast.parse(source.read(), filename=str(path))
 
 
 def _module_level_import_names(tree: ast.Module) -> set:

@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
+<a class="skip-link" href="#main-content" data-i18n="skip_content">Ana içeriğe geç</a>
 <div class="td2-bg" aria-hidden="true">
   <div class="td2-bg-base"></div>
   <div class="td2-glow td2-glow-a"></div>
@@ -50,18 +51,19 @@
   <div class="td2-wrap td2-nav">
     <div class="td2-brand"><span class="dot"></span> TD2 Loot Advisor</div>
     <nav class="td2-nav-links">
-      <a href="index.html" class="active" data-i18n="nav_home">Ana Sayfa</a>
+      <a href="index.html" class="active" aria-current="page" data-i18n="nav_home">Ana Sayfa</a>
       <a href="news/" data-i18n="nav_news">Haberler</a>
       <a href="premium/" data-i18n="nav_premium">Premium</a>
       <a href="account/" data-i18n="nav_account">Hesabım</a>
     </nav>
     <div class="td2-nav-right">
-      <div class="td2-lang"><button class="td2-lang-btn" data-lang="tr">TR</button><button class="td2-lang-btn" data-lang="en">EN</button></div>
+      <div class="td2-lang" role="group" aria-label="Language"><button class="td2-lang-btn" data-lang="tr" aria-pressed="true">TR</button><button class="td2-lang-btn" data-lang="en" aria-pressed="false">EN</button></div>
       <a class="btn btn-primary btn-sm" href="#indir" data-i18n="nav_download">İndir</a>
     </div>
   </div>
 </header>
 
+<main id="main-content" tabindex="-1">
 <section class="td2-hero td2-wrap" id="td2-hero">
   <div class="td2-hero-glow" aria-hidden="true"></div>
   <div class="td2-scan" aria-hidden="true"></div>
@@ -120,6 +122,8 @@
   </div>
   <p class="down-note" data-i18n="down_unsigned_note">Henüz Windows kod imzalama sertifikası yok…</p>
 </section>
+
+</main>
 
 <footer class="td2-footer td2-wrap">
   <div class="links">

@@ -13,7 +13,7 @@ const stmt = q => { let a = []; const s = {
   async all() { return { results: sql.prepare(q).all(...a) }; } }; return s; };
 const ADMIN = "admin-token-0123456789abcdef-xyz";
 globalThis.fetch = async () => new Response("nf", { status: 404 });
-const env = { DB: { prepare: stmt }, HASH_SALT: "t", ADMIN_TOKEN: ADMIN };
+const env = { DB: { prepare: stmt }, HASH_SALT: "test-only-hash-salt-not-for-production-0005", ADMIN_TOKEN: ADMIN };
 
 let fails = 0;
 const ok = (c, m) => { console.log((c ? "OK   " : "FAIL ") + m); if (!c) fails++; };

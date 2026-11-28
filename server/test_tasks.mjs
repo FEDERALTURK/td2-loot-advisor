@@ -16,7 +16,7 @@ globalThis.fetch = async (url, opts = {}) => {
   if (opts.method === "PUT" && url.includes("/contents/tasks/")) { puts.push([url, JSON.parse(opts.body)]); return Response.json({ ok: 1 }, { status: 201 }); }
   return new Response("nf", { status: 404 });
 };
-const env = { DB: { prepare: stmt }, HASH_SALT: "t", ADMIN_TOKEN: ADMIN, GITHUB_TOKEN: "x", REPORTS_REPO: "o/r" };
+const env = { DB: { prepare: stmt }, HASH_SALT: "test-only-hash-salt-not-for-production-0004", ADMIN_TOKEN: ADMIN, GITHUB_TOKEN: "x", REPORTS_REPO: "o/r" };
 
 let fails = 0;
 const ok = (c, m) => { console.log((c ? "OK   " : "FAIL ") + m); if (!c) fails++; };

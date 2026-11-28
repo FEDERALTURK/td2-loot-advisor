@@ -7,7 +7,7 @@
 const STRINGS = {
   tr: {
     nav_home: "Ana Sayfa", nav_news: "Haberler", nav_premium: "Premium", nav_account: "Hesabım",
-    nav_download: "İndir", nav_github: "GitHub",
+    nav_download: "İndir", nav_github: "GitHub", skip_content: "Ana içeriğe geç",
 
     hero_title: "Envanterde zaman kaybetme.",
     hero_sub: "The Division 2'de bir eşyanın üzerine gel, F8'e bas: TD2 Loot Advisor ekranı okur, kendi build kurallarınla karşılaştırır ve saniyeler içinde sakla / düşün / kır kararını verir. Oyunun belleğine hiç dokunmaz.",
@@ -99,6 +99,8 @@ const STRINGS = {
     acc_delete_confirm: "Emin misin? Bu, hesabının tamamını (masaüstü ve telefon dahil) silme talebi başlatır.",
     acc_delete_ok: "Silme talebi alındı. Oturumların hemen kapatıldı; veriler 24 saat sonra kalıcı olarak silinecek.",
     acc_err_generic: "Bir şeyler ters gitti, birazdan tekrar dene.",
+    acc_loading: "Hesap bilgileri yükleniyor…",
+    acc_service_err: "Hesap sunucusuna ulaşılamadı. Bağlantını kontrol edip yeniden dene.",
     acc_logging_in: "Discord'a yönlendiriliyor…",
     acc_completing: "Giriş tamamlanıyor…",
 
@@ -108,7 +110,7 @@ const STRINGS = {
   },
   en: {
     nav_home: "Home", nav_news: "News", nav_premium: "Premium", nav_account: "My account",
-    nav_download: "Download", nav_github: "GitHub",
+    nav_download: "Download", nav_github: "GitHub", skip_content: "Skip to main content",
 
     hero_title: "Stop wasting time in your stash.",
     hero_sub: "Hover an item in The Division 2, press F8: TD2 Loot Advisor reads the screen, checks it against your own build rules, and gives a keep / consider / dismantle verdict in seconds. It never touches game memory.",
@@ -200,6 +202,8 @@ const STRINGS = {
     acc_delete_confirm: "Are you sure? This starts a request to delete your whole account (desktop and phone included).",
     acc_delete_ok: "Deletion requested. Your sessions were revoked immediately; the data will be permanently deleted after 24 hours.",
     acc_err_generic: "Something went wrong, please try again shortly.",
+    acc_loading: "Loading account details…",
+    acc_service_err: "The account service could not be reached. Check your connection and try again.",
     acc_logging_in: "Redirecting to Discord…",
     acc_completing: "Finishing sign-in…",
 
@@ -229,7 +233,11 @@ function td2ApplyI18n(lang) {
   document.documentElement.lang = l;
   document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = td2T(el.getAttribute("data-i18n"), l); });
   document.querySelectorAll("[data-i18n-ph]").forEach(el => { el.placeholder = td2T(el.getAttribute("data-i18n-ph"), l); });
-  document.querySelectorAll(".td2-lang-btn").forEach(b => b.classList.toggle("active", b.dataset.lang === l));
+  document.querySelectorAll(".td2-lang-btn").forEach(b => {
+    const active = b.dataset.lang === l;
+    b.classList.toggle("active", active);
+    b.setAttribute("aria-pressed", String(active));
+  });
 }
 document.addEventListener("DOMContentLoaded", () => {
   td2ApplyI18n();

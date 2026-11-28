@@ -31,12 +31,12 @@ def timeit(fn, n):
 # ---- A) boşta döngü
 try:
     import mss
-    with mss.mss() as s:
+    with mss.MSS() as s:
         mon = s.monitors[1]
     region = {"left": mon["left"], "top": mon["top"], "width": mon["width"], "height": mon["height"]}
 
     def old_iter():
-        with mss.mss() as sct:
+        with mss.MSS() as sct:
             g = sct.grab(region); img = Image.frombytes("RGB", g.size, g.rgb)
         list(ImageOps.grayscale(img).resize((24, 24)).getdata())
     out["idle_old_ms"] = timeit(old_iter, 15)

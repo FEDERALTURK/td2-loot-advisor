@@ -45,6 +45,7 @@ def run(app, model_dir, output):
               "limits": ["Synthetic desktop only; no game/DX12 verification",
                          "Physical mouse pass-through and monitor DPI change require interactive validation"]}
     try:
+        app._ensure_deferred()
         app.i18n.init(app.BUNDLE)
         app.i18n.set_language("tr")
         root = app.tk.Tk()

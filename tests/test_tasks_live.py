@@ -180,7 +180,16 @@ def e2e():
         o = tr2.translate(["Objective\nComplete the Roosevelt Island 00/01 mission on Legendary difficulty"])[0]
         ok(o == "Hedef\nLegendary zorlukta Roosevelt Adası görevini tamamla (00/01)", "üçüncü oyuncunun ekranında hazır çeviri: %r" % o)
     finally:
-        p.terminate()
+        if p.poll() is None:
+            p.terminate()
+        try:
+            p.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            p.kill()
+            p.wait(timeout=5)
+        for stream in (p.stdout, p.stderr):
+            if stream:
+                stream.close()
 
 
 if "--e2e" in sys.argv: e2e()

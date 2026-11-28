@@ -68,7 +68,10 @@ def s5():
     btn = None
     for w in a._quiz_card.winfo_children():
         for b in getattr(w, "winfo_children", lambda: [])():
-            if isinstance(b, app.tk.Button) and b.cget("text") == a._quiz_opt(q, q["right"]): btn = b
+            try:
+                if b.cget("text") == a._quiz_opt(q, q["right"]): btn = b
+            except Exception:
+                pass
     btn.invoke(); a.root.update()
     step("doğru cevap XP verdi", a.cfg["settings"]["quiz_xp"] > xp0, xp=a.cfg["settings"]["quiz_xp"])
     shot("04_quiz")
@@ -104,7 +107,16 @@ def guard(fn):
             import traceback; traceback.print_exc(); step(fn.__name__ + " hata", False, e=repr(e)); finish()
     return run
 for _n in ("s1", "s2", "s3", "s4", "s5", "s6", "s7"): globals()[_n] = guard(globals()[_n])
-a.root.after(4000, s1)
+def wait_info_page(deadline):
+    if hasattr(a, "info_nb"):
+        s1()
+    elif time.monotonic() >= deadline:
+        step("bilgi sayfası açılış kuyruğunda hazır", False)
+        finish()
+    else:
+        a.root.after(100, lambda: wait_info_page(deadline))
+
+a.root.after(4000, lambda: wait_info_page(time.monotonic() + 30))
 a.root.after(120000, finish)
 a.root.mainloop()
 if __name__ == "__main__":

@@ -10,8 +10,11 @@ eşik/ön işleme gerektirmez ve Tesseract kurulumu istemez. Kurulu değilse Tes
     eng.data(img)  -> pytesseract.image_to_data(DICT) biçiminde kelime kutuları (find_card için)
 """
 import logging
+import os
 import re
+import shutil
 import threading
+from pathlib import Path
 
 log = logging.getLogger("td2.ocr")
 
@@ -40,10 +43,28 @@ def rapid_available():
 def tesseract_available():
     try:
         import pytesseract
+        _configure_tesseract(pytesseract)
         pytesseract.get_tesseract_version()
         return True
     except Exception:
         return False
+
+
+def _configure_tesseract(pytesseract):
+    """Find a standard Windows Tesseract install even when it is not on PATH."""
+    configured = getattr(pytesseract.pytesseract, "tesseract_cmd", "tesseract")
+    candidates = [
+        os.environ.get("TESSERACT_CMD", ""),
+        configured if configured != "tesseract" else "",
+        shutil.which("tesseract") or "",
+        r"C:\Program Files\Tesseract-OCR\tesseract.exe",
+        r"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe",
+    ]
+    for candidate in candidates:
+        if candidate and Path(candidate).is_file():
+            pytesseract.pytesseract.tesseract_cmd = str(candidate)
+            return str(candidate)
+    return configured
 
 
 def _rapid(rec_lang="en"):
@@ -56,7 +77,7 @@ def _rapid(rec_lang="en"):
         from rapidocr import RapidOCR
         params = {"Global.log_level": "error", "Global.use_cls": False}   # kart yazısı hep düz: açı modeli gereksiz (~%10 hız)
         if key != "default":
-            from rapidocr import LangRec, OCRVersion, ModelType
+            from rapidocr import LangRec, ModelType, OCRVersion
             params.update({"Rec.lang_type": getattr(LangRec, key.upper()),
                            "Rec.ocr_version": OCRVersion.PPOCRV5, "Rec.model_type": ModelType.MOBILE})
         if USE_DML:
@@ -96,6 +117,7 @@ def dml_probe(image_path, runs=3):
     """DirectML denemesi (ayrı süreçte çalıştırılır; sürücü sorunu programı düşürmesin).
     Aynı kart işlemcide ve DirectML ile okunur: sonuç aynı mı, hangisi hızlı?"""
     import time as _t
+
     from PIL import Image
     out = {"providers": dml_providers(), "ok": False}
     if "DmlExecutionProvider" not in out["providers"]:
@@ -172,6 +194,12 @@ class Engine:
         self.rec_lang = rec_lang if rec_lang in REC_LANGS else "en"
         self.tess_lang, self.tess_config = tess_lang, tess_config
         self.preprocess = preprocess                 # Tesseract için ön işleme (gamedata.text_image)
+        if self.requested in {"auto", "tesseract"}:
+            try:
+                import pytesseract
+                _configure_tesseract(pytesseract)
+            except Exception:
+                pass
         self.name = self._resolve()
 
     def _resolve(self):
@@ -180,8 +208,11 @@ class Engine:
         return "rapidocr" if rapid_available() else "tesseract"
 
     def warm_up(self):
-        """Modeli arka planda yükle (ilk taramada bekleme olmasın)."""
-        if self.name != "rapidocr": return
+        """Modeli arka planda yükle ve hazır olunca Event'i işaretle."""
+        ready = threading.Event()
+        if self.name != "rapidocr":
+            ready.set()
+            return ready
         def go():
             try:
                 from PIL import Image
@@ -189,7 +220,14 @@ class Engine:
                     _rapid(self.rec_lang)(_np(Image.new("RGB", (64, 32))))
             except Exception as e:
                 log.warning("RapidOCR warm-up failed: %s", e)
-        threading.Thread(target=go, daemon=True).start()
+            finally:
+                ready.set()
+        try:
+            threading.Thread(target=go, daemon=True, name="td2-ocr-warmup").start()
+        except Exception:
+            log.exception("RapidOCR warm-up worker could not start")
+            ready.set()
+        return ready
 
     # ------------------------------------------------------------ RapidOCR
     def _rapid_boxes(self, img, scale=1.0):

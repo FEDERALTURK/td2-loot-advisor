@@ -18,6 +18,7 @@
 // Ortam: aynı D1 (env.DB), accounts.js ile aynı HASH_SALT.
 
 import { session as desktopSession } from "./accounts.js";
+import { requireHashSalt } from "./security.js";
 
 const enc = new TextEncoder();
 const now = () => Math.floor(Date.now() / 1000);
@@ -41,7 +42,7 @@ async function sha256(text) {
 }
 function b64uEnc(bytes) { let s = ""; for (const b of bytes) s += String.fromCharCode(b); return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); }
 function randomToken(n = 32) { return b64uEnc(crypto.getRandomValues(new Uint8Array(n))); }
-const salt = env => env.HASH_SALT || "dev-salt";
+const salt = requireHashSalt;
 const ipOf = req => req.headers.get("cf-connecting-ip") || "local";
 const ID = /^[A-Za-z0-9_\-]{16,64}$/;
 

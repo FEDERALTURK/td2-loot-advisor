@@ -14,6 +14,7 @@ import os
 import threading
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 import uuid
 
@@ -26,6 +27,16 @@ KINDS = ("gear", "weapon", "gear_mod", "weapon_mod", "skill_mod")
 MAX_QUEUE = 2000
 BATCH = 50
 UA = {"User-Agent": "TD2-Loot-Advisor", "Content-Type": "application/json"}
+
+
+def _http_base(url):
+    value = (url or DEFAULT_URL).rstrip("/")
+    parsed = urllib.parse.urlsplit(value)
+    if parsed.scheme not in {"http", "https"} or not parsed.hostname or parsed.username or parsed.password or parsed.query or parsed.fragment:
+        raise ValueError("only plain HTTP(S) server URLs are allowed")
+    try: parsed.port
+    except ValueError as exc: raise ValueError("invalid server port") from exc
+    return value
 
 
 def new_client_id():
@@ -54,15 +65,20 @@ class Queue:
     def __init__(self, path):
         self.path, self.lock = path, threading.Lock()
         try:
-            with open(path, encoding="utf-8") as f: self.items = json.load(f).get("drops", [])
+            with open(path, encoding="utf-8") as f:
+                data = json.load(f)
+                self.items = data.get("drops", [])
+                self.rejected = data.get("rejected", [])
         except (OSError, ValueError):
             self.items = []
+            self.rejected = []
         self.sent_total = 0
 
     def save(self):
         with self.lock:
             tmp = str(self.path) + ".tmp"
-            with open(tmp, "w", encoding="utf-8") as f: json.dump({"drops": self.items[-MAX_QUEUE:]}, f)
+            with open(tmp, "w", encoding="utf-8") as f:
+                json.dump({"drops": self.items[-MAX_QUEUE:], "rejected": self.rejected[-MAX_QUEUE:]}, f)
             os.replace(tmp, self.path)
 
     def add(self, rec):
@@ -79,7 +95,7 @@ class Queue:
 
     def flush(self, url, client, timeout=8):
         """Biriken kayıtları gönder. Dönüş: (gönderilen, hata ya da None)."""
-        url = (url or DEFAULT_URL).rstrip("/")
+        url = _http_base(url)
         if not url or not self.items: return 0, None
         sent = 0
         while self.items:
@@ -87,10 +103,17 @@ class Queue:
             body = json.dumps({"client": client, "drops": [{k: v for k, v in r.items() if k != "t"} for r in batch]}).encode()
             try:
                 req = urllib.request.Request(url + "/v1/drops", data=body, headers=UA, method="POST")
-                with urllib.request.urlopen(req, timeout=timeout) as resp: json.loads(resp.read() or b"{}")
+                with urllib.request.urlopen(req, timeout=timeout) as resp: json.loads(resp.read() or b"{}")  # nosec B310 - base is _http_base validated.
             except urllib.error.HTTPError as e:
-                if e.code == 400:                    # bozuk kayıtlar: at, takılı kalmasın
-                    with self.lock: del self.items[:len(batch)]
+                if e.code == 400:
+                    with self.lock:
+                        archive_full = len(self.rejected) + len(batch) > MAX_QUEUE
+                        if not archive_full:
+                            self.rejected.extend(batch)
+                            del self.items[:len(batch)]
+                    self.save()
+                    if archive_full:
+                        return sent, "HTTP 400; invalid batch retained because rejection archive is full"
                     continue
                 self.save(); return sent, f"HTTP {e.code}"
             except Exception as e:
@@ -103,8 +126,8 @@ class Queue:
 
 
 def _get(url, path, headers=None, timeout=10):
-    req = urllib.request.Request((url or DEFAULT_URL).rstrip("/") + path, headers={**UA, **(headers or {})})
-    with urllib.request.urlopen(req, timeout=timeout) as r:
+    req = urllib.request.Request(_http_base(url) + path, headers={**UA, **(headers or {})})
+    with urllib.request.urlopen(req, timeout=timeout) as r:  # nosec B310 - base is _http_base validated.
         return json.loads(r.read())
 
 

@@ -79,6 +79,27 @@ class AnimationTests(unittest.TestCase):
         self.assertEqual(draws, [1])
         self.assertTrue(watch.alive)
 
+    def test_watch_uses_dedicated_surface_key_instead_of_theme_background(self):
+        class SurfaceRoot:
+            def __init__(self):
+                self.surface = "#0d141b"
+
+            def cget(self, option):
+                if option != "fg_color":
+                    raise AttributeError(option)
+                return self.surface
+
+            def configure(self, **kwargs):
+                self.surface = kwargs["fg_color"]
+
+        root = SurfaceRoot()
+        watch = fx.WatchBackground(root, bg="#0d141b")
+        self.assertTrue(watch._set_root_surface())
+        self.assertEqual(root.surface, watch.KEY)
+        self.assertNotEqual(root.surface, watch.bgc)
+        watch._restore_root_surface()
+        self.assertEqual(root.surface, "#0d141b")
+
     def banner(self):
         root = FakeRoot()
         banner = ui_art.Banner.__new__(ui_art.Banner)

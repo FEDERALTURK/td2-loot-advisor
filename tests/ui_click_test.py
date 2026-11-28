@@ -36,7 +36,7 @@ def find_gap_in_tab(tab_index):
     nb = a.nb
     key = tuple(int(app.PAL["bg"][i:i + 2], 16) for i in (1, 3, 5))
     x0, y0 = nb.winfo_rootx(), nb.winfo_rooty()
-    with mss.mss() as s:
+    with mss.MSS() as s:
         shot = s.grab({"left": x0, "top": y0, "width": nb.winfo_width(), "height": 60})
         img = Image.frombytes("RGB", shot.size, shot.rgb)
     cand = []
@@ -113,7 +113,7 @@ def step_transition(i=[0], alphas=[]):
     shots = (ROOT / "shots"); shots.mkdir(exist_ok=True)
     def grab(tag):
         nb = a.nb
-        with mss.mss() as s:
+        with mss.MSS() as s:
             g = s.grab({"left": nb.winfo_rootx(), "top": nb.winfo_rooty(), "width": nb.winfo_width(), "height": 70})
         Image.frombytes("RGB", g.size, g.rgb).save(shots / f"fx_{i[0]}_{tag}.png")
         alphas.append(round(float(a.root.attributes("-alpha")), 2))

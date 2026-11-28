@@ -4,6 +4,7 @@ import tempfile
 from pathlib import Path
 import sys
 import unittest
+from unittest.mock import Mock
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -12,6 +13,14 @@ import build_tool_ui
 from stash import Stash
 
 class BuildToolCatalogTests(unittest.TestCase):
+    def test_stale_combo_selection_is_treated_as_empty(self):
+        panel = build_tool_ui.BuildToolPanel.__new__(build_tool_ui.BuildToolPanel)
+        panel.builds = [{"name": "stale-safe"}]
+        panel.choice = Mock()
+        panel.choice.current.side_effect = build_tool_ui.tk.TclError("invalid command name")
+
+        self.assertIsNone(panel.current())
+
     def test_fixed_weapon_roll_slots_resolve_through_attribute_catalog(self):
         catalog = {
             "weapon_index": {"Test Exotic": {

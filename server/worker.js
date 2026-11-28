@@ -22,6 +22,7 @@ import { route as overviewRoute, countUsage, markCron } from "./overview.js";
 import { route as mobileRoute, cleanup as mobileCleanup } from "./mobile.js";
 import { route as discordRoute, cleanup as discordCleanup } from "./discord.js";
 import { mirrorErrorReport, readErrorReports, isSupabasePanelEnabled } from "./supabase.js";
+import { requireHashSalt } from "./security.js";
 
 const ACTIVITIES = new Set(["open_world", "mission", "legendary", "countdown", "summit", "incursion", "raid", "dark_zone",
   "conflict", "descent", "manhunt", "control_point", "bounty", "season", "vendor", "caches", "crafting", "unknown"]);
@@ -31,6 +32,7 @@ const RARITIES = new Set(["EXOTIC", "NAMED", "GEAR SET", "HIGH-END", "SUPERIOR",
 const TEXT = /^[\p{L}\p{N} '.&:\-()/,]{1,60}$/u;
 const KEY = /^[a-z_]{2,30}$/;
 const HEX = /^[0-9a-f]{8,64}$/;
+const MAX_BODY = 256 * 1024;
 
 const enc = new TextEncoder();
 
@@ -58,6 +60,32 @@ function weekOf(d) {                       // haftalık sıfırlama Salı: o haf
 }
 
 function str(v) { return typeof v === "string" && TEXT.test(v.trim()) ? v.trim() : null; }
+
+async function boundedRequest(req) {
+  if (!req.body) return req;
+  const reader = req.body.getReader();
+  const chunks = [];
+  let size = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      size += value.byteLength;
+      if (size > MAX_BODY) {
+        await reader.cancel();
+        return null;
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  const body = new Uint8Array(size);
+  let offset = 0;
+  for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLength; }
+  return new Request(req.url, { method: req.method, headers: req.headers, body,
+    redirect: req.redirect, signal: req.signal });
+}
 
 function cleanDrop(x) {
   if (!x || typeof x !== "object") return null;
@@ -123,7 +151,7 @@ async function postDrops(req, env) {
   const list = Array.isArray(body.drops) ? body.drops.slice(0, parseInt(env.MAX_BATCH || "50", 10)) : [];
   const drops = list.map(cleanDrop).filter(Boolean);
   if (!drops.length) return json({ accepted: 0 });
-  const salt = env.HASH_SALT || "dev-salt";
+  const salt = requireHashSalt(env);
   const ch = (await sha(salt + ":c:" + client)).slice(0, 32);
   const ip = req.headers.get("cf-connecting-ip") || "local";
   const ih = (await sha(salt + ":i:" + ip)).slice(0, 32);
@@ -262,7 +290,7 @@ async function postReport(req, env, ctx) {
   try { b = await req.json(); } catch { return json({ error: "bad json" }, 400); }
   const r = cleanReport(b);
   if (!r) return json({ error: "invalid report" }, 400);
-  const salt = env.HASH_SALT || "dev-salt";
+  const salt = requireHashSalt(env);
   const client = await sha(salt + "|" + String(b.client || "").slice(0, 64));
   const ip = await sha(salt + "|ip|" + (req.headers.get("cf-connecting-ip") || ""));
   const maxH = parseInt(env.REPORTS_PER_HOUR || "5", 10), maxD = parseInt(env.REPORTS_PER_DAY || "20", 10);
@@ -297,7 +325,7 @@ async function postReport(req, env, ctx) {
 
 async function reportStatus(req, env) {
   const u = new URL(req.url);
-  const salt = env.HASH_SALT || "dev-salt";
+  const salt = requireHashSalt(env);
   const client = await sha(salt + "|" + String(u.searchParams.get("client") || "").slice(0, 64));
   const ids = (u.searchParams.get("ids") || "").split(",").map(x => parseInt(x, 10)).filter(Number.isFinite).slice(0, 20);
   const out = [];
@@ -349,13 +377,16 @@ export default {
     try {
       if (req.method === "OPTIONS") return json({}, 204, { "access-control-allow-methods": "GET, POST, PUT, DELETE",
                                                            "access-control-allow-headers": "content-type, authorization" });
+      try { requireHashSalt(env); } catch { return json({ error: "service misconfigured" }, 503); }
+      if (req.body) {
+        req = await boundedRequest(req);
+        if (!req) return json({ error: "payload too large" }, 413);
+      }
       const discord = await discordRoute(req, env, u.pathname, ctx);
       if (discord) return discord;
       if (u.pathname === "/v1/health") return json({ ok: true, login: !!env.DISCORD_CLIENT_ID,
         discord_app: env.DISCORD_CLIENT_ID || null,
         panel_mirror: isSupabasePanelEnabled(env) ? "enabled" : "disabled" });
-      if (req.method === "POST" && parseInt(req.headers.get("content-length") || "0", 10) > 262144)   // büyük gövde: reddet
-        return json({ error: "payload too large" }, 413);
       if (u.pathname === "/v1/tasks/live" && req.method === "GET") {        // kimliksiz sürüm sayacı (önbellekten önce)
         const c = countUsage(req, env);
         if (ctx && ctx.waitUntil) ctx.waitUntil(c); else await c;

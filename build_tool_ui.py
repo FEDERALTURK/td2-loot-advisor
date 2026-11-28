@@ -4,6 +4,13 @@ import copy
 import webbrowser
 from tkinter import filedialog, messagebox, ttk
 from td2app.ui import ui_theme
+try:
+    from td2app.ui.ctk_compat import (CtkFrame, CtkLabel, CtkButton, CtkEntry,
+        CtkComboBox, CtkTextbox, CtkToplevel, CtkScrollbar)
+except ImportError:
+    CtkFrame, CtkLabel, CtkButton = tk.Frame, tk.Label, tk.Button
+    CtkEntry, CtkComboBox = ttk.Entry, ttk.Combobox
+    CtkTextbox, CtkToplevel, CtkScrollbar = tk.Text, tk.Toplevel, ttk.Scrollbar
 
 import build_tool
 import share
@@ -54,7 +61,7 @@ class BuildToolPanel:
             self._persisted_builds = []
             self._persisted_templates = []
             messagebox.showerror("Build Tool", f"Build data could not be loaded; the file was left unchanged.\n{exc}", parent=root)
-        self.frame = ttk.Frame(parent)
+        self.frame = CtkFrame(parent)
         self.frame.pack(fill="both", expand=True)
         self.content = ui_theme.scrollable(self.frame, self.palette["bg"])
         self._create()
@@ -63,8 +70,8 @@ class BuildToolPanel:
         f = self.content
         f.columnconfigure(0, weight=3); f.columnconfigure(1, weight=2)
         f.rowconfigure(2, weight=1); f.rowconfigure(4, weight=1)
-        head = ttk.Frame(f); head.grid(row=0, column=0, columnspan=2, sticky="ew", padx=8, pady=5)
-        ttk.Label(head, text="THE DIVISION 2 BUILDS TOOL", style="Title.TLabel").pack(side="left")
+        head = CtkFrame(f); head.grid(row=0, column=0, columnspan=2, sticky="ew", padx=8, pady=5)
+        CtkLabel(head, text="THE DIVISION 2 BUILDS TOOL", style="Title.TLabel").pack(side="left")
         actions = ttk.Menubutton(head, text="Build actions ▾")
         actions_menu = tk.Menu(actions, tearoff=False)
         actions_menu.add_command(label="Compare builds", command=self.compare_dialog)
@@ -77,21 +84,21 @@ class BuildToolPanel:
         for text, command in (("Credits", self.credits), ("Patch Notes", self.patch_notes),
                               ("Issues or bug?", self.issues), ("Save & Share", self.share), ("Save Screenshot", self.screenshot),
                               ("Clear", self.clear), ("New Build", self.new)):
-            ttk.Button(head, text=text, command=command).pack(side="right", padx=3)
-        ctl = ttk.Frame(f); ctl.grid(row=1, column=0, columnspan=2, sticky="ew", padx=8, pady=4)
+            CtkButton(head, text=text, command=command).pack(side="right", padx=3)
+        ctl = CtkFrame(f); ctl.grid(row=1, column=0, columnspan=2, sticky="ew", padx=8, pady=4)
         ctl.columnconfigure(1, weight=1)
-        ttk.Label(ctl, text="Build").grid(row=0, column=0, padx=4)
-        self.choice = ttk.Combobox(ctl, state="readonly", width=24); self.choice.grid(row=0, column=1, sticky="ew", padx=4)
+        CtkLabel(ctl, text="Build").grid(row=0, column=0, padx=4)
+        self.choice = CtkComboBox(ctl, state="readonly", width=24); self.choice.grid(row=0, column=1, sticky="ew", padx=4)
         self.choice.bind("<<ComboboxSelected>>", lambda _e: self.refresh())
-        ttk.Label(ctl, text="Specialization").grid(row=0, column=2, padx=(12, 4))
-        self.spec = ttk.Combobox(ctl, state="readonly", width=18, values=self.SPECIALIZATIONS)
+        CtkLabel(ctl, text="Specialization").grid(row=0, column=2, padx=(12, 4))
+        self.spec = CtkComboBox(ctl, state="readonly", width=18, values=self.SPECIALIZATIONS)
         self.spec.grid(row=0, column=3, padx=4); self.spec.bind("<<ComboboxSelected>>", lambda _e: self.update_meta())
-        ttk.Label(ctl, text="Name").grid(row=0, column=4, padx=(12, 4))
-        self.name = tk.StringVar(); ttk.Entry(ctl, textvariable=self.name, width=22).grid(row=0, column=5, padx=4)
-        ttk.Button(ctl, text="Save", command=self.save_current).grid(row=0, column=6, padx=4)
-        self.grid = ttk.Frame(f); self.grid.grid(row=2, column=0, sticky="nsew", padx=(8, 4), pady=4)
+        CtkLabel(ctl, text="Name").grid(row=0, column=4, padx=(12, 4))
+        self.name = tk.StringVar(); CtkEntry(ctl, textvariable=self.name, width=22).grid(row=0, column=5, padx=4)
+        CtkButton(ctl, text="Save", command=self.save_current).grid(row=0, column=6, padx=4)
+        self.grid = CtkFrame(f); self.grid.grid(row=2, column=0, sticky="nsew", padx=(8, 4), pady=4)
         self.grid.bind("<Configure>", lambda event: self._layout_slot_cards(event.width))
-        self.detail = ttk.Frame(f); self.detail.grid(row=2, column=1, sticky="nsew", padx=(4, 8), pady=4)
+        self.detail = CtkFrame(f); self.detail.grid(row=2, column=1, sticky="nsew", padx=(4, 8), pady=4)
         self.weapons_box = ttk.LabelFrame(f, text="Weapon damage / RPM / magazine")
         self.weapons_box.grid(row=3, column=0, columnspan=2, sticky="ew", padx=8, pady=4)
         self.chart = tk.Canvas(f, height=180, bg=self.palette["surface"], highlightthickness=1,
@@ -102,12 +109,17 @@ class BuildToolPanel:
         self.ttk_box.grid(row=5, column=0, columnspan=2, sticky="ew", padx=8, pady=4)
         self.status = tk.StringVar(value=("Read-only · build data could not be loaded · original file preserved"
                                           if self.error else "Independent local data: build_tool.json"))
-        ttk.Label(f, textvariable=self.status, foreground=self.palette["muted"]).grid(
+        CtkLabel(f, textvariable=self.status, foreground=self.palette["muted"]).grid(
             row=6, column=0, columnspan=2, sticky="w", padx=10, pady=(0, 5))
-        self.refresh()
+        self._refresh_job = self.root.after_idle(self.refresh)
 
     def current(self):
-        idx = self.choice.current()
+        try:
+            idx = self.choice.current()
+        except (tk.TclError, RuntimeError):
+            # Theme/language rebuilds may invalidate the old panel before its
+            # queued refresh callback is drained.
+            return None
         return self.builds[idx] if 0 <= idx < len(self.builds) else None
 
     def persist(self):
@@ -198,10 +210,10 @@ class BuildToolPanel:
         build = self.current()
         if not build: return
         old = build["slots"].get(slot) or {}
-        win = tk.Toplevel(self.root); win.title(f"Build Tool · {slot}"); win.transient(self.root); win.grab_set()
+        win = CtkToplevel(self.root); win.title(f"Build Tool · {slot}"); win.transient(self.root); win.grab_set()
         win.geometry(f"{min(820, max(520, win.winfo_screenwidth() - 80))}x"
                      f"{min(900, max(480, win.winfo_screenheight() - 100))}")
-        query = tk.StringVar(value=old.get("name", "")); ttk.Entry(win, textvariable=query).pack(fill="x", padx=10, pady=8)
+        query = tk.StringVar(value=old.get("name", "")); CtkEntry(win, textvariable=query).pack(fill="x", padx=10, pady=8)
         lb = tk.Listbox(win, exportselection=False); lb.pack(fill="both", expand=True, padx=10, pady=(0, 8))
         options = self.options(slot)
         pending_filter = {"after": None}
@@ -219,25 +231,25 @@ class BuildToolPanel:
         editor.pack(fill="x", padx=10, pady=4)
         editor.columnconfigure(1, weight=1)
         editor.columnconfigure(3, weight=1)
-        core = tk.StringVar(value=old.get("core", "")); ttk.Label(editor, text="Core").grid(row=0, column=0, padx=5, pady=3)
-        ttk.Combobox(editor, textvariable=core, values=("", "Weapon Damage", "Armor", "Skill Tier"), width=20).grid(row=0, column=1, padx=5, pady=3)
+        core = tk.StringVar(value=old.get("core", "")); CtkLabel(editor, text="Core").grid(row=0, column=0, padx=5, pady=3)
+        CtkComboBox(editor, textvariable=core, values=("", "Weapon Damage", "Armor", "Skill Tier"), width=20).grid(row=0, column=1, padx=5, pady=3)
         brand = tk.StringVar(value=old.get("brand", "")); gear = tk.StringVar(value=old.get("gear_set", ""))
-        ttk.Label(editor, text="Brand").grid(row=0, column=2, padx=5)
-        ttk.Combobox(editor, textvariable=brand, values=tuple(self.catalog.get("brands", ())), width=24).grid(row=0, column=3, padx=5)
-        ttk.Label(editor, text="Gearset").grid(row=1, column=0, padx=5)
-        ttk.Combobox(editor, textvariable=gear, values=tuple(self.catalog.get("gear_sets", ())), width=22).grid(row=1, column=1, padx=5)
-        talent = tk.StringVar(value=old.get("talent", "")); ttk.Label(editor, text="Talent").grid(row=1, column=2, padx=5)
-        ttk.Entry(editor, textvariable=talent, width=24).grid(row=1, column=3, padx=5)
+        CtkLabel(editor, text="Brand").grid(row=0, column=2, padx=5)
+        CtkComboBox(editor, textvariable=brand, values=tuple(self.catalog.get("brands", ())), width=24).grid(row=0, column=3, padx=5)
+        CtkLabel(editor, text="Gearset").grid(row=1, column=0, padx=5)
+        CtkComboBox(editor, textvariable=gear, values=tuple(self.catalog.get("gear_sets", ())), width=22).grid(row=1, column=1, padx=5)
+        talent = tk.StringVar(value=old.get("talent", "")); CtkLabel(editor, text="Talent").grid(row=1, column=2, padx=5)
+        CtkEntry(editor, textvariable=talent, width=24).grid(row=1, column=3, padx=5)
         attrs = old.get("attrs", {})
         entries = {}
         for idx, key in enumerate(self.ATTRIBUTES):
             row, pair = divmod(idx, 2)
             col = pair * 2
-            ttk.Label(editor, text=key.replace("_", " ").title()).grid(row=row + 2, column=col, padx=5, pady=2, sticky="w")
+            CtkLabel(editor, text=key.replace("_", " ").title()).grid(row=row + 2, column=col, padx=5, pady=2, sticky="w")
             var = tk.StringVar(value=str(attrs.get(key, ""))); entries[key] = var
-            ttk.Entry(editor, textvariable=var, width=12).grid(row=row + 2, column=col + 1, padx=5, pady=2, sticky="w")
+            CtkEntry(editor, textvariable=var, width=12).grid(row=row + 2, column=col + 1, padx=5, pady=2, sticky="w")
         preview = tk.StringVar(value="Select a catalog item to load its fixed details.")
-        ttk.Label(win, textvariable=preview, wraplength=680, justify="left", foreground=self.palette["muted"]).pack(
+        CtkLabel(win, textvariable=preview, wraplength=680, justify="left", foreground=self.palette["muted"]).pack(
             fill="x", padx=12, pady=4)
 
         def select_item(_event=None, reset=True):
@@ -293,14 +305,14 @@ class BuildToolPanel:
                                     "talent": talent.get().strip(), "attrs": parsed}
             build_tool.stamp_catalog(build, self.catalog)
             self.persist(); win.destroy(); self.refresh(self.choice.current())
-        buttons = ttk.Frame(win); buttons.pack(fill="x", padx=10, pady=8)
+        buttons = CtkFrame(win); buttons.pack(fill="x", padx=10, pady=8)
         def remove():
             if not self.can_edit(): return
             build["slots"][slot] = None
             self.persist(); win.destroy(); self.refresh(self.choice.current())
-        ttk.Button(buttons, text="Remove", command=remove).pack(side="left")
-        ttk.Button(buttons, text="Apply", command=apply).pack(side="right", padx=4)
-        ttk.Button(buttons, text="Cancel", command=win.destroy).pack(side="right")
+        CtkButton(buttons, text="Remove", command=remove).pack(side="left")
+        CtkButton(buttons, text="Apply", command=apply).pack(side="right", padx=4)
+        CtkButton(buttons, text="Cancel", command=win.destroy).pack(side="right")
         lb.bind("<Double-1>", lambda _e: apply())
 
     def share(self):
@@ -350,9 +362,9 @@ class BuildToolPanel:
             messagebox.showerror("Build Tool", f"Import failed; local data was not replaced.\n{exc}", parent=self.root)
 
     def template_dialog(self):
-        win = tk.Toplevel(self.root); win.title("Build Tool · Templates"); win.transient(self.root)
+        win = CtkToplevel(self.root); win.title("Build Tool · Templates"); win.transient(self.root)
         win.geometry("560x420")
-        ttk.Label(win, text="Saved locally · templates never replace your builds").pack(anchor="w", padx=10, pady=(10, 4))
+        CtkLabel(win, text="Saved locally · templates never replace your builds").pack(anchor="w", padx=10, pady=(10, 4))
         listing = tk.Listbox(win, exportselection=False); listing.pack(fill="both", expand=True, padx=10, pady=5)
 
         def refresh_list():
@@ -394,24 +406,24 @@ class BuildToolPanel:
             if self.persist(): refresh_list()
 
         refresh_list()
-        buttons = ttk.Frame(win); buttons.pack(fill="x", padx=10, pady=8)
-        ttk.Button(buttons, text="Save current as template", command=save_template).pack(side="left")
-        ttk.Button(buttons, text="Use as new build", command=use_template).pack(side="left", padx=5)
-        ttk.Button(buttons, text="Remove template", command=delete_template).pack(side="left")
-        ttk.Button(buttons, text="Close", command=win.destroy).pack(side="right")
+        buttons = CtkFrame(win); buttons.pack(fill="x", padx=10, pady=8)
+        CtkButton(buttons, text="Save current as template", command=save_template).pack(side="left")
+        CtkButton(buttons, text="Use as new build", command=use_template).pack(side="left", padx=5)
+        CtkButton(buttons, text="Remove template", command=delete_template).pack(side="left")
+        CtkButton(buttons, text="Close", command=win.destroy).pack(side="right")
 
     def compare_dialog(self):
         if len(self.builds) < 2:
             messagebox.showinfo("Build Tool", "Save at least two builds to compare them.", parent=self.root)
             return
-        win = tk.Toplevel(self.root); win.title("Build Tool · Compare builds"); win.transient(self.root)
+        win = CtkToplevel(self.root); win.title("Build Tool · Compare builds"); win.transient(self.root)
         win.geometry("760x520")
         names = [item["name"] for item in self.builds]
-        row = ttk.Frame(win); row.pack(fill="x", padx=10, pady=8)
-        ttk.Label(row, text="Build A").pack(side="left")
-        first = ttk.Combobox(row, state="readonly", values=names, width=28); first.pack(side="left", padx=5)
-        ttk.Label(row, text="Build B").pack(side="left", padx=(12, 0))
-        second = ttk.Combobox(row, state="readonly", values=names, width=28); second.pack(side="left", padx=5)
+        row = CtkFrame(win); row.pack(fill="x", padx=10, pady=8)
+        CtkLabel(row, text="Build A").pack(side="left")
+        first = CtkComboBox(row, state="readonly", values=names, width=28); first.pack(side="left", padx=5)
+        CtkLabel(row, text="Build B").pack(side="left", padx=(12, 0))
+        second = CtkComboBox(row, state="readonly", values=names, width=28); second.pack(side="left", padx=5)
         first.current(max(0, self.choice.current()))
         second.current(1 if self.choice.current() != 1 else 0)
         columns = ("metric", "first", "second", "delta")
@@ -420,7 +432,7 @@ class BuildToolPanel:
             table.heading(key, text=label)
         table.column("metric", width=260); table.pack(fill="both", expand=True, padx=10, pady=4)
         note = tk.StringVar()
-        ttk.Label(win, textvariable=note, foreground=self.palette["muted"], wraplength=720).pack(anchor="w", padx=10, pady=5)
+        CtkLabel(win, textvariable=note, foreground=self.palette["muted"], wraplength=720).pack(anchor="w", padx=10, pady=5)
 
         def refresh_comparison():
             if first.current() < 0 or second.current() < 0: return
@@ -450,7 +462,7 @@ class BuildToolPanel:
                             "—", bonus[2], "B only"))
             note.set(data["assumptions"] + " A negative TTK difference means the estimate is faster.")
 
-        ttk.Button(row, text="Compare", command=refresh_comparison).pack(side="left", padx=8)
+        CtkButton(row, text="Compare", command=refresh_comparison).pack(side="left", padx=8)
         refresh_comparison()
 
     def patch_notes(self):
@@ -500,11 +512,11 @@ class BuildToolPanel:
         slots = ("Primary", "Secondary", "SideArm") + build_tool.SLOTS[:6] + ("Skill1", "Skill2")
         for idx, (slot, title) in enumerate(zip(slots, labels)):
             item = build["slots"].get(slot) or {}
-            card = tk.Frame(self.grid, bg=self.palette["surface"], highlightthickness=1,
+            card = CtkFrame(self.grid, bg=self.palette["surface"], highlightthickness=1,
                             highlightbackground=self.palette["border"], takefocus=1)
             self._slot_cards.append(card)
-            tk.Label(card, text=title, bg=self.palette["surface"], fg=self.palette["accent"], font=("Consolas", 9, "bold")).pack(anchor="w")
-            tk.Label(card, text=item.get("name") or "CHOOSE ITEM", bg=self.palette["surface"], fg=self.palette["fg"],
+            CtkLabel(card, text=title, bg=self.palette["surface"], fg=self.palette["accent"], font=("Consolas", 9, "bold")).pack(anchor="w")
+            CtkLabel(card, text=item.get("name") or "CHOOSE ITEM", bg=self.palette["surface"], fg=self.palette["fg"],
                      wraplength=140, justify="center", height=3).pack(fill="both", expand=True)
             for widget in (card, *card.winfo_children()):
                 widget.bind("<Button-1>", lambda _e, s=slot: self.edit_slot(s))
@@ -535,32 +547,32 @@ class BuildToolPanel:
             for field in fields:
                 source = result["gear_attribute_contributions"].get(field)
                 contribution = f" · gear attributes +{source:g}" if source is not None else ""
-                ttk.Label(group, text=f"{field.replace('_', ' ').title()}: {result['stats'][field]:g}{contribution}").pack(anchor="w", padx=6, pady=1)
-        ttk.Label(self.detail, text=f"Total Armor · {result['armor']:,.0f} · estimate", foreground=self.palette["accent"], style="Title.TLabel").pack(anchor="w", padx=6, pady=4)
-        ttk.Label(self.detail, text=(f"Armor inputs · base 660,014 + {result['cores']['defensive']} defensive cores × 170,000 "
+                CtkLabel(group, text=f"{field.replace('_', ' ').title()}: {result['stats'][field]:g}{contribution}").pack(anchor="w", padx=6, pady=1)
+        CtkLabel(self.detail, text=f"Total Armor · {result['armor']:,.0f} · estimate", foreground=self.palette["accent"], style="Title.TLabel").pack(anchor="w", padx=6, pady=4)
+        CtkLabel(self.detail, text=(f"Armor inputs · base 660,014 + {result['cores']['defensive']} defensive cores × 170,000 "
                   f"+ gear armor attributes {result['gear_attribute_contributions'].get('armor', 0):g}"),
                   wraplength=460, foreground=self.palette["muted"]).pack(anchor="w", padx=6, pady=2)
-        ttk.Label(self.detail, text=("Simulation scope · talents, specialization and SHD effects "
-                  "are not included in the numeric estimate."), wraplength=460,
+        CtkLabel(self.detail, text=("PvE baseline estimate only. PvP balancing/normalization, talents, "
+                  "specialization and SHD effects are not included."), wraplength=460,
                   foreground=self.palette["muted"]).pack(anchor="w", padx=6, pady=2)
         watch = ttk.LabelFrame(self.detail, text="SHD Watch Levels")
         watch.pack(fill="x", padx=4, pady=3)
         levels = self.current().get("shd_levels", {})
-        ttk.Button(watch, text="Set all to max", command=self.set_all_shd).grid(row=0, column=4, padx=5)
+        CtkButton(watch, text="Set all to max", command=self.set_all_shd).grid(row=0, column=4, padx=5)
         for i, name in enumerate(self.SHD):
             row = i//2 + 1
-            ttk.Label(watch, text=name).grid(row=row, column=(i%2)*2, padx=5, pady=2, sticky="w")
+            CtkLabel(watch, text=name).grid(row=row, column=(i%2)*2, padx=5, pady=2, sticky="w")
             value = tk.IntVar(value=levels.get(name, 0))
             spin = ttk.Spinbox(watch, from_=0, to=10, width=4, textvariable=value,
                                command=lambda n=name, v=value: self.set_shd(n, v.get()))
             spin.grid(row=row, column=(i%2)*2+1, padx=4)
-        ttk.Label(watch, text="Watch levels are stored separately; their derived bonuses are not included in stat estimates.",
+        CtkLabel(watch, text="Watch levels are stored separately; their derived bonuses are not included in stat estimates.",
                   foreground=self.palette["muted"]).grid(row=4, column=0, columnspan=5, sticky="w", padx=5, pady=3)
         for title, values in (("Gearset Bonus", result["bonuses"]["gear_sets"]), ("Brand Bonus", result["bonuses"]["brands"])):
             panel = ttk.LabelFrame(self.detail, text=title); panel.pack(fill="x", padx=4, pady=3)
             for bonus in values:
-                ttk.Label(panel, text=f"{bonus['name']} · {bonus['tier']} pc · {bonus['text']}", wraplength=460).pack(anchor="w", padx=6, pady=1)
-            if not values: ttk.Label(panel, text="No active bonus", foreground=self.palette["muted"]).pack(anchor="w", padx=6, pady=2)
+                CtkLabel(panel, text=f"{bonus['name']} · {bonus['tier']} pc · {bonus['text']}", wraplength=460).pack(anchor="w", padx=6, pady=1)
+            if not values: CtkLabel(panel, text="No active bonus", foreground=self.palette["muted"]).pack(anchor="w", padx=6, pady=2)
         fixed_frame = ttk.LabelFrame(self.detail, text="Selected item · catalog fixed details")
         fixed_frame.pack(fill="x", padx=4, pady=3)
         any_details = False
@@ -592,10 +604,10 @@ class BuildToolPanel:
             lines.extend(f"Available {value} slot" for value in available_slots)
             if lines:
                 any_details = True
-                ttk.Label(fixed_frame, text=f"{slot} · {item['name']}\n" + "\n".join(lines),
+                CtkLabel(fixed_frame, text=f"{slot} · {item['name']}\n" + "\n".join(lines),
                           wraplength=460, justify="left").pack(anchor="w", padx=6, pady=3)
         if not any_details:
-            ttk.Label(fixed_frame, text="No catalogued fixed details for selected items.",
+            CtkLabel(fixed_frame, text="No catalogued fixed details for selected items.",
                       foreground=self.palette["muted"]).pack(anchor="w", padx=6, pady=2)
         self._draw_insights()
 
@@ -608,7 +620,7 @@ class BuildToolPanel:
         basis = ttk.LabelFrame(self.detail, text="Library source and version")
         basis.pack(fill="x", padx=4, pady=3)
         counts = catalog["counts"]
-        ttk.Label(basis, text=(f"Coverage: {counts['gear_items']} gear items · {counts['weapons']} weapons · "
+        CtkLabel(basis, text=(f"Coverage: {counts['gear_items']} gear items · {counts['weapons']} weapons · "
                   f"{counts['brands']} brands · {counts['gear_sets']} sets · {counts['attributes']} attributes\n"
                   f"Library {origin['version']} · {origin['community_name']} · "
                   f"commit date {origin['community_date']}\n"
@@ -619,10 +631,10 @@ class BuildToolPanel:
                   wraplength=460, justify="left").pack(anchor="w", padx=6, pady=4)
         snapshot = build.get("catalog_snapshot") or {}
         if snapshot and snapshot.get("fingerprint") != origin["fingerprint"]:
-            ttk.Label(basis, text=f"This build was saved with catalog {snapshot.get('version', 'unknown')} · basis differs",
+            CtkLabel(basis, text=f"This build was saved with catalog {snapshot.get('version', 'unknown')} · basis differs",
                       foreground=self.palette["accent"], wraplength=460).pack(anchor="w", padx=6, pady=(0, 4))
         if catalog["warnings"]:
-            ttk.Label(basis, text="Metadata gaps: " + "; ".join(catalog["warnings"]),
+            CtkLabel(basis, text="Metadata gaps: " + "; ".join(catalog["warnings"]),
                       foreground=self.palette["muted"], wraplength=460).pack(anchor="w", padx=6, pady=(0, 4))
 
         issues = build_tool.validate_build(build, self.catalog)
@@ -631,19 +643,19 @@ class BuildToolPanel:
         validation = ttk.LabelFrame(self.detail, text="Build check · advisory")
         validation.pack(fill="x", padx=4, pady=3)
         headline = f"{len(warnings)} warning(s) · {empty} empty slot(s)"
-        ttk.Label(validation, text=headline,
+        CtkLabel(validation, text=headline,
                   foreground=self.palette["accent"] if warnings else self.palette["fg"]).pack(anchor="w", padx=6, pady=3)
         for issue in warnings[:4]:
-            ttk.Label(validation, text=f"{issue['slot']}: {issue['message']}", wraplength=460,
+            CtkLabel(validation, text=f"{issue['slot']}: {issue['message']}", wraplength=460,
                       foreground=self.palette["muted"]).pack(anchor="w", padx=6, pady=1)
         if len(warnings) > 4:
-            ttk.Label(validation, text=f"and {len(warnings) - 4} more warning(s)",
+            CtkLabel(validation, text=f"and {len(warnings) - 4} more warning(s)",
                       foreground=self.palette["muted"]).pack(anchor="w", padx=6, pady=1)
         if not warnings:
-            ttk.Label(validation, text="No catalog or roll-limit warnings. This does not certify in-game performance.",
+            CtkLabel(validation, text="No catalog or roll-limit warnings. This does not certify in-game performance.",
                       wraplength=460, foreground=self.palette["muted"]).pack(anchor="w", padx=6, pady=1)
         if catalog["warnings"]:
-            ttk.Label(validation, text="Catalog review: " + "; ".join(catalog["warnings"]),
+            CtkLabel(validation, text="Catalog review: " + "; ".join(catalog["warnings"]),
                       wraplength=460, foreground=self.palette["accent"]).pack(anchor="w", padx=6, pady=2)
 
         roll_frame = ttk.LabelFrame(self.detail, text="Variable roll quality · catalog based")
@@ -651,21 +663,21 @@ class BuildToolPanel:
         rows = build_tool.roll_quality(build, self.catalog)
         for row in rows[:8]:
             basis_text = "range" if row["range_verified"] else "max-relative; minimum not supplied"
-            ttk.Label(roll_frame, text=(f"{row['slot']} · {row['attribute'].replace('_', ' ').title()}: "
+            CtkLabel(roll_frame, text=(f"{row['slot']} · {row['attribute'].replace('_', ' ').title()}: "
                       f"{row['value']:g}/{row['maximum']:g} ({row['percent']:.0f}%, {basis_text})"),
                       wraplength=460).pack(anchor="w", padx=6, pady=1)
         if not rows:
-            ttk.Label(roll_frame, text="Enter a variable roll; fixed catalog stats are excluded.",
+            CtkLabel(roll_frame, text="Enter a variable roll; fixed catalog stats are excluded.",
                       foreground=self.palette["muted"]).pack(anchor="w", padx=6, pady=2)
         if len(rows) > 8:
-            ttk.Label(roll_frame, text=f"Showing 8 of {len(rows)} roll(s).",
+            CtkLabel(roll_frame, text=f"Showing 8 of {len(rows)} roll(s).",
                       foreground=self.palette["muted"]).pack(anchor="w", padx=6, pady=1)
 
         farm = ttk.LabelFrame(self.detail, text="Owned gear match · read only")
         farm.pack(fill="x", padx=4, pady=3)
-        ttk.Button(farm, text="Refresh stash matches", command=self.refresh_stash_matches).pack(anchor="w", padx=6, pady=3)
+        CtkButton(farm, text="Refresh stash matches", command=self.refresh_stash_matches).pack(anchor="w", padx=6, pady=3)
         if not callable(self.stash_provider):
-            ttk.Label(farm, text="Stash connection is unavailable in this context.",
+            CtkLabel(farm, text="Stash connection is unavailable in this context.",
                       foreground=self.palette["muted"]).pack(anchor="w", padx=6, pady=2)
         else:
             if self._stash_matches is None:
@@ -673,10 +685,10 @@ class BuildToolPanel:
             matches = self._stash_matches or []
             owned_count = sum(bool(row["owned"]) for row in matches)
             if not matches:
-                ttk.Label(farm, text="Select gear items to compare them with the local stash.",
+                CtkLabel(farm, text="Select gear items to compare them with the local stash.",
                           foreground=self.palette["muted"]).pack(anchor="w", padx=6, pady=1)
             else:
-                ttk.Label(farm, text=f"{owned_count}/{len(matches)} selected gear target(s) have a matching owned item.",
+                CtkLabel(farm, text=f"{owned_count}/{len(matches)} selected gear target(s) have a matching owned item.",
                           foreground=self.palette["fg"]).pack(anchor="w", padx=6, pady=1)
                 if callable(self.target_loot_provider):
                     try:
@@ -698,10 +710,10 @@ class BuildToolPanel:
                                  f"{missions or 'open-world drop'} · {route['day']} · not guaranteed")
                     else:
                         label = f"Missing · {row['target']} · no current verified target-loot route"
-                ttk.Label(farm, text=f"{row['slot']}: {label}", wraplength=460,
+                CtkLabel(farm, text=f"{row['slot']}: {label}", wraplength=460,
                           foreground=self.palette["muted"] if row["owned"] else self.palette["accent"]).pack(anchor="w", padx=6, pady=1)
             if matches and not callable(self.target_loot_provider):
-                ttk.Label(farm, text="Current target-loot feed is unavailable in this context.",
+                CtkLabel(farm, text="Current target-loot feed is unavailable in this context.",
                           foreground=self.palette["muted"]).pack(anchor="w", padx=6, pady=1)
 
     def refresh_stash_matches(self, redraw=True):
@@ -740,12 +752,12 @@ class BuildToolPanel:
             item = build["slots"].get(slot) or {}; calc = by_slot.get(slot, {})
             text = (f"{slot}\n{item.get('name') or 'No weapon selected'}\n"
                     f"Damage {calc.get('damage', 0):g} · RPM {calc.get('rpm', 0):g} · Mag {calc.get('magazine', 0):g} · Reload {calc.get('reload', 0):g}s")
-            tk.Label(self.weapons_box, text=text, bg=self.palette["surface"], fg=self.palette["fg"], justify="left", anchor="w").pack(side="left", fill="x", expand=True, padx=8, pady=5)
+            CtkLabel(self.weapons_box, text=text, bg=self.palette["surface"], fg=self.palette["fg"], justify="left", anchor="w").pack(side="left", fill="x", expand=True, padx=8, pady=5)
 
     def _draw_ttk(self, result):
         for child in self.ttk_box.winfo_children(): child.destroy()
         self.enemy_hp.set(str(int(result["enemy_hp"])))
-        ttk.Label(self.ttk_box, text="Target HP").grid(row=0, column=0, padx=6, pady=4)
+        CtkLabel(self.ttk_box, text="Target HP").grid(row=0, column=0, padx=6, pady=4)
         hp = ttk.Spinbox(self.ttk_box, from_=1, to=100_000_000, increment=100_000, textvariable=self.enemy_hp, width=12,
                          command=self.update_enemy_hp)
         hp.grid(row=0, column=1, padx=4, pady=4); hp.bind("<FocusOut>", lambda _e: self.update_enemy_hp())
@@ -759,9 +771,9 @@ class BuildToolPanel:
             table.insert("", "end", values=(weapon["slot"], weapon["name"], f"{weapon['damage']:,.0f}",
                         f"{weapon['rpm']:,.0f}", f"{weapon['magazine'] or 0:,.0f}", f"{weapon['dps']:,.0f}", f"{weapon['ttk']:.1f}s"))
         if not result["weapons"]:
-            ttk.Label(self.ttk_box, text="Select a weapon or enter base damage and RPM in its slot editor.",
+            CtkLabel(self.ttk_box, text="Select a weapon or enter base damage and RPM in its slot editor.",
                       foreground=self.palette["muted"]).grid(row=2, column=0, columnspan=7, sticky="w", padx=6)
-        ttk.Label(self.ttk_box, text="DPS/TTK estimate uses weapon base damage, RPM, offensive cores, entered damage/critical attributes and parsed attachment stats; talent, specialization and SHD effects are excluded.",
+        CtkLabel(self.ttk_box, text="PvE baseline estimate only: DPS/TTK uses weapon base damage, RPM, offensive cores, entered damage/critical attributes and parsed attachment stats. PvP balancing/normalization, talents, specialization and SHD effects are excluded.",
                   wraplength=900, foreground=self.palette["muted"]).grid(row=3, column=0, columnspan=7, sticky="w", padx=6, pady=2)
 
     def update_enemy_hp(self):

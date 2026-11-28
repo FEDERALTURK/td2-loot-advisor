@@ -29,10 +29,17 @@ function td2ApiBase() { return window.TD2_CONFIG.API_BASE.replace(/\/$/, ""); }
 function td2Token() { try { return localStorage.getItem(TD2_TOKEN_KEY); } catch (e) { return null; } }
 function td2SetToken(t) { try { if (t) localStorage.setItem(TD2_TOKEN_KEY, t); else localStorage.removeItem(TD2_TOKEN_KEY); } catch (e) { /* yoksay */ } }
 
+async function td2Fetch(url, options = {}) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
+  try { return await fetch(url, { ...options, signal: controller.signal }); }
+  finally { clearTimeout(timeout); }
+}
+
 async function td2Api(path, { method = "GET", body, auth = true } = {}) {
   const headers = { "content-type": "application/json" };
   if (auth) { const t = td2Token(); if (t) headers.authorization = "Bearer " + t; }
-  const r = await fetch(td2ApiBase() + path, { method, headers, body: body ? JSON.stringify(body) : undefined });
+  const r = await td2Fetch(td2ApiBase() + path, { method, headers, body: body ? JSON.stringify(body) : undefined });
   let j = null; try { j = await r.json(); } catch (e) { /* gövdesiz yanıt */ }
   return { ok: r.ok, status: r.status, json: j || {} };
 }
@@ -91,7 +98,7 @@ async function td2DeleteAccount() {
 
 // ---------------------------------------------------------------- GitHub: son sürüm
 async function td2LatestRelease() {
-  const r = await fetch(`https://api.github.com/repos/${window.TD2_CONFIG.REPO}/releases/latest`,
+  const r = await td2Fetch(`https://api.github.com/repos/${window.TD2_CONFIG.REPO}/releases/latest`,
     { headers: { accept: "application/vnd.github+json" } });
   if (!r.ok) throw new Error("release_fetch_failed");
   return r.json();
@@ -102,14 +109,14 @@ async function td2LatestRelease() {
 // Site, uygulamanın depoya işlenen asıl kaynağını okur: meta/news_feed.json (bkz. README "Knowledge tab").
 async function td2News() {
   const url = `https://raw.githubusercontent.com/${window.TD2_CONFIG.REPO}/main/meta/news_feed.json`;
-  const r = await fetch(url);
+  const r = await td2Fetch(url);
   if (!r.ok) throw new Error("news_fetch_failed");
   return r.json();
 }
 // The Division 3 durumu — resmî duyurular/kaynaklar, meta/division3_feed.json'dan.
 async function td2Division3() {
   const url = `https://raw.githubusercontent.com/${window.TD2_CONFIG.REPO}/main/meta/division3_feed.json`;
-  const r = await fetch(url);
+  const r = await td2Fetch(url);
   if (!r.ok) throw new Error("d3_fetch_failed");
   return r.json();
 }

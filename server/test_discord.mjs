@@ -20,7 +20,7 @@ function statement(query) {
 const DB = { prepare: statement };
 const pair = generateKeyPairSync("ed25519");
 const publicRaw = pair.publicKey.export({ type: "spki", format: "der" }).subarray(-32).toString("hex");
-const env = { DB, DISCORD_PUBLIC_KEY: publicRaw, DISCORD_CLIENT_ID: "111111111111", TD2_APP_VERSION: "9.1.5-test",
+const env = { DB, HASH_SALT: "test-only-hash-salt-with-at-least-32-characters", DISCORD_PUBLIC_KEY: publicRaw, DISCORD_CLIENT_ID: "111111111111", TD2_APP_VERSION: "9.1.5-test",
   PUBLIC_URL: "https://worker.test", DISCORD_FETCH: async () => new Response(JSON.stringify({ items: [] })) };
 const checks = [];
 const ok = (condition, label) => checks.push([Boolean(condition), label]);

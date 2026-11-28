@@ -36,7 +36,7 @@ globalThis.fetch = async (url, opts = {}) => {
   return Response.json(it);
 };
 
-const env = { DB, HASH_SALT: "test", GITHUB_TOKEN: "ghp_test", REPORTS_REPO: "o/reports", ADMIN_LOGIN: "admin",
+const env = { DB, HASH_SALT: "test-only-hash-salt-not-for-production-0003", GITHUB_TOKEN: "ghp_test", REPORTS_REPO: "o/reports", ADMIN_LOGIN: "admin",
               GITHUB_API: "https://gh.test", SUPABASE_URL: "https://supabase.test",
               SUPABASE_SERVICE_ROLE_KEY: "service-role-test-only", SUPABASE_PANEL_ENABLED: "true" };
 const post = (b, ip = "1.2.3.4") => worker.fetch(new Request("https://w/v1/reports", { method: "POST", body: JSON.stringify(b),

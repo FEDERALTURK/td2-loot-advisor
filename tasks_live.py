@@ -228,7 +228,9 @@ def validate_feed(d):
     for x in (d.get("lines") or [])[:2000] if isinstance(d.get("lines"), list) else []:
         if isinstance(x, dict) and isinstance(x.get("en"), str) and isinstance(x.get("tr"), str):
             lines.append({"en": x["en"][:420], "tr": x["tr"][:840]})
-    return {"version": str(d.get("version", ""))[:24], "generated": d.get("generated"), "tasks": out, "lines": lines}
+    checked_at = d.get("checked_at")
+    return {"version": str(d.get("version", ""))[:24], "generated": d.get("generated"),
+            "checked_at": checked_at[:40] if isinstance(checked_at, str) else None, "tasks": out, "lines": lines}
 
 
 def fetch_live(url, raw_url=None, opener=None, timeout=10, app_version=None, start=False):

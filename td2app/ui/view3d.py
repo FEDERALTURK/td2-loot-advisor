@@ -9,6 +9,7 @@
 import math
 import time
 import tkinter as tk
+from . import ui_theme
 
 
 def _animation_budget(widget, delay_ms):
@@ -248,7 +249,7 @@ class Scene3D(tk.Canvas):
             i = self.create_polygon(*[c for p in pts for c in p], fill=col, outline=_shade(col, 0.82) if edge else "", tags="dyn")
             if tag: self._ids[i] = tag
         for txt, x, y, col in self.labels:
-            self.create_text(x, y, text=txt, fill=col, font=("Segoe UI", 9), anchor="nw", tags="dyn")
+            self.create_text(x, y, text=txt, fill=col, font=(ui_theme.FONT, 9), anchor="nw", tags="dyn")
         self._draw_anchors(w, h, f)
 
     def _draw_anchors(self, w, h, f):
@@ -271,7 +272,7 @@ class Scene3D(tk.Canvas):
                 behind = z > 6.05
                 tx = 6 if side < 0 else w - 6
                 i = self.create_text(tx, ly, text=txt, fill=_shade(col, 0.7) if behind else col,
-                                     font=("Segoe UI Semibold", 9), anchor="w" if side < 0 else "e", tags="dyn")
+                                     font=(ui_theme.FONT_DISPLAY, 9), anchor="w" if side < 0 else "e", tags="dyn")
                 bb = self.bbox(i)
                 ex = (bb[2] + 4) if side < 0 else (bb[0] - 4)
                 lc = _shade(col, 0.6) if behind else col
@@ -711,7 +712,7 @@ class SpriteAgentView(tk.Canvas):
             for Y, X, small, slot, txt, ly in items:
                 col = self.label_color(slot)
                 tx = 6 if side < 0 else w - 6
-                i = self.create_text(tx, ly, text=txt, fill=_shade(col, 0.75) if small else col, font=("Segoe UI Semibold", 9),
+                i = self.create_text(tx, ly, text=txt, fill=_shade(col, 0.75) if small else col, font=(ui_theme.FONT_DISPLAY, 9),
                                      anchor="w" if side < 0 else "e", tags="dyn")
                 bb = self.bbox(i); ex = (bb[2] + 4) if side < 0 else (bb[0] - 4)
                 lc = _shade(col, 0.6) if small else col

@@ -17,6 +17,8 @@
 //  - Yalnız oyunun görev yazısı alınır; oyuncu adı, ekran görüntüsü, IP saklanmaz. İstemci kimliği tuzlu SHA-256 özetidir.
 //  - Tablolar ilk kullanımda kendiliğinden oluşturulur (ayrı bir veritabanı adımı gerekmez).
 
+import { requireHashSalt } from "./security.js";
+
 const CATS = new Set(["project", "bounty", "assignment", "other"]);
 const PERIODS = new Set(["daily", "weekly", "season", "other"]);
 const EN_FIELDS = { title: 80, subtitle: 80, desc: 420, objective: 220 };
@@ -130,7 +132,7 @@ async function postTask(req, env) {
   try { b = await req.json(); } catch { return json({ error: "bad json" }, 400); }
   const c = cleanTask(b);
   if (!c) return json({ error: "invalid task" }, 400);
-  const salt = env.HASH_SALT || "dev-salt";
+  const salt = requireHashSalt(env);
   const rawClient = String(b.client || "").slice(0, 64);
   if (rawClient.length < 8) return json({ error: "invalid client" }, 400);
   const client = await sha(salt + "|task|" + rawClient);
@@ -161,7 +163,7 @@ async function postSuggest(req, env) {
   if (!en || !nw || en === null || nw === null || old === null || nw === old) return json({ error: "invalid suggestion" }, 400);
   const rawClient = String(b.client || "").slice(0, 64);
   if (rawClient.length < 8) return json({ error: "invalid client" }, 400);
-  const salt = env.HASH_SALT || "dev-salt";
+  const salt = requireHashSalt(env);
   const client = await sha(salt + "|task|" + rawClient);
   const ip = await sha(salt + "|ip|" + (req.headers.get("cf-connecting-ip") || ""));
   if (!(await rateCheck(env, "sc:" + client, 30, 24)) || !(await rateCheck(env, "si:" + ip, 90, 24))) return json({ error: "rate limited" }, 429);

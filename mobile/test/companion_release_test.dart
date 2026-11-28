@@ -2,6 +2,29 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:td2_companion/services/companion_release.dart';
 
 void main() {
+  test(
+    'release links are restricted to the Companion repository asset path',
+    () {
+      expect(
+        isTrustedReleaseUrl(
+          'https://github.com/FEDERALTURK/td2-loot-advisor/releases/download/companion-v0.1.10/TD2LootAdvisor_Companion_0.1.10.apk',
+          asset: true,
+          tag: 'companion-v0.1.10',
+        ),
+        isTrue,
+      );
+      expect(
+        isTrustedReleaseUrl('https://attacker.example/file.apk', asset: true),
+        isFalse,
+      );
+      expect(
+        isTrustedReleaseUrl(
+          'https://github.com/FEDERALTURK/other/releases/tag/companion-v0.1.10',
+        ),
+        isFalse,
+      );
+    },
+  );
   test('download progress is bounded and handles unknown content length', () {
     expect(downloadProgress(25, 100), 0.25);
     expect(downloadProgress(150, 100), 1);
@@ -9,6 +32,7 @@ void main() {
   });
 
   test('shared companion user agent follows the installed version', () {
+    expect(companionVersion, '0.1.12');
     expect(companionUserAgent, 'TD2-Loot-Advisor-Companion/$companionVersion');
     expect(companionUserAgent, isNot(contains('0.1.5')));
   });

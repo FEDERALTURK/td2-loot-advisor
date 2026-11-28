@@ -86,7 +86,7 @@ def _monitor_dpi(m):
 
 def scan_pc():
     import mss
-    with mss.mss() as s:
+    with mss.MSS() as s:
         mons = [dict(m) for m in s.monitors[1:]]
     for m in mons:
         m["scale"] = _monitor_dpi(m)
@@ -104,7 +104,7 @@ def scan_game():
     out = {"settings": gs, "window": None, "running": bool(g)}
     if g:
         import mss
-        with mss.mss() as s:
+        with mss.MSS() as s:
             mon = display.monitor_of(g, s.monitors)
         out["window"] = {k: g[k] for k in ("left", "top", "width", "height")}
         out["window"]["monitor"] = {k: mon[k] for k in ("left", "top", "width", "height")}
@@ -157,7 +157,7 @@ def fingerprint(pc, game=None):
     mons = sorted((m["width"], m["height"], m.get("scale", 100)) for m in pc.get("monitors", []))
     gs = (game or {}).get("settings") or {}
     key = json.dumps([pc.get("cpu"), mons, gs.get("width"), gs.get("height"), gs.get("display_mode")], sort_keys=True)
-    return hashlib.sha1(key.encode()).hexdigest()[:16]
+    return hashlib.sha1(key.encode(), usedforsecurity=False).hexdigest()[:16]
 
 
 def make_plan(pc, game, bench, st):

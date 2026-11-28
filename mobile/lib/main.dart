@@ -12,10 +12,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'console/console_caption_page.dart';
+import 'builds/build_workshop.dart';
 import 'services/cloud_link.dart';
 import 'services/companion_release.dart';
-import 'services/build_import.dart';
 import 'services/local_alerts.dart';
+import 'services/task_feed.dart';
 
 const _bg = Color(0xFF090C12);
 const _panel = Color(0xFF121722);
@@ -150,6 +151,7 @@ class CompanionModel extends ChangeNotifier {
   String? refreshMessage;
   DateTime? lastRefresh;
   bool newsAlertsEnabled = false;
+  bool taskAlertsEnabled = false;
   bool updateAlertsEnabled = false;
   bool alertChanging = false;
   String? availableVersion;
@@ -158,6 +160,15 @@ class CompanionModel extends ChangeNotifier {
   String? availableSha256Url;
   bool downloadingUpdate = false;
   double updateProgress = 0;
+  String installedVersion = companionVersion;
+  String updateStatus = 'Henüz kontrol edilmedi';
+  bool checkingUpdate = false;
+  http.Client? _downloadClient;
+  bool _downloadCancelled = false;
+  bool _disposed = false;
+  bool _pollingDesktop = false;
+  bool quietHoursEnabled = false;
+  final Map<String, DateTime> feedUpdatedAt = {};
   DateTime? lastUpdateCheck;
   SharedPreferences? _prefs;
   Timer? _desktopPoll;
@@ -191,9 +202,19 @@ class CompanionModel extends ChangeNotifier {
   int get doneCount => completedTasks.length;
   bool get updateAvailable =>
       availableVersion != null &&
-      isNewerVersion(availableVersion!, companionVersion);
+      isNewerVersion(availableVersion!, installedVersion);
 
   Future<void> load() async {
+    try {
+      installedVersion =
+          await const MethodChannel('td2_companion/update')
+              .invokeMethod<String>('packageVersion') ??
+          companionVersion;
+    } on PlatformException {
+      /* package fallback for unsupported platforms */
+    } on MissingPluginException {
+      /* widget tests / non-Android host */
+    }
     try {
       final loaded = await Future.wait([
         _asset('assets/data/tasks_feed.json'),
@@ -204,10 +225,24 @@ class CompanionModel extends ChangeNotifier {
       newsFeed = loaded[1];
       metaBuilds = loaded[2];
       _prefs = await SharedPreferences.getInstance();
+      quietHoursEnabled =
+          _prefs?.getBool('notification_quiet_enabled') ?? false;
+      await LocalAlerts.initialize();
+      for (final key in [
+        'cached_tasks_feed',
+        'cached_news_feed',
+        'cached_meta_builds',
+      ]) {
+        final stamp = _prefs?.getInt('${key}_updated_ms');
+        if (stamp != null) {
+          feedUpdatedAt[key] = DateTime.fromMillisecondsSinceEpoch(stamp);
+        }
+      }
       _restoreContentCache();
       completedTasks = (_prefs?.getStringList('completed_tasks') ?? <String>[])
           .toSet();
       newsAlertsEnabled = _prefs?.getBool('news_alerts_enabled') ?? false;
+      taskAlertsEnabled = _prefs?.getBool('task_alerts_enabled') ?? false;
       updateAlertsEnabled = _prefs?.getBool('update_alerts_enabled') ?? false;
       final lastUpdateMillis = _prefs?.getInt('last_update_check_ms');
       if (lastUpdateMillis != null) {
@@ -248,9 +283,7 @@ class CompanionModel extends ChangeNotifier {
     if (raw == null) return null;
     try {
       final decoded = jsonDecode(raw);
-      if (decoded is Map &&
-          decoded[listKey] is List &&
-          (decoded[listKey] as List).isNotEmpty) {
+      if (decoded is Map && decoded[listKey] is List) {
         return Map<String, dynamic>.from(decoded);
       }
     } catch (_) {
@@ -261,6 +294,9 @@ class CompanionModel extends ChangeNotifier {
 
   Future<void> _saveFeed(String key, Map<String, dynamic> feed) async {
     await _prefs?.setString(key, jsonEncode(feed));
+    final now = DateTime.now();
+    await _prefs?.setInt('${key}_updated_ms', now.millisecondsSinceEpoch);
+    feedUpdatedAt[key] = now;
   }
 
   Set<String> _newsIds(Map<String, dynamic> feed) =>
@@ -268,6 +304,8 @@ class CompanionModel extends ChangeNotifier {
           .map((item) => '${item['id'] ?? item['url'] ?? item['title'] ?? ''}')
           .where((id) => id.isNotEmpty)
           .toSet();
+
+  Set<String> _taskIds(Map<String, dynamic> feed) => taskFeedIds(feed['tasks']);
 
   Future<Map<String, dynamic>> _asset(String path) async {
     final text = await rootBundle.loadString(path);
@@ -310,27 +348,26 @@ class CompanionModel extends ChangeNotifier {
     ]);
     var changed = false;
     final beforeNews = _newsIds(newsFeed);
-    if (results[0]?['tasks'] is List &&
-        (results[0]!['tasks'] as List).isNotEmpty) {
+    final beforeTasks = _taskIds(tasksFeed);
+    if (results[0]?['tasks'] is List) {
       tasksFeed = results[0]!;
       await _saveFeed('cached_tasks_feed', tasksFeed);
       changed = true;
     }
-    if (results[1]?['items'] is List &&
-        (results[1]!['items'] as List).isNotEmpty) {
+    if (results[1]?['items'] is List) {
       newsFeed = results[1]!;
       await _saveFeed('cached_news_feed', newsFeed);
       changed = true;
     }
-    if (results[2]?['builds'] is List &&
-        (results[2]!['builds'] as List).isNotEmpty) {
+    if (results[2]?['builds'] is List) {
       metaBuilds = results[2]!;
       await _saveFeed('cached_meta_builds', metaBuilds);
       changed = true;
     }
     if (results[1] != null) await _notifyNewNews(beforeNews);
+    if (results[0] != null) await _notifyNewTasks(beforeTasks);
     refreshing = false;
-    lastRefresh = DateTime.now();
+    if (changed) lastRefresh = DateTime.now();
     if (!changed) refreshMessage = 'Çevrimdışı içerik gösteriliyor';
     notifyListeners();
   }
@@ -353,19 +390,53 @@ class CompanionModel extends ChangeNotifier {
       id: 2201,
       title: 'Yeni Division haberi',
       body: title,
+      category: 'news',
+      eventKey: 'news:${fresh.first}',
+    );
+  }
+
+  Future<void> _notifyNewTasks(Set<String> beforeTasks) async {
+    final current = _taskIds(tasksFeed);
+    final remembered = (_prefs?.getStringList('known_task_ids') ?? <String>[])
+        .toSet();
+    final baseline = remembered.isEmpty ? beforeTasks : remembered;
+    final fresh = current.difference(baseline);
+    await _prefs?.setStringList('known_task_ids', current.toList());
+    if (!taskAlertsEnabled || fresh.isEmpty) return;
+    final id = fresh.first;
+    final task = tasks.firstWhere(
+      (row) => '${row['id'] ?? row['wiki_id'] ?? ''}' == id,
+      orElse: () => <String, dynamic>{},
+    );
+    await LocalAlerts.show(
+      id: 2203,
+      title: 'Yeni TD2 görevi',
+      body: _localized(task['text']).isEmpty
+          ? 'Yeni görev içeriği eklendi.'
+          : _localized(task['text']),
+      category: 'task',
+      eventKey: 'task:$id',
     );
   }
 
   Future<void> checkForUpdate({bool force = false}) async {
+    if (checkingUpdate) return;
     if (!force && !isUpdateCheckDue(lastUpdateCheck)) return;
+    checkingUpdate = true;
+    updateStatus = 'Kontrol ediliyor';
+    notifyListeners();
     final client = http.Client();
     try {
       final release = await fetchLatestCompanionRelease(client);
-      if (release == null) return;
+      if (release == null) {
+        updateStatus = 'Sürüm bilgisi alınamadı; tekrar deneyin';
+        return;
+      }
       availableVersion = release.version;
       availableVersionUrl = release.url;
       availableApkUrl = release.apkUrl;
       availableSha256Url = release.sha256Url;
+      updateStatus = updateAvailable ? 'Güncelleme mevcut' : 'Güncel';
       lastUpdateCheck = DateTime.now();
       await _prefs?.setInt(
         'last_update_check_ms',
@@ -378,6 +449,8 @@ class CompanionModel extends ChangeNotifier {
             id: 2202,
             title: 'Companion güncellemesi hazır',
             body: 'v${release.version} indirilmeye hazır.',
+            category: 'update',
+            eventKey: 'update:${release.version}',
           );
           await _prefs?.setString(
             'notified_companion_version',
@@ -387,63 +460,128 @@ class CompanionModel extends ChangeNotifier {
       }
       notifyListeners();
     } catch (_) {
-      // Güncelleme denetimi içerik veya uygulama açılışını engellemez.
+      updateStatus = 'Güncelleme sunucusuna ulaşılamadı';
     } finally {
       client.close();
+      checkingUpdate = false;
+      notifyListeners();
     }
+  }
+
+  void cancelUpdate() {
+    _downloadCancelled = true;
+    _downloadClient?.close();
+    updateStatus = 'İndirme iptal edildi';
+    notifyListeners();
   }
 
   Future<String?> downloadAndInstallUpdate() async {
     final apkUrl = availableApkUrl;
-    if (apkUrl == null || downloadingUpdate) {
-      return 'APK bağlantısı bulunamadı.';
+    if (apkUrl == null ||
+        downloadingUpdate ||
+        !updateAvailable ||
+        !isTrustedReleaseUrl(apkUrl, asset: true)) {
+      return 'Güvenilir güncelleme bulunamadı.';
     }
     downloadingUpdate = true;
+    _downloadCancelled = false;
     updateProgress = 0;
+    updateStatus = 'İndiriliyor';
     notifyListeners();
+    final client = http.Client();
+    _downloadClient = client;
+    File? partial;
     try {
-      final response = await http
-          .get(Uri.parse(apkUrl))
-          .timeout(const Duration(minutes: 3));
-      if (response.statusCode != 200 || response.bodyBytes.isEmpty) {
-        return 'APK indirilemedi (HTTP ${response.statusCode}).';
-      }
       final expected = await _fetchChecksum();
+      if (_downloadCancelled) return 'İndirme iptal edildi.';
       if (expected == null || !RegExp(r'^[a-f0-9]{64}$').hasMatch(expected)) {
-        return 'APK doğrulama bilgisi alınamadı. Lütfen tekrar deneyin.';
-      }
-      final actual = sha256.convert(response.bodyBytes).toString();
-      if (expected != actual) {
-        return 'APK doğrulaması başarısız; dosya kurulmadı.';
+        throw const FormatException('APK doğrulama bilgisi alınamadı');
       }
       final directory = await getApplicationSupportDirectory();
-      final file = File(
-        '${directory.path}/TD2LootAdvisor_Companion_$availableVersion.apk',
+      partial = File('${directory.path}/companion-update.part');
+      final response = await client
+          .send(http.Request('GET', Uri.parse(apkUrl)))
+          .timeout(const Duration(seconds: 30));
+      const maxBytes = 512 * 1024 * 1024;
+      if (response.statusCode != 200 ||
+          (response.contentLength ?? 0) > maxBytes) {
+        throw const FormatException('APK yanıtı veya boyutu geçersiz');
+      }
+      final sink = partial.openWrite();
+      var received = 0;
+      var lastPaint = DateTime.now();
+      try {
+        await for (final chunk in response.stream.timeout(
+          const Duration(seconds: 30),
+        )) {
+          if (_downloadCancelled) {
+            throw const FormatException('İndirme iptal edildi');
+          }
+          received += chunk.length;
+          if (received > maxBytes) {
+            throw const FormatException('APK boyut sınırı aşıldı');
+          }
+          sink.add(chunk);
+          // Backpressure avoids buffering an entire APK on low-memory phones.
+          await sink.flush();
+          updateProgress = downloadProgress(received, response.contentLength);
+          if (DateTime.now().difference(lastPaint).inMilliseconds >= 150) {
+            lastPaint = DateTime.now();
+            notifyListeners();
+          }
+        }
+      } finally {
+        await sink.close();
+      }
+      if (_downloadCancelled) return 'İndirme iptal edildi.';
+      if (received == 0 ||
+          (response.contentLength != null &&
+              received != response.contentLength)) {
+        throw const FormatException('APK indirmesi tamamlanmadı');
+      }
+      updateStatus = 'Doğrulanıyor';
+      notifyListeners();
+      final actual = (await sha256.bind(partial.openRead()).first).toString();
+      if (expected != actual) {
+        throw const FormatException('APK bütünlük doğrulaması başarısız');
+      }
+      if (_downloadCancelled) return 'İndirme iptal edildi.';
+      final file = await partial.rename(
+        '${directory.path}/companion-update.apk',
       );
-      await file.writeAsBytes(response.bodyBytes, flush: true);
+      partial = null;
       await const MethodChannel('td2_companion/update')
           .invokeMethod<bool>('installApk', {'path': file.path});
+      updateStatus = 'Android kurulum onayı bekleniyor';
       return null;
-    } catch (error) {
-      return 'Güncelleme indirilemedi: $error';
+    } catch (_) {
+      updateStatus = _downloadCancelled
+          ? 'İndirme iptal edildi'
+          : 'Güncelleme tamamlanamadı; tekrar deneyin';
+      return updateStatus;
     } finally {
+      client.close();
+      _downloadClient = null;
+      if (partial != null && await partial.exists()) await partial.delete();
       downloadingUpdate = false;
-      updateProgress = 0;
       notifyListeners();
     }
   }
 
   Future<String?> _fetchChecksum() async {
     final checksumUrl = availableSha256Url;
-    if (checksumUrl == null) return null;
+    if (checksumUrl == null || !isTrustedReleaseUrl(checksumUrl, asset: true)) {
+      return null;
+    }
     try {
       final text = await http
           .read(Uri.parse(checksumUrl))
           .timeout(const Duration(seconds: 20));
-      final apkName = 'TD2LootAdvisor_Companion_$availableVersion.apk';
+      final apkName = Uri.parse(availableApkUrl!).pathSegments.last;
       for (final line in text.split(RegExp(r'\r?\n'))) {
         final parts = line.trim().split(RegExp(r'\s+'));
-        if (parts.length >= 2 && parts.last.endsWith(apkName)) {
+        if (parts.length >= 2 &&
+            parts.last.replaceFirst(RegExp(r'^\*'), '') == apkName) {
           return parts.first.toLowerCase();
         }
       }
@@ -457,18 +595,35 @@ class CompanionModel extends ChangeNotifier {
     enabled: enabled,
     preferenceKey: 'news_alerts_enabled',
     news: true,
+    task: false,
   );
 
   Future<String?> setUpdateAlertsEnabled(bool enabled) => _setAlerts(
     enabled: enabled,
     preferenceKey: 'update_alerts_enabled',
     news: false,
+    task: false,
   );
+
+  Future<String?> setTaskAlertsEnabled(bool enabled) => _setAlerts(
+    enabled: enabled,
+    preferenceKey: 'task_alerts_enabled',
+    news: false,
+    task: true,
+  );
+
+  Future<void> setQuietHoursEnabled(bool enabled) async {
+    quietHoursEnabled = enabled;
+    await _prefs?.setBool('notification_quiet_enabled', enabled);
+    await LocalAlerts.configureQuietHours(enabled: enabled);
+    notifyListeners();
+  }
 
   Future<String?> _setAlerts({
     required bool enabled,
     required String preferenceKey,
     required bool news,
+    required bool task,
   }) async {
     if (alertChanging) return null;
     alertChanging = true;
@@ -486,11 +641,19 @@ class CompanionModel extends ChangeNotifier {
             _newsIds(newsFeed).toList(),
           );
         }
+      } else if (task) {
+        taskAlertsEnabled = enabled;
+        if (enabled) {
+          await _prefs?.setStringList(
+            'known_task_ids',
+            _taskIds(tasksFeed).toList(),
+          );
+        }
       } else {
         updateAlertsEnabled = enabled;
       }
       await _prefs?.setBool(preferenceKey, enabled);
-      if (enabled && !news) unawaited(checkForUpdate());
+      if (enabled && !news && !task) unawaited(checkForUpdate());
       return null;
     } finally {
       alertChanging = false;
@@ -585,7 +748,10 @@ class CompanionModel extends ChangeNotifier {
 
   Future<bool> _pollDesktop() async {
     final endpoint = _desktopEndpoint;
-    if (endpoint == null || _desktopToken == null) return false;
+    if (endpoint == null || _desktopToken == null || _pollingDesktop) {
+      return false;
+    }
+    _pollingDesktop = true;
     try {
       final response = await http
           .get(
@@ -605,6 +771,7 @@ class CompanionModel extends ChangeNotifier {
         if (value is! Map) {
           throw const FormatException('JSON nesnesi bekleniyordu');
         }
+        if (endpoint != _desktopEndpoint) return false;
         desktopState = Map<String, dynamic>.from(value);
         desktopError = null;
       }
@@ -615,6 +782,8 @@ class CompanionModel extends ChangeNotifier {
       desktopError = 'Masaüstüne ulaşılamıyor. İki cihazın aynı Wi-Fi’da olduğunu ve Telefon Arkadaşı’nın açık olduğunu kontrol et.';
       notifyListeners();
       return false;
+    } finally {
+      _pollingDesktop = false;
     }
   }
 
@@ -630,7 +799,14 @@ class CompanionModel extends ChangeNotifier {
   }
 
   @override
+  void notifyListeners() {
+    if (!_disposed) super.notifyListeners();
+  }
+
+  @override
   void dispose() {
+    _disposed = true;
+    _downloadClient?.close();
     _desktopPoll?.cancel();
     super.dispose();
   }
@@ -657,6 +833,36 @@ class MainShell extends StatefulWidget {
 
 class _MainShellState extends State<MainShell> {
   int selected = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    LocalAlerts.destination.addListener(_openNotificationDestination);
+  }
+
+  void _openNotificationDestination() {
+    switch (LocalAlerts.destination.value) {
+      case 'update':
+        selected = 0;
+        break;
+      case 'task':
+        selected = 1;
+        break;
+      case 'news':
+        selected = 3;
+        break;
+      default:
+        return;
+    }
+    LocalAlerts.consumeDestination();
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void dispose() {
+    LocalAlerts.destination.removeListener(_openNotificationDestination);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -689,7 +895,7 @@ class _MainShellState extends State<MainShell> {
                 ),
               ),
               const SizedBox(width: 10),
-              const Column(
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
@@ -701,7 +907,7 @@ class _MainShellState extends State<MainShell> {
                     ),
                   ),
                   Text(
-                    'COMPANION  ·  BETA $companionVersion',
+                    'COMPANION  ·  BETA ${widget.model.installedVersion}',
                     style: TextStyle(
                       fontSize: 9,
                       color: _soft,
@@ -730,7 +936,7 @@ class _MainShellState extends State<MainShell> {
             ),
             IconButton(
               tooltip: 'Beta hakkında',
-              onPressed: () => _about(context),
+              onPressed: () => _about(context, widget.model.installedVersion),
               icon: const Icon(Icons.info_outline_rounded),
             ),
             const SizedBox(width: 8),
@@ -797,6 +1003,49 @@ class OverviewPage extends StatelessWidget {
           Text(
             model.season,
             style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 10),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+            decoration: BoxDecoration(
+              color: _panel,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: Colors.white10),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  model.refreshing
+                      ? Icons.sync
+                      : model.refreshMessage != null
+                      ? Icons.cloud_off_outlined
+                      : Icons.cloud_done_outlined,
+                  color: model.refreshMessage != null ? _soft : _orange,
+                  size: 19,
+                ),
+                const SizedBox(width: 9),
+                Expanded(
+                  child: Text(
+                    model.refreshing
+                        ? 'İçerikler güncelleniyor'
+                        : model.refreshMessage ??
+                              (model.lastRefresh == null
+                                  ? 'Yerel içerik hazır'
+                                  : 'Son eşitleme ${_dateTime(model.lastRefresh!)}'),
+                    style: const TextStyle(fontSize: 11, color: _soft),
+                  ),
+                ),
+                if (cloud.paired)
+                  Text(
+                    cloud.desktopOnline ? 'PC ONLINE' : 'BULUT EŞLİ',
+                    style: const TextStyle(
+                      fontSize: 9,
+                      color: _orange,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+              ],
+            ),
           ),
           const SizedBox(height: 18),
           Container(
@@ -992,6 +1241,19 @@ class _ContentAlertsCard extends StatelessWidget {
             ),
             const Divider(height: 1),
             SwitchListTile.adaptive(
+              value: model.taskAlertsEnabled,
+              onChanged: model.alertChanging
+                  ? null
+                  : (value) =>
+                        _change(context, value, model.setTaskAlertsEnabled),
+              title: const Text('Yeni görev bildirimleri'),
+              subtitle: const Text(
+                'Uygulama açıkken görev akışı yenilendiğinde yeni görevleri bildirir.',
+                style: TextStyle(color: _soft, fontSize: 11),
+              ),
+            ),
+            const Divider(height: 1),
+            SwitchListTile.adaptive(
               value: model.updateAlertsEnabled,
               onChanged: model.alertChanging
                   ? null
@@ -1021,6 +1283,45 @@ class _ContentAlertsCard extends StatelessWidget {
                   ),
                 ),
               ),
+              if (model.downloadingUpdate)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                  child: Column(
+                    children: [
+                      LinearProgressIndicator(
+                        value: model.updateProgress > 0
+                            ? model.updateProgress
+                            : null,
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              '${model.updateStatus} · ${(model.updateProgress * 100).round()}%',
+                              style: const TextStyle(
+                                color: _soft,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: model.cancelUpdate,
+                            child: const Text('İptal'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              if (!model.downloadingUpdate)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                  child: Text(
+                    '${model.updateStatus} · Kurulu sürüm ${model.installedVersion}',
+                    style: const TextStyle(color: _soft, fontSize: 11),
+                  ),
+                ),
               if (model.availableApkUrl == null)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
@@ -1045,6 +1346,16 @@ class _ContentAlertsCard extends StatelessWidget {
         ),
       ),
       const SizedBox(height: 8),
+      SwitchListTile.adaptive(
+        contentPadding: EdgeInsets.zero,
+        value: model.quietHoursEnabled,
+        onChanged: model.setQuietHoursEnabled,
+        title: const Text('Sessiz saatler (22.00–08.00)'),
+        subtitle: const Text(
+          'Bu aralıkta içerik bildirimleri gösterilmez.',
+          style: TextStyle(color: _soft, fontSize: 11),
+        ),
+      ),
       const Text(
         'İzin yalnız yukarıdaki anahtarlardan biri açıldığında istenir. Arka planda haber bildirimi için ayrıca Firebase/Play dağıtımı doğrulaması gerekir.',
         style: TextStyle(color: _soft, fontSize: 11),
@@ -1162,91 +1473,6 @@ class _BuildsPageState extends State<BuildsPage> {
     );
   }
 
-  Future<void> _importDesktopJson() async {
-    final controller = TextEditingController();
-    try {
-      final raw = await showDialog<String>(
-        context: context,
-        builder: (dialogContext) => AlertDialog(
-          title: const Text('Masaüstü Build Tool içe aktar'),
-          content: SizedBox(
-            width: 520,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'PC programında Build Tool → Dışa aktar ile oluşturduğun JSON dosyasını açıp içeriğini buraya yapıştır. Veriler bu telefonda işlenir.',
-                    style: TextStyle(color: _soft),
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: controller,
-                    minLines: 6,
-                    maxLines: 12,
-                    maxLength: 2 * 1024 * 1024,
-                    decoration: const InputDecoration(
-                      labelText: 'Dışa aktarılan JSON',
-                      alignLabelWithHint: true,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('İptal'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(dialogContext, controller.text),
-              child: const Text('İçe aktar'),
-            ),
-          ],
-        ),
-      );
-      if (raw == null || raw.trim().isEmpty || !mounted) return;
-      final imported = parseDesktopBuildExport(raw);
-      if (widget.model.savedBuilds.length + imported.length > 200) {
-        throw const FormatException(
-          'Telefonda en fazla 200 build saklanabilir.',
-        );
-      }
-      final names = widget.model.savedBuilds
-          .map((build) => '${build['name']}'.toLowerCase())
-          .toSet();
-      for (final build in imported) {
-        final baseName = '${build['name']}';
-        var name = baseName;
-        var suffix = 1;
-        while (names.contains(name.toLowerCase())) {
-          suffix++;
-          name = '$baseName (Imported${suffix > 2 ? ' $suffix' : ''})';
-        }
-        names.add(name.toLowerCase());
-        build['name'] = name;
-      }
-      await widget.model.replaceSavedBuilds([
-        ...imported,
-        ...widget.model.savedBuilds,
-      ]);
-      if (!mounted) return;
-      setState(() => tab = 1);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${imported.length} build telefona aktarıldı.')),
-      );
-    } on FormatException catch (error) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('İçe aktarılamadı: ${error.message}')),
-      );
-    } finally {
-      controller.dispose();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final meta = widget.model.builds.where((build) {
@@ -1298,12 +1524,6 @@ class _BuildsPageState extends State<BuildsPage> {
                 ),
               ],
             ],
-          ),
-          const SizedBox(height: 12),
-          OutlinedButton.icon(
-            onPressed: _importDesktopJson,
-            icon: const Icon(Icons.file_download_outlined),
-            label: const Text('Masaüstü Build Tool JSON içe aktar'),
           ),
           const SizedBox(height: 12),
           SegmentedButton<int>(
@@ -1612,132 +1832,40 @@ class SavedBuildCard extends StatelessWidget {
   final VoidCallback onDelete;
 
   @override
-  Widget build(BuildContext context) => Card(
-    margin: const EdgeInsets.only(bottom: 10),
-    child: ListTile(
-      onTap: () => _showSavedBuildDetails(context, data),
-      leading: const CircleAvatar(
-        backgroundColor: Color(0xFF302015),
-        child: Icon(Icons.shield_outlined, color: _orange),
-      ),
-      title: Text(
-        '${data['name'] ?? ''}',
-        style: const TextStyle(fontWeight: FontWeight.w700),
-      ),
-      subtitle: Text(
-        '${data['playstyle'] ?? ''}\n${data['gear'] ?? ''}',
-        maxLines: 3,
-        overflow: TextOverflow.ellipsis,
-        style: const TextStyle(color: _soft, height: 1.4),
-      ),
-      isThreeLine: true,
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          IconButton(
-            tooltip: 'Build ayrıntılarını gör',
-            onPressed: () => _showSavedBuildDetails(context, data),
-            icon: const Icon(Icons.visibility_outlined, color: _orange),
-          ),
-          IconButton(
-            tooltip: 'Build’i sil',
-            onPressed: onDelete,
-            icon: const Icon(Icons.delete_outline),
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
-Future<void> _showSavedBuildDetails(
-  BuildContext context,
-  Map<String, dynamic> build,
-) => showModalBottomSheet<void>(
-  context: context,
-  isScrollControlled: true,
-  showDragHandle: true,
-  builder: (context) {
-    final slots = build['slots'] is Map ? build['slots'] as Map : const {};
-    final entries = slots.entries.where((entry) => entry.value is Map).toList();
-    const labels = {
-      'core': 'Çekirdek',
-      'brand': 'Marka',
-      'gear_set': 'Ekipman seti',
-      'talent': 'Yetenek',
-    };
-    return SafeArea(
-      child: SizedBox(
-        height: MediaQuery.sizeOf(context).height * .75,
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(18, 4, 18, 24),
-          children: [
-            Text(
-              '${build['name'] ?? 'Kaydedilmiş build'}',
-              style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w800),
-            ),
-            if ('${build['specialization'] ?? ''}'.isNotEmpty ||
-                '${build['playstyle'] ?? ''}'.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(top: 4, bottom: 12),
-                child: Text(
-                  [build['specialization'], build['playstyle']]
-                      .where((value) => value != null && '$value'.isNotEmpty)
-                      .join(' · '),
-                  style: const TextStyle(color: _soft),
-                ),
-              ),
-            if (entries.isEmpty)
-              Text(
-                '${build['gear'] ?? 'Bu kayıtta ayrıntılı ekipman yuvaları bulunmuyor.'}',
-                style: const TextStyle(color: _soft, height: 1.5),
-              )
-            else
-              ...entries.map((entry) {
-                final item = entry.value as Map;
-                final lines = <String>[];
-                for (final key in labels.keys) {
-                  final value = item[key];
-                  if (value != null && '$value'.isNotEmpty) {
-                    lines.add('${labels[key]}: $value');
-                  }
-                }
-                if (item['attrs'] is Map) {
-                  final attrs = item['attrs'] as Map;
-                  lines.addAll(
-                    attrs.entries.map(
-                      (attr) =>
-                          '${'${attr.key}'.replaceAll('_', ' ')}: ${attr.value}',
-                    ),
-                  );
-                }
-                if (item['attachments'] is List) {
-                  for (final attachment in item['attachments'] as List) {
-                    if (attachment is Map) {
-                      lines.add(
-                        '${attachment['slot'] ?? 'Mod'}: '
-                                '${attachment['name'] ?? ''} ${attachment['stats'] ?? ''}'
-                            .trim(),
-                      );
-                    }
-                  }
-                }
-                return Card(
-                  child: ListTile(
-                    title: Text(
-                      '${entry.key} · ${item['name'] ?? 'Seçilmedi'}',
-                    ),
-                    subtitle: lines.isEmpty ? null : Text(lines.join('\n')),
-                    isThreeLine: lines.length > 1,
-                  ),
-                );
-              }),
-          ],
+  Widget build(BuildContext context) {
+    final calc = data['calculation'] is Map
+        ? Map<String, dynamic>.from(data['calculation'] as Map)
+        : null;
+    final summary = calc == null
+        ? ''
+        : '\nZırh tahmini: ${(calc['armor'] as num?)?.round() ?? 0}';
+    return Card(
+      margin: const EdgeInsets.only(bottom: 10),
+      child: ListTile(
+        leading: const CircleAvatar(
+          backgroundColor: Color(0xFF302015),
+          child: Icon(Icons.shield_outlined, color: _orange),
+        ),
+        title: Text(
+          '${data['name'] ?? ''}',
+          style: const TextStyle(fontWeight: FontWeight.w700),
+        ),
+        subtitle: Text(
+          '${data['playstyle'] ?? ''}\n${data['gear'] ?? ''}$summary',
+          maxLines: 5,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(color: _soft, height: 1.4),
+        ),
+        isThreeLine: true,
+        trailing: IconButton(
+          tooltip: 'Build’i sil',
+          onPressed: onDelete,
+          icon: const Icon(Icons.delete_outline),
         ),
       ),
     );
-  },
-);
+  }
+}
 
 class NewsCard extends StatelessWidget {
   const NewsCard({super.key, required this.item, this.compact = false});
@@ -2409,111 +2537,24 @@ Future<void> _newBuild(
   CompanionModel model,
   CloudLinkModel cloud,
 ) async {
-  final name = TextEditingController();
-  final playstyle = TextEditingController(text: 'PvE / DPS');
-  final gear = TextEditingController();
-  final notes = TextEditingController();
-  final formKey = GlobalKey<FormState>();
-  await showModalBottomSheet<void>(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: _panel,
-    showDragHandle: true,
-    builder: (sheetContext) => Padding(
-      padding: EdgeInsets.fromLTRB(
-        20,
-        8,
-        20,
-        MediaQuery.of(sheetContext).viewInsets.bottom + 24,
-      ),
-      child: Form(
-        key: formKey,
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Text(
-                'Yeni build',
-                style: TextStyle(fontSize: 21, fontWeight: FontWeight.w800),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                cloud.paired
-                    ? 'Build cihazında saklanır ve buluta gönderilir.'
-                    : 'Build cihazında saklanır. Buluta eşitlemek için önce Özet sayfasından telefonunu eşleştir.',
-                style: const TextStyle(color: _soft, fontSize: 12),
-              ),
-              const SizedBox(height: 18),
-              TextFormField(
-                controller: name,
-                autofocus: true,
-                maxLength: 50,
-                decoration: const InputDecoration(labelText: 'Build adı'),
-                validator: (value) => value == null || value.trim().isEmpty
-                    ? 'Bir ad gir.'
-                    : null,
-              ),
-              const SizedBox(height: 10),
-              TextField(
-                controller: playstyle,
-                maxLength: 40,
-                decoration: const InputDecoration(labelText: 'İçerik / rol'),
-              ),
-              const SizedBox(height: 10),
-              TextField(
-                controller: gear,
-                maxLines: 3,
-                maxLength: 240,
-                decoration: const InputDecoration(
-                  labelText: 'Set ve markalar',
-                  hintText: 'Striker, Grupo Sombra…',
-                ),
-              ),
-              const SizedBox(height: 10),
-              TextField(
-                controller: notes,
-                maxLines: 3,
-                maxLength: 300,
-                decoration: const InputDecoration(
-                  labelText: 'Notlar',
-                  hintText: 'Silah, yetenek veya oynanış notu',
-                ),
-              ),
-              const SizedBox(height: 16),
-              FilledButton.icon(
-                onPressed: () async {
-                  if (formKey.currentState?.validate() != true) return;
-                  final build = {
-                    'id': DateTime.now().microsecondsSinceEpoch.toString(),
-                    'name': name.text.trim(),
-                    'playstyle': playstyle.text.trim(),
-                    'gear': gear.text.trim(),
-                    'notes': notes.text.trim(),
-                    'created': DateTime.now().toIso8601String(),
-                  };
-                  await model.saveBuild(build);
-                  if (cloud.paired) unawaited(cloud.pushBuildQuietly(build));
-                  if (sheetContext.mounted) Navigator.pop(sheetContext);
-                },
-                icon: const Icon(Icons.save_outlined),
-                label: const Text('Build’i kaydet'),
-              ),
-            ],
-          ),
-        ),
-      ),
-    ),
-  );
-  name.dispose();
-  playstyle.dispose();
-  gear.dispose();
-  notes.dispose();
+  try {
+    final build = await openBuildWorkshop(context);
+    if (build == null) return;
+    await model.saveBuild(build);
+    if (cloud.paired) unawaited(cloud.pushBuildQuietly(build));
+  } catch (_) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Build kataloğu yüklenemedi.')),
+      );
+    }
+  }
 }
 
-void _about(BuildContext context) => showAboutDialog(
+void _about(BuildContext context, String installedVersion) => showAboutDialog(
   context: context,
   applicationName: 'TD2 Loot Advisor Companion',
-  applicationVersion: '$companionVersion-beta',
+  applicationVersion: '$installedVersion-beta',
   applicationIcon: const Icon(Icons.hexagon_outlined, color: _orange, size: 34),
   children: [
     const Text(
